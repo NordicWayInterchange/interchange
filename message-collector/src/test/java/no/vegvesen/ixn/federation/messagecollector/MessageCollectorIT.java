@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -31,43 +30,40 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
-	//static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
 
-	@Container
-	static KeysContainer keysContainer = getKeyContainer(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
+	private static final String PRODUCER_SP_NAME = "sp_producer";
+	static KeysStructure keysStructure = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", PRODUCER_SP_NAME, "sp_consumer");
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer consumerContainer = getQpidTestContainer("docker/consumer",
-			keysContainer.getKeyFolderOnHost(),
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost")
-			.dependsOn(keysContainer);
+			keysStructure.getKeysOutputPath(),
+			keysStructure.getServerKeystoreName(),
+			keysStructure.getKeystorePassword(),
+			keysStructure.getTruststoreName(),
+			keysStructure.getTruststorePassword(),
+			"localhost");
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer("docker/producer",
-			keysContainer.getKeyFolderOnHost(),
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost")
-			.dependsOn(keysContainer);
+			keysStructure.getKeysOutputPath(),
+			keysStructure.getServerKeystoreName(),
+			keysStructure.getKeystorePassword(),
+			keysStructure.getTruststoreName(),
+			keysStructure.getTruststorePassword(),
+			"localhost");
 
 	public Sink createSink(String containerUrl, String queueName, String keyStore) {
 		return new Sink(containerUrl,
 				queueName,
-				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), keyStore, "truststore.jks"));
+				TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), keyStore, "truststore.jks"));
 	}
 
 	public Source createSource(String containerUrl, String queue, String keystore) {
 		return new Source(containerUrl,
 				queue,
-				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), keystore, "truststore.jks"));
+				TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), keystore, "truststore.jks"));
 	}
 
 	@Test
@@ -82,7 +78,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"localhost.p12", "truststore.jks"),
+				TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(),keysStructure.getServerKeystoreName(), keysStructure.getTruststoreName()),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -90,7 +86,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", keysStructure.getSpKeystoreName(PRODUCER_SP_NAME));
 		source.start();
 
 		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
@@ -130,7 +126,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"localhost.p12", "truststore.jks"),
+				TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(),"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");

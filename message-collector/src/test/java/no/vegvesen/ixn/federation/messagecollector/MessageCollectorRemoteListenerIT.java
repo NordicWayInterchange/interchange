@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
@@ -20,20 +19,17 @@ import static org.mockito.Mockito.*;
 public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
     private static Logger logger = LoggerFactory.getLogger(MessageCollectorRemoteListenerIT.class);
 
-    @Container
-	static KeysContainer keysContainer = getKeyContainer(MessageCollectorRemoteListenerIT.class,"my_ca", "localhost");
+    static KeysStructure keysStructure = generateKeys(MessageCollectorRemoteListenerIT.class,"my_ca","localhost");
 
 	@Container
-    public QpidContainer localContainer = getQpidTestContainer("docker/consumer", keysContainer.getKeyFolderOnHost(), "localhost.p12","password","truststore.jks",	"password","localhost")
-            .dependsOn(keysContainer);
+    public QpidContainer localContainer = getQpidTestContainer("docker/consumer", keysStructure.getKeysOutputPath(), "localhost.p12","password","truststore.jks",	"password","localhost");
 
 	@Container
-    public QpidContainer remoteContainer = getQpidTestContainer("docker/producer", keysContainer.getKeyFolderOnHost(), "localhost.p12","password","truststore.jks", "password","localhost")
-            .dependsOn(keysContainer);
+    public QpidContainer remoteContainer = getQpidTestContainer("docker/producer", keysStructure.getKeysOutputPath(), "localhost.p12","password","truststore.jks", "password","localhost");
 
 	@Test
     public void stoppingRemoteContainerStopsListener() {
-		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "localhost.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
         ListenerEndpoint remote = mock(ListenerEndpoint.class);
         when(remote.getTarget()).thenReturn("subscriptionExchange");

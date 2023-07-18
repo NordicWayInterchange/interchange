@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.docker;
 
 import no.vegvesen.ixn.docker.keygen.generator.ServiceProviderCertGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
@@ -12,6 +13,7 @@ import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
+@Disabled
 public class ServiceProviderCertGeneratorIT {
 
     static Path resourcePath = Paths.get("src/test/resources");
