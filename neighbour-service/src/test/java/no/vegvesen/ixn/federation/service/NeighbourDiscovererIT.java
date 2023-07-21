@@ -570,7 +570,6 @@ public class NeighbourDiscovererIT {
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						new HashSet<>(Arrays.asList(
 								new Subscription(
 										selector1,
@@ -628,7 +627,6 @@ public class NeighbourDiscovererIT {
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								sub
 						)
