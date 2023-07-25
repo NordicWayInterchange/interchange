@@ -91,7 +91,8 @@ public class ServiceProviderRouter {
         switch (subscription.getStatus()) {
             case REQUESTED:
                 if (subscription.getLocalEndpoints().isEmpty()) {
-                    LocalEndpoint endpoint = new LocalEndpoint(UUID.randomUUID().toString(), nodeName, Integer.parseInt(messageChannelPort));
+                    String queueName = "loc-" + UUID.randomUUID().toString();
+                    LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeName, Integer.parseInt(messageChannelPort));
                     subscription.getLocalEndpoints().add(endpoint);
                 }
                 //NOTE fallthrough!
