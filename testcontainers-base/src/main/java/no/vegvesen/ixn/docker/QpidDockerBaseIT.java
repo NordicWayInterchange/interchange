@@ -1,10 +1,14 @@
 package no.vegvesen.ixn.docker;
 
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,6 +50,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String truststoreName = "truststore.jks";
 		Path truststorePath = keysOutputPath.resolve(truststoreName);
 		HashMap<String,String> spKeystoreNames = new HashMap<>();
+		HashMap<String,String> spKeystorePasswords = new HashMap<>();
 		String serverKeystoreName = server + ".p12";
 		String keystorePassword = "password";
 		String truststorePassword = "password";
@@ -61,8 +66,10 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				List<X509Certificate> certificates = ClusterKeyGenerator.generateServiceProviderCertBC(spKeys.getCsr(), topCa.getCertificate(), intermediateCertDetails.getCertificate(), intermediate.getKeyPair().getPrivate(), serviceProvider);
 				String spKeystoreName = serviceProvider + ".p12";
 				Path spKeystorePath = keysOutputPath.resolve(spKeystoreName);
-				ClusterKeyGenerator.generateKeystoreBC("password",serviceProvider,spKeys.getKeyPair().getPrivate(),certificates.toArray(new X509Certificate[0]), new FileOutputStream(spKeystorePath.toFile()));
+				String spKeystorePassword = "password";
+				ClusterKeyGenerator.generateKeystoreBC(spKeystorePassword,serviceProvider,spKeys.getKeyPair().getPrivate(),certificates.toArray(new X509Certificate[0]), new FileOutputStream(spKeystorePath.toFile()));
 				spKeystoreNames.put(serviceProvider,spKeystoreName);
+				spKeystorePasswords.put(serviceProvider,spKeystorePassword);
 			}
 
 		} catch (NoSuchAlgorithmException | OperatorCreationException | CertificateException | KeyStoreException |
@@ -70,7 +77,43 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			throw new RuntimeException(e);
 		}
 		//TODO this does not allow for individual passwords for SP-keystores
-		return new KeysStructure(keysOutputPath, serverKeystoreName, truststoreName, spKeystoreNames, truststorePassword,keystorePassword);
+		return new KeysStructure(keysOutputPath, serverKeystoreName, truststoreName, spKeystoreNames, spKeystorePasswords, truststorePassword,keystorePassword);
+	}
+	
+	
+	public static SSLContext sslClientContext(KeysStructure keysStructure, String spName) {
+		Path keysOutputPath = keysStructure.getKeysOutputPath();
+		Path keyStorePath = keysOutputPath.resolve(keysStructure.getServerKeystoreName());
+		Path trustStorePath = keysOutputPath.resolve(keysStructure.getTruststoreName());
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(
+						keyStorePath.toString(),
+						keysStructure.getSpKeystoreName(spName),
+						KeystoreType.PKCS12
+				),
+				new KeystoreDetails(
+						trustStorePath.toString(),
+						keysStructure.getTruststorePassword(),
+						KeystoreType.JKS
+				)
+		);
+	}
+
+
+	public static SSLContext sslServerContext(KeysStructure keysStructure) {
+		Path basePath = keysStructure.getKeysOutputPath();
+		KeystoreDetails keystoreDetails = new KeystoreDetails(
+				basePath.resolve(keysStructure.getServerKeystoreName()).toString(),
+				keysStructure.getKeystorePassword(),
+				KeystoreType.PKCS12
+		);
+		KeystoreDetails truststoreDetails = new KeystoreDetails(
+				basePath.resolve(keysStructure.getTruststoreName()).toString(),
+				keysStructure.getTruststorePassword(),
+				KeystoreType.JKS
+		);
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails,truststoreDetails);
+
 	}
 
 	public static class KeysStructure {
@@ -79,6 +122,9 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		private final String truststoreName;
 		private final String serverKeystoreName;
 		private final HashMap<String, String> spKeystoreNames;
+
+		private final HashMap<String, String> spKeystorePasswords;
+
 		private final String truststorePassword;
 		private final String keystorePassword;
 
@@ -86,6 +132,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 							 String serverKeystoreName,
 							 String truststoreName,
 							 HashMap<String, String> spKeystoreNames,
+							 HashMap<String, String> spKeystorePasswords, 
 							 String truststorePassword,
 							 String keystorePassword) {
 
@@ -93,6 +140,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			this.truststoreName = truststoreName;
 			this.serverKeystoreName = serverKeystoreName;
 			this.spKeystoreNames = spKeystoreNames;
+			this.spKeystorePasswords = spKeystorePasswords;
 			this.truststorePassword = truststorePassword;
 			this.keystorePassword = keystorePassword;
 		}
@@ -115,6 +163,14 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 
 		public String getSpKeystoreName(String spName) {
 			return spKeystoreNames.get(spName);
+		}
+
+		public HashMap<String, String> getSpKeystorePasswords() {
+			return spKeystorePasswords;
+		}
+
+		public String getSpKeystorePassword(String spName) {
+			return spKeystorePasswords.get(spName);
 		}
 
 		public String getTruststorePassword() {

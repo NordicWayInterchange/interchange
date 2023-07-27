@@ -39,7 +39,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@BeforeEach
 	public void setUp() {
 		Url = qpidContainer.getAmqpsUrl();
-		kingHaraldSSlContext = TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(),keysStructure.getSpKeystoreNames().get(SP_NAME), keysStructure.getTruststoreName());
+		kingHaraldSSlContext = sslClientContext(keysStructure, SP_NAME);
 	}
 
 	@Test

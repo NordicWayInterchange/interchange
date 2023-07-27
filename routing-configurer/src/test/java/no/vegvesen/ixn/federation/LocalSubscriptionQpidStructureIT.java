@@ -30,7 +30,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
@@ -58,7 +57,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
             String httpsUrl = qpidContainer.getHttpsUrl();
             String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpsUrl);
             logger.info("server url: " + httpUrl);
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
@@ -76,8 +74,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     public static final String SP_NAME = "sp-1";
 
-    //@Container
-    //private static KeysContainer keyContainer = getKeyContainer(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
     private static KeysStructure keysStructure = generateKeys(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
 
     @Container
@@ -134,8 +130,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             }
         }
         assertThat(actualEndpoint).isNotNull();
-        Path keysFolder = keysStructure.getKeysOutputPath();
-        SSLContext sslContext = TestKeystoreHelper.sslContext(keysFolder,SP_NAME + ".p12","truststore.jks");
+        SSLContext sslContext = sslClientContext(keysStructure,SP_NAME);
         try (Sink sink = new Sink(
                 String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
                 actualEndpoint.getSource(),
