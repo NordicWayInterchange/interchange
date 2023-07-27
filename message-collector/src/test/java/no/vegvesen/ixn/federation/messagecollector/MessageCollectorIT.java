@@ -37,21 +37,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer consumerContainer = getQpidTestContainer("docker/consumer",
-			keysStructure.getKeysOutputPath(),
-			keysStructure.getServerKeystoreName(),
-			keysStructure.getKeystorePassword(),
-			keysStructure.getTruststoreName(),
-			keysStructure.getTruststorePassword(),
+			keysStructure,
 			"localhost");
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer("docker/producer",
-			keysStructure.getKeysOutputPath(),
-			keysStructure.getServerKeystoreName(),
-			keysStructure.getKeystorePassword(),
-			keysStructure.getTruststoreName(),
-			keysStructure.getTruststorePassword(),
+			keysStructure,
 			"localhost");
 
 	public Sink createSink(String containerUrl, String queueName, String keyStore) {

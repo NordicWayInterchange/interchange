@@ -39,7 +39,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password", "localhost");
+    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", keysStructure, "localhost");
 
 
 

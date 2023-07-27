@@ -53,7 +53,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	private static KeysStructure keysStructure = generateKeys(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password","localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 	private static final String nodeName = "localhost";
 
 

@@ -42,7 +42,9 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("bi-qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password", "localhost");
+    public QpidContainer qpidContainer = getQpidTestContainer("bi-qpid",
+            keysStructure,
+            "localhost");
 
 
     @BeforeEach

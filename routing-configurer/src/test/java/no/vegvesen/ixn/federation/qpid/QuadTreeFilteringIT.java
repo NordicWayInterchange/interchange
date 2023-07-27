@@ -40,7 +40,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 
 	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {

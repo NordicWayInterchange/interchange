@@ -49,7 +49,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public static KeysStructure keysStructure = generateKeys(RoutingConfigurerQpidRestartIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password","localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 
     @Autowired
     SSLContext sslContext;
