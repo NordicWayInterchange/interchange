@@ -220,7 +220,6 @@
         <module>testcontainers-base</module>
         <module>testcontainers-init-postgres</module>
         <module>jms-client</module>
-        <module>test-ssl-utils</module>
         <module>api-model</module>
         <module>interchange-spring-security</module>
         <module>interchange-spring-security-client</module>

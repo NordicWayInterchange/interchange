@@ -76,19 +76,17 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				 IOException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
 			throw new RuntimeException(e);
 		}
-		//TODO this does not allow for individual passwords for SP-keystores
 		return new KeysStructure(keysOutputPath, serverKeystoreName, truststoreName, spKeystoreNames, spKeystorePasswords, truststorePassword,keystorePassword);
 	}
 	
 	
 	public static SSLContext sslClientContext(KeysStructure keysStructure, String spName) {
 		Path keysOutputPath = keysStructure.getKeysOutputPath();
-		Path keyStorePath = keysOutputPath.resolve(keysStructure.getServerKeystoreName());
 		Path trustStorePath = keysOutputPath.resolve(keysStructure.getTruststoreName());
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(
-						keyStorePath.toString(),
-						keysStructure.getSpKeystoreName(spName),
+						keysStructure.getKeysOutputPath().resolve(keysStructure.getSpKeystoreName(spName)).toString(),
+						keysStructure.getSpKeystorePassword(spName),
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(

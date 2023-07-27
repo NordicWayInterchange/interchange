@@ -46,8 +46,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve(keysStructure.getTruststoreName()),
+					"test.ssl.keystore-password=password",
+					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve(keysStructure.getSpKeystoreName("routing_configurer").toString())
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -142,7 +143,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
-		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf.p12");
+		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
