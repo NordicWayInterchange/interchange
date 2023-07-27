@@ -20,7 +20,6 @@ public class SSLContextFactory {
 		KeyStore keystore = null;
 		try {
 			InputStream stream = new FileInputStream(keystoreDetails.getFileName());
-			System.out.println(keystoreDetails.getPassword());
 			keystore = loadKeystoreFromStream(stream, keystoreDetails.getType(), keystoreDetails.getPassword());
 		} catch (FileNotFoundException e) {
 			throw new InvalidSSLConfig("Could not load keystore",e);
