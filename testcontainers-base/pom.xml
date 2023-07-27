@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>test-ssl-utils</artifactId>
+            <artifactId>ssl-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
