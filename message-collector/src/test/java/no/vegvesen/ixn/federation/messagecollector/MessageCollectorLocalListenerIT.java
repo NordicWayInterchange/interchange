@@ -21,27 +21,17 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
 
-	//@Container
-	//static KeysContainer keysContainer = getKeyContainer(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
 	static KeysStructure keysStructure = generateKeys(MessageCollectorLocalListenerIT.class,"my_ca","localhost");
 
 	@Container
 	public QpidContainer localContainer = getQpidTestContainer("docker/consumer",
-			keysStructure.getKeysOutputPath(),
-			keysStructure.getServerKeystoreName(),
-			keysStructure.getKeystorePassword(),
-			keysStructure.getTruststoreName(),
-			keysStructure.getTruststorePassword(),
+			keysStructure,
 			"localhost");
 
 
 	@Container
 	public QpidContainer remoteContainer = getQpidTestContainer("docker/producer",
-			keysStructure.getKeysOutputPath(),
-			keysStructure.getServerKeystoreName(),
-			keysStructure.getKeystorePassword(),
-			keysStructure.getTruststoreName(),
-			keysStructure.getTruststorePassword(),
+			keysStructure,
 			"localhost");
 
 	@Test

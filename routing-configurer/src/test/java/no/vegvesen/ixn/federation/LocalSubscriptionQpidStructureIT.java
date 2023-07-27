@@ -81,7 +81,9 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     private static KeysStructure keysStructure = generateKeys(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "localhost.p12", "password", "truststore.jks", "password","localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
+            keysStructure,
+            "localhost");
 
 
     //TODO would be nic to be able to do without it :-)

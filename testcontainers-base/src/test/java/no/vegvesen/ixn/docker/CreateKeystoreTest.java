@@ -66,7 +66,7 @@ public class CreateKeystoreTest {
         }
         String cn = CertSigner.getCN(new JcaX509CertificateHolder(certificates.get(0)).getSubject());
         System.out.println(cn);
-        ClusterKeyGenerator.generateKeystoreBC("password", cn,privateKey,certificates.toArray(new X509Certificate[0]), outputPath.resolve("henrik.p12"));
+        ClusterKeyGenerator.generateKeystoreBC("password", cn,privateKey,certificates.toArray(new X509Certificate[0]), new FileOutputStream(outputPath.resolve("henrik.p12").toFile()));
 
         ClusterKeyGenerator.makeTrustStore("password", "myKey",certificates.get(certificates.size() -1), new FileOutputStream(outputPath.resolve("truststore.jks").toFile()));
 

@@ -41,7 +41,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "testhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 

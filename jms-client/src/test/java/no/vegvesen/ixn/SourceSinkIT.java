@@ -30,11 +30,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-			keysStructure.getKeysOutputPath(),
-			keysStructure.getServerKeystoreName(),
-			keysStructure.getKeystorePassword(),
-			keysStructure.getTruststoreName(),
-			keysStructure.getTruststorePassword(),
+			keysStructure,
 			"localhost");
 
 	private String Url;

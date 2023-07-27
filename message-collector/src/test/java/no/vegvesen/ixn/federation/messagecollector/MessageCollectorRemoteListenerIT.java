@@ -22,10 +22,14 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
     static KeysStructure keysStructure = generateKeys(MessageCollectorRemoteListenerIT.class,"my_ca","localhost");
 
 	@Container
-    public QpidContainer localContainer = getQpidTestContainer("docker/consumer", keysStructure.getKeysOutputPath(), "localhost.p12","password","truststore.jks",	"password","localhost");
+    public QpidContainer localContainer = getQpidTestContainer("docker/consumer",
+            keysStructure,
+            "localhost");
 
 	@Container
-    public QpidContainer remoteContainer = getQpidTestContainer("docker/producer", keysStructure.getKeysOutputPath(), "localhost.p12","password","truststore.jks", "password","localhost");
+    public QpidContainer remoteContainer = getQpidTestContainer("docker/producer",
+            keysStructure,
+            "localhost");
 
 	@Test
     public void stoppingRemoteContainerStopsListener() {
