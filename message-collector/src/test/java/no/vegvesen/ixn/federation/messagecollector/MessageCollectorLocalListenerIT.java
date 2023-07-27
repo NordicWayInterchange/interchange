@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;

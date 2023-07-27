@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
