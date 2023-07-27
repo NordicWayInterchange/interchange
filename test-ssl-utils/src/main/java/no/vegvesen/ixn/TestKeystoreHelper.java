@@ -10,26 +10,23 @@ import java.nio.file.Path;
 
 public class TestKeystoreHelper {
 
-	private static final String TEST_KEYSTORE_PASSWORD = "password";
+	public static final String TEST_KEYSTORE_PASSWORD = "password";
 	private static final KeystoreType TRUSTSTORE_TYPE = KeystoreType.JKS;
 	private static final KeystoreType KEYSTORE_TYPE = KeystoreType.PKCS12;
 
 
-	public static SSLContext sslContext(Path keystorePath, String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
+	public static SSLContext sslContext(Path keystorePath, String keystore, String keystorePasssword, String truststore, String truststorePassword) throws SSLContextFactory.InvalidSSLConfig {
 		String keystoreFilePath = keystorePath.resolve(keystore).toString();
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE);
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, keystorePasssword, KEYSTORE_TYPE);
 
 		String trustStoreFilePath = keystorePath.resolve(truststore).toString();
-		KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStoreFilePath, TEST_KEYSTORE_PASSWORD, TRUSTSTORE_TYPE);
+		KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStoreFilePath, truststorePassword, TRUSTSTORE_TYPE);
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 	}
 
-
-	public static SSLContext sslContext(String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
-		String keystoreFilePath = getFilePath(keystore);
+	public static SSLContext sslContext(String keystoreFilePath, String trustStoreFilePath) throws SSLContextFactory.InvalidSSLConfig {
 		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE);
 
-		String trustStoreFilePath = getFilePath(truststore);
 		KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStoreFilePath, TEST_KEYSTORE_PASSWORD, TRUSTSTORE_TYPE);
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 	}

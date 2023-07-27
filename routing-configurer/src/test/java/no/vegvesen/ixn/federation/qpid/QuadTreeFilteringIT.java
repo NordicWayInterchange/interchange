@@ -143,7 +143,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf.p12");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
@@ -178,7 +178,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();

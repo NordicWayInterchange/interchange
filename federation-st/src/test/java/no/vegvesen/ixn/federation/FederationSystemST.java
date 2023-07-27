@@ -19,8 +19,8 @@ import java.util.stream.LongStream;
 
 public class FederationSystemST {
 
-	SSLContext spOneSslContext = TestKeystoreHelper.sslContext("jks/sp-one.p12", "jks/truststore.jks");
-	SSLContext spTwoSslContext = TestKeystoreHelper.sslContext("jks/sp-two.p12", "jks/truststore.jks");
+	SSLContext spOneSslContext = TestKeystoreHelper.sslContext(TestKeystoreHelper.getFilePath("jks/sp-one.p12"), TestKeystoreHelper.getFilePath("jks/truststore.jks"));
+	SSLContext spTwoSslContext = TestKeystoreHelper.sslContext(TestKeystoreHelper.getFilePath("jks/sp-two.p12"), TestKeystoreHelper.getFilePath("jks/truststore.jks"));
 
 	int reconnectsProducer = 0;
 	int reconnectsConsumer = 0;
