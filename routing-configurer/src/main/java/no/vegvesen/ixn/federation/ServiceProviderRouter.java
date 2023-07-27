@@ -367,7 +367,6 @@ public class ServiceProviderRouter {
         return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
     }
 
-    //TODO:We can change this drastically now that we have QpidDelta!
     @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
     public void createBindingsWithMatches() {
         List<ServiceProvider> serviceProviders = repository.findAll();
@@ -383,6 +382,7 @@ public class ServiceProviderRouter {
                                     String exchangeName = match.getSubscription().getExchangeName();
                                     if (!delta.getDestinationsFromExchangeName(exchangeName).contains(queueName)) {
                                         bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
+                                        delta.addBindingToExchange(exchangeName, localSubscription.getSelector(), queueName);
                                     }
                                 }
                             }
@@ -412,12 +412,12 @@ public class ServiceProviderRouter {
                                     .collect(Collectors.toSet());
 
                             Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
-
                             for (CapabilitySplit capability : matchingCapabilities) {
                                 if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
                                     if (delta.exchangeExists(capability.getCapabilityExchangeName())) {
                                         LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
                                         qpidClient.addBinding(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource(), capability.getCapabilityExchangeName());
+                                        delta.addBindingToExchange(capability.getCapabilityExchangeName(), subscription.getSelector(), endpoint.getSource());
                                         LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
                                         subscription.addConnection(connection);
                                     }
