@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -246,6 +247,7 @@ public class RoutingConfigurer {
 		if (!delta.queueExists(queueName)) {
 			qpidClient.createQueue(queueName);
 			qpidClient.addReadAccess(subscriberName, queueName);
+			delta.addQueue(new Queue(queueName));
 		}
 	}
 
