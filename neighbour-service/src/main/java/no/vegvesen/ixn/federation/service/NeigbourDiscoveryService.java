@@ -362,16 +362,14 @@ public class NeigbourDiscoveryService {
     public void setGiveUpSubscriptionsToTearDownForRemoval(){
         List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
         for (Neighbour neighbour : neighbours) {
-            if (!neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
-                    if (!subscription.getEndpoints().isEmpty()) {
-                        if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
-                        }
-                        subscription.getEndpoints().clear();
+            for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
+                if (!subscription.getEndpoints().isEmpty()) {
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
-                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                    subscription.getEndpoints().clear();
                 }
+                subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
             neighbourRepository.save(neighbour);
         }
