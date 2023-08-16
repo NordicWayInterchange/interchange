@@ -187,7 +187,7 @@ public class NeighbourRESTClient {
             throw new SubscriptionDeleteException("Error in deleting subscription to neighbour " + name + " due to exception", e);
         } catch (RestClientException e) {
             logger.error("Failed deleting subscription with url {}. ", url, e);
-            throw new SubscriptionPollException("Network layer exception caught", e);
+            throw new SubscriptionDeleteException("Network layer exception caught", e);
         }
     }
 }
