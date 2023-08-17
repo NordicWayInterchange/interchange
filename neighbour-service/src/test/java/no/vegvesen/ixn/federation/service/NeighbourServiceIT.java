@@ -41,31 +41,31 @@ public class NeighbourServiceIT {
     public void testFetchingNeighbourWithCorrectStatus() {
         Neighbour interchangeA = new Neighbour("interchangeA",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
+                new NeighbourSubscriptionRequest(Collections.emptySet()),
+                new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED,
+                new NeighbourSubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.REQUESTED, "interchangeA"))),
-                new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
+                new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "interchangeA"))));
         repository.save(interchangeA);
         repository.save(interchangeB);
 
         List<Neighbour> interchanges = service.listNeighboursToConsumeMessagesFrom();
-        assertThat(interchanges).size().isEqualTo(1);
+        assertThat(interchanges).hasSize(1);
     }
 
     @Test
     public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+                new NeighbourSubscriptionRequest(Collections.emptySet()),
+                new SubscriptionRequest(Collections.emptySet()));
         repository.save(neighbour);
 
 
@@ -74,7 +74,7 @@ public class NeighbourServiceIT {
                         Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'", "myNeighbour")))
         );
         Set<RequestedSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
-        assertThat(subscriptions.size()).isEqualTo(1);
+        assertThat(subscriptions).hasSize(1);
         RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
         assertThat(subscriptionApi.getPath()).isNotNull();
         assertThat(subscriptionApi.getLastUpdatedTimestamp()).isGreaterThan(0);
@@ -108,7 +108,7 @@ public class NeighbourServiceIT {
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(NeighbourSubscriptionRequestStatus.ESTABLISHED);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
     }
 
     @Test
@@ -127,14 +127,13 @@ public class NeighbourServiceIT {
 
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(NeighbourSubscriptionRequestStatus.ESTABLISHED);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
         NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
 
         service.saveDeleteSubscriptions("my-neighbour3", Collections.singleton(sub));
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(NeighbourSubscriptionRequestStatus.MODIFIED);
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
     }
 
     @Test
@@ -152,14 +151,13 @@ public class NeighbourServiceIT {
 
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(NeighbourSubscriptionRequestStatus.ESTABLISHED);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
         NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
 
         service.saveDeleteSubscriptions("my-neighbour4", Collections.singleton(sub));
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(NeighbourSubscriptionRequestStatus.EMPTY);
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(0);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
 
     @Test
@@ -179,7 +177,7 @@ public class NeighbourServiceIT {
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
         RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'", "my-neighbour5");
 
@@ -189,7 +187,7 @@ public class NeighbourServiceIT {
 
         service.saveSetupRouting(neighbour);
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(3);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(3);
     }
 
     @Test

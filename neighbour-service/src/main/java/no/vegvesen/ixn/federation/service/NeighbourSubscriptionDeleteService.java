@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class NeighbourSubscriptionDeleteService {
@@ -40,25 +38,24 @@ public class NeighbourSubscriptionDeleteService {
                 Set<Subscription> subscriptionsToDelete = new HashSet<>();
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (SubscriptionStatus.shouldTearDown(subscription.getSubscriptionStatus())) {
-                        try{
-                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
-                            if (matches.isEmpty()) {
+                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                        if (matches.isEmpty()) {
+                            try{
                                 neighbourFacade.deleteSubscription(neighbour, subscription);
                                 subscriptionsToDelete.add(subscription);
+                            } catch(SubscriptionDeleteException e) {
+                                neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                                logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
+                            } catch(SubscriptionNotFoundException e) {
+                                logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
+                            } finally {
+                                subscriptionsToDelete.add(subscription);
                             }
-                        } catch(SubscriptionDeleteException e) {
-                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                            neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-                            logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
-                        } catch(SubscriptionNotFoundException e) {
-                            logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
-                            subscriptionsToDelete.add(subscription);
                         }
                     }
                 }
                 neighbour.getOurRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
                 if (neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-                    neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
                     logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
                 }
                 neighbourRepository.save(neighbour);

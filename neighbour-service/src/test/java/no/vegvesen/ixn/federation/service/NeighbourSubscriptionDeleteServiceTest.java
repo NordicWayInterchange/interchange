@@ -58,7 +58,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
         subscription2.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 
         SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setStatus(SubscriptionRequestStatus.ESTABLISHED);
         existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);
@@ -67,7 +66,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
-        assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
     }
 
     @Test
@@ -78,7 +76,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
         subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 
         SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setStatus(SubscriptionRequestStatus.ESTABLISHED);
         existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);
@@ -87,7 +84,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
-        assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }
 
     @Test
@@ -99,7 +95,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
         subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 
         SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setStatus(SubscriptionRequestStatus.ESTABLISHED);
         existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);

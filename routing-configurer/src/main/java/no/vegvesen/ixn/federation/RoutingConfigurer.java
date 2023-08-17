@@ -64,7 +64,7 @@ public class RoutingConfigurer {
 
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
-		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getTearDownSubscriptions();
+		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
 				if (qpidClient.queueExists(sub.getQueueName())) {
@@ -73,10 +73,9 @@ public class RoutingConfigurer {
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 
-			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(NeighbourSubscriptionRequestStatus.EMPTY)) {
+			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 				logger.info("Removed routing for neighbour {}", name);
-				//neighbourService.saveTearDownRouting(neighbour, name);
 			}
 		} catch (Exception e) {
 			logger.error("Could not remove routing for neighbour {}", name, e);
@@ -98,7 +97,7 @@ public class RoutingConfigurer {
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
+				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
 				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
 				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
@@ -109,7 +108,7 @@ public class RoutingConfigurer {
 				}
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
-				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED);
 				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName());
 				neighbourService.saveSetupRouting(neighbour);
 			}
@@ -178,7 +177,7 @@ public class RoutingConfigurer {
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsCreated()) {
@@ -202,7 +201,7 @@ public class RoutingConfigurer {
 	}
 
 	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
+		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbour.getName()) == null){
 			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
 			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
 		}
@@ -214,7 +213,7 @@ public class RoutingConfigurer {
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getTearDownSubscriptions();
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {

@@ -152,7 +152,7 @@ class NeighbourServiceTest {
 		firstSubscription.setId(1);
 		firstSubscription.setPath("/ericsson/");
 		Set<NeighbourSubscription> subscriptions = Sets.newSet(firstSubscription);
-		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
 		when(neighbourRepository.save(updatedNeighbour)).thenAnswer(
@@ -326,13 +326,13 @@ class NeighbourServiceTest {
 		Subscription subscription = new Subscription();
 		subscription.setEndpoints(endpoints);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "my-endpoint-1", 5671, new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "my-endpoint-1", 5671,  new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
 
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-1", 5671, "my-source-1")).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-2", 5671, "my-source-2")).thenReturn(listenerEndpoint2);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints, "target");
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}

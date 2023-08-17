@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
+import org.apache.qpid.server.security.auth.database.HashedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +137,7 @@ public class NeigbourDiscoveryService {
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+                if (neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
                         postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {
@@ -174,7 +175,7 @@ public class NeigbourDiscoveryService {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                 }
@@ -198,7 +199,6 @@ public class NeigbourDiscoveryService {
                     logger.info("Too soon to post subscription request to neighbour when backing off");
                 }
             } catch (SubscriptionRequestException e) {
-                ourRequestedSubscriptionsFromNeighbour.setStatus(SubscriptionRequestStatus.FAILED);
                 controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
                 logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
             }
@@ -272,11 +272,10 @@ public class NeigbourDiscoveryService {
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                         }
                         subscription.getEndpoints().clear();
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
@@ -287,7 +286,7 @@ public class NeigbourDiscoveryService {
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -303,14 +302,14 @@ public class NeigbourDiscoveryService {
     //TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
     public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
-            Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
+            Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
             for (Subscription subscription : createdSubscriptions) {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                             subscription.getEndpoints().clear();
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -322,7 +321,7 @@ public class NeigbourDiscoveryService {
                                         lastUpdatedSubscription.getEndpoints()
                                 );
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove(), subscription.getExchangeName());
                                     subscription.getEndpoints().removeAll(endpointCalculator.getEndpointsToRemove());
                                 }
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
@@ -333,7 +332,7 @@ public class NeigbourDiscoveryService {
                     } else {
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                         }
                         subscription.getEndpoints().clear();
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
@@ -346,7 +345,7 @@ public class NeigbourDiscoveryService {
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -360,9 +359,25 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void setGiveUpSubscriptionsToTearDownForRemoval(){
+        List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
+        for (Neighbour neighbour : neighbours) {
+            for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
+                if (!subscription.getEndpoints().isEmpty()) {
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
+                    }
+                    subscription.getEndpoints().clear();
+                }
+                subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+            }
+            neighbourRepository.save(neighbour);
+        }
+    }
+
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
         for(Endpoint endpoint : endpoints) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, endpoint.getSource(), neighbour.getName());
             if (listenerEndpoint != null) {
                 listenerEndpointRepository.delete(listenerEndpoint);
             }

@@ -136,26 +136,4 @@ public class NeighbourTest {
 		return seenYesterday;
 	}
 
-	@Test
-	public void hasEstablishedSubscriptionsNull() {
-		Neighbour neighbour = new Neighbour();
-		assertThat(neighbour.hasEstablishedSubscriptions()).isFalse();
-	}
-
-	@Test
-	public void hasEstablishedSubscriptionsEmpty() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest());
-		assertThat(neighbour.hasEstablishedSubscriptions()).isFalse();
-	}
-
-	@Test
-	public void hasEstablishedSubscriptionsStatusEnabled() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setNeighbourRequestedSubscriptions(
-				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED,
-						Collections.emptySet()));
-		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-	}
-
 }

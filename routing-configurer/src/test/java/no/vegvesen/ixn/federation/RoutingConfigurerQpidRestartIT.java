@@ -134,8 +134,8 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Neighbour neighbour = new Neighbour(
                 "neighbour",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.singleton(sub)),
-                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()));
+                new NeighbourSubscriptionRequest(Collections.singleton(sub)),
+                new SubscriptionRequest(Collections.emptySet()));
 
 
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
@@ -179,8 +179,8 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Neighbour neighbour = new Neighbour(
                 "neighbour",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.singleton(sub)),
-                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()));
+                new NeighbourSubscriptionRequest(Collections.singleton(sub)),
+                new SubscriptionRequest(Collections.emptySet()));
 
 
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));

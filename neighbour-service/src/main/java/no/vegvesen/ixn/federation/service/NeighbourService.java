@@ -128,7 +128,6 @@ public class NeighbourService {
 		logger.info("Processing subscription request...");
 		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
-		persistentRequest.setStatus(NeighbourSubscriptionRequestStatus.REQUESTED);
 
 		logger.info("Processed subscription request: {}", persistentRequest.toString());
 
@@ -182,7 +181,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
+		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
@@ -197,35 +196,21 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findByNeighbourRequestedSubscriptions_StatusIn(NeighbourSubscriptionRequestStatus.REQUESTED, NeighbourSubscriptionRequestStatus.MODIFIED);
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
-	}
-
-	public void saveTearDownRouting(Neighbour neighbour, String name) {
-		neighbour.setSubscriptionRequestStatus(NeighbourSubscriptionRequestStatus.EMPTY);
-		neighbourRepository.save(neighbour);
-		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
 
 	public void saveDeleteSubscriptions(String ixnName, Set<NeighbourSubscription> subscriptionsToDelete) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
-		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.EMPTY);
-			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
-		} else {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.MODIFIED);
-			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
-		}
+		logger.debug("Deleting subscriptions for neighbour {} ", neighbour.getName());
 		neighbourRepository.save(neighbour);
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
-		neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.ESTABLISHED);
-
 		neighbourRepository.save(neighbour);
-		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
+		logger.debug("Saved neighbour {} after setting up routing for subscriptions", neighbour.getName());
 	}
 
 	public void saveNeighbour(Neighbour neighbour) {

@@ -64,13 +64,12 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
-        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }
 
     //Get back 404 - NOT FOUND
@@ -88,17 +87,13 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
-
-        //ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
-        //listenerEndpointRepository.save(listenerEndpoint);
 
         doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
         service.deleteSubscriptions(mockNeighbourFacade);
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
-        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }
 
     //Get back 4xx - something else gone wrong
@@ -116,19 +111,13 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
-
-        //ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
-        //listenerEndpointRepository.save(listenerEndpoint);
 
         doThrow(new SubscriptionDeleteException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
         service.deleteSubscriptions(mockNeighbourFacade);
 
-        Subscription savedSubscription = neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-
-        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
-        assertThat(savedSubscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.GIVE_UP);
+        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
 
 }

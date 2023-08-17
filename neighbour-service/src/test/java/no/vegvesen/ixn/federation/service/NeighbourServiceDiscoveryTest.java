@@ -213,7 +213,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		// Setting up Ericsson's failed subscriptions
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED, "");
-		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
+		SubscriptionRequest subReq = new SubscriptionRequest(Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
 		ericsson.getControlConnection().setBackoffStart(LocalDateTime.now().plusSeconds(10));
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
@@ -229,7 +229,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		// Setting up Ericsson's failed subscriptions
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
-		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(ericssonSubscription));
+		SubscriptionRequest subReq = new SubscriptionRequest(Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
 		ericsson.getControlConnection().setBackoffStart(LocalDateTime.now().plusSeconds(10));
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
@@ -284,7 +284,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		// Mock result of polling in backoff.
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED, "");
-		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
+		SubscriptionRequest subReq = new SubscriptionRequest(Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
 		doReturn(ericssonSubscription).when(neighbourFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 
@@ -309,7 +309,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericssonSubscription.setLastUpdatedTimestamp(1);
 		Endpoint endpoint = new Endpoint("source-1", "host-1", 5671);
 		ericssonSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
-		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(ericssonSubscription));
+		SubscriptionRequest subReq = new SubscriptionRequest(Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
 		//doReturn(ericssonSubscription).when(neighbourFacade).pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class));
 
@@ -374,7 +374,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulPollOfSubscriptionCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
-		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(Collections.singleton(subscription));
 		ericsson.setOurRequestedSubscriptions(ericssonSubscription);
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
@@ -394,7 +394,7 @@ public class NeighbourServiceDiscoveryTest {
 		Endpoint endpoint = new Endpoint("source-1", "host-1", 5671);
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		subscription.setLastUpdatedTimestamp(1);
-		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
+		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(Collections.singleton(subscription));
 		ericsson.setOurRequestedSubscriptions(ericssonSubscription);
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
@@ -416,7 +416,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		Endpoint endpoint1 = new Endpoint("source-1", "host-1", 5671);
 		Endpoint endpoint2 = new Endpoint("source-2", "host-2", 5671);
-		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(Collections.singleton(subscription));
 		ericsson.setOurRequestedSubscriptions(ericssonSubscription);
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
@@ -439,7 +439,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour.setName("neighbour-name");
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
@@ -459,7 +459,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour.setName("neighbour-name");
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
@@ -470,7 +470,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
 
-		assertThat(spyNeighbour.getOurRequestedSubscriptions().getAcceptedSubscriptions()).isEmpty();
+		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.ACCEPTED)).isEmpty();
 	}
 
 	@Test
@@ -479,7 +479,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
@@ -490,7 +490,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
 
-		assertThat(spyNeighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
+		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
 
 	//TODO: test why local subscriptions be different from subscription request for neighbours
@@ -530,13 +530,11 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	private SubscriptionRequest getEmptySR() {
-		Set<Subscription> subscription = new HashSet<>();
-		return new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, subscription);
+		return new SubscriptionRequest(Collections.emptySet());
 	}
 
 	private NeighbourSubscriptionRequest getEmptyNeighSR() {
-		Set<NeighbourSubscription> subscription = new HashSet<>();
-		return new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, subscription);
+		return new NeighbourSubscriptionRequest(Collections.emptySet());
 	}
 
 	private Set<Subscription> getReturnedSubscriptionRequest() {
@@ -552,7 +550,7 @@ public class NeighbourServiceDiscoveryTest {
 		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(Collections.emptySet());
 		CapabilitySplit neighbourCapability = getDatexCapability("NO");
 		Set<CapabilitySplit> capabilitySet = new HashSet<>();
 		capabilitySet.add(neighbourCapability);
@@ -561,9 +559,8 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
 		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED, interchangeNodeProperties.getName()));
-		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(null,neighbourFedInSubscription));
+		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(neighbourFedInSubscription));
 
-		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
 		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
@@ -573,7 +570,7 @@ public class NeighbourServiceDiscoveryTest {
 		otherNeighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
 				otherNeighbourCapabilities,
-				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+				new NeighbourSubscriptionRequest(Collections.emptySet()),
 				new SubscriptionRequest());
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());
@@ -612,7 +609,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour1.setName("spy-neighbour1");
 
@@ -640,7 +637,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour1.setName("spy-neighbour1");
 
@@ -667,7 +664,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
 		subscription.setLastUpdatedTimestamp(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour1.setName("spy-neighbour1");
 
@@ -694,11 +691,12 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
+		subscription.setExchangeName("target");
 		subscription.setNumberOfPolls(0);
 		subscription.setLastUpdatedTimestamp(0);
 		Endpoint endpoint = new Endpoint("spy-neighbour", "spy-neighbour", 5671);
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour1.setName("spy-neighbour1");
 
@@ -707,10 +705,10 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		createdSubscription.setLastUpdatedTimestamp(2);
 
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection(), "target");
 
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(spyNeighbour1.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource())).thenReturn(listenerEndpoint);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", endpoint.getSource(), spyNeighbour1.getName())).thenReturn(listenerEndpoint);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
@@ -725,7 +723,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
 		spyNeighbour1.setName("spy-neighbour1");
 
@@ -761,14 +759,13 @@ public class NeighbourServiceDiscoveryTest {
 				new Capabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								subscription
 						)
 				),
 				new Connection()
 		);
-		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).hasSize(1);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1); //TODO what???
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1); //TODO this is the one in use!
 
@@ -801,7 +798,6 @@ public class NeighbourServiceDiscoveryTest {
 				new Capabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								subscription
 						)
@@ -815,7 +811,7 @@ public class NeighbourServiceDiscoveryTest {
 		returnSubscription.setPath(subscription.getPath());
 		returnSubscription.setConsumerCommonName(subscription.getConsumerCommonName());
 
-		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).hasSize(1);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
 
@@ -841,7 +837,6 @@ public class NeighbourServiceDiscoveryTest {
 				new Capabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								subscription
 						)
@@ -871,7 +866,6 @@ public class NeighbourServiceDiscoveryTest {
 				new Capabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								subscription
 						)
