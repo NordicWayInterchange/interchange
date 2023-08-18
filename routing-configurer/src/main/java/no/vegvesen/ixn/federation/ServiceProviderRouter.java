@@ -326,7 +326,7 @@ public class ServiceProviderRouter {
                             match.getCapability().exchangeExists()) {
 
                         //TODO:Test this Qpid structure!!
-                        if (!delta.exchangeHasBindingToQueue(match.getCapability().getCapabilityExchangeName(), delivery.getExchangeName())) {
+                        if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName())) {
                             String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
                             qpidClient.addBinding(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName(), delivery.getExchangeName());
                             delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, match.getCapability().getCapabilityExchangeName());
