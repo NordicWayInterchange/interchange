@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-nap-frontend
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: nap-frontend
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: nap-frontend
+    release: {{ .Release.Name }}
+  ports:
+    - name: nap-frontend
+      port: {{ .Values.self.nap_frontend_port }}
+      targetPort: nap-frontend

@@ -18,6 +18,7 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the onboarding server REST controller
   nap_name: nap.example-node.itsinterchange.eu                      # Name of the napcore user connected to the napcore server
+  nap_frontend_port: "4444"
 
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
@@ -103,5 +104,19 @@ napcore_server:
   logging:
   - logger_name: .root
     level: info
+nap_frontend:
+  replicas: 1
+  nap_key_store_path: /nap.p12
+  nap_key_store_password: password
+  interchange_uri: "https://nap-frontend.blomst.stminterchange.com:4444/nap/"
+  interchange_prefix: "stminterchange.com.blomst.stminterchange.com.nap."
+  nextauth_secret: "my_nextauth_secret"
+  auth0_client_id: "my_client_id"
+  auth0_client_secret: "shhhhh"
+  auth0_issuer: "https://issuer-server.eu.auth0.com"
+  base_url: "https://nap-frontend.blomst.stminterchange.com"
+  image:
+    repository: eu.gcr.io/nw-shared-w3ml/napcore-frontend
+    tag: "1234567"
 secret_dev_no:
   key_store: "test"
