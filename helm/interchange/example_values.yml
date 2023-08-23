@@ -106,9 +106,9 @@ napcore_server:
     level: info
 nap_frontend:
   replicas: 1
-  nap_key_store_path: /nap.p12
+  nap_key_store_filename: nap.p12
   nap_key_store_password: password
-  interchange_uri: "https://nap-frontend.blomst.stminterchange.com:4444/nap/"
+  interchange_uri: https://nap-frontend.blomst.stminterchange.com:4444/nap/
   interchange_prefix: "stminterchange.com.blomst.stminterchange.com.nap."
   nextauth_secret: "my_nextauth_secret"
   auth0_client_id: "my_client_id"

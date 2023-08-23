@@ -21,24 +21,32 @@ spec:
         component: nap-frontend
         release: {{ .Release.Name }}
     spec:
-      - name: nap-frontend
-        image: "{{ .Values.nap_frontend.image.repository }}:{{ .Values.nap_frontend.image.tag }}"
-        env:
-          - name: PFX_KEY_FILENAME
-            value: {{ .Values.nap_frontend.nap_key_store_path }}
-          - name: PFX_PASSPHRASE
-            value: {{ .Values.nap_frontend.nap_key_store_password }}
-          - name: INTERCHANGE_URI
-            value: {{ .Values.nap_frontend.interchange_uri }}
-          - name: INTERCHANGE_PREFIX
-            value: {{ .Values.nap_frontend.interchange_prefix }}
-          - name: NEXTAUTH_SECRET
-            value: {{ .Values.nap_frontend.nextauth_secret }}
-          - name: AUTH0_CLIENT_ID
-            value: {{ .Values.nap_frontend.auth0_client_id }}
-          - name: AUTH0_CLIENT_SECRET
-            value: {{ .Values.nap_frontend.auth0_client_secret }}
-          - name: AUTH0_ISSUER
-            value: {{ .Values.nap_frontend.auth0_issuer }}
-          - name: NEXTAUTH_URL
-            value: {{ .Values.nap_frontend.base_url }}
+      containers:
+        - name: nap-frontend
+          image: "{{ .Values.nap_frontend.image.repository }}:{{ .Values.nap_frontend.image.tag }}"
+          env:
+            - name: PFX_KEY_FILENAME
+              value: {{ .Values.secret_mount_path}}{{ .Values.nap_frontend.nap_key_store_filename }}
+            - name: PFX_PASSPHRASE
+              value: {{ .Values.nap_frontend.nap_key_store_password }}
+            - name: INTERCHANGE_URI
+              value: {{ .Values.nap_frontend.interchange_uri }}
+            - name: INTERCHANGE_PREFIX
+              value: {{ .Values.nap_frontend.interchange_prefix }}
+            - name: NEXTAUTH_SECRET
+              value: {{ .Values.nap_frontend.nextauth_secret }}
+            - name: AUTH0_CLIENT_ID
+              value: {{ .Values.nap_frontend.auth0_client_id }}
+            - name: AUTH0_CLIENT_SECRET
+              value: {{ .Values.nap_frontend.auth0_client_secret }}
+            - name: AUTH0_ISSUER
+              value: {{ .Values.nap_frontend.auth0_issuer }}
+            - name: NEXTAUTH_URL
+              value: {{ .Values.nap_frontend.base_url }}
+          volumeMounts:
+            - name: secure
+              mountPath: {{ .Values.self.secret_mount_path | quote }}
+      volumes:
+        - name: secure
+          secret:
+            secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
