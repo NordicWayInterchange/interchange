@@ -146,7 +146,6 @@ public class ServiceProviderRouter {
                 }
             }
             serviceProvider.removeSubscriptions(subscriptionsToRemove);
-            logger.info("Saved updated serviceProvider: {}", serviceProvider);
             serviceProvider = repository.save(serviceProvider);
         }
         return serviceProvider;
