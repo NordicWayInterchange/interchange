@@ -28,17 +28,17 @@ spec:
             - name: PFX_KEY_FILENAME
               value: {{ .Values.secret_mount_path}}{{ .Values.nap_frontend.nap_key_store_filename }}
             - name: PFX_PASSPHRASE
-              value: {{ .Values.nap_frontend.nap_key_store_password }}
+              value: {{ .Values.nap_key_store_password }}
             - name: INTERCHANGE_URI
               value: {{ .Values.nap_frontend.interchange_uri }}
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.nap_frontend.interchange_prefix }}
             - name: NEXTAUTH_SECRET
-              value: {{ .Values.nap_frontend.nextauth_secret }}
+              value: {{ .Values.nextauth_secret }}
             - name: AUTH0_CLIENT_ID
-              value: {{ .Values.nap_frontend.auth0_client_id }}
+              value: {{ .Values.auth0_client_id }}
             - name: AUTH0_CLIENT_SECRET
-              value: {{ .Values.nap_frontend.auth0_client_secret }}
+              value: {{ .Values.auth0_client_secret }}
             - name: AUTH0_ISSUER
               value: {{ .Values.nap_frontend.auth0_issuer }}
             - name: NEXTAUTH_URL

@@ -7,6 +7,10 @@ postgres_user: federation                                         # Database use
 postgres_password: federation                                     # Database password
 key_store: "test"                                                 # Name of key store file
 trust_store: truststore.jks                                       # Name of trust store file
+nap_key_store_password: password
+auth0_client_id: "my_client_id"
+auth0_client_secret: "shhhhh"
+nextauth_secret: "my_nextauth_secret"
 
 # Values:
 external_name: example-node.itsinterchange.eu
@@ -107,12 +111,8 @@ napcore_server:
 nap_frontend:
   replicas: 1
   nap_key_store_filename: nap.p12
-  nap_key_store_password: password
   interchange_uri: https://nap-frontend.blomst.stminterchange.com:4444/nap/
   interchange_prefix: "stminterchange.com.blomst.stminterchange.com.nap."
-  nextauth_secret: "my_nextauth_secret"
-  auth0_client_id: "my_client_id"
-  auth0_client_secret: "shhhhh"
   auth0_issuer: "https://issuer-server.eu.auth0.com"
   base_url: "https://nap-frontend.blomst.stminterchange.com"
   image:
