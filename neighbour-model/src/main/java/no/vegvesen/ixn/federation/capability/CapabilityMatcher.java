@@ -232,7 +232,7 @@ public class CapabilityMatcher {
 			}
 			String selectorQuadTreeTile = evaluatedSelector.substring(matchStart + QUAD_TREE_MATCH_PATTERN_START.length(), matchEnd).trim();
 
-			logger.info("Checking capability quadTreeTile against selector quadTree tile [{}]", selectorQuadTreeTile);
+			logger.debug("Checking capability quadTreeTile against selector quadTree tile [{}]", selectorQuadTreeTile);
 			boolean gotMatch = false;
 			for (String capabilityQuadTreeTile : capabilityQuadTrees) {
 				if (selectorQuadTreeTile.startsWith(capabilityQuadTreeTile) || capabilityQuadTreeTile.startsWith(selectorQuadTreeTile)) {
