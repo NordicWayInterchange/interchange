@@ -233,8 +233,10 @@ public class ServiceProviderRouter {
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
             if(privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
-                qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                if (! groupMemberNames.contains(peerName)) {
+                    qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                }
                 if (!delta.queueExists(queueName)) {
                     qpidClient.createQueue(queueName);
                     delta.addQueue(new Queue(queueName));
@@ -254,6 +256,7 @@ public class ServiceProviderRouter {
                     qpidClient.removeMemberFromGroup(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     logger.debug("Removing member {} from group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 }
+                //need to check if the peer has its own private channel
                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 VirtualHostAccessController provider = qpidClient.getQpidAcl();
