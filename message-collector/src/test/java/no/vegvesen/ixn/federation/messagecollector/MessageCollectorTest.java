@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -155,5 +156,27 @@ public class MessageCollectorTest {
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
         verify(messageConnectionOne,times(1)).okConnection();
+    }
+
+    @Test
+    public void removeStoppedListener() {
+        Connection messageConnectionOne = new Connection();
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        HashMap<ListenerEndpoint, MessageCollectorListener> listeners = new HashMap<>();
+        MessageCollectorListener listener = mock(MessageCollectorListener.class);
+        when(listener.isRunning()).thenReturn(false);
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
+        listeners.put(one, listener);
+
+        MessageCollector messageCollector = new MessageCollector(listenerEndpointRepository,collectorCreator,backoffProperties, listeners);
+
+        messageCollector.checkListenerList();
+        assertThat(listeners).isEmpty();
+
+
+
     }
 }
