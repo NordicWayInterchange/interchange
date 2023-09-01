@@ -99,22 +99,16 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
-				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
+			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
-				allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
+			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
+			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
-				if(!allAcceptedSubscriptions.isEmpty()){
-					setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
-				}
-				neighbourService.saveSetupRouting(neighbour);
-			} else {
-				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED);
-				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName(), delta);
-				neighbourService.saveSetupRouting(neighbour);
+			if(!allAcceptedSubscriptions.isEmpty()){
+				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
+			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
