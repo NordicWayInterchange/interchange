@@ -892,6 +892,36 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 	}
 
+	@Test
+	public void setupRegularRoutingWithNonExistingExchangeKeepsTheSubscriptionUnchanged() {
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NO0000",
+						"NO0000:001",
+						"NO",
+						"1.0",
+						Collections.emptySet(),
+						Collections.singleton(1)
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
+		NeighbourSubscription neighbourSubscription = new NeighbourSubscription(
+				"publisherId = 'NO0000'",
+				NeighbourSubscriptionStatus.ACCEPTED
+		);
+
+		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getHost());
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setUpRegularRouting(
+				Collections.singleton(neighbourSubscription),
+				Collections.singleton(denmCapability),
+				"my_Neighbour"
+		);
+		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
+		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();
+		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
+	}
+
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
 		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
