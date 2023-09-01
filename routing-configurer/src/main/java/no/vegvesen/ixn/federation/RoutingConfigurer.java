@@ -96,22 +96,16 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
-				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
+			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
-				allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
+			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
+			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
-				if(!allAcceptedSubscriptions.isEmpty()){
-					setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName());
-				}
-				neighbourService.saveSetupRouting(neighbour);
-			} else {
-				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED);
-				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName());
-				neighbourService.saveSetupRouting(neighbour);
+			if(!allAcceptedSubscriptions.isEmpty()){
+				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName());
 			}
+			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
@@ -121,20 +115,21 @@ public class RoutingConfigurer {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
-				String queueName = "sub-" + UUID.randomUUID();
-				createQueue(queueName, neighbourName);
-				subscription.setQueueName(queueName);
-				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
-				for (CapabilitySplit cap : matchingCaps) {
-					if (cap.exchangeExists()) {
+				//if any of the matching caps does not have the exchange set
+				if (matchingCaps.stream().filter(m -> ! m.exchangeExists()).count() == 0) {
+					String queueName = "sub-" + UUID.randomUUID();
+					createQueue(queueName, neighbourName);
+					subscription.setQueueName(queueName);
+					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
+					for (CapabilitySplit cap : matchingCaps) {
 						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
 							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
 						}
 					}
+					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
+					NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+					subscription.setEndpoints(Collections.singleton(endpoint));
 				}
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
-				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
