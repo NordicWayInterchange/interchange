@@ -44,7 +44,9 @@ public class MessageCollector {
 
     public void checkListenerList() {
         //TODO logging of the entries...
-        listeners.entrySet().removeIf(e -> ! e.getValue().isRunning());
+        List<ListenerEndpoint> entriesToRemove = listeners.entrySet().stream().filter(e -> !e.getValue().isRunning()).map(e -> e.getKey()).collect(Collectors.toList());
+        listeners.keySet().removeAll(entriesToRemove);
+        logger.info("Removed listeners {}", entriesToRemove);
     }
 
     public void setupConnectionsToNewNeighbours() {
