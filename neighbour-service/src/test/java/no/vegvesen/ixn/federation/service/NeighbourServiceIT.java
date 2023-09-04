@@ -289,8 +289,9 @@ public class NeighbourServiceIT {
         );
         Neighbour saved = repository.save(neighbour);
         NeighbourSubscription subscription = saved.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        //TODO
         SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getId());
+        assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
+
     }
 
 }
