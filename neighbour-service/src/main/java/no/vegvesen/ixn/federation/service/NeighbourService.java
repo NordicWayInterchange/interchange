@@ -152,12 +152,13 @@ public class NeighbourService {
 	}
 
 	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
-		logger.info("Looking up polling Neighbour in DB.");
+		logger.debug("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
 
 			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
+			//TODO logging. What do we log on poll?
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
