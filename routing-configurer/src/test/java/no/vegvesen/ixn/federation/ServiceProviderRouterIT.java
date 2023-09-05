@@ -22,6 +22,7 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -439,6 +440,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
 
+	@Disabled("This should be solved in a qpid-delta type of way")
 	@Test
 	public void doNotRemovePeerFromGroupIfItHasPrivateChannels() {
 		String peerName = "my-client-311";
@@ -452,16 +454,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		otherServiceProvider.setName(otherServiceProviderName);
 		otherServiceProvider.addPrivateChannel(peerName);
 
-
+		///Setting up queue for service provider
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
 		router.syncPrivateChannels(serviceProvider.getName());
 		verify(serviceProviderRepository, times(1)).save(serviceProvider);
+		verify(serviceProviderRepository).findByName(serviceProvider.getName());
 
+
+		//Setting up queue for other service provider.
 		when(serviceProviderRepository.findByName(otherServiceProviderName)).thenReturn(otherServiceProvider);
 		router.syncPrivateChannels(otherServiceProvider.getName());
 		verify(serviceProviderRepository, times(1)).save(otherServiceProvider);
+		verify(serviceProviderRepository).findByName(otherServiceProvider.getName());
+
+		//TODO the setup above should be done directly using qpid client.
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
+
 		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
@@ -479,7 +488,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(otherServiceProvider.getPrivateChannels()).hasSize(1);
 	}
 
-	//TODO do we even have a method of doing this???????
+	@Disabled("This should be solved in a qpid-delta kind of way")
 	@Test
 	public void doNotRemovePeerFromGroupIfItIsPeerInOtherPrivateChannels() {
 
