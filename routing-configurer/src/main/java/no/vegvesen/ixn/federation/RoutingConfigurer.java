@@ -5,8 +5,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -131,7 +130,7 @@ public class RoutingConfigurer {
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
 						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
-							qpidClient.addBinding(subscription.getSelector(), cap.getCapabilityExchangeName(), queueName, cap.getCapabilityExchangeName());
+							qpidClient.addBinding(cap.getCapabilityExchangeName(), new Binding(cap.getCapabilityExchangeName(), queueName, new Filter(subscription.getSelector())));
 						}
 					}
 				}
@@ -187,7 +186,7 @@ public class RoutingConfigurer {
 						if (!subscription.exchangeIsCreated()) {
 							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
-							qpidClient.createTopicExchange(exchangeName);
+							qpidClient.createExchange(new Exchange(exchangeName, "headers"));
 							logger.debug("Set up exchange for subscription {}", subscription.toString());
 						}
 						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
@@ -233,7 +232,7 @@ public class RoutingConfigurer {
 	}
 
 	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.addBinding(acceptedSubscription.getSelector(),exchange,queueName, exchange);
+		qpidClient.addBinding(exchange, new Binding(exchange, queueName, new Filter(acceptedSubscription.getSelector())));
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
@@ -245,9 +244,10 @@ public class RoutingConfigurer {
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		if (!delta.queueExists(queueName)) {
-			qpidClient.createQueue(queueName);
+			Queue queue = new Queue(queueName, QpidClient.MAX_TTL_8_DAYS);
+			qpidClient.createQueue(queue);
 			qpidClient.addReadAccess(subscriberName, queueName);
-			delta.addQueue(new Queue(queueName));
+			delta.addQueue(queue);
 		}
 	}
 

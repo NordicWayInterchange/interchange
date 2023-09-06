@@ -79,48 +79,38 @@ public class QpidClient {
 		return response.getStatusCodeValue();
 	}
 
-	public void addBinding(String selector, String source, String destination, String bindingKey) {
-		AddBindingRequest request = new AddBindingRequest(destination,bindingKey,selector);
-		logger.info("Add binding from {} to {} with binding key {} and selector {}", source,destination,bindingKey,selector);
+	public void addBinding(String source, Binding binding) {
+		AddBindingRequest request = new AddBindingRequest(binding);
+		logger.info("Add binding {} from {} ", binding, source);
 		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
 
 	}
 
-	public void createQueue(String queueName) {
-		if (!queueExists(queueName)) {
-			logger.info("Creating queue {}", queueName);
-			_createQueue(queueName);
+	public void createQueue(Queue queue) {
+		if (!queueExists(queue.getName())) {
+			logger.info("Creating queue {}", queue);
+			_createQueue(queue);
 		}
 	}
 
-	public void createTopicExchange(String exchangeName) {
-		if (!exchangeExists(exchangeName)){
-			logger.info("Creating topic exchange {}", exchangeName);
-			_createTopicExchange(exchangeName);
+	public void createExchange(Exchange exchange) {
+		if (!exchangeExists(exchange.getName())){
+			logger.info("Creating exchange {}", exchange);
+			_createExchange(exchange);
 		}
 	}
 
-	public void createDirectExchange(String exchangeName) {
-		if (!exchangeExists(exchangeName)){
-			logger.info("Creating direct exchange {}", exchangeName);
-			_createDirectExchange(exchangeName);
-		}
-	}
-
-	void _createQueue(String queueName) {
-		CreateQueueRequest request = new CreateQueueRequest(queueName,MAX_TTL_8_DAYS);
+	void _createQueue(Queue queue) {
+		CreateQueueRequest request = new CreateQueueRequest(queue);
 		restTemplate.postForEntity(queuesURL + "/",request,String.class);
 	}
-	public void _createDirectExchange(String exchangeName) {
-		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"direct");
-		restTemplate.postForEntity(exchangesURL + "/",request, String.class);
-		logger.debug("Created exchange {}", exchangeName);
-	}
 
-	public void _createTopicExchange(String exchangeName) {
-		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"headers");
-		restTemplate.postForEntity(exchangesURL + "/",request,String.class);
-		logger.debug("Created exchange {}", exchangeName);
+	public Exchange _createExchange(Exchange exchange) {
+		CreateExchangeRequest request = new CreateExchangeRequest(exchange);
+		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
+		logger.debug("Created exchange {}", exchange.getName());
+		return response.getBody();
+
 	}
 
 	public boolean queueExists(String queueName) {
@@ -180,6 +170,7 @@ public class QpidClient {
 	}
 
 
+	//TODO this method is no longer in use in prodction code. Replace it in test code, and remove.
 	public Set<String> getQueueBindKeys(String queueName) {
 		HashSet<String> existingBindKeys = new HashSet<>();
 		String url = queuesURL + "/" + queueName + "/getPublishingLinks";

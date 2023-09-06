@@ -1,42 +1,31 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 public class CreateExchangeRequest {
 
-    private String name;
-    private boolean durable = true;
 
-    private String type;
+    @JsonUnwrapped
+    private Exchange exchange;
 
     public CreateExchangeRequest() {
 
     }
 
-    public CreateExchangeRequest(String name, String type) {
-        this.name = name;
-        this.type = type;
+    public CreateExchangeRequest(Exchange exchange) {
+        this.exchange = exchange;
     }
 
     public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return exchange.getName();
     }
 
     public boolean isDurable() {
-        return durable;
-    }
-
-    public void setDurable(boolean durable) {
-        this.durable = durable;
+        return exchange.isDurable();
     }
 
     public String getType() {
-        return type;
+        return exchange.getType();
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
 }

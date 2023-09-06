@@ -22,7 +22,7 @@ public class BindingTest {
 
         ObjectMapper mapper = new ObjectMapper();
         Binding result = mapper.readValue(object, Binding.class);
-        assertThat(result.getName()).isEqualTo("cap-106173e4-f3be-42a1-a50e-264be5ffbe27");
+        assertThat(result.getBindingKey()).isEqualTo("cap-106173e4-f3be-42a1-a50e-264be5ffbe27");
     }
 
 

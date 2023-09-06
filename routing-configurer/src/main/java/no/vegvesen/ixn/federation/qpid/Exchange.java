@@ -9,7 +9,11 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Exchange {
 
-    String name;
+    private String name;
+
+    private boolean durable = true;
+
+    private String type = "headers";
 
     Set<Binding> bindings = new HashSet<>();
 
@@ -18,6 +22,11 @@ public class Exchange {
 
     public Exchange(String name) {
         this.name = name;
+    }
+
+    public Exchange(String name, String type) {
+        this.name = name;
+        this.type = type;
     }
 
     public Exchange(String name, Set<Binding> bindings) {
@@ -45,20 +54,12 @@ public class Exchange {
         this.bindings.add(binding);
     }
 
-    public void removeBinding(String name, String destination) {
-        findBindingByNameAndDestination(name, destination).ifPresent(value -> this.bindings.remove(value));
-    }
-
-    public Optional<Binding> findBindingByNameAndDestination(String name, String destination) {
-        return bindings.stream()
-                .filter(binding -> binding.getName().equals(name) && binding.getDestination().equals(destination))
-                .findFirst();
-    }
 
     public boolean isBoundToQueue(String queueName) {
         return bindings.stream()
                 .anyMatch(q -> q.getDestination().equals(queueName));
     }
+
 
     @Override
     public String toString() {
@@ -66,5 +67,13 @@ public class Exchange {
                 "name='" + name + '\'' +
                 ", bindings=" + bindings +
                 '}';
+    }
+
+    public boolean isDurable() {
+        return durable;
+    }
+
+    public String getType() {
+        return type;
     }
 }

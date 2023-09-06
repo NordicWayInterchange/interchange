@@ -177,7 +177,7 @@ public class ServiceProviderRouter {
     private void optionallyCreateQueue(String queueName, String serviceProviderName, QpidDelta delta) {
         if (!delta.queueExists(queueName)) {
             logger.info("Creating queue {}", queueName);
-            qpidClient.createQueue(queueName);
+            qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
             qpidClient.addReadAccess(serviceProviderName, queueName);
             delta.addQueue(new Queue(queueName));
         }
@@ -236,7 +236,7 @@ public class ServiceProviderRouter {
                 qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 if (!delta.queueExists(queueName)) {
-                    qpidClient.createQueue(queueName);
+                    qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
                     delta.addQueue(new Queue(queueName));
                 }
                 logger.info("Creating queue {}", queueName);
@@ -280,7 +280,7 @@ public class ServiceProviderRouter {
                         capability.setCapabilityExchangeName(exchangeName);
                     }
                     if (!delta.exchangeExists(capability.getCapabilityExchangeName())) {
-                        qpidClient.createTopicExchange(capability.getCapabilityExchangeName());
+                        qpidClient.createExchange(new Exchange(capability.getCapabilityExchangeName(), "headers"));
                         logger.info("Created exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
                         delta.addExchange(new Exchange(capability.getCapabilityExchangeName()));
                     }
@@ -295,7 +295,7 @@ public class ServiceProviderRouter {
             if (capability.exchangeExists()) {
                 if (!delta.exchangeHasBindingToQueue(capability.getCapabilityExchangeName(), "bi-queue")){
                     String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-                    qpidClient.addBinding(capabilitySelector, capability.getCapabilityExchangeName(), "bi-queue", capability.getCapabilityExchangeName());
+                    qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), "bi-queue", new Filter(capabilitySelector)));
                     delta.addBindingToExchange(capability.getCapabilityExchangeName(), capabilitySelector, "bi-queue");
                 }
             }
@@ -329,7 +329,7 @@ public class ServiceProviderRouter {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
                     List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
                     if (!delta.exchangeExists(delivery.getExchangeName())) {
-                        qpidClient.createDirectExchange(delivery.getExchangeName());
+                        qpidClient.createExchange(new Exchange(delivery.getExchangeName(), "direct"));
                         qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
                         delta.addExchange(new Exchange(delivery.getExchangeName()));
                     }
@@ -340,7 +340,7 @@ public class ServiceProviderRouter {
 
                             if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName())) {
                                 String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                                qpidClient.addBinding(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName(), delivery.getExchangeName());
+                                qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName(), new Filter(joinedSelector)));
                                 delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, match.getCapability().getCapabilityExchangeName());
                             }
                         }
@@ -412,7 +412,7 @@ public class ServiceProviderRouter {
 
     private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
         logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.addBinding(localSubscription.getSelector(), exchangeName, queueName, exchangeName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
@@ -433,7 +433,7 @@ public class ServiceProviderRouter {
                                 if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
                                     if (delta.exchangeExists(capability.getCapabilityExchangeName())) {
                                         LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                        qpidClient.addBinding(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource(), capability.getCapabilityExchangeName());
+                                        qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
                                         delta.addBindingToExchange(capability.getCapabilityExchangeName(), subscription.getSelector(), endpoint.getSource());
                                         LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
                                         subscription.addConnection(connection);
