@@ -16,9 +16,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.CollectionType;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.*;
 import java.util.List;
@@ -73,10 +70,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void createQueueThatAlreadyExistsResultsInException() {
-		client._createQueue("torsk");
+		client._createQueue(new Queue("torsk", MAX_TTL_8_DAYS));
 
 		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
-			client._createQueue("torsk"); //create some queue that already exists
+			client._createQueue(new Queue("torsk", MAX_TTL_8_DAYS)); //create some queue that already exists
 			//
 		});
 		client.removeQueue("torsk");
@@ -90,7 +87,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void setupAndTearDownQueue() {
 		//Set up a new queue
-		client.createQueue("crab");
+		client.createQueue(new Queue("crab", MAX_TTL_8_DAYS));
 		assertThat(client.queueExists("crab")).isTrue();
 
 		//Delete the queue
@@ -173,7 +170,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		client._createDirectExchange("my-exchange");
+		client._createExchange(new Exchange("my-exchange", "direct"));
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
 		client.removeExchange("my-exchange");
@@ -182,10 +179,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void removeExchangeBeforeBindings() {
-		client._createTopicExchange("hammershark");
-		client._createQueue("babyshark");
+		client._createExchange(new Exchange("hammershark", "headers"));
+		client._createQueue(new Queue("babyshark", MAX_TTL_8_DAYS));
 
-		client.addBinding("originatingCountry = 'NO'", "hammershark", "babyshark", "hammershark");
+		client.addBinding("hammershark", new Binding("hammershark", "babyshark", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
 
 		client.removeExchange("hammershark");
@@ -194,10 +191,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void removeQueueBeforeBindings() {
-		client._createTopicExchange("hammershark1");
-		client._createQueue("babyshark1");
+		client._createExchange(new Exchange("hammershark1", "headers"));
+		client._createQueue(new Queue("babyshark1", MAX_TTL_8_DAYS));
 
-		client.addBinding("originatingCountry = 'NO'", "hammershark1", "babyshark1", "hammershark1");
+		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
 
 		client.removeQueue("babyshark1");
@@ -207,11 +204,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void readExchangesFromQpid() throws IOException {
-		client.createTopicExchange("test-exchange1");
-		client.createTopicExchange("test-exchange2");
-		client.createQueue("test-queue");
-		client.addBinding("originatingCountry = 'NO'", "test-exchange1", "test-queue", "test-exchange1");
-		client.addBinding("originatingCountry = 'NO'", "test-exchange2", "test-queue", "test-exchange2");
+		Exchange exchange1 = new Exchange("test-exchange1", "headers");
+		client.createExchange(exchange1);
+		Exchange exchange = new Exchange("test-exchange2", "headers");
+		client.createExchange(exchange);
+		client.createQueue(new Queue("test-queue", MAX_TTL_8_DAYS));
+		client.addBinding("test-exchange1", new Binding("test-exchange1", "test-queue", new Filter("originatingCountry = 'NO'")));
+		client.addBinding("test-exchange2", new Binding("test-exchange2", "test-queue", new Filter("originatingCountry = 'NO'")));
 
 		assertThat(client.getAllExchanges()).isNotEmpty();
 	}
@@ -219,7 +218,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void readQueuesFromQpid() throws IOException {
-		client.createQueue("test-queue");
+		client.createQueue(new Queue("test-queue", MAX_TTL_8_DAYS));
 
 		Set<Queue> result = client.getAllQueues();
 		assertThat(result).isNotEmpty();
@@ -231,10 +230,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "subscriptionExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(new Queue(queue, MAX_TTL_8_DAYS));
+		Exchange exchange1 = new Exchange(exchange, "headers");
+		client.createExchange(exchange1);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
@@ -248,10 +248,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(new Queue(queue, MAX_TTL_8_DAYS));
+		Exchange exchange1 = new Exchange(exchange, "headers");
+		client.createExchange(exchange1);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
@@ -265,10 +266,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange2";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(new Queue(queue, MAX_TTL_8_DAYS));
+		Exchange exchange1 = new Exchange(exchange, "headers");
+		client.createExchange(exchange1);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
@@ -282,10 +284,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String capabilityExchange = "capabilityExchange3";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createTopicExchange(capabilityExchange);
-		client.createDirectExchange(deliveryExchange);
+		Exchange exchange = new Exchange(capabilityExchange, "headers");
+		client.createExchange(exchange);
+		client.createExchange(new Exchange(deliveryExchange, "direct"));
 
-		client.addBinding(selector, deliveryExchange, capabilityExchange, deliveryExchange);
+		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 

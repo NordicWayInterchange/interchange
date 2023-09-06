@@ -47,7 +47,7 @@ public class QpidClientLoggerTest {
         String queue = "MyQueueu";
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"",null,new byte[0],null);
         when(template.getForEntity(any(), any())).thenThrow(exception);
-        client.createQueue(queue);
+        client.createQueue(new Queue(queue, QpidClient.MAX_TTL_8_DAYS));
         assertThat(infoEvents(appender.list.stream())).hasSize(1);
         assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queue))).isTrue();
         assertThat(errorEvents(appender.list.stream())).isEmpty();
@@ -69,7 +69,7 @@ public class QpidClientLoggerTest {
 
         when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
-        client.createDirectExchange(exchangeName);
+        client.createExchange(new Exchange(exchangeName, "direct"));
         assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
         assertThat(errorEvents(appender.list.stream())).isEmpty();
         verify(template).getForEntity(any(),any());
@@ -80,7 +80,8 @@ public class QpidClientLoggerTest {
 
         when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
-        client.createTopicExchange(exchangeName);
+        Exchange exchange = new Exchange(exchangeName, "headers");
+        client.createExchange(exchange);
         assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
         assertThat(errorEvents(appender.list.stream())).isEmpty();
         verify(template).getForEntity(any(),any());
@@ -93,7 +94,7 @@ public class QpidClientLoggerTest {
         String source = "source";
         String destination = "destination";
         String bindingKey = "bindingKey";
-        client.addBinding(selector, source, destination, bindingKey);
+        client.addBinding(source, new Binding(bindingKey, destination, new Filter(selector)));
         assertThat(infoEvents(appender.list.stream()))
                 .hasSize(1)
                 .anyMatch(formattedMessageContains(selector))

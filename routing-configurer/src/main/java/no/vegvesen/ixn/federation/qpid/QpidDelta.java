@@ -88,8 +88,7 @@ public class QpidDelta {
         findExchangeByName(exchangeName).ifPresent(ex -> ex.addBinding(new Binding(
                 exchangeName,
                 destination,
-                new Filter(selector),
-                exchangeName
+                new Filter(selector)
         )));
     }
 

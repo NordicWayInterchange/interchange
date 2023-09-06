@@ -26,7 +26,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -141,10 +140,11 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(queueName);
+		qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
 		qpidClient.addReadAccess(serviceProviderName, queueName);
-		qpidClient.createTopicExchange(exchangeName);
-		qpidClient.addBinding(selector, exchangeName, queueName, exchangeName);
+		Exchange exchange = new Exchange(exchangeName, "headers");
+		qpidClient.createExchange(exchange);
+		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 
@@ -174,10 +174,11 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(queueName);
+		qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
 		qpidClient.addReadAccess(spName, queueName);
-		qpidClient.createTopicExchange(exchangeName);
-		qpidClient.addBinding(selector,exchangeName , queueName, exchangeName);
+		Exchange exchange = new Exchange(exchangeName, "headers");
+		qpidClient.createExchange(exchange);
+		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 

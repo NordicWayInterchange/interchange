@@ -8,8 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -73,7 +72,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        Exchange exchange = new Exchange(exchangeName, "headers");
+        qpidClient.createExchange(exchange);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -89,7 +89,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.addBinding(selector, exchangeName, queueName, exchangeName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -119,7 +119,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueTwo = "queue-two";
         String exchangeName = "test-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        Exchange exchange = new Exchange(exchangeName, "headers");
+        qpidClient.createExchange(exchange);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -135,8 +136,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.addBinding(selector, exchangeName, queueOne, exchangeName);
-        qpidClient.addBinding(selector, exchangeName, queueTwo, exchangeName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueOne, new Filter(selector)));
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueTwo, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -166,7 +167,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        Exchange exchange = new Exchange(exchangeName, "headers");
+        qpidClient.createExchange(exchange);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -182,7 +184,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.addBinding(selector, exchangeName, queueName, exchangeName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
