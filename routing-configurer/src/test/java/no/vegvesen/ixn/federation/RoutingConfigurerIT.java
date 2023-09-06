@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -915,7 +916,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setUpRegularRouting(
 				Collections.singleton(neighbourSubscription),
 				Collections.singleton(denmCapability),
-				"my_Neighbour"
+				"my_Neighbour",
+				new QpidDelta()
 		);
 		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
 		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();

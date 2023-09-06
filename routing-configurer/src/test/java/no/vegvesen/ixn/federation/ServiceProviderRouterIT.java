@@ -377,7 +377,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel(peerName);
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider,new QpidDelta());
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
@@ -400,7 +400,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client-3");
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider,new QpidDelta());
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
@@ -456,14 +456,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		///Setting up queue for service provider
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider,new QpidDelta());
 		verify(serviceProviderRepository, times(1)).save(serviceProvider);
 		verify(serviceProviderRepository).findByName(serviceProvider.getName());
 
 
 		//Setting up queue for other service provider.
 		when(serviceProviderRepository.findByName(otherServiceProviderName)).thenReturn(otherServiceProvider);
-		router.syncPrivateChannels(otherServiceProvider.getName());
+		router.syncPrivateChannels(otherServiceProvider,new QpidDelta());
 		verify(serviceProviderRepository, times(1)).save(otherServiceProvider);
 		verify(serviceProviderRepository).findByName(otherServiceProvider.getName());
 
@@ -474,7 +474,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider,new QpidDelta());
 		verify(serviceProviderRepository, times(2)).save(serviceProvider);
 
 		PrivateChannel otherPrivateChannel = otherServiceProvider.getPrivateChannels().stream().findFirst().get();
