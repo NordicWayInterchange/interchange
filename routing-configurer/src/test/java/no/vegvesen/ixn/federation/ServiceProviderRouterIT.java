@@ -440,7 +440,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
 
-	@Disabled("This should be solved in a qpid-delta type of way")
+	@Disabled("This demands more refatoring to solve")
 	@Test
 	public void doNotRemovePeerFromGroupIfItHasPrivateChannels() {
 		String peerName = "my-client-311";
@@ -456,16 +456,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		///Setting up queue for service provider
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider,new QpidDelta());
+		router.syncPrivateChannels(serviceProvider,client.getQpidDelta());
 		verify(serviceProviderRepository, times(1)).save(serviceProvider);
-		verify(serviceProviderRepository).findByName(serviceProvider.getName());
 
 
 		//Setting up queue for other service provider.
 		when(serviceProviderRepository.findByName(otherServiceProviderName)).thenReturn(otherServiceProvider);
-		router.syncPrivateChannels(otherServiceProvider,new QpidDelta());
+		router.syncPrivateChannels(otherServiceProvider,client.getQpidDelta());
 		verify(serviceProviderRepository, times(1)).save(otherServiceProvider);
-		verify(serviceProviderRepository).findByName(otherServiceProvider.getName());
 
 		//TODO the setup above should be done directly using qpid client.
 
@@ -474,7 +472,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
-		router.syncPrivateChannels(serviceProvider,new QpidDelta());
+		router.syncPrivateChannels(serviceProvider,client.getQpidDelta());
 		verify(serviceProviderRepository, times(2)).save(serviceProvider);
 
 		PrivateChannel otherPrivateChannel = otherServiceProvider.getPrivateChannels().stream().findFirst().get();
