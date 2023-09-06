@@ -106,7 +106,7 @@ public class RoutingConfigurer {
 			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
 			if(!allAcceptedSubscriptions.isEmpty()){
-				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName());
+				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(),delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
