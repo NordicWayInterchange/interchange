@@ -1,31 +1,18 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class QpidDelta {
 
-    Set<Exchange> exchanges = new HashSet<>();
+    List<Exchange> exchanges = new ArrayList<>();
 
-    Set<Queue> queues = new HashSet<>();
+    List<Queue> queues = new ArrayList<>();
 
-    public QpidDelta() {
+    public QpidDelta(List<Exchange> exchanges, List<Queue> queues) {
+        this.exchanges.addAll(exchanges);
+        this.queues.addAll(queues);
 
-    }
-
-    public QpidDelta(Set<Exchange> exchanges, Set<Queue> queues) {
-        this.exchanges = exchanges;
-        this.queues = queues;
-    }
-
-    public Set<Exchange> getExchanges() {
-        return exchanges;
-    }
-
-    public void setExchanges(Set<Exchange> exchanges) {
-        this.exchanges = exchanges;
     }
 
     public void addExchange(Exchange exchange) {
@@ -36,20 +23,16 @@ public class QpidDelta {
         findExchangeByName(exchangeName).ifPresent(value -> this.exchanges.remove(value));
     }
 
-    public Set<Queue> getQueues() {
-        return queues;
-    }
-
-    public void setQueues(Set<Queue> queues) {
-        this.queues = queues;
-    }
-
     public void addQueue(Queue queue) {
         this.queues.add(queue);
     }
 
     public void removeQueue(String queueName) {
         findQueueByName(queueName).ifPresent(value -> this.queues.remove(value));
+    }
+
+    public void removeQueue(Queue queue) {
+        queues.remove(queue);
     }
 
     public boolean exchangeExists(String exchangeName) {
@@ -60,6 +43,10 @@ public class QpidDelta {
     public boolean queueExists(String queueName) {
         return queues.stream()
                 .anyMatch(q -> q.getName().equals(queueName));
+    }
+
+    public Queue findByQueueName(String queueName) {
+        return findQueueByName(queueName).orElse(null);
     }
 
     public Optional<Queue> findQueueByName(String queueName) {
