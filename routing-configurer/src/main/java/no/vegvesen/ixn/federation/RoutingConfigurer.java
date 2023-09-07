@@ -69,9 +69,12 @@ public class RoutingConfigurer {
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
+				/*
 				if (qpidClient.queueExists(sub.getQueueName())) {
 					qpidClient.removeQueue(sub.getQueueName());
 				}
+				 */
+				qpidClient.removeQueueIfExists(sub.getQueueName());
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 

@@ -120,12 +120,13 @@ public class ServiceProviderRouter {
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
-            if (delta.queueExists(source)) {
+            Queue queue = delta.findByQueueName(source);
+            if (queue != null) {
                 qpidClient.removeReadAccess(serviceProvider.getName(), source);
-                qpidClient.removeQueue(source);
+                qpidClient.removeQueueById(queue.getId());
                 logger.info("Removed queue for LocalSubscription {}", subscription);
+                delta.removeQueue(queue);
             }
-            delta.removeQueue(source);
             endpointsToRemove.add(endpoint);
         }
         if (!endpointsToRemove.isEmpty()) {
@@ -263,10 +264,11 @@ public class ServiceProviderRouter {
                 provider.removeQueueReadAccess(name,queueName);
                 qpidClient.postQpidAcl(provider);
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
-                if (delta.queueExists(queueName)) {
-                    qpidClient.removeQueue(queueName);
+                Queue queue = delta.findByQueueName(queueName);
+                if (queue != null) {
+                    qpidClient.removeQueueById(queue.getId());
+                    delta.removeQueue(queue);
                 }
-                delta.removeQueue(queueName);
             }
         }
     }

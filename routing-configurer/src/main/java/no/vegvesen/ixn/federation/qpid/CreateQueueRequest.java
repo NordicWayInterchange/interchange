@@ -16,17 +16,5 @@ public class CreateQueueRequest {
    }
 
 
-    public String getName() {
-        return queue.getName();
-    }
-
-    public boolean isDurable() {
-        return queue.isDurable();
-    }
-
-
-    public long getMaximumMessageTtl() {
-        return queue.getMaximumMessageTtl();
-    }
 
 }

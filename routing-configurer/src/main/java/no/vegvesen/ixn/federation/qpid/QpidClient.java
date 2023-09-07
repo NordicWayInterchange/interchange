@@ -79,10 +79,11 @@ public class QpidClient {
 		return response.getStatusCodeValue();
 	}
 
-	public void addBinding(String source, Binding binding) {
+	public boolean addBinding(String source, Binding binding) {
 		AddBindingRequest request = new AddBindingRequest(binding);
 		logger.info("Add binding {} from {} ", binding, source);
-		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
+		Boolean result = restTemplate.postForEntity(exchangesURL + "/" + source + "/bind", request, Boolean.class).getBody();
+		return result.booleanValue();
 
 	}
 
@@ -100,9 +101,14 @@ public class QpidClient {
 		}
 	}
 
-	void _createQueue(Queue queue) {
+
+	//TODO what do we throw on:
+	//1. Not found
+	//2. Conflict (queue already exists)
+	public Queue _createQueue(Queue queue) {
 		CreateQueueRequest request = new CreateQueueRequest(queue);
-		restTemplate.postForEntity(queuesURL + "/",request,String.class);
+		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
+		return result;
 	}
 
 	public Exchange _createExchange(Exchange exchange) {
@@ -114,31 +120,15 @@ public class QpidClient {
 	}
 
 	public boolean queueExists(String queueName) {
-		return lookupQueueId(queueName) != null;
+		return getQueue(queueName) != null;
 	}
 
-	private String lookupQueueId(String queueName) {
-		String queueQueryUrl = queuesURL + "/" + queueName;
-		logger.debug("quering for queue {} with url {}", queueName, queueQueryUrl);
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<HashMap> response;
+	public Queue getQueue(String queueName) {
 		try {
-			response = restTemplate.getForEntity(new URI(queueQueryUrl), HashMap.class);
-		} catch (HttpClientErrorException.NotFound notFound) {
+			return restTemplate.getForEntity(queuesURL + "/" + queueName, Queue.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
 			return null;
-		} catch (Throwable e) {
-			logger.error("Caught exception {}", e);
-			throw new RoutingConfigurerException(String.format("Could not query for QPID queue %s", queueName), e);
 		}
-		HttpStatus statusCode = response.getStatusCode();
-		if (statusCode.is2xxSuccessful()) {
-			if (response.getBody() != null) {
-				return (String) response.getBody().get("id");
-			}
-		} else {
-			logger.error("Status code {} querying for QPID queue {}", statusCode.value(), queueName);
-		}
-		return null;
 	}
 
 	public boolean exchangeExists(String exchangeName) {
@@ -194,10 +184,18 @@ public class QpidClient {
 		return existingBindKeys;
 	}
 
-	public void removeQueue(String queueName) {
-		String queueId = lookupQueueId(queueName);
-		logger.info("Removing queue {}", queueName);
+
+	//TODO do we really need this??? It should be private!!
+	public void removeQueueById(String queueId) {
+		logger.info("Removing queue with id {}", queueId);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
+	}
+
+	public void removeQueueIfExists(String queueName) {
+		Queue queue = getQueue(queueName);
+		if (queue != null) {
+			removeQueueById(queue.getId());
+		}
 	}
 
 	public void removeExchange(String exchangeName) {
@@ -277,8 +275,8 @@ public class QpidClient {
 		}
 	}
 
-	public Set<Queue> getAllQueues() throws JsonProcessingException {
-		ResponseEntity<Set<Queue>> allQueuesResponse  = restTemplate.exchange(
+	public List<Queue> getAllQueues() throws JsonProcessingException {
+		ResponseEntity<List<Queue>> allQueuesResponse  = restTemplate.exchange(
 				allQueuesUrl,
 				HttpMethod.GET,
 				null,
@@ -287,8 +285,8 @@ public class QpidClient {
 		return allQueuesResponse.getBody();
 	}
 
-	public Set<Exchange> getAllExchanges() throws JsonProcessingException {
-		ResponseEntity<Set<Exchange>> allExchangesResponse = restTemplate.exchange(
+	public List<Exchange> getAllExchanges() throws JsonProcessingException {
+		ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
 				allExchangesUrl,
 				HttpMethod.GET,
 				null,
@@ -298,16 +296,14 @@ public class QpidClient {
 	}
 
 	public QpidDelta getQpidDelta() {
-		QpidDelta qpidDelta = new QpidDelta();
 		try {
-			Set<Queue> allQueues = getAllQueues();
-			Set<Exchange> allExchanges = getAllExchanges();
-			qpidDelta.setExchanges(allExchanges);
-			qpidDelta.setQueues(allQueues);
+			List<Queue> allQueues = getAllQueues();
+			List<Exchange> allExchanges = getAllExchanges();
+			return new QpidDelta(allExchanges,allQueues);
+
 		} catch (JsonProcessingException e) {
 			logger.error("Could not parse qpid delta");
 			throw new RuntimeException(e);
 		}
-		return qpidDelta;
 	}
 }

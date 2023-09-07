@@ -14,16 +14,20 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.util.List;
 import java.util.Set;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.MAX_TTL_8_DAYS;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
@@ -70,29 +74,48 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void createQueueThatAlreadyExistsResultsInException() {
-		client._createQueue(new Queue("torsk", MAX_TTL_8_DAYS));
+		Queue queue = client._createQueue(new Queue("torsk", MAX_TTL_8_DAYS));
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
 			client._createQueue(new Queue("torsk", MAX_TTL_8_DAYS)); //create some queue that already exists
-			//
 		});
-		client.removeQueue("torsk");
+		client.removeQueueById(queue.getId());
+	}
+	@Test
+	public void testGetQueue() {
+		String name = "test-get-queue-queue";
+		Queue queue = new Queue(name);
+		client._createQueue(queue);
+		Queue result = client.getQueue(name);
+		assertThat(result.getName()).isEqualTo(name);
+	}
+	@Test
+	public void testGetNonExistingQueue() {
+		String name = "this-queue-does-not-exist";
+		assertThat(client.getQueue(name)).isNull();
+	}
+	@Test
+	public void testQueueExistsOnExisitingQueue() {
+		String name = "test-queue-exist-queue";
+		Queue queue = new Queue(name);
+		client._createQueue(queue);
+		assertThat(client.queueExists(name)).isTrue();
+		assertThat(client.queueExists("this-queue-does-not-exist")).isFalse();
 	}
 
 	@Test
-	public void queueNotCreatedQueueDoesNotExist() {
-		assertThat(client.queueExists("mackrel")).isFalse();
+	public void testRemovingQueueById() {
+		String name = "test-removing-queue-queue";
+		Queue queue = new Queue(name);
+		Queue createdQueue = client._createQueue(queue);
+		client.removeQueueById(createdQueue.getId());
 	}
 
 	@Test
-	public void setupAndTearDownQueue() {
-		//Set up a new queue
-		client.createQueue(new Queue("crab", MAX_TTL_8_DAYS));
-		assertThat(client.queueExists("crab")).isTrue();
-
-		//Delete the queue
-		client.removeQueue("crab");
-		assertThat(client.queueExists("crab")).isFalse();
+	public void testRemovingNonExistingQueue() {
+		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
+				() -> client.removeQueueById("-1")
+		);
 	}
 
 	@Test
@@ -133,6 +156,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 		assertThat(userNames).doesNotContain(newUser);
 	}
+
+	//TODO what happens if we try to add a member to a non-existing group??
+	//TODO what happens if we try to add a member to an existing group twice??
 
 	@Test
 	public void readAccessIsAdded() {
@@ -192,12 +218,12 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void removeQueueBeforeBindings() {
 		client._createExchange(new Exchange("hammershark1", "headers"));
-		client._createQueue(new Queue("babyshark1", MAX_TTL_8_DAYS));
+		Queue queue = client._createQueue(new Queue("babyshark1", MAX_TTL_8_DAYS));
 
 		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
 
-		client.removeQueue("babyshark1");
+		client.removeQueueById(queue.getId());
 		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
 
@@ -220,7 +246,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void readQueuesFromQpid() throws IOException {
 		client.createQueue(new Queue("test-queue", MAX_TTL_8_DAYS));
 
-		Set<Queue> result = client.getAllQueues();
+		List<Queue> result = client.getAllQueues();
 		assertThat(result).isNotEmpty();
 	}
 
@@ -294,4 +320,35 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
 	}
+
+	@Test
+	public void whatDoesACreateExchangeRequestReturn() throws IOException {
+		Exchange exchange = new Exchange("kyrre", "headers");
+		exchange = client._createExchange(exchange);
+		new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,exchange);
+	}
+
+	@Test
+	public void whatDoeACreateQueueRequestReturn() throws IOException {
+		Queue queue = new Queue("test-create-queue-response");
+		queue = client._createQueue(queue);
+		new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,queue);
+	}
+
+
+	//TODO test no such exchange, no such queue
+	@Test
+	public void whatDoesAnAddBindingRequestReturn() {
+		Queue queue = new Queue("test-bind-result-queue");
+		queue = client._createQueue(queue);
+
+		Exchange exchange = new Exchange("test-bind-result-exchange");
+		exchange = client._createExchange(exchange);
+
+		boolean created = client.addBinding(exchange.getName(),new Binding("my-test-binding-key",queue.getName(),new Filter("a = 'b'")));
+		assertThat(created).isTrue();
+		created = client.addBinding(exchange.getName(),new Binding("my-test-binding-key",queue.getName(),new Filter("a = 'b'")));
+		assertThat(created).isFalse();
+	}
+
 }

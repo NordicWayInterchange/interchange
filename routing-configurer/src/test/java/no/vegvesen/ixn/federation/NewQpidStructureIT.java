@@ -22,6 +22,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
 @ContextConfiguration(initializers = {NewQpidStructureIT.Initializer.class})
@@ -489,10 +491,4 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     }
 
-    @Test
-    public void whatDoesACreateExchangeRequestReturn() throws IOException {
-        Exchange exchange = new Exchange("kyrre", "headers");
-        exchange = qpidClient._createExchange(exchange);
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,exchange);
-    }
 }
