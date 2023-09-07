@@ -198,6 +198,8 @@ public class QpidClient {
 		}
 	}
 
+	//public void removeExchangeIfExists(S)
+
 	public void removeExchange(String exchangeName) {
 		String exchangeId = lookupExchangeId(exchangeName);
 		logger.info("Removing exchange {}", exchangeName);

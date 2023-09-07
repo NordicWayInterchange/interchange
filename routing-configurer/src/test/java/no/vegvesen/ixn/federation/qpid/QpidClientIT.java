@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +119,16 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 	}
 
+	@Test
+	public void createExchangeThatAlreadyExistsResultsInException() {
+		Exchange exchange = client._createExchange(new Exchange("test-create-exchange"));
+
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
+			client._createExchange(new Exchange("test-create-exchange"));
+		});
+		//client.removeExchangeById(exchange.getId());
+		Assertions.fail();
+	}
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
