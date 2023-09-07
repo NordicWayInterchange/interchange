@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Exchange {
 
     private String name;
@@ -15,7 +15,7 @@ public class Exchange {
 
     private String type = "headers";
 
-    Set<Binding> bindings = new HashSet<>();
+    List<Binding> bindings = new ArrayList<>();
 
     public Exchange() {
     }
@@ -29,25 +29,17 @@ public class Exchange {
         this.type = type;
     }
 
-    public Exchange(String name, Set<Binding> bindings) {
+    public Exchange(String name, List<Binding> bindings) {
         this.name = name;
-        this.bindings = bindings;
+        this.bindings.addAll(bindings);
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<Binding> getBindings() {
+    public List<Binding> getBindings() {
         return bindings;
-    }
-
-    public void setBindings(Set<Binding> bindings) {
-        this.bindings = bindings;
     }
 
     public void addBinding(Binding binding) {
@@ -61,19 +53,25 @@ public class Exchange {
     }
 
 
-    @Override
-    public String toString() {
-        return "Exchange{" +
-                "name='" + name + '\'' +
-                ", bindings=" + bindings +
-                '}';
-    }
-
     public boolean isDurable() {
         return durable;
     }
 
     public String getType() {
         return type;
+    }
+
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Exchange{" +
+                "name='" + name + '\'' +
+                ", durable=" + durable +
+                ", type='" + type + '\'' +
+                ", bindings=" + bindings +
+                '}';
     }
 }

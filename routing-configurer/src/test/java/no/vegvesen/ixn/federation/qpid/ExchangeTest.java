@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class ExchangeTest {
     @Test
@@ -23,6 +24,13 @@ public class ExchangeTest {
 
         List<Exchange> result = mapper.readValue(file, collectionType);
         assertThat(result.size()).isEqualTo(4);
+        Exchange exchange = result.get(0);
+        assertThat(exchange.getId()).isEqualTo("3396d263-1767-4658-a192-83e35772395e");
+        assertThat(exchange.getName()).isEqualTo("d5bb43db-90e5-4700-ae58-a3c40aeba250");
+        assertThat(exchange.getType()).isEqualTo("headers");
+        //TODO durable
+        //fail();
+
     }
 
     @Test
