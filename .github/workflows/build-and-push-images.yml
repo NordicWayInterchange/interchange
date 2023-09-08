@@ -86,11 +86,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: interchange
-      - id: auth
-        uses: google-github-actions/auth@v0
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
-      - name: Setup docker
-        run: gcloud auth configure-docker
+          workload_identity_provider: ${{secrets.WORKLOAD_IDENTITY_PROVIDER}}
+          service_account: ${{secrets.SERVICE_ACCOUNT}}
+      - name: Login to Artifact Registry
+        run: gcloud auth configure-docker ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
       - name: Build and upload Docker images
-        run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
+        run: chmod +x build-push-images.sh && ./build-push-images.sh ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}
