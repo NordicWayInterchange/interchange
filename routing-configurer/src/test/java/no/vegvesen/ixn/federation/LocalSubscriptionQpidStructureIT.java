@@ -93,6 +93,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     @MockBean
     OutgoingMatchRepository outgoingMatchRepository;
 
+
+    @Autowired
+    QpidClient client;
+
     @Autowired
     ServiceProviderRouter router;
 
@@ -114,9 +118,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-        //TODO check this with the actual delta from qpid
-        fail();
-        QpidDelta delta = new QpidDelta(Collections.emptyList(), Collections.emptyList());
+        QpidDelta delta = client.getQpidDelta();
         router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
