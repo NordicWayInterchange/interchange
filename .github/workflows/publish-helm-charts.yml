@@ -42,8 +42,8 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
-          export HELM_CHART=$(ls target/helm/interchange-*.tgz)
-          
+          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
+
       # Configure Google Cloud
       - id: auth
         name: 'Authenticate to Google Cloud'
@@ -61,4 +61,4 @@ jobs:
           gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet
       - name: helm push
         run: |
-          helm push $HELM_CHART oci://europe-west4-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
+          helm push ${{ env.HELM_CHART }} oci://europe-west4-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
