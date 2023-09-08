@@ -269,7 +269,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(exchangeName)).isTrue();
-        assertThat(client.getQueueBindKeys("bi-queue")).hasSize(1);
+        assertThat(client.getQueuePublishingLinks("bi-queue")).hasSize(1);
     }
 
     @Test
@@ -348,7 +348,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider2);
         serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
-        assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
+        assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
     }
 
     @Test

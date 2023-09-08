@@ -700,7 +700,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
-		assertThat(client.getQueueBindKeys("my-queue12")).hasSize(1);
+		assertThat(client.getQueuePublishingLinks("my-queue12")).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
@@ -833,8 +833,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -871,9 +871,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(2);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName2);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
 	}
 
 	@Test
@@ -906,8 +906,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -937,8 +937,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(0);
-		assertThat(client.getQueueBindKeys(queueName)).doesNotContain(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
+		assertThat(client.getQueuePublishingLinks(queueName)).noneMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -968,8 +968,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test

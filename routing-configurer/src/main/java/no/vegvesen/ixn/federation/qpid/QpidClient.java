@@ -143,32 +143,16 @@ public class QpidClient {
 	}
 
 
-	//TODO this method is no longer in use in prodction code. Replace it in test code, and remove.
-	public Set<String> getQueueBindKeys(String queueName) {
-		HashSet<String> existingBindKeys = new HashSet<>();
-		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
-		System.out.println("Get publishing links for Queue on URL " + url);
-
-		ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-				url,
+	public List<Binding> getQueuePublishingLinks(String queueName) {
+		return restTemplate.exchange(
+				queuesURL + "/" + queueName + "/getPublishingLinks",
 				HttpMethod.GET,
 				null,
-				new ParameterizedTypeReference<List<Map<String, Object>>>() {
-				});
-		List<Map<String, Object>> queueBindings = response.getBody();
-		if (queueBindings != null) {
-			for (Map<String, Object> binding : queueBindings) {
-				Object bindingKey = binding.get("bindingKey");
-				if (bindingKey instanceof String) {
-					existingBindKeys.add((String) bindingKey);
-				}
-			}
-		}
-		return existingBindKeys;
+				new ParameterizedTypeReference<List<Binding>>() {
+				}).getBody();
 	}
 
 
-	//TODO do we really need this??? It should be private!!
 	public void removeQueueById(String queueId) {
 		logger.info("Removing queue with id {}", queueId);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
