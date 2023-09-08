@@ -5,7 +5,6 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -289,10 +287,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createQueue(new Queue("babyshark", MAX_TTL_8_DAYS));
 
 		client.addBinding("hammershark", new Binding("hammershark", "babyshark", new Filter("originatingCountry = 'NO'")));
-		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
+		Exchange exchange = client.getExchange("hammershark");
+		assertThat(exchange.getBindings()).hasSize(1);
 
 		client.removeExchangeIfExists("hammershark");
-		assertThat(client.getQueueBindKeys("babyshark")).hasSize(0);
+		assertThat(client.getQueuePublishingLinks("babyshark")).hasSize(0);
 	}
 
 	@Test
@@ -301,7 +300,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		Queue queue = client._createQueue(new Queue("babyshark1", MAX_TTL_8_DAYS));
 
 		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
-		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
+		assertThat(client.getQueuePublishingLinks("babyshark1")).hasSize(1);
 
 		client.removeQueueById(queue.getId());
 		assertThat(client.queueExists("babyshark1")).isFalse();
@@ -345,7 +344,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch( b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -363,7 +362,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -381,7 +380,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -405,11 +404,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	//TODO test no such exchange, no such queue
 	@Test
 	public void whatDoesAnAddBindingRequestReturn() {
-		Queue queue = new Queue("test-bind-result-queue");
-		queue = client._createQueue(queue);
+		Queue queue = client._createQueue(new Queue("test-bind-result-queue"));
 
-		Exchange exchange = new Exchange("test-bind-result-exchange");
-		exchange = client._createExchange(exchange);
+		Exchange exchange = client._createExchange(new Exchange("test-bind-result-exchange"));
 
 		boolean created = client.addBinding(exchange.getName(),new Binding("my-test-binding-key",queue.getName(),new Filter("a = 'b'")));
 		assertThat(created).isTrue();

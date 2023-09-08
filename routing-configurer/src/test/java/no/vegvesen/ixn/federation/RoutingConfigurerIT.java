@@ -279,7 +279,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		routingConfigurer.setupNeighbourRouting(salmon, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getQueueName())).isTrue();
-		Set<String> queueBindKeys = client.getQueueBindKeys(s1.getQueueName());
+		List<Binding> queueBindKeys = client.getQueuePublishingLinks(s1.getQueueName());
 		assertThat(queueBindKeys).hasSize(1);
 		assertThat(s2.getQueueName()).isNull();
 
@@ -431,7 +431,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.setupNeighbourRouting(hammershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
-		assertThat(client.getQueueBindKeys(sub.getQueueName()).size()).isEqualTo(1);
+		assertThat(client.getQueuePublishingLinks(sub.getQueueName())).hasSize(1);
 	}
 
 	@Test
@@ -481,7 +481,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
-		assertThat(client.getQueueBindKeys(sub1.getQueueName()).size()).isEqualTo(1);
+		assertThat(client.getQueuePublishingLinks(sub1.getQueueName())).hasSize(1);
 
 		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -497,9 +497,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.getQueueBindKeys(sub1.getQueueName()).size()).isEqualTo(1);
+		assertThat(client.getQueuePublishingLinks(sub1.getQueueName())).hasSize(1);
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
-		assertThat(client.getQueueBindKeys(sub2.getQueueName()).size()).isEqualTo(1);
+		assertThat(client.getQueuePublishingLinks(sub2.getQueueName())).hasSize(1);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 	}
 
@@ -552,7 +552,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
-		assertThat(client.getQueueBindKeys(sub.getQueueName()).size()).isEqualTo(2);
+		assertThat(client.getQueuePublishingLinks(sub.getQueueName())).hasSize(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
 
