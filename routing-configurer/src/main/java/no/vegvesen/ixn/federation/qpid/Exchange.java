@@ -9,29 +9,41 @@ import java.util.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Exchange {
 
+    private static final String DEFAULT_TYPE = "headers";
+    private static final boolean DEFAULT_DURABILITY = true;
+
+    private String id;
     private String name;
 
-    private boolean durable = true;
+    private boolean durable;
 
-    private String type = "headers";
+    private String type;
 
-    List<Binding> bindings = new ArrayList<>();
+    List<Binding> bindings;
 
     public Exchange() {
+        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
+    }
+
+    public Exchange(String name, String id, boolean durable, String type, List<Binding> bindings) {
+        this.name = name;
+        this.id = id;
+        this.durable = durable;
+        this.type = type;
+        this.bindings = new ArrayList<>();
+        this.bindings.addAll(bindings);
     }
 
     public Exchange(String name) {
-        this.name = name;
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
     }
 
     public Exchange(String name, String type) {
-        this.name = name;
-        this.type = type;
+        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>());
     }
 
     public Exchange(String name, List<Binding> bindings) {
-        this.name = name;
-        this.bindings.addAll(bindings);
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,bindings);
     }
 
     public String getName() {
@@ -62,13 +74,14 @@ public class Exchange {
     }
 
     public String getId() {
-        return null;
+        return id;
     }
 
     @Override
     public String toString() {
         return "Exchange{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", durable=" + durable +
                 ", type='" + type + '\'' +
                 ", bindings=" + bindings +

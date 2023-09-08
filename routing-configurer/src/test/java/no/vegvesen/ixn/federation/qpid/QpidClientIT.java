@@ -20,9 +20,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.MAX_TTL_8_DAYS;
@@ -96,7 +95,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(client.getQueue(name)).isNull();
 	}
 	@Test
-	public void testQueueExistsOnExisitingQueue() {
+	public void testQueueExists() {
 		String name = "test-queue-exist-queue";
 		Queue queue = new Queue(name);
 		client._createQueue(queue);
@@ -120,15 +119,85 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testRemoveQueueIfExists() {
+		String name = "test-remove-queue-if-exists";
+		Queue queue = new Queue(name);
+		client._createQueue(queue);
+
+		client.removeQueueIfExists(name);
+		assertThat(client.queueExists(name)).isFalse();
+
+		assertThatNoException().isThrownBy(
+				() -> client.removeQueueIfExists("this-queue-does-not-exist")
+		);
+	}
+
+	@Test
 	public void createExchangeThatAlreadyExistsResultsInException() {
 		Exchange exchange = client._createExchange(new Exchange("test-create-exchange"));
 
 		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
 			client._createExchange(new Exchange("test-create-exchange"));
 		});
-		//client.removeExchangeById(exchange.getId());
-		Assertions.fail();
+		client.removeExchangeById(exchange.getId());
+
 	}
+
+	@Test
+	public void testGetExchange() {
+		String name = "test-get-exchange-exchange";
+		Exchange exchange = new Exchange(name);
+		client._createExchange(exchange);
+		Exchange result = client.getExchange(name);
+		assertThat(result.getName()).isEqualTo(name);
+		assertThat(result.getId()).isNotNull();
+	}
+
+	@Test
+	public void testGetNonExistingExchange() {
+		assertThat(client.getExchange("this-exchange-does-not-exist")).isNull();
+	}
+
+	@Test
+	public void testExchangeExists() {
+		String name = "test-exchange-exists-exchange";
+		client._createExchange(new Exchange(name));
+		assertThat(client.exchangeExists(name)).isTrue();
+		assertThat(client.exchangeExists("this-exchange-does-not-exist")).isFalse();
+	}
+
+	@Test
+	public void testRemoveExhangeById() {
+		String name = "test-remove-exchange-by-id-exchange";
+		Exchange exchange = new Exchange(name);
+		exchange = client._createExchange(exchange);
+		client.removeExchangeById(exchange.getId());
+		assertThat(client.exchangeExists(name)).isFalse();
+	}
+
+	@Test
+	public void removingNonExistingExhangeById() {
+		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
+				() -> client.removeExchangeById("-1")
+		);
+	}
+
+	@Test
+	public void testRemoveExchangeIfExist() {
+		String exchangeName = "test-remove-exchange-if-exists-exchange";
+		Exchange exchange = new Exchange(exchangeName);
+		client._createExchange(exchange);
+
+		client.removeExchangeIfExists(exchangeName);
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+
+		assertThatNoException().isThrownBy(
+				() -> client.removeExchangeIfExists("this-exchange-does-not-exist")
+		);
+
+	}
+
+
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
@@ -210,7 +279,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createExchange(new Exchange("my-exchange", "direct"));
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
-		client.removeExchange("my-exchange");
+		client.removeExchangeIfExists("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isFalse();
 	}
 
@@ -222,7 +291,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addBinding("hammershark", new Binding("hammershark", "babyshark", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
 
-		client.removeExchange("hammershark");
+		client.removeExchangeIfExists("hammershark");
 		assertThat(client.getQueueBindKeys("babyshark")).hasSize(0);
 	}
 
@@ -330,20 +399,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
-	}
-
-	@Test
-	public void whatDoesACreateExchangeRequestReturn() throws IOException {
-		Exchange exchange = new Exchange("kyrre", "headers");
-		exchange = client._createExchange(exchange);
-		new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,exchange);
-	}
-
-	@Test
-	public void whatDoeACreateQueueRequestReturn() throws IOException {
-		Queue queue = new Queue("test-create-queue-response");
-		queue = client._createQueue(queue);
-		new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,queue);
 	}
 
 

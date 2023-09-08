@@ -312,11 +312,12 @@ public class ServiceProviderRouter {
         if (!tearDownCapabilities.isEmpty()) {
             for (CapabilitySplit capability : tearDownCapabilities) {
                 if (capability.exchangeExists()) {
-                    if (delta.exchangeExists(capability.getCapabilityExchangeName())) {
-                        qpidClient.removeExchange(capability.getCapabilityExchangeName());
+                    Exchange exchange = delta.findByExchangeName(capability.getCapabilityExchangeName());
+                    if (exchange != null) {
+                        qpidClient.removeExchangeById(exchange.getId());
                         logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+                        delta.removeExchange(capability.getCapabilityExchangeName());
                     }
-                    delta.removeExchange(capability.getCapabilityExchangeName());
                     capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
                 }
             }
@@ -363,12 +364,13 @@ public class ServiceProviderRouter {
                     if (matches.isEmpty()) {
                         if (delivery.exchangeExists()) {
                             String target = delivery.getExchangeName();
-                            if (delta.exchangeExists(target)) {
+                            Exchange exchange = delta.findByExchangeName(target);
+                            if (exchange != null) {
                                 logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
                                 qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                                qpidClient.removeExchange(target);
+                                qpidClient.removeExchangeById(exchange.getId());
+                                delta.removeExchange(target);
                             }
-                            delta.removeExchange(target);
                             delivery.setExchangeName("");
                         }
                         if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {

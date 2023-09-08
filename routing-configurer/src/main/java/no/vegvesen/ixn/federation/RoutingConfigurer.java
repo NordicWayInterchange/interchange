@@ -223,7 +223,7 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {
-							qpidClient.removeExchange(subscription.getExchangeName());
+							qpidClient.removeExchangeIfExists(subscription.getExchangeName());
 							subscription.removeExchangeName();
 							logger.debug("Removed exchange for subscription {}", subscription.toString());
 						}

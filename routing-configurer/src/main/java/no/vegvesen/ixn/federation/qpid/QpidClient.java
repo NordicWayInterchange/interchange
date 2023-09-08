@@ -8,13 +8,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -131,32 +129,17 @@ public class QpidClient {
 		}
 	}
 
-	public boolean exchangeExists(String exchangeName) {
-		return lookupExchangeId(exchangeName) != null;
+	public Exchange getExchange(String exchangeName) {
+		try {
+			return restTemplate.getForEntity(exchangesURL + "/" + exchangeName, Exchange.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
 	}
 
-	private String lookupExchangeId(String exchangeName) {
-		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.debug("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<HashMap> response;
-		try {
-			response = restTemplate.getForEntity(new URI(exchangeQueryUrl), HashMap.class);
-		} catch (HttpClientErrorException.NotFound notFound) {
-			return null;
-		} catch (Throwable e) {
-			logger.error("Caught exception {}", e);
-			throw new RoutingConfigurerException(String.format("Could not query for QPID exchange %s", exchangeName), e);
-		}
-		HttpStatus statusCode = response.getStatusCode();
-		if (statusCode.is2xxSuccessful()) {
-			if (response.getBody() != null) {
-				return (String) response.getBody().get("id");
-			}
-		} else {
-			logger.error("Status code {} querying for QPID exchange {}", statusCode.value(), exchangeName);
-		}
-		return null;
+
+	public boolean exchangeExists(String exchangeName) {
+		return getExchange(exchangeName) != null;
 	}
 
 
@@ -198,12 +181,17 @@ public class QpidClient {
 		}
 	}
 
-	//public void removeExchangeIfExists(S)
-
-	public void removeExchange(String exchangeName) {
-		String exchangeId = lookupExchangeId(exchangeName);
-		logger.info("Removing exchange {}", exchangeName);
+	public void removeExchangeById(String exchangeId) {
+		logger.info("Removing exchange with id {}", exchangeId);
 		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
+	}
+
+
+	public void removeExchangeIfExists(String exchangeName) {
+		Exchange exchange = getExchange(exchangeName);
+		if (exchange != null) {
+			removeExchangeById(exchange.getId());
+		}
 	}
 
 	public List<String> getGroupMemberNames(String groupName) {
