@@ -84,4 +84,8 @@ public class QpidDelta {
                 .map(value -> value.isBoundToQueue(queueName))
                 .orElse(false);
     }
+
+    public Exchange findByExchangeName(String exchangeName) {
+        return findExchangeByName(exchangeName).orElse(null);
+    }
 }
