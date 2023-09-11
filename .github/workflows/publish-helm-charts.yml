@@ -1,4 +1,4 @@
-name: Push Helm Charts
+name: Publish Helm Charts
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ on:
         description: 'Specified commit hash or branch name (Optional)'
 
 jobs:
-  helm-package-charts:
+  helm-package-and-publish-charts:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,22 +42,22 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
-          
-      # Configure Google Cloud
-      - id: auth
-        name: 'Authenticate to Google Cloud'
+          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
+
+      # Configure Google Cloud and push to Artifact Registry
+      - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: ${{secrets.WORKLOAD_IDENTITY_PROVIDER}}
-          service_account: ${{secrets.SERVICE_ACCOUNT}}
-      - name: Login to GCP - Shared
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+      - name: Setup Google CLI
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: '434.0.0'
           project_id: ${{ secrets.PROJECT_ID }}
-      - name: login to artifact registry
+      - name: Login to Artifact Registry
         run: |
-          gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet
+          gcloud auth configure-docker ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
       - name: helm push
         run: |
-          helm push target/helm/ oci://europe-west4-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
+          helm push ${{ env.HELM_CHART }} oci://${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
