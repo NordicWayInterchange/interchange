@@ -19,6 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
@@ -195,6 +196,27 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	}
 
+	@Test
+	public void testCreatingExchangeWithBindingsDirectlyDiscardsTheBindings() {
+		Queue queue1 = client._createQueue(new Queue("test-creating-binding-with-exchange-queue-1"));
+		Queue queue2 = client._createQueue(new Queue("test-creating-binding-with-exchange-queue-2"));
+
+		Exchange exchange = client._createExchange(
+				new Exchange(
+						"test-creating-binding-with-exchange-exchange",
+						Arrays.asList(
+								new Binding("test-bind-key-1", queue1.getName(),new Filter("a = b")),
+								new Binding("test-bind-key-2", queue2.getName(),new Filter("a = c"))
+						)
+				)
+		);
+		assertThat(exchange.getBindings()).hasSize(0);
+	}
+
+	@Test
+	public void whatDoesGetGroupMembersActuallyReturn() {
+		System.out.println(client.getAllGroups());
+	}
 
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
@@ -401,7 +423,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 
-	//TODO test no such exchange, no such queue
 	@Test
 	public void whatDoesAnAddBindingRequestReturn() {
 		Queue queue = client._createQueue(new Queue("test-bind-result-queue"));
