@@ -19,16 +19,12 @@ public class QpidDelta {
         this.exchanges.add(exchange);
     }
 
-    public void removeExchange(String exchangeName) {
-        findExchangeByName(exchangeName).ifPresent(value -> this.exchanges.remove(value));
+    public void removeExchange(Exchange exchange) {
+        exchanges.remove(exchange);
     }
 
     public void addQueue(Queue queue) {
         this.queues.add(queue);
-    }
-
-    public void removeQueue(String queueName) {
-        findQueueByName(queueName).ifPresent(value -> this.queues.remove(value));
     }
 
     public void removeQueue(Queue queue) {

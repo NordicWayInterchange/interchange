@@ -47,6 +47,8 @@ public class QpidClient {
 	private final String allQueuesUrl;
 	private final String allExchangesUrl;
 
+	private final String allgroupsUrl;
+
 	public QpidClient(String baseUrl,
 					  String vhostName,
 					  RestTemplate restTemplate) {
@@ -58,7 +60,7 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
-		this.allgroupsUrl = String.format("%s/api/latest/")
+		this.allgroupsUrl = String.format("%s/api/latest/group/default",baseUrl);
 	}
 
 	/**
@@ -86,34 +88,31 @@ public class QpidClient {
 
 	}
 
-	public void createQueue(Queue queue) {
-		if (!queueExists(queue.getName())) {
-			logger.info("Creating queue {}", queue);
-			_createQueue(queue);
-		}
+
+	public Queue createQueue(String name) {
+		return _createQueue(new CreateQueueRequest(name));
 	}
 
-	public void createExchange(Exchange exchange) {
-		if (!exchangeExists(exchange.getName())){
-			logger.info("Creating exchange {}", exchange);
-			_createExchange(exchange);
-		}
+	public Queue createQueue(String queueName, long maximumMessageTtl) {
+		return _createQueue(new CreateQueueRequest(queueName,maximumMessageTtl));
+	}
+
+	public Exchange createHeadersExchange(String name) {
+		return _createExchange(new CreateExchangeRequest(name,"headers"));
 	}
 
 
-	//TODO what do we throw on:
-	//1. Not found
-	//2. Conflict (queue already exists)
-	public Queue _createQueue(Queue queue) {
-		CreateQueueRequest request = new CreateQueueRequest(queue);
+	public Exchange createDirectExchange(String exchangeName) {
+		return _createExchange(new CreateExchangeRequest(exchangeName,"direct"));
+	}
+
+	public Queue _createQueue(CreateQueueRequest request) {
 		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
 		return result;
 	}
 
-	public Exchange _createExchange(Exchange exchange) {
-		CreateExchangeRequest request = new CreateExchangeRequest(exchange);
+	public Exchange _createExchange(CreateExchangeRequest request) {
 		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
-		logger.debug("Created exchange {}", exchange.getName());
 		return response.getBody();
 
 	}
@@ -154,41 +153,27 @@ public class QpidClient {
 	}
 
 
-	public void removeQueueById(String queueId) {
-		logger.info("Removing queue with id {}", queueId);
-		restTemplate.delete(queuesURL + "?id=" + queueId);
-	}
-
 	public void removeQueueIfExists(String queueName) {
-		Queue queue = getQueue(queueName);
-		if (queue != null) {
-			removeQueueById(queue.getId());
+		try {
+			restTemplate.delete(queuesURL + "/" + queueName);
+			logger.info("Removed queue {}", queueName);
+		} catch (HttpClientErrorException.NotFound e) {
+			logger.info("Tried to remove non-existing queue {}", queueName);
 		}
-	}
-
-	public void removeExchangeById(String exchangeId) {
-		logger.info("Removing exchange with id {}", exchangeId);
-		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}
 
 
 	public void removeExchangeIfExists(String exchangeName) {
-		Exchange exchange = getExchange(exchangeName);
-		if (exchange != null) {
-			removeExchangeById(exchange.getId());
+		try {
+			restTemplate.delete(exchangesURL + "/" + exchangeName);
+			logger.info("Removed exchange {}", exchangeName);
+		} catch (HttpClientErrorException.NotFound e) {
+			logger.info("Tried to remove non-existing queue {}", exchangeName);
 		}
 	}
 
-	//TODO should we allow getting all groups??
-
-
-	public String getGroupsDescriptions() {
-		return restTemplate.getForEntity()
-	}
-
-	public String getAllGroups() {
-		return restTemplate.getForEntity(groupsUrl ,String.class).getBody();
-
+	public GroupMember getGroupMember(String memberName, String groupName) {
+		return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
 	}
 
 	public List<String> getGroupMemberNames(String groupName) {
@@ -202,12 +187,13 @@ public class QpidClient {
 		List<String> groupMemberNames = groupMembers.getBody().stream().map(GroupMember::getName).collect(Collectors.toList());
 		return groupMemberNames;
 	}
-
 	public void removeMemberFromGroup(String memberName, String groupName) {
 		String url = groupsUrl + groupName + "/" + memberName;
 		logger.info("Removing user {} from group {}",memberName,groupName);
 		restTemplate.delete(url);
 	}
+
+	//TODO what doest this actually return??
 
 	public void addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);

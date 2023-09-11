@@ -49,7 +49,7 @@ public class QpidClientLoggerTest {
         String queue = "MyQueueu";
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"",null,new byte[0],null);
         when(template.getForEntity(any(), any())).thenThrow(exception);
-        client.createQueue(new Queue(queue, QpidClient.MAX_TTL_8_DAYS));
+        client.createQueue(queue, QpidClient.MAX_TTL_8_DAYS);
         assertThat(infoEvents(appender.list.stream())).hasSize(1);
         assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queue))).isTrue();
         assertThat(errorEvents(appender.list.stream())).isEmpty();
@@ -73,7 +73,7 @@ public class QpidClientLoggerTest {
 
         when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
-        client.createExchange(new Exchange(exchangeName, "direct"));
+        client.createDirectExchange(exchangeName);
         assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
         assertThat(errorEvents(appender.list.stream())).isEmpty();
         verify(template).getForEntity(any(),any());
@@ -84,8 +84,7 @@ public class QpidClientLoggerTest {
 
         when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        client.createExchange(exchange);
+        client.createHeadersExchange(exchangeName);
         assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
         assertThat(errorEvents(appender.list.stream())).isEmpty();
         verify(template).getForEntity(any(),any());

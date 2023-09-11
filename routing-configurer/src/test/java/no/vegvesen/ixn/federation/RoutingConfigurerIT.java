@@ -128,8 +128,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
-		cap.setCapabilityExchangeName("cap-ex10");
-		client.createExchange(new Exchange("cap-ex10", "direct"));
+		cap.setCapabilityExchangeName("cap-ex20");
+		client.createDirectExchange("cap-ex20");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -168,7 +168,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap1.setCapabilityExchangeName("cap-ex11");
-		client.createExchange(new Exchange("cap-ex11", "direct"));
+		client.createDirectExchange("cap-ex11");
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -181,8 +181,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
-		cap2.setCapabilityExchangeName("cap-ex11");
-		client.createExchange(new Exchange("cap-ex11", "direct"));
+		cap2.setCapabilityExchangeName("cap-ex12");
+		client.createDirectExchange("cap-ex12");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -230,8 +230,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
-		cap1.setCapabilityExchangeName("cap-ex12");
-		client.createExchange(new Exchange("cap-ex12", "direct"));
+		cap1.setCapabilityExchangeName("cap-ex32");
+		client.createDirectExchange("cap-ex32");
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -245,7 +245,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap2.setCapabilityExchangeName("cap-ex13");
-		client.createExchange(new Exchange("cap-ex13", "direct"));
+		client.createDirectExchange("cap-ex13");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -305,7 +305,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap.setCapabilityExchangeName("cap-ex14");
-		client.createExchange(new Exchange("cap-ex14", "direct"));
+		client.createDirectExchange("cap-ex14");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -411,7 +411,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap.setCapabilityExchangeName("cap-ex1");
-		client.createExchange(new Exchange("cap-ex1", "direct"));
+		client.createDirectExchange("cap-ex1");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -448,7 +448,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap1.setCapabilityExchangeName("cap-ex2");
-		client.createExchange(new Exchange("cap-ex2", "direct"));
+		client.createDirectExchange("cap-ex2");
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -462,7 +462,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap2.setCapabilityExchangeName("cap-ex3");
-		client.createExchange(new Exchange("cap-ex3", "direct"));
+		client.createDirectExchange("cap-ex3");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -517,7 +517,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap1.setCapabilityExchangeName("cap-ex4");
-		client.createExchange(new Exchange("cap-ex4", "direct"));
+		client.createDirectExchange("cap-ex4");
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -531,7 +531,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap2.setCapabilityExchangeName("cap-ex5");
-		client.createExchange(new Exchange("cap-ex5", "direct"));
+		client.createDirectExchange("cap-ex5");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -570,7 +570,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.MANDATORY)
 		);
 		cap.setCapabilityExchangeName("cap-ex6");
-		client.createExchange(new Exchange("cap-ex6", "direct"));
+		client.createDirectExchange("cap-ex6");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -606,7 +606,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.MANDATORY)
 		);
 		cap1.setCapabilityExchangeName("cap-ex7");
-		client.createExchange(new Exchange("cap-ex7", "direct"));
+		client.createDirectExchange("cap-ex7");
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -620,7 +620,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		cap2.setCapabilityExchangeName("cap-ex8");
-		client.createExchange(new Exchange("cap-ex8", "direct"));
+		client.createDirectExchange("cap-ex8");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -715,7 +715,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap.setCapabilityExchangeName("cap-ex9");
-		client.createExchange(new Exchange("cap-ex9", "direct"));
+		client.createDirectExchange("cap-ex9");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -768,8 +768,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap.setCapabilityExchangeName("cap-ex10");
-		Exchange exchange = new Exchange("cap-ex10", "headers");
-		client.createExchange(exchange);
+		client.createHeadersExchange("cap-ex10");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -779,7 +778,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 
-		client.createExchange(new Exchange(deliveryExchangeName, "direct"));
+		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getCapabilityExchangeName(), new Filter(joinedSelector)));
 
@@ -877,8 +876,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subscription.setExchangeName(exchangeName);
 		subscription.setConsumerCommonName("my-node");
 
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange);
+		client.createHeadersExchange(exchangeName);
 
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));

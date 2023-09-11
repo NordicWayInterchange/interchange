@@ -423,7 +423,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -451,8 +451,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex1");
-		Exchange exchange = new Exchange("cap-ex1", "headers");
-		client.createExchange(exchange);
+		client.createHeadersExchange("cap-ex1");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
@@ -488,8 +487,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setCapabilityExchangeName("cap-ex2");
-		Exchange exchange1 = new Exchange("cap-ex2", "headers");
-		client.createExchange(exchange1);
+		client.createHeadersExchange("cap-ex2");
 
 		CapabilitySplit denmCapability2 = new CapabilitySplit(
 				new DenmApplication(
@@ -503,8 +501,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability2.setCapabilityExchangeName("cap-ex3");
-		Exchange exchange = new Exchange("cap-ex3", "headers");
-		client.createExchange(exchange);
+		client.createHeadersExchange("cap-ex3");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setExchangeName("my-exchange6");
@@ -541,8 +538,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex4");
-		Exchange exchange = new Exchange("cap-ex4", "headers");
-		client.createExchange(exchange);
+		client.createHeadersExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -583,7 +579,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex5");
-		client.createExchange(new Exchange("cap-ex5", "direct"));
+		client.createDirectExchange("cap-ex5");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -626,7 +622,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
 		denmCapability1.setCapabilityExchangeName("cap-ex6");
-		client.createExchange(new Exchange("cap-ex6", "direct"));
+		client.createDirectExchange("cap-ex6");
 
 		CapabilitySplit denmCapability2 = new CapabilitySplit(
 				new DenmApplication(
@@ -641,7 +637,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
 		denmCapability2.setCapabilityExchangeName("cap-ex7");
-		client.createExchange(new Exchange("cap-ex7", "direct"));
+		client.createDirectExchange("cap-ex7");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -689,8 +685,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex8");
-		client.createExchange(new Exchange("cap-ex8", "direct"));
-		client.createQueue(new Queue("my-queue12", QpidClient.MAX_TTL_8_DAYS));
+		client.createDirectExchange("cap-ex8");
+		client.createQueue("my-queue12", QpidClient.MAX_TTL_8_DAYS);
 
 		mySP.addLocalSubscription(subscription);
 		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));
@@ -814,9 +810,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue";
 		String exchangeName = "sub-exchange";
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -846,11 +841,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String exchangeName = "sub-exchange-1";
 		String exchangeName2 = "sub-exchange-2";
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
-		Exchange exchange1 = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange1);
-		Exchange exchange = new Exchange(exchangeName2, "headers");
-		client.createExchange(exchange);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
+		client.createHeadersExchange(exchangeName2);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -884,9 +877,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-4";
 		String exchangeName = "sub-exchange-4";
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -918,9 +910,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-3";
 		String exchangeName = "sub-exchange-3";
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -949,9 +940,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-5";
 		String exchangeName = "sub-exchange-5";
 
-		client.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		client.createExchange(exchange);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 

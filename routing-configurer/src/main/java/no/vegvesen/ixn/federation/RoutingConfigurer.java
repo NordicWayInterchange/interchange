@@ -189,7 +189,7 @@ public class RoutingConfigurer {
 						if (!subscription.exchangeIsCreated()) {
 							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
-							qpidClient.createExchange(new Exchange(exchangeName, "headers"));
+							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
 							logger.debug("Set up exchange for subscription {}", subscription.toString());
 						}
 						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
@@ -247,8 +247,7 @@ public class RoutingConfigurer {
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		if (!delta.queueExists(queueName)) {
-			Queue queue = new Queue(queueName, QpidClient.MAX_TTL_8_DAYS);
-			qpidClient.createQueue(queue);
+			Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 			qpidClient.addReadAccess(subscriberName, queueName);
 			delta.addQueue(queue);
 		}

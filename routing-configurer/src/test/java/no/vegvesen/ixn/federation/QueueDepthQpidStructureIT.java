@@ -72,8 +72,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -119,8 +118,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueTwo = "queue-two";
         String exchangeName = "test-exchange";
 
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -167,8 +165,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(

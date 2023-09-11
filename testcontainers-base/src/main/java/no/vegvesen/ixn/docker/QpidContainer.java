@@ -33,7 +33,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
                          String trustStore,
                          String trustStorePassword,
                          String vHostName) {
-        super(new ImageFromDockerfile(imageName,true)
+        super(new ImageFromDockerfile(imageName,false)
                 .withFileFromPath(".",dockerFilePath));
         this.configPathFromClasspath = configPathFromClasspath;
         this.keysBasePath = keysBasePath;
