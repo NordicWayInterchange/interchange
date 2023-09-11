@@ -22,22 +22,18 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
 @ContextConfiguration(initializers = {NewQpidStructureIT.Initializer.class})
@@ -80,10 +76,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     public void directExchangeToOutputQueuePOC() throws Exception {
         //1. Create an exchange
         String exchangeName = "inputExchange";
-        qpidClient.createExchange(new Exchange(exchangeName, "direct"));
+        qpidClient.createDirectExchange(exchangeName);
         String queueName = "outputQueue";
         //2. Create a queue
-        qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
+        qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
         //2.1 Create a Capability to base a Validating selector on
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -184,16 +180,15 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         //1. Creating delivery queue and adding write access.
-        qpidClient.createExchange(new Exchange(inQueueName, "direct"));
+        qpidClient.createDirectExchange(inQueueName);
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         //2. Creating read queue and adding read access.
-        qpidClient.createQueue(new Queue(outQueueName, QpidClient.MAX_TTL_8_DAYS));
+        qpidClient.createQueue(outQueueName, QpidClient.MAX_TTL_8_DAYS);
         qpidClient.addReadAccess("king_gustaf", outQueueName);
 
         //Create intermediate exchange. No ACL needed for this.
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(exchangeName);
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
@@ -266,12 +261,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String input = "input_exchange";
         String output = "output_exchange";
 
-        Exchange exchange1 = new Exchange(input, "headers");
-        qpidClient.createExchange(exchange1);
+        qpidClient.createHeadersExchange(input);
         qpidClient.addWriteAccess("king_gustaf", input);
 
-        Exchange exchange = new Exchange(output, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(output);
 
         String selector = "((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')";
 
@@ -311,8 +304,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     public void testDuplicateMessagesUsingOneDeliveryEndpoint() throws Exception {
         String capabilityExchange1 = "capability-exchange1";
         String capabilityExchange2 = "capability-exchange2";
-        String deliveryExchange = "delivery-exchange";
-        String subscriptionQueue = "king_gustaf";
+        String deliveryExchange = "delivery-exchange-test-duplicate";
+        String subscriptionQueue = "king_gustaf_output_queue";
 
         Subscription subscription = new Subscription(
                 "originatingCountry = 'NO'",
@@ -348,17 +341,15 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED
         );
 
-        qpidClient.createExchange(new Exchange(deliveryExchange, "direct"));
+        qpidClient.createDirectExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
-        qpidClient.createQueue(new Queue(subscriptionQueue, QpidClient.MAX_TTL_8_DAYS));
+        qpidClient.createQueue(subscriptionQueue, QpidClient.MAX_TTL_8_DAYS);
         qpidClient.addReadAccess("king_gustaf", subscriptionQueue);
 
-        Exchange exchange1 = new Exchange(capabilityExchange1, "headers");
-        qpidClient.createExchange(exchange1);
+        qpidClient.createHeadersExchange(capabilityExchange1);
 
-        Exchange exchange = new Exchange(capabilityExchange2, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(capabilityExchange2);
 
         String deliverySelector = delivery.getSelector();
 
@@ -436,12 +427,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         //1. Creating delivery queue and adding write access.
-        qpidClient.createExchange(new Exchange(deliveryExchange, "direct"));
+        qpidClient.createDirectExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         //Create intermediate exchange. No ACL needed for this.
-        Exchange exchange = new Exchange(capabilityExchange, "headers");
-        qpidClient.createExchange(exchange);
+        qpidClient.createHeadersExchange(capabilityExchange);
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();

@@ -118,8 +118,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         capability.setCapabilityExchangeName(exchangeName);
 
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        client.createExchange(exchange);
+        client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -164,8 +163,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         capability.setCapabilityExchangeName(exchangeName);
 
-        Exchange exchange = new Exchange(exchangeName, "headers");
-        client.createExchange(exchange);
+        client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",

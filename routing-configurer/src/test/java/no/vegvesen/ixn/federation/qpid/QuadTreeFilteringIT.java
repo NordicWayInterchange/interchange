@@ -140,10 +140,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
+		qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 		qpidClient.addReadAccess(serviceProviderName, queueName);
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		qpidClient.createExchange(exchange);
+		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
@@ -174,10 +173,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(new Queue(queueName, QpidClient.MAX_TTL_8_DAYS));
+		qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 		qpidClient.addReadAccess(spName, queueName);
-		Exchange exchange = new Exchange(exchangeName, "headers");
-		qpidClient.createExchange(exchange);
+		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
