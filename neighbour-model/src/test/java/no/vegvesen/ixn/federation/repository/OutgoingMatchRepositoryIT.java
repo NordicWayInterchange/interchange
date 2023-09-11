@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,19 +46,25 @@ public class OutgoingMatchRepositoryIT {
     @Test
     public void saveServiceProviderBeforeSavingOutgoingMatchMatch() {
         LocalDelivery delivery = new LocalDelivery();
-        DenmCapability capability = new DenmCapability(
+
+        DenmApplication app = new DenmApplication(
                 "publisher-1",
+                "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
                 Collections.singleton("123"),
-                Collections.singleton("1")
+                Collections.singleton(1)
         );
+
+        Metadata meta = new Metadata();
+
+        CapabilitySplit cap = new CapabilitySplit(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.KNOWN,
-                        Collections.singleton(capability)),
+                        Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
@@ -63,7 +72,7 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         List<OutgoingMatch> allMatches = outgoingMatchRepository.findAll();
@@ -73,19 +82,25 @@ public class OutgoingMatchRepositoryIT {
     @Test
     public void deletingOutgoingMatchFromDatabase() {
         LocalDelivery delivery = new LocalDelivery();
-        DenmCapability capability = new DenmCapability(
+
+        DenmApplication app = new DenmApplication(
                 "publisher-1",
+                "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
                 Collections.singleton("123"),
-                Collections.singleton("1")
+                Collections.singleton(1)
         );
+
+        Metadata meta = new Metadata();
+
+        CapabilitySplit cap = new CapabilitySplit(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.KNOWN,
-                        Collections.singleton(capability)),
+                        Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
@@ -93,7 +108,7 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         outgoingMatchRepository.delete(match);
@@ -107,19 +122,25 @@ public class OutgoingMatchRepositoryIT {
     @Disabled
     public void removeCapabilityBeforeRemovingOutgoingMatch() {
         LocalDelivery delivery = new LocalDelivery();
-        DenmCapability capability = new DenmCapability(
+
+        DenmApplication app = new DenmApplication(
                 "publisher-1",
+                "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
                 Collections.singleton("123"),
-                Collections.singleton("1")
+                Collections.singleton(1)
         );
+
+        Metadata meta = new Metadata();
+
+        CapabilitySplit cap = new CapabilitySplit(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.KNOWN,
-                        Collections.singleton(capability)),
+                        Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
@@ -129,7 +150,7 @@ public class OutgoingMatchRepositoryIT {
 
         Integer capabilityId = sp.getCapabilities().getCapabilities().stream().findFirst().get().getId();
 
-        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         sp.setCapabilities(new Capabilities());

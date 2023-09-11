@@ -25,7 +25,7 @@ public class JmsImageSink implements CommandLineRunner {
 
         KeystoreDetails keystoreDetails = new KeystoreDetails(properties.getKeystorePath(),
                 properties.getKeystorePass(),
-                KeystoreType.PKCS12, properties.getKeyPass());
+                KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorePath(),
                 properties.getKeystorePass(),KeystoreType.JKS);
 

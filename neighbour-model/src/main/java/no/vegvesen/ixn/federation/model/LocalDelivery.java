@@ -4,6 +4,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -36,29 +37,31 @@ public class LocalDelivery {
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "loc_del_con_id", foreignKey = @ForeignKey(name = "fk_loc_del_con"))
+    private Set<LocalDeliveryConnection> connections = new HashSet<>();
+
     public LocalDelivery() {
     }
 
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
         this.id = id;
-        this.endpoints = endpoints;
+        this.endpoints.addAll(endpoints);
         this.path = path;
         this.selector = selector;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
     }
 
-    public LocalDelivery(Integer id, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
-        this.id = id;
-        this.path = path;
-        this.selector = selector;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-        this.status = status;
+    public LocalDelivery(Integer id, String path, String selector, LocalDeliveryStatus status) {
+        this(id, Collections.emptySet(),path,selector,status);
+    }
+
+    public LocalDelivery(String path, String selector, LocalDeliveryStatus status) {
+        this(null,Collections.emptySet(),path,selector,status);
     }
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
-        this.selector = selector;
-        this.status = status;
+        this(null,Collections.emptySet(),null,selector,status);
     }
 
     public Integer getId() {
@@ -133,6 +136,22 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
+    public Set<LocalDeliveryConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Set<LocalDeliveryConnection> connections) {
+        this.connections = connections;
+    }
+
+    public void addConnection(LocalDeliveryConnection connection) {
+        connections.add(connection);
+    }
+
+    public void removeConnections(Set<LocalDeliveryConnection> connectionsToRemove) {
+        this.connections.removeAll(connectionsToRemove);
+    }
+
     public boolean exchangeExists() {
         return !exchangeName.isEmpty();
     }
@@ -142,12 +161,12 @@ public class LocalDelivery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalDelivery delivery = (LocalDelivery) o;
-        return  Objects.equals(selector, delivery.selector) && status == delivery.status;
+        return  Objects.equals(selector, delivery.selector);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, status);
+        return Objects.hash(selector);
     }
 
     @Override

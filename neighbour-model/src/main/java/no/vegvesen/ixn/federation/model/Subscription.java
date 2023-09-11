@@ -33,7 +33,7 @@ public class Subscription {
 
 	private long lastUpdatedTimestamp;
 
-	private String exchangeName;
+	private String exchangeName = "";
 
 	public Subscription() {
 	}
@@ -63,7 +63,15 @@ public class Subscription {
 		this.selector = selector;
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
-		this.endpoints = endpoints;
+		this.endpoints.addAll(endpoints);
+	}
+
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.consumerCommonName = consumerCommonName;
+		this.endpoints.addAll(endpoints);
 	}
 
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -134,9 +142,9 @@ public class Subscription {
 	}
 
 	public void setEndpoints(Set<Endpoint> newEndpoints) {
-		this.endpoints.clear();
 		if (newEndpoints != null) {
-			this.endpoints.addAll(newEndpoints);
+			endpoints.retainAll(newEndpoints);
+			endpoints.addAll(newEndpoints);
 		}
 	}
 
@@ -147,6 +155,24 @@ public class Subscription {
 	public void setExchangeName(String exchangeName) {
 		this.exchangeName = exchangeName;
 	}
+
+	public boolean exchangeIsCreated() {
+		return !exchangeName.isEmpty();
+	}
+
+	public boolean exchangeIsRemoved() {
+		return exchangeName.isEmpty();
+	}
+
+	public void removeExchangeName() {
+		this.exchangeName = "";
+	}
+
+	public boolean isSubscriptionWanted() {
+		return subscriptionStatus.equals(SubscriptionStatus.REQUESTED)
+				|| subscriptionStatus.equals(SubscriptionStatus.CREATED);
+	}
+
 
 	//TODO this is really quite unusual, and really shows that the Subscription needs to be changed
 	//The Selector is the main thing here, actually!

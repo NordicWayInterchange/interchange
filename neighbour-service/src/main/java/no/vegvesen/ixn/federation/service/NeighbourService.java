@@ -1,13 +1,14 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
@@ -50,7 +51,7 @@ public class NeighbourService {
 		return neighbourRepository.findAll();
 	}
 
-	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
+	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -63,7 +64,7 @@ public class NeighbourService {
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		Capabilities capabilities = neighbourToUpdate.getCapabilities();
-		capabilities.addAllDatatypes(incomingCapabilities.getCapabilities());
+		capabilities.replaceCapabilities(incomingCapabilities.getCapabilities());
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
@@ -127,7 +128,6 @@ public class NeighbourService {
 		logger.info("Processing subscription request...");
 		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
-		persistentRequest.setStatus(NeighbourSubscriptionRequestStatus.REQUESTED);
 
 		logger.info("Processed subscription request: {}", persistentRequest.toString());
 
@@ -181,7 +181,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
+		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
@@ -196,36 +196,27 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findByNeighbourRequestedSubscriptions_StatusIn(NeighbourSubscriptionRequestStatus.REQUESTED, NeighbourSubscriptionRequestStatus.MODIFIED);
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
-	}
-
-	public void saveTearDownRouting(Neighbour neighbour, String name) {
-		neighbour.setSubscriptionRequestStatus(NeighbourSubscriptionRequestStatus.EMPTY);
-		neighbourRepository.save(neighbour);
-		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
 
 	public void saveDeleteSubscriptions(String ixnName, Set<NeighbourSubscription> subscriptionsToDelete) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
-		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.EMPTY);
-			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
-		} else {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.MODIFIED);
-			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
-		}
+		logger.debug("Deleting subscriptions for neighbour {} ", neighbour.getName());
 		neighbourRepository.save(neighbour);
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
-		neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.ESTABLISHED);
-
 		neighbourRepository.save(neighbour);
-		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
+		logger.debug("Saved neighbour {} after setting up routing for subscriptions", neighbour.getName());
 	}
+
+	public void saveNeighbour(Neighbour neighbour) {
+		neighbourRepository.save(neighbour);
+	}
+
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);

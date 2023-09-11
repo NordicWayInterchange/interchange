@@ -23,13 +23,18 @@ public class PrivateChannel {
     private String queueName;
 
     public PrivateChannel() {
-        this.queueName = UUID.randomUUID().toString();
+
     }
 
     public PrivateChannel(String peerName, PrivateChannelStatus status) {
         this.peerName = peerName;
         this.status = status;
-        this.queueName = UUID.randomUUID().toString();
+    }
+
+    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status) {
+        this.peerName = peerName;
+        this.queueName = queueName;
+        this.status = status;
     }
 
     public Integer getId() {
@@ -70,7 +75,7 @@ public class PrivateChannel {
         if (!(o instanceof PrivateChannel)) return false;
         PrivateChannel that = (PrivateChannel) o;
         return peerName.equals(that.peerName) &&
-                queueName.equals(that.queueName);
+                Objects.equals(queueName, that.queueName);
     }
 
     @Override

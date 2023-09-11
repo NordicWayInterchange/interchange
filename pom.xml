@@ -142,6 +142,16 @@
                 <artifactId>picocli</artifactId>
                 <version>${picocli-version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.73</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>1.73</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -245,5 +255,10 @@
         <module>jms-client-image-source</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>napcore-rest-api</module>
+        <module>napcore-server</module>
+        <module>napcore-server-app</module>
+        <module>napcore-rest-client</module>
+        <module>csr-signer</module>
     </modules>
 </project>

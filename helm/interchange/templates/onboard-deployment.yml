@@ -28,9 +28,9 @@ spec:
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
         - name: POSTGRES_USER
-          value: {{ .Values.database.postgres_user }}
+          value: {{ .Values.postgres_user }}
         - name: POSTGRES_PASSWORD
-          value: {{ .Values.database.postgres_password }}
+          value: {{ .Values.postgres_password }}
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
         - name: SP_CHNL_PORT
@@ -38,11 +38,11 @@ spec:
         - name: TRUST_STORE
           value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
         - name: TRUST_STORE_PASSWORD
-          value: {{ .Values.self.trust_store_password | quote }}
+          value: {{ .Values.trust_store_password | quote }}
         - name: KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}key_store.p12
+          value: "{{ .Values.self.secret_mount_path }}key_store.p12"
         - name: KEY_STORE_PASSWORD
-          value: {{ .Values.self.key_store_password | quote }}
+          value: {{ .Values.key_store_password | quote }}
         - name: LOG_LEVELS
           value: "{{- range .Values.onboard_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}

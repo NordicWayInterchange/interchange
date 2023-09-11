@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.MapemCapability;
+import no.vegvesen.ixn.federation.model.capability.MapemApplication;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import org.junit.jupiter.api.Test;
 
@@ -13,16 +13,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TypeTransformerTest {
     @Test
     public void testTransformMapemCapability() {
-        MapemCapability capability = new MapemCapability(
+        MapemApplication app = new MapemApplication(
                 "NO-123",
+                "pub-1",
                 "NO",
-                "1.0",
-                Collections.emptySet(),
+                "MAPEM:1.1.0",
                 Collections.emptySet()
         );
 
-        CapabilityApi mapemCapabilityApi = capability.toApi();
-        assertThat(mapemCapabilityApi.getMessageType()).isEqualTo("MAPEM");
+        ApplicationApi appApi = app.toApi();
+        assertThat(appApi.getMessageType()).isEqualTo("MAPEM");
 
     }
 

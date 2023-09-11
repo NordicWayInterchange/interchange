@@ -1,12 +1,16 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,6 +22,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -44,12 +49,16 @@ public class ExportServiceProvidersIT {
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.UNKNOWN,
                         Collections.singleton(
-                                new DatexCapability(
-                                        "NO-0001",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("123"),
-                                        Collections.singleton("6")
+                                new CapabilitySplit(
+                                        new DenmApplication(
+                                                "NO-0001",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("123"),
+                                                Collections.singleton(6)
+                                        ),
+                                        new Metadata()
                                 )
                         )
                 )
@@ -57,7 +66,8 @@ public class ExportServiceProvidersIT {
         serviceProvider.setSubscriptions(Collections.singleton(
                 new LocalSubscription(
                         LocalSubscriptionStatus.CREATED,
-                        "originatingCountry = 'NO' and messageType = 'DENM'")
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        "my-node")
                 )
         );
         repository.save(serviceProvider);
@@ -77,7 +87,7 @@ public class ExportServiceProvidersIT {
         for (ServiceProvider serviceProvider : serviceProviderList) {
             ServiceProviderApi serviceProviderApi = new ServiceProviderApi();
             serviceProviderApi.setName(serviceProvider.getName());
-            Set<CapabilityApi> capabilityApis = capabilityApiTransformer.capabilitiesToCapabilityApis(serviceProvider.getCapabilities().getCapabilities());
+            Set<CapabilitySplitApi> capabilityApis = capabilityApiTransformer.capabilitiesSplitToCapabilitiesSplitApi(serviceProvider.getCapabilities().getCapabilities());
             serviceProviderApi.setCapabilities(capabilityApis);
 
             Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();
@@ -92,6 +102,12 @@ public class ExportServiceProvidersIT {
 
             }
             serviceProviderApi.setDeliveries(deliveries);
+
+            Set<PrivateChannelApi> privateChannels = new HashSet<>();
+            for (PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+            }
+            serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
         }
         writer.writeValue(path.toFile(),serviceProviders);

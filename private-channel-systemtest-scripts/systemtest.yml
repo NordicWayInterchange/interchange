@@ -147,7 +147,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
 

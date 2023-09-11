@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_endpoints")
+@Table(name = "local_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "source"}))
 public class LocalEndpoint {
 
     @Id
@@ -85,15 +85,14 @@ public class LocalEndpoint {
         if (this == o) return true;
         if (!(o instanceof LocalEndpoint)) return false;
         LocalEndpoint that = (LocalEndpoint) o;
-        return id.equals(that.id) &&
-                source.equals(that.source) &&
+        return source.equals(that.source) &&
                 host.equals(that.host) &&
                 port.equals(that.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, host, port);
+        return Objects.hash(source, host, port);
     }
 
     @Override

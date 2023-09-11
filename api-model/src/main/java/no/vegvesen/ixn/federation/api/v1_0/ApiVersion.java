@@ -5,5 +5,5 @@ public final class ApiVersion {
 
     }
 
-    public static String version = "1.3NW3";
+    public static String version = "2.0";
 }

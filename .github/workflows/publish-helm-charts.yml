@@ -1,0 +1,63 @@
+name: Publish Helm Charts
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+    branches:
+      - federation-master
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        required: false
+        description: 'Specified commit hash or branch name (Optional)'
+
+jobs:
+  helm-package-and-publish-charts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout (Latest)
+        uses: actions/checkout@v3
+        if: github.event.inputs.git-ref == ''
+      - name: Checkout (Custom commit or branch)
+        uses: actions/checkout@v3
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      # Package Helm Chart
+      - name: Setup helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package charts
+        run: |
+          helm package helm/interchange -d target/helm
+          helm package helm/basic-interchange -d target/helm
+          helm repo index target/helm
+          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
+
+      # Configure Google Cloud and push to Artifact Registry
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+      - name: Setup Google CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: '434.0.0'
+          project_id: ${{ secrets.PROJECT_ID }}
+      - name: Login to Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+      - name: helm push
+        run: |
+          helm push ${{ env.HELM_CHART }} oci://${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}

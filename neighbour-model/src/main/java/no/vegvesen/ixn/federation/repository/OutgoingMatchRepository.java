@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.OutgoingMatch;
-import no.vegvesen.ixn.federation.model.OutgoingMatchStatus;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,11 +11,7 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
 
     List<OutgoingMatch> findAll();
 
-    List<OutgoingMatch> findAllByStatus(OutgoingMatchStatus status);
-
-    List<OutgoingMatch> findAllByServiceProviderNameAndStatus(String serviceProviderName, OutgoingMatchStatus status);
-
-    List<OutgoingMatch> findAllByServiceProviderNameAndLocalDelivery_IdAndStatus(String serviceProviderName, Integer id, OutgoingMatchStatus status);
+    List<OutgoingMatch> findAllByServiceProviderName(String serviceProviderName);
 
     List<OutgoingMatch> findAllByLocalDelivery_Id(Integer id);
 

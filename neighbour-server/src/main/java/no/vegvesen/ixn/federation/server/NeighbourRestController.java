@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
-import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -52,7 +53,7 @@ public class NeighbourRestController {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
-		logger.info("Common name of certificate matched name in API object.");
+		logger.debug("Common name of certificate matched name in API object.");
 
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
@@ -66,7 +67,7 @@ public class NeighbourRestController {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		//fetch the list of neighbours
 		SubscriptionResponseApi reponse = neighbourService.findSubscriptions(ixnName);
@@ -81,11 +82,11 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received poll of subscription from neighbour {}.", ixnName);
+		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		NeighbourMDCUtil.removeLogVariables();
 		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
@@ -95,18 +96,18 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public CapabilitiesApi updateCapabilities(@RequestBody CapabilitiesApi neighbourCapabilities) {
+	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
-		logger.info("Common name of certificate matches Neighbour name in capability api object.");
+		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
-		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilitiesApiResponse;
@@ -117,11 +118,11 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received subscription to delete from neighbour {}.", ixnName);
+		logger.info("Received request to delete subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
 		NeighbourMDCUtil.removeLogVariables();

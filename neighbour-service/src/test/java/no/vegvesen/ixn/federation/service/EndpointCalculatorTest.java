@@ -36,7 +36,10 @@ public class EndpointCalculatorTest {
                 neighbourEndpoints);
         assertThat(endpointCalculator.getEndpointsToRemove()).isEmpty();
         assertThat(endpointCalculator.getNewEndpoints()).isEmpty();
-        assertThat(endpointCalculator.getCalculatedEndpointsSet()).isEqualTo(Collections.singleton(ourEndpoint));
+        Set<Endpoint> calculatedEndpoints = endpointCalculator.getCalculatedEndpointsSet();
+        assertThat(calculatedEndpoints).hasSize(1);
+        Endpoint calculatedEndpoint = calculatedEndpoints.stream().findFirst().get();
+        assertThat(calculatedEndpoint.getId()).isEqualTo(1);
     }
 
     @Test

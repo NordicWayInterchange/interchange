@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,7 @@ public class ImportServiceProvidersIT {
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
-            Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
+            Set<CapabilitySplit> capabilities = transformer.capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
             Capabilities capabilities1 = new Capabilities();
             capabilities1.setCapabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);
@@ -44,7 +45,8 @@ public class ImportServiceProvidersIT {
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
                 //TODO have to generate queue name, as this was SP name before
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                        localActorSubscription.getSelector())); //already have the user from the Service provider
+                        localActorSubscription.getSelector(),
+                       "my-interchange" )); //already have the user from the Service provider
             }
             repository.save(serviceProvider);
         }

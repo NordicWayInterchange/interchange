@@ -20,14 +20,14 @@ public class LocalSubscription {
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
-    @Column(columnDefinition="TEXT")
-    private String selector = "";
+    @Column(columnDefinition="TEXT", nullable = false)
+    private String selector;
 
     @Column
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -39,12 +39,11 @@ public class LocalSubscription {
     private Set<LocalConnection> connections = new HashSet<>();
 
     public LocalSubscription() {
-
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, String selector) {
-        this.status = status;
+    public LocalSubscription(String selector, String consumerCommonName) {
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
@@ -53,32 +52,24 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
+    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
         this.id = id;
-        this.status = status;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.id = id;
         this.status = status;
         this.selector = selector;
-        this.lastUpdated = lastUpdated;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, Set<LocalEndpoint> localEndpoints) {
-        this.id = id;
-        this.status = status;
-        this.selector = selector;
-        this.lastUpdated = lastUpdated;
-        this.localEndpoints.addAll(localEndpoints);
-    }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.status = status;
         this.selector = selector;
-        this.lastUpdated = lastUpdated;
         this.consumerCommonName = consumerCommonName;
         this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
@@ -99,10 +90,6 @@ public class LocalSubscription {
 
     public String getSelector() {
         return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
     }
 
     public Set<LocalEndpoint> getLocalEndpoints() {
@@ -132,10 +119,6 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
-    public void setConsumerCommonName(String consumerCommonName) {
-        this.consumerCommonName = consumerCommonName;
-    }
-
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
@@ -146,14 +129,13 @@ public class LocalSubscription {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscription that = (LocalSubscription) o;
-        return status == that.status &&
-                Objects.equals(selector, that.selector) &&
+        return Objects.equals(selector, that.selector) &&
                 Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector, consumerCommonName);
+        return Objects.hash(selector, consumerCommonName);
     }
 
     public Integer getId() {
@@ -174,7 +156,8 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(id,newStatus,selector,lastUpdated,consumerCommonName,connections,localEndpoints);
+            this.status = newStatus;
+            return this;
         }
     }
 

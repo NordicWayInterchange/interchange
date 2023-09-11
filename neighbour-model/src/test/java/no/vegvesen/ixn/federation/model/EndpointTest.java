@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,6 +61,18 @@ public class EndpointTest {
         assertThat(additionalEndpoints).isEmpty();
 
 
+
+    }
+
+    @Test
+    public void maxBandwidthAndMessageRateNull() {
+        Endpoint endpoint = new Endpoint(
+                "a",
+                "b",
+                123
+        );
+        assertThat(endpoint.getMaxMessageRate()).isNull();
+        assertThat(endpoint.getMaxBandwidth()).isNull();
 
     }
 

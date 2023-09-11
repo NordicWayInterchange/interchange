@@ -1,16 +1,22 @@
-{	"name" : "king_gustaf.bouvetinterchange.eu",
+{	"name" : "king_gustaf",
   "version" : "1.0",
-  "capabilities" : [
-    {
-      "messageType": "DENM",
-      "publisherId": "NO-123",
-      "originatingCountry": "NO",
-      "protocolVersion": "DENM:1.2.2",
-      "quadTree": [
-        "12003, 12004"
-      ],
-      "causeCode": [
-        "6"
-      ]
-    }]
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "DENM",
+      "publisherId" : "NO00001",
+      "publicationId" : "NO00001-pub-1",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "DENM:1.2.2",
+      "quadTree" : [ "12004", "12003" ],
+      "causeCodes" : [ 6 ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "https://king_gustaf.info.no",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }]
 }

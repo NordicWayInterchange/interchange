@@ -36,7 +36,7 @@ public class SubscriptionRequestTransformer {
 
 
 	public  NeighbourSubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
 	}
 
@@ -52,11 +52,7 @@ public class SubscriptionRequestTransformer {
 		if (apiEndpoints != null) {
 			Set<Endpoint> endpoints = new HashSet<>();
 			for (EndpointApi endpointApi : apiEndpoints) {
-				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort());
-				if (endpointApi.getMaxBandwidth() != null && endpointApi.getMaxMessageRate() != null) {
-					endpoint.setMaxBandwidth(endpointApi.getMaxBandwidth());
-					endpoint.setMaxMessageRate(endpointApi.getMaxMessageRate());
-				}
+				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
 				endpoints.add(endpoint);
 			}
 			subscription.setEndpoints(endpoints);
@@ -79,7 +75,9 @@ public class SubscriptionRequestTransformer {
 				EndpointApi endpointApi = new EndpointApi(
 						endpoint.getSource(),
 						endpoint.getHost(),
-						endpoint.getPort()
+						endpoint.getPort(),
+						endpoint.getMaxBandwidth(),
+						endpoint.getMaxMessageRate()
 				);
 				newEndpoints.add(endpointApi);
 			}

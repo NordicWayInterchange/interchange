@@ -17,7 +17,7 @@ public class SSLContextFactoryTest {
 	@Disabled("This does not throw an exception in java 11 for some reason.")
 	public void sslContextFromKeyAndTrustStoresWrongKeystoreTypeFails() {
 		String keystoreFile = TestKeystoreHelper.getFilePath("jks/localhost.p12");
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.JKS, "password");
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.JKS);
 
 		String filePath = TestKeystoreHelper.getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.PKCS12);
@@ -30,7 +30,7 @@ public class SSLContextFactoryTest {
 	@Test
 	public void sslContextFromKeyAndTrustStoresNonExistingFileFails() {
 		String keystoreFile = "/non/existing/file/foobar.p12";
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12, "password");
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12);
 
 		String filePath = TestKeystoreHelper.getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);

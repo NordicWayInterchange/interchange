@@ -99,6 +99,10 @@ public class Connection {
         this.backoffAttempts = backoffAttempts;
     }
 
+    public void setLastFailedConnectionAttempt(LocalDateTime lastFailedConnectionAttempt) {
+        this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
+    }
+
     @Override
     public String toString() {
         return "ConnectionBackoff{" +

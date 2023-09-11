@@ -1,14 +1,13 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -38,7 +37,7 @@ public class Capabilities {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public void addDataType(Capability newCapability) {
+	public void addDataType(CapabilitySplit newCapability) {
 		capabilities.add(newCapability);
 
 		if (hasDataTypes()) {
@@ -47,7 +46,8 @@ public class Capabilities {
 		setLastUpdated(LocalDateTime.now());
 	}
 
-	public void addAllDatatypes(Set<Capability> newCapabilities) {
+	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
+		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
@@ -57,13 +57,13 @@ public class Capabilities {
 	}
 
 	public void removeDataType(Integer capabilityId) {
-		Set<Capability> currentServiceProviderCapabilities = getCapabilities();
+		Set<CapabilitySplit> currentServiceProviderCapabilities = getCapabilities();
 
-		Optional<Capability> subscriptionToDelete = currentServiceProviderCapabilities
+		Optional<CapabilitySplit> subscriptionToDelete = currentServiceProviderCapabilities
 				.stream()
 				.filter(dataType -> dataType.getId().equals(capabilityId))
 				.findFirst();
-		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		CapabilitySplit toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
@@ -74,7 +74,7 @@ public class Capabilities {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	private Set<Capability> capabilities = new HashSet<>();
+	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp
@@ -83,12 +83,12 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
+	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilities) {
 		this.status = status;
 		setCapabilities(capabilities);
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilties, LocalDateTime lastUpdated) {
+	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
 		this.status = status;
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
@@ -102,17 +102,17 @@ public class Capabilities {
 		this.status = status;
 	}
 
-	public Set<Capability> getCapabilities() {
+	public Set<CapabilitySplit> getCapabilities() {
 		return capabilities;
 	}
 
-	public Set<Capability> getCreatedCapabilities() {
+	public Set<CapabilitySplit> getCreatedCapabilities() {
 		return capabilities.stream()
 				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
 				.collect(Collectors.toSet());
 	}
 
-	public void setCapabilities(Set<Capability> capabilities) {
+	public void setCapabilities(Set<CapabilitySplit> capabilities) {
 		this.capabilities.clear();
 		if ( capabilities != null ) {
 			this.capabilities.addAll(capabilities);
@@ -120,7 +120,7 @@ public class Capabilities {
 	}
 
 	public boolean hasDataTypes() {
-		Set<Capability> createdCapabilities = capabilities.stream()
+		Set<CapabilitySplit> createdCapabilities = capabilities.stream()
 				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
 				.collect(Collectors.toSet());
 

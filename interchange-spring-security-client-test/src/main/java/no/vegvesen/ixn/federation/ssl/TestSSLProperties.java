@@ -40,11 +40,6 @@ public class TestSSLProperties {
 	 */
 	private String keystorePassword = "password";
 
-	/**
-	 * Password for the key within the keystore
-	 */
-	private String keyPassword = "password";
-
 
 	public String getTruststorePassword() {
 		return truststorePassword;
@@ -92,14 +87,6 @@ public class TestSSLProperties {
 
 	public void setKeystorePassword(String keystorePassword) {
 		this.keystorePassword = keystorePassword;
-	}
-
-	public String getKeyPassword() {
-		return keyPassword;
-	}
-
-	public void setKeyPassword(String keyPassword) {
-		this.keyPassword = keyPassword;
 	}
 
 	public String getKeyStoreRuntimeFileName() {

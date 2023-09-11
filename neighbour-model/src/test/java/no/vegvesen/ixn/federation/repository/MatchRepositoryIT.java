@@ -30,6 +30,7 @@ public class MatchRepositoryIT {
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
+    private LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b","consumer");
 
     @AfterEach
     public void tearDown() {
@@ -48,18 +49,17 @@ public class MatchRepositoryIT {
 
     @Test
     public void saveNeighbourAndServiceProviderBeforeSavingMatch() {
-        LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
         matchRepository.save(match);
 
         List<Match> allMatches = matchRepository.findAll();
@@ -68,18 +68,17 @@ public class MatchRepositoryIT {
 
     @Test
     public void deletingMatchFromDatabase() {
-        LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub,sub,MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub,sub,"my-sp");
         matchRepository.save(match);
 
         matchRepository.delete(match);
@@ -99,18 +98,17 @@ public class MatchRepositoryIT {
 
     @Test
     public void deleteSubscriptionAndLocalSubscriptionBeforeDeletingMatch() {
-        LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription(SubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "path/1", "my-interchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
         matchRepository.save(match);
 
         matchRepository.deleteAll();
@@ -129,43 +127,40 @@ public class MatchRepositoryIT {
 
     @Test
     public void tryAddingTwoMatchesWithSameLocalSubscription() {
-        LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         Subscription sub1 = new Subscription();
-        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub1)));
+        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
 
         neighbourRepository.save(neighbour);
         neighbourRepository.save(neighbour1);
 
         assertThat(locSub.getId()).isNotNull(); //in other words, no need to assign it to a new variable, the original one has been updated.
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
-        Match match1 = new Match(locSub, sub1, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
+        Match match1 = new Match(locSub, sub1, "my-sp");
         matchRepository.save(match);
         matchRepository.save(match1);
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(2);
 
-
-        //TODO test that we can use this method with more than one matches with a local subscription.
         List<Match> byLocalSubscriptionId = matchRepository.findAllByLocalSubscriptionId(locSub.getId());
+        assertThat(byLocalSubscriptionId).hasSize(2);
     }
 
     @Test
     public void tryAddingMatchWithLocalSubscriptionFromBase() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
         neighbourRepository.save(neighbour);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
@@ -174,22 +169,20 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
 
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
-
     }
 
     @Test
     public void findMatchByOneSubscriptionStatus() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
         neighbourRepository.save(neighbour);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
@@ -198,7 +191,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
 
         matchRepository.save(match);
 
@@ -208,16 +201,15 @@ public class MatchRepositoryIT {
 
     @Test
     public void findMatchByTwoSubscriptionStatuses() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         Subscription sub1 = new Subscription("a=b", SubscriptionStatus.CREATED);
-        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub1)));
+        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
 
         neighbourRepository.save(neighbour);
         neighbourRepository.save(neighbour1);
@@ -232,8 +224,8 @@ public class MatchRepositoryIT {
         Subscription savedSubscription1 = savedNeighbour1.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
-        Match match1 = new Match(savedLocalSubscription, savedSubscription1, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match1 = new Match(savedLocalSubscription, savedSubscription1, "my-sp");
         matchRepository.save(match);
         matchRepository.save(match1);
 
@@ -242,13 +234,12 @@ public class MatchRepositoryIT {
 
     @Test
     public void localSubscriptionIsNotRemovedWhenMatchIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -258,7 +249,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -274,13 +265,12 @@ public class MatchRepositoryIT {
 
     @Test
     public void subscriptionIsNotRemovedWhenMatchIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -290,7 +280,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -306,13 +296,12 @@ public class MatchRepositoryIT {
 
     @Test
     public void matchIsNotRemovedWhenLocalSubscriptionIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -322,7 +311,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -341,13 +330,12 @@ public class MatchRepositoryIT {
 
     @Test
     public void matchIsNotRemovedWhenSubscriptionIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED, "");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -357,7 +345,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -381,24 +369,25 @@ public class MatchRepositoryIT {
         String serviceProviderName1 = "sp-1";
         String serviceProviderName2 = "sp-2";
 
-        LocalSubscription locSub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+        String consumerCommonName = "consumer";
+        LocalSubscription locSub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, consumerCommonName);
         ServiceProvider sp1 = new ServiceProvider(serviceProviderName1, new Capabilities(), Collections.singleton(locSub1), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp1);
 
-        LocalSubscription locSub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+        LocalSubscription locSub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector,consumerCommonName);
         ServiceProvider sp2 = new ServiceProvider(serviceProviderName2, new Capabilities(), Collections.singleton(locSub2), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp2);
 
         Subscription sub = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-interchange");
         sub.setExchangeName("my-exchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
-        Match match1 = new Match(locSub1, sub, serviceProviderName1, MatchStatus.UP);
-        Match match2 = new Match(locSub2, sub, serviceProviderName2, MatchStatus.UP);
+        Match match1 = new Match(locSub1, sub, serviceProviderName1);
+        Match match2 = new Match(locSub2, sub, serviceProviderName2);
 
         matchRepository.save(match1);
         matchRepository.save(match2);

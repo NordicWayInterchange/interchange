@@ -12,7 +12,7 @@ public class SSLContextFactoryTest {
 	@Test
 	public void sslContextFromKeyAndTrustStores() {
 		String keystoreFile = getFilePath("jks/localhost.p12");
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12, "password");
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12);
 
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);
@@ -24,7 +24,7 @@ public class SSLContextFactoryTest {
 	@Disabled
 	public void sslContextFromKeyAndTrustStoresWrongKeystoreTypeFails() {
 		String keystoreFile = getFilePath("jks/localhost.p12");
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.JKS, "password");
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.JKS);
 
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.PKCS12);
@@ -37,7 +37,7 @@ public class SSLContextFactoryTest {
 	@Test
 	public void sslContextFromKeyAndTrustStoresNonExistingFileFails() {
 		String keystoreFile = "/non/existing/file/foobar.p12";
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12, "password");
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12);
 
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);

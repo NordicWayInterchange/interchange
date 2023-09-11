@@ -58,8 +58,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         KeystoreDetails keys = new KeystoreDetails(
                 keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12").toString(),
                 "password",
-                KeystoreType.PKCS12,
-                "password"
+                KeystoreType.PKCS12
         );
         sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keys,trust);
         QpidClientConfig config = new QpidClientConfig(sslContext);
@@ -136,6 +135,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
                 .userId("anna")
                 .messageType(Constants.DENM)
                 .publisherId("NO-123")
+                .publicationId("NO-123-pub")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")

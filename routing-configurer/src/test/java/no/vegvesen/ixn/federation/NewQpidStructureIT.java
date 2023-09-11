@@ -6,7 +6,11 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -43,9 +47,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
-
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+    @Container
+    private static KeysContainer keyContainer = getKeyContainer(NewQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
     @Autowired
     SSLContext sslContext;
@@ -54,7 +57,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     QpidClient qpidClient;
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
 
@@ -64,15 +67,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             //need to set the logg follower somewhere, this seems like a "good" place to do it for now
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            String httpsUrl = qpidContainer.getHttpsUrl();
-            String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpsUrl);
-            logger.info("server url: " + httpUrl);
+            logger.info("Server admin url: " + qpidContainer.getHttpUrl());
             TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + httpsUrl,
+                    "routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
+                    "test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
+                    "test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12")
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
@@ -86,12 +86,16 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         //2. Create a queue
         qpidClient.createQueue(queueName);
         //2.1 Create a Capability to base a Validating selector on
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("12","13")),
-                new HashSet<>(Arrays.asList("5","6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        new HashSet<>(Arrays.asList("12","13")),
+                        new HashSet<>(Arrays.asList(5, 6))
+                ),
+                new Metadata()
         );
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
@@ -126,6 +130,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .userId("anna")
                 .messageType(Constants.DENM)
                 .publisherId("NO-123")
+                .publicationId("pub-1")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
@@ -140,6 +145,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .userId("localhost")
                 .messageType(Constants.DATEX_2)
                 .publisherId("NO-123")
+                .publicationId("pub-1")
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
                 .latitude(60.352374)
@@ -161,12 +167,16 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 SubscriptionStatus.CREATED
         );
 
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "DENM:1.2.2",
-                new HashSet<>(Arrays.asList("12004")),
-                new HashSet<>(Arrays.asList("6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        new HashSet<>(Arrays.asList("12004")),
+                        new HashSet<>(Arrays.asList(6))
+                ),
+                new Metadata()
         );
 
         LocalDelivery delivery = new LocalDelivery(
@@ -188,6 +198,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String capabilitySelector = creator.makeSelector(capability);
+        System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
 
@@ -232,6 +243,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("kong_olav")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -277,6 +289,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("king_gustaf")
                         .publisherId("NO-123")
+                        .publicationId("NO-123-pub")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -304,20 +317,28 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 SubscriptionStatus.CREATED
         );
 
-        DenmCapability capability1 = new DenmCapability(
-                "NO-123",
-                "NO",
-                "DENM:1.2.2",
-                new HashSet<>(Arrays.asList("12002", "12003")),
-                new HashSet<>(Arrays.asList("6"))
+        CapabilitySplit capability1 = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        new HashSet<>(Arrays.asList("12002", "12003")),
+                        new HashSet<>(Arrays.asList(6))
+                ),
+                new Metadata()
         );
 
-        DenmCapability capability2 = new DenmCapability(
-                "NO-123",
-                "NO",
-                "DENM:1.2.2",
-                new HashSet<>(Arrays.asList("12003")),
-                new HashSet<>(Arrays.asList("6"))
+        CapabilitySplit capability2 = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        new HashSet<>(Arrays.asList("12003")),
+                        new HashSet<>(Arrays.asList(6))
+                ),
+                new Metadata()
         );
 
         LocalDelivery delivery = new LocalDelivery(
@@ -369,6 +390,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("kong_olav")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -392,12 +414,16 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
 
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "DENM:1.2.2",
-                new HashSet<>(Arrays.asList("12003")),
-                new HashSet<>(Arrays.asList("6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        new HashSet<>(Arrays.asList("12003")),
+                        new HashSet<>(Arrays.asList(6))
+                ),
+                new Metadata()
         );
 
         LocalDelivery delivery = new LocalDelivery(
@@ -440,6 +466,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")

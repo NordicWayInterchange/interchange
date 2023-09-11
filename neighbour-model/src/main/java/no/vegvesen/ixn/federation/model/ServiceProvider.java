@@ -50,6 +50,12 @@ public class ServiceProvider {
 		this.name = name;
 	}
 
+	public ServiceProvider(String name,
+						   Set<LocalSubscription> subscriptions) {
+		this.name = name;
+		this.subscriptions.addAll(subscriptions);
+	}
+
 	public ServiceProvider(Integer id,
 						   String name,
 						   Capabilities capabilities,
@@ -60,7 +66,7 @@ public class ServiceProvider {
 		this.id = id;
 		this.name = name;
 		this.capabilities = capabilities;
-		this.subscriptions = subscriptions;
+		this.subscriptions.addAll(subscriptions);
 		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
@@ -73,7 +79,7 @@ public class ServiceProvider {
 
 		this.name = name;
 		this.capabilities = capabilities;
-		this.subscriptions = subscriptions;
+		this.subscriptions.addAll(subscriptions);
 		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
@@ -141,6 +147,17 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	//TODO: REMOVE
+	public void removeSubscription(LocalSubscription subscription) {
+		subscriptions.remove(subscription);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
+	public void removeSubscriptions(Set<LocalSubscription> subscriptionsToRemove) {
+		subscriptions.removeAll(subscriptionsToRemove);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
 		return (capabilities.hasDataTypes() ||
 				!activeSubscriptions().isEmpty());
@@ -193,6 +210,10 @@ public class ServiceProvider {
 
 	public Set<PrivateChannel> getPrivateChannels() {
 		return privateChannels;
+	}
+
+	public void setPrivateChannels(Set<PrivateChannel> newPrivateChannels) {
+		this.privateChannels = newPrivateChannels;
 	}
 
 	public void setDeliveries(Set<LocalDelivery> deliveries) {

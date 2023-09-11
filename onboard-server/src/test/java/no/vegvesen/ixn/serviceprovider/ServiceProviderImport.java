@@ -2,8 +2,10 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -13,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class ServiceProviderImport {
     }
 
     public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi, LocalDateTime savedTimestamp) {
-        Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
+        Set<CapabilitySplit> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
         Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
         capabilities.setLastUpdated(LocalDateTime.now());
         Set<LocalSubscription> subscriptions = new HashSet<>();
@@ -77,10 +78,15 @@ public class ServiceProviderImport {
 
             deliveries.add(delivery);
         }
+
+        Set<PrivateChannel> privateChannels = new HashSet<>();
+        for (PrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
+            privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), privateChannelApi.getQueueName(), PrivateChannelStatus.REQUESTED));
+        }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
-                Collections.emptySet(),
+                privateChannels,
                 savedTimestamp
         );
         serviceProvider.addDeliveries(deliveries);
@@ -119,9 +125,25 @@ public class ServiceProviderImport {
             ).applyTo(configurableApplicationContext.getEnvironment());        }
     }
         /*
-        Used to import/export from a locally runnning database
+        Used to import to a locally runnning database
          */
-    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static class LocalhostImportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
+                    "spring.datasource.username: federation",
+                    "spring.datasource.password: federation",
+                    "spring.datasource.driver-class-name: org.postgresql.Driver",
+                    "spring.jpa.hibernate.ddl-auto = update"
+            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    }
+    /*
+    Used to export a locally runnning database
+     */
+    public static class LocalhostExportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {

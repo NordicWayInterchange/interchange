@@ -1,0 +1,61 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-napcore-server
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: napcore-server
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.napcore_server.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: napcore-server
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: napcore-server
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: napcore-server
+          image: "{{ .Values.napcore_server.image.repository }}:{{ .Values.napcore_server.image.tag }}"
+          env:
+            - name: POSTGRES_URI
+              value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres_user }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres_password }}
+            - name: SERVER_NAME
+              value: {{ .Values.external_name | quote }}
+            - name: NAP_NAME
+              value: {{ .Values.self.nap_name | quote }}
+            - name: NAP_CHNL_PORT
+              value: {{ .Values.self.nap_provider_port | quote }}
+            - name: TRUST_STORE
+              value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
+            - name: TRUST_STORE_PASSWORD
+              value: {{ .Values.trust_store_password | quote }}
+            - name: KEY_STORE
+              value: "{{ .Values.self.secret_mount_path }}key_store.p12"
+            - name: KEY_STORE_PASSWORD
+              value: {{ .Values.key_store_password | quote }}
+            - name: LOG_LEVELS
+              value: "{{- range .Values.napcore_server.logging -}}
+                  -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
+                  {{- end }}"
+          volumeMounts:
+            - name: secure
+              mountPath: {{ .Values.self.secret_mount_path | quote }}
+          ports:
+            - name: napcore
+              containerPort: {{ .Values.self.nap_provider_port }}
+      volumes:
+        - name: secure
+          secret:
+            secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}

@@ -120,7 +120,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
 
   local_neighbour_discoverer:
     image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:federation-master
@@ -138,7 +137,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
 
   local_message_forwarder_app:
     image: eu.gcr.io/nordic-way-aad182cc/message-forwarder:federation-master

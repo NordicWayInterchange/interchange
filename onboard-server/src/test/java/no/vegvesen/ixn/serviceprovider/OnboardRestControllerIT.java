@@ -1,8 +1,15 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -40,14 +47,20 @@ public class OnboardRestControllerIT {
     private CertService certService;
 
     @Autowired
+    private InterchangeNodeProperties nodeProperties;
+
+    @Autowired
     private OnboardRestController restController;
 
     @Test
     public void testDeletingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -70,10 +83,13 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -103,6 +119,7 @@ public class OnboardRestControllerIT {
 
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -129,6 +146,18 @@ public class OnboardRestControllerIT {
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
+    @Test
+    public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        String serviceProvider = "serviceprovider";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider,Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider,request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
+    }
+
 	@Test
     public void testAddingSubscriptionWithEmptyConsumerCommonName() {
         String serviceProviderName = "serviceprovider";
@@ -140,6 +169,7 @@ public class OnboardRestControllerIT {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -153,6 +183,34 @@ public class OnboardRestControllerIT {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddingSubscriptionWhenAnIdenticalWithDifferentStatusAlreadyExists() {
+        String selector = "messageType = 'DATEX2' and originatingCountry = 'NO'";
+        String serviceproviderName = "serviceprovider";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceproviderName,
+                new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Collections.emptySet()),
+                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector,nodeProperties.getName())),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                serviceproviderName,
+                Collections.singleton(new AddSubscription(selector))
+        );
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName,request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceproviderName);
+
+
+
     }
 
 	@Test
@@ -235,35 +293,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "NPRA",
+                        "pub-1",
                         "NO",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "SPRA",
+                        "pub-2",
                         "SE",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "DPRA",
+                        "pub-3",
                         "DK",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -282,24 +349,30 @@ public class OnboardRestControllerIT {
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "SPRA",
+                        "pub-1",
                         "SE",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "DPRA",
+                        "pub-2",
                         "DK",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
@@ -316,35 +389,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "SPRA",
-                        "SE",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "SPRA",
+                                "pub-2",
+                                "SE",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "DPRA",
-                        "DK",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "DPRA",
+                                "pub-3",
+                                "DK",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -363,35 +445,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "SPRA",
-                        "SE",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "SPRA",
+                                "pub-2",
+                                "SE",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "DPRA",
-                        "DK",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "DPRA",
+                                "pub-3",
+                                "DK",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -419,5 +510,35 @@ public class OnboardRestControllerIT {
 
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddingMoreThanOneIdenticalDeliveries() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "messageType = 'DENM'";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new SelectorApi(selector)
+                )
+        );
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(response.getDeliveries()).allMatch(d -> d.getStatus().equals(DeliveryStatus.REQUESTED));
+
+        //change the delivery status in the database
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+        serviceProvider.getDeliveries().stream().forEach( d -> d.setStatus(LocalDeliveryStatus.CREATED));
+        serviceProviderRepository.save(serviceProvider);
+
+        //now, add the second delivery with original status
+        response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+
     }
 }

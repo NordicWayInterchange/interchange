@@ -73,7 +73,6 @@ public class MatchDiscoveryServiceTest {
                         new Capabilities(),
                         new NeighbourSubscriptionRequest(),
                         new SubscriptionRequest(
-                                SubscriptionRequestStatus.REQUESTED,
                                 Collections.singleton(
                                         new Subscription(
                                                 "originatingCountry = 'NO'",
@@ -109,7 +108,6 @@ public class MatchDiscoveryServiceTest {
                new Capabilities(),
                new NeighbourSubscriptionRequest(),
                new SubscriptionRequest(
-                       SubscriptionRequestStatus.REQUESTED,
                        new HashSet<>(Arrays.asList(
                                new Subscription(
                                        "originatingCountry = 'NO'",
@@ -125,7 +123,6 @@ public class MatchDiscoveryServiceTest {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
@@ -164,7 +161,6 @@ public class MatchDiscoveryServiceTest {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
@@ -204,7 +200,6 @@ public class MatchDiscoveryServiceTest {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
@@ -223,8 +218,4 @@ public class MatchDiscoveryServiceTest {
         verify(matchRepository,times(0)).findAllBySubscriptionId(any());
         verify(matchRepository,times(0)).save(any(Match.class));
     }
-
-
-
-    //TODO several subscriptions, one REQUESTED, or none REQUESTED
 }

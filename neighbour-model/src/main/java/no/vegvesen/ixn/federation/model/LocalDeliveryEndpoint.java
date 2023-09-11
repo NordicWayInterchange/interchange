@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_delivery_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "target", "selector"}))
+@Table(name = "local_delivery_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "target"}))
 public class LocalDeliveryEndpoint {
 
     @Id
@@ -16,29 +16,31 @@ public class LocalDeliveryEndpoint {
     private int port;
     private String target;
 
-    @Column(length = 1024)
-    private String selector;
-
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
     public LocalDeliveryEndpoint() {
     }
 
-    public LocalDeliveryEndpoint(String host, int port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalDeliveryEndpoint(Integer id, String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+        this.id = id;
         this.host = host;
         this.port = port;
         this.target = target;
-        this.selector = selector;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
 
-    public LocalDeliveryEndpoint(String host, int port, String target, String selector) {
-        this.host = host;
-        this.port = port;
-        this.target = target;
-        this.selector = selector;
+    public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+        this(null,host,port,target,maxBandwidth,maxMessageRate);
+    }
+
+    public LocalDeliveryEndpoint(String host, int port, String target) {
+        this(null,host,port,target, null,null);
+    }
+
+    public LocalDeliveryEndpoint(Integer id, String host, int port, String target) {
+        this(id,host,port,target,null,null);
     }
 
     public String getHost() {
@@ -65,14 +67,6 @@ public class LocalDeliveryEndpoint {
         this.target = target;
     }
 
-    public String getSelector() {
-        return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
-    }
-
     public Integer getMaxBandwidth() {
         return maxBandwidth;
     }
@@ -89,26 +83,19 @@ public class LocalDeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public String bindKey() {
-        return "" + selector.hashCode();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LocalDeliveryEndpoint)) return false;
         LocalDeliveryEndpoint that = (LocalDeliveryEndpoint) o;
         return port == that.port &&
-                maxBandwidth == that.maxBandwidth &&
-                maxMessageRate == that.maxMessageRate &&
                 Objects.equals(host, that.host) &&
-                Objects.equals(target, that.target) &&
-                Objects.equals(selector, that.selector);
+                Objects.equals(target, that.target);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, port, target, selector, maxBandwidth, maxMessageRate);
+        return Objects.hash(host, port, target);
     }
 
     @Override
@@ -117,7 +104,6 @@ public class LocalDeliveryEndpoint {
                 "host='" + host + '\'' +
                 ", port=" + port +
                 ", target='" + target + '\'' +
-                ", selector='" + selector + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';

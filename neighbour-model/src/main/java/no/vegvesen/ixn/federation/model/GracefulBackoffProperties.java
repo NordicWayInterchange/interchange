@@ -33,7 +33,7 @@ public class GracefulBackoffProperties {
 	 */
 	private String checkOffset = "60000";
 
-	private int backoffInterval = 3600000;
+	private int backoffInterval = 300000;
 
 	public int getStartIntervalLength() {
 		return startIntervalLength;

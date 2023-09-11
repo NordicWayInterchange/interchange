@@ -1,12 +1,16 @@
 package no.vegvesen.ixn.federation.service;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -20,11 +24,11 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -102,8 +106,8 @@ public class NeighbourDiscovererIT {
 		assertThat(toConsumeMessagesFrom).contains(neighbour1);
 	}
 
-	private Capability getDatexCapability(String originatingCountry) {
-		return new DatexCapability(null, originatingCountry, null, null, RedirectStatus.OPTIONAL,null);
+	private CapabilitySplit getDatexCapability(String originatingCountry) {
+		return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(),"SituationPublication"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 
 	@Test
@@ -122,7 +126,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -145,21 +149,21 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now()
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
-						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								new Subscription(
 										"originatingCountry = 'NO'",
@@ -189,16 +193,17 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now()
 				),
 				new NeighbourSubscriptionRequest(),
@@ -234,22 +239,27 @@ public class NeighbourDiscovererIT {
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
-								new DatexCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
+								new CapabilitySplit(
+										new DatexApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												""
+										),
+										new Metadata(RedirectStatus.OPTIONAL)
 								),
-								new DenmCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-2",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+									),
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
@@ -291,16 +301,17 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -335,23 +346,25 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = Collections.singleton(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						nodeProperties.getName()
 				)
 		);
 		Neighbour neighbourA = new Neighbour(
 				"neighourA",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -362,16 +375,17 @@ public class NeighbourDiscovererIT {
 				"neighourB",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0002",
+										"pub-2",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -415,14 +429,16 @@ public class NeighbourDiscovererIT {
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new DenmCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
@@ -448,6 +464,190 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), anySet(), any(String.class));
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+	}
+
+	@Test
+	public void testGiveUp() {
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+
+		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscriptions.add(subscription);
+
+		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
+		serviceProvider.addLocalSubscription(subscription);
+
+		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
+				.thenReturn(new HashSet<>( Arrays.asList(
+						new Subscription(
+								selector,
+								SubscriptionStatus.REQUESTED,
+								nodeProperties.getName()
+						)
+				)));
+
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
+				.thenReturn(new Subscription(
+						selector,
+						SubscriptionStatus.CREATED,
+						nodeProperties.getName()
+				));
+
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated(mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
+				.thenThrow(new SubscriptionPollException("Subscription poll gone wrong"));
+
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, mockNeighbourFacade);
+
+		for (int i=0; i<8; i++) {
+			neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusHours(3));
+			neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusHours(1));
+			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		}
+
+		neighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
+
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, neighbour.getCapabilities().getCapabilities());
+
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
+
+	}
+
+	@Test
+	public void testBackoffIsIncreasedEverytimeASubscriptionFailsWithConnectionFailure() {
+		String selector1 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publisherId = 'NO00001'";
+		String selector2 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publicationId = 'pub-1'";
+		String selector3 = "originatingCountry = 'NO' AND messageType = 'DENM' AND protocolVersion = '1.0'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						new HashSet<>(Arrays.asList(
+								new Subscription(
+										selector1,
+										SubscriptionStatus.CREATED,
+										consumerCommonName
+								), new Subscription(
+										selector2,
+										SubscriptionStatus.CREATED,
+										consumerCommonName
+								), new Subscription(
+										selector3,
+										SubscriptionStatus.CREATED,
+										consumerCommonName
+								)
+						))
+				)
+		);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
+				.thenThrow(new SubscriptionPollException("Subscription poll gone wrong"));
+
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour").getControlConnection().getBackoffAttempts()).isEqualTo(2);
+	}
+
+	@Test
+	public void testResetOfBackoffCounterWhenPollIsSuccessfulAgainAfterFailure() {
+		String selector = "originatingCountry = 'NO' AND messageType = 'DENM' AND publisherId = 'NO00002'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Subscription sub = new Subscription(
+				selector,
+				SubscriptionStatus.FAILED,
+				consumerCommonName
+		);
+		sub.setNumberOfPolls(1);
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour1",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0002",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						Collections.singleton(
+								sub
+						)
+				)
+		);
+
+		neighbour.getControlConnection().setBackoffStart(LocalDateTime.now());
+		neighbour.getControlConnection().setBackoffAttempts(0);
+		neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
+				.thenReturn(
+						new Subscription(
+								selector,
+								SubscriptionStatus.CREATED,
+								nodeProperties.getName()
+						)
+				);
+
+		neighbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour, mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour1").getControlConnection().getBackoffStartTime()).isNull();
 	}
 
 	private void checkForNewNeighbours() {

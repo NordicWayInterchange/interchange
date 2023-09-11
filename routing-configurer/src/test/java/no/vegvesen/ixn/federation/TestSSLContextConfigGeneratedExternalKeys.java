@@ -27,7 +27,7 @@ public class TestSSLContextConfigGeneratedExternalKeys {
 	@Bean
 	public SSLContext getTestSslContext() {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(properties.getKeyStore(), properties.getKeystorePassword(), KeystoreType.valueOf(properties.getKeystoreType()), properties.getKeyPassword()),
+				new KeystoreDetails(properties.getKeyStore(), properties.getKeystorePassword(), KeystoreType.valueOf(properties.getKeystoreType())),
 				new KeystoreDetails(properties.getTrustStore(), properties.getTruststorePassword(), KeystoreType.valueOf(properties.getTruststoreType())));
 	}
 

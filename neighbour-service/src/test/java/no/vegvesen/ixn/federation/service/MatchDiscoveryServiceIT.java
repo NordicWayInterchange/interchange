@@ -70,7 +70,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -95,7 +94,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -103,7 +101,6 @@ public class MatchDiscoveryServiceIT {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
 
         assertThat(matchRepository.findAll()).hasSize(1);
-        assertThat(matchRepository.findAllByStatus(MatchStatus.REDIRECT)).hasSize(1);
     }
 
     @Test
@@ -122,7 +119,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -167,7 +163,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.ESTABLISHED,
                         Collections.singleton(subscription)
                 )
         );

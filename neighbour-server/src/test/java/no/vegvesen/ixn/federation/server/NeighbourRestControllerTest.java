@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -71,15 +72,25 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("NO");
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+				new DatexApplicationApi(
+						"NO-12345",
+						"pub-2",
+						"NO",
+						"DATEX2:2.3",
+						quadTree,
+						"SituationPublication"
+				),
+				new MetadataApi()
+		);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -96,16 +107,25 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		DenmCapabilityApi ericssonDataType = new DenmCapabilityApi();
-		ericssonDataType.setCauseCode(Sets.newLinkedHashSet("cc3"));
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+				new DenmApplicationApi(
+						"NO-12345",
+						"pub-1",
+						"NO",
+						"DENM:1.2.2",
+						quadTree,
+						Collections.singleton(3)
+				),
+				new MetadataApi()
+		);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -122,16 +142,16 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		IvimCapabilityApi ericssonDataType = new IvimCapabilityApi();
-		ericssonDataType.setIviType(Sets.newLinkedHashSet("3993"));
-		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
+		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -149,9 +169,21 @@ class NeighbourRestControllerTest {
 		mockCertificate("unknownNeighbour");
 
 		// Mock the incoming API object.
-		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
+		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(
+				new CapabilitySplitApi(
+						new DatexApplicationApi(
+								"NO-12345",
+								"pub-2",
+								"NO",
+								"DATEX2:2.3",
+								quadTree,
+								"SituationPublication"
+						),
+						new MetadataApi()
+				)
+		));
 
 		// Mock response from DNS facade on Server
 		doThrow(new InterchangeNotInDNSException("expected")).when(neighbourService).incomingCapabilities(any(), any());
@@ -223,9 +255,21 @@ class NeighbourRestControllerTest {
 		mockCertificate("bouvet");
 
 		// Create incoming capability api object.
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		ericsson.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
+		ericsson.setCapabilities(Collections.singleton(
+				new CapabilitySplitApi(
+						new DatexApplicationApi(
+								"NO-12345",
+								"pub-2",
+								"NO",
+								"DATEX2:2.3",
+								quadTree,
+								"SituationPublication"
+						),
+						new MetadataApi()
+				)
+		));
 
 		// Convert to JSON
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
@@ -244,15 +288,25 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("myPublisherId", "NO", null, quadTree, Sets.newLinkedHashSet("myPublicationType"));
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+				new DatexApplicationApi(
+						"NO-12345",
+						"pub-2",
+						"NO",
+						"DATEX2:2.3",
+						quadTree,
+						"SituationPublication"
+				),
+				new MetadataApi()
+		);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -269,9 +323,19 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new CapabilityApi("unknown", "myPublisherId", "NO", null, quadTree);
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+				new ApplicationApi(
+						"unknown",
+						"NO-12345",
+						"pub-2",
+						"NO",
+						"DATEX2:2.3",
+						quadTree
+				),
+				new MetadataApi()
+		);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server

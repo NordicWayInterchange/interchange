@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -28,37 +29,15 @@ public class MatchDiscoveryService {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
-                if (!serviceProviderName.equals(localSubscription.getConsumerCommonName())) {
-                    for (Neighbour neighbour : neighbours) {
-                        for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                                //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
-                                //this ending up with the same selector.
-                                //TODO this really is the most telltale sign that we need to promote Selector to a class
-                                if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
-                                        Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
-                                    //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
-                                    //this would make a method that is completely independent on the repos.
-                                    if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
-                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                                        matchRepository.save(newMatch);
-                                        logger.info("Saved new Match {}", newMatch);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    for (Neighbour neighbour : neighbours) {
-                        for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                                if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
-                                        Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
-                                    if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
-                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);
-                                        matchRepository.save(newMatch);
-                                        logger.info("Saved new Match {}", newMatch);
-                                    }
+                for (Neighbour neighbour : neighbours) {
+                    for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED) && localSubscription.isSubscriptionWanted()) {
+                            if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
+                                    Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
+                                if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
+                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName);
+                                    matchRepository.save(newMatch);
+                                    logger.info("Saved new Match {}", newMatch);
                                 }
                             }
                         }
@@ -68,67 +47,22 @@ public class MatchDiscoveryService {
         }
     }
 
-    public List<Match> findMatchesToSetupExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-    }
-
-    public void updateMatchToSetupEndpoint(Match match) {
-        match.setStatus(MatchStatus.SETUP_ENDPOINT);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status SETUP_ENDPOINT", match);
-    }
-
-    public List<Match> findMatchesByExchangeName(String exchangeName) {
-        return matchRepository.findBySubscription_ExchangeName(exchangeName);
-    }
-
-    public void updateMatchToUp(Match match) {
-        match.setStatus(MatchStatus.UP);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status UP", match);
-    }
-
-    public void synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect() {
-        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
-        for (Match match : matches) {
-            if(! LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
-                    SubscriptionStatus.shouldTearDown(match.getSubscription().getSubscriptionStatus())) {
-                match.setStatus(MatchStatus.DELETED);
-                matchRepository.save(match);
-                logger.info("Saved match {} with status DELETED", match);
+    public void syncMatchesToDelete() {
+        List<Match> existingMatches = matchRepository.findAll();
+        Set<Match> matchesToDelete = new HashSet<>();
+        for (Match match : existingMatches) {
+            if (match.subscriptionIsTearDown()) {
+                if ( match.getSubscription().exchangeIsRemoved()) {
+                    logger.info("Removing Match {}", match);
+                    matchesToDelete.add(match);
+                }
+            } else {
+                if (match.localSubscriptionIsTearDown()) {
+                    logger.info("Removing Match {}", match);
+                    matchesToDelete.add(match);
+                }
             }
         }
-    }
-
-    public List<Match> findMatchesToTearDownEndpointsFor() {
-        return matchRepository.findAllByStatus(MatchStatus.TEARDOWN_ENDPOINT);
-    }
-
-    public void updateMatchToTearDownExchange(Match match) {
-        match.setStatus(MatchStatus.TEARDOWN_EXCHANGE);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status TEARDOWN_EXCHANGE", match);
-    }
-
-    public List<Match> findMatchesToTearDownExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.TEARDOWN_EXCHANGE);
-    }
-
-    public void updateMatchToDeleted(Match match) {
-        match.setStatus(MatchStatus.DELETED);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status DELETED", match);
-    }
-
-    public void removeMatchesThatAreDeleted() {
-        List<Match> matchesToRemove = matchRepository.findAllByStatus(MatchStatus.DELETED);
-        if (!matchesToRemove.isEmpty()) {
-            matchRepository.deleteAll(matchesToRemove);
-            logger.info("Removed deleted Matches");
-        }
-    }
-
-    public List<Match> findMatchesByLocalSubscriptionId(Integer id) {
-        return matchRepository.findAllByLocalSubscriptionId(id);
+        matchRepository.deleteAll(matchesToDelete);
     }
 }

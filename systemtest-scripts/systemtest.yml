@@ -58,6 +58,31 @@ services:
     networks:
       - testing_net
 
+  a_napcore_server:
+    build:
+      context: ../napcore-server-app
+    container_name: a_napcore_server
+    depends_on:
+      - a_db
+    ports:
+      - 32777:8898
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - NAP_NAME=nap.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - NAP_CHNL_PORT=8898
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
   a_qpid:
     build:
       context: ../qpid
@@ -135,7 +160,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
     - testing_net
 
@@ -161,7 +185,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -280,7 +303,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -334,7 +356,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
     - testing_net
 
