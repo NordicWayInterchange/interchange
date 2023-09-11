@@ -58,6 +58,7 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
+		this.allgroupsUrl = String.format("%s/api/latest/")
 	}
 
 	/**
@@ -176,6 +177,18 @@ public class QpidClient {
 		if (exchange != null) {
 			removeExchangeById(exchange.getId());
 		}
+	}
+
+	//TODO should we allow getting all groups??
+
+
+	public String getGroupsDescriptions() {
+		return restTemplate.getForEntity()
+	}
+
+	public String getAllGroups() {
+		return restTemplate.getForEntity(groupsUrl ,String.class).getBody();
+
 	}
 
 	public List<String> getGroupMemberNames(String groupName) {
