@@ -82,6 +82,9 @@ jobs:
   docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      matrix:
+        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app]
     defaults:
       run:
         shell: bash
@@ -97,5 +100,17 @@ jobs:
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
-      - name: Build and upload Docker images
-        run: chmod +x build-push-images.sh && ./build-push-images.sh ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}
+      - name: Create tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_ENV"
+
+      - name: Build the Docker image
+        run: |
+          cd ./${{ matrix.Images }}
+          docker build . --file Dockerfile \ 
+            --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }} \ 
+            --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }} \
+            --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.BRANCH_TAG }}
+      - name: Push docker image
+        run: docker push --all-tags ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
