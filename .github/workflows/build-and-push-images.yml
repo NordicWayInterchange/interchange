@@ -108,8 +108,9 @@ jobs:
       - name: Build the Docker image
         run: |
           cd ./${{ matrix.Images }}
-          docker build . --file Dockerfile \ 
-            --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }} \ 
+          
+          docker build . \
+            --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }} \
             --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }} \
             --tag ${{ secrets.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.BRANCH_TAG }}
       - name: Push docker image
