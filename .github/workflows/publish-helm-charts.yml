@@ -48,8 +48,8 @@ jobs:
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: ${{secrets.WORKLOAD_IDENTITY_PROVIDER}}
-          service_account: ${{secrets.SERVICE_ACCOUNT}}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
       - name: Setup Google CLI
         uses: google-github-actions/setup-gcloud@v1
         with:
