@@ -19,3 +19,4 @@ spec:
     port: {{ .Values.qpid.http_qpid_gui.port }}
   - name: https-qpid-rest
     port: {{ .Values.qpid.https_qpid_rest.port }}
+  type: NodePort
