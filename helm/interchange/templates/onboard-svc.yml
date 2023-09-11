@@ -15,3 +15,4 @@ spec:
   ports:
   - name: onboard
     port: {{ .Values.self.service_provider_port }}
+  type: NodePort
