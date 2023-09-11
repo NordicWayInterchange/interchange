@@ -1,5 +1,9 @@
 name: Build and Push Docker Images
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
   workflow_dispatch:
