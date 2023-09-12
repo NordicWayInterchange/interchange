@@ -169,6 +169,18 @@ public class QpidClient {
 	}
 
 
+	public void removeMemberFromGroup(GroupMember member, String groupName) {
+		String url = groupsUrl + groupName + "/" + member.getName();
+		logger.info("Removing user {} from group {}",member.getName(),groupName);
+		restTemplate.delete(url);
+	}
+
+	public void removeMemberFromGroup(String memberName, String groupName) {
+		String url = groupsUrl + groupName + "/" + memberName;
+		logger.info("Removing user {} from group {}",memberName,groupName);
+		restTemplate.delete(url);
+	}
+
 	public List<GroupMember> getGroupMembers(String groupName) {
 		String url = groupsUrl + groupName;
 		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
@@ -183,12 +195,6 @@ public class QpidClient {
 	public List<String> getGroupMemberNames(String groupName) {
 		List<String> groupMemberNames = getGroupMembers(groupName).stream().map(GroupMember::getName).collect(Collectors.toList());
 		return groupMemberNames;
-	}
-
-	public void removeMemberFromGroup(String memberName, String groupName) {
-		String url = groupsUrl + groupName + "/" + memberName;
-		logger.info("Removing user {} from group {}",memberName,groupName);
-		restTemplate.delete(url);
 	}
 
 	//TODO what doest this actually return??

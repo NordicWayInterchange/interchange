@@ -51,7 +51,6 @@ public class ServiceProviderRouter {
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
-        List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
@@ -61,11 +60,14 @@ public class ServiceProviderRouter {
             serviceProvider = syncSubscriptions(serviceProvider, delta);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
+            GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                optionallyAddServiceProviderToGroup(groupMemberNames,name);
+                if (groupMember == null) {
+                    qpidClient.addMemberToGroup(groupMember.getName(),SERVICE_PROVIDERS_GROUP_NAME);
+                }
             } else {
-                if (groupMemberNames.contains(serviceProvider.getName())){
-                    removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
+                if (groupMember != null) {
+                    qpidClient.removeMemberFromGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
 
@@ -184,18 +186,6 @@ public class ServiceProviderRouter {
         }
     }
 
-    private void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
-        if (!groupMemberNames.contains(name)) {
-            logger.debug("Adding member {} to group {}", name,SERVICE_PROVIDERS_GROUP_NAME);
-            qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
-        }
-    }
-
-    private void removeServiceProviderFromGroup(String name, String groupName) {
-        logger.debug("Removing member {} from group {}", name,groupName);
-        qpidClient.removeMemberFromGroup(name,groupName);
-    }
-
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
         if (!serviceProvider.getPrivateChannels().isEmpty()) {
             Set<PrivateChannel> privateChannels = new HashSet<>();
@@ -222,7 +212,8 @@ public class ServiceProviderRouter {
                 .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
                 .collect(Collectors.toSet());
 
-        if(!groupMemberNames.contains(name)) {
+        GroupMember groupMember = qpidClient.getGroupMember(name,CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+        if (groupMember == null) {
             qpidClient.addMemberToGroup(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
             logger.debug("Adding member {} to group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
         }

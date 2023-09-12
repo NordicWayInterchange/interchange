@@ -268,11 +268,10 @@ public class RoutingConfigurer {
 	}
 
 	private void removeSubscriberFromGroup(String groupName, String subscriberName) {
-		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
-		if (existingGroupMembers.contains(subscriberName)) {
+		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
+		if (groupMember != null) {
 			logger.debug("Subscriber {} found in the groups {} Removing...", subscriberName, groupName);
-			qpidClient.removeMemberFromGroup(subscriberName, groupName);
-			logger.info("Removed subscriber {} from Qpid group {}", subscriberName, groupName);
+			qpidClient.removeMemberFromGroup(groupMember, groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriberName, groupName);
 		}
