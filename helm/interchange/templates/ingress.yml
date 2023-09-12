@@ -35,7 +35,7 @@ spec:
           # Onboard server paths
           - backend:
               service:
-                name: onboard-server
+                name: {{ .Release.Name }}-onboard-server
                 port:
                   number: {{ .Values.self.service_provider_port }}
             pathType: Prefix
@@ -44,7 +44,7 @@ spec:
           # Neighbour server paths
           - backend:
               service:
-                name: neighbour-server
+                name: {{ .Release.Name }}-neighbour-server
                 port:
                   number: {{ .Values.self.control_channel_port }}
             pathType: Prefix
