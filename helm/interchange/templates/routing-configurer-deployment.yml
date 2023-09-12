@@ -32,7 +32,7 @@ spec:
         - name: POSTGRES_PASSWORD
           value: {{ .Values.postgres_password }}
         - name: BASE_URL
-          value: https://{{ .Release.Name }}-qpid-secure
+          value: https://{{ .Release.Name }}-qpid-http
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
         - name: TRUST_STORE
