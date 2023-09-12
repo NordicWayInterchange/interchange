@@ -69,12 +69,10 @@ public class RoutingConfigurer {
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
-				/*
-				if (qpidClient.queueExists(sub.getQueueName())) {
-					qpidClient.removeQueue(sub.getQueueName());
+				Queue queue = qpidClient.getQueue(sub.getQueueName());
+				if (sub != null) {
+					qpidClient.removeQueue(queue);
 				}
-				 */
-				qpidClient.removeQueueIfExists(sub.getQueueName());
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 
@@ -223,7 +221,10 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {
-							qpidClient.removeExchangeIfExists(subscription.getExchangeName());
+							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
+							if (exchange != null) {
+								qpidClient.removeExchange(exchange);
+							}
 							subscription.removeExchangeName();
 							logger.debug("Removed exchange for subscription {}", subscription.toString());
 						}

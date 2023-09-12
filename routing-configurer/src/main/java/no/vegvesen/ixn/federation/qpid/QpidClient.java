@@ -47,8 +47,6 @@ public class QpidClient {
 	private final String allQueuesUrl;
 	private final String allExchangesUrl;
 
-	private final String allgroupsUrl;
-
 	public QpidClient(String baseUrl,
 					  String vhostName,
 					  RestTemplate restTemplate) {
@@ -60,7 +58,6 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
-		this.allgroupsUrl = String.format("%s/api/latest/group/default",baseUrl);
 	}
 
 	/**
@@ -90,28 +87,28 @@ public class QpidClient {
 
 
 	public Queue createQueue(String name) {
-		return _createQueue(new CreateQueueRequest(name));
+		return createQueue(new CreateQueueRequest(name));
 	}
 
 	public Queue createQueue(String queueName, long maximumMessageTtl) {
-		return _createQueue(new CreateQueueRequest(queueName,maximumMessageTtl));
+		return createQueue(new CreateQueueRequest(queueName,maximumMessageTtl));
 	}
 
 	public Exchange createHeadersExchange(String name) {
-		return _createExchange(new CreateExchangeRequest(name,"headers"));
+		return createExchange(new CreateExchangeRequest(name,"headers"));
 	}
 
 
 	public Exchange createDirectExchange(String exchangeName) {
-		return _createExchange(new CreateExchangeRequest(exchangeName,"direct"));
+		return createExchange(new CreateExchangeRequest(exchangeName,"direct"));
 	}
 
-	public Queue _createQueue(CreateQueueRequest request) {
+	private Queue createQueue(CreateQueueRequest request) {
 		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
 		return result;
 	}
 
-	public Exchange _createExchange(CreateExchangeRequest request) {
+	private Exchange createExchange(CreateExchangeRequest request) {
 		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
 		return response.getBody();
 
@@ -152,31 +149,27 @@ public class QpidClient {
 				}).getBody();
 	}
 
-
-	public void removeQueueIfExists(String queueName) {
-		try {
-			restTemplate.delete(queuesURL + "/" + queueName);
-			logger.info("Removed queue {}", queueName);
-		} catch (HttpClientErrorException.NotFound e) {
-			logger.info("Tried to remove non-existing queue {}", queueName);
-		}
+	public void removeQueue(Queue queue) {
+		restTemplate.delete(queuesURL + "/" + queue.getName());
+		logger.info("Removed queue {}", queue.getName());
 	}
 
 
-	public void removeExchangeIfExists(String exchangeName) {
-		try {
-			restTemplate.delete(exchangesURL + "/" + exchangeName);
-			logger.info("Removed exchange {}", exchangeName);
-		} catch (HttpClientErrorException.NotFound e) {
-			logger.info("Tried to remove non-existing queue {}", exchangeName);
-		}
+	public void removeExchange(Exchange exchange) {
+		restTemplate.delete(exchangesURL + "/" + exchange.getName());
+		logger.info("Removed exchange {}", exchange.getName());
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
-		return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
+		try {
+			return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
 	}
 
-	public List<String> getGroupMemberNames(String groupName) {
+
+	public List<GroupMember> getGroupMembers(String groupName) {
 		String url = groupsUrl + groupName;
 		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
 				url,
@@ -184,9 +177,14 @@ public class QpidClient {
 				null,
 				new ParameterizedTypeReference<>() {
 				});
-		List<String> groupMemberNames = groupMembers.getBody().stream().map(GroupMember::getName).collect(Collectors.toList());
+		return groupMembers.getBody();
+	}
+
+	public List<String> getGroupMemberNames(String groupName) {
+		List<String> groupMemberNames = getGroupMembers(groupName).stream().map(GroupMember::getName).collect(Collectors.toList());
 		return groupMemberNames;
 	}
+
 	public void removeMemberFromGroup(String memberName, String groupName) {
 		String url = groupsUrl + groupName + "/" + memberName;
 		logger.info("Removing user {} from group {}",memberName,groupName);
