@@ -105,5 +105,4 @@ napcore_server:
     level: info
 secret_dev_no:
   key_store: "test"
-static_external_ip_name:
-  "my-ip-address"
+static_external_ip_name: "my-ip-address"
