@@ -12,7 +12,7 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: {{ .Values.static_external_ip_name }}
 spec:
   rules:
-    - host: {{ .Values.domain_name }}
+    - host: {{ .Values.self.domain_name }}
       http:
         paths:
 
