@@ -123,9 +123,9 @@ public class ServiceProviderRouter {
             Queue queue = delta.findByQueueName(source);
             if (queue != null) {
                 qpidClient.removeReadAccess(serviceProvider.getName(), source);
-                qpidClient.removeQueueIfExists(source);
-                logger.info("Removed queue for LocalSubscription {}", subscription);
+                qpidClient.removeQueue(queue);
                 delta.removeQueue(queue);
+                logger.info("Removed queue for LocalSubscription {}", subscription);
             }
             endpointsToRemove.add(endpoint);
         }
@@ -266,7 +266,7 @@ public class ServiceProviderRouter {
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
                 Queue queue = delta.findByQueueName(queueName);
                 if (queue != null) {
-                    qpidClient.removeQueueIfExists(queueName);
+                    qpidClient.removeQueue(queue);
                     delta.removeQueue(queue);
                 }
             }
@@ -315,7 +315,7 @@ public class ServiceProviderRouter {
                 if (capability.exchangeExists()) {
                     Exchange exchange = delta.findByExchangeName(capability.getCapabilityExchangeName());
                     if (exchange != null) {
-                        qpidClient.removeExchangeIfExists(exchange.getName());
+                        qpidClient.removeExchange(exchange);
                         logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
                         delta.removeExchange(exchange);
                     }
@@ -370,7 +370,7 @@ public class ServiceProviderRouter {
                             if (exchange != null) {
                                 logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
                                 qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                                qpidClient.removeExchangeIfExists(exchange.getName());
+                                qpidClient.removeExchange(exchange);
                                 delta.removeExchange(exchange);
                             }
                             delivery.setExchangeName("");

@@ -78,7 +78,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
 			client.createQueue("torsk", MAX_TTL_8_DAYS); //create some queue that already exists
 		});
-		client.removeQueueIfExists(queue.getName());
+		client.removeQueue(queue);
 	}
 	@Test
 	public void testGetQueue() {
@@ -101,32 +101,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void testRemovingQueueById() {
-		Queue createdQueue = client.createQueue("test-removing-queue-queue");
-		client.removeQueueIfExists(createdQueue.getName());
-	}
-
-	@Test
-	public void testRemoveQueueIfExists() {
-		String name = "test-remove-queue-if-exists";
-		client.createQueue(name);
-
-		client.removeQueueIfExists(name);
-		assertThat(client.queueExists(name)).isFalse();
-
-		assertThatNoException().isThrownBy(
-				() -> client.removeQueueIfExists("this-queue-does-not-exist")
-		);
-	}
-
-	@Test
 	public void createExchangeThatAlreadyExistsResultsInException() {
 		Exchange exchange = client.createHeadersExchange("test-create-exchange");
 
 		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
 			client.createHeadersExchange("test-create-exchange");
 		});
-		client.removeExchangeIfExists(exchange.getName());
+		client.removeExchange(exchange);
 
 	}
 
@@ -151,19 +132,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists("this-exchange-does-not-exist")).isFalse();
 	}
 
-	@Test
-	public void testRemoveExchangeIfExist() {
-		String exchangeName = "test-remove-exchange-if-exists-exchange";
-		client.createHeadersExchange(exchangeName);
-
-		client.removeExchangeIfExists(exchangeName);
-		assertThat(client.exchangeExists(exchangeName)).isFalse();
-
-		assertThatNoException().isThrownBy(
-				() -> client.removeExchangeIfExists("this-exchange-does-not-exist")
-		);
-
-	}
 
 	@Test
 	public void testGetGroupMember() {
@@ -178,20 +146,14 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testGetGroupMemberNonExistingMember() {
-		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
-				() -> client.getGroupMember(
-						"this-group-member-does-not-exist", SERVICE_PROVIDERS_GROUP_NAME
-				)
-		);
+		GroupMember groupMember = client.getGroupMember("this-group-member-does-not-exist", SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNull();
 	}
 
 	@Test
 	public void testGetGroupMemberNonExistingGroup() {
-		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
-				() -> client.getGroupMember(
-						"this-member-does-not-exist", "this-group-does-not-exist"
-				)
-		);
+		GroupMember groupMember = client.getGroupMember("this-member-does-not-exist", "this-group-does-not-exist");
+		assertThat(groupMember).isNull();
 	}
 
 	@Test
@@ -272,10 +234,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		client.createDirectExchange("my-exchange");
+		Exchange directExchange = client.createDirectExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
-		client.removeExchangeIfExists("my-exchange");
+		client.removeExchange(directExchange);
 		assertThat(client.exchangeExists("my-exchange")).isFalse();
 	}
 
@@ -288,7 +250,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		Exchange exchange = client.getExchange("hammershark");
 		assertThat(exchange.getBindings()).hasSize(1);
 
-		client.removeExchangeIfExists("hammershark");
+		client.removeExchange(exchange);
 		assertThat(client.getQueuePublishingLinks("babyshark")).hasSize(0);
 	}
 
@@ -300,7 +262,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueuePublishingLinks("babyshark1")).hasSize(1);
 
-		client.removeQueueIfExists(queue.getName());
+		client.removeQueue(queue);
 		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
 
