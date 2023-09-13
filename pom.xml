@@ -106,11 +106,6 @@
                 <version>3.5.1</version>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20220924</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
                 <version>8.0.6</version>

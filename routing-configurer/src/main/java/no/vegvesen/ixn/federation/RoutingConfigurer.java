@@ -6,6 +6,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -48,8 +50,9 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
+		QpidDelta delta = qpidClient.getQpidDelta();
 		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
-		setupRouting(readyToSetupRouting);
+		setupRouting(readyToSetupRouting, delta);
 
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
@@ -85,13 +88,13 @@ public class RoutingConfigurer {
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
-	private void setupRouting(List<Neighbour> readyToSetupRouting) {
+	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
-			setupNeighbourRouting(subscriber);
+			setupNeighbourRouting(subscriber, delta);
 		}
 	}
 
-	void setupNeighbourRouting(Neighbour neighbour) {
+	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
@@ -100,16 +103,16 @@ public class RoutingConfigurer {
 				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
 				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
+				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
 				allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
 				if(!allAcceptedSubscriptions.isEmpty()){
-					setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName());
+					setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 				}
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
 				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED);
-				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName());
+				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName(), delta);
 				neighbourService.saveSetupRouting(neighbour);
 			}
 		} catch (Throwable e) {
@@ -117,21 +120,22 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName) {
+	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String queueName = "sub-" + UUID.randomUUID();
-				createQueue(queueName, neighbourName);
+				createQueue(queueName, neighbourName, delta);
 				subscription.setQueueName(queueName);
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
-						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
-							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
+						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
+							qpidClient.addBinding(subscription.getSelector(), cap.getCapabilityExchangeName(), queueName, cap.getCapabilityExchangeName());
 						}
 					}
 				}
+				//TODO:We have to move this up!
 				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
 				subscription.setEndpoints(Collections.singleton(endpoint));
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
@@ -144,12 +148,12 @@ public class RoutingConfigurer {
 		logger.info("Set up routing for neighbour {}", neighbourName);
 	}
 
-	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities) {
+	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String redirectQueue = "re-" + UUID.randomUUID();
-				createQueue(redirectQueue, subscription.getConsumerCommonName());
+				createQueue(redirectQueue, subscription.getConsumerCommonName(), delta);
 				subscription.setQueueName(redirectQueue);
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
@@ -181,7 +185,7 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsCreated()) {
-							String exchangeName = UUID.randomUUID().toString();
+							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
 							qpidClient.createTopicExchange(exchangeName);
 							logger.debug("Set up exchange for subscription {}", subscription.toString());
@@ -228,24 +232,23 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptionQueue(String exchange, NeighbourSubscription subscription) {
-		qpidClient.bindDirectExchange(subscription.getSelector(), exchange, subscription.getQueueName());
-	}
-
-	private void bindRemoteServiceProvider(String exchange, String commonName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.bindTopicExchange(acceptedSubscription.getSelector(),exchange,commonName);
+	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
+		qpidClient.addBinding(acceptedSubscription.getSelector(),exchange,queueName, exchange);
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-		serviceProviderRouter.syncServiceProviders(serviceProviders);
+		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
 	}
 
-	private void createQueue(String queueName, String subscriberName) {
-		qpidClient.createQueue(queueName);
-		qpidClient.addReadAccess(subscriberName,queueName);
+	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
+		if (!delta.queueExists(queueName)) {
+			qpidClient.createQueue(queueName);
+			qpidClient.addReadAccess(subscriberName, queueName);
+			delta.addQueue(new Queue(queueName));
+		}
 	}
 
 	private void addSubscriberToGroup(String groupName, String subscriberName) {

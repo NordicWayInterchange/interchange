@@ -16,8 +16,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.CollectionType;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory;
 
+import java.io.*;
 import java.util.List;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +52,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			String httpsUrl = qpidContainer.getHttpsUrl();
-			logger.info("server url: " + httpsUrl);
+			logger.info("server url: " + qpidContainer.getHttpUrl());
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
@@ -139,14 +144,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		client.addReadAccess(subscriberName, queueName);
 
-		QpidAcl acl = client.getQpidAcl();
-		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isTrue();
+		AclRule queueReadAccessRule = VirtualHostAccessController.createQueueReadAccessRule(subscriberName, queueName);
 
+		VirtualHostAccessController provider = client.getQpidAcl();
+		assertThat(provider.containsRule(queueReadAccessRule)).isTrue();
 
 		client.removeReadAccess(subscriberName, queueName);
 
-		acl = client.getQpidAcl();
-		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isFalse();
+		provider = client.getQpidAcl();
+		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
 
 	@Test
@@ -155,13 +161,14 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String queueName = "catfish";
 
 		client.addWriteAccess(subscriberName, queueName);
-		QpidAcl acl = client.getQpidAcl();
-		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isTrue();
+		AclRule queueWriteAccessRule = VirtualHostAccessController.createQueueWriteAccessRule(subscriberName, queueName);
+		VirtualHostAccessController provider = client.getQpidAcl();
+		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
 
 		client.removeWriteAccess(subscriberName, queueName);
 
-		acl = client.getQpidAcl();
-		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isFalse();
+		provider = client.getQpidAcl();
+		assertThat(provider.containsRule(queueWriteAccessRule)).isFalse();
 	}
 
 	@Test
@@ -178,7 +185,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createTopicExchange("hammershark");
 		client._createQueue("babyshark");
 
-		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark", "babyshark");
+		client.addBinding("originatingCountry = 'NO'", "hammershark", "babyshark", "hammershark");
 		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
 
 		client.removeExchange("hammershark");
@@ -190,10 +197,98 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createTopicExchange("hammershark1");
 		client._createQueue("babyshark1");
 
-		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark1", "babyshark1");
+		client.addBinding("originatingCountry = 'NO'", "hammershark1", "babyshark1", "hammershark1");
 		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
 
 		client.removeQueue("babyshark1");
 		assertThat(client.queueExists("babyshark1")).isFalse();
+	}
+
+
+	@Test
+	public void readExchangesFromQpid() throws IOException {
+		client.createTopicExchange("test-exchange1");
+		client.createTopicExchange("test-exchange2");
+		client.createQueue("test-queue");
+		client.addBinding("originatingCountry = 'NO'", "test-exchange1", "test-queue", "test-exchange1");
+		client.addBinding("originatingCountry = 'NO'", "test-exchange2", "test-queue", "test-exchange2");
+
+		assertThat(client.getAllExchanges()).isNotEmpty();
+	}
+
+
+	@Test
+	public void readQueuesFromQpid() throws IOException {
+		client.createQueue("test-queue");
+
+		Set<Queue> result = client.getAllQueues();
+		assertThat(result).isNotEmpty();
+	}
+
+	@Test
+	public void localSubscriptionQueueIsBoundToSubscriptionExchange() {
+		String queue = "localSubscriptionQueue1";
+		String exchange = "subscriptionExchange1";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void localSubscriptionQueueIsBoundToCapabilityExchange() {
+		String queue = "localSubscriptionQueue2";
+		String exchange = "capabilityExchange1";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void subscriptionQueueIsBoundToCapabilityExchange() {
+		String queue = "subscriptionQueue1";
+		String exchange = "capabilityExchange2";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void deliveryExchangeIsBoundToCapabilityExchange() {
+		String deliveryExchange = "deliveryExchange1";
+		String capabilityExchange = "capabilityExchange3";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createTopicExchange(capabilityExchange);
+		client.createDirectExchange(deliveryExchange);
+
+		client.addBinding(selector, deliveryExchange, capabilityExchange, deliveryExchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
 	}
 }

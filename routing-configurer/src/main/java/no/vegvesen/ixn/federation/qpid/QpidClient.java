@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @ConfigurationPropertiesScan
@@ -31,6 +31,10 @@ public class QpidClient {
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
+
+	private static final String ALL_QUEUES_URL_PATTERN = "%s/api/latest/queue/default/";
+
+	private static final String ALL_EXCHANGES_URL_PATTERN = "%s/api/latest/exchange/default/";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
@@ -42,6 +46,8 @@ public class QpidClient {
 	private final String groupsUrl;
 	private final RestTemplate restTemplate;
 	private final String aclRulesUrl;
+	private final String allQueuesUrl;
+	private final String allExchangesUrl;
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -52,6 +58,8 @@ public class QpidClient {
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
+		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
+		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
 	}
 
 	/**
@@ -71,103 +79,47 @@ public class QpidClient {
 		return response.getStatusCodeValue();
 	}
 
-	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
-	private void postQpid(String urlString, String message, String command) {
-		String url = urlString + command;
-		logger.debug("POST to QPID URL {} with message {} ", url, message);
+	public void addBinding(String selector, String source, String destination, String bindingKey) {
+		AddBindingRequest request = new AddBindingRequest(destination,bindingKey,selector);
+		logger.info("Add binding from {} to {} with binding key {} and selector {}", source,destination,bindingKey,selector);
+		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(url, message, String.class);
-		logger.debug("Resonse code for POST to {} with payload {} is {}", url, message, response.getStatusCodeValue());
-		if (response.getStatusCode().isError()) {
-			String errorMessage = String.format("Error posting to QPID REST API %s with message %s, cause: %s",
-					url,
-					message,
-					response.getStatusCode().getReasonPhrase());
-			logger.error(errorMessage);
-			throw new RoutingConfigurerException(errorMessage);
-		}
-	}
-
-	public void bindDirectExchange(String selector, String source, String destination) {
-		addBinding(selector, source, destination,source);
-	}
-
-	public void bindSubscriptionExchange(String selector, String source, String destination) {
-		addBinding(selector, source, destination, createBindKey(source, destination));
-	}
-
-	public String createBindKey(String source, String destination) {
-		return source + "_" + destination;
-	}
-
-	public void bindTopicExchange(String selector, String source, String destination) {
-		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
-	}
-
-	public void bindToBiQueue(String selector, String source) {
-		addBinding(selector,source,"bi-queue",source);
-	}
-
-	private void addBinding(String selector, String source, String destination, String bindingKey) {
-		JSONObject json = new JSONObject();
-		json.put("destination", destination);
-		json.put("bindingKey", bindingKey);
-		json.put("replaceExistingArguments", true);
-
-		JSONObject innerjson = new JSONObject();
-		innerjson.put("x-filter-jms-selector", selector);
-
-		json.put("arguments", innerjson);
-		String jsonString = json.toString();
-
-		postQpid(exchangesURL + "/" + source, jsonString, "/bind");
 	}
 
 	public void createQueue(String queueName) {
 		if (!queueExists(queueName)) {
+			logger.info("Creating queue {}", queueName);
 			_createQueue(queueName);
 		}
 	}
 
 	public void createTopicExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
+			logger.info("Creating topic exchange {}", exchangeName);
 			_createTopicExchange(exchangeName);
-			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
 
 	public void createDirectExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
+			logger.info("Creating direct exchange {}", exchangeName);
 			_createDirectExchange(exchangeName);
-			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
 
 	void _createQueue(String queueName) {
-		JSONObject json = new JSONObject();
-		json.put("name", queueName);
-		json.put("durable", true);
-		json.put("maximumMessageTtl", MAX_TTL_8_DAYS);
-		String jsonString = json.toString();
-		postQpid(queuesURL, jsonString, "/");
+		CreateQueueRequest request = new CreateQueueRequest(queueName,MAX_TTL_8_DAYS);
+		restTemplate.postForEntity(queuesURL + "/",request,String.class);
 	}
 	public void _createDirectExchange(String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("name", exchangeName);
-		json.put("durable", true);
-		json.put("type","direct");
-		String jsonString = json.toString();
-		postQpid(exchangesURL, jsonString, "/");
+		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"direct");
+		restTemplate.postForEntity(exchangesURL + "/",request, String.class);
 		logger.debug("Created exchange {}", exchangeName);
 	}
 
 	public void _createTopicExchange(String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("name", exchangeName);
-		json.put("durable", true);
-		json.put("type","headers");
-		String jsonString = json.toString();
-		postQpid(exchangesURL, jsonString, "/");
+		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"headers");
+		restTemplate.postForEntity(exchangesURL + "/",request,String.class);
 		logger.debug("Created exchange {}", exchangeName);
 	}
 
@@ -205,7 +157,7 @@ public class QpidClient {
 
 	private String lookupExchangeId(String exchangeName) {
 		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.info("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
+		logger.debug("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<HashMap> response;
 		try {
@@ -227,19 +179,11 @@ public class QpidClient {
 		return null;
 	}
 
-	public void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("destination", interchange);
-		json.put("bindingKey", unwantedBindKey);
-		String jsonString = json.toString();
-
-		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/unbind");
-	}
-
 
 	public Set<String> getQueueBindKeys(String queueName) {
 		HashSet<String> existingBindKeys = new HashSet<>();
 		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
+		System.out.println("Get publishing links for Queue on URL " + url);
 
 		ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
 				url,
@@ -261,85 +205,118 @@ public class QpidClient {
 
 	public void removeQueue(String queueName) {
 		String queueId = lookupQueueId(queueName);
+		logger.info("Removing queue {}", queueName);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 
 	public void removeExchange(String exchangeName) {
 		String exchangeId = lookupExchangeId(exchangeName);
+		logger.info("Removing exchange {}", exchangeName);
 		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}
 
 	public List<String> getGroupMemberNames(String groupName) {
 		String url = groupsUrl + groupName;
-		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-		logger.debug("Received members of group {} from Qpid: {}", groupName, response.getBody());
-
-		JSONArray jsonArray = new JSONArray(response.getBody());
-		ArrayList<String> groupMemberNames = new ArrayList<>();
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject ob = jsonArray.getJSONObject(i);
-			String userName = ob.getString("name");
-			groupMemberNames.add(userName);
-		}
-
-		logger.debug("Returning list of group members: {}", groupMemberNames.toString());
+		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		List<String> groupMemberNames = groupMembers.getBody().stream().map(GroupMember::getName).collect(Collectors.toList());
 		return groupMemberNames;
 	}
 
 	public void removeMemberFromGroup(String memberName, String groupName) {
 		String url = groupsUrl + groupName + "/" + memberName;
+		logger.info("Removing user {} from group {}",memberName,groupName);
 		restTemplate.delete(url);
 	}
 
 	public void addMemberToGroup(String memberName, String groupName) {
-		JSONObject groupJsonObject = new JSONObject();
-		groupJsonObject.put("name", memberName);
-		String jsonString = groupJsonObject.toString();
-
-		postQpid(groupsUrl, jsonString, groupName);
+		GroupMember groupMember = new GroupMember(memberName);
+		logger.info("Adding member {} to group {}",memberName,groupName);
+		restTemplate.postForEntity(groupsUrl + groupName,groupMember,String.class);
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
-        QpidAcl qpidAcl = getQpidAcl();
-        qpidAcl.addQueueReadAccess(subscriberName, queue);
-        postQpidAcl(qpidAcl);
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.addQueueReadAccess(subscriberName, queue);
+		logger.info("Adding read access for {} to queue {}",subscriberName,queue);
+        postQpidAcl(provider);
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
-        QpidAcl qpidAcl = getQpidAcl();
-        qpidAcl.addQueueWriteAccess(subscriberName, queue);
-        postQpidAcl(qpidAcl);
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.addQueueWriteAccess(subscriberName, queue);
+		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
+        postQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
-		QpidAcl qpidAcl = getQpidAcl();
-		qpidAcl.removeQueueReadAccess(subscriberName, queue);
-		postQpidAcl(qpidAcl);
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.removeQueueReadAccess(subscriberName,queue);
+		logger.info("Removing read access for {} to queue {}", subscriberName, queue);
+		postQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
-		QpidAcl qpidAcl = getQpidAcl();
-		qpidAcl.removeQueueWriteAccess(subscriberName, queue);
-		postQpidAcl(qpidAcl);
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.removeQueueWriteAccess(subscriberName,queue);
+		logger.info("Removing write access for {} to queue {}", subscriberName,queue);
+		postQpidAcl(provider);
 
 	}
 
-	public QpidAcl getQpidAcl() {
-		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
-		String aclRulesS = aclRulesResponse.getBody();
-		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
-		return QpidAcl.parseRules(aclRulesS);
-
+	public VirtualHostAccessController getQpidAcl() {
+		ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
+		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
+		return response.getBody();
 	}
 
-	public void postQpidAcl(QpidAcl acl) {
-		JSONObject base64EncodedAcl = new JSONObject();
-		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(acl.aclAsString().getBytes()));
-		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
-		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
-		logger.info("Rules posted to qpid");
+	public void postQpidAcl(VirtualHostAccessController provider) {
+		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
+		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
+		if (response.getStatusCode().isError()) {
+			String errorMessage = String.format("Error posting to QPID REST API %s, cause: %s",
+					aclRulesUrl,
+					response.getStatusCode().getReasonPhrase());
+			logger.error(errorMessage);
+			throw new RoutingConfigurerException(errorMessage);
+		}
 	}
 
+	public Set<Queue> getAllQueues() throws JsonProcessingException {
+		ResponseEntity<Set<Queue>> allQueuesResponse  = restTemplate.exchange(
+				allQueuesUrl,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		return allQueuesResponse.getBody();
+	}
+
+	public Set<Exchange> getAllExchanges() throws JsonProcessingException {
+		ResponseEntity<Set<Exchange>> allExchangesResponse = restTemplate.exchange(
+				allExchangesUrl,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		return allExchangesResponse.getBody();
+	}
+
+	public QpidDelta getQpidDelta() {
+		QpidDelta qpidDelta = new QpidDelta();
+		try {
+			Set<Queue> allQueues = getAllQueues();
+			Set<Exchange> allExchanges = getAllExchanges();
+			qpidDelta.setExchanges(allExchanges);
+			qpidDelta.setQueues(allQueues);
+		} catch (JsonProcessingException e) {
+			logger.error("Could not parse qpid delta");
+			throw new RuntimeException(e);
+		}
+		return qpidDelta;
+	}
 }

@@ -139,7 +139,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
-        routingConfigurer.setupNeighbourRouting(neighbour);
+        routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -184,7 +184,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
-        routingConfigurer.setupNeighbourRouting(neighbour);
+        routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(client.queueExists(queueName)).isFalse();
     }

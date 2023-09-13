@@ -34,7 +34,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -152,7 +151,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(flounder);
+		routingConfigurer.setupNeighbourRouting(flounder, client.getQpidDelta());
 		assertThat(client.queueExists(subscription.getQueueName())).isTrue();
 		assertThat(subscription.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
@@ -213,7 +212,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(halibut);
+		routingConfigurer.setupNeighbourRouting(halibut, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getQueueName())).isTrue();
 		assertThat(client.queueExists(s2.getQueueName())).isTrue();
 		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
@@ -280,7 +279,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(salmon);
+		routingConfigurer.setupNeighbourRouting(salmon, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getQueueName())).isTrue();
 		Set<String> queueBindKeys = client.getQueueBindKeys(s1.getQueueName());
 		assertThat(queueBindKeys).hasSize(1);
@@ -330,7 +329,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				null);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		routingConfigurer.setupNeighbourRouting(nordea);
+		routingConfigurer.setupNeighbourRouting(nordea, client.getQpidDelta());
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
 		try {
 			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
@@ -384,7 +383,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour"));
 
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
-		routingConfigurer.setupNeighbourRouting(toreDownNeighbour);
+		routingConfigurer.setupNeighbourRouting(toreDownNeighbour, client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
 		subs.clear();
@@ -432,7 +431,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 
-		routingConfigurer.setupNeighbourRouting(hammershark);
+		routingConfigurer.setupNeighbourRouting(hammershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 		assertThat(client.getQueueBindKeys(sub.getQueueName()).size()).isEqualTo(1);
 	}
@@ -482,7 +481,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		routingConfigurer.setupNeighbourRouting(tigershark);
+		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
 		assertThat(client.getQueueBindKeys(sub1.getQueueName()).size()).isEqualTo(1);
 
@@ -499,7 +498,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(tigershark);
+		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.getQueueBindKeys(sub1.getQueueName()).size()).isEqualTo(1);
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
 		assertThat(client.getQueueBindKeys(sub2.getQueueName()).size()).isEqualTo(1);
@@ -553,7 +552,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(tigershark);
+		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 		assertThat(client.getQueueBindKeys(sub.getQueueName()).size()).isEqualTo(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
@@ -591,7 +590,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		routingConfigurer.setupNeighbourRouting(neigh);
+		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 	}
 
@@ -651,7 +650,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(neigh);
+		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
 	}
@@ -683,7 +682,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(serviceProvider));
-		routingConfigurer.setupNeighbourRouting(cod);
+		routingConfigurer.setupNeighbourRouting(cod, client.getQpidDelta());
 		assertThat(client.queueExists(cod.getName())).isFalse();
 		assertThat(cod.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.NO_OVERLAP);
 	}
@@ -700,7 +699,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		routingConfigurer.setupNeighbourRouting(clownfish);
+		routingConfigurer.setupNeighbourRouting(clownfish, client.getQpidDelta());
 		assertThat(client.queueExists(clownfish.getName())).isFalse();
 	}
 
@@ -746,7 +745,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(neigh);
+		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
 	}
@@ -783,7 +782,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
-		client.bindDirectExchange(joinedSelector, deliveryExchangeName, cap.getCapabilityExchangeName());
+		client.addBinding(joinedSelector, deliveryExchangeName, cap.getCapabilityExchangeName(), deliveryExchangeName);
 
 		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
 
@@ -795,7 +794,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
-		routingConfigurer.setupNeighbourRouting(neigh);
+		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 
 		AtomicInteger numMessages = new AtomicInteger();

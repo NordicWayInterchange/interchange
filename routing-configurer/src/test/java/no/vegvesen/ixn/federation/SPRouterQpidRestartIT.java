@@ -113,9 +113,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     @Test
     public void testLocalSubscriptionQueueIsAutomaticallyAddedToQpidAfterRestart() {
         String queueName = "loc-" + UUID.randomUUID().toString();
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
@@ -128,17 +126,15 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
 
     @Test
     public void testLocalSubscriptionQueueIsNotAutomaticallyAddedToQpidAfterRestartWhenRedirect() {
         String queueName = "neighbour-queue";
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "my-service-provider");
@@ -151,8 +147,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
     }
@@ -160,9 +156,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     @Test
     public void testLocalSubscriptionQueueIsNotAutomaticallyAddedToQpidAfterRestartWhenRedirectAndTearDown() {
         String queueName = "neighbour-queue";
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-service-provider");
@@ -176,8 +170,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(0);
     }
@@ -185,9 +179,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     @Test
     public void testLocalSubscriptionQueueIsAddedAutomaticallyToQpidWhenInRequestedAfterRestart() {
         String queueName = "loc-" + UUID.randomUUID().toString();
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "");
@@ -200,17 +192,15 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
 
     @Test
     public void testLocalSubscriptionQueuesAreNotAutomaticallyAddedToQpidAfterRestartWhenInTearDown() {
         String queueName = "loc-" + UUID.randomUUID().toString();
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "");
@@ -224,17 +214,15 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
 
     @Test
     public void testLocalSubscriptionQueueIsNotAddedAutomaticallyToQpidWhenInIllegalAfterRestart() {
         String queueName = "loc-" + UUID.randomUUID().toString();
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, "");
@@ -248,8 +236,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
 
@@ -278,8 +266,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(exchangeName)).isTrue();
         assertThat(client.getQueueBindKeys("bi-queue")).hasSize(1);
     }
@@ -309,8 +297,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(exchangeName)).isFalse();
     }
 
@@ -338,15 +326,13 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider1);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider1);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1), client.getQpidDelta());
 
         assertThat(client.exchangeExists(exchangeName)).isTrue();
 
         String queueName = "loc-" + UUID.randomUUID().toString();
-
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
-
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
@@ -359,9 +345,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider2);
-        serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)));
-
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider2);
+        serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
         assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
     }
@@ -391,7 +376,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'NO'";
-
         String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
@@ -402,14 +386,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED);
 
         delivery.setExchangeName(deliveryExchangeName);
-
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
-
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
     }
 
@@ -438,7 +420,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'SE'";
-
         String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
@@ -453,9 +434,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
-
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();
     }
 }
