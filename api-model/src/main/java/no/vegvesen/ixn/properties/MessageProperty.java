@@ -23,7 +23,13 @@ public class MessageProperty {
 	//public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, MessagePropertyType.STRING);
 	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false, MessagePropertyType.STRING);
 	//TODO: serviceType is a comma separated list of Strings
-	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING);
+	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING_ARRAY);
+
+	public static final MessageProperty SHARD_ID = new MessageProperty("shardId", true, true, MessagePropertyType.INTEGER);
+
+	public static final MessageProperty SHARD_COUNT = new MessageProperty("shardCount", true, true, MessagePropertyType.INTEGER);
+
+	public static final MessageProperty BASELINE_VERSION = new MessageProperty("baselineVersion", false, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
 			MESSAGE_TYPE,
 			QUAD_TREE,
@@ -33,7 +39,10 @@ public class MessageProperty {
 			PROTOCOL_VERSION,
 			SERVICE_TYPE,
 			LATITUDE,
-			LONGITUDE
+			LONGITUDE,
+			SHARD_ID,
+			SHARD_COUNT,
+			BASELINE_VERSION
 	);
 
 	//public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true, MessagePropertyType.STRING);
@@ -60,7 +69,7 @@ public class MessageProperty {
 	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, MessagePropertyType.INTEGER_ARRAY);
 
 	/* TODO This is specified as String, but obviously has some string-array properties. Double check that this is not a mistake in spec */
-	public static final MessageProperty IVI_CONTAINER = new MessageProperty("iviContainer", false, false, MessagePropertyType.STRING);
+	public static final MessageProperty IVI_CONTAINER = new MessageProperty("iviContainer", false, false, MessagePropertyType.STRING_ARRAY);
 	public static final List<MessageProperty> ivimApplicationProperties = Arrays.asList(
 			IVI_TYPE,
 			PICTOGRAM_CATEGORY_CODE,
@@ -68,7 +77,7 @@ public class MessageProperty {
 	);
 
 	public static final MessageProperty IDS = new MessageProperty("id", false, true, MessagePropertyType.STRING_ARRAY);
-	public static final MessageProperty NAME = new MessageProperty("name", false, true, MessagePropertyType.STRING);
+	public static final MessageProperty NAME = new MessageProperty("name", false, true, MessagePropertyType.STRING_ARRAY);
 
 	public static final List<MessageProperty> spatemMapemApplicationProperties = Arrays.asList(
 			IDS,
@@ -79,8 +88,8 @@ public class MessageProperty {
 			IDS
 	);
 
-	public static final MessageProperty STATION_TYPE = new MessageProperty("stationType", true, true, MessagePropertyType.STRING_ARRAY);
-	public static final MessageProperty VEHICLE_ROLE = new MessageProperty("vehicleRole", false, true, MessagePropertyType.STRING);
+	public static final MessageProperty STATION_TYPE = new MessageProperty("stationType", true, true, MessagePropertyType.INTEGER);
+	public static final MessageProperty VEHICLE_ROLE = new MessageProperty("vehicleRole", false, true, MessagePropertyType.INTEGER);
 
 	public static final List<MessageProperty> camApplicationProperties = Arrays.asList(
 			STATION_TYPE,

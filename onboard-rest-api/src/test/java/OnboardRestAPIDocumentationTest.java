@@ -1,12 +1,10 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -382,5 +380,124 @@ public class OnboardRestAPIDocumentationTest {
         PrivateChannelApi api = new PrivateChannelApi();
         api.setPeerName("sp2");
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
+    }
+
+    @Test
+    public void addMultipleCapabilitiesTest() throws JsonProcessingException {
+        Set<String> quadTree = Collections.singleton("12004");
+        MetadataApi metadataApi = new MetadataApi(
+                1,
+                "info.com",
+                RedirectStatusApi.OPTIONAL,
+                0,
+                0,
+                0
+        );
+
+        CapabilitySplitApi denm = new CapabilitySplitApi(
+                new DenmApplicationApi(
+                        "NO00000",
+                        "NO00000-DENM",
+                        "NO",
+                        "DENM:1.2.2",
+                        quadTree,
+                        Collections.singleton(6)
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi datex = new CapabilitySplitApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000-DATEX",
+                        "NO",
+                        "DATEX2:2.3",
+                        quadTree,
+                        "SituationPublication"
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi ivim = new CapabilitySplitApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "NO00000-IVIM",
+                        "NO",
+                        "IVI:1.2",
+                        quadTree),
+                metadataApi
+        );
+
+        CapabilitySplitApi spatem = new CapabilitySplitApi(
+                new SpatemApplicationApi(
+                        "NO00000",
+                        "NO00000-SPATEM",
+                        "NO",
+                        "SPATEM",
+                        quadTree
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi mapem = new CapabilitySplitApi(
+                new MapemApplicationApi(
+                        "NO00000",
+                        "NO00000-MAPEM",
+                        "NO",
+                        "MAPEM",
+                        quadTree
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi ssem = new CapabilitySplitApi(
+                new SsemApplicationApi(
+                        "NO00000",
+                        "NO00000-SSEM",
+                        "NO",
+                        "SSEM",
+                        quadTree
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi srem = new CapabilitySplitApi(
+                new SremApplicationApi(
+                        "NO00000",
+                        "NO00000-SREM",
+                        "NO",
+                        "SREM",
+                        quadTree
+                ),
+                metadataApi
+        );
+
+        CapabilitySplitApi cam = new CapabilitySplitApi(
+                new CamApplicationApi(
+                        "NO00000",
+                        "NO00000-CAM",
+                        "NO",
+                        "CAM",
+                        quadTree
+                ),
+                metadataApi
+        );
+
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                "king_olav",
+                new HashSet<>(Arrays.asList(
+                        denm,
+                        datex,
+                        ivim,
+                        spatem,
+                        mapem,
+                        ssem,
+                        srem,
+                        cam
+                ))
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 }

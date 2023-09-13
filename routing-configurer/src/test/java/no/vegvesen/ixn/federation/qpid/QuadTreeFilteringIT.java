@@ -159,6 +159,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 				.latitude(60.352374)
 				.longitude(13.334253)
 				.originatingCountry("NO")
+				.shardId(1)
+				.shardCount(1)
 				.quadTreeTiles(messageQuadTreeTiles)
 				.timestamp(System.currentTimeMillis())
 				.build());
@@ -195,6 +197,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 				.latitude(60.352374)
 				.longitude(13.334253)
 				.originatingCountry("NO")
+				.shardId(1)
+				.shardCount(1)
 				.quadTreeTiles(messageQuadTreeTiles)
 				.timestamp(System.currentTimeMillis())
 				.build());

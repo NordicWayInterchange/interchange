@@ -44,15 +44,7 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder messageType(String messageType) throws JMSException {
-        message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-        return this;
-    }
-
-    public MessageBuilder datex2MessageType() throws JMSException {
-       message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
-       return this;
-    }
+    //Common message properties
 
     public MessageBuilder publisherId(String publisher) throws JMSException {
         message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisher);
@@ -64,18 +56,13 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder protocolVersion(String version) throws JMSException {
-        message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
-        return this;
-    }
-
     public MessageBuilder originatingCountry(String originatingCountry) throws JMSException {
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         return this;
     }
 
-    public MessageBuilder quadTreeTiles(String messageQuadTreeTiles) throws JMSException {
-        message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
+    public MessageBuilder protocolVersion(String version) throws JMSException {
+        message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
         return this;
     }
 
@@ -84,25 +71,47 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder baselineVersion(String baselineVersion) throws JMSException {
+        message.setStringProperty(MessageProperty.BASELINE_VERSION.getName(), baselineVersion);
+        return this;
+    }
+
+    public MessageBuilder messageType(String messageType) throws JMSException {
+        message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+        return this;
+    }
+
+    public MessageBuilder longitude(double longitude) throws JMSException {
+        message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
+        return this;
+    }
+
+    public MessageBuilder latitude(double latitude) throws JMSException {
+        message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
+        return this;
+    }
+
+    public MessageBuilder quadTreeTiles(String messageQuadTreeTiles) throws JMSException {
+        message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
+        return this;
+    }
+
+    public MessageBuilder shardId(Integer shardId) throws JMSException {
+        message.setIntProperty(MessageProperty.SHARD_ID.getName(), shardId);
+        return this;
+    }
+
+    public MessageBuilder shardCount(Integer shardCount) throws JMSException {
+        message.setIntProperty(MessageProperty.SHARD_COUNT.getName(), shardCount);
+        return this;
+    }
+
     public MessageBuilder timestamp(long currentTimeMillis) throws JMSException {
         message.setLongProperty(MessageProperty.TIMESTAMP.getName(), currentTimeMillis);
         return this;
     }
 
-    public MessageBuilder stringProperty(String name, String value) throws JMSException {
-        message.setStringProperty(name, value);
-        return this;
-    }
-
-    public MessageBuilder causeCode(String causeCode) throws JMSException {
-        message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
-        return this;
-    }
-
-    public MessageBuilder subCauseCode(String subCauseCode) throws JMSException {
-        message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
-        return this;
-    }
+    //DATEX2 message properties
 
     public MessageBuilder publicationType(String publicationType) throws JMSException {
         message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
@@ -114,38 +123,60 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder latitude(double latitude) throws JMSException {
-        message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
+    //DENM message properties
+    //TODO: Input variable should be Integer for causeCode and subCauseCode
+
+    public MessageBuilder causeCode(String causeCode) throws JMSException {
+        message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
         return this;
     }
 
-    public MessageBuilder longitude(double longitude) throws JMSException {
-        message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
+    public MessageBuilder subCauseCode(String subCauseCode) throws JMSException {
+        message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
         return this;
     }
+
+    //IVIM message properties
 
     public MessageBuilder iviType(String iviType) throws JMSException {
         message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
         return this;
     }
 
+    public MessageBuilder pictogramCategoryCode(String pictogramCode) throws JMSException {
+        message.setStringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), pictogramCode);
+        return this;
+    }
+
+    public MessageBuilder iviContainer(String iviContainer) throws JMSException {
+        message.setStringProperty(MessageProperty.IVI_CONTAINER.getName(), iviContainer);
+        return this;
+    }
+
+    //SPATEM/MAPEM and SSEM/SREM message property
+
     public MessageBuilder id(String id) throws JMSException {
         message.setStringProperty(MessageProperty.IDS.getName(), id);
         return this;
     }
+
+    //SPATEM/MAPEM additional message property
 
     public MessageBuilder name(String name) throws JMSException {
         message.setStringProperty(MessageProperty.NAME.getName(), name);
         return this;
     }
 
-    public MessageBuilder stationType(String stationType) throws JMSException {
-        message.setStringProperty(MessageProperty.STATION_TYPE.getName(), stationType);
+    //CAM message properties
+    //TODO: Both stationType and vehicleRole should be integers.
+
+    public MessageBuilder stationType(Integer stationType) throws JMSException {
+        message.setIntProperty(MessageProperty.STATION_TYPE.getName(), stationType);
         return this;
     }
 
-    public MessageBuilder vehicleRole(String vehicleRole) throws JMSException {
-        message.setStringProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
+    public MessageBuilder vehicleRole(Integer vehicleRole) throws JMSException {
+        message.setIntProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
         return this;
     }
 

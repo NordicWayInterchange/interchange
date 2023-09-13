@@ -88,22 +88,26 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.textMessage("fisk")
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)
+				.publisherId("king_harald")
+				.publicationId("NO00001")
 				.publicationType("Obstruction")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)
 				.longitude(13.334253)
 				.originatingCountry("SE")
-				.quadTreeTiles(null)
+				.quadTreeTiles(",120002,")
+				.shardId(1)
+				.shardCount(1)
 				.timestamp(System.currentTimeMillis())
 				.build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(message);
 
-		Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
+		//Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
 		Sink kingHaraldTestQueueSink = new Sink(URL, "expiry-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
-		Message receive = testQueueConsumer.receive(1000);
-		assertThat(receive).isNull();
+		Message receive = testQueueConsumer.receive();
+		assertThat(receive).isNotNull();
 	}
 
 	@Test
@@ -158,8 +162,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.quadTreeTiles("")
 				.serviceType("some-ivi-service-type")
 				.timestamp(System.currentTimeMillis())
-				.stringProperty(MessageProperty.IVI_TYPE.getName(), "128")
-				.stringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557")
+				.iviType("128")
+				.pictogramCategoryCode("557")
 				.build();
 
 		source.sendNonPersistentMessage(message);

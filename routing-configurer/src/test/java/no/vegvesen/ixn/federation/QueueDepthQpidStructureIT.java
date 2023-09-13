@@ -216,6 +216,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
+                .shardId(1)
+                .shardCount(1)
                 .causeCode(causeCode)
                 .subCauseCode("76")
                 .build();

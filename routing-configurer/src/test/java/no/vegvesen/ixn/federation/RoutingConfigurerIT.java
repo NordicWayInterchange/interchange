@@ -819,6 +819,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.originatingCountry("NO")
 						.protocolVersion("DENM:1.2.2")
 						.quadTreeTiles(",12004,")
+						.shardId(1)
+						.shardCount(1)
 						.timestamp(System.currentTimeMillis())
 						.build());
 				System.out.println();
