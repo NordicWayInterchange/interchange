@@ -1,46 +1,44 @@
----
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-qpid
+  name: {{ .Release.Name }}-qpid-http
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: qpid
     release: {{ .Release.Name }}
 spec:
+  type: NodePort
   selector:
     app: {{ .Chart.Name }}
     component: qpid
     release: {{ .Release.Name }}
-  type: ClusterIP
   ports:
-  - name: amqp
-    port: 5672
-    targetPort: amqp
-
+  - name: http-qpid-gui
+    port: {{ .Values.qpid.http_qpid_gui.port }}
+  - name: https-qpid-rest
+    port: {{ .Values.qpid.https_qpid_rest.port }}
 ---
 kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-qpid-secure
+  annotations:
+    cloud.google.com/l4-rbs: "enabled"
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: qpid
     release: {{ .Release.Name }}
 spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.static_external_ip }}
+  externalTrafficPolicy: Cluster
   selector:
     app: {{ .Chart.Name }}
     component: qpid
     release: {{ .Release.Name }}
   ports:
-  - name: amqps
-    port: 5671
-    targetPort: amqps
-  - name: http-qpid-gui
-    port: 8080
-    targetPort: http-qpid-gui
-  - name: https-qpid-rest
-    port: 443
-    targetPort: https-qpid-rest
+    - name: amqps
+      protocol: TCP
+      port: {{ .Values.qpid.amqps.port }}
