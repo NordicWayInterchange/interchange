@@ -8,7 +8,7 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: {{ .Chart.Name }}
     component: qpid
