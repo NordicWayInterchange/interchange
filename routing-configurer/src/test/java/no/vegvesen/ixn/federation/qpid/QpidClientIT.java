@@ -159,12 +159,16 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
-		client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
 		List<String> myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
 
 		assertThat(myUserNames).contains(myUser);
 
-		client.removeMemberFromGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
+		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
+
+		assertThat(groupMember).isNull();
 		myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
 
 		assertThat(myUserNames).doesNotContain(myUser);

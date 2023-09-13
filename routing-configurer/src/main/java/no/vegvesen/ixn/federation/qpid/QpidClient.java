@@ -199,10 +199,10 @@ public class QpidClient {
 
 	//TODO what doest this actually return??
 
-	public void addMemberToGroup(String memberName, String groupName) {
+	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
 		logger.info("Adding member {} to group {}",memberName,groupName);
-		restTemplate.postForEntity(groupsUrl + groupName,groupMember,String.class);
+		return restTemplate.postForEntity(groupsUrl + groupName,groupMember,GroupMember.class).getBody();
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
