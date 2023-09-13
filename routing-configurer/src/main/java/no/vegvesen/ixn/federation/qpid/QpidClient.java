@@ -14,7 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @ConfigurationPropertiesScan
@@ -175,29 +174,6 @@ public class QpidClient {
 		restTemplate.delete(url);
 	}
 
-	public void removeMemberFromGroup(String memberName, String groupName) {
-		String url = groupsUrl + groupName + "/" + memberName;
-		logger.info("Removing user {} from group {}",memberName,groupName);
-		restTemplate.delete(url);
-	}
-
-	public List<GroupMember> getGroupMembers(String groupName) {
-		String url = groupsUrl + groupName;
-		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				null,
-				new ParameterizedTypeReference<>() {
-				});
-		return groupMembers.getBody();
-	}
-
-	public List<String> getGroupMemberNames(String groupName) {
-		List<String> groupMemberNames = getGroupMembers(groupName).stream().map(GroupMember::getName).collect(Collectors.toList());
-		return groupMemberNames;
-	}
-
-	//TODO what doest this actually return??
 
 	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
