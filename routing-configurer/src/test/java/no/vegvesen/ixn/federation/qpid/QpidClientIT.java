@@ -161,42 +161,33 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String myUser = "my-service-provider";
 		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
 		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
-		List<String> myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
 
-		assertThat(myUserNames).contains(myUser);
 
 		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
 		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
 
 		assertThat(groupMember).isNull();
-		myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
-
-		assertThat(myUserNames).doesNotContain(myUser);
 	}
 
 	@Test
 	public void createAndDeleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
 		client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
-		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).contains(deleteUser);
 
-		client.removeMemberFromGroup(deleteUser, FEDERATED_GROUP_NAME);
-		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).doesNotContain(deleteUser);
+		GroupMember groupMember = new GroupMember(deleteUser);
+		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
+				() -> client.removeMemberFromGroup(groupMember, FEDERATED_GROUP_NAME)
+		);
 	}
 
 	@Test
 	public void addRemoteServiceProviderToGroup() {
 		String newUser = "service-provider";
-		client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-
-		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-
-		assertThat(userNames).contains(newUser);
-		client.removeMemberFromGroup(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(userNames).doesNotContain(newUser);
+		GroupMember groupMember = client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNotNull();
+		client.removeMemberFromGroup(groupMember,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		groupMember = client.getGroupMember(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNull();
 	}
 
 	//TODO what happens if we try to add a member to a non-existing group??

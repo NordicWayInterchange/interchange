@@ -61,8 +61,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	@BeforeEach
 	public void setUp() {
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to outgoingExchange
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
+		GroupMember groupMember = qpidClient.getGroupMember("king_gustaf", "administrators");
+		if (groupMember == null) {
 			qpidClient.addMemberToGroup("king_gustaf", "administrators");
 		}
 	}
