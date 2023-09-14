@@ -16,8 +16,10 @@ spec:
   ports:
   - name: http-qpid-gui
     port: {{ .Values.qpid.http_qpid_gui.port }}
+    targetPort: http-qpid-gui
   - name: https-qpid-rest
     port: {{ .Values.qpid.https_qpid_rest.port }}
+    targetPort: https-qpid-rest
 ---
 kind: Service
 apiVersion: v1
