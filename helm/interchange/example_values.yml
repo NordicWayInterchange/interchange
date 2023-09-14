@@ -10,7 +10,6 @@ trust_store: truststore.jks                                       # Name of trus
 
 # Values:
 external_name: example-node.itsinterchange.eu
-static_external_ip_name: "my-ip-address"
 static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu

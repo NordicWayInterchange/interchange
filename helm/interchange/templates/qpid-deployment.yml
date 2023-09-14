@@ -9,6 +9,8 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.qpid.replicas }}
+  strategy:
+    type: Recreate # Has to be 'Recreate' since don't want to have two instances running on the same PVC.
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
