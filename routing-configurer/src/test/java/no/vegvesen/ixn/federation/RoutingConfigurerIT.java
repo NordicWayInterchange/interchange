@@ -147,8 +147,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(flounder, client.getQpidDelta());
 		assertThat(client.queueExists(subscription.getQueueName())).isTrue();
 		assertThat(subscription.getLastUpdatedTimestamp()).isGreaterThan(0);
@@ -208,8 +208,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(halibut, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getQueueName())).isTrue();
 		assertThat(client.queueExists(s2.getQueueName())).isTrue();
@@ -275,8 +275,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(salmon, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getQueueName())).isTrue();
 		List<Binding> queueBindKeys = client.getQueuePublishingLinks(s1.getQueueName());
@@ -291,8 +291,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(s2.getLastUpdatedTimestamp()).isEqualTo(0);
 	}
 
+	//TODO this test does not really make any sense. We no longer have incoming exchange (we do this through
+	//separate capability exchanges, and messageCollector. This test is old as ...
 	@Test
-	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() throws JMSException, NamingException {
+	@Disabled("This test does no longer make any sense!")
+	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() {
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"SE-1234",
@@ -317,7 +320,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "nordea");
+				"AND publisherId = 'SE-1234'",
+				NeighbourSubscriptionStatus.ACCEPTED,
+				"nordea");
 		subscriptions.add(subscription);
 
 		Neighbour nordea = new Neighbour(
@@ -327,50 +332,81 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				null);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(nordea, client.getQpidDelta());
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
+		Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
 		try {
-			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
 			writeIncomingExchange.start();
-			JmsMessage message = writeIncomingExchange
-					.createMessageBuilder()
-					.textMessage("Ordinary business at the Nordea office.")
-					.messageType(Constants.DATEX_2)
-					.quadTreeTiles(",123,")
-					.publicationType("Test")
-					.publisherId("NO-123")
-					.publicationId("pub-1")
-					.originatingCountry("SE")
-					.protocolVersion("1.0")
-					.build();
+		} catch (NamingException e) {
+            throw new RuntimeException(e);
+        } catch (JMSException e) {
+            throw new RuntimeException(e);
+        }
+		JmsMessage message = null;
+		try {
+			message = writeIncomingExchange
+						.createMessageBuilder()
+						.textMessage("Ordinary business at the Nordea office.")
+						.messageType(Constants.DATEX_2)
+						.quadTreeTiles(",123,")
+						.publicationType("Test")
+						.publisherId("NO-123")
+						.publicationId("pub-1")
+						.originatingCountry("SE")
+						.protocolVersion("1.0")
+						.build();
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
+		try {
 			writeIncomingExchange.send(message);
 			fail("Should not allow neighbour nordea to write on (incomingExchange)");
-		} catch (JMSException ignore) {
+		} catch (JMSException e) {
+			//This, apparently, should fail...
+			//throw new RuntimeException(e);
+		}
+			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
+		try {
+			writeOnramp.start();
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
 		}
 		try {
-			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
-			writeOnramp.start();
-			JmsMessage message = writeOnramp.createMessageBuilder()
-					.textMessage("Make Nordea great again!")
-					.messageType(Constants.DATEX_2)
-					.publisherId("NO-123")
-					.publicationId("pub-1")
-					.publicationType("Test")
-					.quadTreeTiles(",123,")
-					.originatingCountry("NO")
-					.protocolVersion("1.0")
-					.build();
-			writeOnramp.send(message);
-
-			fail("Should not allow nordea to write on (onramp)");
-		} catch (JMSException ignore) {
+			message = writeOnramp.createMessageBuilder()
+						.textMessage("Make Nordea great again!")
+						.messageType(Constants.DATEX_2)
+						.publisherId("NO-123")
+						.publicationId("pub-1")
+						.publicationType("Test")
+						.quadTreeTiles(",123,")
+						.originatingCountry("NO")
+						.protocolVersion("1.0")
+						.build();
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
 		}
-		theNodeItselfCanReadFromAnyNeighbourQueue(subscription.getQueueName());
+		try {
+			writeOnramp.send(message);
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
+
+		fail("Should not allow nordea to write on (onramp)");
+		try {
+			theNodeItselfCanReadFromAnyNeighbourQueue(subscription.getQueueName());
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Test
-	@Disabled
-	//TODO: Have to write tear down all over again, does not do what it should atm
+	@Disabled("Have to write tear down all over again, does not do what it should atm")
 	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		subs.add(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -495,7 +531,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.getQueuePublishingLinks(sub1.getQueueName())).hasSize(1);
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
@@ -549,7 +585,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub.getQueueName())).hasSize(2);
@@ -647,7 +683,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
@@ -742,7 +778,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
@@ -791,7 +827,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
 		assertThat(client.queueExists(sub.getQueueName())).isTrue();
 

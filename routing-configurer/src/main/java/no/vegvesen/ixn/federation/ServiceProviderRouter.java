@@ -63,7 +63,7 @@ public class ServiceProviderRouter {
             GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
-                    qpidClient.addMemberToGroup(groupMember.getName(),SERVICE_PROVIDERS_GROUP_NAME);
+                    qpidClient.addMemberToGroup(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
                 }
             } else {
                 if (groupMember != null) {
