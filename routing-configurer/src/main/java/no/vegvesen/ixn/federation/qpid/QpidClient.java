@@ -190,7 +190,7 @@ public class QpidClient {
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.addQueueWriteAccess(subscriberName, queue);
+		provider.addExchangeWriteAccess(subscriberName, queue);
 		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
         postQpidAcl(provider);
 	}

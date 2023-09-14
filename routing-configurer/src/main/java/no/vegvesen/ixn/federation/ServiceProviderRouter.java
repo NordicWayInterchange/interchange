@@ -235,8 +235,8 @@ public class ServiceProviderRouter {
                 }
                 logger.info("Creating queue {}", queueName);
                 VirtualHostAccessController provider = qpidClient.getQpidAcl();
-                provider.addQueueWriteAccess(name,queueName);
-                provider.addQueueWriteAccess(peerName,queueName);
+                provider.addExchangeWriteAccess(name,queueName);
+                provider.addExchangeWriteAccess(peerName,queueName);
                 provider.addQueueReadAccess(name,queueName);
                 provider.addQueueReadAccess(peerName,queueName);
                 qpidClient.postQpidAcl(provider);

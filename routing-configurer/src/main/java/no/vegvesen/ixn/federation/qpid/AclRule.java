@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 import java.util.Objects;
 
+//TODO attributes as a separate object, ignoring all unknown attributes??
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AclRule {
 
