@@ -19,7 +19,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
@@ -189,8 +188,61 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(groupMember).isNull();
 	}
 
-	//TODO what happens if we try to add a member to a non-existing group??
-	//TODO what happens if we try to add a member to an existing group twice??
+	@Test
+	public void addMemberToNonExistingGroup(){
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+				() -> client.addMemberToGroup("member-of-non-existing-group", "this-group-does-not-exist")
+		);
+
+	}
+
+	@Test
+	public void testAddMemberToGroupTwice() {
+		String user = "user-added-to-group-twice";
+		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+				() -> client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME)
+		);
+
+	}
+
+	@Test
+	public void testAddAclForNonExistingQueue() {
+		String user = "user-read-non-existing-queue";
+		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		assertThatNoException().isThrownBy(
+				() -> client.addReadAccess(user,"this-queue-does-not-exist")
+		);
+	}
+
+	@Test
+	public void testAddAclForNonExisitingUser() {
+		String user = "this-user-does-not-exist";
+		String exchangeName = "non-existing-user-exchange";
+		client.createHeadersExchange(exchangeName);
+		assertThatNoException().isThrownBy(
+				() -> client.addWriteAccess(user,exchangeName)
+		);
+	}
+
+	//TODO what happens if we add an ACL rule twice??
+	@Test
+	public void addAclRuleTwiceGivesNoError() {
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		qpidAcl.addExchangeWriteAccess("twice-user","twice-queue");
+		qpidAcl.addExchangeWriteAccess("twice-user", "twice-queue");
+
+		assertThat(qpidAcl.getRules().stream().filter(
+				r -> r.getIdentity().equals("twice-user")
+		).count()).isEqualTo(2);
+		assertThatNoException().isThrownBy(
+				() -> client.postQpidAcl(qpidAcl)
+		);
+
+	}
+	//TODO what happens if we create a bogus rule?
+	//TODO what happens if we create a valid rule with bogus attributes?
+
 
 	@Test
 	public void readAccessIsAdded() {
@@ -216,7 +268,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String queueName = "catfish";
 
 		client.addWriteAccess(subscriberName, queueName);
-		AclRule queueWriteAccessRule = VirtualHostAccessController.createQueueWriteAccessRule(subscriberName, queueName);
+		AclRule queueWriteAccessRule = VirtualHostAccessController.createExchangeWriteAccessRule(subscriberName, queueName);
 		VirtualHostAccessController provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
 
