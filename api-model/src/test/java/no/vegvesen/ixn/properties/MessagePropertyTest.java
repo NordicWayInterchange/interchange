@@ -28,16 +28,16 @@ public class MessagePropertyTest {
                         MessageProperty.ORIGINATING_COUNTRY,
                         MessageProperty.PROTOCOL_VERSION,
                         MessageProperty.MESSAGE_TYPE,
-                        MessageProperty.QUAD_TREE,
-                        MessageProperty.SHARD_ID,
-                        MessageProperty.SHARD_COUNT
+                        MessageProperty.QUAD_TREE
 
         ));
         Set<MessageProperty> optionalCommonProperties = new HashSet<>(Arrays.asList(
                 MessageProperty.SERVICE_TYPE,
                 MessageProperty.BASELINE_VERSION,
                 MessageProperty.LONGITUDE,
-                MessageProperty.LATITUDE
+                MessageProperty.LATITUDE,
+                MessageProperty.SHARD_ID,
+                MessageProperty.SHARD_COUNT
 
         ));
 
