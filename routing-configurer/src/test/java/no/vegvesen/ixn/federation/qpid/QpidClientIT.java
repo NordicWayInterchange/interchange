@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.MAX_TTL_8_DAYS;
@@ -225,7 +228,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 	}
 
-	//TODO what happens if we add an ACL rule twice??
 	@Test
 	public void addAclRuleTwiceGivesNoError() {
 		VirtualHostAccessController qpidAcl = client.getQpidAcl();
@@ -240,8 +242,53 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 
 	}
+
+	@Test
+	//@Disabled
+	public void createAclWithMissingAttributes() {
+		Map<String,String> attributes = new HashMap<>();
+		AclRule rule = new AclRule("missing-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatNoException().isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
+
+	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
+	@Test
+	@Disabled
+	public void createValidAclWithBogusAttributes() {
+		Map<String,String> attributes = new HashMap<>();
+		attributes.put("ROUTING_KEY", "routing_key");
+		attributes.put("NAME", "");
+		attributes.put("FOO","bar");
+		AclRule rule = new AclRule("bogus-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
+
 	//TODO what happens if we create a bogus rule?
-	//TODO what happens if we create a valid rule with bogus attributes?
+	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
+	@Test
+	@Disabled
+	public void createBogusAcl() {
+		Map<String,String> attributes = new HashMap<>();
+		attributes.put("ROUTING_KEY", "routing_key");
+		attributes.put("NAME", "");
+		AclRule rule = new AclRule("bogus-rule-user","BLAH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
 
 
 	@Test
