@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -349,7 +350,7 @@ public class MessageTest {
                 5
         );
 
-        Messages messages = new Messages(new HashSet<>(Arrays.asList(
+        Messages messages = new Messages(Arrays.asList(
                 denmMessage,
                 datexMessage,
                 ivimMessage,
@@ -358,7 +359,7 @@ public class MessageTest {
                 ssemMessage,
                 sremMessage,
                 camMessage
-        )));
+        ));
 
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(messages));
