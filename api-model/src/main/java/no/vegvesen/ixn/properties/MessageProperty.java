@@ -25,9 +25,9 @@ public class MessageProperty {
 	//TODO: serviceType is a comma separated list of Strings
 	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING_ARRAY);
 
-	public static final MessageProperty SHARD_ID = new MessageProperty("shardId", true, true, MessagePropertyType.INTEGER);
+	public static final MessageProperty SHARD_ID = new MessageProperty("shardId", false, true, MessagePropertyType.INTEGER);
 
-	public static final MessageProperty SHARD_COUNT = new MessageProperty("shardCount", true, true, MessagePropertyType.INTEGER);
+	public static final MessageProperty SHARD_COUNT = new MessageProperty("shardCount", false, true, MessagePropertyType.INTEGER);
 
 	public static final MessageProperty BASELINE_VERSION = new MessageProperty("baselineVersion", false, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
