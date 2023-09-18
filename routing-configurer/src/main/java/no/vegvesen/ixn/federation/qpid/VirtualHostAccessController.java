@@ -23,13 +23,6 @@ public class VirtualHostAccessController {
         this.rules = rules;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setRules(List<AclRule> rules) {
-        this.rules = rules;
-    }
 
     public String getName() {
         return name;
@@ -79,6 +72,10 @@ public class VirtualHostAccessController {
     public boolean containsRule(AclRule rule) {
         return rules.contains(rule);
 
+    }
+
+    protected void addRule(AclRule rule) {
+        rules.add(rule);
     }
 
     @Override
