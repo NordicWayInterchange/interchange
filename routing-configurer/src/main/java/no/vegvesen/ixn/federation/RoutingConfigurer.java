@@ -257,7 +257,7 @@ public class RoutingConfigurer {
 	private void addSubscriberToGroup(String groupName, String subscriberName) {
 		logger.debug("Attempting to add subscriber {} to the group {}", subscriberName, groupName);
 		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
-		if (groupMember != null) {
+		if (groupMember == null) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriberName, groupName);
 			qpidClient.addMemberToGroup(subscriberName,groupName);
 			logger.info("Added subscriber {} to Qpid group {}", subscriberName, groupName);
