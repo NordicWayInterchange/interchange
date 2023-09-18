@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -117,7 +118,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         capability.setCapabilityExchangeName(exchangeName);
 
-        client.createTopicExchange(exchangeName);
+        client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -162,7 +163,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         capability.setCapabilityExchangeName(exchangeName);
 
-        client.createTopicExchange(exchangeName);
+        client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",

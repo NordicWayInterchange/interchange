@@ -5,8 +5,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -70,8 +69,9 @@ public class RoutingConfigurer {
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
-				if (qpidClient.queueExists(sub.getQueueName())) {
-					qpidClient.removeQueue(sub.getQueueName());
+				Queue queue = qpidClient.getQueue(sub.getQueueName());
+				if (queue != null) {
+					qpidClient.removeQueue(queue);
 				}
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
@@ -131,7 +131,7 @@ public class RoutingConfigurer {
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
 						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
-							qpidClient.addBinding(subscription.getSelector(), cap.getCapabilityExchangeName(), queueName, cap.getCapabilityExchangeName());
+							qpidClient.addBinding(cap.getCapabilityExchangeName(), new Binding(cap.getCapabilityExchangeName(), queueName, new Filter(subscription.getSelector())));
 						}
 					}
 				}
@@ -187,7 +187,7 @@ public class RoutingConfigurer {
 						if (!subscription.exchangeIsCreated()) {
 							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
-							qpidClient.createTopicExchange(exchangeName);
+							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
 							logger.debug("Set up exchange for subscription {}", subscription.toString());
 						}
 						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
@@ -221,7 +221,10 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {
-							qpidClient.removeExchange(subscription.getExchangeName());
+							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
+							if (exchange != null) {
+								qpidClient.removeExchange(exchange);
+							}
 							subscription.removeExchangeName();
 							logger.debug("Removed exchange for subscription {}", subscription.toString());
 						}
@@ -233,7 +236,7 @@ public class RoutingConfigurer {
 	}
 
 	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.addBinding(acceptedSubscription.getSelector(),exchange,queueName, exchange);
+		qpidClient.addBinding(exchange, new Binding(exchange, queueName, new Filter(acceptedSubscription.getSelector())));
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
@@ -245,19 +248,18 @@ public class RoutingConfigurer {
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		if (!delta.queueExists(queueName)) {
-			qpidClient.createQueue(queueName);
+			Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 			qpidClient.addReadAccess(subscriberName, queueName);
-			delta.addQueue(new Queue(queueName));
+			delta.addQueue(queue);
 		}
 	}
 
 	private void addSubscriberToGroup(String groupName, String subscriberName) {
-		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
 		logger.debug("Attempting to add subscriber {} to the group {}", subscriberName, groupName);
-		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
-		if (!existingGroupMembers.contains(subscriberName)) {
+		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
+		if (groupMember == null) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriberName, groupName);
-			qpidClient.addMemberToGroup(subscriberName, groupName);
+			qpidClient.addMemberToGroup(subscriberName,groupName);
 			logger.info("Added subscriber {} to Qpid group {}", subscriberName, groupName);
 		} else {
 			logger.warn("Subscriber {} already exists in the group {}", subscriberName, groupName);
@@ -265,11 +267,10 @@ public class RoutingConfigurer {
 	}
 
 	private void removeSubscriberFromGroup(String groupName, String subscriberName) {
-		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
-		if (existingGroupMembers.contains(subscriberName)) {
+		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
+		if (groupMember != null) {
 			logger.debug("Subscriber {} found in the groups {} Removing...", subscriberName, groupName);
-			qpidClient.removeMemberFromGroup(subscriberName, groupName);
-			logger.info("Removed subscriber {} from Qpid group {}", subscriberName, groupName);
+			qpidClient.removeMemberFromGroup(groupMember, groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriberName, groupName);
 		}

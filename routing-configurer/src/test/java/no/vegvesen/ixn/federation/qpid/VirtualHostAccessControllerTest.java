@@ -36,8 +36,8 @@ public class VirtualHostAccessControllerTest {
 
     @Test
     public void addQueueWriteAccess() throws IOException {
-        provider.addQueueWriteAccess("test-user", "test-queue");
-        AclRule rule = VirtualHostAccessController.createQueueWriteAccessRule("test-user","test-queue");
+        provider.addExchangeWriteAccess("test-user", "test-queue");
+        AclRule rule = VirtualHostAccessController.createExchangeWriteAccessRule("test-user","test-queue");
         assertThat(provider.containsRule(rule)).isTrue();
     }
 
@@ -53,7 +53,7 @@ public class VirtualHostAccessControllerTest {
     public void removeWriteAccess() throws IOException {
         String spName = "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.fourc1";
         String queue = "del-d9032905-c5a2-4119-863c-1899b12fbced";
-        AclRule rule = VirtualHostAccessController.createQueueWriteAccessRule(
+        AclRule rule = VirtualHostAccessController.createExchangeWriteAccessRule(
                 spName,
                 queue
         );

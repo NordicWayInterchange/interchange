@@ -1,69 +1,89 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Exchange {
 
-    String name;
+    private static final String DEFAULT_TYPE = "headers";
+    private static final boolean DEFAULT_DURABILITY = true;
 
-    Set<Binding> bindings = new HashSet<>();
+    private String id;
+    private String name;
+
+    private boolean durable;
+
+    private String type;
+
+    List<Binding> bindings;
 
     public Exchange() {
+        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
+    }
+
+    public Exchange(String name, String id, boolean durable, String type, List<Binding> bindings) {
+        this.name = name;
+        this.id = id;
+        this.durable = durable;
+        this.type = type;
+        this.bindings = new ArrayList<>();
+        this.bindings.addAll(bindings);
     }
 
     public Exchange(String name) {
-        this.name = name;
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
     }
 
-    public Exchange(String name, Set<Binding> bindings) {
-        this.name = name;
-        this.bindings = bindings;
+    public Exchange(String name, String type) {
+        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>());
+    }
+
+    public Exchange(String name, List<Binding> bindings) {
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,bindings);
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<Binding> getBindings() {
+    public List<Binding> getBindings() {
         return bindings;
-    }
-
-    public void setBindings(Set<Binding> bindings) {
-        this.bindings = bindings;
     }
 
     public void addBinding(Binding binding) {
         this.bindings.add(binding);
     }
 
-    public void removeBinding(String name, String destination) {
-        findBindingByNameAndDestination(name, destination).ifPresent(value -> this.bindings.remove(value));
-    }
-
-    public Optional<Binding> findBindingByNameAndDestination(String name, String destination) {
-        return bindings.stream()
-                .filter(binding -> binding.getName().equals(name) && binding.getDestination().equals(destination))
-                .findFirst();
-    }
 
     public boolean isBoundToQueue(String queueName) {
         return bindings.stream()
                 .anyMatch(q -> q.getDestination().equals(queueName));
     }
 
+
+    public boolean isDurable() {
+        return durable;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "Exchange{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", durable=" + durable +
+                ", type='" + type + '\'' +
                 ", bindings=" + bindings +
                 '}';
     }

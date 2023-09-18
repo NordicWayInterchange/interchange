@@ -8,15 +8,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @ConfigurationPropertiesScan
@@ -79,164 +76,109 @@ public class QpidClient {
 		return response.getStatusCodeValue();
 	}
 
-	public void addBinding(String selector, String source, String destination, String bindingKey) {
-		AddBindingRequest request = new AddBindingRequest(destination,bindingKey,selector);
-		logger.info("Add binding from {} to {} with binding key {} and selector {}", source,destination,bindingKey,selector);
-		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
+	public boolean addBinding(String source, Binding binding) {
+		AddBindingRequest request = new AddBindingRequest(binding);
+		logger.info("Add binding {} from {} ", binding, source);
+		Boolean result = restTemplate.postForEntity(exchangesURL + "/" + source + "/bind", request, Boolean.class).getBody();
+		return result.booleanValue();
 
 	}
 
-	public void createQueue(String queueName) {
-		if (!queueExists(queueName)) {
-			logger.info("Creating queue {}", queueName);
-			_createQueue(queueName);
-		}
+
+	public Queue createQueue(String name) {
+		return createQueue(new CreateQueueRequest(name));
 	}
 
-	public void createTopicExchange(String exchangeName) {
-		if (!exchangeExists(exchangeName)){
-			logger.info("Creating topic exchange {}", exchangeName);
-			_createTopicExchange(exchangeName);
-		}
+	public Queue createQueue(String queueName, long maximumMessageTtl) {
+		return createQueue(new CreateQueueRequest(queueName,maximumMessageTtl));
 	}
 
-	public void createDirectExchange(String exchangeName) {
-		if (!exchangeExists(exchangeName)){
-			logger.info("Creating direct exchange {}", exchangeName);
-			_createDirectExchange(exchangeName);
-		}
+	public Exchange createHeadersExchange(String name) {
+		return createExchange(new CreateExchangeRequest(name,"headers"));
 	}
 
-	void _createQueue(String queueName) {
-		CreateQueueRequest request = new CreateQueueRequest(queueName,MAX_TTL_8_DAYS);
-		restTemplate.postForEntity(queuesURL + "/",request,String.class);
-	}
-	public void _createDirectExchange(String exchangeName) {
-		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"direct");
-		restTemplate.postForEntity(exchangesURL + "/",request, String.class);
-		logger.debug("Created exchange {}", exchangeName);
+
+	public Exchange createDirectExchange(String exchangeName) {
+		return createExchange(new CreateExchangeRequest(exchangeName,"direct"));
 	}
 
-	public void _createTopicExchange(String exchangeName) {
-		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"headers");
-		restTemplate.postForEntity(exchangesURL + "/",request,String.class);
-		logger.debug("Created exchange {}", exchangeName);
+	private Queue createQueue(CreateQueueRequest request) {
+		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
+		return result;
+	}
+
+	private Exchange createExchange(CreateExchangeRequest request) {
+		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
+		return response.getBody();
+
 	}
 
 	public boolean queueExists(String queueName) {
-		return lookupQueueId(queueName) != null;
+		return getQueue(queueName) != null;
 	}
 
-	private String lookupQueueId(String queueName) {
-		String queueQueryUrl = queuesURL + "/" + queueName;
-		logger.debug("quering for queue {} with url {}", queueName, queueQueryUrl);
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<HashMap> response;
+	public Queue getQueue(String queueName) {
 		try {
-			response = restTemplate.getForEntity(new URI(queueQueryUrl), HashMap.class);
-		} catch (HttpClientErrorException.NotFound notFound) {
+			return restTemplate.getForEntity(queuesURL + "/" + queueName, Queue.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
 			return null;
-		} catch (Throwable e) {
-			logger.error("Caught exception {}", e);
-			throw new RoutingConfigurerException(String.format("Could not query for QPID queue %s", queueName), e);
 		}
-		HttpStatus statusCode = response.getStatusCode();
-		if (statusCode.is2xxSuccessful()) {
-			if (response.getBody() != null) {
-				return (String) response.getBody().get("id");
-			}
-		} else {
-			logger.error("Status code {} querying for QPID queue {}", statusCode.value(), queueName);
-		}
-		return null;
 	}
+
+	public Exchange getExchange(String exchangeName) {
+		try {
+			return restTemplate.getForEntity(exchangesURL + "/" + exchangeName, Exchange.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
 
 	public boolean exchangeExists(String exchangeName) {
-		return lookupExchangeId(exchangeName) != null;
+		return getExchange(exchangeName) != null;
 	}
 
-	private String lookupExchangeId(String exchangeName) {
-		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.debug("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
-		@SuppressWarnings("rawtypes")
-		ResponseEntity<HashMap> response;
+
+	public List<Binding> getQueuePublishingLinks(String queueName) {
+		return restTemplate.exchange(
+				queuesURL + "/" + queueName + "/getPublishingLinks",
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<List<Binding>>() {
+				}).getBody();
+	}
+
+	public void removeQueue(Queue queue) {
+		restTemplate.delete(queuesURL + "/" + queue.getName());
+		logger.info("Removed queue {}", queue.getName());
+	}
+
+
+	public void removeExchange(Exchange exchange) {
+		restTemplate.delete(exchangesURL + "/" + exchange.getName());
+		logger.info("Removed exchange {}", exchange.getName());
+	}
+
+	public GroupMember getGroupMember(String memberName, String groupName) {
 		try {
-			response = restTemplate.getForEntity(new URI(exchangeQueryUrl), HashMap.class);
-		} catch (HttpClientErrorException.NotFound notFound) {
+			return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
 			return null;
-		} catch (Throwable e) {
-			logger.error("Caught exception {}", e);
-			throw new RoutingConfigurerException(String.format("Could not query for QPID exchange %s", exchangeName), e);
 		}
-		HttpStatus statusCode = response.getStatusCode();
-		if (statusCode.is2xxSuccessful()) {
-			if (response.getBody() != null) {
-				return (String) response.getBody().get("id");
-			}
-		} else {
-			logger.error("Status code {} querying for QPID exchange {}", statusCode.value(), exchangeName);
-		}
-		return null;
 	}
 
 
-	public Set<String> getQueueBindKeys(String queueName) {
-		HashSet<String> existingBindKeys = new HashSet<>();
-		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
-		System.out.println("Get publishing links for Queue on URL " + url);
-
-		ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				null,
-				new ParameterizedTypeReference<List<Map<String, Object>>>() {
-				});
-		List<Map<String, Object>> queueBindings = response.getBody();
-		if (queueBindings != null) {
-			for (Map<String, Object> binding : queueBindings) {
-				Object bindingKey = binding.get("bindingKey");
-				if (bindingKey instanceof String) {
-					existingBindKeys.add((String) bindingKey);
-				}
-			}
-		}
-		return existingBindKeys;
-	}
-
-	public void removeQueue(String queueName) {
-		String queueId = lookupQueueId(queueName);
-		logger.info("Removing queue {}", queueName);
-		restTemplate.delete(queuesURL + "?id=" + queueId);
-	}
-
-	public void removeExchange(String exchangeName) {
-		String exchangeId = lookupExchangeId(exchangeName);
-		logger.info("Removing exchange {}", exchangeName);
-		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
-	}
-
-	public List<String> getGroupMemberNames(String groupName) {
-		String url = groupsUrl + groupName;
-		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				null,
-				new ParameterizedTypeReference<>() {
-				});
-		List<String> groupMemberNames = groupMembers.getBody().stream().map(GroupMember::getName).collect(Collectors.toList());
-		return groupMemberNames;
-	}
-
-	public void removeMemberFromGroup(String memberName, String groupName) {
-		String url = groupsUrl + groupName + "/" + memberName;
-		logger.info("Removing user {} from group {}",memberName,groupName);
+	public void removeMemberFromGroup(GroupMember member, String groupName) {
+		String url = groupsUrl + groupName + "/" + member.getName();
+		logger.info("Removing user {} from group {}",member.getName(),groupName);
 		restTemplate.delete(url);
 	}
 
-	public void addMemberToGroup(String memberName, String groupName) {
+
+	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
 		logger.info("Adding member {} to group {}",memberName,groupName);
-		restTemplate.postForEntity(groupsUrl + groupName,groupMember,String.class);
+		return restTemplate.postForEntity(groupsUrl + groupName,groupMember,GroupMember.class).getBody();
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
@@ -248,7 +190,7 @@ public class QpidClient {
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.addQueueWriteAccess(subscriberName, queue);
+		provider.addExchangeWriteAccess(subscriberName, queue);
 		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
         postQpidAcl(provider);
 	}
@@ -286,8 +228,8 @@ public class QpidClient {
 		}
 	}
 
-	public Set<Queue> getAllQueues() throws JsonProcessingException {
-		ResponseEntity<Set<Queue>> allQueuesResponse  = restTemplate.exchange(
+	public List<Queue> getAllQueues() throws JsonProcessingException {
+		ResponseEntity<List<Queue>> allQueuesResponse  = restTemplate.exchange(
 				allQueuesUrl,
 				HttpMethod.GET,
 				null,
@@ -296,8 +238,8 @@ public class QpidClient {
 		return allQueuesResponse.getBody();
 	}
 
-	public Set<Exchange> getAllExchanges() throws JsonProcessingException {
-		ResponseEntity<Set<Exchange>> allExchangesResponse = restTemplate.exchange(
+	public List<Exchange> getAllExchanges() throws JsonProcessingException {
+		ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
 				allExchangesUrl,
 				HttpMethod.GET,
 				null,
@@ -307,16 +249,14 @@ public class QpidClient {
 	}
 
 	public QpidDelta getQpidDelta() {
-		QpidDelta qpidDelta = new QpidDelta();
 		try {
-			Set<Queue> allQueues = getAllQueues();
-			Set<Exchange> allExchanges = getAllExchanges();
-			qpidDelta.setExchanges(allExchanges);
-			qpidDelta.setQueues(allQueues);
+			List<Queue> allQueues = getAllQueues();
+			List<Exchange> allExchanges = getAllExchanges();
+			return new QpidDelta(allExchanges,allQueues);
+
 		} catch (JsonProcessingException e) {
 			logger.error("Could not parse qpid delta");
 			throw new RuntimeException(e);
 		}
-		return qpidDelta;
 	}
 }

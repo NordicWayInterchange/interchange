@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,19 +15,20 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.CollectionType;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.MAX_TTL_8_DAYS;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
@@ -73,69 +75,221 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void createQueueThatAlreadyExistsResultsInException() {
-		client._createQueue("torsk");
+		Queue queue = client.createQueue("torsk", MAX_TTL_8_DAYS);
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
-			client._createQueue("torsk"); //create some queue that already exists
-			//
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
+			client.createQueue("torsk", MAX_TTL_8_DAYS); //create some queue that already exists
 		});
-		client.removeQueue("torsk");
+		client.removeQueue(queue);
+	}
+	@Test
+	public void testGetQueue() {
+		String name = "test-get-queue-queue";
+		client.createQueue(name);
+		Queue result = client.getQueue(name);
+		assertThat(result.getName()).isEqualTo(name);
+	}
+	@Test
+	public void testGetNonExistingQueue() {
+		String name = "this-queue-does-not-exist";
+		assertThat(client.getQueue(name)).isNull();
+	}
+	@Test
+	public void testQueueExists() {
+		String name = "test-queue-exist-queue";
+		client.createQueue(name);
+		assertThat(client.queueExists(name)).isTrue();
+		assertThat(client.queueExists("this-queue-does-not-exist")).isFalse();
 	}
 
 	@Test
-	public void queueNotCreatedQueueDoesNotExist() {
-		assertThat(client.queueExists("mackrel")).isFalse();
+	public void createExchangeThatAlreadyExistsResultsInException() {
+		Exchange exchange = client.createHeadersExchange("test-create-exchange");
+
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
+			client.createHeadersExchange("test-create-exchange");
+		});
+		client.removeExchange(exchange);
+
 	}
 
 	@Test
-	public void setupAndTearDownQueue() {
-		//Set up a new queue
-		client.createQueue("crab");
-		assertThat(client.queueExists("crab")).isTrue();
+	public void testGetExchange() {
+		client.createHeadersExchange("test-get-exchange-exchange");
+		Exchange result = client.getExchange("test-get-exchange-exchange");
+		assertThat(result.getName()).isEqualTo("test-get-exchange-exchange");
+		assertThat(result.getId()).isNotNull();
+	}
 
-		//Delete the queue
-		client.removeQueue("crab");
-		assertThat(client.queueExists("crab")).isFalse();
+	@Test
+	public void testGetNonExistingExchange() {
+		assertThat(client.getExchange("this-exchange-does-not-exist")).isNull();
+	}
+
+	@Test
+	public void testExchangeExists() {
+		String name = "test-exchange-exists-exchange";
+		client.createHeadersExchange(name);
+		assertThat(client.exchangeExists(name)).isTrue();
+		assertThat(client.exchangeExists("this-exchange-does-not-exist")).isFalse();
+	}
+
+
+	@Test
+	public void testGetGroupMember() {
+		String groupMember = "test-get-group-member-member";
+		client.addMemberToGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
+
+		GroupMember member = client.getGroupMember(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(member).isNotNull();
+		assertThat(member.getName()).isEqualTo(groupMember);
+	}
+
+
+	@Test
+	public void testGetGroupMemberNonExistingMember() {
+		GroupMember groupMember = client.getGroupMember("this-group-member-does-not-exist", SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNull();
+	}
+
+	@Test
+	public void testGetGroupMemberNonExistingGroup() {
+		GroupMember groupMember = client.getGroupMember("this-member-does-not-exist", "this-group-does-not-exist");
+		assertThat(groupMember).isNull();
 	}
 
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
-		client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
-		List<String> myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
+		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
 
-		assertThat(myUserNames).contains(myUser);
 
-		client.removeMemberFromGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
-		myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
+		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
 
-		assertThat(myUserNames).doesNotContain(myUser);
+		assertThat(groupMember).isNull();
 	}
 
 	@Test
 	public void createAndDeleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
-		client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
-		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).contains(deleteUser);
-
-		client.removeMemberFromGroup(deleteUser, FEDERATED_GROUP_NAME);
-		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).doesNotContain(deleteUser);
+		GroupMember groupMember = client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
+		client.removeMemberFromGroup(groupMember,FEDERATED_GROUP_NAME);
+		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
+				() -> client.removeMemberFromGroup(groupMember, FEDERATED_GROUP_NAME)
+		);
 	}
 
 	@Test
 	public void addRemoteServiceProviderToGroup() {
 		String newUser = "service-provider";
-		client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-
-		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-
-		assertThat(userNames).contains(newUser);
-		client.removeMemberFromGroup(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(userNames).doesNotContain(newUser);
+		GroupMember groupMember = client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNotNull();
+		client.removeMemberFromGroup(groupMember,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		groupMember = client.getGroupMember(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(groupMember).isNull();
 	}
+
+	@Test
+	public void addMemberToNonExistingGroup(){
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+				() -> client.addMemberToGroup("member-of-non-existing-group", "this-group-does-not-exist")
+		);
+
+	}
+
+	@Test
+	public void testAddMemberToGroupTwice() {
+		String user = "user-added-to-group-twice";
+		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+				() -> client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME)
+		);
+
+	}
+
+	@Test
+	public void testAddAclForNonExistingQueue() {
+		String user = "user-read-non-existing-queue";
+		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		assertThatNoException().isThrownBy(
+				() -> client.addReadAccess(user,"this-queue-does-not-exist")
+		);
+	}
+
+	@Test
+	public void testAddAclForNonExisitingUser() {
+		String user = "this-user-does-not-exist";
+		String exchangeName = "non-existing-user-exchange";
+		client.createHeadersExchange(exchangeName);
+		assertThatNoException().isThrownBy(
+				() -> client.addWriteAccess(user,exchangeName)
+		);
+	}
+
+	@Test
+	public void addAclRuleTwiceGivesNoError() {
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		qpidAcl.addExchangeWriteAccess("twice-user","twice-queue");
+		qpidAcl.addExchangeWriteAccess("twice-user", "twice-queue");
+
+		assertThat(qpidAcl.getRules().stream().filter(
+				r -> r.getIdentity().equals("twice-user")
+		).count()).isEqualTo(2);
+		assertThatNoException().isThrownBy(
+				() -> client.postQpidAcl(qpidAcl)
+		);
+
+	}
+
+	@Test
+	//@Disabled
+	public void createAclWithMissingAttributes() {
+		Map<String,String> attributes = new HashMap<>();
+		AclRule rule = new AclRule("missing-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatNoException().isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
+
+	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
+	@Test
+	@Disabled
+	public void createValidAclWithBogusAttributes() {
+		Map<String,String> attributes = new HashMap<>();
+		attributes.put("ROUTING_KEY", "routing_key");
+		attributes.put("NAME", "");
+		attributes.put("FOO","bar");
+		AclRule rule = new AclRule("bogus-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
+
+	//TODO what happens if we create a bogus rule?
+	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
+	@Test
+	@Disabled
+	public void createBogusAcl() {
+		Map<String,String> attributes = new HashMap<>();
+		attributes.put("ROUTING_KEY", "routing_key");
+		attributes.put("NAME", "");
+		AclRule rule = new AclRule("bogus-rule-user","BLAH","ALLOW_LOG","EXCHANGE", attributes);
+		VirtualHostAccessController controller = client.getQpidAcl();
+		controller.addRule(rule);
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+
+				() -> client.postQpidAcl(controller)
+		);
+	}
+
 
 	@Test
 	public void readAccessIsAdded() {
@@ -161,7 +315,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String queueName = "catfish";
 
 		client.addWriteAccess(subscriberName, queueName);
-		AclRule queueWriteAccessRule = VirtualHostAccessController.createQueueWriteAccessRule(subscriberName, queueName);
+		AclRule queueWriteAccessRule = VirtualHostAccessController.createExchangeWriteAccessRule(subscriberName, queueName);
 		VirtualHostAccessController provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
 
@@ -173,45 +327,46 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		client._createDirectExchange("my-exchange");
+		Exchange directExchange = client.createDirectExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
-		client.removeExchange("my-exchange");
+		client.removeExchange(directExchange);
 		assertThat(client.exchangeExists("my-exchange")).isFalse();
 	}
 
 	@Test
 	public void removeExchangeBeforeBindings() {
-		client._createTopicExchange("hammershark");
-		client._createQueue("babyshark");
+		client.createHeadersExchange("hammershark");
+		client.createQueue("babyshark", MAX_TTL_8_DAYS);
 
-		client.addBinding("originatingCountry = 'NO'", "hammershark", "babyshark", "hammershark");
-		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
+		client.addBinding("hammershark", new Binding("hammershark", "babyshark", new Filter("originatingCountry = 'NO'")));
+		Exchange exchange = client.getExchange("hammershark");
+		assertThat(exchange.getBindings()).hasSize(1);
 
-		client.removeExchange("hammershark");
-		assertThat(client.getQueueBindKeys("babyshark")).hasSize(0);
+		client.removeExchange(exchange);
+		assertThat(client.getQueuePublishingLinks("babyshark")).hasSize(0);
 	}
 
 	@Test
 	public void removeQueueBeforeBindings() {
-		client._createTopicExchange("hammershark1");
-		client._createQueue("babyshark1");
+		client.createHeadersExchange("hammershark1");
+		Queue queue = client.createQueue("babyshark1", MAX_TTL_8_DAYS);
 
-		client.addBinding("originatingCountry = 'NO'", "hammershark1", "babyshark1", "hammershark1");
-		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
+		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
+		assertThat(client.getQueuePublishingLinks("babyshark1")).hasSize(1);
 
-		client.removeQueue("babyshark1");
+		client.removeQueue(queue);
 		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
 
 
 	@Test
 	public void readExchangesFromQpid() throws IOException {
-		client.createTopicExchange("test-exchange1");
-		client.createTopicExchange("test-exchange2");
-		client.createQueue("test-queue");
-		client.addBinding("originatingCountry = 'NO'", "test-exchange1", "test-queue", "test-exchange1");
-		client.addBinding("originatingCountry = 'NO'", "test-exchange2", "test-queue", "test-exchange2");
+		client.createHeadersExchange("test-exchange1");
+		client.createHeadersExchange("test-exchange2");
+		client.createQueue("test-queue", MAX_TTL_8_DAYS);
+		client.addBinding("test-exchange1", new Binding("test-exchange1", "test-queue", new Filter("originatingCountry = 'NO'")));
+		client.addBinding("test-exchange2", new Binding("test-exchange2", "test-queue", new Filter("originatingCountry = 'NO'")));
 
 		assertThat(client.getAllExchanges()).isNotEmpty();
 	}
@@ -219,10 +374,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void readQueuesFromQpid() throws IOException {
-		client.createQueue("test-queue");
+		String queueName = "test-read-queues-from-qpid";
+		client.createQueue(queueName, MAX_TTL_8_DAYS);
 
-		Set<Queue> result = client.getAllQueues();
-		assertThat(result).isNotEmpty();
+		List<Queue> result = client.getAllQueues();
+		assertThat(result.stream().filter( q -> q.getName().equals(queueName)).count()).isEqualTo(1);
 	}
 
 	@Test
@@ -231,15 +387,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "subscriptionExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchange);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch( b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -248,15 +404,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchange);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -265,15 +421,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange2";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue);
-		client.createTopicExchange(exchange);
+		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchange);
 
-		client.addBinding(selector, exchange, queue, exchange);
+		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
-		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
 	@Test
@@ -282,13 +438,40 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String capabilityExchange = "capabilityExchange3";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createTopicExchange(capabilityExchange);
+		client.createHeadersExchange(capabilityExchange);
 		client.createDirectExchange(deliveryExchange);
 
-		client.addBinding(selector, deliveryExchange, capabilityExchange, deliveryExchange);
+		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
 
 		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
 	}
+
+
+	@Test
+	public void whatDoesAnAddBindingRequestReturn() {
+		Queue queue = client.createQueue("test-bind-result-queue");
+
+		Exchange exchange = client.createHeadersExchange("test-bind-result-exchange");
+
+		boolean created = client.addBinding(exchange.getName(),new Binding("my-test-binding-key",queue.getName(),new Filter("a = 'b'")));
+		assertThat(created).isTrue();
+		created = client.addBinding(exchange.getName(),new Binding("my-test-binding-key",queue.getName(),new Filter("a = 'b'")));
+		assertThat(created).isFalse();
+	}
+
+	@Test
+	public void testCreateQueueCheckIfItsDurable() {
+		Queue queue = client.createQueue("test-create-queue-is-durable");
+		assertThat(queue.getDurable()).isNotNull().isTrue();
+	}
+
+	@Test
+	public void testCreateExchangeCheckIfItsDurable() {
+		Exchange exchange = client.createHeadersExchange("test-create-exchange-is-durable-header");
+		assertThat(exchange.isDurable()).isTrue();
+
+	}
+
 }

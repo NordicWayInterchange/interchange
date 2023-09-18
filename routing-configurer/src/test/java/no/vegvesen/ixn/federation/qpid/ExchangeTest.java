@@ -1,12 +1,14 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.CollectionType;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +25,12 @@ public class ExchangeTest {
 
         List<Exchange> result = mapper.readValue(file, collectionType);
         assertThat(result.size()).isEqualTo(4);
+        Exchange exchange = result.get(0);
+        assertThat(exchange.getId()).isEqualTo("3396d263-1767-4658-a192-83e35772395e");
+        assertThat(exchange.getName()).isEqualTo("d5bb43db-90e5-4700-ae58-a3c40aeba250");
+        assertThat(exchange.getType()).isEqualTo("headers");
+        assertThat(exchange.isDurable()).isTrue();
+
     }
 
     @Test
@@ -94,6 +102,32 @@ public class ExchangeTest {
         Exchange result = mapper.readValue(object, Exchange.class);
         assertThat(result.getName()).isEqualTo("cap-20ef68cf-6405-4b86-bde8-63ab8599d8ab");
         assertThat(result.getBindings().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testJsonWithNameOnly() throws JsonProcessingException {
+        Exchange exchange = new Exchange("test-exchange");
+        String result = new ObjectMapper().writeValueAsString(exchange);
+        assertThat(result).contains("name");
+        assertThat(result).contains("durable");
+        assertThat(result).contains("type");
+        assertThat(result).contains("bindings"); //TODO are bindings really needed? Test in qpidClientIT
+        assertThat(result).doesNotContain("id");
+    }
+
+
+    @Test
+    public void testJsonWithOneBinding() throws JsonProcessingException {
+        Exchange exchange = new Exchange("test-exchange", Collections.singletonList(
+                new Binding("my-binding-key", "my-destination", new Filter("a = b"))
+        ));
+        String result = new ObjectMapper().writeValueAsString(exchange);
+        assertThat(result).contains("name");
+        assertThat(result).contains("durable");
+        assertThat(result).contains("type");
+        assertThat(result).contains("bindings");
+        assertThat(result).doesNotContain("id");
+        assertThat(result).contains("my-binding-key");
     }
 
 }

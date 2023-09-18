@@ -2,17 +2,14 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.federation.qpid.QpidDelta;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -231,7 +228,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
+		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
@@ -250,7 +247,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
+		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
@@ -268,10 +265,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(onlyCaps);
 		onlyCaps.setCapabilities(capabilities);
 		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
+		assertThat(client.getGroupMember(onlyCaps.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 
 		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
+		assertThat(client.getGroupMember(onlyCaps.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.queueExists(onlyCaps.getName())).isFalse();
 	}
 
@@ -284,11 +281,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
 	}
 
 	@Test
@@ -310,7 +308,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 
 		assertThat(sub1.getLocalEndpoints()).hasSize(1);
 		LocalEndpoint endpoint1 = sub1.getLocalEndpoints().stream().findFirst().get();
@@ -336,8 +334,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(client.queueExists(privateChannel.getQueueName())).isTrue();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(privateChannel.getPeerName());
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
+		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
 	}
 
 	@Test
@@ -361,8 +359,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getPeerName());
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(0);
 	}
 
@@ -388,8 +386,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getPeerName());
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
+		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
 
@@ -402,12 +400,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
-		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
-		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
 	}
 
 	@Test
@@ -426,7 +424,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		client.createQueue(queueName);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -454,7 +452,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex1");
-		client.createTopicExchange("cap-ex1");
+		client.createHeadersExchange("cap-ex1");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
@@ -490,7 +488,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setCapabilityExchangeName("cap-ex2");
-		client.createTopicExchange("cap-ex2");
+		client.createHeadersExchange("cap-ex2");
 
 		CapabilitySplit denmCapability2 = new CapabilitySplit(
 				new DenmApplication(
@@ -504,7 +502,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability2.setCapabilityExchangeName("cap-ex3");
-		client.createTopicExchange("cap-ex3");
+		client.createHeadersExchange("cap-ex3");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setExchangeName("my-exchange6");
@@ -541,7 +539,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex4");
-		client.createTopicExchange("cap-ex4");
+		client.createHeadersExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -689,7 +687,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex8");
 		client.createDirectExchange("cap-ex8");
-		client.createQueue("my-queue12");
+		client.createQueue("my-queue12", QpidClient.MAX_TTL_8_DAYS);
 
 		mySP.addLocalSubscription(subscription);
 		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));
@@ -699,7 +697,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
-		assertThat(client.getQueueBindKeys("my-queue12")).hasSize(1);
+		assertThat(client.getQueuePublishingLinks("my-queue12")).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
@@ -813,8 +811,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue";
 		String exchangeName = "sub-exchange";
 
-		client.createQueue(queueName);
-		client.createTopicExchange(exchangeName);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -831,8 +829,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -844,9 +842,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String exchangeName = "sub-exchange-1";
 		String exchangeName2 = "sub-exchange-2";
 
-		client.createQueue(queueName);
-		client.createTopicExchange(exchangeName);
-		client.createTopicExchange(exchangeName2);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
+		client.createHeadersExchange(exchangeName2);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -867,9 +865,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(2);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName2);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
 	}
 
 	@Test
@@ -880,8 +878,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-4";
 		String exchangeName = "sub-exchange-4";
 
-		client.createQueue(queueName);
-		client.createTopicExchange(exchangeName);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -895,14 +893,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
 		//Mocking that binding already exists and isn't created again
-		client.addBinding(selector, exchangeName, queueName, exchangeName);
+		client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -913,8 +911,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-3";
 		String exchangeName = "sub-exchange-3";
 
-		client.createQueue(queueName);
-		client.createTopicExchange(exchangeName);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -931,8 +929,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(0);
-		assertThat(client.getQueueBindKeys(queueName)).doesNotContain(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
+		assertThat(client.getQueuePublishingLinks(queueName)).noneMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test
@@ -943,8 +941,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-5";
 		String exchangeName = "sub-exchange-5";
 
-		client.createQueue(queueName);
-		client.createTopicExchange(exchangeName);
+		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -961,8 +959,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
-		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 	}
 
 	@Test

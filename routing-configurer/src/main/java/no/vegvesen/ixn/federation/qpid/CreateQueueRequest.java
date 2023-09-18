@@ -1,40 +1,34 @@
 package no.vegvesen.ixn.federation.qpid;
 
-public class CreateQueueRequest {
-    private String name;
-    private boolean durable = true;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-    private long maximumMessageTtl;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class CreateQueueRequest {
+
+
+    private String name;
+
+    private Long maximumMessageTtl;
 
     public CreateQueueRequest() {
     }
 
-   public CreateQueueRequest(String name, long maximumMessageTtl) {
+   public CreateQueueRequest(String name, Long maximumMessageTtl) {
        this.name = name;
        this.maximumMessageTtl = maximumMessageTtl;
    }
+
+   public CreateQueueRequest(String name) {
+        this(name,null);
+   }
+
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isDurable() {
-        return durable;
-    }
-
-    public void setDurable(boolean durable) {
-        this.durable = durable;
-    }
-
-    public long getMaximumMessageTtl() {
+    public Long getMaximumMessageTtl() {
         return maximumMessageTtl;
-    }
-
-    public void setMaximumMessageTtl(long maximumMessageTtl) {
-        this.maximumMessageTtl = maximumMessageTtl;
     }
 }

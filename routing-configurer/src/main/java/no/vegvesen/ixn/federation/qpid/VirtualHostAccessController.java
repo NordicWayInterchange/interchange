@@ -23,13 +23,6 @@ public class VirtualHostAccessController {
         this.rules = rules;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setRules(List<AclRule> rules) {
-        this.rules = rules;
-    }
 
     public String getName() {
         return name;
@@ -45,25 +38,11 @@ public class VirtualHostAccessController {
         return new AclRule(memberOrGroupName,"CONSUME","ALLOW_LOG","QUEUE",props);
     }
 
-    public static AclRule createQueueWriteAccessRule(String memberOrGroupName, String queue)  {
+    public static AclRule createExchangeWriteAccessRule(String memberOrGroupName, String queue)  {
         Map<String,String> props = new HashMap<>();
         props.put("ROUTING_KEY",queue);
         props.put("NAME","");
         return new AclRule(memberOrGroupName,"PUBLISH","ALLOW_LOG","EXCHANGE",props);
-    }
-
-    public static AclRule createQueuePublishToExchangeRule(String memberName, String queue) {
-        Map<String, String> props = new HashMap<>();
-        props.put("routingkey", queue);
-        props.put("NAME", "");
-        return new AclRule(memberName,"PUBLISH","ALLOW-LOG","EXCHANGE",props);
-    }
-
-    public static AclRule createExchangeConsumeOnQueueRule(String queue) {
-        Map<String, String> props = new HashMap<>();
-        props.put("NAME", queue);
-        return new AclRule("interchange","CONSUME","ALLOW_LOG","QUEUE",props);
-
     }
 
     public String getId() {
@@ -78,8 +57,8 @@ public class VirtualHostAccessController {
         rules.add(rules.size() - 1, createQueueReadAccessRule(subscriberName,queue));
     }
 
-    public void addQueueWriteAccess(String subscriberName, String queue) {
-        rules.add(rules.size() -1, createQueueWriteAccessRule(subscriberName,queue));
+    public void addExchangeWriteAccess(String subscriberName, String queue) {
+        rules.add(rules.size() -1, createExchangeWriteAccessRule(subscriberName,queue));
     }
 
     public void removeQueueReadAccess(String subscriberName, String queue) {
@@ -87,12 +66,16 @@ public class VirtualHostAccessController {
     }
 
     public void removeQueueWriteAccess(String subscriberName, String queue) {
-        rules.remove(createQueueWriteAccessRule(subscriberName,queue));
+        rules.remove(createExchangeWriteAccessRule(subscriberName,queue));
     }
 
     public boolean containsRule(AclRule rule) {
         return rules.contains(rule);
 
+    }
+
+    protected void addRule(AclRule rule) {
+        rules.add(rule);
     }
 
     @Override

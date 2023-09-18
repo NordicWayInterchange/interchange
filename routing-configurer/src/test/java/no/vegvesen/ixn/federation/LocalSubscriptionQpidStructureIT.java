@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -92,6 +93,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     @MockBean
     OutgoingMatchRepository outgoingMatchRepository;
 
+
+    @Autowired
+    QpidClient client;
+
     @Autowired
     ServiceProviderRouter router;
 
@@ -113,7 +118,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-        router.syncServiceProviders(Collections.singleton(serviceProvider), new QpidDelta());
+        QpidDelta delta = client.getQpidDelta();
+        router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
             for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
