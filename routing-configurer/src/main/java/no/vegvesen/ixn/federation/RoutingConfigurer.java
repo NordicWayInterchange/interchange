@@ -70,7 +70,7 @@ public class RoutingConfigurer {
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
 				Queue queue = qpidClient.getQueue(sub.getQueueName());
-				if (sub != null) {
+				if (queue != null) {
 					qpidClient.removeQueue(queue);
 				}
 			}
