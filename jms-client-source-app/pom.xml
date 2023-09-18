@@ -18,13 +18,13 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>jms-client</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -35,6 +35,10 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
     </dependencies>
     <build>
