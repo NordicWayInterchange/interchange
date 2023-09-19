@@ -392,8 +392,10 @@ public class ServiceProviderRouter {
                             if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
                                 for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
                                     String exchangeName = match.getSubscription().getExchangeName();
-                                    if (!qpidClient.getQueueBindKeys(queueName).contains(qpidClient.createBindKey(exchangeName, queueName))) {
-                                        bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
+                                    if (qpidClient.exchangeExists(exchangeName) && qpidClient.queueExists(queueName)) {
+                                        if (!qpidClient.getQueueBindKeys(queueName).contains(qpidClient.createBindKey(exchangeName, queueName))) {
+                                            bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
+                                        }
                                     }
                                 }
                             }
