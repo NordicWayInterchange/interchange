@@ -9,6 +9,8 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.qpid.replicas }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
