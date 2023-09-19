@@ -91,7 +91,9 @@ public class MessageBuilder {
     }
 
     public MessageBuilder messageType(String messageType) throws JMSException {
-        message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+        if (messageType != null) {
+            message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+        }
         return this;
     }
 
@@ -134,12 +136,16 @@ public class MessageBuilder {
     //DATEX2 message properties
 
     public MessageBuilder publicationType(String publicationType) throws JMSException {
-        message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
+        if (publicationType != null) {
+            message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
+        }
         return this;
     }
 
     public MessageBuilder publicationSubType(String subType) throws JMSException {
-        message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
+        if (subType != null) {
+            message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
+        }
         return this;
     }
 
@@ -163,31 +169,41 @@ public class MessageBuilder {
     //IVIM message properties
 
     public MessageBuilder iviType(String iviType) throws JMSException {
-        message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
+        if (iviType != null) {
+            message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
+        }
         return this;
     }
 
     public MessageBuilder pictogramCategoryCode(String pictogramCode) throws JMSException {
-        message.setStringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), pictogramCode);
+        if (pictogramCode != null) {
+            message.setStringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), pictogramCode);
+        }
         return this;
     }
 
     public MessageBuilder iviContainer(String iviContainer) throws JMSException {
-        message.setStringProperty(MessageProperty.IVI_CONTAINER.getName(), iviContainer);
+        if (iviContainer != null) {
+            message.setStringProperty(MessageProperty.IVI_CONTAINER.getName(), iviContainer);
+        }
         return this;
     }
 
     //SPATEM/MAPEM and SSEM/SREM message property
 
     public MessageBuilder id(String id) throws JMSException {
-        message.setStringProperty(MessageProperty.IDS.getName(), id);
+        if (id != null) {
+            message.setStringProperty(MessageProperty.IDS.getName(), id);
+        }
         return this;
     }
 
     //SPATEM/MAPEM additional message property
 
     public MessageBuilder name(String name) throws JMSException {
-        message.setStringProperty(MessageProperty.NAME.getName(), name);
+        if (name != null) {
+            message.setStringProperty(MessageProperty.NAME.getName(), name);
+        }
         return this;
     }
 
@@ -195,12 +211,16 @@ public class MessageBuilder {
     //TODO: Both stationType and vehicleRole should be integers.
 
     public MessageBuilder stationType(Integer stationType) throws JMSException {
-        message.setIntProperty(MessageProperty.STATION_TYPE.getName(), stationType);
+        if (stationType != null) {
+            message.setIntProperty(MessageProperty.STATION_TYPE.getName(), stationType);
+        }
         return this;
     }
 
     public MessageBuilder vehicleRole(Integer vehicleRole) throws JMSException {
-        message.setIntProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
+        if (vehicleRole != null) {
+            message.setIntProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
+        }
         return this;
     }
 
