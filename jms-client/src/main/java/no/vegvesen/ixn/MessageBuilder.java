@@ -40,39 +40,53 @@ public class MessageBuilder {
     }
 
     public MessageBuilder userId(String user) {
-        message.getFacade().setUserId(user);
+        if (user != null) {
+            message.getFacade().setUserId(user);
+        }
         return this;
     }
 
     //Common message properties
 
     public MessageBuilder publisherId(String publisher) throws JMSException {
-        message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisher);
+        if (publisher != null) {
+            message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisher);
+        }
         return this;
     }
 
     public MessageBuilder publicationId(String publicationId) throws JMSException {
-        message.setStringProperty(MessageProperty.PUBLICATION_ID.getName(), publicationId);
+        if (publicationId != null) {
+            message.setStringProperty(MessageProperty.PUBLICATION_ID.getName(), publicationId);
+        }
         return this;
     }
 
     public MessageBuilder originatingCountry(String originatingCountry) throws JMSException {
-        message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+        if (originatingCountry != null) {
+            message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+        }
         return this;
     }
 
     public MessageBuilder protocolVersion(String version) throws JMSException {
-        message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
+        if (version != null) {
+            message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
+        }
         return this;
     }
 
     public MessageBuilder serviceType(String serviceType) throws JMSException {
-        message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
+        if (serviceType != null) {
+            message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
+        }
         return this;
     }
 
     public MessageBuilder baselineVersion(String baselineVersion) throws JMSException {
-        message.setStringProperty(MessageProperty.BASELINE_VERSION.getName(), baselineVersion);
+        if (baselineVersion != null) {
+            message.setStringProperty(MessageProperty.BASELINE_VERSION.getName(), baselineVersion);
+        }
         return this;
     }
 
@@ -92,17 +106,23 @@ public class MessageBuilder {
     }
 
     public MessageBuilder quadTreeTiles(String messageQuadTreeTiles) throws JMSException {
-        message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
+        if (messageQuadTreeTiles != null) {
+            message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
+        }
         return this;
     }
 
     public MessageBuilder shardId(Integer shardId) throws JMSException {
-        message.setIntProperty(MessageProperty.SHARD_ID.getName(), shardId);
+        if (shardId != null) {
+            message.setIntProperty(MessageProperty.SHARD_ID.getName(), shardId);
+        }
         return this;
     }
 
     public MessageBuilder shardCount(Integer shardCount) throws JMSException {
-        message.setIntProperty(MessageProperty.SHARD_COUNT.getName(), shardCount);
+        if (shardCount != null) {
+            message.setIntProperty(MessageProperty.SHARD_COUNT.getName(), shardCount);
+        }
         return this;
     }
 
@@ -127,12 +147,16 @@ public class MessageBuilder {
     //TODO: Input variable should be Integer for causeCode and subCauseCode
 
     public MessageBuilder causeCode(String causeCode) throws JMSException {
-        message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
+        if (causeCode != null) {
+            message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
+        }
         return this;
     }
 
     public MessageBuilder subCauseCode(String subCauseCode) throws JMSException {
-        message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
+        if (subCauseCode != null) {
+            message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
+        }
         return this;
     }
 
