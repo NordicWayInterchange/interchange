@@ -41,6 +41,7 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
+          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v1
         with:
