@@ -1,5 +1,9 @@
 name: Push Helm Charts
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
     branches:
@@ -37,10 +41,11 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
-      - id: auth
-        uses: google-github-actions/auth@v0
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
       - id: upload-file
         uses: 'google-github-actions/upload-cloud-storage@v0'
         with:
