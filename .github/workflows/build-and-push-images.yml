@@ -1,5 +1,9 @@
 name: Build and Push Docker Images
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
   workflow_dispatch:
@@ -86,10 +90,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: interchange
-      - id: auth
-        uses: google-github-actions/auth@v0
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
       - name: Setup docker
         run: gcloud auth configure-docker
       - name: Build and upload Docker images
