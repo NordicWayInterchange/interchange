@@ -10,6 +10,7 @@ trust_store: truststore.jks                                       # Name of trus
 
 # Values:
 external_name: example-node.itsinterchange.eu
+static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.

@@ -1012,6 +1012,99 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
+	@Test
+	public void createbindinsWithMatchesWhereSubscriptionExchangeIsNotAlreadyCreated() {
+		String name = "service-provider-no-subs-exchange-setup";
+		String source = "no-subs-exchange-setup-local-sub";
+		client.createQueue(source);
+		LocalSubscription localSubscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.REQUESTED,
+				"a = b",
+				qpidContainer.getvHostName(),
+				Collections.emptySet(),
+				Collections.singleton(
+						new LocalEndpoint(
+								source,
+								qpidContainer.getHost(),
+								qpidContainer.getAmqpsPort()
+						)
+				)
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				name,
+				Collections.singleton(
+						localSubscription
+				)
+		);
+		Subscription subscription = new Subscription(
+			SubscriptionStatus.REQUESTED,
+				"a = b",
+				"",
+				"a=b"
+		);
+		String exchangeName = "this-is-my-non-existing-local-exchange";
+		subscription.setExchangeName(exchangeName);
+		Match match = new Match(
+				localSubscription,
+				subscription
+		);
+		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
+		router.createBindingsWithMatches();
+		//TODO asserts, verify that the methods are called
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(client.getQueueBindKeys(source)).doesNotContain(client.createBindKey(exchangeName,source));
+
+	}
+
+	@Test
+	public void createbindinsWithMatchesWhereLocalSubscriptionQueueIsNotAlreadyCreated() {
+		String name = "service-provider-no-local-subs-queue-setup";
+		String source = "no-local-subs-queue-setup-local-sub";
+		String exchangeName = "this-is-my-existing-local-exchange";
+		client.createTopicExchange(exchangeName);
+		LocalSubscription localSubscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.REQUESTED,
+				"a = b",
+				qpidContainer.getvHostName(),
+				Collections.emptySet(),
+				Collections.singleton(
+						new LocalEndpoint(
+								source,
+								qpidContainer.getHost(),
+								qpidContainer.getAmqpsPort()
+						)
+				)
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				name,
+				Collections.singleton(
+						localSubscription
+				)
+		);
+		Subscription subscription = new Subscription(
+				SubscriptionStatus.REQUESTED,
+				"a = b",
+				"",
+				"a=b"
+		);
+		subscription.setExchangeName(exchangeName);
+		Match match = new Match(
+				localSubscription,
+				subscription
+		);
+		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
+		router.createBindingsWithMatches();
+		//TODO asserts, verify that the methods are called
+		assertThat(client.queueExists(source)).isFalse();
+	}
+
+
+	//TODO the queue might not be created, either
+
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
