@@ -219,9 +219,15 @@ public class NeighbourService {
 
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
+		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
-		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
+
+		if (neighbour != null) {
+			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
+			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
+		} else {
+			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
+		}
 	}
 
 	public String getNodeName() {
