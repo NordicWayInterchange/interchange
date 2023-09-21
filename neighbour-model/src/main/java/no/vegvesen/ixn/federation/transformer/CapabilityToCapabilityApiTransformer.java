@@ -80,8 +80,6 @@ public class CapabilityToCapabilityApiTransformer {
 		Metadata metadata = new Metadata();
 		if (metadataApi.getShardCount() != null)
 			metadata.setShardCount(metadataApi.getShardCount());
-		else
-			metadata.setShardCount(1);
 		if (metadataApi.getInfoUrl() != null)
 			metadata.setInfoUrl(metadataApi.getInfoUrl());
 		if (metadataApi.getMaxBandwidth() != null)
