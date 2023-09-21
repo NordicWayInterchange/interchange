@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -19,6 +20,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -213,6 +215,15 @@ class NeighbourServiceTest {
 		assertThat(subscriptions.getSubscriptions()).hasSize(1);
 
 		verify(neighbourRepository, times(1)).findByName(neighbourName);
+	}
+
+	@Test
+	public void finSubscriptionsWhenNeighbourIsNotKnown() {
+		when(neighbourRepository.findByName(any())).thenReturn(null);
+
+		Assertions.assertThrows(InterchangeNotFoundException.class, () ->
+				neighbourService.findSubscriptions("nordea"));
+
 	}
 
 	@Test
