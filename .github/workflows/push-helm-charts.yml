@@ -41,14 +41,20 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
+          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
-      - id: upload-file
-        uses: 'google-github-actions/upload-cloud-storage@v0'
+      - name: Setup Google CLI
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          path: target/helm/
-          destination: nordic_way_helm_repository
-          parent: false
+          version: '446.0.1'
+          project_id: ${{ vars.PROJECT_ID }}
+      - name: Login to Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+      - name: helm push
+        run: |
+          helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm

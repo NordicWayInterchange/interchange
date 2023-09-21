@@ -82,6 +82,9 @@ jobs:
   docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      matrix:
+        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app]
     defaults:
       run:
         shell: bash
@@ -95,7 +98,21 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
-      - name: Setup docker
-        run: gcloud auth configure-docker
-      - name: Build and upload Docker images
-        run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
+      - name: Setup Google CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: '446.0.1'
+          project_id: ${{ vars.PROJECT_ID }}
+      - name: Login to Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+      - name: Create tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_ENV"
+      - name: Build the Docker image
+        run: |
+          cd ./${{ matrix.Images }}
+          
+          docker build . --tag ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
+      - name: Push docker image
+        run: docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
