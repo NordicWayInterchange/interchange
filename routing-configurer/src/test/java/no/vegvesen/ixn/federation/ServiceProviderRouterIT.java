@@ -982,7 +982,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void createbindinsWithMatchesWhereSubscriptionExchangeIsNotAlreadyCreated() {
+	public void createBindingsWithMatchesWhereSubscriptionExchangeIsNotAlreadyCreated() {
 		String name = "service-provider-no-subs-exchange-setup";
 		String source = "no-subs-exchange-setup-local-sub";
 		client.createQueue(source);
@@ -1023,16 +1023,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.createBindingsWithMatches();
 		//TODO asserts, verify that the methods are called
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
-		assertThat(client.getQueueBindKeys(source)).doesNotContain(client.createBindKey(exchangeName,source));
+		assertThat(client.getQueuePublishingLinks(source)).doesNotContain(new Binding(source, name, new Filter("a = b")));
 
 	}
 
 	@Test
-	public void createbindinsWithMatchesWhereLocalSubscriptionQueueIsNotAlreadyCreated() {
+	public void createBindingsWithMatchesWhereLocalSubscriptionQueueIsNotAlreadyCreated() {
 		String name = "service-provider-no-local-subs-queue-setup";
 		String source = "no-local-subs-queue-setup-local-sub";
 		String exchangeName = "this-is-my-existing-local-exchange";
-		client.createTopicExchange(exchangeName);
+		client.createHeadersExchange(exchangeName);
 		LocalSubscription localSubscription = new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.REQUESTED,

@@ -949,7 +949,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setUpRegularRouting(
 				Collections.singleton(neighbourSubscription),
 				Collections.singleton(denmCapability),
-				"my_Neighbour"
+				"my_Neighbour",
+				client.getQpidDelta()
 		);
 		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
 		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();

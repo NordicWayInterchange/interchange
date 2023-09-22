@@ -398,11 +398,14 @@ public class ServiceProviderRouter {
                         List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                         for (Match match : matches) {
                             if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
-                                for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                    String exchangeName = match.getSubscription().getExchangeName();
-                                    if (!delta.getDestinationsFromExchangeName(exchangeName).contains(queueName)) {
-                                        bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
-                                        delta.addBindingToExchange(exchangeName, localSubscription.getSelector(), queueName);
+                                Exchange exchange = delta.findByExchangeName(match.getSubscription().getExchangeName());
+                                if (exchange != null) {
+                                    for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
+                                        Queue queue = delta.findByQueueName(queueName);
+                                        if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
+                                            bindQueueToSubscriptionExchange(queueName, exchange.getName(), localSubscription);
+                                            delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
+                                        }
                                     }
                                 }
                             }
