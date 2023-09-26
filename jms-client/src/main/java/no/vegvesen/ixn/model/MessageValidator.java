@@ -54,13 +54,14 @@ public class MessageValidator {
     }
 
     private boolean validProperties(Message message, Set<String> propertyNames) {
+		boolean valid = true;
 		for (String propertyName : propertyNames) {
 			if (!propertyExistsValidator.validateProperty(message, propertyName)) {
 				logger.warn("propertyName '{}' does not exist on message",propertyName);
-				return false;
+				valid =  false;
 			}
 		}
-		return true;
+		return valid;
 	}
 
 	private String getMessageType(Message message) {

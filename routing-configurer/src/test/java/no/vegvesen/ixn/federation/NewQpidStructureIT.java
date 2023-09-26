@@ -129,6 +129,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
+                .shardId(1)
+                .shardCount(1)
                 .causeCode("6")
                 .subCauseCode("76")
                 .build();
@@ -143,6 +145,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .publicationId("pub-1")
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
+                .shardId(1)
+                .shardCount(1)
                 .latitude(60.352374)
                 .longitude(13.334253)
                 .originatingCountry(originatingCountry)
@@ -245,6 +249,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();
@@ -291,6 +297,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
             }
@@ -392,6 +400,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,12002,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();
@@ -468,6 +478,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();

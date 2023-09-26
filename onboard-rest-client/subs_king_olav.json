@@ -1,0 +1,8 @@
+{	"name" : "king_gustaf.bouvetinterchange.eu",
+  "version" : "1.0",
+  "subscriptions" : [
+    {
+      "selector" : "originatingCountry = 'NO' and publisherId = 'NO00000' and quadTree like '%,12004%'"
+
+    }]
+}

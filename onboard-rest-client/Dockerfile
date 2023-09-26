@@ -28,4 +28,7 @@ ADD systemtest_remote_cap.json /
 ADD redirect_sub_king_gustaf_denm_no.json /
 ADD cap_king_charles_denm_no.json /
 ADD sub_king_charles_denm_no.json /
+ADD caps_king_olav.json /
+ADD subs_king_olav.json /
+ADD dels_king_olav.json /
 ENTRYPOINT ["/entrypoint.sh"]

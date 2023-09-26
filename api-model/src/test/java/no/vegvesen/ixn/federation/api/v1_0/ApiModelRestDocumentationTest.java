@@ -25,7 +25,14 @@ public class ApiModelRestDocumentationTest {
                                         Collections.singleton("1234"),
                                         Collections.singleton(6)
                                 ),
-                                new MetadataApi()
+                                new MetadataApi(
+                                        1,
+                                        "info.com",
+                                        RedirectStatusApi.OPTIONAL,
+                                        0,
+                                        0,
+                                        0
+                                )
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();
