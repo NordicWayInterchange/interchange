@@ -72,7 +72,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(serviceProviderCapabilities));
             return 0;
         }
     }
@@ -92,7 +92,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             AddCapabilitiesRequest capability = mapper.readValue(file,AddCapabilitiesRequest.class);
             AddCapabilitiesResponse result = client.addCapability(capability);
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -278,7 +278,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             PrivateChannelApi privateChannel = mapper.readValue(file,PrivateChannelApi.class);
             PrivateChannelApi result = client.addPrivateChannel(privateChannel);
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -312,7 +312,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             PrivateChannelListApi result = client.getPrivateChannels();
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
