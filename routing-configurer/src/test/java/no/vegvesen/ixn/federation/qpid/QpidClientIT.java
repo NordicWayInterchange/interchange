@@ -30,10 +30,6 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDER
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
- * the actual hostname would normally end up as something like "localhost".
- */
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
@@ -41,10 +37,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 
 	@Container
-	private static final KeysContainer keyContainer = getKeyContainer(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+	private static final KeysContainer keyContainer = getKeyContainer(QpidClientIT.class,"my_ca", "localhost", "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "testhost.p12", "password", "truststore.jks", "password","localhost")
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
