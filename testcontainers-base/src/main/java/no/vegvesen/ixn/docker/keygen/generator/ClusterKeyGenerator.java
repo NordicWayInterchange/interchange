@@ -2,6 +2,7 @@ package no.vegvesen.ixn.docker.keygen.generator;
 
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.keygen.*;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.CertIOException;
@@ -11,13 +12,14 @@ import org.bouncycastle.cert.jcajce.JcaX500NameUtil;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
-import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
@@ -87,22 +89,27 @@ public class ClusterKeyGenerator {
                 //TODO create keyStore for host (using chain, I expect)
             }
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
-                KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(description.getName(), description.getCountry());
-                List<X509Certificate> spCertChain = generateServiceProviderCertBC(spCsr.getCsr(), topCa.getCertificate(), intermediateCert.getCertificate(), intermediateCsr.getKeyPair().getPrivate(),description.getName());
-                String serviceProviderKeystorePassword = generatePassword(random,24);
-                String serviceProviderKeystoreName = description.getName() + ".p12";
-                Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
-                X509Certificate[] certChain = spCertChain.toArray(new X509Certificate[0]);
-                generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), spCsr.getKeyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
-                Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
-                saveCert(spCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
-                Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
-                saveCertChain(spCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
-                Path serviceProviderKeyPath = outputFolder.resolve(String.format("%s.key.pem", description.getName()));
-                saveKeyPair(spCsr.getKeyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
+                generateServiceProviderKeys(outputFolder, description, random, topCa.getCertificate(), intermediateCert.getCertificate(), intermediateCsr.getKeyPair().getPrivate());
             }
 
         }
+    }
+
+    //TODO this could use a List of certificates. Much easier.
+    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, SecureRandom random, X509Certificate topCaCertificate, X509Certificate intermediateCertificate, PrivateKey intermediatePrivateKey) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException {
+        KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(description.getName(), description.getCountry());
+        List<X509Certificate> spCertChain = generateServiceProviderCertBC(spCsr.getCsr(), topCaCertificate, intermediateCertificate, intermediatePrivateKey, description.getName());
+        String serviceProviderKeystorePassword = generatePassword(random,24);
+        String serviceProviderKeystoreName = description.getName() + ".p12";
+        Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
+        X509Certificate[] certChain = spCertChain.toArray(new X509Certificate[0]);
+        generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), spCsr.getKeyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
+        Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
+        saveCert(spCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
+        Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
+        saveCertChain(spCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
+        Path serviceProviderKeyPath = outputFolder.resolve(String.format("%s.key.pem", description.getName()));
+        saveKeyPair(spCsr.getKeyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
     }
 
     public static List<X509Certificate> generateServiceProviderCertBC(PKCS10CertificationRequest certificationRequest, X509Certificate caCertificate, X509Certificate intermediateCertificate, PrivateKey privateKey, String cn) {
@@ -326,19 +333,18 @@ public class ClusterKeyGenerator {
         return caDetails;
     }
 
-    private static KeyPair generateKeyPair(int keysize) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(keysize);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return keyPair;
+
+    //TODO this could return a list of certificates if a chain.
+    public static X509Certificate loadSingleCertificate(Path certificatePath) throws IOException, CertificateException {
+        PEMParser certificateParser = new PEMParser(new FileReader(certificatePath.toFile()));
+        X509CertificateHolder certificateHolder = (X509CertificateHolder) certificateParser.readObject();
+        return new JcaX509CertificateConverter().getCertificate(certificateHolder);
     }
 
-    private static String generatePassword(SecureRandom random, int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i =  0; i < length; i++) {
-            builder.append(allowedChars[random.nextInt(allowedChars.length)]);
-        }
-        return builder.toString();
+    public static PrivateKey loadPrivateKey(Path pemKeyPath) throws IOException {
+        PEMParser keyParser = new PEMParser(new FileReader(pemKeyPath.toFile()));
+        return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) keyParser.readObject());
+
     }
 
     public static class KeyPairAndCertificate {
@@ -358,7 +364,23 @@ public class ClusterKeyGenerator {
             return certificate;
         }
     }
-    
+
+    private static KeyPair generateKeyPair(int keysize) throws NoSuchAlgorithmException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(keysize);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        return keyPair;
+    }
+
+    private static String generatePassword(SecureRandom random, int length) {
+        StringBuilder builder = new StringBuilder();
+        for (int i =  0; i < length; i++) {
+            builder.append(allowedChars[random.nextInt(allowedChars.length)]);
+        }
+        return builder.toString();
+    }
+
+
     
     public static class KeyPairAndCsr {
         private KeyPair keyPair;
