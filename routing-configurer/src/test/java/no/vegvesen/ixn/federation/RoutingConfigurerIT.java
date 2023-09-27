@@ -923,9 +923,24 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
-
+		System.out.println(subscription.getExchangeName());
 		assertThat(subscription.exchangeIsRemoved()).isTrue();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
+	}
+
+	@Test
+	public void subscriptionExchangeIsNotRemovedWhenSubscriptionIsDeleted() {
+		String exchangeName = "subscription-exchange-one";
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
 	}
 
 	@Test

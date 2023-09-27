@@ -120,4 +120,43 @@ public class NeighbourSubscriptionDeleteServiceIT {
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
 
+    @Test
+    public void subscriptionIsNotDeletedBeforeExchangeIsRemoved() {
+        String neighbourName = "my-neighbour";
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName(neighbourName);
+
+        Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+        ourSubscription.setExchangeName("my-exchange");
+
+        Set<Subscription> subscriptions = new HashSet<>();
+        subscriptions.add(ourSubscription);
+
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        neighbourRepository.save(neighbour);
+
+        service.deleteSubscriptions(mockNeighbourFacade);
+
+        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+    }
+
+    @Test
+    public void subscriptionIsDeletedAfterExchangeIsRemoved() {
+        String neighbourName = "my-neighbour";
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName(neighbourName);
+
+        Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+
+        Set<Subscription> subscriptions = new HashSet<>();
+        subscriptions.add(ourSubscription);
+
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        neighbourRepository.save(neighbour);
+
+        service.deleteSubscriptions(mockNeighbourFacade);
+
+        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
+    }
+
 }
