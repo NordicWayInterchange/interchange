@@ -84,6 +84,21 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+
+	public ServiceProvider(String name,
+						   Capabilities capabilities,
+						   Set<LocalSubscription> localSubscriptions,
+						   Set<PrivateChannel> privateChannels,
+						   Set<LocalDelivery> localDeliveries,
+						   LocalDateTime subscriptionUpdated) {
+		this.name = name;
+		this.capabilities = capabilities;
+		this.subscriptions.addAll(localSubscriptions);
+		this.privateChannels.addAll(privateChannels);
+		this.deliveries.addAll(localDeliveries);
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}

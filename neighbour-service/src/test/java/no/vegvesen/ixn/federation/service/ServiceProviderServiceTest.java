@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -138,5 +139,11 @@ public class ServiceProviderServiceTest {
         service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(0);
+    }
+
+
+    @Test
+    public void updateDeliveryStatusShouldNotChangeTheStatusOfADeliveryThatDoesNotHaveAnExchangeYet() {
+        fail();
     }
 }
