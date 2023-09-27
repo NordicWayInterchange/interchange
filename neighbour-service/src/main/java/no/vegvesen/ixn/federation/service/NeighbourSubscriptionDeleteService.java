@@ -41,15 +41,19 @@ public class NeighbourSubscriptionDeleteService {
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         if (matches.isEmpty()) {
                             try{
-                                neighbourFacade.deleteSubscription(neighbour, subscription);
-                                subscriptionsToDelete.add(subscription);
+                                if (subscription.exchangeIsRemoved()) {
+                                    neighbourFacade.deleteSubscription(neighbour, subscription);
+                                    subscriptionsToDelete.add(subscription);
+                                }
                             } catch(SubscriptionDeleteException e) {
                                 neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                                 logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
                             } catch(SubscriptionNotFoundException e) {
                                 logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
                             } finally {
-                                subscriptionsToDelete.add(subscription);
+                                if (subscription.exchangeIsRemoved()) {
+                                    subscriptionsToDelete.add(subscription);
+                                }
                             }
                         }
                     }
