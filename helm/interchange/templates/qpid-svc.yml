@@ -33,6 +33,8 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 spec:
+  ipFamilies:
+    - IPv6
   type: LoadBalancer
   loadBalancerIP: {{ .Values.static_external_ip }}
   externalTrafficPolicy: Cluster

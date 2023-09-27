@@ -10,6 +10,8 @@ metadata:
     component: napcore-server
     release: {{ .Release.Name }}
 spec:
+  ipFamilies:
+    - IPv6
   type: LoadBalancer
   loadBalancerIP: {{ .Values.static_external_ip }}
   externalTrafficPolicy: Cluster
