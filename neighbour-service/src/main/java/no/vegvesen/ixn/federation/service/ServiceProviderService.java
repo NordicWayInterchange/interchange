@@ -119,7 +119,9 @@ public class ServiceProviderService {
                         || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                         || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
                     if (outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId()).isEmpty()) {
-                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                        if (! delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                            delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                        }
                     } else {
                         if (!delivery.exchangeExists()) {
                             String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
