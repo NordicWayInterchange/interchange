@@ -9,11 +9,11 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -92,6 +93,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     @MockBean
     OutgoingMatchRepository outgoingMatchRepository;
 
+
+    @Autowired
+    QpidClient client;
+
     @Autowired
     ServiceProviderRouter router;
 
@@ -112,8 +117,9 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 Collections.emptySet(),
                 LocalDateTime.now());
-        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        router.syncServiceProviders(Collections.singleton(serviceProvider));
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        QpidDelta delta = client.getQpidDelta();
+        router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
             for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {

@@ -6,9 +6,9 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.qpid.QpidAcl;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -50,58 +50,63 @@ public class ServiceProviderRouter {
         return repository.findAll();
     }
 
-    public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
-        List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
+    public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
-            syncPrivateChannels(name);
-            tearDownDeliveryQueues(name);
-            tearDownCapabilityExchanges(name);
-            syncSubscriptions(name);
-            removeUnwantedSubscriptions(name);
+            serviceProvider = syncPrivateChannels(serviceProvider, delta);
+            serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
+            serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
+            serviceProvider = syncSubscriptions(serviceProvider, delta);
+            serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
+            GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                optionallyAddServiceProviderToGroup(groupMemberNames,name);
+                if (groupMember == null) {
+                    qpidClient.addMemberToGroup(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
+                }
             } else {
-                if (groupMemberNames.contains(serviceProvider.getName())){
-                    removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
+                if (groupMember != null) {
+                    qpidClient.removeMemberFromGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
-            setUpCapabilityExchanges(name);
-            bindCapabilityExchangesToBiQueue(name);
-            syncLocalSubscriptionsToServiceProviderCapabilities(name, serviceProviders);
-            setUpDeliveryQueue(name);
+
+            serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
+            bindCapabilityExchangesToBiQueue(serviceProvider, delta);
+            serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
+            serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
     }
 
-    public void syncSubscriptions(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
-        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-            if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                processSubscription(serviceProvider, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+    public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
+        if (!serviceProvider.getSubscriptions().isEmpty()) {
+            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                    processSubscription(serviceProvider, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort(), delta);
+                } else {
+                    processRedirectSubscription(subscription);
+                }
             }
-            else {
-                processRedirectSubscription(subscription);
-            }
+            serviceProvider = repository.save(serviceProvider);
         }
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
-    public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort) {
+    public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort, QpidDelta delta) {
         switch (subscription.getStatus()) {
             case REQUESTED:
                 if (subscription.getLocalEndpoints().isEmpty()) {
-                    LocalEndpoint endpoint = new LocalEndpoint(UUID.randomUUID().toString(), nodeName, Integer.parseInt(messageChannelPort));
+                    String queueName = "loc-" + UUID.randomUUID().toString();
+                    LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeName, Integer.parseInt(messageChannelPort));
                     subscription.getLocalEndpoints().add(endpoint);
                 }
                 //NOTE fallthrough!
             case CREATED:
-                onRequested(serviceProvider.getName(), subscription);
+                onRequested(serviceProvider.getName(), subscription, delta);
                 break;
             case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
-                onTearDown(serviceProvider, subscription);
+                onTearDown(serviceProvider, subscription, delta);
                 break;
             case ILLEGAL:
                 // Remove the subscription from the ServiceProvider
@@ -113,13 +118,15 @@ public class ServiceProviderRouter {
         }
     }
 
-    private void onTearDown(ServiceProvider serviceProvider, LocalSubscription subscription) {
+    private void onTearDown(ServiceProvider serviceProvider, LocalSubscription subscription, QpidDelta delta) {
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
-            if (qpidClient.queueExists(source)) {
+            Queue queue = delta.findByQueueName(source);
+            if (queue != null) {
                 qpidClient.removeReadAccess(serviceProvider.getName(), source);
-                qpidClient.removeQueue(source);
+                qpidClient.removeQueue(queue);
+                delta.removeQueue(queue);
                 logger.info("Removed queue for LocalSubscription {}", subscription);
             }
             endpointsToRemove.add(endpoint);
@@ -130,25 +137,27 @@ public class ServiceProviderRouter {
         subscription.getConnections().clear();
     }
 
-    public void removeUnwantedSubscriptions(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
-        Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
-        for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
-            if (!localSubscription.isSubscriptionWanted()) {
-                List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                if (matches.isEmpty() && localSubscription.getLocalEndpoints().isEmpty()) {
-                    subscriptionsToRemove.add(localSubscription);
+    public ServiceProvider removeUnwantedSubscriptions(ServiceProvider serviceProvider) {
+        if (!serviceProvider.getSubscriptions().isEmpty()) {
+            Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
+            for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
+                if (!localSubscription.isSubscriptionWanted()) {
+                    List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+                    if (matches.isEmpty() && localSubscription.getLocalEndpoints().isEmpty()) {
+                        subscriptionsToRemove.add(localSubscription);
+                    }
                 }
             }
+            serviceProvider.removeSubscriptions(subscriptionsToRemove);
+            serviceProvider = repository.save(serviceProvider);
         }
-        serviceProvider.removeSubscriptions(subscriptionsToRemove);
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
-    private void onRequested(String serviceProviderName, LocalSubscription subscription) {
+    private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
-            optionallyCreateQueue(source, serviceProviderName);
+            optionallyCreateQueue(source, serviceProviderName, delta);
         }
         subscription.setStatus(LocalSubscriptionStatus.CREATED);
     }
@@ -168,51 +177,42 @@ public class ServiceProviderRouter {
         }
     }
 
-    private void optionallyCreateQueue(String queueName, String serviceProviderName) {
-        if (!qpidClient.queueExists(queueName)) {
+    private void optionallyCreateQueue(String queueName, String serviceProviderName, QpidDelta delta) {
+        if (!delta.queueExists(queueName)) {
             logger.info("Creating queue {}", queueName);
-            qpidClient.createQueue(queueName);
+            Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
             qpidClient.addReadAccess(serviceProviderName, queueName);
+            delta.addQueue(queue);
         }
     }
 
-    private void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
-        if (!groupMemberNames.contains(name)) {
-            logger.debug("Adding member {} to group {}", name,SERVICE_PROVIDERS_GROUP_NAME);
-            qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
+    public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
+        if (!serviceProvider.getPrivateChannels().isEmpty()) {
+            Set<PrivateChannel> privateChannels = new HashSet<>();
+            privateChannels.addAll(serviceProvider.getPrivateChannels());
+            if (!privateChannels.isEmpty()) {
+                syncPrivateChannelsWithQpid(privateChannels, serviceProvider.getName(), delta);
+                Set<PrivateChannel> privateChannelsToRemove = privateChannels
+                        .stream()
+                        .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
+                        .collect(Collectors.toSet());
+
+                privateChannels.removeAll(privateChannelsToRemove);
+                serviceProvider.setPrivateChannels(privateChannels);
+            }
+            serviceProvider = repository.save(serviceProvider);
         }
+        return serviceProvider;
     }
 
-    private void removeServiceProviderFromGroup(String name, String groupName) {
-        logger.debug("Removing member {} from group {}", name,groupName);
-        qpidClient.removeMemberFromGroup(name,groupName);
-    }
-
-    public void syncPrivateChannels(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
-        Set<PrivateChannel> privateChannels = new HashSet<>();
-        privateChannels.addAll(serviceProvider.getPrivateChannels());
-        if(!privateChannels.isEmpty()) {
-            syncPrivateChannelsWithQpid(privateChannels, serviceProviderName);
-            Set<PrivateChannel> privateChannelsToRemove = privateChannels
-                    .stream()
-                    .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
-                    .collect(Collectors.toSet());
-
-            privateChannels.removeAll(privateChannelsToRemove);
-            serviceProvider.setPrivateChannels(privateChannels);
-            repository.save(serviceProvider);
-        }
-    }
-
-    private void syncPrivateChannelsWithQpid(Set<PrivateChannel> privateChannels, String name) {
-        List<String> groupMemberNames = qpidClient.getGroupMemberNames(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+    private void syncPrivateChannelsWithQpid(Set<PrivateChannel> privateChannels, String name, QpidDelta delta) {
         Set<PrivateChannel> privateChannelsWithStatusCreated = privateChannels
                 .stream()
                 .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
                 .collect(Collectors.toSet());
 
-        if(!groupMemberNames.contains(name)) {
+        GroupMember groupMember = qpidClient.getGroupMember(name,CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+        if (groupMember == null) {
             qpidClient.addMemberToGroup(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
             logger.debug("Adding member {} to group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
         }
@@ -224,40 +224,53 @@ public class ServiceProviderRouter {
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
             if(privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
-                qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                GroupMember peer = qpidClient.getGroupMember(peerName,CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                if (peer == null) {
+                    qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                }
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                qpidClient.createQueue(queueName);
+                if (!delta.queueExists(queueName)) {
+                    Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+                    delta.addQueue(queue);
+                }
                 logger.info("Creating queue {}", queueName);
-                QpidAcl acl = qpidClient.getQpidAcl();
-                acl.addQueueWriteAccess(name,queueName);
-                acl.addQueueWriteAccess(peerName,queueName);
-                acl.addQueueReadAccess(name, queueName);
-                acl.addQueueReadAccess(peerName,queueName);
-                qpidClient.postQpidAcl(acl);
+                VirtualHostAccessController provider = qpidClient.getQpidAcl();
+                provider.addExchangeWriteAccess(name,queueName);
+                provider.addExchangeWriteAccess(peerName,queueName);
+                provider.addQueueReadAccess(name,queueName);
+                provider.addQueueReadAccess(peerName,queueName);
+                qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
             if(privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
-                if(groupMemberNames.contains(name) && privateChannelsWithStatusCreated.isEmpty()){
-                    qpidClient.removeMemberFromGroup(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                GroupMember member = qpidClient.getGroupMember(name,CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                if(member != null && privateChannelsWithStatusCreated.isEmpty()){
+                    qpidClient.removeMemberFromGroup(member, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     logger.debug("Removing member {} from group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 }
-                qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                if (peer != null) {
+                    qpidClient.removeMemberFromGroup(peer, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                }
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                QpidAcl acl = qpidClient.getQpidAcl();
-                acl.removeQueueWriteAccess(peerName,queueName);
-                acl.removeQueueWriteAccess(name, queueName);
-                acl.removeQueueReadAccess(peerName,queueName);
-                acl.removeQueueReadAccess(name, queueName);
-                qpidClient.postQpidAcl(acl);
+                VirtualHostAccessController provider = qpidClient.getQpidAcl();
+                provider.removeQueueWriteAccess(peerName,queueName);
+                provider.removeQueueWriteAccess(name,queueName);
+                provider.removeQueueReadAccess(peerName,queueName);
+                provider.removeQueueReadAccess(name,queueName);
+                qpidClient.postQpidAcl(provider);
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
-                qpidClient.removeQueue(queueName);
+                Queue queue = delta.findByQueueName(queueName);
+                if (queue != null) {
+                    qpidClient.removeQueue(queue);
+                    delta.removeQueue(queue);
+                }
             }
         }
     }
 
-    public void setUpCapabilityExchanges(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+    public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         if (serviceProvider.hasCapabilities()) {
             for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
                 if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
@@ -265,115 +278,109 @@ public class ServiceProviderRouter {
                         String exchangeName = "cap-" + UUID.randomUUID();
                         capability.setCapabilityExchangeName(exchangeName);
                     }
-                    if (!qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
-                        qpidClient.createTopicExchange(capability.getCapabilityExchangeName());
-                        logger.info("Created exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+                    if (!delta.exchangeExists(capability.getCapabilityExchangeName())) {
+                        String capabilityExchangeName = capability.getCapabilityExchangeName();
+                        Exchange exchange = qpidClient.createHeadersExchange(capabilityExchangeName);
+                        logger.info("Created exchange {} for Capability with id {}", capabilityExchangeName, capability.getId());
+                        delta.addExchange(exchange);
                     }
                 }
             }
         }
-        repository.save(serviceProvider);
+        return repository.save(serviceProvider);
     }
 
-    public void bindCapabilityExchangesToBiQueue(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+    public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
             if (capability.exchangeExists()) {
-                if (!qpidClient.getQueueBindKeys("bi-queue").contains(capability.getCapabilityExchangeName())) {
+                if (!delta.exchangeHasBindingToQueue(capability.getCapabilityExchangeName(), "bi-queue")){
                     String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-                    qpidClient.bindToBiQueue(capabilitySelector, capability.getCapabilityExchangeName());
+                    qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), "bi-queue", new Filter(capabilitySelector)));
+                    delta.addBindingToExchange(capability.getCapabilityExchangeName(), capabilitySelector, "bi-queue");
                 }
             }
         }
     }
 
-    public void tearDownCapabilityExchanges(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+    public ServiceProvider tearDownCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         Set<CapabilitySplit> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
-        for (CapabilitySplit capability : tearDownCapabilities) {
-            if (capability.exchangeExists()) {
-                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
-                    qpidClient.removeExchange(capability.getCapabilityExchangeName());
-                    logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+        if (!tearDownCapabilities.isEmpty()) {
+            for (CapabilitySplit capability : tearDownCapabilities) {
+                if (capability.exchangeExists()) {
+                    Exchange exchange = delta.findByExchangeName(capability.getCapabilityExchangeName());
+                    if (exchange != null) {
+                        qpidClient.removeExchange(exchange);
+                        logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+                        delta.removeExchange(exchange);
+                    }
+                    capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
                 }
-                capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
             }
+            serviceProvider = repository.save(serviceProvider);
         }
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
-    public void setUpDeliveryQueue(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
-        for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-            if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
-                if (!qpidClient.exchangeExists(delivery.getExchangeName())) {
-                    qpidClient.createDirectExchange(delivery.getExchangeName());
-                    qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
-                }
+    public ServiceProvider setUpDeliveryQueue(ServiceProvider serviceProvider, QpidDelta delta) {
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
+                    if (!delta.exchangeExists(delivery.getExchangeName())) {
+                        String exchangeName = delivery.getExchangeName();
+                        Exchange exchange = qpidClient.createDirectExchange(exchangeName);
+                        qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
+                        delta.addExchange(exchange);
+                    }
 
-                Set<String> existingConnections = delivery.getConnections().stream()
-                        .map(LocalDeliveryConnection::getDestination)
-                        .collect(Collectors.toSet());
+                    for (OutgoingMatch match : matches) {
+                        if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED) &&
+                                match.getCapability().exchangeExists()) {
 
-                for (OutgoingMatch match : matches) {
-                    if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED) &&
-                            match.getCapability().exchangeExists()) {
-                        if (!existingConnections.contains(match.getCapability().getCapabilityExchangeName())) {
-                            LocalDeliveryConnection connection = new LocalDeliveryConnection(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
-                            String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                            qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
-                            delivery.addConnection(connection);
+                            if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName())) {
+                                String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
+                                qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName(), new Filter(joinedSelector)));
+                                delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, match.getCapability().getCapabilityExchangeName());
+                            }
                         }
                     }
                 }
             }
+            serviceProvider = repository.save(serviceProvider);
         }
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
-    public void tearDownDeliveryQueues(String serviceProviderName) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
-        for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-            if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
-                    && !delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
-                List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
-                if (matches.isEmpty()) {
-                    if (delivery.exchangeExists()) {
-                        String target = delivery.getExchangeName();
-                        if (qpidClient.exchangeExists(target)) {
-                            logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-                            qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                            qpidClient.removeExchange(target);
+    public ServiceProvider tearDownDeliveryQueues(ServiceProvider serviceProvider, QpidDelta delta) {
+        if (!serviceProvider.getDeliveries().isEmpty()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
+                        && !delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
+                    if (matches.isEmpty()) {
+                        if (delivery.exchangeExists()) {
+                            String target = delivery.getExchangeName();
+                            Exchange exchange = delta.findByExchangeName(target);
+                            if (exchange != null) {
+                                logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                                qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                                qpidClient.removeExchange(exchange);
+                                delta.removeExchange(exchange);
+                            }
+                            delivery.setExchangeName("");
                         }
-                        delivery.setExchangeName("");
-                        delivery.removeConnections(delivery.getConnections());
-                    }
-                    if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
-                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
-                    }
-                } else {
-                    Set<String> capabilityConnections = matches.stream()
-                            .filter(m -> m.getCapability().getStatus().equals(CapabilityStatus.CREATED))
-                            .map(m -> m.getCapability().getCapabilityExchangeName())
-                            .collect(Collectors.toSet());
-
-                    Set<LocalDeliveryConnection> connectionsToRemove = new HashSet<>();
-
-                    for (LocalDeliveryConnection connection : delivery.getConnections()) {
-                        if (!capabilityConnections.contains(connection.getDestination())) {
-                            connectionsToRemove.add(connection);
+                        if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
+                            delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                         }
                     }
-
-                    delivery.removeConnections(connectionsToRemove);
                 }
             }
+            serviceProvider = repository.save(serviceProvider);
         }
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
     public String joinDeliverySelectorWithCapabilitySelector(CapabilitySplit capability, String selector) {
@@ -383,6 +390,7 @@ public class ServiceProviderRouter {
     @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
     public void createBindingsWithMatches() {
         List<ServiceProvider> serviceProviders = repository.findAll();
+        QpidDelta delta = qpidClient.getQpidDelta();
         for (ServiceProvider serviceProvider : serviceProviders) {
             for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
                 if (localSubscription.isSubscriptionWanted() && !localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
@@ -390,11 +398,13 @@ public class ServiceProviderRouter {
                         List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                         for (Match match : matches) {
                             if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
-                                for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                    String exchangeName = match.getSubscription().getExchangeName();
-                                    if (qpidClient.exchangeExists(exchangeName) && qpidClient.queueExists(queueName)) {
-                                        if (!qpidClient.getQueueBindKeys(queueName).contains(qpidClient.createBindKey(exchangeName, queueName))) {
-                                            bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
+                                Exchange exchange = delta.findByExchangeName(match.getSubscription().getExchangeName());
+                                if (exchange != null) {
+                                    for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
+                                        Queue queue = delta.findByQueueName(queueName);
+                                        if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
+                                            bindQueueToSubscriptionExchange(queueName, exchange.getName(), localSubscription);
+                                            delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
                                         }
                                     }
                                 }
@@ -408,11 +418,10 @@ public class ServiceProviderRouter {
 
     private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
         logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.bindSubscriptionExchange(localSubscription.getSelector(), exchangeName, queueName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
     }
 
-    public void syncLocalSubscriptionsToServiceProviderCapabilities(String serviceProviderName, Iterable<ServiceProvider> serviceProviders) {
-        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+    public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
         if (serviceProvider.hasActiveSubscriptions()) {
             Set<CapabilitySplit> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
@@ -426,12 +435,12 @@ public class ServiceProviderRouter {
                                     .collect(Collectors.toSet());
 
                             Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
-
                             for (CapabilitySplit capability : matchingCapabilities) {
                                 if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                    if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                                    if (delta.exchangeExists(capability.getCapabilityExchangeName())) {
                                         LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                        qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
+                                        qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+                                        delta.addBindingToExchange(capability.getCapabilityExchangeName(), subscription.getSelector(), endpoint.getSource());
                                         LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
                                         subscription.addConnection(connection);
                                     }
@@ -441,8 +450,9 @@ public class ServiceProviderRouter {
                     }
                 }
             }
+            serviceProvider = repository.save(serviceProvider);
         }
-        repository.save(serviceProvider);
+        return serviceProvider;
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<CapabilitySplit> capabilities) {

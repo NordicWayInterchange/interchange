@@ -47,17 +47,18 @@ public class NeigbourDiscoveryService {
         this.discovererProperties = discovererProperties;
     }
     public void checkForNewNeighbours() {
-        logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
+        logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
         List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
         logger.debug("Got neighbours from DNS {}.", neighbours);
 
         for (Neighbour neighbour : neighbours) {
-            NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-            if (neighbourRepository.findByName(neighbour.getName()) == null && !neighbour.getName().equals(interchangeNodeProperties.getName())) {
+            String neighbourName = neighbour.getName();
+            NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbourName);
+            if (neighbourRepository.findByName(neighbourName) == null && !neighbourName.equals(interchangeNodeProperties.getName())) {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
                 neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-                logger.info("Found a new neighbour. Saving in database");
+                logger.info("Found new neighbour {}. Saving in database",neighbourName);
                 neighbourRepository.save(neighbour);
             }
             NeighbourMDCUtil.removeLogVariables();
@@ -65,7 +66,6 @@ public class NeigbourDiscoveryService {
     }
 
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
-        logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 Capabilities.CapabilitiesStatus.UNKNOWN,
                 Capabilities.CapabilitiesStatus.KNOWN,
@@ -98,10 +98,11 @@ public class NeigbourDiscoveryService {
     public void retryUnreachable(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
         if (!unreachableNeighbours.isEmpty()) {
-            logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
+            logger.debug("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
             for (Neighbour neighbour : unreachableNeighbours) {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+                    logger.info("Retrying capability post to neighbour {}", neighbour.getName());
                     postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
@@ -120,15 +121,14 @@ public class NeigbourDiscoveryService {
             neighbourCapabilities.setCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
-            logger.info("Successfully completed capability exchange.");
-            logger.debug("Updated neighbour: {}", neighbour.toString());
+            logger.debug("Updated neighbour: {}", neighbour);
         } catch (CapabilityPostException e) {
             logger.error("Capability post failed", e);
             neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
             neighbour = neighbourRepository.save(neighbour);
-            logger.info("Saving updated neighbour: {}", neighbour.toString());
+            logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
 
@@ -139,6 +139,7 @@ public class NeigbourDiscoveryService {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
+                        logger.info("Posting subscription request to neighbour {}", neighbour.getName());
                         postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {
                         logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
@@ -167,7 +168,6 @@ public class NeigbourDiscoveryService {
         String neighbourName = neighbour.getName();
         Set<CapabilitySplit> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
-        logger.info("Found neighbour for subscription request: {}", neighbourName);
         Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
@@ -194,9 +194,9 @@ public class NeigbourDiscoveryService {
 
                     }
                     controlConnection.okConnection();
-                    logger.info("Successfully posted subscription request to neighbour.");
+                    logger.info("Successfully posted subscription request to {}", neighbourName);
                 } else {
-                    logger.info("Too soon to post subscription request to neighbour when backing off");
+                    logger.info("Too soon to post subscription request to neighbour {} when backing off",neighbourName);
                 }
             } catch (SubscriptionRequestException e) {
                 controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
@@ -204,9 +204,9 @@ public class NeigbourDiscoveryService {
             }
             // Successful subscription request, update discovery state subscription request timestamp.
             neighbour = neighbourRepository.save(neighbour);
-            logger.info("Saving updated neighbour: {}", neighbour.toString());
+            //logger.info("Saving updated neighbour: {}", neighbour.toString());
         } else {
-            logger.info("Neighbour has our last subscription request");
+            logger.info("Neighbour {} has our last subscription request", neighbourName);
         }
     }
 
@@ -266,7 +266,7 @@ public class NeigbourDiscoveryService {
                         subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
                         neighbour.getControlConnection().okConnection();
                         if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                            logger.info("Subscription for neighbour {} with path {} is CREATED", neighbour.getName(), subscription.getPath());
+                            logger.debug("Subscription for neighbour {} with path {} is CREATED", neighbour.getName(), subscription.getPath());
                         }
                         logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
                     } else {
@@ -294,7 +294,7 @@ public class NeigbourDiscoveryService {
                 }
             }
         } finally {
-            logger.info("Saving updated neighbour: {}", neighbour.toString());
+            logger.info("Saving updated neighbour: {}", neighbour.getName());
             neighbourRepository.save(neighbour);
         }
     }

@@ -2,7 +2,7 @@ FROM eclipse-temurin:11-alpine
 
 RUN apk add --no-cache bash openssl jq
 
-ENV QPID_VERSION=8.0.6
+ENV QPID_VERSION=9.0.0
 
 RUN cd /usr/local && \
     wget http://archive.apache.org/dist/qpid/broker-j/${QPID_VERSION}/binaries/apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \
@@ -16,7 +16,6 @@ ENV QPID_HOME="/usr/local/qpid"
 ENV VHOST_FILE="/config/vhost.json"
 ENV PASSWD_FILE="/config/passwd"
 ENV GROUPS_FILE="/config/groups"
-ENV QPID_OPTS="-Djdk.tls.client.protocols=\"TLSv1.3\""
 ADD config.json ${QPID_WORK}
 ADD entrypoint.sh /
 RUN chmod ug+x entrypoint.sh

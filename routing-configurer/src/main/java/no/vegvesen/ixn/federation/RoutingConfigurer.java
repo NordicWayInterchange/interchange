@@ -5,7 +5,8 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -48,8 +49,9 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
+		QpidDelta delta = qpidClient.getQpidDelta();
 		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
-		setupRouting(readyToSetupRouting);
+		setupRouting(readyToSetupRouting, delta);
 
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
@@ -67,8 +69,9 @@ public class RoutingConfigurer {
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
-				if (qpidClient.queueExists(sub.getQueueName())) {
-					qpidClient.removeQueue(sub.getQueueName());
+				Queue queue = qpidClient.getQueue(sub.getQueueName());
+				if (queue != null) {
+					qpidClient.removeQueue(queue);
 				}
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
@@ -85,13 +88,13 @@ public class RoutingConfigurer {
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
-	private void setupRouting(List<Neighbour> readyToSetupRouting) {
+	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
-			setupNeighbourRouting(subscriber);
+			setupNeighbourRouting(subscriber, delta);
 		}
 	}
 
-	void setupNeighbourRouting(Neighbour neighbour) {
+	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
@@ -99,11 +102,11 @@ public class RoutingConfigurer {
 			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
 			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
+			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
 			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
 			if(!allAcceptedSubscriptions.isEmpty()){
-				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName());
+				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
@@ -111,19 +114,19 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName) {
+	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				//if any of the matching caps does not have the exchange set
 				if (matchingCaps.stream().filter(m -> ! m.exchangeExists()).count() == 0) {
 					String queueName = "sub-" + UUID.randomUUID();
-					createQueue(queueName, neighbourName);
+					createQueue(queueName, neighbourName, delta);
 					subscription.setQueueName(queueName);
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
 					for (CapabilitySplit cap : matchingCaps) {
-						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
-							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
+						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
+							qpidClient.addBinding(cap.getCapabilityExchangeName(), new Binding(cap.getCapabilityExchangeName(), queueName, new Filter(subscription.getSelector())));
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
@@ -139,12 +142,12 @@ public class RoutingConfigurer {
 		logger.info("Set up routing for neighbour {}", neighbourName);
 	}
 
-	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities) {
+	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String redirectQueue = "re-" + UUID.randomUUID();
-				createQueue(redirectQueue, subscription.getConsumerCommonName());
+				createQueue(redirectQueue, subscription.getConsumerCommonName(), delta);
 				subscription.setQueueName(redirectQueue);
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
@@ -176,9 +179,9 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsCreated()) {
-							String exchangeName = UUID.randomUUID().toString();
+							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
-							qpidClient.createTopicExchange(exchangeName);
+							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
 							logger.debug("Set up exchange for subscription {}", subscription.toString());
 						}
 						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
@@ -212,7 +215,10 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {
-							qpidClient.removeExchange(subscription.getExchangeName());
+							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
+							if (exchange != null) {
+								qpidClient.removeExchange(exchange);
+							}
 							subscription.removeExchangeName();
 							logger.debug("Removed exchange for subscription {}", subscription.toString());
 						}
@@ -223,33 +229,31 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptionQueue(String exchange, NeighbourSubscription subscription) {
-		qpidClient.bindDirectExchange(subscription.getSelector(), exchange, subscription.getQueueName());
-	}
-
-	private void bindRemoteServiceProvider(String exchange, String commonName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.bindTopicExchange(acceptedSubscription.getSelector(),exchange,commonName);
+	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
+		qpidClient.addBinding(exchange, new Binding(exchange, queueName, new Filter(acceptedSubscription.getSelector())));
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-		serviceProviderRouter.syncServiceProviders(serviceProviders);
+		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
 	}
 
-	private void createQueue(String queueName, String subscriberName) {
-		qpidClient.createQueue(queueName);
-		qpidClient.addReadAccess(subscriberName,queueName);
+	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
+		if (!delta.queueExists(queueName)) {
+			Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+			qpidClient.addReadAccess(subscriberName, queueName);
+			delta.addQueue(queue);
+		}
 	}
 
 	private void addSubscriberToGroup(String groupName, String subscriberName) {
-		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
 		logger.debug("Attempting to add subscriber {} to the group {}", subscriberName, groupName);
-		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
-		if (!existingGroupMembers.contains(subscriberName)) {
+		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
+		if (groupMember == null) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriberName, groupName);
-			qpidClient.addMemberToGroup(subscriberName, groupName);
+			qpidClient.addMemberToGroup(subscriberName,groupName);
 			logger.info("Added subscriber {} to Qpid group {}", subscriberName, groupName);
 		} else {
 			logger.warn("Subscriber {} already exists in the group {}", subscriberName, groupName);
@@ -257,11 +261,10 @@ public class RoutingConfigurer {
 	}
 
 	private void removeSubscriberFromGroup(String groupName, String subscriberName) {
-		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
-		if (existingGroupMembers.contains(subscriberName)) {
+		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
+		if (groupMember != null) {
 			logger.debug("Subscriber {} found in the groups {} Removing...", subscriberName, groupName);
-			qpidClient.removeMemberFromGroup(subscriberName, groupName);
-			logger.info("Removed subscriber {} from Qpid group {}", subscriberName, groupName);
+			qpidClient.removeMemberFromGroup(groupMember, groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriberName, groupName);
 		}

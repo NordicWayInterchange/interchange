@@ -8,8 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -24,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
-import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -74,7 +72,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -90,7 +88,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -120,7 +118,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueTwo = "queue-two";
         String exchangeName = "test-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -136,8 +134,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueOne);
-        qpidClient.bindTopicExchange(selector, exchangeName, queueTwo);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueOne, new Filter(selector)));
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueTwo, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -167,7 +165,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
 
-        qpidClient.createTopicExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
 
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -183,7 +181,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -216,6 +214,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
+                .shardId(1)
+                .shardCount(1)
                 .causeCode(causeCode)
                 .subCauseCode("76")
                 .build();

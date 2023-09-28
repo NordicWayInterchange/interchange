@@ -6,17 +6,13 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,7 +79,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createDirectExchange(exchangeName);
         String queueName = "outputQueue";
         //2. Create a queue
-        qpidClient.createQueue(queueName);
+        qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
         //2.1 Create a Capability to base a Validating selector on
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -101,7 +96,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String selector = creator.makeSelector(capability);
         System.out.println(selector);
         //3. Create a binding on exchange using the validating selector, pointing at queue
-        qpidClient.bindDirectExchange(selector, exchangeName, queueName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
         //4. Create a Source, sending one good message, and one bad
         AtomicInteger numMessages = new AtomicInteger();
@@ -134,6 +129,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
+                .shardId(1)
+                .shardCount(1)
                 .causeCode("6")
                 .subCauseCode("76")
                 .build();
@@ -148,6 +145,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .publicationId("pub-1")
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
+                .shardId(1)
+                .shardCount(1)
                 .latitude(60.352374)
                 .longitude(13.334253)
                 .originatingCountry(originatingCountry)
@@ -189,11 +188,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         //2. Creating read queue and adding read access.
-        qpidClient.createQueue(outQueueName);
+        qpidClient.createQueue(outQueueName, QpidClient.MAX_TTL_8_DAYS);
         qpidClient.addReadAccess("king_gustaf", outQueueName);
 
         //Create intermediate exchange. No ACL needed for this.
-        qpidClient.createTopicExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
@@ -208,8 +207,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(joinedSelector);
 
         //4. Adding binding on deliveryQueue to out-queue
-        qpidClient.bindDirectExchange(joinedSelector,inQueueName,exchangeName);
-        qpidClient.bindTopicExchange(subscriptionSelector, exchangeName, outQueueName);
+        qpidClient.addBinding(inQueueName, new Binding(inQueueName, exchangeName, new Filter(joinedSelector)));
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, outQueueName, new Filter(subscriptionSelector)));
 
         //5. Adding binding on out queue to outgoingExchange
         //TODO this is not being done. We need a lot of selectors here:
@@ -250,6 +249,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();
@@ -257,7 +258,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             System.out.println();
             Thread.sleep(200);
         }
-        System.out.println(qpidClient.getQpidAcl().aclAsString());
+        System.out.println(qpidClient.getQpidAcl());
         assertThat(numMessages.get()).isEqualTo(1);
     }
 
@@ -266,14 +267,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String input = "input_exchange";
         String output = "output_exchange";
 
-        qpidClient.createTopicExchange(input);
+        qpidClient.createHeadersExchange(input);
         qpidClient.addWriteAccess("king_gustaf", input);
 
-        qpidClient.createTopicExchange(output);
+        qpidClient.createHeadersExchange(output);
 
         String selector = "((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')";
 
-        qpidClient.bindTopicExchange(selector,input,output);
+        qpidClient.addBinding(input, new Binding(input, output, new Filter(selector)));
 
         AtomicInteger numMessages = new AtomicInteger();
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
@@ -296,6 +297,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
             }
@@ -309,8 +312,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     public void testDuplicateMessagesUsingOneDeliveryEndpoint() throws Exception {
         String capabilityExchange1 = "capability-exchange1";
         String capabilityExchange2 = "capability-exchange2";
-        String deliveryExchange = "delivery-exchange";
-        String subscriptionQueue = "king_gustaf";
+        String deliveryExchange = "delivery-exchange-test-duplicate";
+        String subscriptionQueue = "king_gustaf_output_queue";
 
         Subscription subscription = new Subscription(
                 "originatingCountry = 'NO'",
@@ -349,12 +352,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createDirectExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
-        qpidClient.createQueue(subscriptionQueue);
+        qpidClient.createQueue(subscriptionQueue, QpidClient.MAX_TTL_8_DAYS);
         qpidClient.addReadAccess("king_gustaf", subscriptionQueue);
 
-        qpidClient.createTopicExchange(capabilityExchange1);
+        qpidClient.createHeadersExchange(capabilityExchange1);
 
-        qpidClient.createTopicExchange(capabilityExchange2);
+        qpidClient.createHeadersExchange(capabilityExchange2);
 
         String deliverySelector = delivery.getSelector();
 
@@ -370,10 +373,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String joinedSelector2 = String.format("(%s) AND (%s)", capabilitySelector2, deliverySelector);
         System.out.println(joinedSelector2);
 
-        qpidClient.bindDirectExchange(joinedSelector1,deliveryExchange,capabilityExchange1);
-        qpidClient.bindDirectExchange(joinedSelector2,deliveryExchange,capabilityExchange2);
-        qpidClient.bindTopicExchange(subscriptionSelector, capabilityExchange1, subscriptionQueue);
-        qpidClient.bindTopicExchange(subscriptionSelector, capabilityExchange2, subscriptionQueue);
+        qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange1, new Filter(joinedSelector1)));
+        qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange2, new Filter(joinedSelector2)));
+        qpidClient.addBinding(capabilityExchange1, new Binding(capabilityExchange1, subscriptionQueue, new Filter(subscriptionSelector)));
+        qpidClient.addBinding(capabilityExchange2, new Binding(capabilityExchange2, subscriptionQueue, new Filter(subscriptionSelector)));
 
         AtomicInteger numMessages = new AtomicInteger();
 
@@ -397,6 +400,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,12002,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();
@@ -436,7 +441,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         //Create intermediate exchange. No ACL needed for this.
-        qpidClient.createTopicExchange(capabilityExchange);
+        qpidClient.createHeadersExchange(capabilityExchange);
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
@@ -448,8 +453,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(joinedSelector);
 
         //4. Adding binding on deliveryQueue to out-queue
-        qpidClient.bindDirectExchange(joinedSelector,deliveryExchange,capabilityExchange);
-        qpidClient.bindTopicExchange(capabilitySelector, capabilityExchange, consumeQueue);
+        qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(joinedSelector)));
+        qpidClient.addBinding(capabilityExchange, new Binding(capabilityExchange, consumeQueue, new Filter(capabilitySelector)));
 
         AtomicInteger numMessages = new AtomicInteger();
 
@@ -473,6 +478,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,")
+                        .shardId(1)
+                        .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
                 System.out.println();
@@ -485,4 +492,5 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         assertThat(numMessages.get()).isEqualTo(2);
 
     }
+
 }
