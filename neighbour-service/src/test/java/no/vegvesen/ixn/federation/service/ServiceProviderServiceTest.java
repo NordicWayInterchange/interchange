@@ -190,4 +190,33 @@ public class ServiceProviderServiceTest {
         verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
 
     }
+
+
+    @Test
+    public void updateDeliveryStatusShouldMakeDeliveryNoOverlapIfNoCapabilitiesMatch() {
+        LocalDelivery localDelivery = new LocalDelivery(
+                1,
+                "/deliveries/1",
+                "publicationId = '0001:0001'",
+                LocalDeliveryStatus.REQUESTED
+        );
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                new Capabilities(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.singleton(
+                        localDelivery
+                ),
+                LocalDateTime.now()
+
+        );
+        when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
+        when(outgoingMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
+        service.updateDeliveryStatus(serviceProvider.getName());
+        assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+        verify(serviceProviderRepository).findByName(serviceProvider.getName());
+        verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
+    }
 }
