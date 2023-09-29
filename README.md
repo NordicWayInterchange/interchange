@@ -39,18 +39,18 @@ For any questions please contact
 
 ### Prerequisites
 * Maven 3.5.x or later
-* Java 8
+* Java 11
 * Docker Engine 18.06.1-ce and Docker Compose 1.22.0 or later
 
 ### Building the project with Maven
 The maven build uses [testcontainers](https://www.testcontainers.org/) in the integration test stage, so you will need Docker installed locally
 in order to run the integration tests.
-To build the project without integration test, use `mvn build`, and to run the integration tests, run `mvn verify`.
+To build the project without integration test, use `mvn package`, and to run the integration tests, run `mvn verify`.
 
  
 ### Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
-is automatically built by GitHub and published to the container registry eu.gcr.io/nw-shared-w3ml/ on 
+is automatically built by GitHub and published to the container registry europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/ on 
 each commit. Each component in the system has its own registry.
 
 All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
@@ -77,8 +77,6 @@ The helm templates is provided under helm/interchange/templates.
 See the example values file helm/interchange/example_values.yml 
 
 ### Resources
-[Trello](https://trello.com/b/MXlcCmye/interchange)
-
 [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki)
 
 [Nordic Way](http://vejdirektoratet.dk/EN/roadsector/Nordicway/Pages/Default.aspx)
