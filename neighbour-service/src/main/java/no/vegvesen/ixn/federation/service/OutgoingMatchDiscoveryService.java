@@ -44,7 +44,6 @@ public class OutgoingMatchDiscoveryService {
                                     }
                                 }
                             }
-                            //TODO, set to NO_OVERLAP if we cannot find any matching capabilities
                         }
                     }
                 }

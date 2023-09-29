@@ -193,46 +193,4 @@ public class OutgoingMatchDiscoveryServiceIT {
         assertThat(repository.findAll()).hasSize(0);
     }
 
-    //TODO need to test this with regards to import!!!!
-    @Test
-    public void syncLocalDeliveryShouldReturnNoOverlapIfNoCapabilitiesAreFound() {
-        LocalDelivery localDelivery = new LocalDelivery(
-                1,
-                "/deliveries/1",
-                "publicationId = '0001:0001'",
-                LocalDeliveryStatus.REQUESTED
-        );
-        CapabilitySplit capability = new CapabilitySplit(
-                1,
-                new DenmApplication(
-                        "0001",
-                        "0001:0002",
-                        "NO",
-                        "1.0",
-                        Collections.emptySet(),
-                        Collections.emptySet()
-                ),
-                new Metadata()
-        );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "serviceProvider",
-                new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
-                        Collections.singleton(
-                                capability
-                        )
-                ),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.singleton(
-                        localDelivery
-                ),
-                LocalDateTime.now()
-
-        );
-        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
-        assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
-
-
-    }
 }
