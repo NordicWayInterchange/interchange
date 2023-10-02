@@ -64,6 +64,7 @@ public class RoutingConfigurer {
 		}
 	}
 
+	//TODO how about redirect subscriptions?
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);

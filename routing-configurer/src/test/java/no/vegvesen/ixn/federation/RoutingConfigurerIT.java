@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -957,6 +958,42 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
 		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();
 		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
+	}
+
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
+		String neighbourSPName = "neighbour-service-provider";
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName
+		);
+		String neighbourName = "redirect-neighbour";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						Collections.singleton(subscription)
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(UUID.randomUUID().toString());
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client
+				.getQpidAcl()
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+
+
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
