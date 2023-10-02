@@ -161,7 +161,7 @@ public class ServiceProviderService {
         for (CapabilitySplit capability : capabilitiesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByCapability_Id(capability.getId());
             if (possibleMatches.isEmpty()) {
-                if (!capability.exchangeExists()) {
+                if (!capability.hasShards()) {
                     logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
                     serviceProvider.getCapabilities().getCapabilities().remove(capability);
                     currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());

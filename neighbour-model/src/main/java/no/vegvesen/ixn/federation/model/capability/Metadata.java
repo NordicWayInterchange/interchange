@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.model.RedirectStatus;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "metadata")
@@ -26,6 +26,10 @@ public class Metadata {
     private Integer maxMessageRate;
 
     private Integer repetitionInterval;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "met_id", foreignKey = @ForeignKey(name="fk_met"))
+    private List<Shard> shards = new ArrayList<>();
 
     public Metadata() {
 
@@ -106,6 +110,33 @@ public class Metadata {
             default:
                 return RedirectStatusApi.OPTIONAL;
         }
+    }
+
+    public List<Shard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<Shard> shards) {
+        this.shards.clear();
+        if (shards != null) {
+            this.shards.addAll(shards);
+        }
+    }
+
+    public boolean hasShards() {
+        return !shards.isEmpty();
+    }
+
+    public void removeShards() {
+        this.shards.clear();
+    }
+
+    public Set<String> getExchangesFromShards() {
+        Set<String> exchanges = new HashSet<>();
+        for (Shard shard : shards) {
+            exchanges.add(shard.getExchangeName());
+        }
+        return exchanges;
     }
 
     @Override
