@@ -22,8 +22,6 @@ public class CapabilitySplit {
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.CREATED;
 
-    private String capabilityExchangeName = "";
-
     public CapabilitySplit() {
 
     }
@@ -71,16 +69,12 @@ public class CapabilitySplit {
         this.status = status;
     }
 
-    public String getCapabilityExchangeName() {
-        return capabilityExchangeName;
+    public boolean isSharded() {
+        return metadata.getShardCount() > 1;
     }
 
-    public void setCapabilityExchangeName(String capabilityExchangeName) {
-        this.capabilityExchangeName = capabilityExchangeName;
-    }
-
-    public boolean exchangeExists() {
-        return !capabilityExchangeName.isEmpty();
+    public boolean hasShards() {
+        return metadata.hasShards();
     }
 
     @Override
@@ -88,12 +82,12 @@ public class CapabilitySplit {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CapabilitySplit that = (CapabilitySplit) o;
-        return Objects.equals(application, that.application) && status == that.status && Objects.equals(capabilityExchangeName, that.capabilityExchangeName);
+        return Objects.equals(application, that.application) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(application, status, capabilityExchangeName);
+        return Objects.hash(application, status);
     }
 
     @Override
@@ -102,8 +96,7 @@ public class CapabilitySplit {
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +
-                ", status=" + status +
-                ", capabilityExchangeName='" + capabilityExchangeName + '\'' +
+                ", status=" + status + '\'' +
                 '}';
     }
 }

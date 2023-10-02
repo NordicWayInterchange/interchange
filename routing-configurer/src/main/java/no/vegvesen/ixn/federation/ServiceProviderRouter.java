@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
@@ -273,16 +274,31 @@ public class ServiceProviderRouter {
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         if (serviceProvider.hasCapabilities()) {
             for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
-                if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                    if (!capability.exchangeExists()) {
+                if (!capability.getMetadata().hasShards() && capability.getStatus().equals(CapabilityStatus.CREATED)) {
+                    if (capability.isSharded()) {
+                        List<Shard> newShards = new ArrayList<>();
+                        int numberOfShards = capability.getMetadata().getShardCount();
+                        for (int i = 0; i<numberOfShards; i++) {
+                            String exchangeName = "cap-" + UUID.randomUUID();
+                            if (!delta.exchangeExists(exchangeName)) {
+                                Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
+                                logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+                                delta.addExchange(exchange);
+                            }
+                            String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability) + i+1;
+                            Shard newShard = new Shard(i+1, exchangeName, capabilitySelector);
+                            newShards.add(newShard);
+                        }
+                        capability.getMetadata().setShards(newShards);
+                    } else {
                         String exchangeName = "cap-" + UUID.randomUUID();
-                        capability.setCapabilityExchangeName(exchangeName);
-                    }
-                    if (!delta.exchangeExists(capability.getCapabilityExchangeName())) {
-                        String capabilityExchangeName = capability.getCapabilityExchangeName();
-                        Exchange exchange = qpidClient.createHeadersExchange(capabilityExchangeName);
-                        logger.info("Created exchange {} for Capability with id {}", capabilityExchangeName, capability.getId());
-                        delta.addExchange(exchange);
+                        if (!delta.exchangeExists(exchangeName)) {
+                            Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
+                            logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+                            delta.addExchange(exchange);
+                        }
+                        Shard newShard = new Shard(1, exchangeName, MessageValidatingSelectorCreator.makeSelector(capability));
+                        capability.getMetadata().setShards(Collections.singletonList(newShard));
                     }
                 }
             }
@@ -292,11 +308,10 @@ public class ServiceProviderRouter {
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
-            if (capability.exchangeExists()) {
-                if (!delta.exchangeHasBindingToQueue(capability.getCapabilityExchangeName(), "bi-queue")){
-                    String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-                    qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), "bi-queue", new Filter(capabilitySelector)));
-                    delta.addBindingToExchange(capability.getCapabilityExchangeName(), capabilitySelector, "bi-queue");
+            for (Shard shard : capability.getMetadata().getShards()) {
+                if (!delta.exchangeHasBindingToQueue(shard.getExchangeName(), "bi-queue")){
+                    qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
+                    delta.addBindingToExchange(shard.getExchangeName(), shard.getSelector(), "bi-queue");
                 }
             }
         }
@@ -309,14 +324,16 @@ public class ServiceProviderRouter {
 
         if (!tearDownCapabilities.isEmpty()) {
             for (CapabilitySplit capability : tearDownCapabilities) {
-                if (capability.exchangeExists()) {
-                    Exchange exchange = delta.findByExchangeName(capability.getCapabilityExchangeName());
-                    if (exchange != null) {
-                        qpidClient.removeExchange(exchange);
-                        logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
-                        delta.removeExchange(exchange);
+                if (capability.getMetadata().hasShards()) {
+                    for (Shard shard : capability.getMetadata().getShards()) {
+                        Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                        if (exchange != null) {
+                            qpidClient.removeExchange(exchange);
+                            logger.info("Removed exchange {} for Capability with id {}", shard.getExchangeName(), capability.getId());
+                            delta.removeExchange(exchange);
+                        }
                     }
-                    capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
+                    capability.getMetadata().removeShards();
                 }
             }
             serviceProvider = repository.save(serviceProvider);
@@ -337,13 +354,17 @@ public class ServiceProviderRouter {
                     }
 
                     for (OutgoingMatch match : matches) {
-                        if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED) &&
-                                match.getCapability().exchangeExists()) {
-
-                            if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName())) {
-                                String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                                qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName(), new Filter(joinedSelector)));
-                                delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, match.getCapability().getCapabilityExchangeName());
+                        CapabilitySplit capability = match.getCapability();
+                        if (capability.hasShards()) {
+                            if (capability.isSharded()) {
+                                //TODO: Sharding, check if selector is sharded as well.
+                            } else {
+                                Shard shard = capability.getMetadata().getShards().get(0);
+                                if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), shard.getExchangeName())) {
+                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                    qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), shard.getExchangeName(), new Filter(joinedSelector)));
+                                    delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, shard.getExchangeName());
+                                }
                             }
                         }
                     }
@@ -385,6 +406,10 @@ public class ServiceProviderRouter {
 
     public String joinDeliverySelectorWithCapabilitySelector(CapabilitySplit capability, String selector) {
         return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
+    }
+
+    public String joinTwoSelectors(String firstSelector, String secondSelector) {
+        return String.format("(%s) AND (%s)", firstSelector, secondSelector);
     }
 
     @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
@@ -436,13 +461,18 @@ public class ServiceProviderRouter {
 
                             Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
                             for (CapabilitySplit capability : matchingCapabilities) {
-                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                    if (delta.exchangeExists(capability.getCapabilityExchangeName())) {
-                                        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                        qpidClient.addBinding(capability.getCapabilityExchangeName(), new Binding(capability.getCapabilityExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-                                        delta.addBindingToExchange(capability.getCapabilityExchangeName(), subscription.getSelector(), endpoint.getSource());
-                                        LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
-                                        subscription.addConnection(connection);
+                                if (capability.hasShards()) {
+                                    if (capability.isSharded()) {
+                                        //TODO: Sharding
+                                    } else {
+                                        Shard shard = capability.getMetadata().getShards().get(0);
+                                        if (!existingConnections.contains(shard.getExchangeName())) {
+                                            LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                            qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+                                            delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
+                                            LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
+                                            subscription.addConnection(connection);
+                                        }
                                     }
                                 }
                             }
@@ -456,9 +486,10 @@ public class ServiceProviderRouter {
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<CapabilitySplit> capabilities) {
-        Set<String> existingConnections = capabilities.stream()
-                .map(CapabilitySplit::getCapabilityExchangeName)
-                .collect(Collectors.toSet());
+        Set<String> existingConnections = new HashSet<>();
+        for (CapabilitySplit cap : capabilities) {
+            existingConnections.addAll(cap.getMetadata().getExchangesFromShards());
+        }
 
         Set<LocalConnection> unwantedConnections = new HashSet<>();
         for (LocalConnection connection : subscription.getConnections()) {
