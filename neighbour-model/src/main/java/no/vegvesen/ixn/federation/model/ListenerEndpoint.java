@@ -53,54 +53,28 @@ public class ListenerEndpoint {
 
     public String getNeighbourName() { return neighbourName; }
 
-    public void setNeighbourName(String neighbourName) { this.neighbourName = neighbourName; }
-
     public String getSource() { return source; }
-
-    public void setSource(String source) { this.source = source; }
 
     public String getHost() {
         return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
     }
 
     public Integer getPort() {
         return port;
     }
 
-    public void setPort(Integer port) {
-        this.port = port;
-    }
-
     public Connection getMessageConnection () { return messageConnection; }
-
-    public void setMessageConnection (Connection messageConnection) { this.messageConnection = messageConnection; }
 
     public int getMaxBandwidth() {
         return maxBandwidth;
-    }
-
-    public void setMaxBandwidth(int maxBandwidth) {
-        this.maxBandwidth = maxBandwidth;
     }
 
     public int getMaxMessageRate() {
         return maxMessageRate;
     }
 
-    public void setMaxMessageRate(int maxMessageRate) {
-        this.maxMessageRate = maxMessageRate;
-    }
-
     public String getTarget() {
         return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
     }
 
     @Override

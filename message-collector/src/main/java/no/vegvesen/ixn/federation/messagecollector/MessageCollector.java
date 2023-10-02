@@ -26,10 +26,14 @@ public class MessageCollector {
 
     @Autowired
     public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
+        this(listenerEndpointRepository,collectorCreator,backoffProperties,new HashMap<>());
+    }
+
+    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, Map<ListenerEndpoint,MessageCollectorListener> listeners) {
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.collectorCreator = collectorCreator;
-        this.listeners = new HashMap<>();
         this.backoffProperties = backoffProperties;
+        this.listeners = listeners;
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
@@ -38,15 +42,11 @@ public class MessageCollector {
         setupConnectionsToNewNeighbours();
     }
 
-    private void checkListenerList() {
-        Set<ListenerEndpoint> listenerEndpoints = listeners.keySet();
-        for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
-            MessageCollectorListener listener = listeners.get(listenerEndpoint);
-            if (! listener.isRunning()) {
-                listeners.remove(listenerEndpoint);
-                logger.info("Removed stopped listener {} with host {} and port {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getPort());
-            }
-        }
+    public void checkListenerList() {
+        //TODO logging of the entries...
+        List<ListenerEndpoint> entriesToRemove = listeners.entrySet().stream().filter(e -> !e.getValue().isRunning()).map(e -> e.getKey()).collect(Collectors.toList());
+        listeners.keySet().removeAll(entriesToRemove);
+        logger.info("Removed listeners {}", entriesToRemove);
     }
 
     public void setupConnectionsToNewNeighbours() {
