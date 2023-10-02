@@ -856,9 +856,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.shardCount(1)
 						.timestamp(System.currentTimeMillis())
 						.build());
-				System.out.println();
 			}
-			System.out.println();
 			Thread.sleep(200);
 		}
 		assertThat(numMessages.get()).isEqualTo(1);
@@ -923,7 +921,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
-		System.out.println(subscription.getExchangeName());
 		assertThat(subscription.exchangeIsRemoved()).isTrue();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 	}
