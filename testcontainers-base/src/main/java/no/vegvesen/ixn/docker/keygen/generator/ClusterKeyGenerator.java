@@ -341,11 +341,24 @@ public class ClusterKeyGenerator {
         return new JcaX509CertificateConverter().getCertificate(certificateHolder);
     }
 
+    public static X509Certificate[] loadCertificateChain(Path certificatePath) throws IOException, CertificateException {
+        PEMParser parser = new PEMParser(new FileReader(certificatePath.toFile()));
+        Object o = parser.readObject();
+        List<X509Certificate> certificates = new ArrayList<>();
+        JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
+        while (o  != null) {
+            certificates.add(converter.getCertificate((X509CertificateHolder) o));
+            o = parser.readObject();
+        }
+        return certificates.toArray(new X509Certificate[0]);
+    }
+
     public static PrivateKey loadPrivateKey(Path pemKeyPath) throws IOException {
         PEMParser keyParser = new PEMParser(new FileReader(pemKeyPath.toFile()));
         return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) keyParser.readObject());
 
     }
+
 
     public static class KeyPairAndCertificate {
         private KeyPair keyPair;
@@ -372,7 +385,7 @@ public class ClusterKeyGenerator {
         return keyPair;
     }
 
-    private static String generatePassword(SecureRandom random, int length) {
+    public static String generatePassword(SecureRandom random, int length) {
         StringBuilder builder = new StringBuilder();
         for (int i =  0; i < length; i++) {
             builder.append(allowedChars[random.nextInt(allowedChars.length)]);
