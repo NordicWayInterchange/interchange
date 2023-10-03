@@ -42,7 +42,7 @@ public class OutgoingMatchDiscoveryServiceIT {
     public void testThatMatchIsCreated() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-1");
 
         CapabilitySplit cap1 = new CapabilitySplit(
                 new DenmApplication(
@@ -85,10 +85,10 @@ public class OutgoingMatchDiscoveryServiceIT {
     }
 
     @Test
-    public void testThatMultipleMatchesAreCreated() {
+    public void testThatMultipleMatchesAreNotCreated() {
         LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-2");
 
         CapabilitySplit cap1 = new CapabilitySplit(
                 new DenmApplication(
@@ -124,7 +124,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
-        assertThat(repository.findAll()).hasSize(2);
+        assertThat(repository.findAll()).hasSize(1);
 
         //clean-up
         repository.deleteAll();
@@ -135,7 +135,7 @@ public class OutgoingMatchDiscoveryServiceIT {
     public void testThatDeliveryHasNoOverlap() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-3");
 
         CapabilitySplit cap1 = new CapabilitySplit(
                 new DenmApplication(

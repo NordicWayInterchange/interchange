@@ -30,17 +30,18 @@ public class OutgoingMatchDiscoveryService {
         for (ServiceProvider serviceProvider: serviceProviders) {
             if (serviceProvider.hasDeliveries()) {
                 for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                    if (serviceProvider.hasCapabilities()) {
-                        if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
-                                || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
-                                || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
+                    if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
+                            || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
+                        if (serviceProvider.hasCapabilities()) {
                             Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
                             for (CapabilitySplit capability : matchingCapabilities) {
                                 if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) == null) {
-                                    if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                                        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName());
-                                        logger.info("Match saved for delivery with id {}", delivery.getId());
-                                        repository.save(outgoingMatch);
+                                    if (repository.findByLocalDelivery_Id(delivery.getId()) == null) {
+                                        if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
+                                            OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName());
+                                            logger.info("Match saved for delivery with id {}", delivery.getId());
+                                            repository.save(outgoingMatch);
+                                        }
                                     }
                                 }
                             }

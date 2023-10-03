@@ -13,7 +13,7 @@ public class OutgoingMatch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "out_matches_seq")
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "loc_del", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_out_match_local_delivery"))
     private LocalDelivery localDelivery;
 
