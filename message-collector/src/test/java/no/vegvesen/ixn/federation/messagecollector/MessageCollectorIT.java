@@ -177,7 +177,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -185,7 +185,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
 		source.start();
 		JmsMessage message1 = source.createMessageBuilder()
 				.textMessage("Should work!")
@@ -206,7 +206,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		JmsMessage senderMessage = message1;
 		source.sendNonPersistentMessage(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer",keysStructure, "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
 		Message message = consumer.receive(1000);
@@ -226,7 +226,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -234,7 +234,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
 		source.start();
 		String message = "Should work!";
 		byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
@@ -258,7 +258,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		JmsMessage senderMessage = message1;
 		source.send(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", keysStructure,"sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
 		Message receiveMessage = consumer.receive(1000);
