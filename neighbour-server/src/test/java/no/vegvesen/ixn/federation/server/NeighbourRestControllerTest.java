@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -26,8 +27,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,11 +41,12 @@ class NeighbourRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	@MockBean
-	NeighbourService neighbourService;
 
 	@MockBean
-	ServiceProviderService serviceProviderService;
+	private ServiceProviderService serviceProviderService;
+
+	@MockBean
+	NeighbourService neighbourService;
 
 	@Autowired
 	private NeighbourRestController neighbourRestController;
@@ -348,6 +352,19 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	void listSubscriptionsForNeighbourThatDoesNotExistInDatabaseReturnsNotFound() throws Exception {
+		mockCertificate("ericsson");
+		doThrow(new InterchangeNotFoundException("")).when(neighbourService).findSubscriptions("ericsson");
+		mockMvc.perform(
+				get("/ericsson/subscriptions")
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+		)
+				.andDo(print())
+				.andExpect( result -> assertThat(result.getResponse().getStatus()).isEqualTo(404));
 	}
 
 }

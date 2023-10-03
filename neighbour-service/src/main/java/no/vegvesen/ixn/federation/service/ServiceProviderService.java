@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
@@ -119,7 +120,15 @@ public class ServiceProviderService {
                         || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                         || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
                     if (outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId()).isEmpty()) {
-                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                        if (! delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                            delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                        } else {
+                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
+                            if (matchingCapabilities.isEmpty()) {
+                                delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                            }
+
+                        }
                     } else {
                         if (!delivery.exchangeExists()) {
                             String deliveryExchangeName = "del-" + UUID.randomUUID().toString();

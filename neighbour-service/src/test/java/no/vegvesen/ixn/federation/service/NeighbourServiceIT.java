@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -238,6 +240,58 @@ public class NeighbourServiceIT {
         //Now, try again, with the same capabilties, to simulate double post.
         service.incomingCapabilities(capabilitiesApi,localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
+    }
+
+    @Test
+    public void teardownSubscriptionAndNeighbourPostsIdenticalNewSubscription() {
+        String selector = "a = 'hello'";
+        String name = "teardown-and-new-neighbour-request";
+        Neighbour neighbour = new Neighbour(
+                name,
+                new Capabilities(),
+                new NeighbourSubscriptionRequest(
+                    Collections.singleton(
+                            new NeighbourSubscription(selector,NeighbourSubscriptionStatus.CREATED,name)
+                    )
+                ),
+                new SubscriptionRequest()
+        );
+        repository.save(neighbour);
+
+        SubscriptionRequestApi addRequest = new SubscriptionRequestApi(
+                name,
+                Collections.singleton(
+                        new RequestedSubscriptionApi(
+                                selector
+                        )
+                )
+        );
+        SubscriptionResponseApi subscriptionResponseApi = service.incomingSubscriptionRequest(addRequest);
+        try {
+            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(System.out,subscriptionResponseApi);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void pollingASubscriptionWithStatusTearDown() {
+        String name = "tear-down-neighbour";
+        Neighbour neighbour = new Neighbour(
+                name,
+                new Capabilities(),
+                new NeighbourSubscriptionRequest(
+                        Collections.singleton(
+                                new NeighbourSubscription("a = 'hello'",NeighbourSubscriptionStatus.TEAR_DOWN,name)
+                        )
+                ),
+                new SubscriptionRequest()
+        );
+        Neighbour saved = repository.save(neighbour);
+        NeighbourSubscription subscription = saved.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getId());
+        assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
+
     }
 
 }

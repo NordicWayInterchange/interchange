@@ -664,6 +664,31 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void tearDownDeliveryQueueShouldNotChangeRequestedDeliveries() {
+		LocalDelivery localDelivery = new LocalDelivery(
+				1,
+				"/this/is/my/path",
+				"a = b",
+				LocalDeliveryStatus.REQUESTED
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"no-change-for-requested-delivery-sp",
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				Collections.singleton(
+						localDelivery
+				),
+				null
+		);
+		QpidDelta delta = client.getQpidDelta();
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(1)).thenReturn(new ArrayList<>());
+		router.tearDownDeliveryQueues(serviceProvider,delta);
+		assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
+	}
+
+
+	@Test
 	public void localSubscriptionConnectsToCapabilityExchange() {
 		ServiceProvider mySP = new ServiceProvider("my-sp");
 		ServiceProvider otherSP = new ServiceProvider("other-sp");

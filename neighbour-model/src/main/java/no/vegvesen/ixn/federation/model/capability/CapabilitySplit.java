@@ -33,6 +33,12 @@ public class CapabilitySplit {
         this.metadata = metadata;
     }
 
+    public CapabilitySplit(Integer id, Application application, Metadata metadata) {
+        this.id = id;
+        this.application = application;
+        this.metadata = metadata;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }

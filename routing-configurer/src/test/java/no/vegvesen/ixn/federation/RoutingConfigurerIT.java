@@ -856,9 +856,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.shardCount(1)
 						.timestamp(System.currentTimeMillis())
 						.build());
-				System.out.println();
 			}
-			System.out.println();
 			Thread.sleep(200);
 		}
 		assertThat(numMessages.get()).isEqualTo(1);
@@ -923,9 +921,23 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
-
 		assertThat(subscription.exchangeIsRemoved()).isTrue();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
+	}
+
+	@Test
+	public void subscriptionExchangeIsNotRemovedWhenSubscriptionIsDeleted() {
+		String exchangeName = "subscription-exchange-one";
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
 	}
 
 	@Test

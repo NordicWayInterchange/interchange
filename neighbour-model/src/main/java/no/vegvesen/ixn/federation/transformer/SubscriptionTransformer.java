@@ -70,6 +70,8 @@ public class SubscriptionTransformer {
 	public SubscriptionStatusApi neighbourSubscriptionStatusToSubscriptionStatusApi(NeighbourSubscriptionStatus subscriptionStatus) {
 		if (subscriptionStatus.equals(NeighbourSubscriptionStatus.ACCEPTED)) {
 			return SubscriptionStatusApi.REQUESTED;
+		} else if (subscriptionStatus.equals(NeighbourSubscriptionStatus.TEAR_DOWN)) {
+			return SubscriptionStatusApi.ERROR;
 		}
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}
