@@ -159,8 +159,8 @@ public class ServiceProviderServiceTest {
                         "0001:0001",
                         "NO",
                         "1.0",
-                        Collections.emptySet(),
-                        Collections.emptySet()
+                        Collections.singleton("0122"),
+                        Collections.singleton(6)
                 ),
                 new Metadata()
         );
