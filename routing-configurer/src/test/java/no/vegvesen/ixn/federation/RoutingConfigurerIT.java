@@ -964,10 +964,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
 		String neighbourSPName = "neighbour-service-provider";
+		String queueName = UUID.randomUUID().toString();
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName
+				neighbourSPName,
+				queueName
 		);
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
@@ -978,23 +980,27 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				new SubscriptionRequest()
 		);
-		Queue queue = client.createQueue(UUID.randomUUID().toString());
+		Queue queue = client.createQueue(queueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
-		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
-		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client
 				.getQpidAcl()
 				.containsRule(VirtualHostAccessController
 						.createQueueReadAccessRule(neighbourSPName,queue.getName())
 				)
 		).isFalse();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
 
 
 	}
+	//TODO test with more than one redirect subscription from same SP
+	//TODO test with several redirect subscriptions, each one from a different SP
+
+
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");

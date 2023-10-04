@@ -201,13 +201,6 @@ public class NeighbourService {
 		return readyToUpdateRouting;
 	}
 
-	public void saveDeleteSubscriptions(String ixnName, Set<NeighbourSubscription> subscriptionsToDelete) {
-		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
-		logger.debug("Deleting subscriptions for neighbour {} ", neighbour.getName());
-		neighbourRepository.save(neighbour);
-	}
-
 	public void saveSetupRouting(Neighbour neighbour) {
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} after setting up routing for subscriptions", neighbour.getName());

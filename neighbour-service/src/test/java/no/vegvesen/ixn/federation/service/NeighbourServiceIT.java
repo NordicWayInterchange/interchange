@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -131,7 +130,9 @@ public class NeighbourServiceIT {
 
         NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
 
-        service.saveDeleteSubscriptions("my-neighbour3", Collections.singleton(sub));
+        neighbour = repository.findByName(neighbour.getName());
+        neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
+        service.saveNeighbour(neighbour);
 
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
     }
@@ -153,9 +154,11 @@ public class NeighbourServiceIT {
         service.saveSetupRouting(neighbour);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
-        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        neighbour = repository.findByName(neighbour.getName());
+        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
 
-        service.saveDeleteSubscriptions("my-neighbour4", Collections.singleton(sub));
+        neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
+        service.saveNeighbour(neighbour);
 
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
