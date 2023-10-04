@@ -9,7 +9,7 @@ public class MessageValidatingSelectorCreator {
 
 
     public static String makeSelector(CapabilitySplit capability) {
-        String messageType = capability.getApplication().messageType();
+        String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())
                 .originatingCountry(capability.getApplication().getOriginatingCountry())
@@ -18,7 +18,7 @@ public class MessageValidatingSelectorCreator {
                 .messageType(messageType);
         if (messageType.equals(Constants.DENM)) {
             DenmApplication denmApplication = (DenmApplication) capability.getApplication();
-            builder.causeCodes(denmApplication.getCauseCodes());
+            builder.causeCodes(denmApplication.getCauseCode());
         } else if (messageType.equals(Constants.DATEX_2)) {
             DatexApplication datexApplication = (DatexApplication) capability.getApplication();
             builder.publicationTypes(datexApplication.getPublicationType());

@@ -787,7 +787,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	public void setupRoutingWithCapabilityExchanges() throws Exception {
 		LocalDelivery delivery = new LocalDelivery(
-				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
+				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
 				LocalDeliveryStatus.CREATED
 		);
 		String deliveryExchangeName = "del-ex10";
@@ -813,12 +813,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String capabilitySelector = creator.makeSelector(cap);
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
+		System.out.println(joinedSelector);
 
 		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getCapabilityExchangeName(), new Filter(joinedSelector)));
 
-		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
+		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		subs.add(sub);
@@ -847,8 +848,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.publisherId("NO-123")
 						.publicationId("pub-1")
 						.messageType(Constants.DENM)
-						.causeCode("6")
-						.subCauseCode("61")
+						.causeCode(6)
+						.subCauseCode(61)
 						.originatingCountry("NO")
 						.protocolVersion("DENM:1.2.2")
 						.quadTreeTiles(",12004,")
@@ -948,7 +949,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO0000:001",
 						"NO",
 						"1.0",
-						Collections.emptySet(),
+						Collections.singleton("0122"),
 						Collections.singleton(1)
 				),
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
