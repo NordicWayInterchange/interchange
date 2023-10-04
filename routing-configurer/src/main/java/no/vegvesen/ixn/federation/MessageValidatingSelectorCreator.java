@@ -9,7 +9,7 @@ public class MessageValidatingSelectorCreator {
 
 
     public static String makeSelector(CapabilitySplit capability) {
-        String messageType = capability.getApplication().messageType();
+        String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())
                 .originatingCountry(capability.getApplication().getOriginatingCountry())

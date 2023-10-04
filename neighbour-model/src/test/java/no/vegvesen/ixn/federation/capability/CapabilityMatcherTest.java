@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CapabilityMatcherTest {
 
 	private static final LinkedHashSet<String> QUAD_TREE_0121_0122 = Sets.newLinkedHashSet("0121", "0122");
-	private static final LinkedHashSet<String> PUBL_TYPES_SITUATION_MEASURED_DATA = Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication");
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
@@ -223,7 +221,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	public void matchSpatemSelectorWithQuadTree() {
 		SpatemApplication application = new SpatemApplication(
 				"NO-12345",
@@ -244,7 +241,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		CamApplication camApplication = new CamApplication("publ-id-1", "pub-1", "NO", "1.0", QUAD_TREE_0121_0122);
 		CapabilitySplit camCapability = new CapabilitySplit();
@@ -258,7 +254,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled("At the moment, it's not possible to filter on optional fields that are not a part of the set of properties")
 	void mathcCapabilityWithSelectorOfOnlyOptionalField() {
 		SpatemApplication application = new SpatemApplication(
 				"NO-12345",
@@ -276,6 +271,19 @@ class CapabilityMatcherTest {
 		System.out.println(localSubscription.getSelector());
 		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();
+	}
+
+	@Test
+	void newMatchDenmCapabilityWithSelector() throws JsonProcessingException {
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(denm_a_b_causeCode_1_2);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		capability.setMetadata(meta);
+
+		String selector = "originatingCountry = 'NO' AND causeCodes = 6 OR causeCodes = 5";
+
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
 	}
 
 }
