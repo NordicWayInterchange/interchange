@@ -2,12 +2,12 @@ package no.vegvesen.ixn.federation.capability;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.matcher.SelectorCapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import com.monotch.dxp.solution.nw3selectorpoc.lib.SelectorCapabilityMatcher;
 
 import java.util.HashSet;
 import java.util.Set;
