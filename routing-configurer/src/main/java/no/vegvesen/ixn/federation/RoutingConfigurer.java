@@ -67,7 +67,6 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
-		//try {
 		//TODO wow, this must be extensively tested!!
 		Set<String> redirectedServiceProviders = new HashSet<>();
 		for (NeighbourSubscription sub : subscriptions) {
@@ -100,9 +99,6 @@ public class RoutingConfigurer {
 				removeSubscriberFromGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME,redirectedSpName);
 			}
 		}
-		//} catch (Exception e) {
-		//	logger.error("Could not remove routing for neighbour {}", name, e);
-		//}
 	}
 
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
