@@ -26,8 +26,8 @@ public class ImageSource extends Source{
                 .latitude(60.352374)
                 .longitude(13.334253)
                 .serviceType("some-denm-service-type")
-                .causeCode("3")
-                .subCauseCode("6")
+                .causeCode(3)
+                .subCauseCode(6)
                 .timestamp(System.currentTimeMillis())
                 .bytesMessage(convertImageToByteArray(imageName))
                 .build();
@@ -46,8 +46,8 @@ public class ImageSource extends Source{
                 .latitude(60.352374)
                 .longitude(13.334253)
                 .serviceType("some-denm-service-type")
-                .causeCode("3")
-                .subCauseCode("6")
+                .causeCode(3)
+                .subCauseCode(6)
                 .timestamp(System.currentTimeMillis())
                 .build();
         sendNonPersistentMessage(message, Message.DEFAULT_TIME_TO_LIVE);

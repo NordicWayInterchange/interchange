@@ -26,7 +26,7 @@ public class MapemApplication extends Application {
     }
 
     @Override
-    public String messageType() {
+    public String getMessageType() {
         return Constants.MAPEM;
     }
 

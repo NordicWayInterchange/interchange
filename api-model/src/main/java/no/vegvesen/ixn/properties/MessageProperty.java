@@ -58,8 +58,8 @@ public class MessageProperty {
 	);
 
 	//TODO: causeCode and subCauseCode is changed to Integer
-	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.INTEGER);
+	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.INTEGER);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,
 			SUB_CAUSE_CODE

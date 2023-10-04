@@ -64,7 +64,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	private CapabilitySplit getDatexCapability(String originatingCountry) {
 		return new CapabilitySplit(
-				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(),"SituationPublication"),
+				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.singleton("0122"),"SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
 

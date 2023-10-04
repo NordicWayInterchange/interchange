@@ -74,7 +74,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "5", 3000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 3000));
 
         Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
         MessageConsumer testConsumer = sink.createConsumer();
@@ -95,7 +95,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "5", 10000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 10000));
 
         Thread.sleep(6000);
 
@@ -118,7 +118,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "5", 3000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 3000));
 
         Thread.sleep(4000);
 
@@ -129,7 +129,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         assertThat(receive).isNotPresent();
     }
 
-    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, String causeCode, long ttl) throws JMSException {
+    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, Integer causeCode, long ttl) throws JMSException {
         return source.createMessageBuilder()
                 .bytesMessage(bytemessage)
                 .userId("anna")
@@ -142,7 +142,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
                 .shardId(1)
                 .shardCount(1)
                 .causeCode(causeCode)
-                .subCauseCode("76")
+                .subCauseCode(76)
                 .ttl(ttl)
                 .build();
     }

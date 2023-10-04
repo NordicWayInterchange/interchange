@@ -332,7 +332,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						Collections.emptySet(),
+						Collections.singleton("0122"),
 						"publicationType"
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
