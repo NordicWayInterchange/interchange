@@ -71,11 +71,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.monotch.dxp.solution.nw3-selector-poc</groupId>
-            <artifactId>lib</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
