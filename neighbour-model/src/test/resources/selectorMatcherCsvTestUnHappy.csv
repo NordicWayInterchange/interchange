@@ -1,0 +1,1 @@
+"{""quadTree"":[""01220111"",""01200132""]}","NOT quadTree LIKE '%,0122%'",1,"Negating (by logic) the parent/bigger area of only one of the possible tiles should still match"
