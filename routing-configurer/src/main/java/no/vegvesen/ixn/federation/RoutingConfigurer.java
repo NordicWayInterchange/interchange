@@ -67,7 +67,6 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
-		//TODO wow, this must be extensively tested!!
 		Set<String> redirectedServiceProviders = new HashSet<>();
 		for (NeighbourSubscription sub : subscriptions) {
 			Queue queue = qpidClient.getQueue(sub.getQueueName());
