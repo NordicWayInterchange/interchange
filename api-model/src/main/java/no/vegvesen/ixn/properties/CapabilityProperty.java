@@ -8,6 +8,7 @@ public class CapabilityProperty {
 
     public static final CapabilityProperty MESSAGE_TYPE = new CapabilityProperty("messageType");
     public static final CapabilityProperty PUBLISHER_ID = new CapabilityProperty("publisherId");
+    public static final CapabilityProperty PUBLICATION_ID = new CapabilityProperty("publicationId");
     public static final CapabilityProperty ORIGINATING_COUNTRY = new CapabilityProperty("originatingCountry");
     public static final CapabilityProperty PROTOCOL_VERSION = new CapabilityProperty("protocolVersion");
     public static final CapabilityProperty QUAD_TREE = new CapabilityProperty("quadTree");
@@ -16,6 +17,7 @@ public class CapabilityProperty {
     public static final List<CapabilityProperty> commonCapabilityProperties = Arrays.asList(
             MESSAGE_TYPE,
             PUBLISHER_ID,
+            PUBLICATION_ID,
             ORIGINATING_COUNTRY,
             PROTOCOL_VERSION,
             QUAD_TREE
@@ -35,13 +37,15 @@ public class CapabilityProperty {
     );
 
     public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
-                    commonCapabilityProperties
+                    commonCapabilityProperties,
+                    datex2CapabilityProperties
             ).flatMap(Collection::stream)
             .map(CapabilityProperty::getName)
             .collect(Collectors.toSet());
 
     public static Set<String> mandatoryDenmPropertyNames = Stream.of(
-                    commonCapabilityProperties
+                    commonCapabilityProperties,
+                    denmCapabilityProperties
             ).flatMap(Collection::stream)
             .map(CapabilityProperty::getName)
             .collect(Collectors.toSet());

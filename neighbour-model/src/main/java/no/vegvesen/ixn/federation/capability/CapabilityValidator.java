@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.properties.CapabilityProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -9,41 +11,44 @@ import java.util.Set;
 @Component
 public class CapabilityValidator {
 
-    public static boolean validateCapability(CapabilitySplitApi capability) {
-        boolean capabilityIsVerified = false;
+    private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
+
+    public static boolean capabilityIsValid(CapabilitySplitApi capability) {
+        boolean capabilityIsValid = false;
 
         ApplicationApi application = capability.getApplication();
 
         if (application instanceof DatexApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatoryDatex2PropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatoryDatex2PropertyNames);
         }
         else if (application instanceof DenmApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatoryDenmPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatoryDenmPropertyNames);
         }
         else if (application instanceof IvimApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatoryIvimPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatoryIvimPropertyNames);
         }
         else if (application instanceof SpatemApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
         }
         else if (application instanceof MapemApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
         }
         else if (application instanceof SremApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
         }
         else if (application instanceof SsemApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
         }
         else if (application instanceof CamApplicationApi) {
-            capabilityIsVerified = checkProperties(application, CapabilityProperty.mandatoryCamPropertyNames);
+            capabilityIsValid = checkProperties(application, CapabilityProperty.mandatoryCamPropertyNames);
         }
-        return capabilityIsVerified;
+        return capabilityIsValid;
     }
 
     public static boolean checkProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
         for (String property: mandatoryProperties) {
             if (applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property) == null) {
+                logger.info("Capability property {} is not set for application {}", property, applicationApi);
                 return false;
             }
         }
