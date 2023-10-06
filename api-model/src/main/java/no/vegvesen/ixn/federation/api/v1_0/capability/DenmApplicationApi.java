@@ -40,6 +40,7 @@ public class DenmApplicationApi extends ApplicationApi {
         Map<String, Object> values = new HashMap<>();
         putValue(values, CapabilityProperty.MESSAGE_TYPE, messageType);
         putValue(values, CapabilityProperty.PUBLISHER_ID, this.getPublisherId());
+        putValue(values, CapabilityProperty.PUBLICATION_ID, this.getPublicationId());
         putValue(values, CapabilityProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
         putValue(values, CapabilityProperty.PROTOCOL_VERSION, this.getProtocolVersion());
         putMultiValue(values, CapabilityProperty.QUAD_TREE, this.getQuadTree());
