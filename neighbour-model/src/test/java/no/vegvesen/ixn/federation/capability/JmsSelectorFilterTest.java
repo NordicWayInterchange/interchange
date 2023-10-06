@@ -4,6 +4,7 @@ import org.apache.qpid.server.filter.Filterable;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
 import org.apache.qpid.server.filter.selector.ParseException;
 import org.apache.qpid.server.message.AMQMessageHeader;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,6 +31,10 @@ public class JmsSelectorFilterTest {
         assertThat(new JMSSelectorFilter("NOT (entry LIKE '%aa%')").matches(filterable)).isFalse();
         assertThat(new JMSSelectorFilter("(entry LIKE '%aaa%')").matches(filterable)).isTrue();
         assertThat(new JMSSelectorFilter("NOT entry LIKE '%aa%'").matches(filterable)).isFalse();
+        assertThat(new JMSSelectorFilter("not (quadTree like '%,12%')")
+                .matches(new SimpleStringFilterable("quadTree",",1011,1311,"))).isTrue();
+        assertThat(new JMSSelectorFilter("not quadTree like '%,12%'")
+                .matches(new SimpleStringFilterable("quadTree",",1211,1311,"))).isFalse();
 
         /*
         Fra SQL:
@@ -42,12 +47,47 @@ public class JmsSelectorFilterTest {
                 () -> new JMSSelectorFilter("entry (not like '%aa%')")
 
         );
-        assertThat(new JMSSelectorFilter("entry in ('aaaa','bbb','ccc')").matches(filterable)).isTrue();
-        assertThat(new JMSSelectorFilter("entry in ('%aa%','bbb','ccc')").matches(filterable)).isTrue();
 
     }
 
+    @Test
+    public void notLikeWithParenthesisTrue() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT (entry LIKE '%aaa%')").matches(new SimpleStringFilterable("entry","bbbb"))).isTrue();
+    }
 
+    @Test
+    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
+    public void notLikeWithoutParenthesisTrue() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT entry LIKE '%aaa%'").matches(new SimpleStringFilterable("entry","bbbb"))).isTrue();
+    }
+
+    @Test
+    public void notLikeWithParenthesisFalse() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT (entry LIKE '%aaa%')").matches(new SimpleStringFilterable("entry","aaaaa"))).isFalse();
+    }
+
+    @Test
+    public void notLikeWithoutParenthesisFalse() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT entry LIKE '%aaa%'").matches(new SimpleStringFilterable("entry","aaaaa"))).isFalse();
+    }
+
+    @Test
+    public void doubleNotLikeWithParenthesisFalse() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT (entry not LIKE '%aaa%')").matches(new SimpleStringFilterable("entry","bbbb"))).isFalse();
+    }
+
+    @Test
+    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
+    public void doubleNotLikeWithoutParenthesisFalse() throws ParseException {
+        assertThat(new JMSSelectorFilter("NOT entry not LIKE '%aaa%'").matches(new SimpleStringFilterable("entry","bbbb"))).isFalse();
+    }
+
+    @Test
+    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
+    public void quadTreeSpscificVersion() throws ParseException {
+        assertThat(new JMSSelectorFilter("not quadTree like '%,12%'")
+                .matches(new SimpleStringFilterable("quadTree",",1011,1311,"))).isTrue();
+    }
     private static class SimpleStringFilterable implements Filterable {
         private final String variableName;
         private final String variableValue;
