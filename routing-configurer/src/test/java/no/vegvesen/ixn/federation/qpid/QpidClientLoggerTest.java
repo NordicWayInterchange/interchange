@@ -47,26 +47,23 @@ public class QpidClientLoggerTest {
     @Test
     public void createQueue() {
         String queue = "MyQueueu";
-        HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"",null,new byte[0],null);
-        when(template.getForEntity(any(), any())).thenThrow(exception);
+        when(template.postForEntity(anyString(),any(CreateQueueRequest.class),any(Class.class))).thenReturn(new ResponseEntity<>(new Queue(queue),HttpStatus.OK));
         client.createQueue(queue, QpidClient.MAX_TTL_8_DAYS);
         assertThat(infoEvents(appender.list.stream())).hasSize(1);
         assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queue))).isTrue();
         assertThat(errorEvents(appender.list.stream())).isEmpty();
     }
 
-    /* TODO this has to be updated to new structure
     @Test
     public void removeQueue() {
-        when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
-        String queueName = "queueName";
-        client.removeQueue(queueName);
+        Queue queue = new Queue("queueName");
+
+        client.removeQueue(queue);
         assertThat(infoEvents(appender.list.stream())).hasSize(1);
-        assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queueName))).isTrue();
+        assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains("queueName"))).isTrue();
         assertThat(errorEvents(appender.list.stream())).isEmpty();
         verify(template).getForEntity(any(),any());
     }
-     */
 
     @Test
     public void createDirectExchange() {
