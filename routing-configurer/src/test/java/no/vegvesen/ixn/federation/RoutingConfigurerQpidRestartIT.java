@@ -7,8 +7,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -104,6 +104,10 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
+        metadata.setShards(Collections.singletonList(shard));
+
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
                         "NO12345",
@@ -113,10 +117,8 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         new HashSet<>(Arrays.asList("0123")),
                         new HashSet<>(Arrays.asList(5))
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                metadata
         );
-
-        capability.setCapabilityExchangeName(exchangeName);
 
         client.createHeadersExchange(exchangeName);
 
@@ -149,6 +151,10 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRedirectNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
+        metadata.setShards(Collections.singletonList(shard));
+
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
                         "NO2345",
@@ -158,10 +164,8 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         new HashSet<>(Arrays.asList("0123")),
                         new HashSet<>(Arrays.asList(5))
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                metadata
         );
-
-        capability.setCapabilityExchangeName(exchangeName);
 
         client.createHeadersExchange(exchangeName);
 
