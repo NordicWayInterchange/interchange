@@ -234,4 +234,16 @@ class CapabilityMatcherTest {
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
 	}
 
+	@Test
+	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.emptySet());
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(denm_a_b_causeCode_1_2);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		capability.setMetadata(meta);
+
+		String selector = "originatingCountry = 'NO' AND causeCodes = 5";
+
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
+	}
 }
