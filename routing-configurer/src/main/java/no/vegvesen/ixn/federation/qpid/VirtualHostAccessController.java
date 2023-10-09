@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +14,14 @@ public class VirtualHostAccessController {
 
     private String name;
 
-    private List<AclRule> rules;
+    private List<AclRule> rules = new ArrayList<>();
 
     public VirtualHostAccessController() {
     }
 
     public VirtualHostAccessController(String id, List<AclRule> rules) {
         this.id = id;
-        this.rules = rules;
+        this.rules.addAll(rules);
     }
 
 

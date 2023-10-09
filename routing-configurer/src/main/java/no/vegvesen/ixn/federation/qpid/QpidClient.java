@@ -32,7 +32,7 @@ public class QpidClient {
 	private static final String ALL_QUEUES_URL_PATTERN = "%s/api/latest/queue/default/";
 
 	private static final String ALL_EXCHANGES_URL_PATTERN = "%s/api/latest/exchange/default/";
-	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
+	public static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
@@ -103,11 +103,13 @@ public class QpidClient {
 	}
 
 	private Queue createQueue(CreateQueueRequest request) {
+		logger.info("Create queue {}", request.getName());
 		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
 		return result;
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
+		logger.info("Create exchange {} of type {}", request.getName(), request.getType());
 		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
 		return response.getBody();
 
@@ -217,15 +219,8 @@ public class QpidClient {
 	}
 
 	public void postQpidAcl(VirtualHostAccessController provider) {
-		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
-		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
-		if (response.getStatusCode().isError()) {
-			String errorMessage = String.format("Error posting to QPID REST API %s, cause: %s",
-					aclRulesUrl,
-					response.getStatusCode().getReasonPhrase());
-			logger.error(errorMessage);
-			throw new RoutingConfigurerException(errorMessage);
-		}
+		logger.info("Posting updated ACL");
+		restTemplate.postForEntity(aclRulesUrl, provider, String.class);
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {

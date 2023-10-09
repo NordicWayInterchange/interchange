@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -47,47 +48,99 @@ public class QpidClientLoggerTest {
     @Test
     public void createQueue() {
         String queue = "MyQueueu";
-        HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"",null,new byte[0],null);
-        when(template.getForEntity(any(), any())).thenThrow(exception);
+        when(template.postForEntity(anyString(),any(CreateQueueRequest.class),any(Class.class)))
+                .thenReturn(new ResponseEntity<>(new Queue(queue),HttpStatus.OK));
         client.createQueue(queue, QpidClient.MAX_TTL_8_DAYS);
-        assertThat(infoEvents(appender.list.stream())).hasSize(1);
-        assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queue))).isTrue();
-        assertThat(errorEvents(appender.list.stream())).isEmpty();
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1);
+        assertThat(infoEvents(appender.list.stream())
+                .anyMatch(formattedMessageContains(queue)))
+                .isTrue();
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
     }
 
-    /* TODO this has to be updated to new structure
     @Test
     public void removeQueue() {
-        when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
-        String queueName = "queueName";
-        client.removeQueue(queueName);
-        assertThat(infoEvents(appender.list.stream())).hasSize(1);
-        assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queueName))).isTrue();
-        assertThat(errorEvents(appender.list.stream())).isEmpty();
-        verify(template).getForEntity(any(),any());
+        Queue queue = new Queue("queueName");
+
+        client.removeQueue(queue);
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains("queueName"));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
     }
-     */
 
     @Test
     public void createDirectExchange() {
 
-        when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
+        when(template.postForEntity(anyString(), any(CreateExchangeRequest.class),any(Class.class)))
+                .thenReturn(new ResponseEntity<>(new Exchange(exchangeName),HttpStatus.OK));
         client.createDirectExchange(exchangeName);
-        assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
-        assertThat(errorEvents(appender.list.stream())).isEmpty();
-        verify(template).getForEntity(any(),any());
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains(exchangeName));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
     }
 
     @Test
     public void createTopicExchange() {
 
-        when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         String exchangeName = "exchangeName";
+        when(template.postForEntity(anyString(), any(CreateExchangeRequest.class),any(Class.class)))
+                .thenReturn(new ResponseEntity<>(new Exchange(exchangeName),HttpStatus.OK));
         client.createHeadersExchange(exchangeName);
-        assertThat(infoEvents(appender.list.stream())).hasSize(1).anyMatch(formattedMessageContains(exchangeName));
-        assertThat(errorEvents(appender.list.stream())).isEmpty();
-        verify(template).getForEntity(any(),any());
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains(exchangeName));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
+    }
+
+
+    @Test
+    public void removeExchange() {
+        String exchangeName = "someExhange";
+
+        client.removeExchange(new Exchange(exchangeName));
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains(exchangeName));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
+
+    }
+
+    @Test
+    public void addMemberToGroup() {
+        String memberName = "groupMember";
+        String group = "myGroup";
+        when(template.postForEntity(anyString(),any(GroupMember.class),any(Class.class)))
+                .thenReturn(new ResponseEntity<>(new GroupMember(memberName),HttpStatus.OK));
+        client.addMemberToGroup(memberName, group);
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains(memberName))
+                .anyMatch(formattedMessageContains(group));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
+    }
+
+    @Test
+    public void removeMemberFromGroup() {
+        String memberName = "aMember";
+        String groupName = "aGroup";
+        client.removeMemberFromGroup(new GroupMember(memberName), groupName);
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1)
+                .anyMatch(formattedMessageContains(memberName))
+                .anyMatch(formattedMessageContains(groupName));
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
+
     }
 
     @Test
@@ -97,6 +150,8 @@ public class QpidClientLoggerTest {
         String source = "source";
         String destination = "destination";
         String bindingKey = "bindingKey";
+        when(template.postForEntity(anyString(), any(AddBindingRequest.class),any(Class.class)))
+                .thenReturn(new ResponseEntity<>(Boolean.TRUE,HttpStatus.OK));
         client.addBinding(source, new Binding(bindingKey, destination, new Filter(selector)));
         assertThat(infoEvents(appender.list.stream()))
                 .hasSize(1)
@@ -105,6 +160,15 @@ public class QpidClientLoggerTest {
                 .anyMatch(formattedMessageContains(destination))
                 .anyMatch(formattedMessageContains(bindingKey));
         assertThat(errorEvents(appender.list.stream())).isEmpty();
+    }
+
+    @Test
+    public void postQpidAcl() {
+        client.postQpidAcl(new VirtualHostAccessController("myAcl", new ArrayList<>()));
+        assertThat(infoEvents(appender.list.stream()))
+                .hasSize(1);
+        assertThat(errorEvents(appender.list.stream()))
+                .isEmpty();
     }
 
     private static Stream<ILoggingEvent> infoEvents(Stream<ILoggingEvent> stream) {
