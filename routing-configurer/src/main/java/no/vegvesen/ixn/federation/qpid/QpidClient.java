@@ -109,6 +109,7 @@ public class QpidClient {
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
+		logger.info("Create exchange {} of type {}", request.getName(), request.getType());
 		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
 		return response.getBody();
 
@@ -218,15 +219,8 @@ public class QpidClient {
 	}
 
 	public void postQpidAcl(VirtualHostAccessController provider) {
-		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
-		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
-		if (response.getStatusCode().isError()) {
-			String errorMessage = String.format("Error posting to QPID REST API %s, cause: %s",
-					aclRulesUrl,
-					response.getStatusCode().getReasonPhrase());
-			logger.error(errorMessage);
-			throw new RoutingConfigurerException(errorMessage);
-		}
+		logger.info("Posting updated ACL");
+		restTemplate.postForEntity(aclRulesUrl, provider, String.class);
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {
