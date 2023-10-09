@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -970,6 +971,158 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();
 		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
 	}
+
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
+		String neighbourSPName = "neighbour-service-provider";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String neighbourName = "redirect-neighbour";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						Collections.singleton(subscription)
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client
+				.getQpidAcl()
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+
+
+	}
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldNotRemoveSPFromGroupIfOtherRedirectSubsExist() {
+		String neighbourSPName = "neighbour-non-teardown-service-provider-1";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String nonTeardownQueueName = "non-teardown-redirected-queue";
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				neighbourSPName,
+				nonTeardownQueueName
+		);
+		String neighbourName = "redirect-neighbour";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addReadAccess(neighbourSPName,nonTeardownQueue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+
+
+	}
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldNotAffectOtherRedirectedSubscriptions() {
+		String neighbourSPName = "neighbour-service-provider-teardown-x";
+		String otherNeighbourSPName = "other-neighbour-service-provider";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String nonTeardownQueueName = "non-teardown-redirected-queue-x";
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				otherNeighbourSPName,
+				nonTeardownQueueName
+		);
+		String neighbourName = "redirect-neighbour-xx";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.addMemberToGroup(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(otherNeighbourSPName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+
+
+	}
+
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
