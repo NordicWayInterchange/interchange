@@ -22,7 +22,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -51,8 +51,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("publicationType");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("publicationType");
     }
 
     @Test
@@ -69,7 +69,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -98,8 +98,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("causeCode");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("causeCode");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -131,7 +131,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -147,7 +147,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -163,7 +163,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -179,7 +179,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -195,7 +195,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isTrue();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).isEmpty();
     }
 
     @Test
@@ -222,8 +222,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("publisherId");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("publisherId");
     }
 
     @Test
@@ -250,8 +250,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("publicationId");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("publicationId");
     }
 
     @Test
@@ -278,8 +278,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("originatingCountry");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("originatingCountry");
     }
 
     @Test
@@ -306,8 +306,8 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("protocolVersion");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("protocolVersion");
     }
 
     @Test
@@ -334,7 +334,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityIsValid(capability)).isFalse();
-        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).isFalse();
+        assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("quadTree");
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("quadTree");
     }
 }
