@@ -80,7 +80,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexNo = new CapabilitySplitApi();
 		datexNo.setApplication(app);

@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -55,6 +57,16 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
 		}
 
+		Set<String> allPublicationIds = allPublicationIds();
+		for (CapabilitySplitApi capability : capabilityApi.getCapabilities()) {
+			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
+				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
+			}
+			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
+			if (!capabilityProperties.isEmpty()) {
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
+			}
+		}
 
 		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
@@ -75,6 +87,14 @@ public class OnboardRestController {
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
+	}
+
+	private Set<String> allPublicationIds() {
+		Set<CapabilitySplit> allCapabilities = getAllLocalCapabilities();
+		allCapabilities.addAll(getAllNeighbourCapabilities());
+		return allCapabilities.stream()
+				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
+				.collect(Collectors.toSet());
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
