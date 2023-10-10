@@ -94,12 +94,16 @@ public class Sink implements AutoCloseable {
 					System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 				}
 				System.out.println("** Message received **");
-				@SuppressWarnings("rawtypes") Enumeration messageNames =  message.getPropertyNames();
+				Enumeration<String> propertyNames =  message.getPropertyNames();
 
-				while (messageNames.hasMoreElements()) {
-					String messageName = (String) messageNames.nextElement();
-					String value = message.getStringProperty(messageName);
-					System.out.println(String.format("%s:%s",messageName,value));
+				while (propertyNames.hasMoreElements()) {
+					String propertyName = propertyNames.nextElement();
+					Object value = message.getObjectProperty(propertyName);
+					if (value instanceof String) {
+						System.out.println(String.format("%s:'%s'",propertyName,value));
+					} else {
+						System.out.println(String.format("%s:%s:%s", propertyName, value.getClass().getSimpleName(), value));
+					}
 				}
 
 				String messageBody;
