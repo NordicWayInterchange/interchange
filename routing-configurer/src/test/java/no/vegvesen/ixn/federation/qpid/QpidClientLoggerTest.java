@@ -50,7 +50,7 @@ public class QpidClientLoggerTest {
         String queue = "MyQueueu";
         when(template.postForEntity(anyString(),any(CreateQueueRequest.class),any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new Queue(queue),HttpStatus.OK));
-        client.createQueue(queue, QpidClient.MAX_TTL_8_DAYS);
+        client.createQueue(queue);
         assertThat(infoEvents(appender.list.stream()))
                 .hasSize(1);
         assertThat(infoEvents(appender.list.stream())
