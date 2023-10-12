@@ -23,7 +23,8 @@ public class QpidClient {
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
 	public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
 	public static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
-	public final static long MAX_TTL_8_DAYS = 691_200_000L;
+
+	public final static long MAX_TTL_15_MINUTES = 900_000L;
 
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
@@ -86,11 +87,7 @@ public class QpidClient {
 
 
 	public Queue createQueue(String name) {
-		return createQueue(new CreateQueueRequest(name));
-	}
-
-	public Queue createQueue(String queueName, long maximumMessageTtl) {
-		return createQueue(new CreateQueueRequest(queueName,maximumMessageTtl));
+		return createQueue(new CreateQueueRequest(name, MAX_TTL_15_MINUTES));
 	}
 
 	public Exchange createHeadersExchange(String name) {

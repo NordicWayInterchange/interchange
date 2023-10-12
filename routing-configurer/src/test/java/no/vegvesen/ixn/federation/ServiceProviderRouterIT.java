@@ -422,7 +422,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -728,7 +728,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				metadata
 		);
 		client.createHeadersExchange("cap-ex8");
-		client.createQueue("my-queue12", QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue("my-queue12");
 
 		mySP.addLocalSubscription(subscription);
 		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));
@@ -852,7 +852,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue";
 		String exchangeName = "sub-exchange";
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
@@ -883,7 +883,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String exchangeName = "sub-exchange-1";
 		String exchangeName2 = "sub-exchange-2";
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 		client.createHeadersExchange(exchangeName2);
 
@@ -919,7 +919,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-4";
 		String exchangeName = "sub-exchange-4";
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
@@ -952,7 +952,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-3";
 		String exchangeName = "sub-exchange-3";
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
@@ -982,7 +982,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "loc-sub-queue-5";
 		String exchangeName = "sub-exchange-5";
 
-		client.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");

@@ -79,7 +79,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createDirectExchange(exchangeName);
         String queueName = "outputQueue";
         //2. Create a queue
-        qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+        qpidClient.createQueue(queueName);
         //2.1 Create a Capability to base a Validating selector on
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
@@ -188,7 +188,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         //2. Creating read queue and adding read access.
-        qpidClient.createQueue(outQueueName, QpidClient.MAX_TTL_8_DAYS);
+        qpidClient.createQueue(outQueueName);
         qpidClient.addReadAccess("king_gustaf", outQueueName);
 
         //Create intermediate exchange. No ACL needed for this.
@@ -352,7 +352,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createDirectExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
-        qpidClient.createQueue(subscriptionQueue, QpidClient.MAX_TTL_8_DAYS);
+        qpidClient.createQueue(subscriptionQueue);
         qpidClient.addReadAccess("king_gustaf", subscriptionQueue);
 
         qpidClient.createHeadersExchange(capabilityExchange1);

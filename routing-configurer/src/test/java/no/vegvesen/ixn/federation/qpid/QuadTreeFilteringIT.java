@@ -140,7 +140,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		qpidClient.createQueue(queueName);
 		qpidClient.addReadAccess(serviceProviderName, queueName);
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
@@ -175,7 +175,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+		qpidClient.createQueue(queueName);
 		qpidClient.addReadAccess(spName, queueName);
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));

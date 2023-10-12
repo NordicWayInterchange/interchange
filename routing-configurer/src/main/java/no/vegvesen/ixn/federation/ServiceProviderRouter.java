@@ -181,7 +181,7 @@ public class ServiceProviderRouter {
     private void optionallyCreateQueue(String queueName, String serviceProviderName, QpidDelta delta) {
         if (!delta.queueExists(queueName)) {
             logger.info("Creating queue {}", queueName);
-            Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+            Queue queue = qpidClient.createQueue(queueName);
             qpidClient.addReadAccess(serviceProviderName, queueName);
             delta.addQueue(queue);
         }
@@ -231,7 +231,7 @@ public class ServiceProviderRouter {
                 }
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 if (!delta.queueExists(queueName)) {
-                    Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+                    Queue queue = qpidClient.createQueue(queueName);
                     delta.addQueue(queue);
                 }
                 logger.info("Creating queue {}", queueName);
