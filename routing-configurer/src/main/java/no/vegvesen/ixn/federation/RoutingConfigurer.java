@@ -68,21 +68,36 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
-		try {
-			for (NeighbourSubscription sub : subscriptions) {
-				Queue queue = qpidClient.getQueue(sub.getQueueName());
-				if (queue != null) {
-					qpidClient.removeQueue(queue);
-				}
+		Set<String> redirectedServiceProviders = new HashSet<>();
+		for (NeighbourSubscription sub : subscriptions) {
+			Queue queue = qpidClient.getQueue(sub.getQueueName());
+			if (queue != null) {
+				qpidClient.removeQueue(queue);
 			}
-			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
-
-			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
-				logger.info("Removed routing for neighbour {}", name);
+			//If the subscription is a redirect, have to remove the user from the ACL for the queue
+			String consumerCommonName = sub.getConsumerCommonName();
+			if (! consumerCommonName.equals(neighbour.getName())) {
+				qpidClient.removeReadAccess(consumerCommonName, queue.getName());
+				redirectedServiceProviders.add(consumerCommonName);
 			}
-		} catch (Exception e) {
-			logger.error("Could not remove routing for neighbour {}", name, e);
+		}
+		//If it is the last subscription of the SP, we need to remove them from the remote_sp group
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
+		neighbourService.saveNeighbour(neighbour);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
+			logger.info("Removed routing for neighbour {}", name);
+		}
+		for (String redirectedSpName : redirectedServiceProviders) {
+			Set<NeighbourSubscription> subscriptionsWithConsumerCommonName = neighbour
+					.getNeighbourRequestedSubscriptions()
+					.getSubscriptions()
+					.stream()
+					.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
+					.collect(Collectors.toSet());
+			if (subscriptionsWithConsumerCommonName.isEmpty()) {
+				removeSubscriberFromGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME,redirectedSpName);
+			}
 		}
 	}
 

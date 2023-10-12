@@ -308,6 +308,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
 
+
+	@Test
+	public void removeReadAccessThatDoesNotExist() {
+		assertThatNoException().isThrownBy(
+				() -> client.removeReadAccess("htis-subscriber-does-not-exist","this-queue-does-not-exist")
+		);
+
+	}
+
 	@Test
 	public void writeAccessIsAdded() {
 		String subscriberName = "catfish";
