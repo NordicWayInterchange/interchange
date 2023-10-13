@@ -129,10 +129,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        String queueName = "sub-" + UUID.randomUUID();
-
         NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.CREATED, "neighbour");
-        sub.setQueueName(queueName);
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
@@ -141,10 +138,11 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 new SubscriptionRequest(Collections.emptySet()));
 
 
+        when(neighbourService.getMessagePort()).thenReturn("5671");
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-        assertThat(client.queueExists(queueName)).isFalse();
+        assertThat(sub.getEndpoints()).isEmpty();
     }
 
     @Test
@@ -176,10 +174,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        String queueName = "re-" + UUID.randomUUID();
-
         NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.CREATED, "neighbour-consumer");
-        sub.setQueueName(queueName);
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
@@ -188,9 +183,10 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 new SubscriptionRequest(Collections.emptySet()));
 
 
+        when(neighbourService.getMessagePort()).thenReturn("5671");
         when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-        assertThat(client.queueExists(queueName)).isFalse();
+        assertThat(sub.getEndpoints()).isEmpty();
     }
 }

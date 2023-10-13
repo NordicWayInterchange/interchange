@@ -30,8 +30,6 @@ public class NeighbourSubscription {
 
     private long lastUpdatedTimestamp;
 
-    private String queueName;
-
     public NeighbourSubscription() {
 
     }
@@ -131,14 +129,6 @@ public class NeighbourSubscription {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getQueueName() {
-        return queueName;
-    }
-
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -162,12 +152,7 @@ public class NeighbourSubscription {
                 ", path='" + path + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", endpoints=" + endpoints +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", queueName='" + queueName + '\'' +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp + '\'' +
                 '}';
-    }
-
-    public String bindKey() {
-        return "" + selector.hashCode();
     }
 }
