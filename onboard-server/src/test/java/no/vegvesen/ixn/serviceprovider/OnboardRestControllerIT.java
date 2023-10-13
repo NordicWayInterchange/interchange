@@ -432,10 +432,10 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
         FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), selector);
-        assertThat(response.getCapabilities()).hasSize(3);
+        assertThat(response.getCapabilities()).hasSize(1);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
