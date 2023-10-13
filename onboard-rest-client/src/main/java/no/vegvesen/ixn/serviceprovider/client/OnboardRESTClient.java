@@ -10,8 +10,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.util.HashMap;
-import java.util.Map;
 
 public class OnboardRESTClient {
 
@@ -45,10 +43,11 @@ public class OnboardRESTClient {
     }
 
     public FetchMatchingCapabilitiesResponse fetchAllMatchingCapabilities(String selector) {
-        String url = String.format("%s/%s/network/capabilities", server, user);
-        Map<String,String> parameters = new HashMap<>();
-        parameters.put("selector",selector);
-        return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,parameters).getBody();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = String.format("%s/%s/network/capabilities?selector={selector}", server, user);
+        return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,selector).getBody();
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
