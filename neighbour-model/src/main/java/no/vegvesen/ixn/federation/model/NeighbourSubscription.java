@@ -62,14 +62,6 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus neighbourSubscriptionStatus, String consumerCommonName, String queueName) {
-        this.selector = selector;
-        this.subscriptionStatus = neighbourSubscriptionStatus;
-        this.consumerCommonName = consumerCommonName;
-        this.queueName = queueName;
-
-    }
-
     public Integer getId() {
         return id;
     }
