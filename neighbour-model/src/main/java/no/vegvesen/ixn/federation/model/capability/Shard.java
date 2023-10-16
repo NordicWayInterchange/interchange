@@ -15,6 +15,7 @@ public class Shard {
 
     private String exchangeName;
 
+    @Column(columnDefinition="TEXT")
     private String selector;
 
     public Shard() {
