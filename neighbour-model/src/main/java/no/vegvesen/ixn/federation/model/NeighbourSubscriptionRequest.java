@@ -32,7 +32,7 @@ public class NeighbourSubscriptionRequest {
     }
 
     public NeighbourSubscriptionRequest(Set<NeighbourSubscription> subscription) {
-        this.subscription = subscription;
+        this.subscription.addAll(subscription);
     }
 
     public Set<NeighbourSubscription> getSubscriptions() {

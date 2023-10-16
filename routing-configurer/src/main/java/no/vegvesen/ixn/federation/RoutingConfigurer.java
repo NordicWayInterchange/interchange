@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
@@ -67,21 +68,36 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
-		try {
-			for (NeighbourSubscription sub : subscriptions) {
-				Queue queue = qpidClient.getQueue(sub.getQueueName());
-				if (queue != null) {
-					qpidClient.removeQueue(queue);
-				}
+		Set<String> redirectedServiceProviders = new HashSet<>();
+		for (NeighbourSubscription sub : subscriptions) {
+			Queue queue = qpidClient.getQueue(sub.getQueueName());
+			if (queue != null) {
+				qpidClient.removeQueue(queue);
 			}
-			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
-
-			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
-				logger.info("Removed routing for neighbour {}", name);
+			//If the subscription is a redirect, have to remove the user from the ACL for the queue
+			String consumerCommonName = sub.getConsumerCommonName();
+			if (! consumerCommonName.equals(neighbour.getName())) {
+				qpidClient.removeReadAccess(consumerCommonName, queue.getName());
+				redirectedServiceProviders.add(consumerCommonName);
 			}
-		} catch (Exception e) {
-			logger.error("Could not remove routing for neighbour {}", name, e);
+		}
+		//If it is the last subscription of the SP, we need to remove them from the remote_sp group
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
+		neighbourService.saveNeighbour(neighbour);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
+			logger.info("Removed routing for neighbour {}", name);
+		}
+		for (String redirectedSpName : redirectedServiceProviders) {
+			Set<NeighbourSubscription> subscriptionsWithConsumerCommonName = neighbour
+					.getNeighbourRequestedSubscriptions()
+					.getSubscriptions()
+					.stream()
+					.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
+					.collect(Collectors.toSet());
+			if (subscriptionsWithConsumerCommonName.isEmpty()) {
+				removeSubscriberFromGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME,redirectedSpName);
+			}
 		}
 	}
 
@@ -118,15 +134,18 @@ public class RoutingConfigurer {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
-				//if any of the matching caps does not have the exchange set
-				if (matchingCaps.stream().filter(m -> ! m.exchangeExists()).count() == 0) {
+				//if any of the matching caps does not have the shards set
+				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
 					String queueName = "sub-" + UUID.randomUUID();
 					createQueue(queueName, neighbourName, delta);
 					subscription.setQueueName(queueName);
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
 					for (CapabilitySplit cap : matchingCaps) {
-						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
-							qpidClient.addBinding(cap.getCapabilityExchangeName(), new Binding(cap.getCapabilityExchangeName(), queueName, new Filter(subscription.getSelector())));
+						if (cap.isSharded()) {
+							//TODO: if capability is sharded, check is the subscription contains chardId as well.
+						} else {
+							Shard shard = cap.getMetadata().getShards().get(0);
+							qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), queueName, new Filter(subscription.getSelector())));
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
@@ -146,20 +165,25 @@ public class RoutingConfigurer {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
-				String redirectQueue = "re-" + UUID.randomUUID();
-				createQueue(redirectQueue, subscription.getConsumerCommonName(), delta);
-				subscription.setQueueName(redirectQueue);
-				for (CapabilitySplit cap : matchingCaps) {
-					if (cap.exchangeExists()) {
-						addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
-						bindRemoteServiceProvider(cap.getCapabilityExchangeName(), redirectQueue, subscription);
+				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
+					String redirectQueue = "re-" + UUID.randomUUID();
+					createQueue(redirectQueue, subscription.getConsumerCommonName(), delta);
+					subscription.setQueueName(redirectQueue);
+					for (CapabilitySplit cap : matchingCaps) {
+						if (cap.isSharded()) {
+							//TODO: if capability is sharded, check is the subscription contains chardId as well.
+						} else {
+							Shard shard = cap.getMetadata().getShards().get(0);
+							addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+							bindRemoteServiceProvider(shard.getExchangeName(), redirectQueue, subscription);
+						}
 					}
+					//TODO: Move 3 lines inside if over here
+					NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+					subscription.setEndpoints(Collections.singleton(endpoint));
+					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
+					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
-				//TODO: Move 3 lines inside if over here
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
-				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-				logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
@@ -242,7 +266,7 @@ public class RoutingConfigurer {
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		if (!delta.queueExists(queueName)) {
-			Queue queue = qpidClient.createQueue(queueName, QpidClient.MAX_TTL_8_DAYS);
+			Queue queue = qpidClient.createQueue(queueName);
 			qpidClient.addReadAccess(subscriberName, queueName);
 			delta.addQueue(queue);
 		}

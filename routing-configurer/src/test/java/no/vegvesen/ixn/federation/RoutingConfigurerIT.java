@@ -7,12 +7,10 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.DenmApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -117,6 +115,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard = new Shard(1, "cap-ex20", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -126,10 +128,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex20");
-		client.createDirectExchange("cap-ex20");
+		client.createHeadersExchange("cap-ex20");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -156,6 +157,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsIsCreated() {
+		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard1 = new Shard(1, "cap-ex11", "publicationId = 'pub-1'");
+		metadata1.setShards(Collections.singletonList(shard1));
+
 		CapabilitySplit cap1 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -165,10 +170,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata1
 		);
-		cap1.setCapabilityExchangeName("cap-ex11");
-		client.createDirectExchange("cap-ex11");
+		client.createHeadersExchange("cap-ex11");
+
+		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard2 = new Shard(1, "cap-ex12", "publicationId = 'pub-1'");
+		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -179,10 +187,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata2
 		);
-		cap2.setCapabilityExchangeName("cap-ex12");
-		client.createDirectExchange("cap-ex12");
+		client.createHeadersExchange("cap-ex12");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -219,6 +226,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
+		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard1 = new Shard(1, "cap-ex32", "publicationId = 'pub-1'");
+		metadata1.setShards(Collections.singletonList(shard1));
+
 		CapabilitySplit cap1 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -228,10 +239,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata1
 		);
-		cap1.setCapabilityExchangeName("cap-ex32");
-		client.createDirectExchange("cap-ex32");
+		client.createHeadersExchange("cap-ex32");
+
+		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard2 = new Shard(1, "cap-ex13", "publicationId = 'pub-1'");
+		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -242,10 +256,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata2
 		);
-		cap2.setCapabilityExchangeName("cap-ex13");
-		client.createDirectExchange("cap-ex13");
+		client.createHeadersExchange("cap-ex13");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -296,6 +309,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	@Disabled("This test does no longer make any sense!")
 	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() {
+		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard = new Shard(1, "cap-ex14", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"SE-1234",
@@ -305,10 +322,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex14");
-		client.createDirectExchange("cap-ex14");
+		client.createHeadersExchange("cap-ex14");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -435,6 +451,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingOneSubscriptionResultsInOneBindKey() {
+		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -444,10 +464,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex1");
-		client.createDirectExchange("cap-ex1");
+		client.createHeadersExchange("cap-ex1");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -472,6 +491,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingTwoSubscriptionsResultsInTwoBindKeys() {
+		Metadata metadata1 = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
+		metadata1.setShards(Collections.singletonList(shard1));
+
 		CapabilitySplit cap1 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -481,10 +504,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata1
 		);
-		cap1.setCapabilityExchangeName("cap-ex2");
-		client.createDirectExchange("cap-ex2");
+		client.createHeadersExchange("cap-ex2");
+
+		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
+		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -495,10 +521,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata2
 		);
-		cap2.setCapabilityExchangeName("cap-ex3");
-		client.createDirectExchange("cap-ex3");
+		client.createHeadersExchange("cap-ex3");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -541,6 +566,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingTwoSubscriptionsAndOneCapabilityResultsInTwoBindKeys() {
+		Metadata metadata1 = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard1 = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
+		metadata1.setShards(Collections.singletonList(shard1));
+
 		CapabilitySplit cap1 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -550,10 +579,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata1
 		);
-		cap1.setCapabilityExchangeName("cap-ex4");
-		client.createDirectExchange("cap-ex4");
+		client.createHeadersExchange("cap-ex4");
+
+		Metadata metadata2 = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
+		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -564,10 +596,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata2
 		);
-		cap2.setCapabilityExchangeName("cap-ex5");
-		client.createDirectExchange("cap-ex5");
+		client.createHeadersExchange("cap-ex5");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -594,6 +625,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProvider() {
+		Metadata metadata = new Metadata(RedirectStatus.MANDATORY);
+		Shard shard = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -603,10 +638,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.MANDATORY)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex6");
-		client.createDirectExchange("cap-ex6");
+		client.createHeadersExchange("cap-ex6");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -630,6 +664,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbour() {
+		Metadata metadata1 = new Metadata(RedirectStatus.MANDATORY);
+		Shard shard1 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
+		metadata1.setShards(Collections.singletonList(shard1));
+
 		CapabilitySplit cap1 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -639,10 +677,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.MANDATORY)
+				metadata1
 		);
-		cap1.setCapabilityExchangeName("cap-ex7");
-		client.createDirectExchange("cap-ex7");
+		client.createHeadersExchange("cap-ex7");
+
+		Metadata metadata2 = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard2 = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
+		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
@@ -653,10 +694,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata2
 		);
-		cap2.setCapabilityExchangeName("cap-ex8");
-		client.createDirectExchange("cap-ex8");
+		client.createHeadersExchange("cap-ex8");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
@@ -691,6 +731,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void routingIsNotSetUpWhenTryingToRedirect() {
+		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
+		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -700,7 +744,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				metadata
 		);
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -739,6 +783,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbourForOneCapability() {
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard = new Shard(1, "cap-ex9", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
@@ -748,10 +796,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("01230122", "01230123")),
 						"RoadBlock"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex9");
-		client.createDirectExchange("cap-ex9");
+		client.createHeadersExchange("cap-ex9");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
@@ -792,6 +839,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		String deliveryExchangeName = "del-ex10";
 
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard = new Shard(1, "cap-ex10", "publicationId = 'pub-1'");
+		metadata.setShards(Collections.singletonList(shard));
+
 		CapabilitySplit cap = new CapabilitySplit(
 				new DenmApplication(
 						"NO-123",
@@ -801,9 +852,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						new HashSet<>(Arrays.asList("12004")),
 						new HashSet<>(Arrays.asList(6))
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				metadata
 		);
-		cap.setCapabilityExchangeName("cap-ex10");
 		client.createHeadersExchange("cap-ex10");
 
 		ServiceProvider sp = new ServiceProvider("sp");
@@ -816,7 +866,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
-		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getCapabilityExchangeName(), new Filter(joinedSelector)));
+		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getMetadata().getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 
 		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
 
@@ -970,6 +1020,158 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();
 		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
 	}
+
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
+		String neighbourSPName = "neighbour-service-provider";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String neighbourName = "redirect-neighbour";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						Collections.singleton(subscription)
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client
+				.getQpidAcl()
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+
+
+	}
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldNotRemoveSPFromGroupIfOtherRedirectSubsExist() {
+		String neighbourSPName = "neighbour-non-teardown-service-provider-1";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String nonTeardownQueueName = "non-teardown-redirected-queue";
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				neighbourSPName,
+				nonTeardownQueueName
+		);
+		String neighbourName = "redirect-neighbour";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addReadAccess(neighbourSPName,nonTeardownQueue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+
+
+	}
+
+	@Test
+	public void tearDownRedirectedSubscriptionShouldNotAffectOtherRedirectedSubscriptions() {
+		String neighbourSPName = "neighbour-service-provider-teardown-x";
+		String otherNeighbourSPName = "other-neighbour-service-provider";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourSPName,
+				queueName
+		);
+		String nonTeardownQueueName = "non-teardown-redirected-queue-x";
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				otherNeighbourSPName,
+				nonTeardownQueueName
+		);
+		String neighbourName = "redirect-neighbour-xx";
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue.getName());
+		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.addMemberToGroup(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourSPName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(otherNeighbourSPName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+
+
+	}
+
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");

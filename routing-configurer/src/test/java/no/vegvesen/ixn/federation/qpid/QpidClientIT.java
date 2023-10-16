@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.MAX_TTL_8_DAYS;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 import static org.assertj.core.api.Assertions.*;
@@ -75,10 +74,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void createQueueThatAlreadyExistsResultsInException() {
-		Queue queue = client.createQueue("torsk", MAX_TTL_8_DAYS);
+		Queue queue = client.createQueue("torsk");
 
 		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
-			client.createQueue("torsk", MAX_TTL_8_DAYS); //create some queue that already exists
+			client.createQueue("torsk"); //create some queue that already exists
 		});
 		client.removeQueue(queue);
 	}
@@ -309,6 +308,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
 
+
+	@Test
+	public void removeReadAccessThatDoesNotExist() {
+		assertThatNoException().isThrownBy(
+				() -> client.removeReadAccess("htis-subscriber-does-not-exist","this-queue-does-not-exist")
+		);
+
+	}
+
 	@Test
 	public void writeAccessIsAdded() {
 		String subscriberName = "catfish";
@@ -337,7 +345,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void removeExchangeBeforeBindings() {
 		client.createHeadersExchange("hammershark");
-		client.createQueue("babyshark", MAX_TTL_8_DAYS);
+		client.createQueue("babyshark");
 
 		client.addBinding("hammershark", new Binding("hammershark", "babyshark", new Filter("originatingCountry = 'NO'")));
 		Exchange exchange = client.getExchange("hammershark");
@@ -350,7 +358,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void removeQueueBeforeBindings() {
 		client.createHeadersExchange("hammershark1");
-		Queue queue = client.createQueue("babyshark1", MAX_TTL_8_DAYS);
+		Queue queue = client.createQueue("babyshark1");
 
 		client.addBinding("hammershark1", new Binding("hammershark1", "babyshark1", new Filter("originatingCountry = 'NO'")));
 		assertThat(client.getQueuePublishingLinks("babyshark1")).hasSize(1);
@@ -364,7 +372,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void readExchangesFromQpid() throws IOException {
 		client.createHeadersExchange("test-exchange1");
 		client.createHeadersExchange("test-exchange2");
-		client.createQueue("test-queue", MAX_TTL_8_DAYS);
+		client.createQueue("test-queue");
 		client.addBinding("test-exchange1", new Binding("test-exchange1", "test-queue", new Filter("originatingCountry = 'NO'")));
 		client.addBinding("test-exchange2", new Binding("test-exchange2", "test-queue", new Filter("originatingCountry = 'NO'")));
 
@@ -375,7 +383,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void readQueuesFromQpid() throws IOException {
 		String queueName = "test-read-queues-from-qpid";
-		client.createQueue(queueName, MAX_TTL_8_DAYS);
+		client.createQueue(queueName);
 
 		List<Queue> result = client.getAllQueues();
 		assertThat(result.stream().filter( q -> q.getName().equals(queueName)).count()).isEqualTo(1);
@@ -387,7 +395,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "subscriptionExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createQueue(queue);
 		client.createHeadersExchange(exchange);
 
 		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
@@ -404,7 +412,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange1";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createQueue(queue);
 		client.createHeadersExchange(exchange);
 
 		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
@@ -421,7 +429,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String exchange = "capabilityExchange2";
 		String selector = "originatingCountry = 'NO'";
 
-		client.createQueue(queue, MAX_TTL_8_DAYS);
+		client.createQueue(queue);
 		client.createHeadersExchange(exchange);
 
 		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));

@@ -92,7 +92,7 @@ public class OnboardRestController {
 	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @RequestParam(required = false) String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		logger.info("List network capabilities for serivce provider {}",serviceProviderName);
+		logger.info("List network capabilities for service provider {}",serviceProviderName);
 		Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
