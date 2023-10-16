@@ -38,6 +38,9 @@ public class QpidClient {
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
+
+	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker/broker";
+
 	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
@@ -46,6 +49,9 @@ public class QpidClient {
 	private final String aclRulesUrl;
 	private final String allQueuesUrl;
 	private final String allExchangesUrl;
+
+	private final String queryApiUrl;
+
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -58,6 +64,7 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
+		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
 	}
 
 	/**
@@ -218,6 +225,14 @@ public class QpidClient {
 	public void postQpidAcl(VirtualHostAccessController provider) {
 		logger.info("Posting updated ACL");
 		restTemplate.postForEntity(aclRulesUrl, provider, String.class);
+	}
+
+
+	/*
+	TODO this needs a better result class, probably a list of hashmaps.
+	 */
+	public String executeQuery(String query) {
+		return restTemplate.postForEntity(queryApiUrl,new Query(query),String.class).getBody();
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {
