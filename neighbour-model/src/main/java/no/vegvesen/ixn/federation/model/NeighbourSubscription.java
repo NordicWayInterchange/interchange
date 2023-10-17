@@ -16,8 +16,9 @@ public class NeighbourSubscription {
     @Enumerated(EnumType.STRING)
     private NeighbourSubscriptionStatus subscriptionStatus;
 
-    @Column(columnDefinition="TEXT")
-    private String selector;
+    @Embedded
+    @Column(columnDefinition = "TEXT")
+    private Selector selector;
 
     private String path;
 
@@ -35,12 +36,12 @@ public class NeighbourSubscription {
     }
 
     public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.subscriptionStatus = subscriptionStatus;
     }
 
     public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus, String consumerCommonName) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.subscriptionStatus = subscriptionStatus;
         this.consumerCommonName = consumerCommonName;
     }
@@ -48,7 +49,7 @@ public class NeighbourSubscription {
     public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
 
         this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints.addAll(endpoints);
@@ -57,7 +58,7 @@ public class NeighbourSubscription {
     public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.path = path;
         this.consumerCommonName = consumerCommonName;
     }
@@ -79,11 +80,11 @@ public class NeighbourSubscription {
     }
 
     public String getSelector() {
-        return selector;
+        return selector.getSelector();
     }
 
     public void setSelector(String selector) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
     }
 
     public String getPath() {
