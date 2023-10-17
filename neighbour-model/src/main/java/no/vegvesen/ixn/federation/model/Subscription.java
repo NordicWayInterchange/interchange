@@ -17,8 +17,8 @@ public class Subscription {
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
 
-	@Column(columnDefinition="TEXT")
-	private String selector;
+	@Embedded
+	private Selector selector;
 
 	private String path;
 
@@ -39,12 +39,12 @@ public class Subscription {
 	}
 
 	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
 	public Subscription(String selector, SubscriptionStatus subscriptionStatus, String consumerCommonName) {
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.subscriptionStatus = subscriptionStatus;
 		this.consumerCommonName = consumerCommonName;
 	}
@@ -52,7 +52,7 @@ public class Subscription {
 	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
 	}
@@ -60,7 +60,7 @@ public class Subscription {
 	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
 		this.endpoints.addAll(endpoints);
@@ -68,7 +68,7 @@ public class Subscription {
 
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
 		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
 		this.endpoints.addAll(endpoints);
@@ -76,7 +76,7 @@ public class Subscription {
 
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
+		this.selector = new Selector(selector);
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
 	}
@@ -90,11 +90,11 @@ public class Subscription {
 	}
 
 	public String getSelector() {
-		return selector;
+		return selector.getSelector();
 	}
 
 	public void setSelector(String selector) {
-		this.selector = selector;
+		this.selector = new Selector(selector);
 	}
 
 	public Integer getId() {
@@ -195,7 +195,7 @@ public class Subscription {
 		return "Subscription{" +
 				"id=" + id +
 				", subscriptionStatus=" + subscriptionStatus +
-				", selector='" + selector + '\'' +
+				", selector='" + selector.getSelector() + '\'' +
 				", path='" + path + '\'' +
 				", numberOfPolls=" + numberOfPolls +
 				", consumerCommonName='" + consumerCommonName + '\'' +
