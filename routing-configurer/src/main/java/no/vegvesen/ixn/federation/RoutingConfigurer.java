@@ -74,10 +74,10 @@ public class RoutingConfigurer {
 			if (queue != null) {
 				qpidClient.removeQueue(queue);
 			}
-			//If the subscription is a redirect, have to remove the user from the ACL for the queue
+
 			String consumerCommonName = sub.getConsumerCommonName();
+			qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 			if (! consumerCommonName.equals(neighbour.getName())) {
-				qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 				redirectedServiceProviders.add(consumerCommonName);
 			}
 		}

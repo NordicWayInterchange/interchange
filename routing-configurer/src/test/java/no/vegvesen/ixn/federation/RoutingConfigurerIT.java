@@ -1021,6 +1021,88 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
 	}
 
+	@Test
+	public void tearDownSubscriptionShouldRemoveAclForQueue() {
+		String neighbourName = "neighbour";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourName,
+				queueName
+		);
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						Collections.singleton(subscription)
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourName,queue.getName());
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client
+				.getQpidAcl()
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,queue.getName())
+				)
+		).isFalse();
+		assertThat(client.getQueue(queue.getName())).isNull();
+	}
+
+	@Test
+	public void tearDownSubscriptionShouldNotRemoveNeighbourFromGroupIfOtherSubsExist() {
+		String neighbourSPName = "neighbour-non-teardown-service-provider-1";
+		String neighbourName = "redirect-neighbour";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourName,
+				queueName
+		);
+		String nonTeardownQueueName = "non-teardown-redirected-queue";
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				neighbourName,
+				nonTeardownQueueName
+		);
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourName,queue.getName());
+		client.addReadAccess(neighbourName,nonTeardownQueue.getName());
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+	}
 
 	@Test
 	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
@@ -1055,8 +1137,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		).isFalse();
 		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
-
-
 	}
 
 	@Test
@@ -1110,8 +1190,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
-
-
 	}
 
 	@Test
@@ -1168,8 +1246,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
-
-
 	}
 
 
