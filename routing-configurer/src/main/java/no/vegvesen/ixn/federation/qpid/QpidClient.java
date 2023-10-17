@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class QpidClient {
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
+	private static final String CONNECTION_URL_PATTERN = "%s/api/latest/connection";
 
 	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker/broker";
 
@@ -52,6 +54,8 @@ public class QpidClient {
 
 	private final String queryApiUrl;
 
+	private final String connectionUrl;
+
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -65,6 +69,7 @@ public class QpidClient {
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
 		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
+		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
 	}
 
 	/**
@@ -231,8 +236,27 @@ public class QpidClient {
 	/*
 	TODO this needs a better result class, probably a list of hashmaps.
 	 */
-	public String executeQuery(String query) {
-		return restTemplate.postForEntity(queryApiUrl,new Query(query),String.class).getBody();
+	public QueryResult executeQuery(String query) {
+		/*
+		ResponseEntity<List<HashMap<String, String>>> response = restTemplate.exchange(
+				queryApiUrl,
+				HttpMethod.POST,
+				new HttpEntity<>(new Query(query)),
+				new ParameterizedTypeReference<>() {
+				});
+		return response.getBody();
+		 */
+		return restTemplate.postForEntity(queryApiUrl,new Query(query),QueryResult.class).getBody();
+	}
+
+
+	public String getConnection(String port, String connectionName) {
+		return restTemplate.getForEntity(connectionUrl + "/" + port + "/" + connectionName,String.class).getBody();
+	}
+
+	public void deleteConnection(String connectionName) {
+		logger.info("Deleting connection {}", connectionName);
+		restTemplate.delete(connectionUrl + "/AMQPS/" + connectionName);
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {
