@@ -1055,8 +1055,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void tearDownSubscriptionShouldNotRemoveNeighbourFromGroupIfOtherSubsExist() {
-		String neighbourSPName = "neighbour-non-teardown-service-provider-1";
-		String neighbourName = "redirect-neighbour";
+		String neighbourName = "non-redirect-neighbour";
 		String queueName = UUID.randomUUID().toString();
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
@@ -1064,7 +1063,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				neighbourName,
 				queueName
 		);
-		String nonTeardownQueueName = "non-teardown-redirected-queue";
+		String nonTeardownQueueName = "non-teardown-queue";
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
