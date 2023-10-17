@@ -24,7 +24,7 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
     public RootCAKeyGenerator(Path keysFolder, String caDomain, String countryCode) {
         this(new ImageFromDockerfile("vinz-clortho")
-                .withFileFromClasspath(".", Paths.get("rootca","newca").toString()),
+                .withFileFromClasspath(".", "rootca/newca"),
                 keysFolder,caDomain,countryCode);
 
     }
