@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -46,6 +47,9 @@ public class OnboardRestControllerIT {
 
     @Autowired
     private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private PrivateChannelRepository privateChannelRepository;
 
     @MockBean
     private CertService certService;
@@ -634,6 +638,22 @@ public class OnboardRestControllerIT {
 
         serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(serviceProvider.getDeliveries()).hasSize(1);
+
+    }
+
+    @Test
+    public void testAddingPrivateChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
+        PrivateChannelApi newChannel = restController.addPrivateChannel(serviceProviderName,clientChannel);
+        PrivateChannel findChannel = privateChannelRepository.findByPeerName(clientChannel.getPeerName());
+
+        assertThat(newChannel.getPeerName().equals(findChannel.getPeerName()));
+
+    }
+    @Test
+    public void testAddingDuplicateChannel(){
 
     }
 }

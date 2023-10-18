@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -29,6 +30,7 @@ public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final NeighbourRepository neighbourRepository;
+	private final PrivateChannelRepository privateChannelRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
@@ -38,10 +40,11 @@ public class OnboardRestController {
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
 								 NeighbourRepository neighbourRepository,
-								 CertService certService,
+								 PrivateChannelRepository privateChannelRepository, CertService certService,
 								 InterchangeNodeProperties nodeProperties) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.neighbourRepository = neighbourRepository;
+		this.privateChannelRepository = privateChannelRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
 	}
@@ -299,7 +302,7 @@ public class OnboardRestController {
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN
 	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
@@ -309,16 +312,20 @@ public class OnboardRestController {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
+		boolean channelExists = privateChannelRepository.existsByPeerName(clientChannel.getPeerName());
 
-		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getPeerName());
-
-		serviceProviderRepository.save(serviceProviderToUpdate);
-		OnboardMDCUtil.removeLogVariables();
-		return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+		if(channelExists){
+			throw new PrivateChannelException("Client already has private channel");
+		}
+		else{
+			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED);
+			privateChannelRepository.save(newPrivateChannel);
+			OnboardMDCUtil.removeLogVariables();
+			return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+		}
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}") //JOHAN
 	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
@@ -338,7 +345,7 @@ public class OnboardRestController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN
 	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);

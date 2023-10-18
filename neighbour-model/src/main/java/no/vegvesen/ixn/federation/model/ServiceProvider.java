@@ -202,7 +202,8 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
-	public PrivateChannel addPrivateChannel(String peerName) {
+	/*
+	public PrivateChannel addPrivateChannel(String peerName) { //JOHAN
 		PrivateChannel newPrivateChannel = new PrivateChannel(peerName, PrivateChannelStatus.REQUESTED);
 		if(privateChannels.contains(newPrivateChannel)){
 			throw new PrivateChannelException("Client already has private channel");
@@ -211,8 +212,10 @@ public class ServiceProvider {
 		}
 		return newPrivateChannel;
 	}
+	Skal være ferdig -- sletter ikke enda
 
-	public void setPrivateChannelToTearDown(Integer privateChannelId) {
+  	*/
+	public void setPrivateChannelToTearDown(Integer privateChannelId) { //JOHAN
 		PrivateChannel privateChannelToDelete = privateChannels
 				.stream()
 				.filter(privateChannel -> privateChannel.getId().equals(privateChannelId))
