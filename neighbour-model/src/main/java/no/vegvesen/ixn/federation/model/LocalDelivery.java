@@ -22,9 +22,8 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
-    @Column(columnDefinition="TEXT")
-    private String selector = "";
+    @Embedded
+    private Selector selector;
 
     @Column
     @UpdateTimestamp
@@ -44,7 +43,7 @@ public class LocalDelivery {
     public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status) {
         this.id = id;
         this.endpoints.addAll(endpoints);
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.status = status;
     }
 
@@ -98,11 +97,11 @@ public class LocalDelivery {
     }
 
     public String getSelector() {
-        return selector;
+        return selector.getSelector();
     }
 
     public void setSelector(String selector) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
     }
 
     public LocalDateTime getLastUpdatedTimestamp() {
