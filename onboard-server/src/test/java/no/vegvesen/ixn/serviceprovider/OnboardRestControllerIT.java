@@ -23,12 +23,10 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -559,6 +557,11 @@ public class OnboardRestControllerIT {
     }
     @Test
     public void testAddingDuplicateChannel(){
-
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+        restController.addPrivateChannel(serviceProviderName,clientChannel);
+        assertThrows(RuntimeException.class, ()->{
+            restController.addPrivateChannel(serviceProviderName,clientChannel);
+        });
     }
 }
