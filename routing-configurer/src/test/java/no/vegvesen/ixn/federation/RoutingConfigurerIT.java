@@ -1027,12 +1027,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void tearDownSubscriptionShouldRemoveAclForQueue() {
 		String neighbourName = "neighbour";
 		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourName,
-				queueName
+				neighbourName
 		);
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new Capabilities(),
@@ -1059,19 +1064,27 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void tearDownSubscriptionShouldNotRemoveNeighbourFromGroupIfOtherSubsExist() {
 		String neighbourName = "non-redirect-neighbour";
 		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourName,
-				queueName
-		);
+				neighbourName);
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-queue";
+		NeighbourEndpoint nonTearDownEndpoint = new NeighbourEndpoint(
+				nonTeardownQueueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				neighbourName,
-				nonTeardownQueueName
-		);
+				neighbourName);
+		nonTearDownSubscription.setEndpoints(Collections.singleton(nonTearDownEndpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new Capabilities(),
