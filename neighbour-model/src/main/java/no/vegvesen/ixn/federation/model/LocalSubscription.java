@@ -19,9 +19,8 @@ public class LocalSubscription {
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
-    @Column(columnDefinition="TEXT", nullable = false)
-    private String selector;
+    @Embedded
+    private Selector selector;
 
     @Column
     @UpdateTimestamp
@@ -42,26 +41,26 @@ public class LocalSubscription {
     }
 
     public LocalSubscription(String selector, String consumerCommonName) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, String selector, String consumerCommonName) {
         this.id = id;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.id = id;
         this.status = status;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
 
@@ -69,7 +68,7 @@ public class LocalSubscription {
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.status = status;
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
         this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
@@ -89,7 +88,7 @@ public class LocalSubscription {
     }
 
     public String getSelector() {
-        return selector;
+        return selector.getSelector();
     }
 
     public Set<LocalEndpoint> getLocalEndpoints() {
