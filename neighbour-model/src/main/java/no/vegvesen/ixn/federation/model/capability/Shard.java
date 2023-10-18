@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.model.capability;
 
+import no.vegvesen.ixn.federation.model.Selector;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -15,8 +17,8 @@ public class Shard {
 
     private String exchangeName;
 
-    @Column(columnDefinition="TEXT")
-    private String selector;
+    @Embedded
+    private Selector selector;
 
     public Shard() {
 
@@ -25,7 +27,7 @@ public class Shard {
     public Shard(Integer shardId, String exchangeName, String selector) {
         this.shardId = shardId;
         this.exchangeName = exchangeName;
-        this.selector = selector;
+        this.selector = new Selector(selector);
     }
 
     public Integer getShardId() {
@@ -45,11 +47,11 @@ public class Shard {
     }
 
     public String getSelector() {
-        return selector;
+        return selector.getSelector();
     }
 
     public void setSelector(String selector) {
-        this.selector = selector;
+        this.selector = new Selector(selector);
     }
 
     @Override
