@@ -332,11 +332,18 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
+		//ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
+		//serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
+
+		PrivateChannel PrivateChannelToUpdate = privateChannelRepository.findById(Integer.parseInt(privateChannelId)).orElseThrow(() -> {
+			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
+		});
+
+		PrivateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel saved = privateChannelRepository.save(PrivateChannelToUpdate);
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
-		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		//ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");

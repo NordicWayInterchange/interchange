@@ -202,7 +202,7 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
-	/*
+
 	public PrivateChannel addPrivateChannel(String peerName) { //JOHAN
 		PrivateChannel newPrivateChannel = new PrivateChannel(peerName, PrivateChannelStatus.REQUESTED);
 		if(privateChannels.contains(newPrivateChannel)){
@@ -212,9 +212,7 @@ public class ServiceProvider {
 		}
 		return newPrivateChannel;
 	}
-	Skal være ferdig -- sletter ikke enda
 
-  	*/
 	public void setPrivateChannelToTearDown(Integer privateChannelId) { //JOHAN
 		PrivateChannel privateChannelToDelete = privateChannels
 				.stream()
