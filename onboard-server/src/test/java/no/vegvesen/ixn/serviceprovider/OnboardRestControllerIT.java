@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.com.google.common.collect.Iterators;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -654,8 +655,21 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
         restController.addPrivateChannel(serviceProviderName,clientChannel);
+
         assertThrows(RuntimeException.class, ()->{
             restController.addPrivateChannel(serviceProviderName,clientChannel);
         });
+    }
+    @Test
+    public void testAddingAndDeletingChannel(){
+        String serviceProviderName = "my-service-provider";
+
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
+        PrivateChannelApi channelApi = restController.addPrivateChannel(serviceProviderName,clientChannel);
+
+        restController.deletePrivateChannel(serviceProviderName, channelApi.getId().toString());
+
+        assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size() == 1);
     }
 }
