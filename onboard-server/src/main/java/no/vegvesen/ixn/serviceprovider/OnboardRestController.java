@@ -302,7 +302,7 @@ public class OnboardRestController {
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN -- Skal være ferdig, test mer
 	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
@@ -325,7 +325,7 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}") //JOHAN
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}") //JOHAN --Skal være ferdig, test mer
 	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
@@ -357,10 +357,14 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-
+		/*
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-
 		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
+		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
+		for(PrivateChannel privateChannel : privateChannels){
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+		}*/
+		List<PrivateChannel> privateChannels = privateChannelRepository.findAll();
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 		for(PrivateChannel privateChannel : privateChannels){
 			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));

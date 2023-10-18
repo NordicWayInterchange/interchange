@@ -10,4 +10,5 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
     boolean existsByPeerName(String Peername);
     PrivateChannel findByPeerName(String Peername);
     List<PrivateChannel> findAllByStatus(PrivateChannelStatus privateChannelStatus);
+    List<PrivateChannel> findAll();
 }
