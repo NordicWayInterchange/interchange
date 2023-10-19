@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -39,6 +40,8 @@ public class ExportServiceProvidersIT {
 
     @Autowired
     ServiceProviderRepository repository;
+    @Autowired
+    PrivateChannelRepository privateChannelRepository;
 
 
     @Test
@@ -73,13 +76,15 @@ public class ExportServiceProvidersIT {
         repository.save(serviceProvider);
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
-        writeToFile(path, serviceProviderList);
+        writeToFile(path, serviceProviderList, privateChannelRepository.findAll());
 
         ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
         assertThat(serviceProviderApis.length).isEqualTo(1);
     }
 
-    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList) throws IOException {
+    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, List<PrivateChannel> privateChannelList) throws IOException {
+
+
         CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
         TypeTransformer transformer = new TypeTransformer();
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -104,7 +109,7 @@ public class ExportServiceProvidersIT {
             serviceProviderApi.setDeliveries(deliveries);
 
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
-            for (PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
+            for (PrivateChannel privateChannel : privateChannelList) {
                 privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);

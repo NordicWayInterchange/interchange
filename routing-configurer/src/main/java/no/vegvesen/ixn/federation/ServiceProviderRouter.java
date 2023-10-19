@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +33,16 @@ public class ServiceProviderRouter {
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
+    private final PrivateChannelRepository privateChannelRepository;
     private final QpidClient qpidClient;
     private final MatchRepository matchRepository;
     private final OutgoingMatchRepository outgoingMatchRepository;
     private final InterchangeNodeProperties nodeProperties;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
         this.repository = repository;
+        this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
         this.matchRepository = matchRepository;
         this.outgoingMatchRepository = outgoingMatchRepository;
@@ -188,9 +191,9 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
-        if (!serviceProvider.getPrivateChannels().isEmpty()) {
+        if (!privateChannelRepository.findAll().isEmpty()) {
             Set<PrivateChannel> privateChannels = new HashSet<>();
-            privateChannels.addAll(serviceProvider.getPrivateChannels());
+            privateChannels.addAll(privateChannelRepository.findAll());
             if (!privateChannels.isEmpty()) {
                 syncPrivateChannelsWithQpid(privateChannels, serviceProvider.getName(), delta);
                 Set<PrivateChannel> privateChannelsToRemove = privateChannels
