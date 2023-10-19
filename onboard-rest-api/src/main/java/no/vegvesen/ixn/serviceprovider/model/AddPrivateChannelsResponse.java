@@ -54,7 +54,7 @@ public class AddPrivateChannelsResponse {
     }
     @Override
     public String toString(){
-        return "AddDeliveriesResponse{" +
+        return "AddPrivateChannelsResponse{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", privateChannels=" + privateChannels +
