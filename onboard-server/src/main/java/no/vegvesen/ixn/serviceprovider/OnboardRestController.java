@@ -304,21 +304,21 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
 	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
-		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), clientChannel.getServiceProviderName());
-		logger.info("Add private channel for service provider {}", clientChannel.getServiceProviderName());
-		this.certService.checkIfCommonNameMatchesNameInApiObject(clientChannel.getServiceProviderName());
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Add private channel for service provider {}", serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		if(clientChannel == null) {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
-		boolean channelExists = privateChannelRepository.existsByPeerNameAndServiceProviderNameAndQueueName(clientChannel.getPeerName(), clientChannel.getServiceProviderName(), clientChannel.getQueueName());
+		boolean channelExists = privateChannelRepository.existsByPeerNameAndServiceProviderName(clientChannel.getPeerName(), serviceProviderName);
 
 		if(channelExists){
 			throw new PrivateChannelException("Client already has private channel");
 		}
 		else{
-			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, clientChannel.getServiceProviderName());
+			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
 			privateChannelRepository.save(newPrivateChannel);
 			OnboardMDCUtil.removeLogVariables();
 			return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId(), newPrivateChannel.getServiceProviderName());
