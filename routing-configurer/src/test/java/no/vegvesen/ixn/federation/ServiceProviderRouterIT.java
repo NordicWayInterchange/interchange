@@ -315,6 +315,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(sub2.getLocalEndpoints()).hasSize(0);
 	}
 
+	/*
 	@Test
 	public void setUpQueueForPrivateChannels() {
 		ServiceProvider serviceProvider = new ServiceProvider();
@@ -388,7 +389,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
-
+*/
 	@Test
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");

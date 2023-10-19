@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
@@ -50,6 +51,9 @@ public class OnboardRestControllerTest {
 
 	@MockBean
 	private NeighbourRepository neighbourRepository;
+
+	@MockBean
+	private PrivateChannelRepository privateChannelRepository;
 
 	@Autowired
 	private OnboardRestController onboardRestController;

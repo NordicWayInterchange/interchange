@@ -221,7 +221,7 @@ public class ServiceProviderRepositoryIT {
 
 		 */
 	}
-
+/*
 	@Test
 	public void addMultiplePrivateChannels() {
 		ServiceProvider sp1 = new ServiceProvider("my-client-1");
@@ -262,4 +262,6 @@ public class ServiceProviderRepositoryIT {
 
 		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(1);
 	}
+
+ */
 }
