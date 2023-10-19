@@ -1,29 +1,30 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class QueryResult {
+public class ConnectionQueryResult {
+    List<String> headers;
+    List<List<String>> results;
+    Integer total;
 
+    public List<String> getHeaders() {
+        return headers;
+    }
 
-    private List<Map<String,Object>> results;
+    public void setHeaders(List<String> headers) {
+        this.headers = headers;
+    }
 
-    private Integer total;
-
-
-    public List<Map<String, Object>> getResults() {
+    public List<List<String>> getResults() {
         return results;
     }
 
-    public void setResults(List<Map<String, Object>> results) {
+    public void setResults(List<List<String>> results) {
         this.results = results;
     }
-
 
     public Integer getTotal() {
         return total;
@@ -32,7 +33,6 @@ public class QueryResult {
     public void setTotal(Integer total) {
         this.total = total;
     }
-
 
     @Override
     public String toString() {
