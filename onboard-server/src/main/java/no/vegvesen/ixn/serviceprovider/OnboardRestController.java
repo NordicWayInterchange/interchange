@@ -331,20 +331,15 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
-		//ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		//serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
-
 		PrivateChannel PrivateChannelToUpdate = privateChannelRepository.findById(Integer.parseInt(privateChannelId)).orElseThrow(() -> {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		});
 
 		PrivateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		PrivateChannel saved = privateChannelRepository.save(PrivateChannelToUpdate);
 
-		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
-		//ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		logger.debug("Updated Service Provider: {}", saved.toString());
+		logger.debug("Updated Service Provider: {}", saved);
 
 		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");
 		OnboardMDCUtil.removeLogVariables();
@@ -352,18 +347,12 @@ public class OnboardRestController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE) //JOHAN -- skal være ferdig, test mer
 	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		/*
-		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
-		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
-		for(PrivateChannel privateChannel : privateChannels){
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
-		}*/
+
 		List<PrivateChannel> privateChannels = privateChannelRepository.findAll();
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 		for(PrivateChannel privateChannel : privateChannels){
