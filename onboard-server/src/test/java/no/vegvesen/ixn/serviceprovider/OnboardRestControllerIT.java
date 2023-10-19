@@ -643,10 +643,10 @@ public class OnboardRestControllerIT {
     public void testAddingDuplicateChannels(){
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel", serviceProviderName);
-        restController.addPrivateChannel(clientChannel);
+        restController.addPrivateChannel(serviceProviderName,clientChannel);
 
         assertThrows(RuntimeException.class, ()->{
-            restController.addPrivateChannel(clientChannel);
+            restController.addPrivateChannel(serviceProviderName,clientChannel);
         });
     }
     @Test
@@ -654,8 +654,8 @@ public class OnboardRestControllerIT {
 
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel", serviceProviderName);
-        PrivateChannelApi channelApi = restController.addPrivateChannel(clientChannel);
-        restController.deletePrivateChannel(channelApi.getId().toString());
+        PrivateChannelApi channelApi = restController.addPrivateChannel(serviceProviderName,clientChannel);
+        restController.deletePrivateChannel(serviceProviderName,channelApi.getId().toString());
         assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()==1);
     }
     @Test
@@ -664,9 +664,9 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel", serviceProviderName);
         PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2", serviceProviderName);
         PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3", serviceProviderName);
-        restController.addPrivateChannel(clientChannel_1);
-        restController.addPrivateChannel(clientChannel_2);
-        restController.addPrivateChannel(clientChannel_3);
+        restController.addPrivateChannel(serviceProviderName,clientChannel_1);
+        restController.addPrivateChannel(serviceProviderName,clientChannel_2);
+        restController.addPrivateChannel(serviceProviderName, clientChannel_3);
         assertThat(privateChannelRepository.findAll().size() == 3);
     }
 
