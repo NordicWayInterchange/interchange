@@ -191,20 +191,23 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
-        if (!privateChannelRepository.findAll().isEmpty()) {
+        List<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
+        if (!privateChannelList.isEmpty()) {
             Set<PrivateChannel> privateChannels = new HashSet<>();
-            privateChannels.addAll(privateChannelRepository.findAll());
+            privateChannels.addAll(privateChannelList);
             if (!privateChannels.isEmpty()) {
                 syncPrivateChannelsWithQpid(privateChannels, serviceProvider.getName(), delta);
+/*
                 Set<PrivateChannel> privateChannelsToRemove = privateChannels
                         .stream()
                         .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
                         .collect(Collectors.toSet());
-
+*/
+                List<PrivateChannel> privateChannelsToRemove = privateChannelRepository.deleteAllByStatus(PrivateChannelStatus.TEAR_DOWN);
                 privateChannels.removeAll(privateChannelsToRemove);
-                serviceProvider.setPrivateChannels(privateChannels);
+               // serviceProvider.setPrivateChannels(privateChannels);
             }
-            serviceProvider = repository.save(serviceProvider);
+           // serviceProvider = repository.save(serviceProvider);
         }
         return serviceProvider;
     }

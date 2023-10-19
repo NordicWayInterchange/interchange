@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         }
     }
 
+
     private static Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
     private static Path testKeysPath = getFolderPath("target/test-keys" + LocalSubscriptionQpidStructureIT.class.getSimpleName());
@@ -92,6 +94,9 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     @MockBean
     OutgoingMatchRepository outgoingMatchRepository;
+
+    @MockBean
+    PrivateChannelRepository privateChannelRepository;
 
 
     @Autowired
