@@ -315,8 +315,6 @@ public class OnboardRestController {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		});
 
-
-
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		PrivateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
 		PrivateChannel saved = privateChannelRepository.save(PrivateChannelToUpdate);
