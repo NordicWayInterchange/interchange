@@ -283,7 +283,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PrivateChannelApi addPrivateChannel(@RequestBody PrivateChannelApi clientChannel) {
+	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), clientChannel.getServiceProviderName());
 		logger.info("Add private channel for service provider {}", clientChannel.getServiceProviderName());
 		this.certService.checkIfCommonNameMatchesNameInApiObject(clientChannel.getServiceProviderName());
@@ -306,15 +306,16 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public RedirectView deletePrivateChannel(@PathVariable String privateChannelId) {
+	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel PrivateChannelToUpdate = privateChannelRepository.findById(Integer.parseInt(privateChannelId)).orElseThrow(() -> {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		});
 
-		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), PrivateChannelToUpdate.getServiceProviderName());
-		logger.info("Service Provider {}, DELETE private channel {}", PrivateChannelToUpdate.getServiceProviderName(), privateChannelId);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(PrivateChannelToUpdate.getServiceProviderName());
+
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		PrivateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
