@@ -20,7 +20,6 @@ public class PrivateChannelApi {
         this.peerName = peerName;
         this.queueName = queueName;
     }
-
     // NY
     public PrivateChannelApi(String peerName, String queueName, Integer id, String serviceProviderName) {
         this.id = id;
