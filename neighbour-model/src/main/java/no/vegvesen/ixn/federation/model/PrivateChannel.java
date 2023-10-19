@@ -32,6 +32,12 @@ public class PrivateChannel {
         this.peerName = peerName;
         this.status = status;
     }
+    public PrivateChannel(String peerName, PrivateChannelStatus status, String serviceProviderName) {
+        this.peerName = peerName;
+        this.status = status;
+        this.serviceProviderName = serviceProviderName;
+    }
+
 
     //NY
     public PrivateChannel(PrivateChannelStatus status, String peerName, String queueName, String serviceProviderName) {
