@@ -22,6 +22,8 @@ public class PrivateChannel {
     @Column
     private String queueName;
 
+    @Column
+    private String serviceProviderName;
     public PrivateChannel() {
 
     }
@@ -29,6 +31,14 @@ public class PrivateChannel {
     public PrivateChannel(String peerName, PrivateChannelStatus status) {
         this.peerName = peerName;
         this.status = status;
+    }
+
+    //NY
+    public PrivateChannel(PrivateChannelStatus status, String peerName, String queueName, String serviceProviderName) {
+        this.status = status;
+        this.peerName = peerName;
+        this.queueName = queueName;
+        this.serviceProviderName = serviceProviderName;
     }
 
     public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status) {

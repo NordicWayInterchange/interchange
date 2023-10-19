@@ -6,6 +6,7 @@ public class PrivateChannelApi {
     private String peerName;
     private String queueName;
 
+    private String serviceProviderName;
     public PrivateChannelApi() {
 
     }
@@ -18,6 +19,14 @@ public class PrivateChannelApi {
         this.id = id;
         this.peerName = peerName;
         this.queueName = queueName;
+    }
+
+    // NY
+    public PrivateChannelApi(String peerName, String queueName, Integer id, String serviceProviderName) {
+        this.id = id;
+        this.peerName = peerName;
+        this.queueName = queueName;
+        this.serviceProviderName = serviceProviderName;
     }
 
     public Integer getId() {
