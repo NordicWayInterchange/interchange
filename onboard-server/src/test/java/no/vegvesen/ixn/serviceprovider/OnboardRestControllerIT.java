@@ -557,16 +557,12 @@ public class OnboardRestControllerIT {
     }
     @Test
     public void testAddingAndDeletingChannel(){
+
         String serviceProviderName = "my-service-provider";
-
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel", serviceProviderName);
-
         PrivateChannelApi channelApi = restController.addPrivateChannel(clientChannel);
-
         restController.deletePrivateChannel(channelApi.getId().toString());
-        privateChannelRepository.deleteAllByStatus(PrivateChannelStatus.TEAR_DOWN);
-
-        assertThat(privateChannelRepository.findAll().isEmpty());
+        assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()==1);
     }
     @Test
     public void testAddingMultipleChannels(){
@@ -574,11 +570,9 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel", serviceProviderName);
         PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2", serviceProviderName);
         PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3", serviceProviderName);
-
         restController.addPrivateChannel(clientChannel_1);
         restController.addPrivateChannel(clientChannel_2);
         restController.addPrivateChannel(clientChannel_3);
-
         assertThat(privateChannelRepository.findAll().size() == 3);
     }
 
