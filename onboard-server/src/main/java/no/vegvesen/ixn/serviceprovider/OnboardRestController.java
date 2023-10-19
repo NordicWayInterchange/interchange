@@ -328,7 +328,6 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
 	public RedirectView deletePrivateChannel(@PathVariable String privateChannelId) {
 
-
 		PrivateChannel PrivateChannelToUpdate = privateChannelRepository.findById(Integer.parseInt(privateChannelId)).orElseThrow(() -> {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		});
@@ -350,7 +349,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
+	public AddPrivateChannelsResponse getPrivateChannels(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -361,7 +360,7 @@ public class OnboardRestController {
 			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId(), privateChannel.getServiceProviderName()));
 		}
 		OnboardMDCUtil.removeLogVariables();
-		return new PrivateChannelListApi(privateChannelsApis);
+		return new AddPrivateChannelsResponse(privateChannelsApis);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
