@@ -15,11 +15,7 @@ public class PrivateChannelApi {
         this.peerName = peerName;
     }
 
-    public PrivateChannelApi(String peerName, String queueName, Integer id) {
-        this.id = id;
-        this.peerName = peerName;
-        this.queueName = queueName;
-    }
+
     // NY
     public PrivateChannelApi(String peerName, String queueName, Integer id, String serviceProviderName) {
         this.id = id;
@@ -50,5 +46,12 @@ public class PrivateChannelApi {
 
     public void setQueueName(String queueName) {
         this.queueName = queueName;
+    }
+    public String getServiceProviderName() {
+        return serviceProviderName;
+    }
+
+    public void setServiceProviderName(String serviceProviderName) {
+        this.serviceProviderName = serviceProviderName;
     }
 }
