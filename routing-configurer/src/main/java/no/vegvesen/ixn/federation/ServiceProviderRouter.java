@@ -193,26 +193,14 @@ public class ServiceProviderRouter {
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
         List<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
         if (!privateChannelList.isEmpty()) {
-            Set<PrivateChannel> privateChannels = new HashSet<>();
-            privateChannels.addAll(privateChannelList);
-            if (!privateChannels.isEmpty()) {
-                syncPrivateChannelsWithQpid(privateChannels, serviceProvider.getName(), delta);
-/*
-                Set<PrivateChannel> privateChannelsToRemove = privateChannels
-                        .stream()
-                        .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
-                        .collect(Collectors.toSet());
-*/
-                List<PrivateChannel> privateChannelsToRemove = privateChannelRepository.deleteAllByStatus(PrivateChannelStatus.TEAR_DOWN);
-                privateChannels.removeAll(privateChannelsToRemove);
-               // serviceProvider.setPrivateChannels(privateChannels);
-            }
-           // serviceProvider = repository.save(serviceProvider);
+
+            syncPrivateChannelsWithQpid(privateChannelList, serviceProvider.getName(), delta);
+            privateChannelRepository.deleteAllByStatus(PrivateChannelStatus.TEAR_DOWN);
         }
         return serviceProvider;
     }
 
-    private void syncPrivateChannelsWithQpid(Set<PrivateChannel> privateChannels, String name, QpidDelta delta) {
+    private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
         Set<PrivateChannel> privateChannelsWithStatusCreated = privateChannels
                 .stream()
                 .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
