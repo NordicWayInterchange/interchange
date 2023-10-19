@@ -203,30 +203,6 @@ public class ServiceProvider {
 	}
 
 
-	public PrivateChannel addPrivateChannel(String peerName) { //JOHAN
-		PrivateChannel newPrivateChannel = new PrivateChannel(peerName, PrivateChannelStatus.REQUESTED);
-		if(privateChannels.contains(newPrivateChannel)){
-			throw new PrivateChannelException("Client already has private channel");
-		} else {
-			privateChannels.add(newPrivateChannel);
-		}
-		return newPrivateChannel;
-	}
-
-	public void setPrivateChannelToTearDown(Integer privateChannelId) { //JOHAN
-		PrivateChannel privateChannelToDelete = privateChannels
-				.stream()
-				.filter(privateChannel -> privateChannel.getId().equals(privateChannelId))
-				.findFirst()
-				.orElseThrow(
-						() -> new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.")
-				);
-		privateChannelToDelete.setStatus(PrivateChannelStatus.TEAR_DOWN);
-	}
-
-	public Set<PrivateChannel> getPrivateChannels() {
-		return privateChannels;
-	}
 
 	public void setPrivateChannels(Set<PrivateChannel> newPrivateChannels) {
 		this.privateChannels = newPrivateChannels;
