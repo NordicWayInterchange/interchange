@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,10 @@ public class QpidClient {
 
 	private static final String CONNECTION_URL_PATTERN = "%s/api/latest/connection";
 
-	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker/broker";
+	private static final String QUERY_ENGINE_API_PATTERN = "%s/api/latest/querybroker/broker";
+
+	//TODO this might be more configurable, since the 'connection' part is a configured object
+	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker/connection";
 
 	private final String exchangesURL;
 	private final String queuesURL;
@@ -52,9 +54,10 @@ public class QpidClient {
 	private final String allQueuesUrl;
 	private final String allExchangesUrl;
 
-	private final String queryApiUrl;
+	private final String queryEngineApiUrl;
 
 	private final String connectionUrl;
+	private final String queryApiUrl;
 
 
 	public QpidClient(String baseUrl,
@@ -68,8 +71,9 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
-		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
+		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN,baseUrl);
 		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
+		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
 	}
 
 	/**
@@ -233,20 +237,13 @@ public class QpidClient {
 	}
 
 
-	/*
-	TODO this needs a better result class, probably a list of hashmaps.
-	 */
-	public QueryResult executeQuery(String query) {
-		/*
-		ResponseEntity<List<HashMap<String, String>>> response = restTemplate.exchange(
-				queryApiUrl,
-				HttpMethod.POST,
-				new HttpEntity<>(new Query(query)),
-				new ParameterizedTypeReference<>() {
-				});
-		return response.getBody();
-		 */
-		return restTemplate.postForEntity(queryApiUrl,new Query(query),QueryResult.class).getBody();
+	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy) {
+		return restTemplate.getForEntity(queryApiUrl + "?select={query}&where={where}&orderBy={orderBy}",ConnectionQueryResult.class,select,where,orderBy).getBody();
+	}
+
+
+	public QueryResult executeQuery(Query query) {
+		return restTemplate.postForEntity(queryEngineApiUrl,query,QueryResult.class).getBody();
 	}
 
 
