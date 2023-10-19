@@ -318,7 +318,7 @@ public class OnboardRestController {
 			throw new PrivateChannelException("Client already has private channel");
 		}
 		else{
-			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED);
+			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
 			privateChannelRepository.save(newPrivateChannel);
 			OnboardMDCUtil.removeLogVariables();
 			return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());

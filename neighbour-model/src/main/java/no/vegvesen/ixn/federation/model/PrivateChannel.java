@@ -27,11 +27,14 @@ public class PrivateChannel {
     public PrivateChannel() {
 
     }
-
+/*
     public PrivateChannel(String peerName, PrivateChannelStatus status) {
         this.peerName = peerName;
         this.status = status;
     }
+
+ */
+    // NY
     public PrivateChannel(String peerName, PrivateChannelStatus status, String serviceProviderName) {
         this.peerName = peerName;
         this.status = status;
@@ -39,20 +42,20 @@ public class PrivateChannel {
     }
 
 
-    //NY
-    public PrivateChannel(PrivateChannelStatus status, String peerName, String queueName, String serviceProviderName) {
-        this.status = status;
+    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, String serviceProviderName) {
         this.peerName = peerName;
         this.queueName = queueName;
+        this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
 
+    /*
     public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status) {
         this.peerName = peerName;
         this.queueName = queueName;
         this.status = status;
     }
-
+*/
     public Integer getId() {
         return id;
     }
