@@ -11,10 +11,11 @@ public class PrivateChannelApi {
 
     }
 
-    public PrivateChannelApi(String peerName) {
-        this.peerName = peerName;
-    }
 
+    public PrivateChannelApi(String peerName, String serviceProviderName) {
+        this.peerName = peerName;
+        this.serviceProviderName = serviceProviderName;
+    }
 
     // NY
     public PrivateChannelApi(String peerName, String queueName, Integer id, String serviceProviderName) {
