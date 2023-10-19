@@ -86,7 +86,6 @@ public class ServiceProviderImport {
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
-                privateChannels,
                 savedTimestamp
         );
         serviceProvider.addDeliveries(deliveries);

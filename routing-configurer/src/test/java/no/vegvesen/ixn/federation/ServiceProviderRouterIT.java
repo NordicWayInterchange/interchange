@@ -689,7 +689,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"no-change-for-requested-delivery-sp",
 				new Capabilities(),
 				Collections.emptySet(),
-				Collections.emptySet(),
 				Collections.singleton(
 						localDelivery
 				),

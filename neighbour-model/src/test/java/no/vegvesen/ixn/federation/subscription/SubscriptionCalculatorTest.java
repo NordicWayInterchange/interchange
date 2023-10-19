@@ -70,7 +70,6 @@ public class SubscriptionCalculatorTest {
                 null,
                 new Capabilities(),
                 Collections.emptySet(),
-                Collections.emptySet(),
                 aprilNano1);
 
 
@@ -78,7 +77,6 @@ public class SubscriptionCalculatorTest {
         ServiceProvider bServiceProvider = new ServiceProvider(null,
                 null,
                 new Capabilities(),
-                Collections.emptySet(),
                 Collections.emptySet(),
                 aprilNano2);
 

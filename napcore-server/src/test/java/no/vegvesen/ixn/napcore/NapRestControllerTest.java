@@ -102,7 +102,6 @@ public class NapRestControllerTest {
                                 )
                         )
                 ),
-                Collections.emptySet(),
                 null
         );
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
@@ -165,7 +164,6 @@ public class NapRestControllerTest {
                                 )
                         )
                 ),
-                Collections.emptySet(),
                 null
         );
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
@@ -189,7 +187,6 @@ public class NapRestControllerTest {
                 1,
                 serviceProviderName,
                 new Capabilities(),
-                Collections.emptySet(),
                 Collections.emptySet(),
                 null
         );
