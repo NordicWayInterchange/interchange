@@ -75,6 +75,14 @@ public class PrivateChannel {
         this.queueName = uuid;
     }
 
+    public String getServiceProviderName() {
+        return serviceProviderName;
+    }
+
+    public void setServiceProviderName(String serviceProviderName) {
+        this.serviceProviderName = serviceProviderName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
