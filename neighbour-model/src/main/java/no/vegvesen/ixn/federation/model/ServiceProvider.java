@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 
 import javax.persistence.*;
@@ -33,10 +32,6 @@ public class ServiceProvider {
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "priv_channel_id", foreignKey = @ForeignKey(name = "fk_priv_channel"))
-	private Set<PrivateChannel> privateChannels = new HashSet<>();
-
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
 	private Set<LocalDelivery> deliveries = new HashSet<>();
 
@@ -60,27 +55,23 @@ public class ServiceProvider {
 						   String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   LocalDateTime subscriptionUpdated) {
 
 		this.id = id;
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
-		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   LocalDateTime subscriptionUpdated) {
 
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
-		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
@@ -88,13 +79,11 @@ public class ServiceProvider {
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> localSubscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   Set<LocalDelivery> localDeliveries,
 						   LocalDateTime subscriptionUpdated) {
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(localSubscriptions);
-		this.privateChannels.addAll(privateChannels);
 		this.deliveries.addAll(localDeliveries);
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
@@ -203,11 +192,6 @@ public class ServiceProvider {
 	}
 
 
-
-	public void setPrivateChannels(Set<PrivateChannel> newPrivateChannels) {
-		this.privateChannels = newPrivateChannels;
-	}
-
 	public void setDeliveries(Set<LocalDelivery> deliveries) {
 		this.deliveries = deliveries;
 	}
@@ -253,7 +237,6 @@ public class ServiceProvider {
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
-				", privateChannels=" + Arrays.toString(privateChannels.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}

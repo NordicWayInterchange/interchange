@@ -120,7 +120,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         Collections.emptySet(),
                         Collections.emptySet())
                 ),
-                Collections.emptySet(),
                 LocalDateTime.now());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         QpidDelta delta = client.getQpidDelta();

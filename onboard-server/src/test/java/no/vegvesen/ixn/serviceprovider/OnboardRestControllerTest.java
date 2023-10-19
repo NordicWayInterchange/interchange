@@ -400,7 +400,6 @@ public class OnboardRestControllerTest {
 				firstServiceProvider,
 				new Capabilities(),
 				Collections.emptySet(),
-				Collections.emptySet(),
 				LocalDateTime.now()
 		);
 		when(serviceProviderRepository.findByName(firstServiceProvider))
@@ -423,7 +422,6 @@ public class OnboardRestControllerTest {
 				1,
 				firstServiceProvider,
 				new Capabilities(),
-				Collections.emptySet(),
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
@@ -455,7 +453,6 @@ public class OnboardRestControllerTest {
 				1,
 				firstServiceProvider,
 				new Capabilities(),
-				Collections.emptySet(),
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
