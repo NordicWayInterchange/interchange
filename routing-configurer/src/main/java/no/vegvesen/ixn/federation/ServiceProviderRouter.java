@@ -191,7 +191,7 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
-        List<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
+        List<PrivateChannel> privateChannelList = privateChannelRepository.findAllByServiceProviderName(serviceProvider.getName());
         if (!privateChannelList.isEmpty()) {
 
             syncPrivateChannelsWithQpid(privateChannelList, serviceProvider.getName(), delta);
