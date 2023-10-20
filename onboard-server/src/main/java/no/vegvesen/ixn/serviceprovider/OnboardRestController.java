@@ -311,6 +311,8 @@ public class OnboardRestController {
 		if (clientChannel == null) {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
+		getOrCreateServiceProvider(serviceProviderName);
+
 		PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
 		privateChannelRepository.save(newPrivateChannel);
 		OnboardMDCUtil.removeLogVariables();
