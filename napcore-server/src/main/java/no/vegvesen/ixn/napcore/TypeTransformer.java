@@ -1,11 +1,14 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.federation.model.LocalEndpoint;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelsResponse;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -82,5 +85,17 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities;
+    }
+    public AddPrivateChannelsResponse transformPrivateChannelsToAddPrivateChannelsResponse(List<PrivateChannel> privateChannels){
+        List<PrivateChannelApi> responseList = new ArrayList<>();
+        for(PrivateChannel channelToAdd: privateChannels) {
+            PrivateChannelApi privateChannelApi = new PrivateChannelApi(
+                    channelToAdd.getPeerName(),
+                    channelToAdd.getQueueName(),
+                    channelToAdd.getId()
+            );
+            responseList.add(privateChannelApi);
+        }
+        return new AddPrivateChannelsResponse(responseList);
     }
 }
