@@ -651,7 +651,6 @@ public class OnboardRestControllerIT {
         System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()==1);
-
     }
     @Test
     public void testAddingMultipleChannels(){
