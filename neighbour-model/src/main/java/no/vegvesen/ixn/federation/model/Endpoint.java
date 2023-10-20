@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -17,6 +18,10 @@ public class Endpoint {
     private Integer port;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "subshard_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_sub_shard"))
+    private List<SubscriptionShard> shards;
 
     public Endpoint() {
 
@@ -73,6 +78,20 @@ public class Endpoint {
 
     public Integer getId() {
         return id;
+    }
+
+    public List<SubscriptionShard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<SubscriptionShard> newShards) {
+        if (!newShards.isEmpty()) {
+            shards.addAll(newShards);
+        }
+    }
+
+    public boolean hasShards() {
+        return !shards.isEmpty();
     }
 
     @Override
