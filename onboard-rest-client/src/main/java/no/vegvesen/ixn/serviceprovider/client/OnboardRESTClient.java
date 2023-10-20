@@ -112,9 +112,9 @@ public class OnboardRESTClient {
         restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
     }
 
-    public AddPrivateChannelsResponse getPrivateChannels() {
+    public ListPrivateChannelsResponse getPrivateChannels() {
         String url = String.format("%s/%s/privatechannels/", server, user);
-        return restTemplate.getForEntity(url, AddPrivateChannelsResponse.class).getBody();
+        return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
 }
 
