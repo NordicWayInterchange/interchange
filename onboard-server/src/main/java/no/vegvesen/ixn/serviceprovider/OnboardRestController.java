@@ -288,21 +288,13 @@ public class OnboardRestController {
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(clientChannel == null) {
+		if (clientChannel == null) {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
-
-		boolean channelExists = privateChannelRepository.existsByPeerNameAndServiceProviderName(clientChannel.getPeerName(), serviceProviderName);
-
-		if(channelExists){
-			throw new PrivateChannelException("Client already has private channel");
-		}
-		else{
-			PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
-			privateChannelRepository.save(newPrivateChannel);
-			OnboardMDCUtil.removeLogVariables();
-			return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
-		}
+		PrivateChannel newPrivateChannel = new PrivateChannel(clientChannel.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		privateChannelRepository.save(newPrivateChannel);
+		OnboardMDCUtil.removeLogVariables();
+		return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
@@ -335,7 +327,7 @@ public class OnboardRestController {
 
 		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(serviceProviderName);
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
-		for(PrivateChannel privateChannel : privateChannels){
+		for (PrivateChannel privateChannel : privateChannels) {
 			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
 		}
 		OnboardMDCUtil.removeLogVariables();
