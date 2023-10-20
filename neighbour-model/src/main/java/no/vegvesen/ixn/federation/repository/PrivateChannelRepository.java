@@ -7,7 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface PrivateChannelRepository extends CrudRepository<PrivateChannel, Integer> {
-    boolean existsByPeerNameAndServiceProviderName(String Peername, String serviceProviderName);
     List<PrivateChannel> findAllByServiceProviderName(String serviceProviderName);
     List<PrivateChannel> findAllByStatus(PrivateChannelStatus privateChannelStatus);
     List<PrivateChannel> findAll();
