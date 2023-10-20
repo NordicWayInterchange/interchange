@@ -12,4 +12,5 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
     List<PrivateChannel> findAllByStatus(PrivateChannelStatus privateChannelStatus);
     List<PrivateChannel> findAll();
     List<PrivateChannel> deleteAllByStatus(PrivateChannelStatus privateChannelStatus);
+    List<PrivateChannel> findAllByPeerName();
 }
