@@ -7,14 +7,14 @@ import java.util.Objects;
 public class AddPrivateChannelsResponse {
     private String version = "1.0";
     private String name;
-    private List<PrivateChannelApi> privateChannels = new ArrayList<>();
+    private List<PrivateChannelApi> privateChannels;
 
     public AddPrivateChannelsResponse() {
-
+        this.privateChannels = new ArrayList<>();
     }
 
-    public AddPrivateChannelsResponse(List<PrivateChannelApi> privateChannelApis) {
-        this.privateChannels = privateChannelApis;
+    public AddPrivateChannelsResponse(List<PrivateChannelApi> privateChannels) {
+        this.privateChannels = privateChannels;
     }
 
     public String getVersion() {
@@ -37,7 +37,7 @@ public class AddPrivateChannelsResponse {
         this.privateChannels = privateChannelApis;
     }
 
-    public List<PrivateChannelApi> getPrivateChannelApis() {
+    public List<PrivateChannelApi> getPrivateChannels() {
         return privateChannels;
     }
     @Override

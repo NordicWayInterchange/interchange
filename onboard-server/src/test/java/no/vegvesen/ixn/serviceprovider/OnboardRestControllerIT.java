@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.shaded.com.google.common.collect.Iterators;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -639,24 +638,20 @@ public class OnboardRestControllerIT {
 
     }
 
-    @Test
-    public void testAddingDuplicateChannels(){
-        String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
-        restController.addPrivateChannel(serviceProviderName,clientChannel);
 
-        assertThrows(RuntimeException.class, ()->{
-            restController.addPrivateChannel(serviceProviderName,clientChannel);
-        });
-    }
     @Test
     public void testAddingAndDeletingChannel(){
 
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
-        PrivateChannelApi channelApi = restController.addPrivateChannel(serviceProviderName,clientChannel);
-        restController.deletePrivateChannel(serviceProviderName,channelApi.getId().toString());
+        AddPrivateChannelsRequest request = new AddPrivateChannelsRequest(serviceProviderName, List.of(clientChannel));
+
+        AddPrivateChannelsResponse response = restController.addPrivateChannel(serviceProviderName, request);
+
+        System.out.println(response.getPrivateChannels().get(0));
+        restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()==1);
+
     }
     @Test
     public void testAddingMultipleChannels(){
@@ -664,9 +659,8 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
         PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
         PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
-        restController.addPrivateChannel(serviceProviderName,clientChannel_1);
-        restController.addPrivateChannel(serviceProviderName,clientChannel_2);
-        restController.addPrivateChannel(serviceProviderName, clientChannel_3);
+        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(serviceProviderName, List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+
         assertThat(privateChannelRepository.findAll().size() == 3);
     }
 

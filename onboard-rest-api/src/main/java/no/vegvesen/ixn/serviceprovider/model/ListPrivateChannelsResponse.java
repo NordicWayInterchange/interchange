@@ -9,6 +9,7 @@ public class ListPrivateChannelsResponse {
     public ListPrivateChannelsResponse() {
     }
 
+
     public ListPrivateChannelsResponse(String name, List<PrivateChannelApi> privateChannels) {
         this.name = name;
         this.privateChannels = privateChannels;
