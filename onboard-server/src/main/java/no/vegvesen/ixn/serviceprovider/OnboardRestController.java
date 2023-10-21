@@ -291,6 +291,7 @@ public class OnboardRestController {
 		if (clientChannel == null) {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
+
 		getOrCreateServiceProvider(serviceProviderName);
 
 		AddPrivateChannelsResponse response = new AddPrivateChannelsResponse();
