@@ -312,7 +312,8 @@ public class OnboardRestController {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
-		getOrCreateServiceProvider(serviceProviderName);
+		ServiceProvider newServiceProvider = getOrCreateServiceProvider(serviceProviderName);
+		serviceProviderRepository.save(newServiceProvider);
 
 		AddPrivateChannelsResponse response = new AddPrivateChannelsResponse();
 
