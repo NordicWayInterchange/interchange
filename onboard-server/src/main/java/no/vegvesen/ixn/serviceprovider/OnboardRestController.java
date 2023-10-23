@@ -363,6 +363,13 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 		return new ListPrivateChannelsResponse(serviceProviderName,privateChannelsApis);
 	}
+	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/getprivatechannel")
+	public AddPrivateChannelsResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("listing private channels for service provider {}", serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		return null;
+	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
