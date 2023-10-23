@@ -9,6 +9,7 @@ import java.util.List;
 public interface PrivateChannelRepository extends CrudRepository<PrivateChannel, Integer> {
     List<PrivateChannel> findAllByServiceProviderName(String serviceProviderName);
     List<PrivateChannel> findAllByStatus(PrivateChannelStatus privateChannelStatus);
+    PrivateChannel findByServiceProviderNameAndId(String serviceProviderName, Integer Id);
     List<PrivateChannel> findAll();
     List<PrivateChannel> findAllByPeerName(String peerName);
 }
