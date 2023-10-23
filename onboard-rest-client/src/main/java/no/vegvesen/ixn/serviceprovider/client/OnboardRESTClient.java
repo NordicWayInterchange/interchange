@@ -99,13 +99,13 @@ public class OnboardRESTClient {
         restTemplate.delete(url);
     }
 
-    public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
+    public AddPrivateChannelsResponse addPrivateChannel(AddPrivateChannelsRequest privateChannelApi) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PrivateChannelApi> entity = new HttpEntity<>(privateChannelApi,headers);
+        HttpEntity<AddPrivateChannelsRequest> entity = new HttpEntity<>(privateChannelApi,headers);
         String url = server + "/" + user + "/privatechannels";
         System.out.println(url);
-        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
+        return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelsResponse.class).getBody();
     }
 
     public void deletePrivateChannel(Integer privateChannelId) {
