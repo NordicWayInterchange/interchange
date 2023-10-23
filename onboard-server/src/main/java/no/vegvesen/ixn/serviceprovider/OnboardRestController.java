@@ -313,7 +313,7 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId))
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId));
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
