@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -189,14 +190,12 @@ public class ServiceProviderRouter {
             delta.addQueue(queue);
         }
     }
-
     public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
         List<PrivateChannel> privateChannelList = privateChannelRepository.findAllByServiceProviderName(serviceProvider.getName());
         if (!privateChannelList.isEmpty()) {
-
             syncPrivateChannelsWithQpid(privateChannelList, serviceProvider.getName(), delta);
-            privateChannelRepository.deleteAllByStatus(PrivateChannelStatus.TEAR_DOWN);
-        }
+            privateChannelList.stream().filter((a) -> a.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)).forEach(privateChannelRepository::delete);
+             }
         return serviceProvider;
     }
 
@@ -215,6 +214,7 @@ public class ServiceProviderRouter {
         for(PrivateChannel privateChannel : privateChannels) {
             if (privateChannel.getQueueName() == null) {
                 privateChannel.setQueueName(UUID.randomUUID().toString());
+                privateChannelRepository.save(privateChannel);
             }
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
