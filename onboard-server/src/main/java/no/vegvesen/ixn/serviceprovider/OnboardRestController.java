@@ -313,13 +313,14 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		PrivateChannel PrivateChannelToUpdate = privateChannelRepository.findById(Integer.parseInt(privateChannelId)).orElseThrow(() -> {
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId))
+		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
-		});
+		}
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
-		PrivateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
-		PrivateChannel saved = privateChannelRepository.save(PrivateChannelToUpdate);
+		privateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel saved = privateChannelRepository.save(privateChannelToUpdate);
 
 		logger.debug("Updated Service Provider: {}", saved);
 
