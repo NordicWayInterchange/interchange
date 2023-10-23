@@ -363,12 +363,23 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 		return new ListPrivateChannelsResponse(serviceProviderName,privateChannelsApis);
 	}
-	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/getprivatechannel")
-	public AddPrivateChannelsResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId){
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/getprivatechannel")
+	public AddPrivateChannelsResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("listing private channels for service provider {}", serviceProviderName);
+		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		return null;
+
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId));
+		if (privateChannel == null) {
+			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
+		}
+
+		AddPrivateChannelsResponse channelToReturn = new AddPrivateChannelsResponse(serviceProviderName, List.of(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId())));
+
+		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
+		OnboardMDCUtil.removeLogVariables();
+		return channelToReturn;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -17,6 +17,11 @@ public class AddPrivateChannelsResponse {
         this.privateChannels = privateChannels;
     }
 
+    public AddPrivateChannelsResponse(String name, List<PrivateChannelApi> privateChannels) {
+        this.name = name;
+        this.privateChannels = privateChannels;
+    }
+
     public String getVersion() {
         return version;
     }
