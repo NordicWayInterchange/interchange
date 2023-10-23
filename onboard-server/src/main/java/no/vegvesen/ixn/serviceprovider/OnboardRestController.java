@@ -344,7 +344,7 @@ public class OnboardRestController {
 		return new ListPrivateChannelsResponse(serviceProviderName,privateChannelsApis);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/getprivatechannel")
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
 	public AddPrivateChannelsResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);

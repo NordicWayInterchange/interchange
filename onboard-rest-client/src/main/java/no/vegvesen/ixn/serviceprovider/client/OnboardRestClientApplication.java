@@ -7,6 +7,7 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.aspectj.weaver.ast.Call;
 import picocli.CommandLine;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
@@ -38,6 +39,7 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.GetSubscription.class,
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
+                OnboardRestClientApplication.GetPrivateChannel.class,
                 OnboardRestClientApplication.DeletePrivateChannel.class,
                 OnboardRestClientApplication.FetchMatchingCapabilities.class
         })
@@ -312,6 +314,22 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             ListPrivateChannelsResponse result = client.getPrivateChannels();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+            return 0;
+        }
+    }
+    @Command(name="getprivatechannel", description = "Get private channel by id")
+    static class GetPrivateChannel implements Callable<Integer>{
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index="0", description = "The ID of the private channel to get")
+        Integer privateChannelId;
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            AddPrivateChannelsResponse result = client.getPrivateChannel(privateChannelId);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
