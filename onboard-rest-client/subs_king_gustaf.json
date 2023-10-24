@@ -1,0 +1,13 @@
+{	"name" : "king_gustaf.bouvetinterchange.eu",
+  "version" : "1.0",
+  "subscriptions" : [
+    {
+      "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'"
+    },
+    {
+      "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '5'"
+    },
+    {
+      "selector" : "originatingCountry = 'NO' or originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'"
+    }]
+}

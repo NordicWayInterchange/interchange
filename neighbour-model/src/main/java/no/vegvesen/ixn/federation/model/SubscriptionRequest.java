@@ -31,7 +31,7 @@ public class SubscriptionRequest {
 	}
 
 	public SubscriptionRequest(Set<Subscription> subscription) {
-		this.subscription = subscription;
+		this.subscription.addAll(subscription);
 	}
 
 	public Set<Subscription> getSubscriptions() {

@@ -27,6 +27,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -678,5 +679,148 @@ public class NeighbourDiscovererIT {
 		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
+	@Test
+	public void pollSubscriptionWithStatusFailed() {
+		Subscription subscription = new Subscription(
+				SubscriptionStatus.FAILED,
+				"originatingCountry = 'NO' and messageType = 'DENM' and causeCode = '6'",
+				"/path/1",
+				nodeProperties.getName(),
+				Collections.singleton(
+						new Endpoint(
+								"my-source",
+								nodeProperties.getName(),
+								5671
+						)
+				)
+		);
+		subscription.setExchangeName("my-exchange");
+		subscription.setNumberOfPolls(1);
+
+		Neighbour neighbour = new Neighbour(
+				"flounder-neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(Collections.singleton(subscription))
+		);
+
+		Neighbour savedNeighbour = repository.save(neighbour);
+
+		Subscription savedNeighbourSubscription = repository.findByName("flounder-neighbour").getOurRequestedSubscriptions().getSubscriptions()
+				.stream().findFirst().get();
+
+		System.out.println("First: " + savedNeighbourSubscription.getExchangeName());
+
+		Subscription polledSubscription = new Subscription(
+				"originatingCountry = 'NO' and messageType = 'DENM' and causeCode = '6'",
+				SubscriptionStatus.CREATED
+		);
+		polledSubscription.setConsumerCommonName(nodeProperties.getName());
+		polledSubscription.setEndpoints(Collections.singleton(
+				new Endpoint(
+						"my-source",
+						nodeProperties.getName(),
+						5671
+				)
+		));
+		polledSubscription.setLastUpdatedTimestamp(12);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(polledSubscription);
+		neighbourDiscoveryService.pollSubscriptionsOneNeighbour(savedNeighbour, mockNeighbourFacade);
+
+		Subscription newlySavedNeighbourSubscription = repository.findByName("flounder-neighbour").getOurRequestedSubscriptions().getSubscriptions()
+				.stream().findFirst().get();
+
+		System.out.println("Second: " + newlySavedNeighbourSubscription.getExchangeName());
+		System.out.println(newlySavedNeighbourSubscription.getSubscriptionStatus());
+	}
+
+	@Test
+	public void postSubscriptionAndGetAllOurSubscriptionsInReturn() {
+		String selector1 = "originatingCountry = 'NO' and messageType = 'DENM' and causeCode = '6'";
+		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and causeCode = '5'";
+
+		Subscription subscription = new Subscription(
+				SubscriptionStatus.CREATED,
+				selector1,
+				"/path/1",
+				nodeProperties.getName(),
+				Collections.singleton(
+						new Endpoint(
+								"my-source",
+								nodeProperties.getName(),
+								5671
+						)
+				)
+		);
+		subscription.setExchangeName("my-exchange");
+		subscription.setNumberOfPolls(1);
+
+		Subscription subscriptionDupe = new Subscription(
+				SubscriptionStatus.CREATED,
+				selector1,
+				"/path/1",
+				nodeProperties.getName(),
+				Collections.singleton(
+						new Endpoint(
+								"my-source",
+								nodeProperties.getName(),
+								5671
+						)
+				)
+		);
+
+		Subscription newSubscription = new Subscription(
+				SubscriptionStatus.ACCEPTED,
+				selector2,
+				"/path/2",
+				nodeProperties.getName()
+		);
+
+		CapabilitySplit capability = new CapabilitySplit(
+				new DenmApplication(
+						"NO00000",
+						"NO00000-DENM",
+						"NO",
+						"DENM:1.2.2",
+						Collections.singleton("12004"),
+						new HashSet<>(Arrays.asList(5, 6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+
+		LocalSubscription localSubscription1 = new LocalSubscription(
+				LocalSubscriptionStatus.CREATED,
+				selector1,
+				nodeProperties.getName()
+		);
+
+		LocalSubscription localSubscription2 = new LocalSubscription(
+				LocalSubscriptionStatus.CREATED,
+				selector2,
+				nodeProperties.getName()
+		);
+
+		Neighbour neighbour = new Neighbour(
+				"flounder-neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(capability)
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(Collections.singleton(subscription))
+		);
+
+		repository.save(neighbour);
+
+		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), anyString())).thenReturn(new HashSet<>(Arrays.asList(subscriptionDupe, newSubscription)));
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, new HashSet<>(Arrays.asList(localSubscription1, localSubscription2)), mockNeighbourFacade);
+
+		Subscription savedOldSubscription = repository.findByName("flounder-neighbour").getOurRequestedSubscriptions().getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
+				.findFirst().get();
+
+		System.out.println("EXCHANGENAME: " + savedOldSubscription.getExchangeName());
+	}
 
 }
