@@ -116,9 +116,9 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/privatechannels/", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
-    public AddPrivateChannelsResponse getPrivateChannel(Integer privateChannelId){
+    public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){
        String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
-        return restTemplate.getForEntity(url, AddPrivateChannelsResponse.class).getBody();
+        return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
 }
 

@@ -295,7 +295,7 @@ public class OnboardRestController {
 		ServiceProvider newServiceProvider = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderRepository.save(newServiceProvider);
 
-		AddPrivateChannelsResponse response = new AddPrivateChannelsResponse();
+		AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
 
 		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
 			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
@@ -338,15 +338,17 @@ public class OnboardRestController {
 
 		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(serviceProviderName);
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
+
 		for (PrivateChannel privateChannel : privateChannels) {
 			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
 		}
+
 		OnboardMDCUtil.removeLogVariables();
 		return new ListPrivateChannelsResponse(serviceProviderName,privateChannelsApis);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public AddPrivateChannelsResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+	public GetPrivateChannelResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -356,7 +358,7 @@ public class OnboardRestController {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}
 
-		AddPrivateChannelsResponse channelToReturn = new AddPrivateChannelsResponse(serviceProviderName, List.of(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId())));
+		GetPrivateChannelResponse channelToReturn = new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
 
 		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();

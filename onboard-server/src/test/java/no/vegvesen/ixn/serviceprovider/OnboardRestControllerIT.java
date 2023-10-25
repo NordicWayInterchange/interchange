@@ -568,5 +568,25 @@ public class OnboardRestControllerIT {
 
         assertThat(privateChannelRepository.findAll().size() == 3);
     }
+    @Test
+    public void testDeletingChannel(){
+        String serviceProviderName = "my-service-provider";
+
+        assertThrows(RuntimeException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
+    }
+    @Test
+    public void testGettingChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
+        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        AddPrivateChannelsResponse privateChannels = restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(serviceProviderName, List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
+
+        assertThat(channelResponse != null);
+        assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existant-provider", "1"));
+
+
+    }
 
 }
