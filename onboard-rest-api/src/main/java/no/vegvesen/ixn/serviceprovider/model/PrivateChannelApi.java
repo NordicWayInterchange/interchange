@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 public class PrivateChannelApi {
 
     private Integer id;
+
     private String peerName;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
 
     public PrivateChannelApi() {
