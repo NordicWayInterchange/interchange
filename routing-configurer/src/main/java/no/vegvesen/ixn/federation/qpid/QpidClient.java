@@ -43,7 +43,7 @@ public class QpidClient {
 	private static final String QUERY_ENGINE_API_PATTERN = "%s/api/latest/querybroker/broker";
 
 	//TODO this might be more configurable, since the 'connection' part is a configured object
-	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker/connection";
+	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker";
 
 	private final String exchangesURL;
 	private final String queuesURL;
@@ -237,8 +237,16 @@ public class QpidClient {
 	}
 
 
-	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy) {
-		return restTemplate.getForEntity(queryApiUrl + "?select={query}&where={where}&orderBy={orderBy}",ConnectionQueryResult.class,select,where,orderBy).getBody();
+	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}&orderBy={orderBy}",ConnectionQueryResult.class,select,where,orderBy).getBody();
+	}
+
+	public ConnectionQueryResult executeConnectionQuery(String select, String where, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}",ConnectionQueryResult.class,select,where).getBody();
+	}
+
+	public ConnectionQueryResult executeConnectionQuery(String select, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}",ConnectionQueryResult.class,select).getBody();
 	}
 
 
