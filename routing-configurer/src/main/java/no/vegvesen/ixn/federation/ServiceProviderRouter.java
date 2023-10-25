@@ -216,7 +216,6 @@ public class ServiceProviderRouter {
         for(PrivateChannel privateChannel : privateChannels) {
             if (privateChannel.getQueueName() == null) {
                 privateChannel.setQueueName(UUID.randomUUID().toString());
-
             }
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
