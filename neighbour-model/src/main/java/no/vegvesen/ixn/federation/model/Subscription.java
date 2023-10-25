@@ -33,7 +33,7 @@ public class Subscription {
 
 	private long lastUpdatedTimestamp;
 
-	private String exchangeName = "";
+	//private String exchangeName = "";
 
 	public Subscription() {
 	}
@@ -148,7 +148,7 @@ public class Subscription {
 		}
 	}
 
-	public String getExchangeName() {
+/*	public String getExchangeName() {
 		return exchangeName;
 	}
 
@@ -166,7 +166,7 @@ public class Subscription {
 
 	public void removeExchangeName() {
 		this.exchangeName = "";
-	}
+	}*/
 
 	public boolean isSubscriptionWanted() {
 		return subscriptionStatus.equals(SubscriptionStatus.REQUESTED)

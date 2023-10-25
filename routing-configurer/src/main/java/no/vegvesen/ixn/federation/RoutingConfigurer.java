@@ -204,11 +204,11 @@ public class RoutingConfigurer {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.getEndpoints().isEmpty()) {
 							for (Endpoint endpoint : subscription.getEndpoints()) {
-								if (!endpoint.hasShards()) {
+								if (!endpoint.hasShard()) {
 									String exchangeName = "sub-" + UUID.randomUUID();
-									endpoint.setShards(Collections.singletonList(
+									endpoint.setShard(
 											new SubscriptionShard(exchangeName)
-									));
+									);
 									qpidClient.createHeadersExchange(exchangeName);
 									logger.debug("Set up exchange for subscription {}", subscription.toString());
 								}
@@ -251,15 +251,14 @@ public class RoutingConfigurer {
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						for (Endpoint endpoint : subscription.getEndpoints()) {
-							if (endpoint.hasShards()) {
-								for (SubscriptionShard shard: endpoint.getShards()) {
-									Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
-									if (exchange != null) {
-										qpidClient.removeExchange(exchange);
-										logger.debug("Removed exchange for subscription {}", subscription.toString());
-									}
+							if (endpoint.hasShard()) {
+								SubscriptionShard shard = endpoint.getShard();
+								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+								if (exchange != null) {
+									qpidClient.removeExchange(exchange);
+									logger.debug("Removed exchange for subscription {}", subscription.toString());
 								}
-								endpoint.getShards().clear();
+								endpoint.removeShard();
 							}
 						}
 						/*if (!subscription.exchangeIsRemoved()) {

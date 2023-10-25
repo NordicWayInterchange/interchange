@@ -52,7 +52,7 @@ public class MatchDiscoveryService {
         Set<Match> matchesToDelete = new HashSet<>();
         for (Match match : existingMatches) {
             if (match.subscriptionIsTearDown()) {
-                if ( match.getSubscription().exchangeIsRemoved()) {
+                if ( match.getSubscription().getEndpoints().isEmpty()) {
                     logger.info("Removing Match {}", match);
                     matchesToDelete.add(match);
                 }

@@ -19,9 +19,9 @@ public class Endpoint {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "subshard_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_sub_shard"))
-    private List<SubscriptionShard> shards;
+    private SubscriptionShard shard;
 
     public Endpoint() {
 
@@ -80,18 +80,20 @@ public class Endpoint {
         return id;
     }
 
-    public List<SubscriptionShard> getShards() {
-        return shards;
+    public SubscriptionShard getShard() {
+        return shard;
     }
 
-    public void setShards(List<SubscriptionShard> newShards) {
-        if (!newShards.isEmpty()) {
-            shards.addAll(newShards);
-        }
+    public void setShard(SubscriptionShard newShard) {
+        this.shard = newShard;
     }
 
-    public boolean hasShards() {
-        return !shards.isEmpty();
+    public boolean hasShard() {
+        return shard != null;
+    }
+
+    public void removeShard() {
+        this.shard = null;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class NeighbourSubscriptionDeleteService {
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         if (matches.isEmpty()) {
                             try{
-                                if (subscription.exchangeIsRemoved()) {
+                                if (subscription.getEndpoints().isEmpty()) {
                                     neighbourFacade.deleteSubscription(neighbour, subscription);
                                     subscriptionsToDelete.add(subscription);
                                 }
@@ -51,7 +51,7 @@ public class NeighbourSubscriptionDeleteService {
                             } catch(SubscriptionNotFoundException e) {
                                 logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
                             } finally {
-                                if (subscription.exchangeIsRemoved()) {
+                                if (subscription.getEndpoints().isEmpty()) {
                                     subscriptionsToDelete.add(subscription);
                                 }
                             }
