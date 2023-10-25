@@ -16,7 +16,7 @@ ADD cap_king_olav_denm_no.json /
 ADD sub_king_gustaf_denm_no.json /
 ADD false_localSubscription_dat_no.json /
 ADD local_private_channel.json /
-ADD remote_private_channel.json /
+ADD private_channel_king_olav.json /
 ADD ivi_no_localSubscription.json /
 ADD del_king_gustaf_denm_no.json /
 ADD ivi_no_localSubscription.json /

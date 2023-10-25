@@ -1,0 +1,10 @@
+{	"name" : "king_gustaf.bouvetinterchange.eu",
+  "version" : "1.0",
+  "privateChannels" : [
+    {
+      "peerName" : "king_olav.bouvetinterchange.eu"
+    },
+    {
+      "peerName" : "king_charles.bouvetinterchange.eu"
+    }]
+}
