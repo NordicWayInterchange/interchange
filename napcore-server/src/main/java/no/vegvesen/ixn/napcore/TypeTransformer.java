@@ -86,16 +86,5 @@ public class TypeTransformer {
         }
         return matchingCapabilities;
     }
-    public AddPrivateChannelsResponse transformPrivateChannelsToAddPrivateChannelsResponse(List<PrivateChannel> privateChannels){
-        List<PrivateChannelApi> responseList = new ArrayList<>();
-        for(PrivateChannel channelToAdd: privateChannels) {
-            PrivateChannelApi privateChannelApi = new PrivateChannelApi(
-                    channelToAdd.getPeerName(),
-                    channelToAdd.getQueueName(),
-                    channelToAdd.getId()
-            );
-            responseList.add(privateChannelApi);
-        }
-        return new AddPrivateChannelsResponse(responseList);
-    }
+
 }

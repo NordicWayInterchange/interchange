@@ -59,7 +59,7 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
-            serviceProvider = syncPrivateChannels(serviceProvider, delta);
+            syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
             serviceProvider = syncSubscriptions(serviceProvider, delta);
@@ -190,13 +190,15 @@ public class ServiceProviderRouter {
             delta.addQueue(queue);
         }
     }
-    public ServiceProvider syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
+
+    public void syncPrivateChannels(ServiceProvider serviceProvider, QpidDelta delta) {
         List<PrivateChannel> privateChannelList = privateChannelRepository.findAllByServiceProviderName(serviceProvider.getName());
+
         if (!privateChannelList.isEmpty()) {
             syncPrivateChannelsWithQpid(privateChannelList, serviceProvider.getName(), delta);
             privateChannelList.stream().filter((a) -> a.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)).forEach(privateChannelRepository::delete);
-             }
-        return serviceProvider;
+        }
+
     }
 
     private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
@@ -214,7 +216,7 @@ public class ServiceProviderRouter {
         for(PrivateChannel privateChannel : privateChannels) {
             if (privateChannel.getQueueName() == null) {
                 privateChannel.setQueueName(UUID.randomUUID().toString());
-                privateChannelRepository.save(privateChannel);
+
             }
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
@@ -262,6 +264,7 @@ public class ServiceProviderRouter {
                     delta.removeQueue(queue);
                 }
             }
+            privateChannelRepository.save(privateChannel);
         }
     }
 
