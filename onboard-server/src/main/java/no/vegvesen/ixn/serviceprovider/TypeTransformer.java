@@ -274,16 +274,18 @@ public class TypeTransformer {
                 capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
         );
     }
-    public AddPrivateChannelsResponse transformPrivateChannelsToAddPrivateChannelsResponse(List<PrivateChannel> privateChannels){
-        List<PrivateChannelApi> responseList = new ArrayList<>();
-        for(PrivateChannel channelToAdd: privateChannels) {
-            PrivateChannelApi privateChannelApi = new PrivateChannelApi(
-                    channelToAdd.getPeerName(),
-                    channelToAdd.getQueueName(),
-                    channelToAdd.getId()
-            );
-            responseList.add(privateChannelApi);
+
+
+    public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
+
+        return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
+    }
+
+    public AddPrivateChannelsResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName,List<PrivateChannel> privateChannelsList){
+        AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
+        for(PrivateChannel privateChannel : privateChannelsList){
+            response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
         }
-        return new AddPrivateChannelsResponse(responseList);
+        return response;
     }
 }

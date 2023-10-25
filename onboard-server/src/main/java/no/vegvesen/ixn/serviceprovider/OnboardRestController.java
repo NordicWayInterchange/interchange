@@ -295,16 +295,18 @@ public class OnboardRestController {
 		ServiceProvider newServiceProvider = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderRepository.save(newServiceProvider);
 
-		AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
+		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
 		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
+
 			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
 			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
-			response.getPrivateChannels().add(new PrivateChannelApi(savedChannel.getPeerName(), savedChannel.getQueueName(), savedChannel.getId()));
+
+			savedChannelsList.add(savedChannel);
 		}
 
 		OnboardMDCUtil.removeLogVariables();
-		return response;
+		return typeTransformer.transformPrivateChannelListToAddPrivateChannelsResponse(serviceProviderName,savedChannelsList);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
@@ -358,11 +360,10 @@ public class OnboardRestController {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}
 
-		GetPrivateChannelResponse channelToReturn = new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
-
 		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
-		return channelToReturn;
+
+		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
