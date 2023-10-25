@@ -329,7 +329,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            AddPrivateChannelsResponse result = client.getPrivateChannel(privateChannelId);
+            GetPrivateChannelResponse result = client.getPrivateChannel(privateChannelId);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
