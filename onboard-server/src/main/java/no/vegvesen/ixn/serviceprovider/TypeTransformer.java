@@ -275,7 +275,6 @@ public class TypeTransformer {
         );
     }
 
-
     public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
 
         return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
