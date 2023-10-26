@@ -202,10 +202,8 @@ public class ServiceProviderRouter {
     }
 
     private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
-        Set<PrivateChannel> privateChannelsWithStatusCreated = privateChannels
-                .stream()
-                .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
-                .collect(Collectors.toSet());
+
+        List<PrivateChannel> privateChannelsWithStatusCreated = privateChannelRepository.findAllByStatus(PrivateChannelStatus.CREATED);
 
         GroupMember groupMember = qpidClient.getGroupMember(name,CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
         if (groupMember == null) {
@@ -215,7 +213,7 @@ public class ServiceProviderRouter {
 
         for(PrivateChannel privateChannel : privateChannels) {
             if (privateChannel.getQueueName() == null) {
-                privateChannel.setQueueName(UUID.randomUUID().toString());
+                privateChannel.setQueueName(String.format("priv-%s",UUID.randomUUID().toString()));
             }
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();

@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
@@ -83,5 +82,4 @@ public class TypeTransformer {
         }
         return matchingCapabilities;
     }
-
 }
