@@ -49,7 +49,7 @@ public class NeigbourDiscoveryService {
     public void checkForNewNeighbours() {
         logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
         List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
-        logger.debug("Got neighbours from DNS {}.", neighbours);
+        logger.debug("Got neighbours from DNS {}.", neighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
 
         for (Neighbour neighbour : neighbours) {
             String neighbourName = neighbour.getName();
@@ -58,7 +58,7 @@ public class NeigbourDiscoveryService {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
                 neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-                logger.info("Found new neighbour {}. Saving in database",neighbourName);
+                logger.info("Found new neighbour {}",neighbourName);
                 neighbourRepository.save(neighbour);
             }
             NeighbourMDCUtil.removeLogVariables();
@@ -82,13 +82,13 @@ public class NeigbourDiscoveryService {
                         logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
                         postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                     } else {
-                        logger.debug("Neighbour has our last capabilities");
+                        logger.debug("Neighbour {} has our last capabilities", neighbour.getName());
                     }
                 } else {
-                    logger.info("Too soon to post capabilities to neighbour when backing off");
+                    logger.info("Too soon to post capabilities to neighbour {} when backing off",neighbour.getName());
                 }
             } catch (Exception e) {
-                logger.error("Unknown exception while exchanging capabilities with neighbour", e);
+                logger.error("Unknown exception while exchanging capabilities with neighbour {}",neighbour.getName(), e);
             } finally {
                 NeighbourMDCUtil.removeLogVariables();
             }
@@ -105,7 +105,7 @@ public class NeigbourDiscoveryService {
                     logger.info("Retrying capability post to neighbour {}", neighbour.getName());
                     postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                 } catch (Exception e) {
-                    logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
+                    logger.error("Error occurred while posting capabilities to unreachable neighbour {}",neighbour.getName(), e);
                 } finally {
                     NeighbourMDCUtil.removeLogVariables();
                 }
@@ -121,9 +121,9 @@ public class NeigbourDiscoveryService {
             neighbourCapabilities.setCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
-            logger.debug("Updated neighbour: {}", neighbour);
+            logger.debug("Updated neighbour: {}", neighbour.getName());
         } catch (CapabilityPostException e) {
-            logger.error("Capability post failed", e);
+            logger.error("Capability post to neigbour {} failed",neighbour.getName(), e);
             neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
@@ -142,13 +142,13 @@ public class NeigbourDiscoveryService {
                         logger.info("Posting subscription request to neighbour {}", neighbour.getName());
                         postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {
-                        logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
+                        logger.debug("No need to post subscription request to neighbour {}",neighbour.getName());
                     }
                 } else {
-                    logger.warn("Neighbour has neither capabilities nor subscriptions");
+                    logger.info("Neighbour {} does not have subscriptions",neighbour.getName());
                 }
             } catch (Exception e) {
-                logger.error("Exception when evaluating subscriptions for neighbour", e);
+                logger.error("Exception when evaluating subscriptions for neighbour {}",neighbour.getName(), e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
@@ -200,7 +200,7 @@ public class NeigbourDiscoveryService {
                 }
             } catch (SubscriptionRequestException e) {
                 controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
-                logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
+                logger.error("Failed subscription request for neighbour {}",neighbourName, e);
             }
             // Successful subscription request, update discovery state subscription request timestamp.
             neighbour = neighbourRepository.save(neighbour);
@@ -222,7 +222,7 @@ public class NeigbourDiscoveryService {
                     pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
                 }
             } catch (Exception e) {
-                logger.error("Unknown error while polling subscriptions for one neighbour",e);
+                logger.error("Unknown error while polling subscriptions for neighbour {}",neighbour.getName(),e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
@@ -240,7 +240,7 @@ public class NeigbourDiscoveryService {
                     pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbourFacade);
                 }
             } catch (Exception e) {
-                logger.error("Unknown error while polling subscription with status CREATED",e);
+                logger.error("Unknown error while polling subscriptions with status CREATED for neighbour {}",neighbour.getName(), e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
@@ -268,7 +268,7 @@ public class NeigbourDiscoveryService {
                         if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
                             logger.debug("Subscription for neighbour {} with path {} is CREATED", neighbour.getName(), subscription.getPath());
                         }
-                        logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
+                        logger.info("Successfully polled subscription {}. Subscription status: {}  - Number of polls: {}", subscription.getId(), subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
@@ -276,21 +276,21 @@ public class NeigbourDiscoveryService {
                         }
                         subscription.getEndpoints().clear();
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                        logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+                        logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription {} to GIVE_UP.",subscription.getId());
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     //TODO: Should we still poll on the bi if the subscription cannot be properly polled?
                     subscription.incrementNumberOfPolls();
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-                    logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                    logger.error("Error in polling subscription status. Setting subscription {} to FAILED.", subscription.getId(), e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                         tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-                    logger.error("Subscription {} is gone from neighbour", subscription,e);
+                    logger.error("Subscription {} is gone from neighbour", subscription.getId(),e);
                 }
             }
         } finally {
@@ -335,14 +335,13 @@ public class NeigbourDiscoveryService {
                             tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                         }
                         subscription.getEndpoints().clear();
-                        logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
-                        //TODO we should not do anything here, other than setting
+                        logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription {} to GIVE_UP.",subscription.getId());
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     //TODO: Should we still poll on the bi if the subscription cannot be properly polled?
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-                    logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                    logger.error("Error in polling for subscription status. Setting subscription {} to FAILED.",subscription.getId(), e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                         tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());

@@ -73,6 +73,8 @@ public class RoutingConfigurer {
 			Queue queue = qpidClient.getQueue(sub.getQueueName());
 			if (queue != null) {
 				qpidClient.removeQueue(queue);
+			} else {
+				logger.warn("Queue {} could not be removed as it does not exist", sub.getQueueName());
 			}
 			//If the subscription is a redirect, have to remove the user from the ACL for the queue
 			String consumerCommonName = sub.getConsumerCommonName();
@@ -153,7 +155,7 @@ public class RoutingConfigurer {
 					subscription.setEndpoints(Collections.singleton(endpoint));
 				}
 			} else {
-				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
+				logger.info("Subscription {} does not match any Service Provider Capability", subscription.getId());
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
@@ -185,7 +187,7 @@ public class RoutingConfigurer {
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 			} else {
-				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
+				logger.info("Subscription {} does not match any Service Provider Capability", subscription.getId());
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
@@ -206,7 +208,9 @@ public class RoutingConfigurer {
 							String exchangeName = "sub-" + UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
 							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
-							logger.debug("Set up exchange for subscription {}", subscription.toString());
+							logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+						} else {
+							logger.debug("Subscription {} already has exchange {}", subscription.getId(),subscription.getExchangeName());
 						}
 						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
 					}
@@ -225,7 +229,7 @@ public class RoutingConfigurer {
 	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
 		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbour.getName()) == null){
 			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
-			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.getId());
 		}
 	}
 
@@ -242,9 +246,11 @@ public class RoutingConfigurer {
 							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
 							if (exchange != null) {
 								qpidClient.removeExchange(exchange);
+							} else {
+								logger.warn("Exchange {} is expected to exist, but does not",subscription.getExchangeName());
 							}
 							subscription.removeExchangeName();
-							logger.debug("Removed exchange for subscription {}", subscription.toString());
+							logger.debug("Removed exchange for subscription {}", subscription.getId());
 						}
 					}
 				}

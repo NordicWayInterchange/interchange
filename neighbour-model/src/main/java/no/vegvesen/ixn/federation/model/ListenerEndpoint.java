@@ -77,6 +77,10 @@ public class ListenerEndpoint {
         return target;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "ListenerEndpoint{" +
