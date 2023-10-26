@@ -214,13 +214,6 @@ public class RoutingConfigurer {
 								}
 							}
 						}
-						/*if (!subscription.exchangeIsCreated()) {
-							String exchangeName = "sub-" + UUID.randomUUID().toString();
-							subscription.setExchangeName(exchangeName);
-							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
-							logger.debug("Set up exchange for subscription {}", subscription.toString());
-						}*/
-						//createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
 					}
 				}
 			}
@@ -261,14 +254,6 @@ public class RoutingConfigurer {
 								endpoint.removeShard();
 							}
 						}
-						/*if (!subscription.exchangeIsRemoved()) {
-							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
-							if (exchange != null) {
-								qpidClient.removeExchange(exchange);
-							}
-							subscription.removeExchangeName();
-							logger.debug("Removed exchange for subscription {}", subscription.toString());
-						}*/
 					}
 				}
 			}

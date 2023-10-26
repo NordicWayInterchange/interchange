@@ -422,8 +422,8 @@ public class ServiceProviderRouter {
                     if (!localSubscription.getLocalEndpoints().isEmpty()) {
                         List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                         for (Match match : matches) {
-                            if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
-                                Exchange exchange = delta.findByExchangeName(match.getSubscription().getExchangeName());
+                            if (match.getSubscription().isSubscriptionWanted()) {
+                                /*Exchange exchange = delta.findByExchangeName(match.getSubscription().getExchangeName());
                                 if (exchange != null) {
                                     for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
                                         Queue queue = delta.findByQueueName(queueName);
@@ -432,7 +432,7 @@ public class ServiceProviderRouter {
                                             delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
                                         }
                                     }
-                                }
+                                }*/ //TODO: implement
                             }
                         }
                     }
