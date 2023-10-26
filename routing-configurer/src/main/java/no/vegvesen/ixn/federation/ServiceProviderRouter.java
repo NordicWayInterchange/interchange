@@ -239,8 +239,8 @@ public class ServiceProviderRouter {
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
                 GroupMember member = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                int channelsWithPeerName = privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).size();
-                int channelsWithServiceProviderName = privateChannelRepository.findAllByServiceProviderNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED).size();
+                long channelsWithPeerName = privateChannelRepository.countByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED);
+                long channelsWithServiceProviderName = privateChannelRepository.countByServiceProviderNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
 
                 if (channelsWithPeerName == 0 && channelsWithServiceProviderName == 0) {
                     if (member != null && privateChannelsWithStatusCreated.isEmpty()) {
