@@ -318,10 +318,9 @@ public class OnboardRestController {
 		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
 		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
-
 			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
-			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
 
+			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
 			savedChannelsList.add(savedChannel);
 		}
 
