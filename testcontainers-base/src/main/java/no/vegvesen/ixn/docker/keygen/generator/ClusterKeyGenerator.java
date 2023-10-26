@@ -63,6 +63,9 @@ public class ClusterKeyGenerator {
         Path truststorePasswordPath = outputFolder.resolve(passwordFile);
         Files.writeString(truststorePasswordPath,topDomainTrustStorePassword);
         for (IntermediateDomain domain : topDomain.getIntermediateDomains()) {
+            //TODO this should generate TWO key/cert paris.
+            //One for the CA
+            //One for the host at the intermediate domain.
             KeyPairAndCsr intermediateCsr = generateIntermediateKeypairAndCsr(domain.getDomainName(), domain.getOwningCountry());
             CertificateAndCertificateChain intermediateCert = signIntermediateCsr(topCa.getCertificate(), topCa.getKeyPair(), intermediateCsr.getCsr());
             String intermediateCaKeystorePassword = generatePassword(random,24);
