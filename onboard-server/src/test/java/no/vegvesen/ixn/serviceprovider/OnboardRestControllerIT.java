@@ -650,7 +650,7 @@ public class OnboardRestControllerIT {
 
         System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
-        assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()==1);
+        assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()).isEqualTo(1);
     }
     @Test
     public void testAddingMultipleChannels(){
@@ -659,7 +659,7 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
         PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
-        assertThat(privateChannelRepository.findAll().size() == 3);
+        assertThat(privateChannelRepository.findAll().size()).isEqualTo(3);
     }
     @Test
     public void testDeletingInvalidChannel(){
@@ -667,7 +667,7 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(List.of(clientChannel)));
         assertThrows(RuntimeException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
-        assertThat(privateChannelRepository.findAll().size()==1);
+        assertThat(privateChannelRepository.findAll().size()).isEqualTo(1);
     }
 
     @Test
@@ -680,9 +680,25 @@ public class OnboardRestControllerIT {
         AddPrivateChannelsResponse privateChannels = restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
-        assertThat(channelResponse != null);
+        assertThat(channelResponse).isNotNull();
         assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existant-provider", "1"));
     }
+    @Test
+    public void testGettingPrivateChannelsWithServiceProviderAsPeer(){
+        String serviceProviderName_1 = "my-service-provider";
+        String serviceProviderName_2 = "my-service-provider2";
 
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi(serviceProviderName_1);
+
+        restController.addPrivateChannel(serviceProviderName_1,new AddPrivateChannelsRequest(List.of(clientChannel_1)));
+        restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelsRequest(List.of(clientChannel_2)));
+
+        ListPrivateChannelsResponse response_1 = restController.getPrivateChannelsWithServiceProviderAsPeer(serviceProviderName_1);
+        ListPrivateChannelsResponse response_2 = restController.getPrivateChannelsWithServiceProviderAsPeer(serviceProviderName_2);
+        assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
+        assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
+
+    }
 
 }

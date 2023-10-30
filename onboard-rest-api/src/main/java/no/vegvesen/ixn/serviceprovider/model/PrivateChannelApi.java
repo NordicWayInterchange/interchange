@@ -61,5 +61,8 @@ public class PrivateChannelApi {
     public void setQueueName(String queueName) {
         this.queueName = queueName;
     }
+    public String toString(){
+        return id + " " + peerName + " "+ queueName;
+    }
 
 }
