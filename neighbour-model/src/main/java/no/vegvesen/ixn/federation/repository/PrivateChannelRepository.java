@@ -11,6 +11,7 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
     List<PrivateChannel> findAllByStatus(PrivateChannelStatus privateChannelStatus);
     PrivateChannel findByServiceProviderNameAndId(String serviceProviderName, Integer Id);
     List<PrivateChannel> findAll();
+    List<PrivateChannel> findAllByPeerName(String peerName);
     long countByServiceProviderNameAndStatus(String serviceProviderName, PrivateChannelStatus status);
     long countByPeerNameAndStatus(String peerName, PrivateChannelStatus status);
 }

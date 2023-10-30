@@ -11,8 +11,8 @@ public class AddPrivateChannelsRequest {
     public AddPrivateChannelsRequest() {
     }
 
-    public AddPrivateChannelsRequest(String name, List<PrivateChannelApi> privateChannels) {
-        this.name = name;
+
+    public AddPrivateChannelsRequest(List<PrivateChannelApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 
