@@ -245,18 +245,20 @@ public class ServiceProviderRouter {
                 long channelsWithServiceProviderNameAsPeerName = privateChannelRepository.countByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED); //1
                 long channelsWithPeerNameAsServiceProviderName = privateChannelRepository.countByServiceProviderNameAndStatus(peerName, PrivateChannelStatus.CREATED); //2
 
-                if ((channelsWithPeerName == 0 && channelsWithServiceProviderNameAsPeerName == 0) || (channelsWithServiceProviderName == 0 && channelsWithPeerNameAsServiceProviderName == 0)) {
+                if (channelsWithServiceProviderName == 0 && channelsWithPeerNameAsServiceProviderName == 0) {
                     if (member != null && privateChannelsWithStatusCreated.isEmpty()) {
                         qpidClient.removeMemberFromGroup(member, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                         logger.debug("Removing member {} from group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
-
+                }
+                if(channelsWithPeerName == 0 && channelsWithServiceProviderNameAsPeerName == 0) {
                     GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     if (peer != null) {
                         qpidClient.removeMemberFromGroup(peer, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                         logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
                 }
+
                 VirtualHostAccessController provider = qpidClient.getQpidAcl();
                 provider.removeQueueWriteAccess(peerName, queueName);
                 provider.removeQueueWriteAccess(name, queueName);
