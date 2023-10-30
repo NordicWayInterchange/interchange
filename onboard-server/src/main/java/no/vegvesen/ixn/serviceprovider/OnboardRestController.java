@@ -384,6 +384,24 @@ public class OnboardRestController {
 
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
+	// private channels man er peer i
+	//
+	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/")
+	public ListPrivateChannelsResponse getPrivateChannelsWithServiceProviderAsPeer(@PathVariable String serviceProviderName){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Get private channels where peername is {}", serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(serviceProviderName);
+		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
+
+		for (PrivateChannel privateChannel : privateChannels) {
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+		}
+
+		OnboardMDCUtil.removeLogVariables();
+		return new ListPrivateChannelsResponse(serviceProviderName, privateChannelsApis);
+	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
