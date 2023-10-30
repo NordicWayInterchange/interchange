@@ -15,12 +15,12 @@ public class PrivateChannelEndpoint {
     @Column
     private Integer port;
     @Column
-    private String target;
+    private String queueName;
 
     public PrivateChannelEndpoint(String host, Integer port, String target) {
         this.source = host;
         this.port = port;
-        this.target = target;
+        this.queueName = target;
     }
 
     public PrivateChannelEndpoint() {
@@ -50,12 +50,12 @@ public class PrivateChannelEndpoint {
         this.port = port;
     }
 
-    public String getTarget() {
-        return target;
+    public String getQueueName() {
+        return queueName;
     }
 
-    public void setTarget(String target) {
-        this.target = target;
+    public void setQueueName(String target) {
+        this.queueName = target;
     }
     @Override
     public boolean equals(Object o) {
@@ -68,7 +68,7 @@ public class PrivateChannelEndpoint {
     }
     @Override
     public int hashCode() {
-        return Objects.hash(source, target, port);
+        return Objects.hash(source, queueName, port);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class PrivateChannelEndpoint {
                 "id=" + id +
                 ", source='" + source + '\'' +
                 ", port=" + port +
-                ", target=" + target +
+                ", target=" + queueName +
                 '}';
     }
 }

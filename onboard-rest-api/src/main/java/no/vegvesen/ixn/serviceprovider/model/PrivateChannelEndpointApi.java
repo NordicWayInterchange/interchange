@@ -4,15 +4,15 @@ import java.util.Objects;
 
 public class PrivateChannelEndpointApi {
     private String host;
-    private int port;
-    private String target;
+    private Integer port;
+    private String queueName;
     public PrivateChannelEndpointApi() {
     }
 
-    public PrivateChannelEndpointApi(String host, int port, String target) {
+    public PrivateChannelEndpointApi(String host, Integer port, String target) {
         this.host = host;
         this.port = port;
-        this.target = target;
+        this.queueName = target;
     }
 
     public String getHost() {
@@ -31,23 +31,23 @@ public class PrivateChannelEndpointApi {
         this.port = port;
     }
 
-    public String getTarget() {
-        return target;
+    public String getQueueName() {
+        return queueName;
     }
 
-    public void setTarget(String target) {
-        this.target = target;
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
     }
     @Override
     public boolean equals(Object o){
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelEndpointApi that = (PrivateChannelEndpointApi) o;
-        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target);
+        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(queueName, that.queueName);
     }
     @Override
     public int hashCode(){
-        return Objects.hash(host, port, target);
+        return Objects.hash(host, port, queueName);
     }
     @Override
     public String toString(){

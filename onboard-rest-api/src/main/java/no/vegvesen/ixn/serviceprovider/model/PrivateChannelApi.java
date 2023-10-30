@@ -13,7 +13,6 @@ public class PrivateChannelApi {
     private String queueName;
 
     private PrivateChannelStatus status;
-    private PrivateChannelEndpointApi endpoints;
     public PrivateChannelApi() {
 
     }
@@ -28,14 +27,6 @@ public class PrivateChannelApi {
         this.peerName = peerName;
         this.queueName = queueName;
         this.status = status;
-    }
-
-    public PrivateChannelEndpointApi getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(PrivateChannelEndpointApi endpoints) {
-        this.endpoints = endpoints;
     }
 
     public PrivateChannelStatus getStatus() {
