@@ -9,10 +9,7 @@ import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
-import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,15 +35,17 @@ public class ServiceProviderRouter {
     private final MatchRepository matchRepository;
     private final OutgoingMatchRepository outgoingMatchRepository;
     private final InterchangeNodeProperties nodeProperties;
+    private final PrivateChannelEndpointRepository privateChannelEndpointRepository;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties, PrivateChannelEndpointRepository privateChannelEndpointRepository) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
         this.matchRepository = matchRepository;
         this.outgoingMatchRepository = outgoingMatchRepository;
         this.nodeProperties = nodeProperties;
+        this.privateChannelEndpointRepository = privateChannelEndpointRepository;
     }
 
 
@@ -234,7 +232,9 @@ public class ServiceProviderRouter {
                 provider.addQueueReadAccess(peerName, queueName);
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
-
+                PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
+                privateChannel.setEndpoint(endpoint);
+                privateChannelEndpointRepository.save(endpoint);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
