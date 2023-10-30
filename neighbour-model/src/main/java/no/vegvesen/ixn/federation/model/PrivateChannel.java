@@ -24,6 +24,9 @@ public class PrivateChannel {
 
     @Column
     private String serviceProviderName;
+    @OneToOne
+    private PrivateChannelEndpoint endpoint;
+
     public PrivateChannel() {
 
     }
@@ -42,6 +45,13 @@ public class PrivateChannel {
         this.serviceProviderName = serviceProviderName;
     }
 
+    public PrivateChannelEndpoint getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(PrivateChannelEndpoint endpoint) {
+        this.endpoint = endpoint;
+    }
 
     public Integer getId() {
         return id;

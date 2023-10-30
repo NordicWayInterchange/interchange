@@ -2,14 +2,14 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 
-public class PrivateChannelEndpoint {
+public class PrivateChannelEndpointApi {
     private String host;
     private int port;
     private String target;
-    public PrivateChannelEndpoint() {
+    public PrivateChannelEndpointApi() {
     }
 
-    public PrivateChannelEndpoint(String host, int port, String target) {
+    public PrivateChannelEndpointApi(String host, int port, String target) {
         this.host = host;
         this.port = port;
         this.target = target;
@@ -42,7 +42,7 @@ public class PrivateChannelEndpoint {
     public boolean equals(Object o){
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PrivateChannelEndpoint that = (PrivateChannelEndpoint) o;
+        PrivateChannelEndpointApi that = (PrivateChannelEndpointApi) o;
         return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target);
     }
     @Override
