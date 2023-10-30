@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.Endpoint;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +43,14 @@ public class CollectorCreator {
         this.writeQueue = collectorProperties.getWritequeue();
     }
 
-    MessageCollectorListener setupCollection(ListenerEndpoint listenerEndpoint) {
+    MessageCollectorListener setupCollection(Endpoint endpoint) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
-        String localExchange = listenerEndpoint.getTarget();
+        String localExchange = endpoint.getShard().getExchangeName();
         logger.debug("Write URL: {}, exchange {}", writeUrl, localExchange);
         Source writeSource = new Source(writeUrl, localExchange, sslContext);
 
-        String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
-        String readQueue = listenerEndpoint.getSource();
+        String readUrl = String.format("amqps://%s:%s", endpoint.getHost(), endpoint.getPort());
+        String readQueue = endpoint.getSource();
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
         logger.info("Fetching messages from URL {}, queue {} ; write to URL {} target {}", readUrl, readQueue, writeUrl, localExchange);
 
@@ -72,6 +72,4 @@ public class CollectorCreator {
         }
         return listener;
     }
-
-
 }

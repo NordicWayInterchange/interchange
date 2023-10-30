@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -42,6 +41,11 @@ public class Endpoint {
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this(null,source,host,port,maxMessageRate,maxBandwidth);
+    }
+
+    public Endpoint(String source, String host, Integer port, SubscriptionShard shard) {
+        this(null,source,host,port,null,null);
+        this.setShard(shard);
     }
 
     public Endpoint(Integer id, String source, String host, Integer port) {

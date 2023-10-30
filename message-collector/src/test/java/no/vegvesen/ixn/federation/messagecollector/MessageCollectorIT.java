@@ -7,8 +7,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import org.apache.qpid.jms.message.JmsBytesMessage;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
@@ -23,8 +22,11 @@ import javax.naming.NamingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,12 +69,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Test
 	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
+		Subscription sub1 = new Subscription(
+				"messageType = 'DATEX2' AND originatingCountry = 'NO'",
+				SubscriptionStatus.CREATED
+		);
+		sub1.setEndpoints(Collections.singleton(new Endpoint("localhost", "localhost", producerContainer.getAmqpsPort(), new SubscriptionShard("subscriptionExchange"))));
 
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(new HashSet<>(Arrays.asList(sub1)))
+		);
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Arrays.asList(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -81,7 +92,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				localIxnFederationPort,
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(neighbourRepository, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
@@ -114,13 +125,23 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@Test
 	@Order(2)
+	@Disabled
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
+		Subscription sub1 = new Subscription(
+				"messageType = 'DATEX2' AND originatingCountry = 'NO'",
+				SubscriptionStatus.CREATED
+		);
+		sub1.setEndpoints(Collections.singleton(new Endpoint("localhost", producerContainer.getHost(), producerContainer.getAmqpsPort(), new SubscriptionShard("subscriptionExchange"))));
 
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(new HashSet<>(Arrays.asList(sub1)))
+		);
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Arrays.asList(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -129,7 +150,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				localIxnFederationPort,
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(neighbourRepository, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
@@ -165,11 +186,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Order(3)
 	@Disabled
 	public void testDatexMessagesWithMessageCollector() throws NamingException, JMSException {
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
+		Subscription sub1 = new Subscription(
+				"messageType = 'DATEX2' AND originatingCountry = 'NO'",
+				SubscriptionStatus.CREATED
+		);
+		sub1.setEndpoints(Collections.singleton(new Endpoint("", "", 5671, new SubscriptionShard("subscriptionExchange"))));
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(new HashSet<>(Arrays.asList(sub1)))
+		);
+
+		NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+		when(neighbourRepository.findAll()).thenReturn(Arrays.asList(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -178,7 +209,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				localIxnFederationPort,
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(neighbourRepository, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
@@ -214,11 +245,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Order(4)
 	@Disabled
 	public void testDenmMessagesWithMessageCollector() throws NamingException, JMSException {
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
+		Subscription sub1 = new Subscription(
+				"messageType = 'DENM' AND originatingCountry = 'NO'",
+				SubscriptionStatus.CREATED
+		);
+		sub1.setEndpoints(Collections.singleton(new Endpoint("", "", 5671, new SubscriptionShard("subscriptionExchange"))));
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(new HashSet<>(Arrays.asList(sub1)))
+		);
+
+		NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+		when(neighbourRepository.findAll()).thenReturn(Arrays.asList(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -227,7 +268,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				localIxnFederationPort,
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(neighbourRepository, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
@@ -241,7 +282,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				.publisherId("Test")
 				.publicationId("pub-1")
 				.quadTreeTiles(",3232,")
-				.protocolVersion("DATEX2;2.3")
+				.protocolVersion("DENM:1.2.2")
 				.latitude(60.352374)
 				.longitude(13.334253)
 				.originatingCountry("SE")

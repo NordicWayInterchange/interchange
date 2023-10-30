@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.Endpoint;
+import no.vegvesen.ixn.federation.model.SubscriptionShard;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,8 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
     public void stoppingRemoteContainerStopsListener() {
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
-        ListenerEndpoint remote = mock(ListenerEndpoint.class);
-        when(remote.getTarget()).thenReturn("subscriptionExchange");
+        Endpoint remote = mock(Endpoint.class);
+        when(remote.getShard()).thenReturn(new SubscriptionShard("subscriptionExchange"));
         when(remote.getHost()).thenReturn("localhost");
         when(remote.getPort()).thenReturn(remoteContainer.getAmqpsPort());
         when(remote.getSource()).thenReturn("localhost");

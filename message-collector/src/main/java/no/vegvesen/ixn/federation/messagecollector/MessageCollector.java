@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +16,20 @@ import java.util.stream.Collectors;
 public class MessageCollector {
 
     private final CollectorCreator collectorCreator;
-    private GracefulBackoffProperties backoffProperties;
-    private ListenerEndpointRepository listenerEndpointRepository;
+    private NeighbourRepository neighbourRepository;
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
-    private Map<ListenerEndpoint, MessageCollectorListener> listeners;
+    private Map<Endpoint, MessageCollectorListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageCollector.class);
 
 
     @Autowired
-    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
-        this(listenerEndpointRepository,collectorCreator,backoffProperties,new HashMap<>());
+    public MessageCollector(NeighbourRepository neighbourRepository, CollectorCreator collectorCreator) {
+        this(neighbourRepository,collectorCreator,new HashMap<>());
     }
 
-    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, Map<ListenerEndpoint,MessageCollectorListener> listeners) {
-        this.listenerEndpointRepository = listenerEndpointRepository;
+    public MessageCollector(NeighbourRepository neighbourRepository, CollectorCreator collectorCreator, Map<Endpoint,MessageCollectorListener> listeners) {
+        this.neighbourRepository = neighbourRepository;
         this.collectorCreator = collectorCreator;
-        this.backoffProperties = backoffProperties;
         this.listeners = listeners;
     }
 
@@ -44,66 +41,65 @@ public class MessageCollector {
 
     public void checkListenerList() {
         //TODO logging of the entries...
-        List<ListenerEndpoint> entriesToRemove = listeners.entrySet().stream().filter(e -> !e.getValue().isRunning()).map(e -> e.getKey()).collect(Collectors.toList());
+        List<Endpoint> entriesToRemove = listeners.entrySet().stream().filter(e -> !e.getValue().isRunning()).map(e -> e.getKey()).collect(Collectors.toList());
         listeners.keySet().removeAll(entriesToRemove);
         logger.info("Removed listeners {}", entriesToRemove);
     }
 
     public void setupConnectionsToNewNeighbours() {
-        List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAll();
-        Set<ListenerEndpoint> interchangeListenerEndpoints = new HashSet<>();
-
-        for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
-            String neighbourName = listenerEndpoint.getNeighbourName();
-            String hostName = listenerEndpoint.getHost();
-            interchangeListenerEndpoints.add(listenerEndpoint);
-            if (!listeners.containsKey(listenerEndpoint)) {
-                setUpConnectionToNeighbour(listenerEndpoint);
-            }
-            else {
-                if (listeners.get(listenerEndpoint).isRunning()) {
-                    logger.debug("Listener for {} with host {} is still running with no changes", neighbourName, hostName);
-                } else {
-                    logger.debug("Non-running listener detected, name {} with host {}", neighbourName, hostName);
+        List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+        Set<Endpoint> endpoints = new HashSet<>();
+        for (Neighbour neighbour : neighbours) {
+            for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
+                    endpoints.addAll(subscription.getEndpoints());
                 }
             }
         }
 
-        List<ListenerEndpoint> listenerKeysToRemove = new ArrayList<>();
+        Set<Endpoint> interchangeEndpoints = new HashSet<>();
 
-        for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
-            if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
-                String neighbourName = listenerEndpoint.getNeighbourName();
-                logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
-                logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+        for (Endpoint endpoint : endpoints) {
+            String hostName = endpoint.getHost();
+            interchangeEndpoints.add(endpoint);
+
+            if (!listeners.containsKey(endpoint)) {
+                setUpConnectionToNeighbour(endpoint);
+            } else {
+                if (listeners.get(endpoint).isRunning()) {
+                    logger.debug("Listener with host {} is still running with no changes", hostName);
+                } else {
+                    logger.debug("Non-running listener detected, with host {}", hostName);
+                }
+            }
+        }
+
+        List<Endpoint> listenerKeysToRemove = new ArrayList<>();
+
+        for (Endpoint endpoint : listeners.keySet()) {
+            if (!interchangeEndpoints.contains(endpoint)) {
+                logger.info("Listener with host {} and port {} is now being removed", endpoint.getHost(), endpoint.getPort());
+                MessageCollectorListener toRemove = listeners.get(endpoint);
+                logger.debug("Tearing down listener with host {} and port {}", endpoint.getHost(), endpoint.getPort());
                 toRemove.teardown();
-                listenerKeysToRemove.add(listenerEndpoint);
+                listenerKeysToRemove.add(endpoint);
             }
         }
 
         listeners.keySet().removeAll(listenerKeysToRemove);
     }
 
-    public void setUpConnectionToNeighbour(ListenerEndpoint listenerEndpoint){
-        String name = listenerEndpoint.getNeighbourName();
-        if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
-            try {
-                logger.info("Setting up connection to ixn with name {}, host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
-                listeners.put(listenerEndpoint, messageListener);
-                listenerEndpoint.getMessageConnection().okConnection();
-            } catch (MessageCollectorException e) {
-                logger.warn("Tried to create connection to {} with host {} and port {}, but failed with exception.", name, listenerEndpoint.getHost(), listenerEndpoint.getPort(), e);
-                listenerEndpoint.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-            }
-        }
-        else {
-            logger.info("Too soon to connect to {} with host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+    public void setUpConnectionToNeighbour(Endpoint endpoint){
+        String name = endpoint.getHost();
+        try {
+            logger.info("Setting up connection to ixn with name {}, host {} and port {}", name, endpoint.getHost(), endpoint.getPort());
+            MessageCollectorListener messageListener = collectorCreator.setupCollection(endpoint);
+            listeners.put(endpoint, messageListener);
+        } catch (MessageCollectorException e) {
+            logger.warn("Tried to create connection to {} with host {} and port {}, but failed with exception.", name, endpoint.getHost(), endpoint.getPort(), e);
         }
     }
-
-    Map<ListenerEndpoint, MessageCollectorListener> getListeners() {
+    Map<Endpoint, MessageCollectorListener> getListeners() {
         return listeners;
     }
 }

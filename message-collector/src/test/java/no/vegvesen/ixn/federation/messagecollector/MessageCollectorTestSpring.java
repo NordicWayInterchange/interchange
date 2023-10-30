@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import javax.net.ssl.SSLContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {MessageCollector.class, CollectorCreator.class, CollectorProperties.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
+@SpringBootTest(classes = {MessageCollector.class, CollectorCreator.class, CollectorProperties.class, InterchangeNodeProperties.class})
 @EnableScheduling //Enable scheduling to verify scheduling parameters annotated with ${...}
 class MessageCollectorTestSpring {
 
@@ -22,7 +21,7 @@ class MessageCollectorTestSpring {
 	SSLContext sslContext;
 
 	@MockBean
-	ListenerEndpointRepository listenerEndpointRepository;
+	NeighbourRepository neighbourRepository;
 
 	@MockBean
 	MatchDiscoveryService matchDiscoveryService;
