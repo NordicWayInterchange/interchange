@@ -361,7 +361,7 @@ public class OnboardRestController {
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
 		for (PrivateChannel privateChannel : privateChannels) {
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(),privateChannel.getStatus(), privateChannel.getId()));
 		}
 
 		OnboardMDCUtil.removeLogVariables();
@@ -384,8 +384,7 @@ public class OnboardRestController {
 
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
-	// private channels man er peer i
-	//
+
 	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/")
 	public ListPrivateChannelsResponse getPrivateChannelsWithServiceProviderAsPeer(@PathVariable String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
@@ -396,7 +395,7 @@ public class OnboardRestController {
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
 		for (PrivateChannel privateChannel : privateChannels) {
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
 		}
 
 		OnboardMDCUtil.removeLogVariables();

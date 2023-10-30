@@ -120,6 +120,10 @@ public class OnboardRESTClient {
        String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
+    public ListPrivateChannelsResponse getPrivateChannelsWithServiceProviderAsPeer(){
+        String url = String.format("%s/%s/privatechannels", server,user);
+        return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
+    }
 }
 
 
