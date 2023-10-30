@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
+
 public class PrivateChannelApi {
 
     private Integer id;
@@ -9,6 +11,8 @@ public class PrivateChannelApi {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
+
+    private PrivateChannelStatus status;
 
     public PrivateChannelApi() {
 
@@ -19,11 +23,19 @@ public class PrivateChannelApi {
         this.peerName = peerName;
     }
 
-    // NY
-    public PrivateChannelApi(String peerName, String queueName, Integer id) {
+    public PrivateChannelApi(String peerName, String queueName, PrivateChannelStatus status, Integer id) {
         this.id = id;
         this.peerName = peerName;
         this.queueName = queueName;
+        this.status = status;
+    }
+
+    public PrivateChannelStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PrivateChannelStatus status) {
+        this.status = status;
     }
 
     public Integer getId() {
