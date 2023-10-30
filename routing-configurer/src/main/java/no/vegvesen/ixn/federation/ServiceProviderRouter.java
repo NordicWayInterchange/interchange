@@ -234,6 +234,7 @@ public class ServiceProviderRouter {
                 provider.addQueueReadAccess(peerName, queueName);
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
+
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
