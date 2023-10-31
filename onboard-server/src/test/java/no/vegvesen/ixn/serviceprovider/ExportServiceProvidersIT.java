@@ -111,7 +111,7 @@ public class ExportServiceProvidersIT {
 
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : privateChannelList) {
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(),privateChannel.getStatus(),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(),privateChannel.getStatus(),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
