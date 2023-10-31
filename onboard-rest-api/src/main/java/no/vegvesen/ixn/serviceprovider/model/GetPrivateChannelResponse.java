@@ -1,19 +1,21 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class GetPrivateChannelResponse {
     private Integer id;
     private String peerName;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
     private String serviceProviderName;
     private PrivateChannelEndpointApi endpoint;
 
-    public GetPrivateChannelResponse(Integer id, String peerName, String queueName, PrivateChannelEndpointApi endpoint, String serviceProviderName) {
+    public GetPrivateChannelResponse(Integer id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName) {
         this.id = id;
         this.peerName = peerName;
-        this.queueName = queueName;
         this.serviceProviderName = serviceProviderName;
         this.endpoint = endpoint;
     }

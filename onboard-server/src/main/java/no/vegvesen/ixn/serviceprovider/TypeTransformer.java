@@ -278,7 +278,7 @@ public class TypeTransformer {
     public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
         System.out.println(privateChannel);
         if(privateChannel.getEndpoint() != null) {
-            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), privateChannel.getQueueName(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getServiceProviderName());
+            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getServiceProviderName());
         }
         else{
             return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
