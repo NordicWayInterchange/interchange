@@ -49,7 +49,7 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
-		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
+		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
