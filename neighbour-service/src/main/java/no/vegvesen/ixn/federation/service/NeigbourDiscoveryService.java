@@ -354,7 +354,7 @@ public class NeigbourDiscoveryService {
             }
         }
         finally {
-            logger.info("Saving updated neighbour: {}", neighbour.toString());
+            logger.info("Saving updated neighbour: {}", neighbour.getName());
             neighbourRepository.save(neighbour);
         }
     }
