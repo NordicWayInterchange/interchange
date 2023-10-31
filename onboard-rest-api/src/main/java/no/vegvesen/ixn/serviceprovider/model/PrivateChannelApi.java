@@ -31,7 +31,7 @@ public class PrivateChannelApi {
         this.queueName = queueName;
         this.status = status;
     }
-    public PrivateChannelApi(String peerName, String queueName, PrivateChannelStatus status, PrivateChannelEndpointApi endpoint, Integer id) {
+    public PrivateChannelApi(String peerName , PrivateChannelStatus status, PrivateChannelEndpointApi endpoint, Integer id) {
         this.id = id;
         this.peerName = peerName;
         this.queueName = queueName;
