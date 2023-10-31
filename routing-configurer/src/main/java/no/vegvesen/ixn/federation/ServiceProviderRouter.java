@@ -35,17 +35,15 @@ public class ServiceProviderRouter {
     private final MatchRepository matchRepository;
     private final OutgoingMatchRepository outgoingMatchRepository;
     private final InterchangeNodeProperties nodeProperties;
-    private final PrivateChannelEndpointRepository privateChannelEndpointRepository;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties, PrivateChannelEndpointRepository privateChannelEndpointRepository) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
         this.matchRepository = matchRepository;
         this.outgoingMatchRepository = outgoingMatchRepository;
         this.nodeProperties = nodeProperties;
-        this.privateChannelEndpointRepository = privateChannelEndpointRepository;
     }
 
 
@@ -234,7 +232,6 @@ public class ServiceProviderRouter {
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
                 privateChannel.setEndpoint(endpoint);
-                privateChannelEndpointRepository.save(endpoint);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {

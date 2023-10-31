@@ -12,6 +12,7 @@ import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -110,7 +111,7 @@ public class ExportServiceProvidersIT {
 
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : privateChannelList) {
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(),privateChannel.getStatus(), privateChannel.getId()));
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(),privateChannel.getStatus(),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);

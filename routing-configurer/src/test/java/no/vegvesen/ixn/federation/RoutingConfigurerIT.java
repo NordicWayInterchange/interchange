@@ -112,7 +112,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	InterchangeNodeProperties interchangeNodeProperties;
 
 
-
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);

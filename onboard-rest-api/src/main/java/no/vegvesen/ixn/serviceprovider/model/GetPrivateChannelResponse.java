@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+
 import java.util.Objects;
 
 public class GetPrivateChannelResponse {
@@ -7,15 +8,30 @@ public class GetPrivateChannelResponse {
     private String peerName;
     private String queueName;
     private String serviceProviderName;
+    private PrivateChannelEndpointApi endpoint;
 
+    public GetPrivateChannelResponse(Integer id, String peerName, String queueName, PrivateChannelEndpointApi endpoint, String serviceProviderName) {
+        this.id = id;
+        this.peerName = peerName;
+        this.queueName = queueName;
+        this.serviceProviderName = serviceProviderName;
+        this.endpoint = endpoint;
+    }
     public GetPrivateChannelResponse(Integer id, String peerName, String queueName, String serviceProviderName) {
         this.id = id;
         this.peerName = peerName;
         this.queueName = queueName;
         this.serviceProviderName = serviceProviderName;
     }
-
     public GetPrivateChannelResponse() {
+    }
+
+    public PrivateChannelEndpointApi getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(PrivateChannelEndpointApi endpoint) {
+        this.endpoint = endpoint;
     }
 
     public Integer getId() {
@@ -63,6 +79,7 @@ public class GetPrivateChannelResponse {
                 ", peerName='" + peerName + '\'' +
                 ", queueName='" + queueName + '\'' +
                 ", serviceProviderName=" + serviceProviderName +
+                ", endpoint='" + endpoint + '\'' +
                 "}";
     }
 }

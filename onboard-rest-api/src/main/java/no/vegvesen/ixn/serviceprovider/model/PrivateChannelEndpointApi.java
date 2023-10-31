@@ -1,26 +1,33 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
+
 import java.util.Objects;
 
 public class PrivateChannelEndpointApi {
-    private String host;
+    private String source;
     private Integer port;
     private String queueName;
     public PrivateChannelEndpointApi() {
     }
 
-    public PrivateChannelEndpointApi(String host, Integer port, String target) {
-        this.host = host;
+    public PrivateChannelEndpointApi(String source, Integer port, String queueName) {
+        this.source = source;
         this.port = port;
-        this.queueName = target;
+        this.queueName = queueName;
+    }
+    public PrivateChannelEndpointApi(PrivateChannelEndpoint privateChannelEndpoint){
+            this.source = privateChannelEndpoint.getSource();
+            this.port = privateChannelEndpoint.getPort();
+            this.queueName = privateChannelEndpoint.getQueueName();
     }
 
     public String getHost() {
-        return host;
+        return source;
     }
 
     public void setHost(String host) {
-        this.host = host;
+        this.source = host;
     }
 
     public int getPort() {
@@ -43,14 +50,17 @@ public class PrivateChannelEndpointApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelEndpointApi that = (PrivateChannelEndpointApi) o;
-        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(queueName, that.queueName);
+        return Objects.equals(source, that.source) && Objects.equals(port, that.port) && Objects.equals(queueName, that.queueName);
     }
     @Override
     public int hashCode(){
-        return Objects.hash(host, port, queueName);
+        return Objects.hash(source, port, queueName);
     }
-    @Override
-    public String toString(){
-        return "";
+    public String toString() {
+        return "PrivateChannelEndpointApi{" +
+                ", source='" + source + '\'' +
+                ", port=" + port +
+                ", queueName=" + queueName +
+                '}';
     }
 }

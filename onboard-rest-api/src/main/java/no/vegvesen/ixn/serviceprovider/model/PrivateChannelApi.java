@@ -13,6 +13,9 @@ public class PrivateChannelApi {
     private String queueName;
 
     private PrivateChannelStatus status;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private PrivateChannelEndpointApi endpoint;
     public PrivateChannelApi() {
 
     }
@@ -27,6 +30,25 @@ public class PrivateChannelApi {
         this.peerName = peerName;
         this.queueName = queueName;
         this.status = status;
+    }
+    public PrivateChannelApi(String peerName, String queueName, PrivateChannelStatus status, PrivateChannelEndpointApi endpoint, Integer id) {
+        this.id = id;
+        this.peerName = peerName;
+        this.queueName = queueName;
+        this.status = status;
+        this.endpoint = endpoint;
+
+    }
+
+    public PrivateChannelEndpointApi getEndpoint() {
+        if(endpoint != null) {
+            return endpoint;
+        }
+        else return null;
+    }
+
+    public void setEndpoint(PrivateChannelEndpointApi endpoint) {
+        this.endpoint = endpoint;
     }
 
     public PrivateChannelStatus getStatus() {
@@ -61,7 +83,14 @@ public class PrivateChannelApi {
         this.queueName = queueName;
     }
     public String toString(){
-        return id + " " + peerName + " "+ queueName;
+        return "PrivateChannelApi{" +
+                "id='" + id + '\'' +
+                ", peerName='" + peerName + '\'' +
+                ", queueName='" + queueName + '\'' +
+                ", status=" + status +
+                ", endpoint=" + endpoint +
+                '}';
+
     }
 
 }
