@@ -17,12 +17,11 @@ public class PrivateChannelEndpoint {
     @Column
     private String queueName;
 
-    public PrivateChannelEndpoint(String host, Integer port, String target) {
+    public PrivateChannelEndpoint(String host, Integer port, String queueName) {
         this.source = host;
         this.port = port;
-        this.queueName = target;
+        this.queueName = queueName;
     }
-
     public PrivateChannelEndpoint() {
     }
 
@@ -73,11 +72,11 @@ public class PrivateChannelEndpoint {
 
     @Override
     public String toString() {
-        return "LocalEndpoint{" +
+        return "PrivateChannelEndpoint{" +
                 "id=" + id +
                 ", source='" + source + '\'' +
                 ", port=" + port +
-                ", target=" + queueName +
+                ", queueName=" + queueName +
                 '}';
     }
 }

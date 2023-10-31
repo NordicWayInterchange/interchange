@@ -48,6 +48,8 @@ public class OnboardRestControllerIT {
     @Autowired
     private PrivateChannelRepository privateChannelRepository;
 
+
+
     @MockBean
     private CertService certService;
 
@@ -679,7 +681,6 @@ public class OnboardRestControllerIT {
 
         AddPrivateChannelsResponse privateChannels = restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelsRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
-
         assertThat(channelResponse).isNotNull();
         assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existant-provider", "1"));
     }

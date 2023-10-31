@@ -395,7 +395,12 @@ public class OnboardRestController {
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
 		for (PrivateChannel privateChannel : privateChannels) {
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
+			if(privateChannel.getEndpoint() != null) {
+				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+			}
+			else{
+				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
+			}
 		}
 
 		OnboardMDCUtil.removeLogVariables();

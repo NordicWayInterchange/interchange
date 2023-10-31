@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "private_channels")
@@ -24,7 +23,7 @@ public class PrivateChannel {
 
     @Column
     private String serviceProviderName;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private PrivateChannelEndpoint endpoint;
 
     public PrivateChannel() {
@@ -38,11 +37,12 @@ public class PrivateChannel {
     }
 
 
-    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, String serviceProviderName) {
+    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peerName = peerName;
         this.queueName = queueName;
         this.status = status;
         this.serviceProviderName = serviceProviderName;
+        this.endpoint = privateChannelEndpoint;
     }
 
     public PrivateChannelEndpoint getEndpoint() {
@@ -114,6 +114,7 @@ public class PrivateChannel {
                 ", status=" + status +
                 ", peerName='" + peerName + '\'' +
                 ", queueName='" + queueName + '\'' +
+                ", endpoint='" + endpoint + '\'' +
                 '}';
     }
 }
