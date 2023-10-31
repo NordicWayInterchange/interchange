@@ -289,7 +289,7 @@ public class TypeTransformer {
         AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelsList){
             if(privateChannel.getEndpoint() != null) {
-                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getStatus(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
             }
             else{
                 response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
