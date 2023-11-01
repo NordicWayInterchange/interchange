@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
@@ -118,7 +118,7 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		try {
+		//try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
@@ -132,9 +132,9 @@ public class RoutingConfigurer {
 				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
-		} catch (Throwable e) {
-			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		}
+		//} catch (Throwable e) {
+		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
+		//}
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
@@ -142,7 +142,9 @@ public class RoutingConfigurer {
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				//if any of the matching caps does not have the shards set
-				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
+				long numberOfCapsWithoutShardsSet = matchingCaps.stream().filter(m -> m.getMetadata().getShards().isEmpty()).count();
+				logger.debug("We have {} capabilities without shards set",numberOfCapsWithoutShardsSet);
+				if (numberOfCapsWithoutShardsSet == 0) {
 					if (subscription.getEndpoints().isEmpty()) {
 						String queueName = "sub-" + UUID.randomUUID();
 						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
