@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.*;
+import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
@@ -99,8 +100,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @MockBean
     PrivateChannelRepository privateChannelRepository;
-
-
 
     @Autowired
     QpidClient client;

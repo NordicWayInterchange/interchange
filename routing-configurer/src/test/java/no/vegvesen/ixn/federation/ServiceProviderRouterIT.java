@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.*;
+import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -83,7 +84,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@MockBean
 	PrivateChannelRepository privateChannelRepository;
 
-
 	@Autowired
 	QpidClient client;
 
@@ -98,7 +98,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@MockBean
 	OutgoingMatchRepository outgoingMatchRepository;
-
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {

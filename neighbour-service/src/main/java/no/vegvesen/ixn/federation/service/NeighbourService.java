@@ -203,8 +203,8 @@ public class NeighbourService {
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
+		logger.debug("Saving neighbour after setting up routing for subscriptions, state {}", neighbour);
 		neighbourRepository.save(neighbour);
-		logger.debug("Saved neighbour {} after setting up routing for subscriptions", neighbour.getName());
 	}
 
 	public void saveNeighbour(Neighbour neighbour) {
