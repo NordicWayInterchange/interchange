@@ -9,10 +9,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
-import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -111,7 +108,7 @@ public class ExportServiceProvidersIT {
 
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : privateChannelList) {
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(),privateChannel.getStatus(),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);

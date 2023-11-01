@@ -361,7 +361,7 @@ public class OnboardRestController {
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
 		for (PrivateChannel privateChannel : privateChannels) {
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(),privateChannel.getStatus(), privateChannel.getId()));
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
 		}
 
 		OnboardMDCUtil.removeLogVariables();
@@ -385,7 +385,7 @@ public class OnboardRestController {
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
 
-	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/")
+	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/peer")
 	public ListPrivateChannelsResponse getPrivateChannelsWithServiceProviderAsPeer(@PathVariable String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
@@ -396,10 +396,10 @@ public class OnboardRestController {
 
 		for (PrivateChannel privateChannel : privateChannels) {
 			if(privateChannel.getEndpoint() != null) {
-				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getStatus(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
 			}
 			else{
-				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
+				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
 			}
 		}
 
