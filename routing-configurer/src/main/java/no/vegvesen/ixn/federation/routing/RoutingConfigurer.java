@@ -139,14 +139,17 @@ public class RoutingConfigurer {
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
+			logger.debug("Checking subscription {}", subscription);
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				//if any of the matching caps does not have the shards set
+				logger.debug("Subscription matches {} caps", matchingCaps.size());
 				long numberOfCapsWithoutShardsSet = matchingCaps.stream().filter(m -> m.getMetadata().getShards().isEmpty()).count();
 				logger.debug("We have {} capabilities without shards set",numberOfCapsWithoutShardsSet);
 				if (numberOfCapsWithoutShardsSet == 0) {
 					if (subscription.getEndpoints().isEmpty()) {
 						String queueName = "sub-" + UUID.randomUUID();
+						logger.debug("Creating endpoint {} for subscription {}", queueName,subscription);
 						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
 						subscription.setEndpoints(Collections.singleton(endpoint));
 					}
@@ -172,7 +175,7 @@ public class RoutingConfigurer {
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
-		logger.info("Set up routing for neighbour {}", neighbourName);
+		logger.debug("Set up routing for neighbour {}", neighbourName);
 	}
 
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities, QpidDelta delta) {
