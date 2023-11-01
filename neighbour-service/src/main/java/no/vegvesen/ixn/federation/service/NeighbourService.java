@@ -177,16 +177,16 @@ public class NeighbourService {
 		neighbourRepository.save(neighbour);
 	}
 
-	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+	public Set<Neighbour> findNeighboursWithKnownCapabilities() {
+		return new HashSet<>(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN));
 	}
 
-	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
+	public Set<Neighbour> getNeighboursFailedSubscriptionRequest() {
+		return new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED));
 	}
 
-	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
-		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+	public Set<Neighbour> listNeighboursToConsumeMessagesFrom() {
+		return new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED));
 	}
 
 	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
@@ -196,8 +196,8 @@ public class NeighbourService {
 		return tearDownSet;
 	}
 
-	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED);
+	public Set<Neighbour> findNeighboursToSetupRoutingFor() {
+		Set<Neighbour> readyToUpdateRouting = new HashSet<>(neighbourRepository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED));
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
 	}

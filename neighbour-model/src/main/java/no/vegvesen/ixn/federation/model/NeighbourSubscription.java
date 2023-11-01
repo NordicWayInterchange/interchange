@@ -25,7 +25,7 @@ public class NeighbourSubscription {
     private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "end_id", foreignKey = @ForeignKey(name = "fk_end_neigh_sub"))
+    @JoinColumn(name = "neigh_end_id", foreignKey = @ForeignKey(name = "fk_end_neigh_sub"))
     private Set<NeighbourEndpoint> endpoints = new HashSet<>();
 
     private long lastUpdatedTimestamp;

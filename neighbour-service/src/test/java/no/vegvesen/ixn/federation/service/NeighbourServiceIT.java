@@ -57,7 +57,7 @@ public class NeighbourServiceIT {
         repository.save(interchangeA);
         repository.save(interchangeB);
 
-        List<Neighbour> interchanges = service.listNeighboursToConsumeMessagesFrom();
+        Set<Neighbour> interchanges = service.listNeighboursToConsumeMessagesFrom();
         assertThat(interchanges).hasSize(1);
     }
 

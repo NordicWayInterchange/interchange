@@ -162,7 +162,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singleton(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -201,7 +201,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singleton(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
 
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
@@ -271,7 +271,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singleton(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
 
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -506,7 +506,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, getEmptyNeighSR(), getEmptySR());
 		capabilitiesNO.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 
-		List<Neighbour> neighbours = new LinkedList<>();
+		Set<Neighbour> neighbours = new HashSet<>();
 		neighbours.add(neighbourA);
 		neighbours.add(neighbourB);
 		neighbours.add(neighbourC);
@@ -575,7 +575,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), Optional.of(lastUpdatedLocalSubscriptions), selfLocalSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(new HashSet<>(Arrays.asList(neighbour,otherNeighbour)), Optional.of(lastUpdatedLocalSubscriptions), selfLocalSubscriptions, neighbourFacade);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
