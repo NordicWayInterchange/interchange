@@ -620,6 +620,53 @@ public class OnboardRestControllerIT {
         ListPrivateChannelsResponse response_2 = restController.getPrivateChannelsWithServiceProviderAsPeer(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testListDeliveries(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Set.of(
+                        new SelectorApi("messageType = 'DENM'")
+                )
+        );
+        restController.addDeliveries(serviceProviderName, request);
+        ListDeliveriesResponse response = restController.listDeliveries(serviceProviderName);
+
+        assertThat(response.getDeliveries().size()).isEqualTo(1);
+        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+
+    }
+    @Test
+    public void testGettingDelivery(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Set.of(
+                        new SelectorApi("messageType = 'DENM'")
+                )
+        );
+        AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
+
+        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId();
+        GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
+
+        assertThat(getDeliveryResponse).isNotNull();
+        // Non-existent delivery
+        assertThrows(NotFoundException.class, () -> {
+           restController.getDelivery(serviceProviderName, "999");
+        });
+    }
+
+    @Test
+    public void testGettingServiceProviders(){
+        ServiceProvider serviceProvider_1 = new ServiceProvider("service-provider-1");
+        ServiceProvider serviceProvider_2 = new ServiceProvider("service-provider-2");
+        ServiceProvider serviceProvider_3 = new ServiceProvider("service-provider-3");
+        serviceProviderRepository.saveAll(List.of(serviceProvider_1,serviceProvider_2,serviceProvider_3));
+
+        assertThat(restController.getServiceProviders().size()).isEqualTo(3);
 
     }
 
