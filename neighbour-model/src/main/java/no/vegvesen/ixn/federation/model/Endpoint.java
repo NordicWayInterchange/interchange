@@ -18,6 +18,10 @@ public class Endpoint {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "subshard_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_sub_shard"))
+    private SubscriptionShard shard;
+
     public Endpoint() {
 
     }
@@ -37,6 +41,11 @@ public class Endpoint {
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this(null,source,host,port,maxMessageRate,maxBandwidth);
+    }
+
+    public Endpoint(String source, String host, Integer port, SubscriptionShard shard) {
+        this(null,source,host,port,null,null);
+        this.setShard(shard);
     }
 
     public Endpoint(Integer id, String source, String host, Integer port) {
@@ -73,6 +82,22 @@ public class Endpoint {
 
     public Integer getId() {
         return id;
+    }
+
+    public SubscriptionShard getShard() {
+        return shard;
+    }
+
+    public void setShard(SubscriptionShard newShard) {
+        this.shard = newShard;
+    }
+
+    public boolean hasShard() {
+        return shard != null;
+    }
+
+    public void removeShard() {
+        this.shard = null;
     }
 
     @Override

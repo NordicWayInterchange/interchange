@@ -863,7 +863,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -895,10 +897,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Subscription subscription2 = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription2.setExchangeName(exchangeName2);
+
+		Endpoint endpoint2 = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName2));
+		subscription2.setEndpoints(Collections.singleton(endpoint2));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 		Match match2 = new Match(localSubscription, subscription2, "my-service-provider");
@@ -930,7 +936,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -963,7 +971,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -993,7 +1003,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -1055,7 +1067,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"a=b"
 		);
 		String exchangeName = "this-is-my-non-existing-local-exchange";
-		subscription.setExchangeName(exchangeName);
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+
 		Match match = new Match(
 				localSubscription,
 				subscription
@@ -1101,7 +1115,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"",
 				"a=b"
 		);
-		subscription.setExchangeName(exchangeName);
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+
 		Match match = new Match(
 				localSubscription,
 				subscription

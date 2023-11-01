@@ -222,13 +222,19 @@ public class RoutingConfigurer {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						if (!subscription.exchangeIsCreated()) {
-							String exchangeName = "sub-" + UUID.randomUUID().toString();
-							subscription.setExchangeName(exchangeName);
-							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
-							logger.debug("Set up exchange for subscription {}", subscription.toString());
+						if (!subscription.getEndpoints().isEmpty()) {
+							for (Endpoint endpoint : subscription.getEndpoints()) {
+								if (!endpoint.hasShard()) {
+									String exchangeName = "sub-" + UUID.randomUUID();
+									endpoint.setShard(
+											new SubscriptionShard(exchangeName)
+									);
+									qpidClient.createHeadersExchange(exchangeName);
+									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+								}
+							}
 						}
-						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
+						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints());
 					}
 				}
 			}
@@ -236,9 +242,9 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
+	public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
 		for(Endpoint endpoint : endpoints) {
-			createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
+			createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), endpoint.getShard().getExchangeName(), neighbour);
 		}
 	}
 
@@ -258,14 +264,20 @@ public class RoutingConfigurer {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						if (!subscription.exchangeIsRemoved()) {
-							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
-							if (exchange != null) {
-								qpidClient.removeExchange(exchange);
+						Set<Endpoint> endpointsToRemove = new HashSet<>();
+						for (Endpoint endpoint : subscription.getEndpoints()) {
+							if (endpoint.hasShard()) {
+								SubscriptionShard shard = endpoint.getShard();
+								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+								if (exchange != null) {
+									qpidClient.removeExchange(exchange);
+									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+								}
+								endpoint.removeShard();
+								endpointsToRemove.add(endpoint);
 							}
-							subscription.removeExchangeName();
-							logger.debug("Removed exchange for subscription {}", subscription.toString());
 						}
+						subscription.getEndpoints().removeAll(endpointsToRemove);
 					}
 				}
 			}

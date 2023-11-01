@@ -31,7 +31,7 @@ public class MatchDiscoveryService {
             for (LocalSubscription localSubscription : localSubscriptions) {
                 for (Neighbour neighbour : neighbours) {
                     for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED) && localSubscription.isSubscriptionWanted()) {
+                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED) && localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
                             if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
                                     Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                 if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
@@ -52,7 +52,7 @@ public class MatchDiscoveryService {
         Set<Match> matchesToDelete = new HashSet<>();
         for (Match match : existingMatches) {
             if (match.subscriptionIsTearDown()) {
-                if ( match.getSubscription().exchangeIsRemoved()) {
+                if ( match.getSubscription().getEndpoints().isEmpty()) {
                     logger.info("Removing Match {}", match);
                     matchesToDelete.add(match);
                 }
