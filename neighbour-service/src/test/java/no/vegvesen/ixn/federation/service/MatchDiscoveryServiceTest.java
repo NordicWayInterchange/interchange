@@ -61,7 +61,7 @@ public class MatchDiscoveryServiceTest {
                         new Capabilities(),
                         Collections.singleton(
                                 new LocalSubscription(
-                                        LocalSubscriptionStatus.REQUESTED,
+                                        LocalSubscriptionStatus.CREATED,
                                         "originatingCountry = 'NO'",
                                         "my-node"
                                 )),
@@ -96,7 +96,7 @@ public class MatchDiscoveryServiceTest {
                new Capabilities(),
                Collections.singleton(
                        new LocalSubscription(
-                               LocalSubscriptionStatus.REQUESTED,
+                               LocalSubscriptionStatus.CREATED,
                                "originatingCountry = 'NO'",
                                "my-node"
                        )),
@@ -148,7 +148,7 @@ public class MatchDiscoveryServiceTest {
                 new Capabilities(),
                 Collections.singleton(
                         new LocalSubscription(
-                                LocalSubscriptionStatus.REQUESTED,
+                                LocalSubscriptionStatus.CREATED,
                                 "originatingCountry = 'NO'",
                                 "SP"
                         )),
@@ -187,7 +187,7 @@ public class MatchDiscoveryServiceTest {
                 new Capabilities(),
                 Collections.singleton(
                         new LocalSubscription(
-                                LocalSubscriptionStatus.REQUESTED,
+                                LocalSubscriptionStatus.CREATED,
                                 "originatingCountry = 'NO'",
                                 "my-node"
                         )),
