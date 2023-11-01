@@ -381,7 +381,8 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp2);
 
         Subscription sub = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-interchange");
-        sub.setExchangeName("my-exchange");
+        Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard());
+        sub.setEndpoints(Collections.singleton(endpoint));
         Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
@@ -392,8 +393,7 @@ public class MatchRepositoryIT {
         matchRepository.save(match1);
         matchRepository.save(match2);
 
-        List<Match> savedMatches = matchRepository.findBySubscription_ExchangeName("my-exchange");
-        assertThat(savedMatches).hasSize(2);
+        assertThat(matchRepository.findAll()).hasSize(2);
     }
 
 }

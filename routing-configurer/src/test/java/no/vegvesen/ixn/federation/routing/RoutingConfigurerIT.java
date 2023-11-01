@@ -916,49 +916,49 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671);
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671);
+		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671, new SubscriptionShard("target-1"));
+		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671, new SubscriptionShard("target-1"));
 
 		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
 
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(null);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection(), "target-1");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection(), "target-1");
 
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		routingConfigurer.createListenerEndpointFromEndpointsList(neighbour, endpoints, "target");
+		routingConfigurer.createListenerEndpointFromEndpointsList(neighbour, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
 
 	@Test
-	public void setUpSubscriptionExchange() {
+	public void setUpSubscriptionShardExchange() {
 		String selector = "a=b";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
 		subscription.setConsumerCommonName("my-node");
-		//subscription.setExchangeName("subscription-exchange");
-
+		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671)));
 
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
 
-		assertThat(client.exchangeExists(subscription.getExchangeName())).isTrue();
+		assertThat(client.exchangeExists(subscription.getEndpoints().stream().findFirst().get().getShard().getExchangeName())).isTrue();
 	}
 
 	@Test
-	public void tearDownSubscriptionExchange() {
+	public void tearDownSubscriptionShardExchange() {
 		String selector = "a=b";
 		String exchangeName = "subscription-exchange";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
-		subscription.setExchangeName(exchangeName);
+		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName))));
 		subscription.setConsumerCommonName("my-node");
 
 		client.createHeadersExchange(exchangeName);
@@ -970,7 +970,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
-		assertThat(subscription.exchangeIsRemoved()).isTrue();
+		assertThat(subscription.getEndpoints().isEmpty()).isTrue();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 	}
 

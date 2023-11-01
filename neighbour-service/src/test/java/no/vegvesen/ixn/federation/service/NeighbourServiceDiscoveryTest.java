@@ -691,10 +691,9 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
-		subscription.setExchangeName("target");
 		subscription.setNumberOfPolls(0);
 		subscription.setLastUpdatedTimestamp(0);
-		Endpoint endpoint = new Endpoint("spy-neighbour", "spy-neighbour", 5671);
+		Endpoint endpoint = new Endpoint("spy-neighbour", "spy-neighbour", 5671, new SubscriptionShard("target"));
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);

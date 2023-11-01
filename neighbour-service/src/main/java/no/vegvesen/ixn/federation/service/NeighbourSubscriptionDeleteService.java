@@ -41,7 +41,7 @@ public class NeighbourSubscriptionDeleteService {
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         if (matches.isEmpty()) {
                             try{
-                                if (subscription.exchangeIsRemoved()) {
+                                if (subscription.getEndpoints().isEmpty()) {
                                     neighbourFacade.deleteSubscription(neighbour, subscription);
                                     subscriptionsToDelete.add(subscription);
                                 }
@@ -51,7 +51,7 @@ public class NeighbourSubscriptionDeleteService {
                             } catch(SubscriptionNotFoundException e) {
                                 logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
                             } finally {
-                                if (subscription.exchangeIsRemoved()) {
+                                if (subscription.getEndpoints().isEmpty()) {
                                     subscriptionsToDelete.add(subscription);
                                 }
                             }
@@ -60,7 +60,7 @@ public class NeighbourSubscriptionDeleteService {
                 }
                 neighbour.getOurRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
                 if (neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-                    logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
+                    logger.info("SubscriptionRequest is empty");
                 }
                 neighbourRepository.save(neighbour);
                 logger.debug("Saving updated neighbour: {}", neighbour.toString());
