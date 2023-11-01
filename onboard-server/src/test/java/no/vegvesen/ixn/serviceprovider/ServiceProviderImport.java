@@ -83,7 +83,7 @@ public class ServiceProviderImport {
         Set<PrivateChannel> privateChannels = new HashSet<>();
         for (PrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
             PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(privateChannelApi.getEndpoint().getHost(),privateChannelApi.getEndpoint().getPort(), privateChannelApi.getEndpoint().getQueueName());
-            privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), privateChannelApi.getQueueName(), PrivateChannelStatus.REQUESTED,endpoint, serviceProviderApi.getName()));
+            privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), endpoint.getQueueName(), PrivateChannelStatus.REQUESTED,endpoint, serviceProviderApi.getName()));
         }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,

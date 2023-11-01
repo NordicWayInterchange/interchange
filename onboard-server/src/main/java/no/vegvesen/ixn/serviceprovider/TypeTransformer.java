@@ -281,7 +281,7 @@ public class TypeTransformer {
             return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getServiceProviderName());
         }
         else{
-            return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getServiceProviderName());
+            return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getServiceProviderName());
         }
         }
 
@@ -289,10 +289,10 @@ public class TypeTransformer {
         AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelsList){
             if(privateChannel.getEndpoint() != null) {
-                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getStatus(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
             }
             else{
-                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getStatus(), privateChannel.getId()));
+                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
             }
         }
         return response;

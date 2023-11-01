@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 
 public class PrivateChannelApi {
 
@@ -9,10 +8,7 @@ public class PrivateChannelApi {
 
     private String peerName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String queueName;
-
-    private PrivateChannelStatus status;
+    private PrivateChannelStatusApi status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
@@ -24,19 +20,17 @@ public class PrivateChannelApi {
     public PrivateChannelApi(String peerName) {
         this.peerName = peerName;
     }
-
-    public PrivateChannelApi(String peerName, String queueName, PrivateChannelStatus status, Integer id) {
+    public PrivateChannelApi(String peerName, PrivateChannelStatusApi status, Integer id) {
         this.id = id;
         this.peerName = peerName;
-        this.queueName = queueName;
         this.status = status;
     }
-    public PrivateChannelApi(String peerName , PrivateChannelStatus status, PrivateChannelEndpointApi endpoint, Integer id) {
+
+    public PrivateChannelApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, Integer id) {
         this.id = id;
         this.peerName = peerName;
         this.status = status;
         this.endpoint = endpoint;
-
     }
 
     public PrivateChannelEndpointApi getEndpoint() {
@@ -50,11 +44,11 @@ public class PrivateChannelApi {
         this.endpoint = endpoint;
     }
 
-    public PrivateChannelStatus getStatus() {
+    public PrivateChannelStatusApi getStatus() {
         return status;
     }
 
-    public void setStatus(PrivateChannelStatus status) {
+    public void setStatus(PrivateChannelStatusApi status) {
         this.status = status;
     }
 
@@ -74,18 +68,11 @@ public class PrivateChannelApi {
         this.peerName = peerName;
     }
 
-    public String getQueueName() {
-        return queueName;
-    }
 
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }
     public String toString(){
         return "PrivateChannelApi{" +
                 "id='" + id + '\'' +
                 ", peerName='" + peerName + '\'' +
-                ", queueName='" + queueName + '\'' +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
                 '}';
