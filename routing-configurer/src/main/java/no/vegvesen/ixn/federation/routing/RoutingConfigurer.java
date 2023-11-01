@@ -51,7 +51,7 @@ public class RoutingConfigurer {
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
 		QpidDelta delta = qpidClient.getQpidDelta();
-		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
+		Set<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
 		setupRouting(readyToSetupRouting, delta);
 
 		logger.debug("Checking for neighbours to tear down routing");
@@ -111,7 +111,7 @@ public class RoutingConfigurer {
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
-	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
+	private void setupRouting(Set<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
 			setupNeighbourRouting(subscriber, delta);
 		}

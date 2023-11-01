@@ -51,6 +51,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
     @Test
     public void deleteSubscriptionWhenItHasSubscriptionStatusTear_Down () {
         Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour");
 
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
         Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "");
@@ -71,6 +72,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
     @Test
     public void subscriptionRequestGetStatusEmptyWhenAllSubscriptionsAreDeleted () {
         Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour");
 
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
         subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -88,8 +90,8 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @Test
     public void deleteReturns404FromNeighbour() {
-
         Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour");
 
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
         subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);

@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -96,7 +97,7 @@ public class NeighbourDiscoverer {
 	public void performSubscriptionRequestWithKnownNeighbours() {
 		// Perform subscription request with all neighbours with capabilities KNOWN
 		logger.debug("Checking for any Neighbours with KNOWN capabilities");
-		List<Neighbour> neighboursForSubscriptionRequest = neighbourService.findNeighboursWithKnownCapabilities();
+		Set<Neighbour> neighboursForSubscriptionRequest = new HashSet<>(neighbourService.findNeighboursWithKnownCapabilities());
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
@@ -105,7 +106,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
-		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
+		Set<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
