@@ -3,8 +3,11 @@ package no.vegvesen.ixn.serviceprovider.model;
 import java.util.List;
 
 public class ListPrivateChannelPeers {
+
     private String version = "1.0";
+
     private String name;
+
     private List<PrivateChannelPeerApi> privateChannels;
 
     public ListPrivateChannelPeers() {
@@ -30,6 +33,7 @@ public class ListPrivateChannelPeers {
     public void setPrivateChannels(List<PrivateChannelPeerApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
+
     public String toString(){
         return "ListPrivateChannelPeers{" +
                 "version='" + version + '\'' +

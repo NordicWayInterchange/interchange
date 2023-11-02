@@ -6,7 +6,6 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;

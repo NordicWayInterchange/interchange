@@ -546,7 +546,6 @@ public class OnboardRestControllerIT {
 
     }
 
-
     @Test
     public void testAddingAndDeletingChannel(){
 
@@ -560,6 +559,7 @@ public class OnboardRestControllerIT {
         restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()).isEqualTo(1);
     }
+
     @Test
     public void testAddingChannels(){
         String serviceProviderName = "my-service-provider";
@@ -573,6 +573,7 @@ public class OnboardRestControllerIT {
         assertThat(privateChannelRepository.findAll().size()).isEqualTo(3);
         assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
     }
+
     @Test
     public void testDeletingInvalidChannel(){
         String serviceProviderName = "my-service-provider";
@@ -581,6 +582,7 @@ public class OnboardRestControllerIT {
         assertThrows(RuntimeException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
         assertThat(privateChannelRepository.findAll().size()).isEqualTo(1);
     }
+
     @Test
     public void testGettingPrivateChannels(){
         String serviceProviderName = "my-service-provider";
@@ -605,6 +607,7 @@ public class OnboardRestControllerIT {
         assertThat(channelResponse).isNotNull();
         assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existent-provider", "1"));
     }
+
     @Test
     public void testGettingPrivateChannelsWithServiceProviderAsPeer(){
         String serviceProviderName_1 = "my-service-provider";
@@ -638,6 +641,7 @@ public class OnboardRestControllerIT {
         verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
 
     }
+
     @Test
     public void testGettingDelivery(){
         String serviceProviderName = "my-service-provider";

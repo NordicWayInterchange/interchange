@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -306,6 +305,7 @@ public class TypeTransformer {
         }
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);
     }
+
     public ListPrivateChannelPeers transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList){
         List<PrivateChannelPeerApi> privateChannelsApis = new ArrayList<>();
 

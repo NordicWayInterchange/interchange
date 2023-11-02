@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

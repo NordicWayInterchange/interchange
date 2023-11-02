@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class AddPrivateChannelsRequest {
+
     private String version = "1.0";
+
     private String name;
+
     private List<PrivateChannelApi> privateChannels;
 
     public AddPrivateChannelsRequest() {
     }
-
 
     public AddPrivateChannelsRequest(List<PrivateChannelApi> privateChannels) {
         this.privateChannels = privateChannels;
@@ -39,6 +41,7 @@ public class AddPrivateChannelsRequest {
     public void setPrivateChannels(List<PrivateChannelApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -46,6 +49,7 @@ public class AddPrivateChannelsRequest {
         AddPrivateChannelsRequest that = (AddPrivateChannelsRequest) o;
         return Objects.equals(version, that.version) && Objects.equals(name, that.name) && Objects.equals(privateChannels, that.privateChannels);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(version, name, privateChannels);

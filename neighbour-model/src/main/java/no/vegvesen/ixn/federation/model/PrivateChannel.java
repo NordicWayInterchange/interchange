@@ -23,6 +23,7 @@ public class PrivateChannel {
 
     @Column
     private String serviceProviderName;
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private PrivateChannelEndpoint endpoint;
 
@@ -35,7 +36,6 @@ public class PrivateChannel {
         this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
-
 
     public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peerName = peerName;

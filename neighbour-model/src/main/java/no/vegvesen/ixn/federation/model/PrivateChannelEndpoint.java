@@ -6,14 +6,18 @@ import java.util.Objects;
 @Entity
 @Table(name="private_channel_endpoints")
 public class PrivateChannelEndpoint {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_endpoint_seq")
     @Column
     private Integer id;
+
     @Column
     private String host;
+
     @Column
     private Integer port;
+
     @Column
     private String queueName;
 
@@ -22,6 +26,7 @@ public class PrivateChannelEndpoint {
         this.port = port;
         this.queueName = queueName;
     }
+
     public PrivateChannelEndpoint() {
     }
 
@@ -56,6 +61,7 @@ public class PrivateChannelEndpoint {
     public void setQueueName(String target) {
         this.queueName = target;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -65,6 +71,7 @@ public class PrivateChannelEndpoint {
                 host.equals(that.host) &&
                 port.equals(that.port);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(host, queueName, port);

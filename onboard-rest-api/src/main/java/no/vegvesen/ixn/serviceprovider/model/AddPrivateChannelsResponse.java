@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class AddPrivateChannelsResponse {
+
     private String version = "1.0";
+
     private String name;
+
     private List<PrivateChannelApi> privateChannels;
 
     public AddPrivateChannelsResponse() {
         this.privateChannels = new ArrayList<>();
-    }
-
-    public AddPrivateChannelsResponse(List<PrivateChannelApi> privateChannels) {
-        this.privateChannels = privateChannels;
     }
 
     public AddPrivateChannelsResponse(String name) {
@@ -45,6 +44,7 @@ public class AddPrivateChannelsResponse {
     public List<PrivateChannelApi> getPrivateChannels() {
         return privateChannels;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,6 +57,7 @@ public class AddPrivateChannelsResponse {
     public int hashCode() {
         return Objects.hash(version, name, privateChannels);
     }
+
     @Override
     public String toString(){
         return "AddPrivateChannelsResponse{" +
