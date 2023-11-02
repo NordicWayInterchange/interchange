@@ -338,14 +338,9 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(serviceProviderName);
-		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
-
-		for (PrivateChannel privateChannel : privateChannels) {
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
-		}
 
 		OnboardMDCUtil.removeLogVariables();
-		return new ListPrivateChannelsResponse(serviceProviderName,privateChannelsApis);
+		return typeTransformer.transformPrivateChannelListToListPrivateChannels(serviceProviderName, privateChannels);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
@@ -366,26 +361,15 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/peer")
-	public ListPrivateChannelsResponse getPrivateChannelsWithServiceProviderAsPeer(@PathVariable String serviceProviderName){
+	public ListPrivateChannelPeers getPrivateChannelPeers(@PathVariable String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(serviceProviderName);
-		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
-
-		for (PrivateChannel privateChannel : privateChannels) {
-			if(privateChannel.getEndpoint() != null) {
-				PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
-			}
-			else{
-				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
-			}
-		}
 
 		OnboardMDCUtil.removeLogVariables();
-		return new ListPrivateChannelsResponse(serviceProviderName, privateChannelsApis);
+		return typeTransformer.transformPrivateChannelListToListPrivateChannelsWithServiceProvider(serviceProviderName, privateChannels);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)

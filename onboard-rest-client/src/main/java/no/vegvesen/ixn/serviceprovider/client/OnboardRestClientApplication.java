@@ -7,7 +7,6 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.aspectj.weaver.ast.Call;
 import picocli.CommandLine;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
@@ -335,7 +334,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             return 0;
         }
     }
-    @Command(name="getprivatechannelswithserviceprovideraspeer", description = "Get all private channels with service provider as peer")
+    @Command(name="getprivatechannelpeers", description = "Get all private channels with service provider as peer")
     static class GetPrivateChannelsWithServiceProviderAsPeer implements Callable<Integer>{
         @ParentCommand
         OnboardRestClientApplication parentCommand;
@@ -345,7 +344,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            ListPrivateChannelsResponse result = client.getPrivateChannelsWithServiceProviderAsPeer();
+            ListPrivateChannelPeers result = client.getPrivateChannelPeers();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
