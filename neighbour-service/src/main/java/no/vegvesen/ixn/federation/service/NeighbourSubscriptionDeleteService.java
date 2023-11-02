@@ -32,7 +32,7 @@ public class NeighbourSubscriptionDeleteService {
     }
 
     public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
-        Set<Neighbour> neighbours = new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN));
+        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
         for (Neighbour neighbour : neighbours) {
             if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
                 Set<Subscription> subscriptionsToDelete = new HashSet<>();

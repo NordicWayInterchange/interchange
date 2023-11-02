@@ -88,7 +88,7 @@ public class NeighbourDiscovererIT {
 		));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptions);
 
-		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(new HashSet<>(Arrays.asList(neighbour1, neighbour2)), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour1, neighbour2), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -100,7 +100,7 @@ public class NeighbourDiscovererIT {
 		Subscription requestedSubscription = found1.getSubscriptionsForPolling().iterator().next();
 		performSubscriptionPolling(neighbour1, requestedSubscription);
 
-		Set<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 		assertThat(toConsumeMessagesFrom).contains(neighbour1);
 	}
@@ -117,7 +117,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
-		Set<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
@@ -126,7 +126,7 @@ public class NeighbourDiscovererIT {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
 		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
-		Set<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
@@ -331,7 +331,7 @@ public class NeighbourDiscovererIT {
 		Optional<LocalDateTime> lastUpdatedTime = Optional.of(LocalDateTime.now());
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedTime)).isTrue();
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
-				Collections.singleton(neighbour),
+				Collections.singletonList(neighbour),
 				lastUpdatedTime,
 				localSubscriptions,
 				mockNeighbourFacade);
@@ -394,7 +394,7 @@ public class NeighbourDiscovererIT {
 		repository.save(neighbourA);
 		repository.save(neighbourB);
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
-				new HashSet<>(Arrays.asList(neighbourA,neighbourB)),
+				Arrays.asList(neighbourA,neighbourB),
 				Optional.of(LocalDateTime.now()),
 				localSubscriptions,
 				mockNeighbourFacade);

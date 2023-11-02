@@ -132,7 +132,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void evaluateAndPostSubscriptionRequest(Set<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
+    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             try {
@@ -211,10 +211,10 @@ public class NeigbourDiscoveryService {
     }
 
     public void pollSubscriptions(NeighbourFacade neighbourFacade) {
-        Set<Neighbour> neighboursToPoll = new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 SubscriptionStatus.REQUESTED,
                 SubscriptionStatus.ACCEPTED,
-                SubscriptionStatus.FAILED));
+                SubscriptionStatus.FAILED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -231,8 +231,8 @@ public class NeigbourDiscoveryService {
     }
 
     public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
-        Set<Neighbour> neighboursToPoll = new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
-                SubscriptionStatus.CREATED));
+        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+                SubscriptionStatus.CREATED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -360,7 +360,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void setGiveUpSubscriptionsToTearDownForRemoval(){
-        Set<Neighbour> neighbours = new HashSet<>(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP));
+        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
         for (Neighbour neighbour : neighbours) {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
                 if (!subscription.getEndpoints().isEmpty()) {

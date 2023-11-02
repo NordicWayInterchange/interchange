@@ -130,7 +130,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -296,7 +296,8 @@ public class NeighbourRepositoryIT {
 
 		repository.save(neighbour);
 
-		assertThat(new HashSet<>(repository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED))).hasSize(1);
+		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(1);
+		assertThat(repository.findByName("my-multi-neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
 }

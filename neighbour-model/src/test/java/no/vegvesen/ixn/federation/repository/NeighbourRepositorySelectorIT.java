@@ -114,7 +114,7 @@ public class NeighbourRepositorySelectorIT {
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 
-		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.ACCEPTED, SubscriptionStatus.REQUESTED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn)).isTrue();
@@ -133,7 +133,7 @@ public class NeighbourRepositorySelectorIT {
 		ericsson.getOurRequestedSubscriptions().setSubscriptions(subscriptionSet);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn)).isTrue();
 	}
