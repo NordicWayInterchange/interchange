@@ -21,7 +21,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +107,8 @@ public class ExportServiceProvidersIT {
 
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : privateChannelList) {
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()),new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);

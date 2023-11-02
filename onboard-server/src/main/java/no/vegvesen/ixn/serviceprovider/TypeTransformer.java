@@ -276,25 +276,33 @@ public class TypeTransformer {
     }
 
     public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
-        System.out.println(privateChannel);
         if(privateChannel.getEndpoint() != null) {
-            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getServiceProviderName());
+            PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), endpointApi, privateChannel.getServiceProviderName());
         }
         else{
             return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getServiceProviderName());
         }
         }
 
-    public AddPrivateChannelsResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName,List<PrivateChannel> privateChannelsList){
+    public AddPrivateChannelsResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName,List<PrivateChannel> privateChannelList){
         AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
-        for(PrivateChannel privateChannel : privateChannelsList){
+        for(PrivateChannel privateChannel : privateChannelList){
             if(privateChannel.getEndpoint() != null) {
-                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+                PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
             }
             else{
                 response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
             }
         }
         return response;
+    }
+    public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList){
+        ArrayList<PrivateChannelApi> returnList = new ArrayList<>();
+        for(PrivateChannel privateChannel : privateChannelList){
+
+        }
+
     }
 }
