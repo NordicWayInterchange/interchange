@@ -349,7 +349,7 @@ public class OnboardRestController {
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId));
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, Integer.parseInt(privateChannelId), PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}

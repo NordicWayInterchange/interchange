@@ -11,21 +11,32 @@ public class GetPrivateChannelResponse {
     private String peerName;
 
     private String serviceProviderName;
+    private PrivateChannelStatusApi status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
-    public GetPrivateChannelResponse(Integer id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName) {
+    public GetPrivateChannelResponse(Integer id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
         this.endpoint = endpoint;
+        this.status = status;
     }
 
-    public GetPrivateChannelResponse(Integer id, String peerName, String serviceProviderName) {
+    public GetPrivateChannelResponse(Integer id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
+        this.status = status;
+    }
+
+    public PrivateChannelStatusApi getStatus() {
+        return status;
+    }
+
+    public void setStatus(PrivateChannelStatusApi status) {
+        this.status = status;
     }
 
     public GetPrivateChannelResponse() {
@@ -78,6 +89,7 @@ public class GetPrivateChannelResponse {
                 "id='" + id + '\'' +
                 ", peerName='" + peerName + '\'' +
                 ", serviceProviderName=" + serviceProviderName +
+                ", status=" + status +
                 ", endpoint='" + endpoint + '\'' +
                 "}";
     }
