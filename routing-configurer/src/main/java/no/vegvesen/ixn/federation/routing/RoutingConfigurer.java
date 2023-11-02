@@ -118,7 +118,7 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		//try {
+		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
@@ -132,9 +132,9 @@ public class RoutingConfigurer {
 				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
-		//} catch (Throwable e) {
-		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		//}
+		} catch (Throwable e) {
+			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
+		}
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
