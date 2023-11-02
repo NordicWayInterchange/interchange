@@ -2,6 +2,8 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Objects;
+
 public class PrivateChannelPeerApi {
     private Integer id;
 
@@ -58,6 +60,19 @@ public class PrivateChannelPeerApi {
 
     public void setEndpoint(PrivateChannelEndpointApi endpoint) {
         this.endpoint = endpoint;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        PrivateChannelPeerApi that = (PrivateChannelPeerApi) o;
+        return Objects.equals(id, that.id) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(status, that.status) && Objects.equals(endpoint, that.endpoint);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(id, serviceProviderName, status, endpoint);
     }
 
     @Override
