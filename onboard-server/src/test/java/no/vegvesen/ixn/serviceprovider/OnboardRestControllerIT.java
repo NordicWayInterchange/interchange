@@ -651,7 +651,7 @@ public class OnboardRestControllerIT {
 
         System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
-        assertThat(privateChannelRepository.findAllByStatus(PrivateChannelStatus.TEAR_DOWN).size()).isEqualTo(1);
+        assertThat(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.TEAR_DOWN, serviceProviderName).size()).isEqualTo(1);
     }
 
     @Test
