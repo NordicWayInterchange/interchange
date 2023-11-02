@@ -10,6 +10,7 @@ public class GetPrivateChannelResponse {
     private String peerName;
 
     private String serviceProviderName;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
     public GetPrivateChannelResponse(Integer id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName) {
