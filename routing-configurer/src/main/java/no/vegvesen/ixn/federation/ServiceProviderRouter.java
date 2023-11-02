@@ -198,8 +198,7 @@ public class ServiceProviderRouter {
 
     private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
 
-        List<PrivateChannel> privateChannelsWithStatusCreated = privateChannelRepository.findAllByStatus(PrivateChannelStatus.CREATED);
-
+        List<PrivateChannel> privateChannelsWithStatusCreated = privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, name);
         GroupMember groupMember = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
         if (groupMember == null) {
             qpidClient.addMemberToGroup(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
@@ -238,18 +237,18 @@ public class ServiceProviderRouter {
                 GroupMember member = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
 
                 long channelsWithPeerAsPeer = privateChannelRepository.countByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED);
-                long channelsWithServiceProviderAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
-
                 long channelsWithServiceProviderAsPeer = privateChannelRepository.countByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
+
+                long channelsWithServiceProviderAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
                 long channelsWithPeerAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(peerName, PrivateChannelStatus.CREATED);
 
-                if (channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
+                if (channelsWithServiceProviderAsServiceProvider == 0 && channelsWithServiceProviderAsPeer == 0) {
                     if (member != null && privateChannelsWithStatusCreated.isEmpty()) {
                         qpidClient.removeMemberFromGroup(member, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                         logger.debug("Removing member {} from group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
                 }
-                if(channelsWithServiceProviderAsServiceProvider == 0 && channelsWithServiceProviderAsPeer == 0) {
+                if(channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
                     GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     if (peer != null) {
                         qpidClient.removeMemberFromGroup(peer, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
