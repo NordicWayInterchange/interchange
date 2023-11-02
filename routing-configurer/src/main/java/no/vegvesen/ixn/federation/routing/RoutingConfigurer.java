@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
@@ -51,7 +51,7 @@ public class RoutingConfigurer {
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
 		QpidDelta delta = qpidClient.getQpidDelta();
-		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
+		Set<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
 		setupRouting(readyToSetupRouting, delta);
 
 		logger.debug("Checking for neighbours to tear down routing");
@@ -111,14 +111,14 @@ public class RoutingConfigurer {
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
-	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
+	private void setupRouting(Set<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
 			setupNeighbourRouting(subscriber, delta);
 		}
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		try {
+		//try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
@@ -132,19 +132,24 @@ public class RoutingConfigurer {
 				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
-		} catch (Throwable e) {
-			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		}
+		//} catch (Throwable e) {
+		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
+		//}
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
+			logger.debug("Checking subscription {}", subscription);
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				//if any of the matching caps does not have the shards set
-				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
+				logger.debug("Subscription matches {} caps", matchingCaps.size());
+				long numberOfCapsWithoutShardsSet = matchingCaps.stream().filter(m -> m.getMetadata().getShards().isEmpty()).count();
+				logger.debug("We have {} capabilities without shards set",numberOfCapsWithoutShardsSet);
+				if (numberOfCapsWithoutShardsSet == 0) {
 					if (subscription.getEndpoints().isEmpty()) {
 						String queueName = "sub-" + UUID.randomUUID();
+						logger.debug("Creating endpoint {} for subscription {}", queueName,subscription);
 						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
 						subscription.setEndpoints(Collections.singleton(endpoint));
 					}
@@ -170,7 +175,7 @@ public class RoutingConfigurer {
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
-		logger.info("Set up routing for neighbour {}", neighbourName);
+		logger.debug("Set up routing for neighbour {}", neighbourName);
 	}
 
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities, QpidDelta delta) {
