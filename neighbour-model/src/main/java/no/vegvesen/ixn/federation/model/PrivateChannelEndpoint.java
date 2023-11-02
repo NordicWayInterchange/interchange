@@ -11,14 +11,14 @@ public class PrivateChannelEndpoint {
     @Column
     private Integer id;
     @Column
-    private String source;
+    private String host;
     @Column
     private Integer port;
     @Column
     private String queueName;
 
     public PrivateChannelEndpoint(String host, Integer port, String queueName) {
-        this.source = host;
+        this.host = host;
         this.port = port;
         this.queueName = queueName;
     }
@@ -33,12 +33,12 @@ public class PrivateChannelEndpoint {
         this.id = id;
     }
 
-    public String getSource() {
-        return source;
+    public String getHost() {
+        return host;
     }
 
-    public void setSource(String host) {
-        this.source = host;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public int getPort() {
@@ -61,20 +61,20 @@ public class PrivateChannelEndpoint {
         if (this == o) return true;
         if (!(o instanceof LocalEndpoint)) return false;
         PrivateChannelEndpoint that = (PrivateChannelEndpoint) o;
-        return source.equals(that.source) &&
-                source.equals(that.source) &&
+        return host.equals(that.host) &&
+                host.equals(that.host) &&
                 port.equals(that.port);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(source, queueName, port);
+        return Objects.hash(host, queueName, port);
     }
 
     @Override
     public String toString() {
         return "PrivateChannelEndpoint{" +
                 "id=" + id +
-                ", source='" + source + '\'' +
+                ", host='" + host + '\'' +
                 ", port=" + port +
                 ", queueName=" + queueName +
                 '}';

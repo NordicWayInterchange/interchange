@@ -396,7 +396,8 @@ public class OnboardRestController {
 
 		for (PrivateChannel privateChannel : privateChannels) {
 			if(privateChannel.getEndpoint() != null) {
-				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), new PrivateChannelEndpointApi(privateChannel.getEndpoint()), privateChannel.getId()));
+				PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
 			}
 			else{
 				privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
