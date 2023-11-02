@@ -97,7 +97,7 @@ public class NeighbourDiscoverer {
 	public void performSubscriptionRequestWithKnownNeighbours() {
 		// Perform subscription request with all neighbours with capabilities KNOWN
 		logger.debug("Checking for any Neighbours with KNOWN capabilities");
-		Set<Neighbour> neighboursForSubscriptionRequest = new HashSet<>(neighbourService.findNeighboursWithKnownCapabilities());
+		List<Neighbour> neighboursForSubscriptionRequest = neighbourService.findNeighboursWithKnownCapabilities();
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
@@ -106,7 +106,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
-		Set<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
+		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
