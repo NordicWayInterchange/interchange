@@ -12,14 +12,15 @@ public class PrivateChannelApi {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
+
     public PrivateChannelApi() {
 
     }
 
-
     public PrivateChannelApi(String peerName) {
         this.peerName = peerName;
     }
+
     public PrivateChannelApi(String peerName, PrivateChannelStatusApi status, Integer id) {
         this.id = id;
         this.peerName = peerName;
@@ -67,7 +68,6 @@ public class PrivateChannelApi {
     public void setPeerName(String peerName) {
         this.peerName = peerName;
     }
-
 
     public String toString(){
         return "PrivateChannelApi{" +

@@ -21,11 +21,13 @@ public class PrivateChannelPeerApi {
         this.endpoint = endpoint;
         this.id = id;
     }
+
     public PrivateChannelPeerApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.id = id;
     }
+
     public Integer getId() {
         return id;
     }
@@ -58,6 +60,7 @@ public class PrivateChannelPeerApi {
         this.endpoint = endpoint;
     }
 
+    @Override
     public String toString(){
         return "PrivateChannelPeerApi{" +
                 "id='" + id + '\'' +

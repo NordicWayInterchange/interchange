@@ -7,9 +7,11 @@ import java.util.Objects;
 
 public class GetPrivateChannelResponse {
     private Integer id;
+
     private String peerName;
 
     private String serviceProviderName;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
@@ -19,11 +21,13 @@ public class GetPrivateChannelResponse {
         this.serviceProviderName = serviceProviderName;
         this.endpoint = endpoint;
     }
+
     public GetPrivateChannelResponse(Integer id, String peerName, String serviceProviderName) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
     }
+
     public GetPrivateChannelResponse() {
     }
 
@@ -47,8 +51,6 @@ public class GetPrivateChannelResponse {
         this.peerName = peerName;
     }
 
-
-
     public String getServiceProviderName() {
         return serviceProviderName;
     }
@@ -56,6 +58,7 @@ public class GetPrivateChannelResponse {
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
     }
+
     @Override
     public boolean equals(Object o){
         if(this == o) return true;
@@ -63,10 +66,12 @@ public class GetPrivateChannelResponse {
         GetPrivateChannelResponse that = (GetPrivateChannelResponse) o;
         return id.equals(that.id) && peerName.equals(that.peerName) && serviceProviderName.equals(that.serviceProviderName);
     }
+
     @Override
     public int hashCode(){
         return Objects.hash(id,peerName, serviceProviderName);
     }
+
     @Override
     public String toString(){
         return "GetPrivateChannelsResponse{" +

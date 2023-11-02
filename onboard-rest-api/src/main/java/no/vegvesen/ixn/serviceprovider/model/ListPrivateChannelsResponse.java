@@ -1,15 +1,18 @@
 package no.vegvesen.ixn.serviceprovider.model;
+
 import java.util.List;
 import java.util.Objects;
 
 public class ListPrivateChannelsResponse {
+
     private String version = "1.0";
+
     private String name;
+
     private List<PrivateChannelApi> privateChannels;
 
     public ListPrivateChannelsResponse() {
     }
-
 
     public ListPrivateChannelsResponse(String name, List<PrivateChannelApi> privateChannels) {
         this.name = name;
@@ -47,10 +50,12 @@ public class ListPrivateChannelsResponse {
         ListPrivateChannelsResponse that = (ListPrivateChannelsResponse) o;
         return Objects.equals(name, that.name) && Objects.equals(privateChannels, that.privateChannels);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(name, privateChannels);
     }
+
     @Override
     public String toString(){
         return "ListPrivateChannelsResponse{" +
