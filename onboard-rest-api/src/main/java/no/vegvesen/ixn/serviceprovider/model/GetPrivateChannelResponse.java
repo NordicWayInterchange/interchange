@@ -11,6 +11,7 @@ public class GetPrivateChannelResponse {
     private String peerName;
 
     private String serviceProviderName;
+
     private PrivateChannelStatusApi status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -306,18 +306,18 @@ public class TypeTransformer {
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);
     }
 
-    public ListPrivateChannelPeers transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList){
-        List<PrivateChannelPeerApi> privateChannelsApis = new ArrayList<>();
+    public ListPeerPrivateChannels transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList){
+        List<PeerPrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
         for (PrivateChannel privateChannel : privateChannelList) {
             if(privateChannel.getEndpoint() != null) {
                 PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-                privateChannelsApis.add(new PrivateChannelPeerApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
             }
             else{
-                privateChannelsApis.add(new PrivateChannelPeerApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
             }
         }
-        return new ListPrivateChannelPeers(serviceProviderName, privateChannelsApis);
+        return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
 }

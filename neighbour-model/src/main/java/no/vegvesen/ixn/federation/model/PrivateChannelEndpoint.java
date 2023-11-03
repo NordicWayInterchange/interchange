@@ -8,7 +8,7 @@ import java.util.Objects;
 public class PrivateChannelEndpoint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_endpoint_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "privatechannel_endpoint_seq")
     @Column
     private Integer id;
 

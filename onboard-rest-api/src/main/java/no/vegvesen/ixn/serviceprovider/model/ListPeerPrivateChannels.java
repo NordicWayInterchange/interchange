@@ -3,18 +3,18 @@ package no.vegvesen.ixn.serviceprovider.model;
 import java.util.List;
 import java.util.Objects;
 
-public class ListPrivateChannelPeers {
+public class ListPeerPrivateChannels {
 
     private String version = "1.0";
 
     private String name;
 
-    private List<PrivateChannelPeerApi> privateChannels;
+    private List<PeerPrivateChannelApi> privateChannels;
 
-    public ListPrivateChannelPeers() {
+    public ListPeerPrivateChannels() {
     }
 
-    public ListPrivateChannelPeers(String name, List<PrivateChannelPeerApi> privateChannels) {
+    public ListPeerPrivateChannels(String name, List<PeerPrivateChannelApi> privateChannels) {
         this.name = name;
         this.privateChannels = privateChannels;
     }
@@ -27,11 +27,11 @@ public class ListPrivateChannelPeers {
         this.name = name;
     }
 
-    public List<PrivateChannelPeerApi> getPrivateChannels() {
+    public List<PeerPrivateChannelApi> getPrivateChannels() {
         return privateChannels;
     }
 
-    public void setPrivateChannels(List<PrivateChannelPeerApi> privateChannels) {
+    public void setPrivateChannels(List<PeerPrivateChannelApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 
@@ -44,13 +44,13 @@ public class ListPrivateChannelPeers {
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        ListPrivateChannelPeers that = (ListPrivateChannelPeers) o;
+        ListPeerPrivateChannels that = (ListPeerPrivateChannels) o;
         return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(privateChannels, that.privateChannels);
     }
 
     @Override
     public String toString(){
-        return "ListPrivateChannelPeers{" +
+        return "ListPeerPrivateChannels{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", privateChannels=" + privateChannels +

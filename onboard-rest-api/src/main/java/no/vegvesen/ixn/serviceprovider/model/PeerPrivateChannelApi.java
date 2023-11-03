@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
 
-public class PrivateChannelPeerApi {
+public class PeerPrivateChannelApi {
     private Integer id;
 
     private String serviceProviderName;
@@ -14,17 +14,17 @@ public class PrivateChannelPeerApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
-    public PrivateChannelPeerApi() {
+    public PeerPrivateChannelApi() {
     }
 
-    public PrivateChannelPeerApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
+    public PeerPrivateChannelApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.endpoint = endpoint;
         this.id = id;
     }
 
-    public PrivateChannelPeerApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status) {
+    public PeerPrivateChannelApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.id = id;
@@ -66,7 +66,7 @@ public class PrivateChannelPeerApi {
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        PrivateChannelPeerApi that = (PrivateChannelPeerApi) o;
+        PeerPrivateChannelApi that = (PeerPrivateChannelApi) o;
         return Objects.equals(id, that.id) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(status, that.status) && Objects.equals(endpoint, that.endpoint);
     }
 
@@ -77,7 +77,7 @@ public class PrivateChannelPeerApi {
 
     @Override
     public String toString(){
-        return "PrivateChannelPeerApi{" +
+        return "PeerPrivateChannelApi{" +
                 "id='" + id + '\'' +
                 ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", status=" + status +

@@ -39,7 +39,7 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
                 OnboardRestClientApplication.GetPrivateChannel.class,
-                OnboardRestClientApplication.GetPrivateChannelsWithServiceProviderAsPeer.class,
+                OnboardRestClientApplication.GetPeerPrivateChannels.class,
                 OnboardRestClientApplication.DeletePrivateChannel.class,
                 OnboardRestClientApplication.FetchMatchingCapabilities.class
         })
@@ -334,8 +334,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             return 0;
         }
     }
-    @Command(name="getprivatechannelpeers", description = "Get all private channels with service provider as peer")
-    static class GetPrivateChannelsWithServiceProviderAsPeer implements Callable<Integer>{
+    @Command(name="getpeerprivatechannels", description = "Get all private channels with service provider as peer")
+    static class GetPeerPrivateChannels implements Callable<Integer>{
         @ParentCommand
         OnboardRestClientApplication parentCommand;
 
@@ -344,7 +344,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            ListPrivateChannelPeers result = client.getPrivateChannelPeers();
+            ListPeerPrivateChannels result = client.getPeerPrivateChannels();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
