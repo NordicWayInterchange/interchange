@@ -4,10 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class OnboardRestAPIDocumentationTest {
 
@@ -381,6 +378,12 @@ public class OnboardRestAPIDocumentationTest {
         api.setPeerName("sp2");
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }
+    @Test
+    public void addPrivateChannel() throws JsonProcessingException {
+        PrivateChannelApi privateChannel = new PrivateChannelApi("peer-name");
+        AddPrivateChannelsRequest request = new AddPrivateChannelsRequest(List.of(privateChannel));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
 
     @Test
     public void addMultipleCapabilitiesTest() throws JsonProcessingException {
@@ -500,4 +503,5 @@ public class OnboardRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
+
 }
