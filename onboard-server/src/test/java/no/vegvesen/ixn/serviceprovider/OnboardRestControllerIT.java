@@ -619,8 +619,8 @@ public class OnboardRestControllerIT {
         restController.addPrivateChannel(serviceProviderName_1,new AddPrivateChannelsRequest(List.of(clientChannel_1)));
         restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelsRequest(List.of(clientChannel_2)));
 
-        ListPrivateChannelPeers response_1 = restController.getPrivateChannelPeers(serviceProviderName_1);
-        ListPrivateChannelPeers response_2 = restController.getPrivateChannelPeers(serviceProviderName_2);
+        ListPeerPrivateChannels response_1 = restController.getPeerPrivateChannels(serviceProviderName_1);
+        ListPeerPrivateChannels response_2 = restController.getPeerPrivateChannels(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
     }

@@ -25,6 +25,7 @@ public class PrivateChannel {
     private String serviceProviderName;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name="end_id", foreignKey = @ForeignKey(name="fk_end_privatechannel"))
     private PrivateChannelEndpoint endpoint;
 
     public PrivateChannel() {

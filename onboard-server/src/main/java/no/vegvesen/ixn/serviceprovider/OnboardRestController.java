@@ -361,7 +361,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/peer")
-	public ListPrivateChannelPeers getPrivateChannelPeers(@PathVariable String serviceProviderName){
+	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
