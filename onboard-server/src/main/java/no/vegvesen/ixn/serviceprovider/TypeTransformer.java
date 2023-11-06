@@ -284,8 +284,8 @@ public class TypeTransformer {
         }
         }
 
-    public AddPrivateChannelsResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName,List<PrivateChannel> privateChannelList){
-        AddPrivateChannelsResponse response = new AddPrivateChannelsResponse(serviceProviderName);
+    public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList){
+        AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelList){
             if(privateChannel.getEndpoint() != null) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
