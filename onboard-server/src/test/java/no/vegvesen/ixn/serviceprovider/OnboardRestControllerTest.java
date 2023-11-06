@@ -28,10 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -473,5 +470,41 @@ public class OnboardRestControllerTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 
+	}
+
+	@Test
+	public void testAddingMultipleChannels() throws Exception {
+		String serviceProviderName = "king_olav.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1, privateChannel_1, privateChannel_1));
+
+		PrivateChannel savedChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		List<PrivateChannel> privateChannels = List.of(savedChannel, savedChannel, savedChannel);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProviderName)).thenReturn(List.of(savedChannel, savedChannel, savedChannel));
+
+		when(privateChannelRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArguments()[0];
+			PrivateChannel s = (PrivateChannel) argument;
+			s.setId(1);
+			int j = 0;
+			for (PrivateChannel privateChannel : privateChannels) {
+				privateChannel.setId(j++);
+			}
+			return s;
+		});
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+		verify(privateChannelRepository, times(3)).save(any());
 	}
 }
