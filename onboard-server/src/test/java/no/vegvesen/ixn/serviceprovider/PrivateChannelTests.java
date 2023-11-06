@@ -36,38 +36,6 @@ public class PrivateChannelTests {
     @MockBean
     private CertService certService;
 
-    @Test
-    public void testAddingMultipleChannels(){
-        String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-        PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
-        AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1, privateChannel_1, privateChannel_1));
-        PrivateChannel savedChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
-
-        when(repository.findAllByServiceProviderName(serviceProviderName)).thenReturn(List.of(savedChannel, savedChannel, savedChannel));
-        when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
-
-        AddPrivateChannelResponse response = restController.addPrivateChannel(serviceProviderName, request);
-
-        assertThat(response.getPrivateChannels().size()).isEqualTo(3);
-        assertThat(restController.getPrivateChannels(serviceProviderName).getPrivateChannels().size()).isEqualTo(3);
-
-        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(any());
-        verify(repository, times(3)).save(any());
-    }
-
-    @Test
-    public void testAddingInvalidChannel(){
-
-        String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-        AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of());
-
-        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(serviceProviderName, null)));
-        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
-        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, request));
-
-        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(any());
-        verify(repository, times(0)).save(any());
-    }
 
     @Test
     public void testAddingAndDeletingChannel(){

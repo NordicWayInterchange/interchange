@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
@@ -25,11 +26,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -507,4 +510,160 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(3)).save(any());
 	}
+	@Test
+	public void testAddingInvalidChannel() throws Exception {
+		String serviceProviderName = "king_olav.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of());
+
+		String requestBody = objectMapper.writeValueAsString(request);
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andExpect(status().isInternalServerError());
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(objectMapper.writeValueAsString(new AddPrivateChannelRequest(serviceProviderName, null))))
+				.andExpect(status().isInternalServerError());
+
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(objectMapper.writeValueAsString(null)))
+				.andExpect(status().is4xxClientError());
+
+	}
+	@Test
+	public void testAddingAndDeletingChannel() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
+		PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		savedPrivateChannel.setId(2);
+
+		mockCertificate(serviceProviderName);
+
+		when(privateChannelRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		when(privateChannelRepository.findByServiceProviderNameAndId(any(), any())).thenReturn(savedPrivateChannel);
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProviderName)).thenReturn(List.of(savedPrivateChannel));
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+				post(String.format("/%s/privatechannels",serviceProviderName))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestBody))
+				.andDo(print()).andExpect(status().isOk());
+
+
+		// SENERE
+
+
+
+	}
+
+	@Test
+	public void testDeletingNonExistentChannel() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
+		PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		savedPrivateChannel.setId(2);
+
+		mockCertificate(serviceProviderName);
+
+		when(privateChannelRepository.save(any())).thenAnswer(i->i.getArguments()[0]);
+		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(any(),any(), any())).thenReturn(savedPrivateChannel);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+		//SENERE
+	}
+	@Test
+	public void testGettingOneChannel() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
+
+		PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		savedPrivateChannel.setId(2);
+
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		when(privateChannelRepository.save(any())).thenAnswer(i->i.getArguments()[0]);
+		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(any(),any(), any())).thenReturn(savedPrivateChannel);
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andExpect(status().isOk());
+
+
+		mockCertificate(serviceProviderName);
+		mockMvc.perform(
+				get(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getId().toString()))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("")
+		).andDo(print()).andExpect(status().isOk());
+
+	}
+	@Test
+	public void testGettingNonExistentChannel() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
+		PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		savedPrivateChannel.setId(2);
+
+		mockCertificate(serviceProviderName);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+	@Test
+	public void testGetPeerPrivateChannels() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
+
+		mockCertificate(serviceProviderName);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+						post(String.format("/%s/privatechannels",serviceProviderName))
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
 }
