@@ -288,7 +288,7 @@ public class OnboardRestController {
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if (clientChannel == null || clientChannel.getPrivateChannels() == null) {
+		if (clientChannel == null || clientChannel.getPrivateChannels() == null || clientChannel.getPrivateChannels().isEmpty()) {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
