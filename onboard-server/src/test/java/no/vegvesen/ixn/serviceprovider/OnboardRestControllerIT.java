@@ -48,8 +48,6 @@ public class OnboardRestControllerIT {
     @Autowired
     private PrivateChannelRepository privateChannelRepository;
 
-
-
     @MockBean
     private CertService certService;
 
