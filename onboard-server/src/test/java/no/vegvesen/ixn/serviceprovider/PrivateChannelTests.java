@@ -57,19 +57,13 @@ public class PrivateChannelTests {
 
     @Test
     public void testAddingInvalidChannel(){
-        String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 
+        String serviceProviderName = "king_olaf.bouvetinterchange.eu";
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of());
 
-        assertThrows(RuntimeException.class, () ->{
-            restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(serviceProviderName, null));
-        });
-        assertThrows(RuntimeException.class, () ->{
-            restController.addPrivateChannel(serviceProviderName, null);
-        });
-        assertThrows(RuntimeException.class, () ->{
-            restController.addPrivateChannel(serviceProviderName, request);
-        });
+        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(serviceProviderName, null)));
+        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, request));
 
         verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(any());
         verify(repository, times(0)).save(any());
@@ -95,9 +89,8 @@ public class PrivateChannelTests {
         verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(any());
         verify(repository, times(2)).save(any());
     }
-
     @Test
-    public void testGettingChannel(){
+    public void testGettingOneChannel(){
         String serviceProviderName = "king_olaf.bouvetinterchange.eu";
         PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
@@ -105,8 +98,9 @@ public class PrivateChannelTests {
         savedPrivateChannel.setId(2);
 
         when(repository.save(any())).thenAnswer(i->i.getArguments()[0]);
-        restController.addPrivateChannel(serviceProviderName, request);
         when(repository.findByServiceProviderNameAndIdAndStatusIsNot(any(),any(), any())).thenReturn(savedPrivateChannel);
+
+        restController.addPrivateChannel(serviceProviderName, request);
 
         assertThat(restController.getPrivateChannel(serviceProviderName, savedPrivateChannel.getId().toString())).isNotNull();
 
@@ -122,14 +116,17 @@ public class PrivateChannelTests {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
         PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
         savedPrivateChannel.setId(2);
+
         when(repository.save(any())).thenAnswer(i->i.getArguments()[0]);
-        restController.addPrivateChannel(serviceProviderName, request);
         when(repository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName,2, PrivateChannelStatus.REQUESTED)).thenReturn(savedPrivateChannel);
 
-        assertThrows(RuntimeException.class, ()->{
-            restController.getPrivateChannel(serviceProviderName, Integer.valueOf(3).toString());
-        });
-        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(any());
+        restController.addPrivateChannel(serviceProviderName, request);
+
+        assertThrows(RuntimeException.class, ()-> restController.getPrivateChannel(serviceProviderName, Integer.valueOf(3).toString()));
+        assertThrows(RuntimeException.class, () -> restController.getPrivateChannel(serviceProviderName, ""));
+
+        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(any());
+        verify(repository, times(1)).save(any());
     }
 
     @Test
@@ -137,15 +134,14 @@ public class PrivateChannelTests {
         String serviceProviderName = "king_olaf.bouvetinterchange.eu";
         PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName,List.of(privateChannel_1));
-        PrivateChannel savedPrivateChannel = new PrivateChannel(privateChannel_1.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
-        savedPrivateChannel.setId(2);
 
         when(repository.save(any())).thenAnswer(i->i.getArguments()[0]);
         restController.addPrivateChannel(serviceProviderName, request);
-        when(repository.findAllByPeerName(serviceProviderName)).thenReturn(List.of(savedPrivateChannel));
+        when(repository.findAllByPeerName(serviceProviderName)).thenReturn(List.of());
 
-        assertThat(restController.getPeerPrivateChannels(serviceProviderName).getPrivateChannels().size()).isEqualTo(1);
+        assertThat(restController.getPeerPrivateChannels(serviceProviderName).getPrivateChannels().size()).isEqualTo(0);
 
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(any());
+        verify(repository, times(1)).save(any());
     }
 }
