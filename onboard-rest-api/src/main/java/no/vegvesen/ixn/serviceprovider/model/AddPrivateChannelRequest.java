@@ -3,7 +3,7 @@ package no.vegvesen.ixn.serviceprovider.model;
 import java.util.List;
 import java.util.Objects;
 
-public class AddPrivateChannelsRequest {
+public class AddPrivateChannelRequest {
 
     private String version = "1.0";
 
@@ -11,10 +11,15 @@ public class AddPrivateChannelsRequest {
 
     private List<PrivateChannelApi> privateChannels;
 
-    public AddPrivateChannelsRequest() {
+    public AddPrivateChannelRequest() {
     }
 
-    public AddPrivateChannelsRequest(List<PrivateChannelApi> privateChannels) {
+    public AddPrivateChannelRequest(List<PrivateChannelApi> privateChannels) {
+        this.privateChannels = privateChannels;
+    }
+
+    public AddPrivateChannelRequest(String name, List<PrivateChannelApi> privateChannels) {
+        this.name = name;
         this.privateChannels = privateChannels;
     }
 
@@ -46,7 +51,7 @@ public class AddPrivateChannelsRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddPrivateChannelsRequest that = (AddPrivateChannelsRequest) o;
+        AddPrivateChannelRequest that = (AddPrivateChannelRequest) o;
         return Objects.equals(version, that.version) && Objects.equals(name, that.name) && Objects.equals(privateChannels, that.privateChannels);
     }
 
@@ -57,7 +62,7 @@ public class AddPrivateChannelsRequest {
 
     @Override
     public String toString(){
-        return "AddPrivateChannelsRequest{" +
+        return "AddPrivateChannelRequest{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", privateChannels=" + privateChannels +

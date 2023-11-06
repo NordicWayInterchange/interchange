@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AddPrivateChannelsResponse {
+public class AddPrivateChannelResponse {
 
     private String version = "1.0";
 
@@ -12,11 +12,11 @@ public class AddPrivateChannelsResponse {
 
     private List<PrivateChannelApi> privateChannels;
 
-    public AddPrivateChannelsResponse() {
+    public AddPrivateChannelResponse() {
         this.privateChannels = new ArrayList<>();
     }
 
-    public AddPrivateChannelsResponse(String name) {
+    public AddPrivateChannelResponse(String name) {
         this.name = name;
         this.privateChannels = new ArrayList<>();
     }
@@ -49,7 +49,7 @@ public class AddPrivateChannelsResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddPrivateChannelsResponse response = (AddPrivateChannelsResponse) o;
+        AddPrivateChannelResponse response = (AddPrivateChannelResponse) o;
         return Objects.equals(version, response.version) && Objects.equals(name, response.name) && Objects.equals(privateChannels, response.privateChannels);
     }
 
@@ -60,7 +60,7 @@ public class AddPrivateChannelsResponse {
 
     @Override
     public String toString(){
-        return "AddPrivateChannelsResponse{" +
+        return "AddPrivateChannelResponse{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", privateChannels=" + privateChannels +
