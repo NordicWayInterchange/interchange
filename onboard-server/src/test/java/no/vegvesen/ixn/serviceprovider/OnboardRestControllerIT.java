@@ -576,7 +576,9 @@ public class OnboardRestControllerIT {
     public void testDeletingInvalidChannel(){
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel)));
+
         assertThrows(RuntimeException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
         assertThat(privateChannelRepository.findAll().size()).isEqualTo(1);
     }
@@ -605,9 +607,17 @@ public class OnboardRestControllerIT {
         assertThat(channelResponse).isNotNull();
         assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existent-provider", "1"));
     }
-
     @Test
-    public void testGettingPrivateChannelsWithServiceProviderAsPeer(){
+    public void testGettingNonExistentChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+
+       assertThrows(RuntimeException.class, () -> restController.getPrivateChannel(serviceProviderName, "99"));
+       assertThrows(RuntimeException.class, () -> restController.getPrivateChannel(serviceProviderName, ""));
+    }
+    @Test
+    public void testGetPeerPrivateChannels(){
         String serviceProviderName_1 = "my-service-provider";
         String serviceProviderName_2 = "my-service-provider2";
 
