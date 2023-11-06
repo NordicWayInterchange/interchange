@@ -329,7 +329,8 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -343,12 +344,9 @@ public class OnboardRestController {
 		privateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
 		PrivateChannel saved = privateChannelRepository.save(privateChannelToUpdate);
 
-		logger.debug("Updated Service Provider: {}", saved);
+		logger.debug("Updated Private Channel: {}", saved);
 
-		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");
 		OnboardMDCUtil.removeLogVariables();
-		return redirect;
-
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
