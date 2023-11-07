@@ -280,4 +280,40 @@ public class NeighbourRepositoryIT {
 		assertThat(savedSub.getEndpoints()).hasSize(1);
 	}
 
+	@Test
+	public void getNeighboursByNeighbourSubscriptionStatusListsDuplicates() {
+		NeighbourSubscription sub1 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120020%'", NeighbourSubscriptionStatus.ACCEPTED, "consumer");
+		NeighbourSubscription sub2 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120021%'", NeighbourSubscriptionStatus.ACCEPTED, "consumer");
+		NeighbourSubscription sub3 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120022%'", NeighbourSubscriptionStatus.ACCEPTED, "consumer");
+
+		Neighbour neighbour = new Neighbour(
+				"my-dupe-neighbour-subscription-neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2, sub3))),
+				new SubscriptionRequest()
+		);
+
+		repository.save(neighbour);
+
+		assertThat(repository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED)).hasSize(3);
+	}
+
+	@Test
+	public void getNeighboursBySubscriptionStatusListsDuplicates() {
+		Subscription sub1 = new Subscription("originatingCountry = 'NO' AND quadTree LIKE '%,120020%'", SubscriptionStatus.ACCEPTED, "consumer");
+		Subscription sub2 = new Subscription("originatingCountry = 'NO' AND quadTree LIKE '%,120021%'", SubscriptionStatus.ACCEPTED, "consumer");
+		Subscription sub3 = new Subscription("originatingCountry = 'NO' AND quadTree LIKE '%,120022%'", SubscriptionStatus.ACCEPTED, "consumer");
+
+		Neighbour neighbour = new Neighbour(
+				"my-dupe-subscription-neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2, sub3)))
+		);
+
+		repository.save(neighbour);
+
+		assertThat(repository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(3);
+	}
+
 }
