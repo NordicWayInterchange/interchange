@@ -111,7 +111,7 @@ public class RoutingConfigurer {
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
-	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
+	public void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
 			setupNeighbourRouting(subscriber, delta);
 		}

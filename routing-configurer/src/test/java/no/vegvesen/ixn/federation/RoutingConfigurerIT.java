@@ -958,6 +958,58 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testSetupRoutingWithDuplicatesFromRepository() {
+		String exchangeName = "cap-exchange-dupe";
+		Shard shard = new Shard(
+				1,
+				exchangeName,
+				"originatingCountry = 'NO'"
+		);
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		metadata.setShards(Collections.singletonList(shard));
+
+		client.createHeadersExchange(exchangeName);
+
+		CapabilitySplit capability = new CapabilitySplit(
+				new DenmApplication(
+						"NO00000",
+						"NO00000-denm-pub",
+						"NO",
+						"DENM:1.2.2",
+						Collections.singleton("12002"),
+						Collections.singleton(5)
+				),
+				metadata
+		);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-local-service-provider");
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(capability)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
+
+		NeighbourSubscription sub1 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120020%'", NeighbourSubscriptionStatus.ACCEPTED, "my-dupe-neighbour-subscription-neighbour");
+		NeighbourSubscription sub2 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120021%'", NeighbourSubscriptionStatus.ACCEPTED, "my-dupe-neighbour-subscription-neighbour");
+		NeighbourSubscription sub3 = new NeighbourSubscription("originatingCountry = 'NO' AND quadTree LIKE '%,120022%'", NeighbourSubscriptionStatus.ACCEPTED, "my-dupe-neighbour-subscription-neighbour");
+
+		Neighbour neighbour = new Neighbour(
+				"my-dupe-neighbour-subscription-neighbour",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2, sub3))),
+				new SubscriptionRequest()
+		);
+
+		List<Neighbour> neighboursListFromRepository = Arrays.asList(neighbour, neighbour, neighbour);
+		assertThat(neighboursListFromRepository).hasSize(3);
+
+		when(neighbourService.getMessagePort()).thenReturn("5671");
+		when(neighbourService.getNodeName()).thenReturn("my-node");
+
+		routingConfigurer.setupRouting(neighboursListFromRepository, client.getQpidDelta());
+
+		verify(neighbourService, times(3)).saveSetupRouting(any());
+	}
+
+	@Test
 	public void tearDownSubscriptionExchange() {
 		String selector = "a=b";
 		String exchangeName = "subscription-exchange";
