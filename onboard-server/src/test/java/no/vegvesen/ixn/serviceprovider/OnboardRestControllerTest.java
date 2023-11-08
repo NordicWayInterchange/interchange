@@ -726,6 +726,10 @@ public class OnboardRestControllerTest {
 								.content(requestBody))
 				.andExpect(status().isOk());
 
+		mockMvc.perform(
+				get(String.format("/%s/privatechannels/peer", serviceProviderName))
+		).andExpect(status().isOk());
+
 		verify(privateChannelRepository, times(1)).save(any());
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
