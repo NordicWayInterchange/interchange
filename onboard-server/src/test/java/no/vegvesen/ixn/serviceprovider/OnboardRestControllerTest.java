@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
@@ -26,13 +25,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -79,7 +76,6 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void postingCapabilitiesReturnsStatusOk() throws Exception {
-
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
 
@@ -89,10 +85,12 @@ public class OnboardRestControllerTest {
 		CapabilitySplitApi datexNo = new CapabilitySplitApi();
 		datexNo.setApplication(app);
 		datexNo.setMetadata(meta);
+
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				firstServiceProvider,
 				Collections.singleton(datexNo)
 		);
+
 		String datexNoString = objectMapper.writeValueAsString(request);
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
@@ -142,12 +140,10 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNoContent());
-
 	}
 
 	@Test
 	void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
-
 		mockCertificate("First Service Provider");
 
 		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication");
@@ -161,6 +157,7 @@ public class OnboardRestControllerTest {
                 Collections.singleton(datexFi)
 
 		);
+
 		String capabilitiesPath = String.format("/%s/capabilities", "SecondServiceProvider");
 
 		String datexFiString = objectMapper.writeValueAsString(request);
@@ -187,7 +184,7 @@ public class OnboardRestControllerTest {
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
-		//TODO this is dirty!
+
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
 			Object argument = i.getArguments()[0];
 			ServiceProvider s = (ServiceProvider) argument;
@@ -256,14 +253,16 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Set<LocalSubscription> serviceProviderSubscriptionRequest = new HashSet<>();
 		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
+
 		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
+
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
 		firstServiceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
+
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -327,6 +326,7 @@ public class OnboardRestControllerTest {
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
 		AddSubscription addSubscription = new AddSubscription(selector);
+
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
 				Collections.singleton(addSubscription)
@@ -347,8 +347,11 @@ public class OnboardRestControllerTest {
 	void postUnknownPropertyNameThrowsBadRequestException() throws Exception {
 		String serviceProviderName = "best service provider";
 		mockCertificate(serviceProviderName);
+
 		String capabilityApiToServerJson = "{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}";
+
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
 		mockMvc.perform(
 				post(String.format("/%s/capabilities", serviceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
@@ -362,6 +365,7 @@ public class OnboardRestControllerTest {
 	public void postingDeliveryReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
+
 		AddDeliveriesRequest request = new AddDeliveriesRequest(
 				firstServiceProvider,
 				Collections.singleton(new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'"))
@@ -381,7 +385,6 @@ public class OnboardRestControllerTest {
 			return s;
 		});
 
-
 		mockMvc.perform(
 				post(String.format("/%s/deliveries",firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
@@ -395,6 +398,7 @@ public class OnboardRestControllerTest {
 	public void listingDeliveriesReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
+
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
 				firstServiceProvider,
@@ -402,6 +406,7 @@ public class OnboardRestControllerTest {
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
+
 		when(serviceProviderRepository.findByName(firstServiceProvider))
 				.thenReturn(serviceProvider);
 
@@ -410,7 +415,6 @@ public class OnboardRestControllerTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
-
 	}
 
 	@Test
@@ -418,6 +422,7 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
 				firstServiceProvider,
@@ -425,6 +430,7 @@ public class OnboardRestControllerTest {
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
+
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
 						1,
@@ -433,6 +439,7 @@ public class OnboardRestControllerTest {
 						LocalDeliveryStatus.REQUESTED
 				)
 		));
+
 		when(serviceProviderRepository.findByName(firstServiceProvider))
 				.thenReturn(serviceProvider);
 
@@ -445,10 +452,10 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void deleteDeliveryReturnsNoContent() throws Exception {
-
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
 				firstServiceProvider,
@@ -456,6 +463,7 @@ public class OnboardRestControllerTest {
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
+
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
 						1,
@@ -465,14 +473,16 @@ public class OnboardRestControllerTest {
 						LocalDeliveryStatus.REQUESTED
 				)
 		));
+
 		when(serviceProviderRepository.findByName(firstServiceProvider))
 				.thenReturn(serviceProvider);
+
 		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
-
 	}
 
 	@Test
@@ -533,14 +543,12 @@ public class OnboardRestControllerTest {
 								.content(objectMapper.writeValueAsString(new AddPrivateChannelRequest(serviceProviderName, null))))
 				.andExpect(status().isInternalServerError());
 
-
 		mockMvc.perform(
 						post(String.format("/%s/privatechannels", serviceProviderName))
 								.accept(MediaType.APPLICATION_JSON)
 								.contentType(MediaType.APPLICATION_JSON)
 								.content(objectMapper.writeValueAsString(null)))
 				.andExpect(status().is4xxClientError());
-
 	}
 
 	@Test
@@ -560,6 +568,7 @@ public class OnboardRestControllerTest {
 					return p;
 				}
 		);
+
 		when(privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, 2)).thenReturn(savedPrivateChannel);
 		when(privateChannelRepository.findAllByServiceProviderName(serviceProviderName)).thenReturn(List.of(savedPrivateChannel));
 		String requestBody = objectMapper.writeValueAsString(request);
@@ -577,7 +586,6 @@ public class OnboardRestControllerTest {
 								.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 
-
 		mockMvc.perform(
 				get(String.format("/%s/privatechannels", serviceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
@@ -585,7 +593,6 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(2)).save(any());
 		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
-
 	}
 
 	@Test
@@ -620,12 +627,10 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(0)).delete(any());
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndId(any(), any());
-
 	}
 
 	@Test
 	public void testGettingOneChannel() throws Exception {
-
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
@@ -645,7 +650,6 @@ public class OnboardRestControllerTest {
 								.content(requestBody))
 				.andExpect(status().isOk());
 
-
 		mockMvc.perform(
 				get(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getId().toString()))
 						.accept(MediaType.APPLICATION_JSON)
@@ -654,12 +658,10 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
 		verify(privateChannelRepository, times(1)).save(any());
-
 	}
 
 	@Test
 	public void testGettingNonExistentChannel() throws Exception {
-
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		PrivateChannelApi privateChannel_1 = new PrivateChannelApi("king_gustaf.bouvetinterchange.eu");
 		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(privateChannel_1));
@@ -675,7 +677,6 @@ public class OnboardRestControllerTest {
 			PrivateChannel s = (PrivateChannel) argument;
 			s.setId(1);
 			return s;
-
 		});
 
 		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, savedPrivateChannel.getId(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
@@ -698,7 +699,6 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).save(any());
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
-
 	}
 
 	@Test
@@ -715,23 +715,15 @@ public class OnboardRestControllerTest {
 			PrivateChannel s = (PrivateChannel) argument;
 			s.setId(1);
 			return s;
-
-
 		});
 
 		mockMvc.perform(
-						post(String.format("/%s/privatechannels", serviceProviderName))
+						get(String.format("/%s/privatechannels/peer", serviceProviderName))
 								.accept(MediaType.APPLICATION_JSON)
 								.contentType(MediaType.APPLICATION_JSON)
 								.content(requestBody))
 				.andExpect(status().isOk());
 
-		mockMvc.perform(
-				get(String.format("/%s/privatechannels/peer", serviceProviderName))
-		).andExpect(status().isOk());
-
-		verify(privateChannelRepository, times(1)).save(any());
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
-
 }
