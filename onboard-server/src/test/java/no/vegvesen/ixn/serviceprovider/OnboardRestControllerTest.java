@@ -84,7 +84,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexNo = new CapabilitySplitApi();
 		datexNo.setApplication(app);
@@ -725,10 +725,6 @@ public class OnboardRestControllerTest {
 								.contentType(MediaType.APPLICATION_JSON)
 								.content(requestBody))
 				.andExpect(status().isOk());
-
-		mockMvc.perform(
-				get(String.format("/%s/privatechannels/peer", serviceProviderName))
-		).andExpect(status().isOk());
 
 		verify(privateChannelRepository, times(1)).save(any());
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());

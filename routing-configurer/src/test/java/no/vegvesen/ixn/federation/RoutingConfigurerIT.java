@@ -149,7 +149,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(flounder, client.getQpidDelta());
-		assertThat(client.queueExists(subscription.getQueueName())).isTrue();
+		assertThat(client.queueExists(subscription.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(subscription.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
 
@@ -216,8 +216,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(halibut, client.getQpidDelta());
-		assertThat(client.queueExists(s1.getQueueName())).isTrue();
-		assertThat(client.queueExists(s2.getQueueName())).isTrue();
+		assertThat(client.queueExists(s1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.queueExists(s2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
 		assertThat(s2.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
@@ -289,10 +289,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(salmon, client.getQpidDelta());
-		assertThat(client.queueExists(s1.getQueueName())).isTrue();
-		List<Binding> queueBindKeys = client.getQueuePublishingLinks(s1.getQueueName());
+		assertThat(client.queueExists(s1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		List<Binding> queueBindKeys = client.getQueuePublishingLinks(s1.getEndpoints().stream().findFirst().get().getSource());
 		assertThat(queueBindKeys).hasSize(1);
-		assertThat(s2.getQueueName()).isNull();
+		assertThat(s2.getEndpoints()).isEmpty();
 
 		Set<NeighbourSubscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.CREATED);
 		assertThat(createdSubscriptions).hasSize(1);
@@ -411,7 +411,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		fail("Should not allow nordea to write on (onramp)");
 		try {
-			theNodeItselfCanReadFromAnyNeighbourQueue(subscription.getQueueName());
+			theNodeItselfCanReadFromAnyNeighbourQueue(subscription.getEndpoints().stream().findFirst().get().getSource());
 		} catch (NamingException e) {
 			throw new RuntimeException(e);
 		} catch (JMSException e) {
@@ -480,11 +480,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
+		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 
 		routingConfigurer.setupNeighbourRouting(hammershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getQueueName())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub.getQueueName())).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 	}
 
 	@Test
@@ -537,10 +538,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
+		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub1.getQueueName())).hasSize(1);
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 
 		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -556,9 +558,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.getQueuePublishingLinks(sub1.getQueueName())).hasSize(1);
-		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub2.getQueueName())).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 	}
 
@@ -616,8 +618,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getQueueName())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub.getQueueName())).hasSize(2);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
 
@@ -655,9 +657,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
+		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getQueueName())).isTrue();
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 	}
 
 	@Test
@@ -723,8 +726,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
-		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 	}
 
 	@Test
@@ -825,8 +828,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub1.getQueueName())).isTrue();
-		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 	}
 
 	@Test
@@ -877,11 +880,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getQueueName())).isTrue();
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 
 		AtomicInteger numMessages = new AtomicInteger();
 		try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
-				sub.getQueueName(),
+				sub.getEndpoints().stream().findFirst().get().getSource(),
 				sslContext,
 				message -> numMessages.incrementAndGet())) {
 			sink.start();
@@ -1015,21 +1018,118 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				client.getQpidDelta()
 		);
 		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
-		assertThat(neighbourSubscription.getQueueName()).isNullOrEmpty();
 		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
 	}
 
+	@Test
+	public void tearDownSubscriptionShouldRemoveAclForQueue() {
+		String neighbourName = "neighbour";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourName
+		);
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						Collections.singleton(subscription)
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourName,queue.getName());
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client
+				.getQpidAcl()
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,queue.getName())
+				)
+		).isFalse();
+		assertThat(client.getQueue(queue.getName())).isNull();
+	}
+
+	@Test
+	public void tearDownSubscriptionShouldNotRemoveNeighbourFromGroupIfOtherSubsExist() {
+		String neighbourName = "non-redirect-neighbour";
+		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				"a = b",
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				neighbourName);
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		String nonTeardownQueueName = "non-teardown-queue";
+		NeighbourEndpoint nonTearDownEndpoint = new NeighbourEndpoint(
+				nonTeardownQueueName,
+				"hostName",
+				5671
+		);
+		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
+				"c = d",
+				NeighbourSubscriptionStatus.CREATED,
+				neighbourName);
+		nonTearDownSubscription.setEndpoints(Collections.singleton(nonTearDownEndpoint));
+		Neighbour neighbour = new Neighbour(
+				neighbourName,
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(
+						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
+				),
+				new SubscriptionRequest()
+		);
+		Queue queue = client.createQueue(queueName);
+		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
+		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addReadAccess(neighbourName,queue.getName());
+		client.addReadAccess(neighbourName,nonTeardownQueue.getName());
+
+		routingConfigurer.tearDownNeighbourRouting(neighbour);
+
+
+		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		VirtualHostAccessController qpidAcl = client.getQpidAcl();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,queue.getName())
+				)
+		).isFalse();
+		assertThat(qpidAcl
+				.containsRule(VirtualHostAccessController
+						.createQueueReadAccessRule(neighbourName,nonTeardownQueue.getName())
+				)
+		).isTrue();
+		assertThat(client.getQueue(queue.getName())).isNull();
+		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+	}
 
 	@Test
 	public void tearDownRedirectedSubscriptionShouldRemoveAclForQueue() {
 		String neighbourSPName = "neighbour-service-provider";
 		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName,
-				queueName
-		);
+				neighbourSPName);
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
@@ -1053,27 +1153,33 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		).isFalse();
 		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
-
-
 	}
 
 	@Test
 	public void tearDownRedirectedSubscriptionShouldNotRemoveSPFromGroupIfOtherRedirectSubsExist() {
 		String neighbourSPName = "neighbour-non-teardown-service-provider-1";
 		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName,
-				queueName
-		);
+				neighbourSPName);
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-redirected-queue";
+		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
+				nonTeardownQueueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				neighbourSPName,
-				nonTeardownQueueName
-		);
+				neighbourSPName);
+		nonTearDownSubscription.setEndpoints(Collections.singleton(endpointNonTearDown));
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
@@ -1108,8 +1214,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
-
-
 	}
 
 	@Test
@@ -1117,19 +1221,27 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String neighbourSPName = "neighbour-service-provider-teardown-x";
 		String otherNeighbourSPName = "other-neighbour-service-provider";
 		String queueName = UUID.randomUUID().toString();
+		NeighbourEndpoint endpoint = new NeighbourEndpoint(
+				queueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName,
-				queueName
-		);
+				neighbourSPName);
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-redirected-queue-x";
+		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
+				nonTeardownQueueName,
+				"hostName",
+				5671
+		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				otherNeighbourSPName,
-				nonTeardownQueueName
-		);
+				otherNeighbourSPName);
+		nonTearDownSubscription.setEndpoints(Collections.singleton(endpointNonTearDown));
 		String neighbourName = "redirect-neighbour-xx";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
@@ -1166,8 +1278,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
-
-
 	}
 
 

@@ -5,8 +5,10 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -26,7 +28,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -56,7 +59,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -85,7 +88,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -103,6 +106,97 @@ public class OnboardRestControllerIT {
         assertThat(response.getId()).isEqualTo(capability.getId());
 
         verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    public void testAddingCapabilityWithMissingProperties() {
+        DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        String serviceProviderName = "my-service-provider";
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("publisherId");
+    }
+
+    @Test
+    public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        ServiceProvider other = new ServiceProvider("other-service-provider");
+        other.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(
+                        new CapabilitySplit(
+                            new DatexApplication(
+                                    "NO00000",
+                                    "NO-pub-1",
+                                    "NO",
+                                    "1.0",
+                                    Collections.singleton("1200"),
+                                    "SituationPublication"),
+                                new Metadata()
+                ))));
+
+        serviceProviderRepository.save(other);
+
+        String serviceProviderName = "my-service-provider";
+
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("publicationId");
+    }
+
+    @Test
+    public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        Neighbour other = new Neighbour("my-neighbour",
+                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+                        Collections.singleton(
+                                new CapabilitySplit(
+                                        new DatexApplication(
+                                                "NO00000",
+                                                "NO-pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("1200"),
+                                                "SituationPublication"),
+                                        new Metadata()
+                                ))),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest()
+        );
+
+        neighbourRepository.save(other);
+
+        String serviceProviderName = "my-service-provider";
+
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("publicationId");
     }
 
     @Test

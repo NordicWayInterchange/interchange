@@ -30,8 +30,6 @@ public class NeighbourSubscription {
 
     private long lastUpdatedTimestamp;
 
-    private String queueName;
-
     public NeighbourSubscription() {
 
     }
@@ -62,14 +60,6 @@ public class NeighbourSubscription {
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
-    }
-
-    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus neighbourSubscriptionStatus, String consumerCommonName, String queueName) {
-        this.selector = selector;
-        this.subscriptionStatus = neighbourSubscriptionStatus;
-        this.consumerCommonName = consumerCommonName;
-        this.queueName = queueName;
-
     }
 
     public Integer getId() {
@@ -131,14 +121,6 @@ public class NeighbourSubscription {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getQueueName() {
-        return queueName;
-    }
-
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -162,12 +144,7 @@ public class NeighbourSubscription {
                 ", path='" + path + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", endpoints=" + endpoints +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", queueName='" + queueName + '\'' +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp + '\'' +
                 '}';
-    }
-
-    public String bindKey() {
-        return "" + selector.hashCode();
     }
 }
