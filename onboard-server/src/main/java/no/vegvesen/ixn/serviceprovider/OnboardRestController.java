@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -339,7 +338,7 @@ public class OnboardRestController {
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
 		}catch (Exception e){
-			throw new PrivateChannelRequestException(String.format("Id %s is invalid", privateChannelId));
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
 		}
 
 		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
@@ -379,7 +378,7 @@ public class OnboardRestController {
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
 		}catch (Exception e){
-			throw new PrivateChannelRequestException(String.format("Id %s is invalid", privateChannelId));
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
 		}
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
