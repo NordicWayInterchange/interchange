@@ -655,11 +655,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void testGettingChannelWithInvalidId() throws Exception{
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setId(1);
-
 		mockCertificate(serviceProviderName);
-		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, savedPrivateChannel.getId(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
 
 		mockMvc.perform(
 				get(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
