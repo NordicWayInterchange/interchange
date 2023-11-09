@@ -339,7 +339,7 @@ public class OnboardRestController {
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
 		}catch (Exception e){
-			throw new PrivateChannelRequestException(String.format("Could not find private channel with id %s", privateChannelId));
+			throw new PrivateChannelRequestException(String.format("Id %s is invalid", privateChannelId));
 		}
 
 		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
@@ -375,10 +375,11 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		Integer parsedId;
+
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
 		}catch (Exception e){
-			throw new PrivateChannelRequestException(String.format("Could not find private channel with id %s", privateChannelId));
+			throw new PrivateChannelRequestException(String.format("Id %s is invalid", privateChannelId));
 		}
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
