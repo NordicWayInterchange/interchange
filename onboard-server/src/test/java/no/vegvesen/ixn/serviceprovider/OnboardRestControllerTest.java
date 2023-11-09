@@ -465,9 +465,12 @@ public class OnboardRestControllerTest {
 						LocalDeliveryStatus.REQUESTED
 				)
 		));
+
 		when(serviceProviderRepository.findByName(firstServiceProvider))
 				.thenReturn(serviceProvider);
+
 		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))
