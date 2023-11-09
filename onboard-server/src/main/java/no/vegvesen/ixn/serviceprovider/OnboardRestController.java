@@ -335,7 +335,14 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, Integer.parseInt(privateChannelId));
+		Integer parsedId;
+		try{
+			parsedId = Integer.parseInt(privateChannelId);
+		}catch (Exception e){
+			throw new PrivateChannelRequestException(String.format("Could not find private channel with id %s", privateChannelId));
+		}
+
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
@@ -367,7 +374,14 @@ public class OnboardRestController {
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, Integer.parseInt(privateChannelId), PrivateChannelStatus.TEAR_DOWN);
+		Integer parsedId;
+		try{
+			parsedId = Integer.parseInt(privateChannelId);
+		}catch (Exception e){
+			throw new PrivateChannelRequestException(String.format("Could not find private channel with id %s", privateChannelId));
+		}
+
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}

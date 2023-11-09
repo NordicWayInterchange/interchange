@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelRequestException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;
@@ -51,6 +53,10 @@ public class OnboardServerErrorAdvice {
 		return error(NOT_FOUND, e);
 	}
 
+	@ExceptionHandler({PrivateChannelRequestException.class})
+	public ResponseEntity<ErrorDetails> handlePrivateChannelRequestException(RuntimeException e) {
+		return error(BAD_REQUEST, e);
+	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
