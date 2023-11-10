@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +59,9 @@ public class ExportServiceProvidersIT {
                                                 Collections.singleton("123"),
                                                 Collections.singleton(6)
                                         ),
-                                        new Metadata()
+                                        new Metadata(
+                                                RedirectStatus.OPTIONAL
+                                        )
                                 )
                         )
                 )
@@ -71,17 +74,29 @@ public class ExportServiceProvidersIT {
                 )
         );
         repository.save(serviceProvider);
+
+        privateChannelRepository.save(new PrivateChannel(
+                "my-peer",
+                "my-queue",
+                PrivateChannelStatus.CREATED,
+                new PrivateChannelEndpoint(
+                        "my-host",
+                        5671,
+                        "my-queue"
+                ),
+                serviceProvider.getName()
+        ));
+
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
-        writeToFile(path, serviceProviderList, privateChannelRepository.findAll());
+        List<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
+        writeToFile(path, serviceProviderList, privateChannelList);
 
         ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
         assertThat(serviceProviderApis.length).isEqualTo(1);
     }
 
     public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, List<PrivateChannel> privateChannelList) throws IOException {
-
-
         CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
         TypeTransformer transformer = new TypeTransformer();
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -105,14 +120,16 @@ public class ExportServiceProvidersIT {
             }
             serviceProviderApi.setDeliveries(deliveries);
 
+            Set<PrivateChannel> serviceProviderPrivateChannelList = privateChannelList.stream().filter(p -> p.getServiceProviderName().equals(serviceProvider.getName())).collect(Collectors.toSet());
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
-            for (PrivateChannel privateChannel : privateChannelList) {
+            for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
                 privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
         }
+        System.out.println(writer.writeValueAsString(serviceProviders));
         writer.writeValue(path.toFile(),serviceProviders);
     }
 

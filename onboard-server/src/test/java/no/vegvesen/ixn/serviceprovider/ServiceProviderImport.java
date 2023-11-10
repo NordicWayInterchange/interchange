@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ServiceProviderImport {
@@ -91,6 +93,24 @@ public class ServiceProviderImport {
         );
         serviceProvider.addDeliveries(deliveries);
         return serviceProvider;
+    }
+
+    public static List<PrivateChannel> mapPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<PrivateChannelApi> privateChannelApis) {
+        List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
+        for (PrivateChannelApi privateChannelApi : privateChannelApis) {
+            importedPrivateChannels.add(new PrivateChannel(
+                    privateChannelApi.getPeerName(),
+                    privateChannelApi.getEndpoint().getQueueName(),
+                    PrivateChannelStatus.REQUESTED,
+                    new PrivateChannelEndpoint(
+                            privateChannelApi.getEndpoint().getHost(),
+                            privateChannelApi.getEndpoint().getPort(),
+                            privateChannelApi.getEndpoint().getQueueName()
+                    ),
+                    serviceProviderName
+            ));
+        }
+        return importedPrivateChannels;
     }
 
     /*

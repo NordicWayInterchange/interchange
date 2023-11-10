@@ -42,8 +42,8 @@ public class PrivateChannel {
         this.peerName = peerName;
         this.queueName = queueName;
         this.status = status;
-        this.serviceProviderName = serviceProviderName;
         this.endpoint = privateChannelEndpoint;
+        this.serviceProviderName = serviceProviderName;
     }
 
     public PrivateChannelEndpoint getEndpoint() {
