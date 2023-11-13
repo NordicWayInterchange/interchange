@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.OldPrivateChannelApi;
 
 import java.util.Set;
 
@@ -10,7 +10,7 @@ public class OldServiceProviderApi {
     private Set<OldLocalActorSubscription> subscriptions;
     private Set<CapabilitySplitApi> capabilities;
     private Set<DeliveryApi> deliveries;
-    private Set<PrivateChannelApi> privateChannels;
+    private Set<OldPrivateChannelApi> privateChannels;
 
     public String getName() {
         return name;
@@ -44,11 +44,11 @@ public class OldServiceProviderApi {
         this.deliveries = deliveries;
     }
 
-    public Set<PrivateChannelApi> getPrivateChannels() {
+    public Set<OldPrivateChannelApi> getPrivateChannels() {
         return privateChannels;
     }
 
-    public void setPrivateChannels(Set<PrivateChannelApi> privateChannels) {
+    public void setPrivateChannels(Set<OldPrivateChannelApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 

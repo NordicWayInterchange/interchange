@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
+import no.vegvesen.ixn.serviceprovider.model.OldPrivateChannelApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -81,11 +82,11 @@ public class ServiceProviderImport {
             deliveries.add(delivery);
         }
 
-        Set<PrivateChannel> privateChannels = new HashSet<>();
-        for (PrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
+       /* Set<PrivateChannel> privateChannels = new HashSet<>();
+        for (OldPrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
             PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(privateChannelApi.getEndpoint().getHost(),privateChannelApi.getEndpoint().getPort(), privateChannelApi.getEndpoint().getQueueName());
             privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), endpoint.getQueueName(), PrivateChannelStatus.REQUESTED,endpoint, serviceProviderApi.getName()));
-        }
+        }*/
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
@@ -97,6 +98,7 @@ public class ServiceProviderImport {
 
     public static List<PrivateChannel> mapPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<PrivateChannelApi> privateChannelApis) {
         List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
+
         for (PrivateChannelApi privateChannelApi : privateChannelApis) {
             importedPrivateChannels.add(new PrivateChannel(
                     privateChannelApi.getPeerName(),
@@ -109,6 +111,21 @@ public class ServiceProviderImport {
                     ),
                     serviceProviderName
             ));
+        }
+        return importedPrivateChannels;
+    }
+
+    public static List<PrivateChannel> mapOldPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<OldPrivateChannelApi> privateChannelApis) {
+        List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
+
+        for (OldPrivateChannelApi privateChannelApi : privateChannelApis) {
+            PrivateChannel privateChannel = new PrivateChannel(
+                    privateChannelApi.getPeerName(),
+                    privateChannelApi.getQueueName(),
+                    PrivateChannelStatus.REQUESTED,
+                    serviceProviderName
+            );
+            importedPrivateChannels.add(privateChannel);
         }
         return importedPrivateChannels;
     }

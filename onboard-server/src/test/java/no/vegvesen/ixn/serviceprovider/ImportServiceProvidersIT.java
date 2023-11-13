@@ -71,7 +71,7 @@ public class ImportServiceProvidersIT {
             ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi, saveTime);
             serviceProvidersToSave.add(serviceProvider);
 
-            List<PrivateChannel> privateChannels = ServiceProviderImport.mapPrivateChannelApiToPrivateChannels(serviceProviderApi.getName(), serviceProviderApi.getPrivateChannels());
+            List<PrivateChannel> privateChannels = ServiceProviderImport.mapOldPrivateChannelApiToPrivateChannels(serviceProviderApi.getName(), serviceProviderApi.getPrivateChannels());
             privateChannelsToSave.addAll(privateChannels);
         }
         repository.saveAll(serviceProvidersToSave);
