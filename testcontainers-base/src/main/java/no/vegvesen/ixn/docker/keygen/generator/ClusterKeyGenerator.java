@@ -118,16 +118,9 @@ public class ClusterKeyGenerator {
     public static List<X509Certificate> generateServiceProviderCertBC(PKCS10CertificationRequest certificationRequest, X509Certificate caCertificate, X509Certificate intermediateCertificate, PrivateKey privateKey, String cn) {
         try {
             CertSigner certSigner = new CertSigner(privateKey, intermediateCertificate, caCertificate);
-            List<X509Certificate> certChain = certSigner.sign(certificationRequest,cn);
-            return certChain;
-        } catch (IOException | NoSuchAlgorithmException | CertificateException |
-                 OperatorCreationException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchProviderException e) {
+            return certSigner.sign(certificationRequest,cn);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | OperatorCreationException |
+                 SignatureException | InvalidKeyException | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
 
@@ -159,7 +152,7 @@ public class ClusterKeyGenerator {
         SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
         BigInteger serialNumber = new BigInteger(Long.toString(new SecureRandom().nextLong()));
         Date startDate = new Date();
-        Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
+        Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
         X500Name issuerSubject = JcaX500NameUtil.getSubject(intermediateCertificate);
         X500Name csrSubject = csr.getSubject();
         JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
@@ -222,7 +215,7 @@ public class ClusterKeyGenerator {
         SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
         BigInteger serialNumber = new BigInteger(Long.toString(new SecureRandom().nextLong()));
         Date startDate = new Date();
-        Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
+        Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
 
         X500Name issuerSubject = JcaX500NameUtil.getSubject(caCert);
         X500Name csrSubject = csr.getSubject();
@@ -252,8 +245,7 @@ public class ClusterKeyGenerator {
         //TODO do we need BC here?
         certificate.verify(caCert.getPublicKey());
 
-        CertificateAndCertificateChain result = new CertificateAndCertificateChain(certificate, Arrays.asList(certificate, caCert));
-        return result;
+        return new CertificateAndCertificateChain(certificate, Arrays.asList(certificate, caCert));
     }
 
 
@@ -267,8 +259,7 @@ public class ClusterKeyGenerator {
     public static KeyPairAndCsr generateIntermediateKeypairAndCsr(String domainName, String owningCountry) throws NoSuchAlgorithmException, OperatorCreationException {
         KeyPair keyPair = generateKeyPair(4096);
         PKCS10CertificationRequest csr = createCsr(domainName, owningCountry, keyPair);
-        KeyPairAndCsr intermediateCsr = new KeyPairAndCsr(keyPair,csr);
-        return intermediateCsr;
+        return new KeyPairAndCsr(keyPair,csr);
     }
 
     private static PKCS10CertificationRequest createCsr(String domainName, String owningCountry, KeyPair keyPair) throws OperatorCreationException {
@@ -279,16 +270,14 @@ public class ClusterKeyGenerator {
                         owningCountry
                 )
         );
-        PKCS10CertificationRequest csr = createCertificateRequest(x500Principal, keyPair, "SHA512withRSA");
-        return csr;
+        return createCertificateRequest(x500Principal, keyPair, "SHA512withRSA");
     }
 
     private static PKCS10CertificationRequest createCertificateRequest(X500Principal subject, KeyPair keyPair, String signAlgorithm) throws OperatorCreationException {
         JcaPKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(signAlgorithm);
         ContentSigner signer = signBuilder.build(keyPair.getPrivate());
-        PKCS10CertificationRequest csr = builder.build(signer);
-        return csr;
+        return builder.build(signer);
     }
 
 
@@ -312,7 +301,7 @@ public class ClusterKeyGenerator {
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder("SHA512withRSA");
         BigInteger serial = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date fromDate = new Date();
-        Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
+        Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
         X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
                 x500Principal,
                 serial,
@@ -332,8 +321,7 @@ public class ClusterKeyGenerator {
         ContentSigner signer = signBuilder.build(keyPair.getPrivate());
         X509Certificate cert = new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
 
-        KeyPairAndCertificate caDetails = new KeyPairAndCertificate(keyPair,cert);
-        return caDetails;
+        return new KeyPairAndCertificate(keyPair,cert);
     }
 
 
@@ -384,8 +372,7 @@ public class ClusterKeyGenerator {
     private static KeyPair generateKeyPair(int keysize) throws NoSuchAlgorithmException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(keysize);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return keyPair;
+        return keyPairGenerator.generateKeyPair();
     }
 
     public static String generatePassword(SecureRandom random, int length) {
@@ -397,7 +384,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    
+
     public static class KeyPairAndCsr {
         private KeyPair keyPair;
         

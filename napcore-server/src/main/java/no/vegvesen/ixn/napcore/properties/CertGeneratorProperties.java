@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -55,9 +54,9 @@ public class CertGeneratorProperties {
         try {
             KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keyStorePassword,"PKCS12");
             KeyStore trustStore = CertSigner.loadKeyStore(truststoreLocation,truststorePassword,"JKS");
-            PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyStorePassword.toCharArray());
-            X509Certificate intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
-            X509Certificate caCertificate = (X509Certificate) trustStore.getCertificate("myKey");
+            PrivateKey privateKey = CertSigner.getKey(keyStore, keyAlias, keyStorePassword);
+            X509Certificate intermediateCertificate = CertSigner.getCertificate(keyStore, keyAlias);
+            X509Certificate caCertificate = CertSigner.getCertificate(trustStore, "myKey");
             return new CertSigner(privateKey,intermediateCertificate,caCertificate);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
                  UnrecoverableKeyException e) {
