@@ -31,7 +31,7 @@ public class SSLContextFactory {
 		} catch (FileNotFoundException e) {
 			throw new InvalidSSLConfig("Could not load truststore",e);
 		}
-		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
+		return newSSLContext(keystore, keystoreDetails.getKeyPassword(), truststore);
 	}
 
 	private static KeyStore loadKeystoreFromStream(InputStream stream, KeystoreType type, String password) {
@@ -50,12 +50,18 @@ public class SSLContextFactory {
 	}
 
 	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
+		final KeyManagerFactory kmf;
+		final TrustManagerFactory tmf;
 		try {
 			// Get a KeyManager and initialize it
-			final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(ks, keyPassword.toCharArray());
+			kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			kmf.init(ks,keyPassword.toCharArray());
+		} catch (final GeneralSecurityException e) {
+			throw new InvalidSSLConfig(e);
+		}
+		try {
 
-			final TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			tmf.init(ts);
 
 			// Get the SSLContext to help create SSLSocketFactory
