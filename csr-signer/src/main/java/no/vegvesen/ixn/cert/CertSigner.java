@@ -58,6 +58,10 @@ public class CertSigner {
         this.caCertificate = caCertificate;
     }
 
+    public static X509Certificate getCertificate(KeyStore keyStore, String keyAlias) throws KeyStoreException {
+        return (X509Certificate) keyStore.getCertificate(keyAlias);
+    }
+
     public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
@@ -71,7 +75,7 @@ public class CertSigner {
         //But could probably just read it later from the cert.
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
-        Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
+        Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
         X500Name csrSubject = csr.getSubject();
         if (! cn.equals(getCN(csrSubject))) {
             throw new IllegalSubjectException();
@@ -120,8 +124,7 @@ public class CertSigner {
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
         certificate.verify(intermediateCertificate.getPublicKey());
-        List<X509Certificate> certificates = Arrays.asList(certificate,intermediateCertificate,caCertificate);
-        return certificates;
+        return Arrays.asList(certificate,intermediateCertificate,caCertificate);
     }
 
     public static String getCN(X500Name csrSubject) {
@@ -133,9 +136,6 @@ public class CertSigner {
                 if (BCStyle.CN.equals(type)) {
                     csrCn = IETFUtils.valueToString(typeAndValue.getValue());
                 }
-            }
-            if (csrCnRdn == null) {
-                throw new RuntimeException("Could not find CN for Subject");
             }
         } else {
             //TODO check the csrCn is correct. (Also other tings? Like org?)
@@ -158,14 +158,12 @@ public class CertSigner {
         JcaPEMWriter writer = new JcaPEMWriter(certWriter);
         writer.writeObject(certificate);
         writer.close();
-        String pem = certWriter.toString();
-        return pem;
+        return certWriter.toString();
     }
 
     public static PKCS10CertificationRequest getPkcs10CertificationRequest(String csrAsString) throws IOException {
         PEMParser csrParser = new PEMParser(new StringReader(csrAsString));
-        PKCS10CertificationRequest csr = (PKCS10CertificationRequest) csrParser.readObject();
-        return csr;
+        return (PKCS10CertificationRequest) csrParser.readObject();
     }
 
 
@@ -173,6 +171,10 @@ public class CertSigner {
         KeyStore keyStore = KeyStore.getInstance(storeType);
         keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
         return keyStore;
+    }
+
+    public static PrivateKey getKey(KeyStore keyStore, String keyAlias, String keyStorePassword) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        return (PrivateKey) keyStore.getKey(keyAlias, keyStorePassword.toCharArray());
     }
 
 }
