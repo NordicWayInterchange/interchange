@@ -130,7 +130,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -278,6 +278,26 @@ public class NeighbourRepositoryIT {
 		Subscription savedSub = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
 		assertThat(savedSub.getEndpoints()).hasSize(1);
+	}
+
+	@Test
+	public void getBySubscriptionStatusOnSubscriptionsReturnsOneNeighbour(){
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-multi-neighbour");
+		Endpoint endpoint1 = new Endpoint("my-queue-1","my-host", 5671);
+		sub1.setEndpoints(Collections.singleton(endpoint1));
+
+		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "my-multi-neighbour");
+		Endpoint endpoint2 = new Endpoint("my-queue-2","my-host", 5671);
+		sub2.setEndpoints(Collections.singleton(endpoint2));
+
+		Set<Subscription> subs = new HashSet<>(Arrays.asList(sub1, sub2));
+		SubscriptionRequest subscriptions = new SubscriptionRequest(subs);
+		Neighbour neighbour = new Neighbour("my-multi-neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), subscriptions);
+
+		repository.save(neighbour);
+
+		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(1);
+		assertThat(repository.findByName("my-multi-neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
 }
