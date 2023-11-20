@@ -31,7 +31,7 @@ public class SSLContextFactory {
 		} catch (FileNotFoundException e) {
 			throw new InvalidSSLConfig("Could not load truststore",e);
 		}
-		return newSSLContext(keystore, keystoreDetails.getKeyPassword(), truststore);
+		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
 	}
 
 	private static KeyStore loadKeystoreFromStream(InputStream stream, KeystoreType type, String password) {
