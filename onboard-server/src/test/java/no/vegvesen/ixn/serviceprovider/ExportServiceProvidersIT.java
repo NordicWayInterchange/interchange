@@ -88,7 +88,7 @@ public class ExportServiceProvidersIT {
 
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
-        List<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
+        List<PrivateChannel> privateChannelList = (List<PrivateChannel>) privateChannelRepository.findAll();
         writeToFile(path, serviceProviderList, privateChannelList);
 
         ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
