@@ -32,7 +32,6 @@ public class ImportServiceProvidersIT {
     @Autowired
     PrivateChannelRepository privateChannelRepository;
 
-    //TODO private Channels
     @Test
     @Disabled
     public void importServiceProviders() throws IOException, URISyntaxException {

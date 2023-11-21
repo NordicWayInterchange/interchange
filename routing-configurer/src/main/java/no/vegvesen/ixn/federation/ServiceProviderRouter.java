@@ -206,11 +206,10 @@ public class ServiceProviderRouter {
         }
 
         for (PrivateChannel privateChannel : privateChannels) {
-            if (privateChannel.getQueueName() == null) {
-                privateChannel.setQueueName(String.format("priv-%s", UUID.randomUUID().toString()));
-            }
+
             String peerName = privateChannel.getPeerName();
-            String queueName = privateChannel.getQueueName();
+            String queueName = privateChannel.getEndpoint().getQueueName();
+
             if (privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
                 GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 if (peer == null) {
@@ -229,15 +228,10 @@ public class ServiceProviderRouter {
                 provider.addQueueReadAccess(peerName, queueName);
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
-                if (privateChannel.getEndpoint() == null) {
-                    PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
-                    privateChannel.setEndpoint(endpoint);
-                }
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
                 GroupMember member = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-
                 long channelsWithPeerAsPeer = privateChannelRepository.countByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED);
                 long channelsWithServiceProviderAsPeer = privateChannelRepository.countByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
 

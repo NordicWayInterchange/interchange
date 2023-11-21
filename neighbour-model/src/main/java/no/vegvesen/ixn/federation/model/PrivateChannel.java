@@ -17,10 +17,6 @@ public class PrivateChannel {
 
     @Column
     private String peerName;
-
-    @Column
-    private String queueName;
-
     @Column
     private String serviceProviderName;
 
@@ -37,21 +33,13 @@ public class PrivateChannel {
         this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
-
-    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+    public PrivateChannel(String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peerName = peerName;
-        this.queueName = queueName;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status, String serviceProviderName) {
-        this.peerName = peerName;
-        this.queueName = queueName;
-        this.status = status;
-        this.serviceProviderName = serviceProviderName;
-    }
 
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
@@ -85,13 +73,6 @@ public class PrivateChannel {
         this.status = status;
     }
 
-    public String getQueueName() {
-        return queueName;
-    }
-
-    public void setQueueName(String uuid) {
-        this.queueName = uuid;
-    }
 
     public String getServiceProviderName() {
         return serviceProviderName;
@@ -107,12 +88,12 @@ public class PrivateChannel {
         if (!(o instanceof PrivateChannel)) return false;
         PrivateChannel that = (PrivateChannel) o;
         return peerName.equals(that.peerName) &&
-                Objects.equals(queueName, that.queueName);
+                Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(peerName, queueName);
+        return Objects.hash(peerName, endpoint);
     }
 
     @Override
@@ -121,7 +102,7 @@ public class PrivateChannel {
                 "id=" + id +
                 ", status=" + status +
                 ", peerName='" + peerName + '\'' +
-                ", queueName='" + queueName + '\'' +
+                ", serviceProviderName='"+serviceProviderName + '\'' +
                 ", endpoint='" + endpoint + '\'' +
                 '}';
     }

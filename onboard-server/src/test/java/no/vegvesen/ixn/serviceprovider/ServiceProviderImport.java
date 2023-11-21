@@ -102,7 +102,6 @@ public class ServiceProviderImport {
         for (PrivateChannelApi privateChannelApi : privateChannelApis) {
             importedPrivateChannels.add(new PrivateChannel(
                     privateChannelApi.getPeerName(),
-                    privateChannelApi.getEndpoint().getQueueName(),
                     PrivateChannelStatus.REQUESTED,
                     new PrivateChannelEndpoint(
                             privateChannelApi.getEndpoint().getHost(),
@@ -121,7 +120,6 @@ public class ServiceProviderImport {
         for (OldPrivateChannelApi privateChannelApi : privateChannelApis) {
             PrivateChannel privateChannel = new PrivateChannel(
                     privateChannelApi.getPeerName(),
-                    privateChannelApi.getQueueName(),
                     PrivateChannelStatus.REQUESTED,
                     serviceProviderName
             );

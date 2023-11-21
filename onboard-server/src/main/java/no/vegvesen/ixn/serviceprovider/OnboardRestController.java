@@ -319,6 +319,10 @@ public class OnboardRestController {
 		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
 			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
 
+			String queueName = UUID.randomUUID().toString();
+			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
+			newPrivateChannel.setEndpoint(endpoint);
+
 			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
 			savedChannelsList.add(savedChannel);
 		}

@@ -77,7 +77,6 @@ public class ExportServiceProvidersIT {
 
         privateChannelRepository.save(new PrivateChannel(
                 "my-peer",
-                "my-queue",
                 PrivateChannelStatus.CREATED,
                 new PrivateChannelEndpoint(
                         "my-host",
