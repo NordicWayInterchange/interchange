@@ -17,7 +17,6 @@ public class NeighbourSubscription {
     private NeighbourSubscriptionStatus subscriptionStatus;
 
     @Embedded
-    @Column(columnDefinition = "TEXT")
     private Selector selector;
 
     private String path;
