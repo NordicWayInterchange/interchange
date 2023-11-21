@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.CouldNotParseIdException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,12 @@ public class OnboardServerErrorAdvice {
 		return error(NOT_FOUND, e);
 	}
 
+	@ExceptionHandler({PrivateChannelException.class})
+	public ResponseEntity<ErrorDetails> handlePrivateChannelRequestException(PrivateChannelException e) {
+		return error(BAD_REQUEST, e);
+	}
 	@ExceptionHandler({CouldNotParseIdException.class})
-	public ResponseEntity<ErrorDetails> handlePrivateChannelRequestException(RuntimeException e) {
+	public ResponseEntity<ErrorDetails> handleParseErrorException(CouldNotParseIdException e){
 		return error(BAD_REQUEST, e);
 	}
 

@@ -6,6 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.CouldNotParseIdException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
@@ -663,18 +665,30 @@ public class OnboardRestControllerIT {
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
         assertThat(privateChannelRepository.findAll().size()).isEqualTo(3);
-        assertThrows(RuntimeException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
     }
 
     @Test
-    public void testDeletingInvalidChannel(){
+    public void testDeletingNonExistentChannel(){
         String serviceProviderName = "my-service-provider";
         PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
 
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel)));
 
-        assertThrows(RuntimeException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
+        NotFoundException thrown = assertThrows(NotFoundException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
+        assertThat(thrown.getMessage()).isEqualTo("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
         assertThat(privateChannelRepository.findAll().size()).isEqualTo(1);
+    }
+    @Test
+    public void testDeletingInvalidChannelId(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)));
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.deletePrivateChannel(serviceProviderName, "notAnId"));
+        assertThat(thrown.getMessage()).contains("invalid");
     }
 
     @Test
@@ -699,7 +713,6 @@ public class OnboardRestControllerIT {
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
         assertThat(channelResponse).isNotNull();
-        assertThrows(NotFoundException.class,() -> restController.getPrivateChannel("non-existent-provider", "1"));
     }
     @Test
     public void testGettingNonExistentChannel(){
@@ -707,8 +720,18 @@ public class OnboardRestControllerIT {
         PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
         restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
 
-       assertThrows(RuntimeException.class, () -> restController.getPrivateChannel(serviceProviderName, "99"));
-       assertThrows(RuntimeException.class, () -> restController.getPrivateChannel(serviceProviderName, ""));
+       NotFoundException thrown = assertThrows(NotFoundException.class, () -> restController.getPrivateChannel(serviceProviderName, "99"));
+       assertThat(thrown.getMessage()).contains("Could not find");
+    }
+    @Test
+    public void testGettingChannelWithInvalidId(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.getPrivateChannel(serviceProviderName, "notAnId"));
+        assertThat(thrown.getMessage()).contains("invalid");
+
     }
     @Test
     public void testGetPeerPrivateChannels(){

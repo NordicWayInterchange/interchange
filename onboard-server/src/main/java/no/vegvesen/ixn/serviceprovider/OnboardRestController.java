@@ -288,7 +288,7 @@ public class OnboardRestController {
 		Integer subsId;
 		try {
 			subsId = Integer.parseInt(subscriptionId);
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
 		}
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
@@ -308,7 +308,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		if (clientChannel == null || clientChannel.getPrivateChannels() == null || clientChannel.getPrivateChannels().isEmpty()) {
-			throw new PrivateChannelException("Client channel cannot be null");
+			throw new PrivateChannelException("Private channel can not be null");
 		}
 
 		ServiceProvider newServiceProvider = getOrCreateServiceProvider(serviceProviderName);
@@ -341,7 +341,7 @@ public class OnboardRestController {
 		Integer parsedId;
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
-		}catch (Exception e){
+		}catch (NumberFormatException e){
 			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
 		}
 
@@ -381,7 +381,7 @@ public class OnboardRestController {
 
 		try{
 			parsedId = Integer.parseInt(privateChannelId);
-		}catch (Exception e){
+		}catch (NumberFormatException e){
 			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
 		}
 
