@@ -664,7 +664,7 @@ public class OnboardRestControllerIT {
 
         restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
-        assertThat(privateChannelRepository.findAll().size()).isEqualTo(3);
+        assertThat(privateChannelRepository.findAll()).hasSize(3);
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
         assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
     }
@@ -678,7 +678,7 @@ public class OnboardRestControllerIT {
 
         NotFoundException thrown = assertThrows(NotFoundException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
         assertThat(thrown.getMessage()).isEqualTo("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
-        assertThat(privateChannelRepository.findAll().size()).isEqualTo(1);
+        assertThat(privateChannelRepository.findAll()).hasSize(1);
     }
     @Test
     public void testDeletingInvalidChannelId(){
