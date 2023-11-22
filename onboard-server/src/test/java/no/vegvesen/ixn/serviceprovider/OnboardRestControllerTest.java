@@ -511,6 +511,21 @@ public class OnboardRestControllerTest {
 		verify(privateChannelRepository, times(0)).save(any());
 	}
 	@Test
+	public void testAddingChannelWithServiceProviderAsPeerName() throws Exception {
+		String serviceProviderName = "king_olav.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelApi(serviceProviderName)));
+
+		mockMvc.perform(
+				post(String.format("/%s/privatechannels", serviceProviderName))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+		).andExpect(status().isBadRequest());
+
+		verify(privateChannelRepository, times(0)).save(any());
+	}
+	@Test
 	public void testAddingInvalidRequest() throws Exception{
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);

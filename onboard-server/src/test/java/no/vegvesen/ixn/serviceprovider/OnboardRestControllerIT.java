@@ -668,7 +668,14 @@ public class OnboardRestControllerIT {
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
         assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
     }
+    @Test
+    public void testAddingChannelWithServiceProviderAsPeerName(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi(serviceProviderName);
 
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
+        assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
+    }
     @Test
     public void testDeletingNonExistentChannel(){
         String serviceProviderName = "my-service-provider";
