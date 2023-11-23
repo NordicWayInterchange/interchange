@@ -10,7 +10,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>api-model</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

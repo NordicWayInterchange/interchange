@@ -28,7 +28,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>napcore-rest-api</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
