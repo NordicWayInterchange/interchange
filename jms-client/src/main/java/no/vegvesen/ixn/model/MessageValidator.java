@@ -48,6 +48,7 @@ public class MessageValidator {
 				mandatoryPropertyNames = MessageProperty.mandatoryCamPropertyNames;
 				break;
 			default:
+				logger.warn("MessageType '{}' is not valid",messageType);
 				return false;
 		}
 		return validProperties(message, mandatoryPropertyNames);
