@@ -40,6 +40,7 @@ public class ImageSource extends Source{
                 .userId("localhost")
                 .messageType("DENM")
                 .publisherId("NO-12345")
+                .publicationId("123")
                 .protocolVersion("DENM:1.2.2")
                 .originatingCountry(originatingCountry)
                 .quadTreeTiles(messageQuadTreeTiles)
