@@ -14,9 +14,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <spring-boot-dependencies.version>2.7.5</spring-boot-dependencies.version>
-        <picocli-version>4.7.0</picocli-version>
-        <testcontainers.version>1.17.5</testcontainers.version>
+        <spring-boot-dependencies.version>2.7.17</spring-boot-dependencies.version>
+        <picocli-version>4.7.5</picocli-version>
+        <testcontainers.version>1.19.3</testcontainers.version>
     </properties>
 
     <distributionManagement>
@@ -98,23 +98,17 @@
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-jms-client</artifactId>
                 <!-- The 1.7.* version line uses javax.jms, and 2.1.* uses jakarta.jms-->
-                <version>1.7.0</version>
+                <version>1.11.0</version>
             </dependency>
             <dependency>
                 <groupId>dnsjava</groupId>
                 <artifactId>dnsjava</artifactId>
-                <version>3.5.1</version>
+                <version>3.5.3</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>8.0.6</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>9.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -140,12 +134,17 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.74</version>
+                <version>1.77</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
-                <version>1.74</version>
+                <version>1.77</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.7.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
