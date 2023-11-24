@@ -161,8 +161,16 @@ public class OnboardRestController {
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
+		Integer parsedCapabilityId;
+		try{
+			parsedCapabilityId = Integer.parseInt(capabilityId);
+		}
+		catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", capabilityId));
+		}
+
 		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
-		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
+		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
 
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
@@ -177,8 +185,16 @@ public class OnboardRestController {
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+
+		Integer parsedCapabilityId;
+		try{
+			parsedCapabilityId = Integer.parseInt(capabilityId);
+		}
+		catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", capabilityId));
+		}
 		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
-				c.getId().equals(Integer.parseInt(capabilityId)))
+				c.getId().equals(parsedCapabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
@@ -252,7 +268,15 @@ public class OnboardRestController {
 
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(dataTypeId));
+		Integer parsedDataTypeId;
+		try{
+			parsedDataTypeId = Integer.parseInt(dataTypeId);
+		}
+		catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", dataTypeId));
+		}
+
+		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
@@ -285,12 +309,14 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
 		Integer subsId;
 		try {
 			subsId = Integer.parseInt(subscriptionId);
 		} catch (NumberFormatException e) {
 			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
 		}
+
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
 				s.getId().equals(subsId))
@@ -476,8 +502,17 @@ public class OnboardRestController {
 		logger.info("get delivery {}, for service provider {}", deliveryId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+
+		Integer parsedDeliveryId;
+		try{
+			parsedDeliveryId = Integer.parseInt(deliveryId);
+		}
+		catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", deliveryId));
+		}
+
 		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
-				d.getId().equals(Integer.parseInt(deliveryId)))
+				d.getId().equals(parsedDeliveryId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
@@ -497,8 +532,16 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
+		Integer parsedId;
+		try{
+			parsedId = Integer.parseInt(deliveryId);
+		}
+		catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", deliveryId));
+		}
+
 		//Setting the Delivery to TEAR_DOWN
-		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
+		serviceProvider.removeLocalDelivery(parsedId);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
