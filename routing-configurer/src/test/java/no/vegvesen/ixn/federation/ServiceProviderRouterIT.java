@@ -9,15 +9,13 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.proton.amqp.transport.End;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +81,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
 
+	@MockBean
+	PrivateChannelRepository privateChannelRepository;
+
 	@Autowired
 	QpidClient client;
 
@@ -126,6 +127,185 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				.flatMap(s -> s.getLocalEndpoints().stream())
 				.collect(Collectors.toSet());
 		assertThat(endpoints2).hasSize(1);
+	}
+
+	@Test
+	public void setUpQueueForPrivateChannels(){
+		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName");
+		PrivateChannel privateChannel = new PrivateChannel("private-channel",PrivateChannelStatus.REQUESTED, endpoint,"service-provider");
+
+		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(client.queueExists(privateChannel.getEndpoint().getQueueName())).isTrue();
+		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+
+		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(1)).findAllByStatusAndServiceProviderName(any(), any());
+
+	}
+
+	@Test
+	public void tearDownQueueForPrivateChannels(){
+		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName");
+		PrivateChannel privateChannel = new PrivateChannel("private-channel",PrivateChannelStatus.REQUESTED, endpoint,"service-provider");
+
+		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of());
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(client.queueExists(privateChannel.getEndpoint().getQueueName())).isFalse();
+		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+
+		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
+	}
+
+	@Test
+	public void doNotRemoveServiceProviderFromGroupWhenTheyAreServiceProviderInAnotherChannel() {
+		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider.getName(),80,"queueName_1");
+		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName_2");
+
+		PrivateChannel privateChannel_1 = new PrivateChannel("private-channel-1",PrivateChannelStatus.REQUESTED, endpoint_1,"service-provider");
+		PrivateChannel privateChannel_2 = new PrivateChannel("private-channel-2", PrivateChannelStatus.CREATED, endpoint_2, "service-provider");
+
+		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
+		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		privateChannel_1.setStatus(PrivateChannelStatus.TEAR_DOWN);
+
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		when(privateChannelRepository.countByPeerNameAndStatus(any(), any())).thenReturn(0L,0L);
+		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(1L,0L);
+
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+
+		verify(privateChannelRepository, times(2)).countByPeerNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
+	}
+
+	@Test
+	public void doNotRemoveServiceProviderFromGroupWhenTheyArePeerInAnotherChannel(){
+		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider.getName(),80,"queueName_1");
+		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName_2");
+
+		PrivateChannel privateChannel_1 = new PrivateChannel("private-channel-1",PrivateChannelStatus.REQUESTED, endpoint_1,"service-provider");
+		PrivateChannel privateChannel_2 = new PrivateChannel("service-provider", PrivateChannelStatus.REQUESTED, endpoint_2, "service-provider");
+
+
+		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
+		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		privateChannel_1.setStatus(PrivateChannelStatus.TEAR_DOWN);
+
+		when(privateChannelRepository.countByPeerNameAndStatus(any(), any())).thenReturn(0L,1L);
+		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(1L,0L);
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+
+		verify(privateChannelRepository, times(2)).countByPeerNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
+	}
+
+	@Test
+	public void doNotRemovePeerFromGroupWhenTheyAreServiceProviderInAnotherChannel(){
+		ServiceProvider serviceProvider_1 = new ServiceProvider("service-1");
+		ServiceProvider serviceProvider_2 = new ServiceProvider("service-2");
+		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider_1.getName(),80,"queueName_1");
+		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider_2.getName(), 80, "queueName_2");
+
+		PrivateChannel privateChannel_1 = new PrivateChannel("service-2", PrivateChannelStatus.REQUESTED, endpoint_1, "service-1");
+		PrivateChannel privateChannel_2 = new PrivateChannel("service-1", PrivateChannelStatus.REQUESTED, endpoint_2, "service-2");
+
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1));
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_2.getName())).thenReturn(List.of(privateChannel_2));
+
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider_2.getName())).thenReturn(List.of(privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider_1, client.getQpidDelta());
+		router.syncPrivateChannels(serviceProvider_2, client.getQpidDelta());
+
+		privateChannel_1.setStatus(PrivateChannelStatus.TEAR_DOWN);
+
+		when(privateChannelRepository.countByPeerNameAndStatus(any(), any())).thenReturn(0L,1L);
+		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(0L,1L);
+
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider_1.getName())).thenReturn(List.of());
+
+		router.syncPrivateChannels(serviceProvider_1, client.getQpidDelta());
+
+		assertThat(client.getGroupMember(serviceProvider_2.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getGroupMember(serviceProvider_1.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+
+		verify(privateChannelRepository, times(2)).countByPeerNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
+	}
+
+	@Test
+	public void doNotRemovePeerFromGroupWhenTheyArePeerInAnotherChannel(){
+		ServiceProvider serviceProvider_1 = new ServiceProvider("service-1");
+		ServiceProvider serviceProvider_2 = new ServiceProvider("service-2");
+
+		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider_1.getName(), 80, "queueName_1");
+		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider_1.getName(), 80, "queueName_2");
+		PrivateChannelEndpoint endpoint_3 = new PrivateChannelEndpoint(serviceProvider_2.getName(), 80, "queueName_3");
+
+		PrivateChannel privateChannel_1 = new PrivateChannel("service-2",PrivateChannelStatus.REQUESTED, endpoint_1, "service-1");
+		PrivateChannel privateChannel_2 = new PrivateChannel("service-2", PrivateChannelStatus.REQUESTED, endpoint_2, "service-1");
+		PrivateChannel privateChannel_3 = new PrivateChannel("service-1", PrivateChannelStatus.REQUESTED, endpoint_3, "service-2");
+
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_2.getName())).thenReturn(List.of(privateChannel_3));
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1, privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider_2, client.getQpidDelta());
+		router.syncPrivateChannels(serviceProvider_1, client.getQpidDelta());
+
+		privateChannel_1.setStatus(PrivateChannelStatus.TEAR_DOWN);
+
+		when(privateChannelRepository.countByPeerNameAndStatus(any(),any())).thenReturn(1L,1L);
+		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(1L,1L);
+		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider_1.getName())).thenReturn(List.of(privateChannel_2));
+
+		router.syncPrivateChannels(serviceProvider_1, client.getQpidDelta());
+		assertThat(client.getGroupMember(serviceProvider_2.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+
+		verify(privateChannelRepository, times(2)).countByPeerNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
+		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
+		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
+
 	}
 
 	@Test
@@ -314,80 +494,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(endpoint1.getSource())).isTrue();
 
 		assertThat(sub2.getLocalEndpoints()).hasSize(0);
-	}
-
-	@Test
-	public void setUpQueueForPrivateChannels() {
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setName("my-private-service-provider");
-
-		serviceProvider.addPrivateChannel("my-client");
-
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		verify(serviceProviderRepository, times(1)).save(any());
-
-		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
-
-		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
-
-		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
-		assertThat(client.queueExists(privateChannel.getQueueName())).isTrue();
-		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-	}
-
-	@Test
-	public void tearDownQueueForPrivateChannels() {
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setName("my-private-service-provider-1");
-
-		serviceProvider.addPrivateChannel("my-client-1");
-
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		verify(serviceProviderRepository, times(1)).save(any());
-
-		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
-
-		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
-
-		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
-
-		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		verify(serviceProviderRepository, times(2)).save(any());
-
-		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
-		assertThat(serviceProvider.getPrivateChannels()).hasSize(0);
-	}
-
-	@Test
-	public void doNotRemoveServiceProviderFromGroupWhenTheyHaveMultiplePrivateChannels() {
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setName("my-private-service-provider-2");
-
-		serviceProvider.addPrivateChannel("my-client-11");
-		serviceProvider.addPrivateChannel("my-client-12");
-
-		//when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		verify(serviceProviderRepository, times(1)).save(any());
-
-		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(2);
-
-		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
-
-		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
-
-		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		verify(serviceProviderRepository, times(2)).save(any());
-
-		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMember(privateChannel.getPeerName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
 
 	@Test
@@ -689,7 +795,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"no-change-for-requested-delivery-sp",
 				new Capabilities(),
-				Collections.emptySet(),
 				Collections.emptySet(),
 				Collections.singleton(
 						localDelivery

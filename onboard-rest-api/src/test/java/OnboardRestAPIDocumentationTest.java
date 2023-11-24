@@ -4,10 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class OnboardRestAPIDocumentationTest {
 
@@ -381,6 +378,42 @@ public class OnboardRestAPIDocumentationTest {
         api.setPeerName("sp2");
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }
+    @Test
+    public void AddPrivateChannelRequest() throws JsonProcessingException {
+        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu");
+        privateChannel.setStatus(PrivateChannelStatusApi.REQUESTED);
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest("king_gustaf.bouvetinterchange.eu",List.of(privateChannel));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    @Test
+    public void addPrivateChannelResponse() throws JsonProcessingException {
+        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, 1);
+        AddPrivateChannelResponse response = new AddPrivateChannelResponse();
+        response.setName("king_gustaf.bouvetinterchange.eu");
+        response.getPrivateChannels().add(privateChannel);
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+    @Test
+    public void getPrivateChannelResponse() throws JsonProcessingException {
+        PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
+        GetPrivateChannelResponse response = new GetPrivateChannelResponse(1, "king_olaf.bouvetinterchange.eu",endpoint,"king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+    @Test
+    public void ListPrivateChannelsResponse()throws JsonProcessingException{
+        PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
+        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,1);
+        ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+    @Test
+    public void ListPeerPrivateChannels() throws JsonProcessingException {
+        PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
+        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(1,"king_olaf.bouvetinterchange.eu" ,PrivateChannelStatusApi.CREATED, endpoint);
+        ListPeerPrivateChannels response = new ListPeerPrivateChannels("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
 
     @Test
     public void addMultipleCapabilitiesTest() throws JsonProcessingException {
@@ -500,4 +533,5 @@ public class OnboardRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
+
 }

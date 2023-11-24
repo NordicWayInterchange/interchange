@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import org.junit.jupiter.api.Disabled;
@@ -28,7 +29,9 @@ public class ImportServiceProvidersIT {
     @Autowired
     ServiceProviderRepository repository;
 
-    //TODO private Channels
+    @Autowired
+    PrivateChannelRepository privateChannelRepository;
+
     @Test
     @Disabled
     public void importServiceProviders() throws IOException, URISyntaxException {
@@ -61,13 +64,17 @@ public class ImportServiceProvidersIT {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         List<ServiceProvider> serviceProvidersToSave = new ArrayList<>();
+        List<PrivateChannel> privateChannelsToSave = new ArrayList<>();
         LocalDateTime saveTime = LocalDateTime.now();
         for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
             ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi, saveTime);
             serviceProvidersToSave.add(serviceProvider);
+
+            List<PrivateChannel> privateChannels = ServiceProviderImport.mapPrivateChannelApiToPrivateChannels(serviceProviderApi.getName(), serviceProviderApi.getPrivateChannels());
+            privateChannelsToSave.addAll(privateChannels);
         }
         repository.saveAll(serviceProvidersToSave);
-
+        privateChannelRepository.saveAll(privateChannelsToSave);
     }
 
 

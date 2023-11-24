@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ServiceProviderImport {
@@ -79,18 +81,31 @@ public class ServiceProviderImport {
             deliveries.add(delivery);
         }
 
-        Set<PrivateChannel> privateChannels = new HashSet<>();
-        for (PrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
-            privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), privateChannelApi.getQueueName(), PrivateChannelStatus.REQUESTED));
-        }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
-                privateChannels,
                 savedTimestamp
         );
         serviceProvider.addDeliveries(deliveries);
         return serviceProvider;
+    }
+
+    public static List<PrivateChannel> mapPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<PrivateChannelApi> privateChannelApis) {
+        List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
+
+        for (PrivateChannelApi privateChannelApi : privateChannelApis) {
+            importedPrivateChannels.add(new PrivateChannel(
+                    privateChannelApi.getPeerName(),
+                    PrivateChannelStatus.REQUESTED,
+                    new PrivateChannelEndpoint(
+                            privateChannelApi.getEndpoint().getHost(),
+                            privateChannelApi.getEndpoint().getPort(),
+                            privateChannelApi.getEndpoint().getQueueName()
+                    ),
+                    serviceProviderName
+            ));
+        }
+        return importedPrivateChannels;
     }
 
     /*

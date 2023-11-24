@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -33,10 +31,6 @@ public class ServiceProvider {
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "priv_channel_id", foreignKey = @ForeignKey(name = "fk_priv_channel"))
-	private Set<PrivateChannel> privateChannels = new HashSet<>();
-
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
 	private Set<LocalDelivery> deliveries = new HashSet<>();
 
@@ -60,27 +54,23 @@ public class ServiceProvider {
 						   String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   LocalDateTime subscriptionUpdated) {
 
 		this.id = id;
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
-		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   LocalDateTime subscriptionUpdated) {
 
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
-		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
@@ -88,13 +78,11 @@ public class ServiceProvider {
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> localSubscriptions,
-						   Set<PrivateChannel> privateChannels,
 						   Set<LocalDelivery> localDeliveries,
 						   LocalDateTime subscriptionUpdated) {
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(localSubscriptions);
-		this.privateChannels.addAll(privateChannels);
 		this.deliveries.addAll(localDeliveries);
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
@@ -202,34 +190,6 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
-	public PrivateChannel addPrivateChannel(String peerName) {
-		PrivateChannel newPrivateChannel = new PrivateChannel(peerName, PrivateChannelStatus.REQUESTED);
-		if(privateChannels.contains(newPrivateChannel)){
-			throw new PrivateChannelException("Client already has private channel");
-		} else {
-			privateChannels.add(newPrivateChannel);
-		}
-		return newPrivateChannel;
-	}
-
-	public void setPrivateChannelToTearDown(Integer privateChannelId) {
-		PrivateChannel privateChannelToDelete = privateChannels
-				.stream()
-				.filter(privateChannel -> privateChannel.getId().equals(privateChannelId))
-				.findFirst()
-				.orElseThrow(
-						() -> new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.")
-				);
-		privateChannelToDelete.setStatus(PrivateChannelStatus.TEAR_DOWN);
-	}
-
-	public Set<PrivateChannel> getPrivateChannels() {
-		return privateChannels;
-	}
-
-	public void setPrivateChannels(Set<PrivateChannel> newPrivateChannels) {
-		this.privateChannels = newPrivateChannels;
-	}
 
 	public void setDeliveries(Set<LocalDelivery> deliveries) {
 		this.deliveries = deliveries;
@@ -276,7 +236,6 @@ public class ServiceProvider {
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
-				", privateChannels=" + Arrays.toString(privateChannels.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}

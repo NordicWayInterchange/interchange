@@ -38,6 +38,8 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.GetSubscription.class,
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
+                OnboardRestClientApplication.GetPrivateChannel.class,
+                OnboardRestClientApplication.GetPeerPrivateChannels.class,
                 OnboardRestClientApplication.DeletePrivateChannel.class,
                 OnboardRestClientApplication.FetchMatchingCapabilities.class
         })
@@ -276,8 +278,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            PrivateChannelApi privateChannel = mapper.readValue(file,PrivateChannelApi.class);
-            PrivateChannelApi result = client.addPrivateChannel(privateChannel);
+            AddPrivateChannelRequest privateChannel = mapper.readValue(file, AddPrivateChannelRequest.class);
+            AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
@@ -311,7 +313,38 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            PrivateChannelListApi result = client.getPrivateChannels();
+            ListPrivateChannelsResponse result = client.getPrivateChannels();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+            return 0;
+        }
+    }
+    @Command(name="getprivatechannel", description = "Get private channel by id")
+    static class GetPrivateChannel implements Callable<Integer>{
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index="0", description = "The ID of the private channel to get")
+        Integer privateChannelId;
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            GetPrivateChannelResponse result = client.getPrivateChannel(privateChannelId);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+            return 0;
+        }
+    }
+    @Command(name="getpeerprivatechannels", description = "Get all private channels with service provider as peer")
+    static class GetPeerPrivateChannels implements Callable<Integer>{
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            ListPeerPrivateChannels result = client.getPeerPrivateChannels();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }

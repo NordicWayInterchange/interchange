@@ -6,6 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.CouldNotParseIdException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
@@ -13,6 +15,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -24,10 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,6 +46,9 @@ public class OnboardRestControllerIT {
 
     @Autowired
     private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private PrivateChannelRepository privateChannelRepository;
 
     @MockBean
     private CertService certService;
@@ -636,4 +639,171 @@ public class OnboardRestControllerIT {
         assertThat(serviceProvider.getDeliveries()).hasSize(1);
 
     }
+
+    @Test
+    public void testAddingAndDeletingChannel(){
+
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
+
+        AddPrivateChannelResponse response = restController.addPrivateChannel(serviceProviderName, request);
+
+        System.out.println(response.getPrivateChannels().get(0));
+        restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
+        assertThat(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.TEAR_DOWN, serviceProviderName).size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testAddingChannels(){
+        String serviceProviderName = "my-service-provider";
+
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
+        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+
+        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+
+        assertThat(privateChannelRepository.findAll()).hasSize(3);
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
+    }
+    @Test
+    public void testAddingChannelWithServiceProviderAsPeerName(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi(serviceProviderName);
+
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
+        assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
+    }
+    @Test
+    public void testDeletingNonExistentChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
+        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel)));
+
+        NotFoundException thrown = assertThrows(NotFoundException.class, () -> restController.deletePrivateChannel(serviceProviderName, "99"));
+        assertThat(thrown.getMessage()).isEqualTo("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
+        assertThat(privateChannelRepository.findAll()).hasSize(1);
+    }
+    @Test
+    public void testDeletingInvalidChannelId(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)));
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.deletePrivateChannel(serviceProviderName, "notAnId"));
+        assertThat(thrown.getMessage()).contains("invalid");
+    }
+
+    @Test
+    public void testGettingPrivateChannels(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
+        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        ListPrivateChannelsResponse response = restController.getPrivateChannels(serviceProviderName);
+        assertThat(response.getPrivateChannels().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void testGettingChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
+        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+
+        AddPrivateChannelResponse privateChannels = restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
+
+        assertThat(channelResponse).isNotNull();
+    }
+    @Test
+    public void testGettingNonExistentChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+
+       NotFoundException thrown = assertThrows(NotFoundException.class, () -> restController.getPrivateChannel(serviceProviderName, "99"));
+       assertThat(thrown.getMessage()).contains("Could not find");
+    }
+    @Test
+    public void testGettingChannelWithInvalidId(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.getPrivateChannel(serviceProviderName, "notAnId"));
+        assertThat(thrown.getMessage()).contains("invalid");
+
+    }
+    @Test
+    public void testGetPeerPrivateChannels(){
+        String serviceProviderName_1 = "my-service-provider";
+        String serviceProviderName_2 = "my-service-provider2";
+
+        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
+        PrivateChannelApi clientChannel_2 = new PrivateChannelApi(serviceProviderName_1);
+
+        restController.addPrivateChannel(serviceProviderName_1,new AddPrivateChannelRequest(List.of(clientChannel_1)));
+        restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
+
+        ListPeerPrivateChannels response_1 = restController.getPeerPrivateChannels(serviceProviderName_1);
+        ListPeerPrivateChannels response_2 = restController.getPeerPrivateChannels(serviceProviderName_2);
+        assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
+        assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testListDeliveries(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Set.of(
+                        new SelectorApi("messageType = 'DENM'")
+                )
+        );
+        restController.addDeliveries(serviceProviderName, request);
+        ListDeliveriesResponse response = restController.listDeliveries(serviceProviderName);
+
+        assertThat(response.getDeliveries().size()).isEqualTo(1);
+        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+
+    }
+
+    @Test
+    public void testGettingDelivery(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Set.of(
+                        new SelectorApi("messageType = 'DENM'")
+                )
+        );
+        AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
+
+        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId();
+        GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
+
+        assertThat(getDeliveryResponse).isNotNull();
+        // Non-existent delivery
+        assertThrows(NotFoundException.class, () -> {
+           restController.getDelivery(serviceProviderName, "999");
+        });
+    }
+
+    @Test
+    public void testGettingServiceProviders(){
+        ServiceProvider serviceProvider_1 = new ServiceProvider("service-provider-1");
+        ServiceProvider serviceProvider_2 = new ServiceProvider("service-provider-2");
+        ServiceProvider serviceProvider_3 = new ServiceProvider("service-provider-3");
+        serviceProviderRepository.saveAll(List.of(serviceProvider_1,serviceProvider_2,serviceProvider_3));
+
+        assertThat(restController.getServiceProviders().size()).isEqualTo(3);
+
+    }
+
 }

@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -36,7 +37,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -72,6 +72,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         }
     }
 
+
     private static Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
     private static Path testKeysPath = getFolderPath("target/test-keys" + LocalSubscriptionQpidStructureIT.class.getSimpleName());
@@ -93,6 +94,9 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     @MockBean
     OutgoingMatchRepository outgoingMatchRepository;
+
+    @MockBean
+    PrivateChannelRepository privateChannelRepository;
 
 
     @Autowired
@@ -116,7 +120,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         Collections.emptySet(),
                         Collections.emptySet())
                 ),
-                Collections.emptySet(),
                 LocalDateTime.now());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         QpidDelta delta = client.getQpidDelta();

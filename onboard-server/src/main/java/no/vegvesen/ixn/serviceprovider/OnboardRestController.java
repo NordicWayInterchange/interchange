@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +29,7 @@ public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final NeighbourRepository neighbourRepository;
+	private final PrivateChannelRepository privateChannelRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
@@ -38,10 +39,11 @@ public class OnboardRestController {
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
 								 NeighbourRepository neighbourRepository,
-								 CertService certService,
+								 PrivateChannelRepository privateChannelRepository, CertService certService,
 								 InterchangeNodeProperties nodeProperties) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.neighbourRepository = neighbourRepository;
+		this.privateChannelRepository = privateChannelRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
 	}
@@ -286,7 +288,7 @@ public class OnboardRestController {
 		Integer subsId;
 		try {
 			subsId = Integer.parseInt(subscriptionId);
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
 		}
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
@@ -300,59 +302,115 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
+	public AddPrivateChannelResponse addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(clientChannel == null) {
-			throw new PrivateChannelException("Client channel cannot be null");
+		if (clientChannel == null || clientChannel.getPrivateChannels() == null || clientChannel.getPrivateChannels().isEmpty()) {
+			throw new PrivateChannelException("Private channel can not be null");
 		}
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
+		ServiceProvider newServiceProvider = getOrCreateServiceProvider(serviceProviderName);
+		serviceProviderRepository.save(newServiceProvider);
 
-		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getPeerName());
+		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
-		serviceProviderRepository.save(serviceProviderToUpdate);
+		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
+
+			if(privateChannelToAdd.getPeerName().equals(serviceProviderName)){
+				throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
+			}
+
+			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+
+			String queueName = "priv-"+UUID.randomUUID();
+			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
+			newPrivateChannel.setEndpoint(endpoint);
+
+			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
+			savedChannelsList.add(savedChannel);
+		}
+
 		OnboardMDCUtil.removeLogVariables();
-		return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+		return typeTransformer.transformPrivateChannelListToAddPrivateChannelsResponse(serviceProviderName,savedChannelsList);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
+		Integer parsedId;
+		try{
+			parsedId = Integer.parseInt(privateChannelId);
+		}catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
+		}
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
+		if (privateChannelToUpdate == null) {
+			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
+		}
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
-		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		logger.debug("Updated Service Provider: {}", saved.toString());
+		privateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel saved = privateChannelRepository.save(privateChannelToUpdate);
 
-		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");
+		logger.debug("Updated Private Channel: {}", saved);
+
 		OnboardMDCUtil.removeLogVariables();
-		return redirect;
-
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
+	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(serviceProviderName);
 
-		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
-		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
-		for(PrivateChannel privateChannel : privateChannels){
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
-		}
 		OnboardMDCUtil.removeLogVariables();
-		return new PrivateChannelListApi(privateChannelsApis);
+		return typeTransformer.transformPrivateChannelListToListPrivateChannels(serviceProviderName, privateChannels);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
+	public GetPrivateChannelResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		Integer parsedId;
+
+		try{
+			parsedId = Integer.parseInt(privateChannelId);
+		}catch (NumberFormatException e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
+		}
+
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
+		if (privateChannel == null) {
+			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
+		}
+
+		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
+		OnboardMDCUtil.removeLogVariables();
+
+		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
+	}
+
+	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/peer")
+	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable String serviceProviderName){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Get private channels where peername is {}", serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(serviceProviderName);
+
+		OnboardMDCUtil.removeLogVariables();
+		return typeTransformer.transformPrivateChannelListToListPrivateChannelsWithServiceProvider(serviceProviderName, privateChannels);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -5,12 +5,11 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
-import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,11 +21,11 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,6 +38,8 @@ public class ExportServiceProvidersIT {
 
     @Autowired
     ServiceProviderRepository repository;
+    @Autowired
+    PrivateChannelRepository privateChannelRepository;
 
 
     @Test
@@ -58,7 +59,9 @@ public class ExportServiceProvidersIT {
                                                 Collections.singleton("123"),
                                                 Collections.singleton(6)
                                         ),
-                                        new Metadata()
+                                        new Metadata(
+                                                RedirectStatus.OPTIONAL
+                                        )
                                 )
                         )
                 )
@@ -71,15 +74,28 @@ public class ExportServiceProvidersIT {
                 )
         );
         repository.save(serviceProvider);
+
+        privateChannelRepository.save(new PrivateChannel(
+                "my-peer",
+                PrivateChannelStatus.CREATED,
+                new PrivateChannelEndpoint(
+                        "my-host",
+                        5671,
+                        "my-queue"
+                ),
+                serviceProvider.getName()
+        ));
+
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
-        writeToFile(path, serviceProviderList);
+        List<PrivateChannel> privateChannelList = (List<PrivateChannel>) privateChannelRepository.findAll();
+        writeToFile(path, serviceProviderList, privateChannelList);
 
         ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
         assertThat(serviceProviderApis.length).isEqualTo(1);
     }
 
-    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList) throws IOException {
+    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, List<PrivateChannel> privateChannelList) throws IOException {
         CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
         TypeTransformer transformer = new TypeTransformer();
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -103,13 +119,16 @@ public class ExportServiceProvidersIT {
             }
             serviceProviderApi.setDeliveries(deliveries);
 
+            Set<PrivateChannel> serviceProviderPrivateChannelList = privateChannelList.stream().filter(p -> p.getServiceProviderName().equals(serviceProvider.getName())).collect(Collectors.toSet());
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
-            for (PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+            for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
+                PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
         }
+        System.out.println(writer.writeValueAsString(serviceProviders));
         writer.writeValue(path.toFile(),serviceProviders);
     }
 

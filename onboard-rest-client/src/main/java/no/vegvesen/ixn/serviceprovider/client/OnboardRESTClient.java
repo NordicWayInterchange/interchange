@@ -99,22 +99,30 @@ public class OnboardRESTClient {
         restTemplate.delete(url);
     }
 
-    public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
+    public AddPrivateChannelResponse addPrivateChannel(AddPrivateChannelRequest privateChannelApi) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PrivateChannelApi> entity = new HttpEntity<>(privateChannelApi,headers);
+        HttpEntity<AddPrivateChannelRequest> entity = new HttpEntity<>(privateChannelApi,headers);
         String url = server + "/" + user + "/privatechannels";
         System.out.println(url);
-        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
+        return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelResponse.class).getBody();
     }
 
     public void deletePrivateChannel(Integer privateChannelId) {
         restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
     }
 
-    public PrivateChannelListApi getPrivateChannels() {
+    public ListPrivateChannelsResponse getPrivateChannels() {
         String url = String.format("%s/%s/privatechannels/", server, user);
-        return restTemplate.getForEntity(url, PrivateChannelListApi.class).getBody();
+        return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
+    }
+    public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){
+       String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
+        return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
+    }
+    public ListPeerPrivateChannels getPeerPrivateChannels(){
+        String url = String.format("%s/%s/privatechannels/peer", server,user);
+        return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
 }
 

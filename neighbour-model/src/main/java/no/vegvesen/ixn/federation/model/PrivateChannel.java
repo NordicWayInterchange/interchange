@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "private_channels")
@@ -18,23 +17,36 @@ public class PrivateChannel {
 
     @Column
     private String peerName;
-
     @Column
-    private String queueName;
+    private String serviceProviderName;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name="end_id", foreignKey = @ForeignKey(name="fk_end_privatechannel"))
+    private PrivateChannelEndpoint endpoint;
 
     public PrivateChannel() {
 
     }
 
-    public PrivateChannel(String peerName, PrivateChannelStatus status) {
+    public PrivateChannel(String peerName, PrivateChannelStatus status, String serviceProviderName) {
         this.peerName = peerName;
         this.status = status;
+        this.serviceProviderName = serviceProviderName;
+    }
+    public PrivateChannel(String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+        this.peerName = peerName;
+        this.status = status;
+        this.endpoint = privateChannelEndpoint;
+        this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannel(String peerName, String queueName, PrivateChannelStatus status) {
-        this.peerName = peerName;
-        this.queueName = queueName;
-        this.status = status;
+
+    public PrivateChannelEndpoint getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(PrivateChannelEndpoint endpoint) {
+        this.endpoint = endpoint;
     }
 
     public Integer getId() {
@@ -61,12 +73,13 @@ public class PrivateChannel {
         this.status = status;
     }
 
-    public String getQueueName() {
-        return queueName;
+
+    public String getServiceProviderName() {
+        return serviceProviderName;
     }
 
-    public void setQueueName(String uuid) {
-        this.queueName = uuid;
+    public void setServiceProviderName(String serviceProviderName) {
+        this.serviceProviderName = serviceProviderName;
     }
 
     @Override
@@ -75,12 +88,12 @@ public class PrivateChannel {
         if (!(o instanceof PrivateChannel)) return false;
         PrivateChannel that = (PrivateChannel) o;
         return peerName.equals(that.peerName) &&
-                Objects.equals(queueName, that.queueName);
+                Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(peerName, queueName);
+        return Objects.hash(peerName, endpoint);
     }
 
     @Override
@@ -89,7 +102,8 @@ public class PrivateChannel {
                 "id=" + id +
                 ", status=" + status +
                 ", peerName='" + peerName + '\'' +
-                ", queueName='" + queueName + '\'' +
+                ", serviceProviderName='"+serviceProviderName + '\'' +
+                ", endpoint='" + endpoint + '\'' +
                 '}';
     }
 }

@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -273,5 +272,46 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
         );
+    }
+
+    public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
+        if(privateChannel.getEndpoint() != null) {
+            PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+        }
+        else{
+            return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+        }
+        }
+
+    public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList){
+        AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
+        for(PrivateChannel privateChannel : privateChannelList){
+                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+        }
+        return response;
+    }
+
+    public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList){
+        ArrayList<PrivateChannelApi> returnList = new ArrayList<>();
+        for(PrivateChannel privateChannel : privateChannelList){
+            returnList.add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+        }
+        return new ListPrivateChannelsResponse(serviceProviderName, returnList);
+    }
+
+    public ListPeerPrivateChannels transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList){
+        List<PeerPrivateChannelApi> privateChannelsApis = new ArrayList<>();
+
+        for (PrivateChannel privateChannel : privateChannelList) {
+            if(privateChannel.getEndpoint() != null) {
+                PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
+            }
+            else{
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
+            }
+        }
+        return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
 }

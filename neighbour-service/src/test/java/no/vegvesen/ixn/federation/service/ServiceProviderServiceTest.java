@@ -173,7 +173,6 @@ public class ServiceProviderServiceTest {
                         )
                 ),
                 Collections.emptySet(),
-                Collections.emptySet(),
                 Collections.singleton(
                         localDelivery
                 ),
@@ -204,7 +203,6 @@ public class ServiceProviderServiceTest {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(),
-                Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.singleton(
                         localDelivery
