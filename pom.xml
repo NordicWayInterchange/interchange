@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <spring-boot-dependencies.version>2.7.17</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>2.7.18</spring-boot-dependencies.version>
         <picocli-version>4.7.5</picocli-version>
         <testcontainers.version>1.19.3</testcontainers.version>
     </properties>
