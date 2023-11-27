@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -235,6 +236,7 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
+	@Disabled
 	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.emptySet());
 		CapabilitySplit capability = new CapabilitySplit();

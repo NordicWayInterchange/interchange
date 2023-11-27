@@ -17,7 +17,7 @@ public class SelectorCapabilityMatcher {
     private final String[] quadKeyIdentifiers;
 
     public SelectorCapabilityMatcher() {
-        this("quadTree");
+        this( "quadTree");
     }
 
     public SelectorCapabilityMatcher(String... quadKeyIdentifiers) {
@@ -31,7 +31,7 @@ public class SelectorCapabilityMatcher {
         try {
             Map<String, Object> map = mapper.readValue(capabilityJson, Map.class);
             SelectorParser<Map<String, Object>> selectorParser = new SelectorParser<>();
-            selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.get(value));
+            selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.getOrDefault(value, Trilean.UNKNOWN));
             TrileanExpression<Map<String, Object>> matcher = selectorParser.parse(selector);
             Map<String, Set<Object>> capabilityMultiValueMap = convertMapValuesToCollections(map);
             for (String quadKeyIdentifier : quadKeyIdentifiers) {

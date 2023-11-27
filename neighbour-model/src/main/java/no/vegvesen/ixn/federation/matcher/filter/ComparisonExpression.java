@@ -1,3 +1,23 @@
+/*
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
 package no.vegvesen.ixn.federation.matcher.filter;
 
 import no.vegvesen.ixn.federation.matcher.Trilean;
@@ -15,14 +35,6 @@ import java.util.regex.Pattern;
  * Three-valued version of org.apache.qpid.server.filter.ComparisonExpression. Comments from original.
  */
 public abstract class ComparisonExpression<T> extends BinaryExpression<T> implements TrileanExpression<T> {
-    public static <E> TrileanExpression<E> createBetween(Expression<E> value, Expression<E> left, Expression<E> right) {
-        return LogicExpression.createAND(createGreaterThanEqual(value, left), createLessThanEqual(value, right));
-    }
-
-    public static <E> TrileanExpression<E> createNotBetween(Expression<E> value, Expression<E> left, Expression<E> right) {
-        return LogicExpression.createOR(createLessThan(value, left), createGreaterThan(value, right));
-    }
-
     private static final HashSet<Character> REGEXP_CONTROL_CHARS = new HashSet<>();
 
     static {
@@ -48,85 +60,16 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
         REGEXP_CONTROL_CHARS.add('!');
     }
 
-    static class LikeExpression<E> extends UnaryExpression<E> implements TrileanExpression<E> {
-        private final Pattern likePattern;
+    public ComparisonExpression(Expression<T> left, Expression<T> right) {
+        super(left, right);
+    }
 
-        public LikeExpression(Expression<E> right, String like, int escape) {
-            super(right);
-            StringBuilder regexp = new StringBuilder(like.length() * 2);
-            regexp.append("\\A"); // The beginning of the input
-            for (int i = 0; i < like.length(); i++) {
-                char c = like.charAt(i);
-                if (escape == (0xFFFF & c)) {
-                    i++;
-                    if (i >= like.length()) {
-                        // nothing left to escape...
-                        break;
-                    }
-                    char t = like.charAt(i);
-                    regexp.append("\\x");
-                    regexp.append(Integer.toHexString(0xFFFF & t));
-                } else if (c == '%') {
-                    if (i + 1 < like.length() && like.charAt(i + 1) == ',') {
-                        regexp.append(".*?\\b"); // Do a non-greedy match and a word-boundary match. This is because some UDAP properties use the "," as a word boundary symbol.
-                        i++;
-                    } else {
-                        regexp.append(".*?"); // Do a non-greedy match.
-                    }
-                } else if (c == '_') {
-                    regexp.append("."); // match one
-                } else if (REGEXP_CONTROL_CHARS.contains(c)) {
-                    regexp.append("\\x");
-                    regexp.append(Integer.toHexString(0xFFFF & c));
-                } else {
-                    regexp.append(c);
-                }
-            }
-            regexp.append("\\z"); // The end of the input
-            String regexpString = regexp.toString();
-            likePattern = Pattern.compile(regexpString, Pattern.DOTALL);
-        }
+    public static <E> TrileanExpression<E> createBetween(Expression<E> value, Expression<E> left, Expression<E> right) {
+        return LogicExpression.createAND(createGreaterThanEqual(value, left), createLessThanEqual(value, right));
+    }
 
-        /**
-         * org.apache.activemq.filter.UnaryExpression#getExpressionSymbol()
-         */
-        @Override
-        public String getExpressionSymbol() {
-            return "LIKE";
-        }
-
-        /**
-         * org.apache.activemq.filter.Expression#evaluate(MessageEvaluationContext)
-         */
-        @Override
-        public Object evaluate(E message) {
-            Object rv = this.getRight().evaluate(message);
-            if (rv == null) {
-                return null;
-            } else if (rv instanceof String) {
-                return patternsMatchOrMismatchValue(((String) rv));
-            } else {
-                return Trilean.FALSE;
-            }
-        }
-
-        private Trilean patternsMatchOrMismatchValue(String value) {
-            if (likePattern.matcher(value).matches()) {
-                return Trilean.TRUE;
-            } else {
-                return Trilean.FALSE;
-            }
-        }
-
-        @Override
-        public Trilean matches(E message) {
-            Object object = evaluate(message);
-            if (object instanceof Trilean) {
-                return ((Trilean) object);
-            } else {
-                return Trilean.FALSE;
-            }
-        }
+    public static <E> TrileanExpression<E> createNotBetween(Expression<E> value, Expression<E> left, Expression<E> right) {
+        return LogicExpression.createOR(createLessThan(value, left), createGreaterThan(value, right));
     }
 
     public static <E> TrileanExpression<E> createLike(Expression<E> left, String right, String escape) {
@@ -269,15 +212,11 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
         }
     }
 
-    public ComparisonExpression(Expression<T> left, Expression<T> right) {
-        super(left, right);
-    }
-
     @Override
     public Object evaluate(T message) {
         Object lv = getLeft().evaluate(message);
         Object rv = getRight().evaluate(message);
-        if ((lv == null) | (rv == null)) {
+        if ((lv == Trilean.UNKNOWN) | (rv == Trilean.UNKNOWN)) {
             return Trilean.UNKNOWN;
         }
         if ((lv instanceof Comparable) && (rv instanceof Comparable)) {
@@ -393,6 +332,87 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
         }
     }
 
+    static class LikeExpression<E> extends UnaryExpression<E> implements TrileanExpression<E> {
+        private final Pattern likePattern;
+
+        public LikeExpression(Expression<E> right, String like, int escape) {
+            super(right);
+            StringBuilder regexp = new StringBuilder(like.length() * 2);
+            regexp.append("\\A"); // The beginning of the input
+            for (int i = 0; i < like.length(); i++) {
+                char c = like.charAt(i);
+                if (escape == (0xFFFF & c)) {
+                    i++;
+                    if (i >= like.length()) {
+                        // nothing left to escape...
+                        break;
+                    }
+                    char t = like.charAt(i);
+                    regexp.append("\\x");
+                    regexp.append(Integer.toHexString(0xFFFF & t));
+                } else if (c == '%') {
+                    if (i + 1 < like.length() && like.charAt(i + 1) == ',') {
+                        regexp.append(".*?\\b"); // Do a non-greedy match and a word-boundary match. This is because some UDAP properties use the "," as a word boundary symbol.
+                        i++;
+                    } else {
+                        regexp.append(".*?"); // Do a non-greedy match.
+                    }
+                } else if (c == '_') {
+                    regexp.append("."); // match one
+                } else if (REGEXP_CONTROL_CHARS.contains(c)) {
+                    regexp.append("\\x");
+                    regexp.append(Integer.toHexString(0xFFFF & c));
+                } else {
+                    regexp.append(c);
+                }
+            }
+            regexp.append("\\z"); // The end of the input
+            String regexpString = regexp.toString();
+            likePattern = Pattern.compile(regexpString, Pattern.DOTALL);
+        }
+
+        /**
+         * org.apache.activemq.filter.UnaryExpression#getExpressionSymbol()
+         */
+        @Override
+        public String getExpressionSymbol() {
+            return "LIKE";
+        }
+
+        /**
+         * org.apache.activemq.filter.Expression#evaluate(MessageEvaluationContext)
+         */
+        @Override
+        public Object evaluate(E message) {
+            Object rv = this.getRight().evaluate(message);
+            if (rv == null) {
+                return null;
+            } else if (rv instanceof String) {
+                return patternsMatchOrMismatchValue(((String) rv));
+            } else {
+                return Trilean.FALSE;
+            }
+        }
+
+        private Trilean patternsMatchOrMismatchValue(String value) {
+            if (likePattern.matcher(value).matches()) {
+                return Trilean.TRUE;
+            } else {
+                return Trilean.FALSE;
+            }
+        }
+
+        @Override
+        public Trilean matches(E message) {
+            Object object = evaluate(message);
+            if (object instanceof Trilean) {
+                return ((Trilean) object);
+            } else {
+                return Trilean.FALSE;
+            }
+        }
+    }
+
     private static class EqualExpression<E> extends ComparisonExpression<E> {
         public EqualExpression(final Expression<E> left, final Expression<E> right) {
             super(left, right);
@@ -402,7 +422,7 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
         public Object evaluate(E message) {
             Object lv = getLeft().evaluate(message);
             Object rv = getRight().evaluate(message);
-            // If one of the values is null
+            // Iff one of the values is null
             if ((lv == null) ^ (rv == null)) {
                 return Trilean.FALSE;
             }
