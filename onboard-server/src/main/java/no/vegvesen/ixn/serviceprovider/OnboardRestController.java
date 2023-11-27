@@ -224,10 +224,10 @@ public class OnboardRestController {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
 				} else {
-					localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+					throw new SubscriptionRequestException("Bad api object for Subscription request. consumerCommonName must match serviceProviderName");
 				}
 			} else {
-				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+				throw new SubscriptionRequestException("Bad api object for Subscription request. Invalid selector.");
 			}
 			localSubscriptions.add(localSubscription);
 		}
@@ -463,7 +463,7 @@ public class OnboardRestController {
 			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
 				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			} else {
-				localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+				throw new DeliveryException("Bad api object for adding delivery. The selector is invalid");
 			}
 			localDeliveries.add(localDelivery);
 		}
@@ -547,21 +547,5 @@ public class OnboardRestController {
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		OnboardMDCUtil.removeLogVariables();
-	}
-
-	// TODO: Remove
-	@RequestMapping(method = RequestMethod.GET, path = "/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ServiceProvider> getServiceProviders() {
-		logger.info("received request for getting all service providers");
-
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-		List<ServiceProvider> returnServiceProviders = new ArrayList<>();
-
-		for (ServiceProvider s : serviceProviders) {
-			returnServiceProviders.add(s);
-		}
-
-		return returnServiceProviders;
 	}
 }

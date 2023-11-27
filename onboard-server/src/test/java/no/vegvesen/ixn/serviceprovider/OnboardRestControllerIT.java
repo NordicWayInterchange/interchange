@@ -795,15 +795,4 @@ public class OnboardRestControllerIT {
         });
     }
 
-    @Test
-    public void testGettingServiceProviders(){
-        ServiceProvider serviceProvider_1 = new ServiceProvider("service-provider-1");
-        ServiceProvider serviceProvider_2 = new ServiceProvider("service-provider-2");
-        ServiceProvider serviceProvider_3 = new ServiceProvider("service-provider-3");
-        serviceProviderRepository.saveAll(List.of(serviceProvider_1,serviceProvider_2,serviceProvider_3));
-
-        assertThat(restController.getServiceProviders().size()).isEqualTo(3);
-
-    }
-
 }
