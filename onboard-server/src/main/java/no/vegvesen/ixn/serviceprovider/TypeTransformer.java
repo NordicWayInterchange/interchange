@@ -64,7 +64,9 @@ public class TypeTransformer {
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getErrorMessage()));
+
         }
         return result;
     }
@@ -104,7 +106,8 @@ public class TypeTransformer {
                     createDeliveryPath(serviceProviderName, delivery.getId().toString(), delivery.getStatus()),
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
-                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
+                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus()),
+                    delivery.getErrorMessage()
                     )
             );
         }
@@ -138,7 +141,8 @@ public class TypeTransformer {
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getErrorMessage()
                     )
             );
         }

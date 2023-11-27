@@ -224,10 +224,12 @@ public class OnboardRestController {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
 				} else {
-					throw new SubscriptionRequestException("Bad api object for Subscription request. consumerCommonName must match serviceProviderName");
+					localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+					localSubscription.setErrorMessage("Bad api object. Invalid consumerCommonName");
 				}
 			} else {
-				throw new SubscriptionRequestException("Bad api object for Subscription request. Invalid selector.");
+				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+				localSubscription.setErrorMessage("Bad api object. Invalid selector.");
 			}
 			localSubscriptions.add(localSubscription);
 		}
@@ -463,7 +465,8 @@ public class OnboardRestController {
 			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
 				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			} else {
-				throw new DeliveryException("Bad api object for adding delivery. The selector is invalid");
+				localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
 			}
 			localDeliveries.add(localDelivery);
 		}
