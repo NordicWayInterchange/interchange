@@ -9,7 +9,7 @@
       "originatingCountry" : "NO",
       "protocolVersion" : "DENM:1.2.2",
       "quadTree" : [ "12004" ],
-      "causeCodes" : [ 6 ]
+      "causeCode" : [ 6 ]
     },
     "metadata" : {
       "shardCount" : 1,

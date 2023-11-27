@@ -20,7 +20,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 "NO",
                                 "DENM:1.2.2",
                                 new HashSet<>(Arrays.asList("123","122")),
-                                Collections.singleton(6)
+                                new HashSet<>(Arrays.asList(6, 5))
                         ),
                         new Metadata()
                 )

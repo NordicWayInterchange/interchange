@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 
 import java.util.HashMap;
@@ -11,27 +10,27 @@ import java.util.Set;
 
 public class DenmApplicationApi extends ApplicationApi {
 
-    private Set<Integer> causeCodes = new HashSet<>();
+    private Set<Integer> causeCode = new HashSet<>();
 
     public DenmApplicationApi() {
 
     }
 
-    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<Integer> causeCodes) {
+    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<Integer> causeCode) {
         super(Constants.DENM, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
-        if (causeCodes != null) {
-            this.causeCodes.addAll(causeCodes);
+        if (causeCode != null) {
+            this.causeCode.addAll(causeCode);
         }
     }
 
-    public Set<Integer> getCauseCodes() {
-        return causeCodes;
+    public Set<Integer> getCauseCode() {
+        return causeCode;
     }
 
-    public void setCauseCode(Set<Integer> causeCodes) {
-        this.causeCodes.clear();
-        if (causeCodes != null){
-            this.causeCodes.addAll(causeCodes);
+    public void setCauseCode(Set<Integer> causeCode) {
+        this.causeCode.clear();
+        if (causeCode != null){
+            this.causeCode.addAll(causeCode);
         }
     }
 
@@ -44,7 +43,7 @@ public class DenmApplicationApi extends ApplicationApi {
         putValue(values, CapabilityProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
         putValue(values, CapabilityProperty.PROTOCOL_VERSION, this.getProtocolVersion());
         putMultiValue(values, CapabilityProperty.QUAD_TREE, this.getQuadTree());
-        putIntegerMultiValue(values, CapabilityProperty.CAUSE_CODE, this.getCauseCodes());
+        putIntegerMultiValue(values, CapabilityProperty.CAUSE_CODE, this.getCauseCode());
         return values;
     }
 
@@ -63,7 +62,7 @@ public class DenmApplicationApi extends ApplicationApi {
     @Override
     public String toString() {
         return "DenmCapabilityApplicationApi{" +
-                "causeCode=" + causeCodes +
+                "causeCode=" + causeCode +
                 '}' + super.toString();
     }
 }
