@@ -18,15 +18,6 @@ public class LocalActorSubscription {
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
-        this.id = id;
-        this.path = path;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
-        this.status = status;
-    }
-
     public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
         this.id = id;
         this.path = path;

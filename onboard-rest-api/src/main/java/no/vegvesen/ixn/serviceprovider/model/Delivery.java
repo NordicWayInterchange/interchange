@@ -16,13 +16,7 @@ public class Delivery {
     public Delivery() {
     }
 
-    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status) {
-        this.id = id;
-        this.path = path;
-        this.selector = selector;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-        this.status = status;
-    }
+
     public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
         this.id = id;
         this.path = path;
