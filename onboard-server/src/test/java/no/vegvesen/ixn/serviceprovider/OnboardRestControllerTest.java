@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
@@ -15,7 +14,6 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +25,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -321,6 +315,18 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
+	void listSubscriptionsReturnsStatusOk()throws  Exception {
+		String serviceProviderName = "service-provider";
+		mockCertificate(serviceProviderName);
+
+		mockMvc.perform(
+				get(String.format("/%s/subscriptions", serviceProviderName))
+		).andExpect(status().isOk());
+
+		verify(serviceProviderRepository, times(1)).findByName(any());
+	}
+
+	@Test
 	void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
 		String firstServiceProviderName = "FirstServiceProvider";
 		String secondServiceProviderName = "SecondServiceProvider";
@@ -359,6 +365,30 @@ public class OnboardRestControllerTest {
 				.andExpect(status().isBadRequest());
 	}
 
+	@Test
+	public void getCapabilitiesReturnsStatusOk()throws Exception{
+		String serviceProviderName = "First Service Provider";
+		mockCertificate(serviceProviderName);
+
+		when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(serviceProviderName));
+
+		mockMvc.perform(
+				get(String.format("/%s/capabilities", serviceProviderName)))
+				.andExpect(status().isOk());
+
+		verify(serviceProviderRepository, times(1)).findByName(any());
+	}
+
+	@Test
+	public void fetchMatchingCapabilitiesReturnsStatusOk() throws Exception{
+		String selector= "messageType='DENM'";
+		String serviceProviderName= "serviceProvider";
+		mockCertificate(serviceProviderName);
+
+		mockMvc.perform(
+				get(String.format("/%s/network/capabilities?selector=%s", serviceProviderName, selector))
+		).andExpect(status().isOk());
+	}
 	@Test
 	public void postingDeliveryReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
@@ -595,6 +625,18 @@ public class OnboardRestControllerTest {
 		verify(privateChannelRepository, times(0)).save(any());
 		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndId(any(),any());
 
+	}
+
+	@Test
+	public void testGettingPrivateChannelsReturnsStatusOk() throws Exception{
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+
+		mockMvc.perform(
+				get(String.format("/%s/privatechannels", serviceProviderName))
+		).andExpect(status().isOk());
+
+		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
 	}
 	@Test
 	public void testGettingOneChannel() throws Exception {
