@@ -5,9 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.CouldNotParseIdException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
@@ -128,6 +126,7 @@ public class OnboardRestControllerIT {
         assertThat(thrown.getMessage()).contains("publisherId");
     }
 
+
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
@@ -161,6 +160,17 @@ public class OnboardRestControllerIT {
                 )));
 
         assertThat(thrown.getMessage()).contains("publicationId");
+    }
+
+    @Test
+    public void testDeletingCapabilityWithInvalidId(){
+        String serviceProviderName = "serviceprovider";
+        String invalidId = "notAnId";
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> {
+            restController.deleteCapability(serviceProviderName, invalidId);
+        });
+        assertThat(thrown.getMessage()).contains("invalid");
     }
 
     @Test
@@ -200,6 +210,7 @@ public class OnboardRestControllerIT {
 
         assertThat(thrown.getMessage()).contains("publicationId");
     }
+
 
     @Test
     public void testAddingIllegalSubscription() {
@@ -243,6 +254,17 @@ public class OnboardRestControllerIT {
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
+
+    @Test
+    public void testDeletingSubscriptionWithInvalidId(){
+        String serviceProviderName = "serviceprovider";
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () ->{
+           restController.deleteSubscription(serviceProviderName, "notAnId");
+        });
+
+        assertThat(thrown.getMessage()).contains("invalid");
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
 
     @Test
     public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
@@ -309,6 +331,37 @@ public class OnboardRestControllerIT {
 
 
 
+    }
+
+    @Test
+    public void testAddingInvalidSubscriptionObject(){
+        String serviceProviderName = "serviceprovider";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName,
+                null);
+
+        SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () ->{
+           restController.addSubscriptions(serviceProviderName, request);
+        });
+
+        assertThat(thrown.getMessage()).isEqualTo("Bad api object for Subscription Request. No selectors.");
+    }
+
+    @Test
+    public void testAddingSubscriptionWithInvalidSelector(){
+        String selector = "Invalid selector";
+        String serviceProviderName = "serviceprovider";
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+
+        serviceProviderRepository.save(serviceProvider);
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                serviceProviderName,
+                Collections.singleton(new AddSubscription(selector))
+        );
+
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        assertThat(response.getSubscriptions().stream().findFirst().get().getErrorMessage()).isNotBlank();
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
 	@Test
@@ -614,7 +667,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingMoreThanOneIdenticalDeliveries() {
         String serviceProviderName = "my-service-provider";
-        String selector = "messageType = 'DENM'";
+        String selector = "messageType='DENM'";
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
@@ -640,6 +693,82 @@ public class OnboardRestControllerIT {
 
     }
 
+    @Test
+    public void testAddingDeliveryWithInvalidSelector(){
+
+        String serviceProviderName = "my-service-provider";
+        String selector = "Invalid selector";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new SelectorApi(selector)
+                )
+        );
+
+        serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(response.getDeliveries().stream().findFirst().get().getErrorMessage()).isNotBlank();
+        assertThat(response.getDeliveries().stream().findFirst().get().getStatus().toString()).isEqualTo("ILLEGAL");
+    }
+
+    @Test
+    public void testAddingDeliveryWithNoSelector(){
+        String serviceProviderName = "my-service-provider";
+        String selector = null;
+
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new SelectorApi(selector)
+                )
+        );
+        serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
+        DeliveryException thrown = assertThrows(DeliveryException.class, () -> {
+           restController.addDeliveries(serviceProviderName, request);
+        });
+        assertThat(thrown.getMessage()).
+                isEqualTo("Bad api object for adding delivery. The selector object was null.");
+    }
+
+    @Test
+    public void testDeletingDelivery(){
+
+        String serviceProviderName = "my-service-provider";
+        String selector = "messageType='DENM'";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new SelectorApi(selector)
+                )
+        );
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+
+        restController.deleteDelivery(serviceProviderName,response.getDeliveries().stream().findFirst().get().getId());
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()
+                .stream()
+                .filter(i -> i.getStatus().equals(DeliveryStatus.ILLEGAL)))
+                .hasSize(1);
+    }
+    @Test
+    public void testGettingDeliveryWithInvalidId(){
+        String serviceProviderName = "my-service-provider";
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () ->{
+            restController.getDelivery(serviceProviderName, "notAnId");
+        });
+        assertThat(thrown.getMessage()).contains("invalid");
+    }
+    @Test
+    public void testDeletingDeliveryWithInvalidId(){
+        String serviceProviderName = "my-service-provider";
+
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () ->{
+            restController.deleteDelivery(serviceProviderName, "notAnId");
+        });
+
+        assertThat(thrown.getMessage()).contains("invalid");
+    }
     @Test
     public void testAddingAndDeletingChannel(){
 
