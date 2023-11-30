@@ -17,6 +17,7 @@
         <spring-boot-dependencies.version>2.7.18</spring-boot-dependencies.version>
         <picocli-version>4.7.5</picocli-version>
         <testcontainers.version>1.19.3</testcontainers.version>
+	<spring-security.version>5.8.8</spring-security.version>
     </properties>
 
     <distributionManagement>
@@ -93,7 +94,6 @@
                 <version>${spring-boot-dependencies.version}</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-jms-client</artifactId>
