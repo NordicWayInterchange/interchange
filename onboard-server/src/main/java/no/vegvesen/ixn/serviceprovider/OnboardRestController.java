@@ -224,11 +224,11 @@ public class OnboardRestController {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
 				} else {
-					localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+					localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
 					localSubscription.setErrorMessage("Bad api object. Invalid consumerCommonName");
 				}
 			} else {
-				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
 				localSubscription.setErrorMessage("Bad api object. Invalid selector.");
 			}
 			localSubscriptions.add(localSubscription);
