@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.model.capability;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
