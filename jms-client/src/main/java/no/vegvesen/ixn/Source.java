@@ -4,7 +4,7 @@ import org.apache.qpid.jms.message.JmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 

@@ -2,8 +2,8 @@ package no.vegvesen.ixn;
 
 import org.apache.qpid.jms.message.JmsMessage;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;

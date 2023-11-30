@@ -30,7 +30,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;

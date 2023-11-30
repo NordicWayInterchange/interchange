@@ -3,8 +3,8 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 
-import javax.jms.Message;
-import javax.jms.MessageListener;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

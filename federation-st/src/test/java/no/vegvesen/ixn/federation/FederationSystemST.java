@@ -8,9 +8,9 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.LongSummaryStatistics;

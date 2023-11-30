@@ -14,7 +14,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
