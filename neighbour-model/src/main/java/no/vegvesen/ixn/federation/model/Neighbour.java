@@ -5,7 +5,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
