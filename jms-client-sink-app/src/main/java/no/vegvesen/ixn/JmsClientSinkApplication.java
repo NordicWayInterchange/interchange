@@ -13,8 +13,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageListener;
 import javax.net.ssl.SSLContext;
 
 @Command(name = "jmsclientsink",

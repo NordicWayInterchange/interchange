@@ -3,8 +3,8 @@ package no.vegvesen.ixn.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 public class PropertyExistsValidator implements MessagePropertyValidator {
 

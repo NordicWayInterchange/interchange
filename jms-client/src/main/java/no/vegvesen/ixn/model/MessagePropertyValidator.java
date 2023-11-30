@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.model;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 public interface MessagePropertyValidator {
 

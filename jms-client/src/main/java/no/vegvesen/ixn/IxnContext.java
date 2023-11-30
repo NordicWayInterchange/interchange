@@ -2,9 +2,9 @@ package no.vegvesen.ixn;
 
 import org.apache.qpid.jms.JmsConnectionFactory;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.JMSException;
+import jakarta.jms.Connection;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 

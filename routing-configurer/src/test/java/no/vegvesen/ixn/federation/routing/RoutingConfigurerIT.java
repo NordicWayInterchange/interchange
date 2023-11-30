@@ -33,7 +33,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
