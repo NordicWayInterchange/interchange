@@ -227,7 +227,7 @@ public class OnboardRestControllerIT {
                 .get();
 
         assertThat(response.getSubscriptions()).hasSize(1);
-        assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -302,7 +302,7 @@ public class OnboardRestControllerIT {
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -359,8 +359,10 @@ public class OnboardRestControllerIT {
         );
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(response.getSubscriptions().stream().findFirst().get().getErrorMessage()).isNotBlank();
+        assertThat(response.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -660,7 +662,7 @@ public class OnboardRestControllerIT {
                 .get();
 
         assertThat(response.getDeliveries()).hasSize(1);
-        assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+        assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -709,7 +711,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(response.getDeliveries().stream().findFirst().get().getErrorMessage()).isNotBlank();
-        assertThat(response.getDeliveries().stream().findFirst().get().getStatus().toString()).isEqualTo("ILLEGAL");
+        assertThat(response.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
 
     @Test

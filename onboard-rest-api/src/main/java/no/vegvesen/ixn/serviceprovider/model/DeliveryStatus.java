@@ -5,5 +5,6 @@ public enum DeliveryStatus {
     CREATED,
     ILLEGAL,
     NOT_VALID,
-    NO_OVERLAP
+    NO_OVERLAP,
+    ERROR
 }

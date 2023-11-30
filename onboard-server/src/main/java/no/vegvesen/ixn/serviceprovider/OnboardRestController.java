@@ -465,7 +465,7 @@ public class OnboardRestController {
 			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
 				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			} else {
-				localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
 			}
 			localDeliveries.add(localDelivery);
