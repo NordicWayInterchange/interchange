@@ -120,8 +120,8 @@ public class NeighbourRESTClient {
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
-            HttpStatus status = e.getStatusCode();
-            logger.debug("Failed post of subscription request to neighbour with url {} \nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), status.toString());
+            HttpStatusCode code = e.getStatusCode();
+            logger.debug("Failed post of subscription request to neighbour with url {} \nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity, code);
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
 
@@ -150,7 +150,8 @@ public class NeighbourRESTClient {
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
-            HttpStatus status = e.getStatusCode();
+            HttpStatusCode status = e.getStatusCode();
+
             logger.debug("Failed polling subscription with url {}. Server returned error code: {}", url, status);
 
 
@@ -180,8 +181,8 @@ public class NeighbourRESTClient {
         try {
             restTemplate.delete(url);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            HttpStatus status = e.getStatusCode();
-            logger.debug("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
+            HttpStatusCode status = e.getStatusCode();
+            logger.debug("Failed deleting subscription with url {}. Server returned error code {}", url, status);
             if (HttpStatus.NOT_FOUND.equals(status)) {
                 throw new SubscriptionNotFoundException("Error in deleting subscription to neighbour " + name + " due to exception", e);
             }
