@@ -177,7 +177,10 @@ public class ServiceProviderRouter {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        } else {
+        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+        }
+        else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
