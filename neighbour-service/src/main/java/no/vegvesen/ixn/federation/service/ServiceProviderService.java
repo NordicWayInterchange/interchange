@@ -89,7 +89,7 @@ public class ServiceProviderService {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (!serviceProvider.getDeliveries().isEmpty()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
+                if (!(delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL) || delivery.getStatus().equals(LocalDeliveryStatus.ERROR))) {
                     Set<String> targets = new HashSet<>();
                     for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                         String target = endpoint.getTarget();
@@ -190,7 +190,8 @@ public class ServiceProviderService {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
                 .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
-                        || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL))
+                        || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
+                        || d.getStatus().equals(LocalDeliveryStatus.ERROR))
                 .collect(Collectors.toSet());
 
         for (LocalDelivery delivery : deliveriesToTearDown) {
