@@ -23,8 +23,8 @@ self:                                                               # ------ Gen
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/qpid                  # Public container registry for Nordic Way where the docker images are located
-    tag: "074e6bd"                                                  # Image tag for the Qpid-image
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid                  # Public container registry for Nordic Way where the docker images are located
+    tag: "759a89d"                                                  # Image tag for the Qpid-image
   expose_amqps: true                                                # Expose the AMPQS port for incoming messages.
   persistence:                                                      # Configure persistence of queues in Qpid
     enabled: true
@@ -33,18 +33,11 @@ qpid:                                                               # Apache Qpi
   memorydump:
     enabled: true                                                   # store a memory dump on persistent disk
   java_mem: -Xmx1g -XX:MaxDirectMemorySize=3g                       # memory instructions for qpid
-interchange:                                                        # Java application that validates incoming messages to Qpid
-  image:
-    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
-    tag: "074e6bd"
-  logging:                                                          # Optional: Specify the log level of the java application. This can be done for all java components.
-  - logger_name: .root
-    level: info
 neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer
+    tag: "759a89d"
   logging:
   - logger_name: .root
     level: info
@@ -61,12 +54,12 @@ database:                                                           # Database o
 message_collector:
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/message-collector
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector
+    tag: "759a89d"
 message_forwarder:                                                  # Java application that forwards local messages to neighbours.
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/message-forwarder
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-forwarder
+    tag: "759a89d"
   logging:
   - logger_name: .root
     level: info
@@ -75,32 +68,32 @@ message_forwarder:                                                  # Java appli
 neighbour_server:                                                   # Java application running a REST endpoints that other neighbours contact us through
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-server
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server
+    tag: "759a89d"
   logging:
   - logger_name: .root
     level: info
 routing_configurer:                                                 # Java application that uses the Qpid API to configure routing of messages
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/routing-configurer
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer
+    tag: "759a89d"
   logging:
   - logger_name: .no.vegvesen
     level: debug
 onboard_server:                                                     # Java application running a REST endpoint for managing Service Providers(create, read, update, delete)
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/onboard-server
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server
+    tag: "759a89d"
   logging:
   - logger_name: .root
     level: info
 napcore_server:
   replicas: 1
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/napcore-server
-    tag: "074e6bd"
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server
+    tag: "759a89d"
   logging:
   - logger_name: .root
     level: info

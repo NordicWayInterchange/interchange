@@ -6,13 +6,6 @@ self:                                                               # ------ Gen
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
 
-## the name which will be used to address the QPID server externally
-# external_name: test.nordic-way.io
-interchange:
-  image:
-    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
-    tag: latest
-
 qpid:
   replicas: 1
   persistence:
@@ -49,9 +42,6 @@ qpid:
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
 
-haproxy:
-  image_version: haproxy:2.3
-  replicas: 1
 
 message_collector:
   replicas: 1
