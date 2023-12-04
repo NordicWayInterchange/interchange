@@ -43,7 +43,7 @@ public class ServiceProviderService {
             updateNewLocalDeliveryEndpoints(name, host, port);
             updateTearDownLocalDeliveryEndpoints(name);
             removeTearDownCapabilities(name);
-            removeTearDownAndIllegalDeliveries(name);
+            removeTearDownIllegalAndErrorDeliveries(name);
         }
     }
 
@@ -186,7 +186,7 @@ public class ServiceProviderService {
         serviceProviderRepository.save(serviceProvider);
     }
 
-    public void removeTearDownAndIllegalDeliveries(String serviceProviderName) {
+    public void removeTearDownIllegalAndErrorDeliveries(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
                 .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)

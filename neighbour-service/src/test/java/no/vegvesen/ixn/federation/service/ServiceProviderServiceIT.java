@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,6 +37,7 @@ public class ServiceProviderServiceIT {
 
     @Autowired
     ServiceProviderService service;
+
 
     @Test
     public void repositoryIsAutowired() {
@@ -130,5 +132,21 @@ public class ServiceProviderServiceIT {
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);
+    }
+
+    @Test
+    public void testDeliveryWithErrorGetsRemovedFromServiceProvider(){
+        String serviceProviderName = "my-service-provider";
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+        LocalDelivery delivery = new LocalDelivery();
+        delivery.setStatus(LocalDeliveryStatus.ERROR);
+
+        repository.save(serviceProvider);
+        service.syncServiceProviders("my-node", 5671);
+
+        ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
+        assertThat(savedAgainServiceProvider.getDeliveries()).hasSize(0);
+
+
     }
 }

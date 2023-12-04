@@ -884,6 +884,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testLocalSubscriptionWithErrorGetsRemovedFromServiceProvider(){
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ERROR,
+				"",
+				"myNode"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
+	}
+
+	@Test
 	public void tearDownLocalSubscriptionWithEmptyMatch() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,
