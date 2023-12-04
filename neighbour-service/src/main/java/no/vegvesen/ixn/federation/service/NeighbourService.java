@@ -165,7 +165,7 @@ public class NeighbourService {
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
-			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 
@@ -219,7 +219,7 @@ public class NeighbourService {
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
 		} else {
-			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 
