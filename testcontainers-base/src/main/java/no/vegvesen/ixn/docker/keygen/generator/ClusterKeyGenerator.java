@@ -12,6 +12,7 @@ import org.bouncycastle.cert.jcajce.JcaX500NameUtil;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -348,6 +349,11 @@ public class ClusterKeyGenerator {
         PEMParser keyParser = new PEMParser(new FileReader(pemKeyPath.toFile()));
         return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) keyParser.readObject());
 
+    }
+
+    public static KeyPair loadKeyPair(Path pemKeyPath) throws IOException {
+        PEMParser parser = new PEMParser(new FileReader(pemKeyPath.toFile()));
+        return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) parser.readObject());
     }
 
 
