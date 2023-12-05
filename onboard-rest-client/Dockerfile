@@ -6,11 +6,6 @@ COPY target/onboard-rest-client-1.0.3-SNAPSHOT.jar onboard-rest-client.jar
 ADD entrypoint.sh /
 RUN chmod u+x /entrypoint.sh
 ADD cap_king_gustaf_denm_no.json /
-ADD dat_se_datatype.json /
-ADD ivi_no_datatype.json /
-ADD ivi_se_datatype.json /
-ADD denm_no_datatype.json /
-ADD denm_se_datatype.json /
 ADD capability_dat_no.json /
 ADD cap_king_olav_denm_no.json /
 ADD sub_king_gustaf_denm_no.json /
