@@ -109,6 +109,18 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testGettingCapabilityWithInvalidId(){
+        String serviceProviderName = "serviceprovider";
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () ->{
+           restController.getServiceProviderCapability(serviceProviderName, "notAnId");
+        });
+
+        assertThat(thrown.getMessage()).contains("invalid");
+    }
+
+
+
+    @Test
     public void testAddingCapabilityWithMissingProperties() {
         DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
@@ -160,6 +172,16 @@ public class OnboardRestControllerIT {
                 )));
 
         assertThat(thrown.getMessage()).contains("publicationId");
+    }
+
+    @Test
+    public void testDeletingNonExistentCapability(){
+        String serviceProviderName = "serviceprovider";
+
+        NotFoundException thrown = assertThrows(NotFoundException.class, () ->{
+            restController.deleteCapability(serviceProviderName, "1");
+        });
+        assertThat(thrown.getMessage()).contains("The capability to delete is not in the Service Provider capabilities.");
     }
 
     @Test
@@ -364,6 +386,15 @@ public class OnboardRestControllerIT {
         assertThat(response.getSubscriptions().stream().findFirst().get().getErrorMessage()).isNotBlank();
         assertThat(response.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testGettingSubscriptionWithInvalidId(){
+        String serviceProviderName = "serviceprovider";
+        CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> {
+           restController.getServiceProviderSubscription(serviceProviderName, "notAnId");
+        });
+        assertThat(thrown.getMessage()).contains("invalid");
     }
 
 	@Test
@@ -761,6 +792,17 @@ public class OnboardRestControllerIT {
         });
         assertThat(thrown.getMessage()).contains("invalid");
     }
+
+    @Test
+    public void testDeletingNonExistentDelivery(){
+        String serviceProviderName = "my-service-provider";
+
+        NotFoundException thrown = assertThrows(NotFoundException.class, () ->{
+            restController.deleteDelivery(serviceProviderName, "1");
+        });
+        assertThat(thrown.getMessage()).contains("The delivery to delete is not in the Service Provider deliveries.");
+    }
+
     @Test
     public void testDeletingDeliveryWithInvalidId(){
         String serviceProviderName = "my-service-provider";

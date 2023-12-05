@@ -316,7 +316,7 @@ public class OnboardRestController {
 		try {
 			subsId = Integer.parseInt(subscriptionId);
 		} catch (NumberFormatException e) {
-			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
+			throw new CouldNotParseIdException(String.format("Id %s is invalid",subscriptionId));
 		}
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
