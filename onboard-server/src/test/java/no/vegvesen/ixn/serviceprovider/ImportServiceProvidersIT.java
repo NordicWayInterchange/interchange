@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
+import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,9 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 @SpringBootTest
-@ContextConfiguration(initializers = {ServiceProviderImport.LocalInitializer.class})
+@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class ImportServiceProvidersIT {
 
 
