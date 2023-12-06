@@ -2,16 +2,19 @@ package no.vegvesen.ixn.napcore.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.napcore.model.*;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
-import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import org.apache.http.impl.client.HttpClients;
 
 
 import javax.net.ssl.SSLContext;
@@ -37,11 +40,19 @@ public class NapRESTClient {
     private final String nap;
 
     public NapRESTClient(SSLContext sslContext, String server, String user, String nap) {
+        SSLConnectionSocketFactory sslConnectionSocketFactory = SSLConnectionSocketFactoryBuilder
+                .create()
+                .setSslContext(sslContext)
+                .build();
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
+                .create()
+                .setSSLSocketFactory(sslConnectionSocketFactory)
+                .build();
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
                                 .custom()
-                                .setSSLContext(sslContext)
+                                .setConnectionManager(connectionManager)
                                 .build()
                 )
         );
