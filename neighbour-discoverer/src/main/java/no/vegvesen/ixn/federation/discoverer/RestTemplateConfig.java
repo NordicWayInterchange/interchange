@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -21,8 +23,8 @@ public class RestTemplateConfig {
 		this.sslContext = sslContext;
 	}
 
-	HttpClient createHttpClient() {
-		return HttpClients.custom().setSSLContext(sslContext).build();
+	CloseableHttpClient createHttpClient() {
+		return HttpClients.custom().setSSLContextFactory(new SSLConnectionSocketFactory(sslContext)).build();
 	}
 
 	@Bean
