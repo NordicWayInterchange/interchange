@@ -45,7 +45,9 @@
                     <!-- unit tests are named *Test.java, Run with 'mvn test' -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
+                    <!--
                     <version>2.22.2</version>
+                    -->
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
                     </configuration>
@@ -73,7 +75,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
-        <spring-boot-dependencies.version>3.1.6</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.2.0</spring-boot-dependencies.version>
         <!--
         <spring-boot-dependencies.version>3.0.13</spring-boot-dependencies.version>
         -->
@@ -169,7 +171,9 @@
                         <!-- Integration tests are named *IT.java, Run with 'mvn verify' -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <!--
                         <version>2.22.2</version>
+                        -->
                         <configuration>
                             <includes>
                                 <include>*IT</include>
