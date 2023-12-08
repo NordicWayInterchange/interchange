@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -55,11 +57,11 @@ public class NeighbourRESTClientTest {
 
     @Test
     public void doPostCapabilitiesOk() {
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new CapabilitiesSplitApi(), HttpStatus.OK));
         client.doPostCapabilities("https://test.server/","test",new CapabilitiesSplitApi());
         //We don't want the client to emit INFO messages, as we do this in the RESTFacade
-        verify(template).exchange(any(),any(),any(),any(Class.class),(Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -67,13 +69,13 @@ public class NeighbourRESTClientTest {
     @Test
     @DisplayName("Post capability: Server returns OK, but with empty response body")
     public void doPostCapabilitiesOkEmpty() {
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
         assertThat(thrown.getMessage()).contains(neighbourName);
         //We don't want the client to emit INFO messages, as we do this in the RESTFacade
-        verify(template).exchange(any(),any(),any(),any(Class.class),(Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -82,13 +84,13 @@ public class NeighbourRESTClientTest {
     public void doPostCapabilitiesServerError() {
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,"",null,new byte[0],null);
 
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
                 () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
         assertThat(thrown.getMessage()).contains(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -98,14 +100,14 @@ public class NeighbourRESTClientTest {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.INTERNAL_SERVER_ERROR.toString(),"Huston, we have a problem");
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
 
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
 
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
                 () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -113,14 +115,14 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPostCapabilitiesWithRestClientException() {
         RestClientException exception = new RestClientException("I am a teapot");
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
 
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
                 () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -128,11 +130,11 @@ public class NeighbourRESTClientTest {
 
     @Test
     public void doPostSubscriptionRequestOk() {
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity(new SubscriptionResponseApi(),HttpStatus.OK));
 
         client.doPostSubscriptionRequest(new SubscriptionRequestApi(),"https://test.server/","test");
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -140,13 +142,13 @@ public class NeighbourRESTClientTest {
     @Test
     @DisplayName("Post subscription request: Server returns OK, but with empty response body")
     public void postSubscriptionRequestOkEmpty() {
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity(null,HttpStatus.OK));
 
         String neighbourName = "test";
         SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () -> client.doPostSubscriptionRequest(new SubscriptionRequestApi(), "https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -154,7 +156,7 @@ public class NeighbourRESTClientTest {
     @Test
     @DisplayName("Post non empty subscription request, get empty one back")
     public void doPostSubscriptionRequestEmpty() {
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity(new SubscriptionResponseApi(),HttpStatus.OK));
 
         String neighbourName = "test";
@@ -166,7 +168,7 @@ public class NeighbourRESTClientTest {
         SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () ->
                 client.doPostSubscriptionRequest(subscriptionRequestApi, "https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -175,14 +177,14 @@ public class NeighbourRESTClientTest {
     public void doPostSubscriptionRequestNoErrorResponse() {
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,"",null,new byte[0],null);
 
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
 
         String neighbourName = "test";
         SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () ->
                 client.doPostSubscriptionRequest(new SubscriptionRequestApi(), "https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -192,7 +194,7 @@ public class NeighbourRESTClientTest {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.BAD_REQUEST.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
 
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
 
         String neighbourName = "test";
@@ -200,7 +202,7 @@ public class NeighbourRESTClientTest {
                 client.doPostSubscriptionRequest(new SubscriptionRequestApi(), "https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
 
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -208,7 +210,7 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPostSubscriptionRequestRestClientException() {
         RestClientException exception = new RestClientException("Something is not right");
-        when(template.exchange(any(),any(),any(), any(Class.class), (Object[])any()))
+        when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenThrow(exception);
 
         String neighbourName = "test";
@@ -216,17 +218,17 @@ public class NeighbourRESTClientTest {
                 client.doPostSubscriptionRequest(new SubscriptionRequestApi(), "https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
 
-        verify(template).exchange(any(),any(),any(), any(Class.class), (Object[])any());
+        verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
 
     @Test
     public void doPollSubscriptionStatusStatusOk() {
-        when(template.getForEntity(any(),any(), (Object[]) any()))
+        when(template.getForEntity(any(String.class),any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new SubscriptionPollResponseApi(),HttpStatus.OK));
         client.doPollSubscriptionStatus("https://test.server/","test");
-        verify(template).getForEntity(any(),any(),(Object[])any());
+        verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -234,12 +236,12 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPollSubscriptionStatusServerError() {
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,"",null,new byte[0],null);
-        when(template.getForEntity(any(),any(), (Object[]) any()))
+        when(template.getForEntity(any(String.class),any(Class.class)))
                 .thenThrow(exception);
         String neighbourName = "test";
         SubscriptionPollException thrown = assertThrows(SubscriptionPollException.class, () -> client.doPollSubscriptionStatus("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).getForEntity(any(),any(),(Object[])any());
+        verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -249,12 +251,12 @@ public class NeighbourRESTClientTest {
     public void doPollSubscriptionStatusClientError() throws JsonProcessingException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.BAD_REQUEST.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
-        when(template.getForEntity(any(),any(), (Object[]) any()))
+        when(template.getForEntity(any(String.class),any(Class.class)))
                 .thenThrow(exception);
         String neighbourName = "test";
         SubscriptionPollException thrown = assertThrows(SubscriptionPollException.class, () -> client.doPollSubscriptionStatus("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).getForEntity(any(),any(),(Object[])any());
+        verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -263,12 +265,12 @@ public class NeighbourRESTClientTest {
     public void doPollSubscriptionStatusNotFound() throws JsonProcessingException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.NOT_FOUND.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,HttpStatus.NOT_FOUND.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
-        when(template.getForEntity(any(),any(), (Object[]) any()))
+        when(template.getForEntity(any(String.class),any(Class.class)))
                 .thenThrow(exception);
         String neighbourName = "test";
         SubscriptionNotFoundException thrown = assertThrows(SubscriptionNotFoundException.class, () -> client.doPollSubscriptionStatus("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).getForEntity(any(),any(),(Object[])any());
+        verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -276,21 +278,21 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPollSubscriptionStatusRestClientException() {
         RestClientException exception = new RestClientException("No-go");
-        when(template.getForEntity(any(),any(), (Object[]) any()))
+        when(template.getForEntity(any(String.class),any(Class.class)))
                 .thenThrow(exception);
         String neighbourName = "test";
         SubscriptionPollException thrown = assertThrows(SubscriptionPollException.class, () -> client.doPollSubscriptionStatus("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).getForEntity(any(),any(),(Object[])any());
+        verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
 
     @Test
     public void deleteSubscriptionOk() {
-        doNothing().when(template).delete(any(), (Object[])any());
+        doNothing().when(template).delete(any(String.class));
         client.deleteSubscriptions("https://test.server/","test");
-        verify(template).delete(any(), (Object[])any());
+        verify(template).delete(any(String.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -298,12 +300,12 @@ public class NeighbourRESTClientTest {
     @Test
     public void deleteSubscriptionServerException() {
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,"",null,new byte[0],null);
-        doThrow(exception).when(template).delete(any(), (Object[])any());
+        doThrow(exception).when(template).delete(any(String.class));
         String neighbourName = "test";
         SubscriptionDeleteException thrown = assertThrows(SubscriptionDeleteException.class,
                 () -> client.deleteSubscriptions("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).delete(any(), (Object[])any());
+        verify(template).delete(any(String.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
@@ -311,12 +313,12 @@ public class NeighbourRESTClientTest {
     @Test
     public void deleteSubscriptionNotFoundException() {
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,HttpStatus.NOT_FOUND.getReasonPhrase(),null,new byte[0],null);
-        doThrow(exception).when(template).delete(any(), (Object[])any());
+        doThrow(exception).when(template).delete(any(String.class));
         String neighbourName = "test";
         SubscriptionNotFoundException thrown = assertThrows(SubscriptionNotFoundException.class,
                 () -> client.deleteSubscriptions("https://test.server/", neighbourName));
         assertThat(thrown).hasMessageContaining(neighbourName);
-        verify(template).delete(any(), (Object[])any());
+        verify(template).delete(any(String.class));
         assertThat(infoEvents(appender)).isEmpty();
         assertThat(errorEvents(appender)).isEmpty();
     }
