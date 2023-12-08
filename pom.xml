@@ -9,19 +9,6 @@
     <version>1.0.3-SNAPSHOT</version>
 
     <packaging>pom</packaging>
-    <properties>
-        <license.licenseName>mit</license.licenseName>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>17</java.version>
-        <spring-boot-dependencies.version>3.0.13</spring-boot-dependencies.version>
-        <picocli-version>4.7.5</picocli-version>
-        <testcontainers.version>1.19.3</testcontainers.version>
-	<!--
-	<spring-security.version>5.8.8</spring-security.version>
-	-->
-    </properties>
-
     <distributionManagement>
         <repository>
             <id>github</id>
@@ -43,7 +30,7 @@
                         <licenseName>mit</licenseName>
                     </configuration>
                 </plugin>
-
+<!--
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -53,7 +40,7 @@
                         <target>17</target>
                     </configuration>
                 </plugin>
-
+-->
                 <plugin>
                     <!-- unit tests are named *Test.java, Run with 'mvn test' -->
                     <groupId>org.apache.maven.plugins</groupId>
@@ -80,6 +67,25 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <properties>
+        <license.licenseName>mit</license.licenseName>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>17</java.version>
+        <spring-boot-dependencies.version>3.1.6</spring-boot-dependencies.version>
+        <!--
+        <spring-boot-dependencies.version>3.0.13</spring-boot-dependencies.version>
+        -->
+        <picocli-version>4.7.5</picocli-version>
+        <testcontainers.version>1.19.3</testcontainers.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+        <!--
+        <spring-security.version>5.8.8</spring-security.version>
+        -->
+    </properties>
 
     <dependencyManagement>
         <dependencies>
