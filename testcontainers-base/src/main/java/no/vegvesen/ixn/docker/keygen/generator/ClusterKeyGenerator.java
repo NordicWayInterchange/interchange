@@ -198,18 +198,17 @@ public class ClusterKeyGenerator {
     }
 
     private static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
-        JcaPEMWriter pemWriter;
-        pemWriter = new JcaPEMWriter(writer);
-        for (X509Certificate cert : certificateChain) {
-            pemWriter.writeObject(cert);
+        try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)){
+            for (X509Certificate cert : certificateChain) {
+                pemWriter.writeObject(cert);
+            }
         }
-        pemWriter.close();
     }
 
     private static void saveCert(X509Certificate certificate, Writer writer) throws IOException {
-        JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
-        pemWriter.writeObject(certificate);
-        pemWriter.close();
+        try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)) {
+            pemWriter.writeObject(certificate);
+        }
     }
 
     public static CertificateAndCertificateChain signIntermediateCsr(X509Certificate caCert, KeyPair caKeyPair, PKCS10CertificationRequest csr) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {

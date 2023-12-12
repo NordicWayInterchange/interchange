@@ -17,21 +17,20 @@ import java.security.cert.CertificateException;
 public class SSLContextFactory {
 	public static SSLContext sslContextFromKeyAndTrustStores(KeystoreDetails keystoreDetails,
 															 KeystoreDetails truststoreDetails){
+		KeyStore keystore = getKeyStore(keystoreDetails);
+		KeyStore truststore = getKeyStore(truststoreDetails);
+		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
+	}
+
+	private static KeyStore getKeyStore(KeystoreDetails keystoreDetails) {
 		KeyStore keystore = null;
 		try {
 			InputStream stream = new FileInputStream(keystoreDetails.getFileName());
 			keystore = loadKeystoreFromStream(stream, keystoreDetails.getType(), keystoreDetails.getPassword());
 		} catch (FileNotFoundException e) {
-			throw new InvalidSSLConfig("Could not load keystore",e);
+			throw new InvalidSSLConfig(String.format("Could not load store from %s, of type %s",keystoreDetails.getFileName(),keystoreDetails.getType()), e);
 		}
-		KeyStore truststore = null;
-		try {
-			InputStream stream = new FileInputStream(truststoreDetails.getFileName());
-			truststore = loadKeystoreFromStream(stream, truststoreDetails.getType(), truststoreDetails.getPassword());
-		} catch (FileNotFoundException e) {
-			throw new InvalidSSLConfig("Could not load truststore",e);
-		}
-		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
+		return keystore;
 	}
 
 	private static KeyStore loadKeystoreFromStream(InputStream stream, KeystoreType type, String password) {
