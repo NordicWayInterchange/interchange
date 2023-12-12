@@ -110,9 +110,9 @@ public class NeighbourService {
 
 	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
-		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
+		logger.debug("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
-		logger.info("Looking up neighbour in database.");
+		logger.debug("Looking up neighbour in database.");
 		Neighbour neighbour = neighbourRepository.findByName(neighbourSubscriptionRequest.getName());
 
 		if (neighbour == null) {
@@ -124,14 +124,13 @@ public class NeighbourService {
 
 		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
-		logger.info("Received non-empty subscription request.");
-		logger.info("Processing subscription request...");
 		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
+		logger.info("Neighbour {} requested {} subscriptions, of which {} is processed", neighbour.getName(),incomingRequest.getSubscriptions().size(), processedSubscriptionRequest.size());
+		logger.debug("Processed requests: {}",processedSubscriptionRequest);
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
+		logger.debug("Processed subscription request: {}", persistentRequest);
 
-		logger.info("Processed subscription request: {}", persistentRequest.toString());
-
-		logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
+		logger.debug("Saving neighbour in DB to generate paths for the subscriptions.");
 		// Save neighbour in DB to generate subscription ids for subscription paths.
 		neighbour = neighbourRepository.save(neighbour);
 		persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
@@ -166,7 +165,7 @@ public class NeighbourService {
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
-			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 
@@ -220,7 +219,7 @@ public class NeighbourService {
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
 		} else {
-			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 

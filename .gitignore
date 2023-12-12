@@ -7,3 +7,5 @@ tmp/
 qpid/messages/
 target/
 jks/node/ca/*
+jms-client-sink-app/jmsclientsink_completion
+onboard-rest-client/onboardclient_completion
