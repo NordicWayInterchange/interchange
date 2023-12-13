@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
@@ -17,7 +18,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
-		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, Collections.singleton(6));
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, Collections.singleton(6));
 		CapabilitySplit capability = new CapabilitySplit();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -30,7 +31,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -43,7 +44,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -56,7 +57,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", null, QUAD_TREE_0121_0122, "SituationBublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -69,7 +70,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -82,7 +83,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -95,7 +96,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", null, QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -108,7 +109,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122,"Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -121,7 +122,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -136,7 +137,12 @@ class CapabilityMatcherTest {
 	public void testDenmCapability() {
 		Set<String> quadTreeTiles = new HashSet<>();
 		quadTreeTiles.add("12004");
-		DenmApplication application = new DenmApplication("NO-123", "pub-123", "NO", "DENM:1.2.2", quadTreeTiles, Collections.singleton(6));
+		DenmApplication application = new DenmApplication("NO-123",
+				"pub-123",
+				 "NO",
+				  "DENM:1.2.2",
+				   quadTreeTiles,
+				    Collections.singleton(6));
 
 		CapabilitySplit capability = new CapabilitySplit();
 		capability.setApplication(application);
@@ -146,13 +152,60 @@ class CapabilityMatcherTest {
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
-				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')",
+				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6)",
 				""
 		);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
 				Sets.newLinkedHashSet(subscription), ""
 		);
+		assertThat(commonInterest).hasSize(1);
+	}
+
+
+	@Test
+	public void denmNonMatching() {
+        Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Collections.singleton(new CapabilitySplit(
+                        new DenmApplication("NO-123",
+                                "pub-123",
+                                "NO",
+                                "DENM:1.2.2",
+                                Collections.singleton("12004"),
+                                Collections.singleton(5)),
+                        new Metadata(RedirectStatus.OPTIONAL)
+                )),
+				Collections.singleton(new LocalSubscription(
+                        52,
+                        LocalSubscriptionStatus.CREATED,
+                        "(publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')",
+                        ""
+                )),
+				""
+		);
+		assertThat(commonInterest).isEmpty();
+	}
+
+	@Test
+	public void denmMatchesOneOfSeveral() {
+		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+                Set.of(new CapabilitySplit(
+                                new DenmApplication("NO-123",
+                                        "pub-123",
+                                        "NO",
+                                        "DENM:1.2.2",
+                                        Set.of("12004"),
+                                        Set.of(5, 6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )),
+                        Collections.singleton(new LocalSubscription(
+                                52,
+                                LocalSubscriptionStatus.CREATED,
+                                "(publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')",
+                                ""
+                        )),
+                        ""
+                );
 		assertThat(commonInterest).hasSize(1);
 	}
 
@@ -184,7 +237,7 @@ class CapabilityMatcherTest {
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
 		String consumerCommonName = "";
-		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'",consumerCommonName);
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id = 2 or id = 3",consumerCommonName);
 		System.out.println(localSubscription.getSelector());
 		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();

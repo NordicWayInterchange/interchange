@@ -15,28 +15,28 @@ public class DenmApplication extends Application{
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "application_causecodes", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_appcac_cap")))
     @Column(name = "cause_codes")
-    private Set<Integer> causeCodes = new HashSet<>();
+    private Set<Integer> causeCode = new HashSet<>();
 
     public DenmApplication() {
 
     }
 
-    public DenmApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<Integer> causeCodes) {
+    public DenmApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<Integer> causeCode) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
-        this.causeCodes.addAll(causeCodes);
+        this.causeCode.addAll(causeCode);
     }
 
-    public Set<Integer> getCauseCodes() {
-        return causeCodes;
+    public Set<Integer> getCauseCode() {
+        return causeCode;
     }
 
-    public void setCauseCodes(Set<Integer> causeCodes) {
-        this.causeCodes = causeCodes;
+    public void setCauseCode(Set<Integer> causeCode) {
+        this.causeCode = causeCode;
     }
 
     @Override
     public ApplicationApi toApi() {
-        return new DenmApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getCauseCodes());
+        return new DenmApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getCauseCode());
     }
 
     @Override

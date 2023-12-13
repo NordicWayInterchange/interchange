@@ -18,7 +18,7 @@ public class MessageValidatingSelectorCreator {
                 .messageType(messageType);
         if (messageType.equals(Constants.DENM)) {
             DenmApplication denmApplication = (DenmApplication) capability.getApplication();
-            builder.causeCodes(denmApplication.getCauseCodes());
+            builder.causeCode(denmApplication.getCauseCode());
         } else if (messageType.equals(Constants.DATEX_2)) {
             DatexApplication datexApplication = (DatexApplication) capability.getApplication();
             builder.publicationTypes(datexApplication.getPublicationType());

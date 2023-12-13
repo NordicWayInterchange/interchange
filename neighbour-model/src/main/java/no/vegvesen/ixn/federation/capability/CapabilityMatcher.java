@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("WeakerAccess")
@@ -101,45 +102,45 @@ public class CapabilityMatcher {
 	}
 
 	private static boolean matchDatex(DatexApplication capability, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = capability.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = capability.getSingleValuesBase();
 		return matchSingleStringValue(selectorFilter, mandatoryValues, MessageProperty.PUBLICATION_TYPE.getName(), capability.getPublicationType());
 	}
 
 	private static boolean matchDenm(DenmApplication application, JMSSelectorFilter selectorFilter) {
-		return matchEnumValues(selectorFilter, application.getSingleValuesBase(), MessageProperty.CAUSE_CODE.getName(), application.getCauseCodes());
+		return matchEnumValues(selectorFilter, application.getSingleValuesBase(), MessageProperty.CAUSE_CODE.getName(), application.getCauseCode());
 	}
 
 	private static boolean matchIvi(IvimApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
 	private static boolean matchSpatem(SpatemApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
 	private static boolean matchMapem(MapemApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
 	private static boolean matchSrem(SremApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
 	private static boolean matchSsem(SsemApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
 	private static boolean matchCam(CamApplication application, JMSSelectorFilter selectorFilter) {
-		Map<String, String> mandatoryValues = application.getSingleValuesBase();
+		Map<String, Object> mandatoryValues = application.getSingleValuesBase();
 		return matchApplicationValues(selectorFilter, mandatoryValues);
 	}
 
-	private static boolean matchApplicationValues(JMSSelectorFilter selectorFilter, Map<String, String> mandatoryValues) {
+	private static boolean matchApplicationValues(JMSSelectorFilter selectorFilter, Map<String, Object> mandatoryValues) {
 		CapabilityFilter capabilityFilter = new CapabilityFilter(mandatoryValues);
 		boolean matches = selectorFilter.matches(capabilityFilter);
 		logger.debug("Evaluated match {} against selector [{}]",
@@ -174,7 +175,7 @@ public class CapabilityMatcher {
 
 	// Enum values are properties where a property may have only one value in the message headers, but multiple possible
 	// values may be specified in the Capability, thus making an enum-type.
-	private static boolean matchEnumValues(JMSSelectorFilter selectorFilter, Map<String, String> mandatoryValues, String propertyName, Set<Integer> propertyValues) {
+	private static boolean matchEnumValues(JMSSelectorFilter selectorFilter, Map<String, Object> mandatoryValues, String propertyName, Set<Integer> propertyValues) {
 		CapabilityFilter capabilityFilter = new CapabilityFilter(mandatoryValues);
 		if (propertyValues.isEmpty()){
 			boolean matches = selectorFilter.matches(capabilityFilter);
@@ -183,7 +184,7 @@ public class CapabilityMatcher {
 			return matches;
 		}
 		for (Integer propertyValue : propertyValues) {
-			capabilityFilter.putValue(propertyName, propertyValue.toString());
+			capabilityFilter.putValue(propertyName, propertyValue);
 			if (selectorFilter.matches(capabilityFilter)) {
 				logger.debug("array value matches selector [{}] on property [{}] with value [{}].",
 						selectorFilter.getSelector(), propertyName, propertyValue);
@@ -193,7 +194,7 @@ public class CapabilityMatcher {
 		return false;
 	}
 
-	private static boolean matchSingleStringValue(JMSSelectorFilter selectorFilter, Map<String, String> mandatoryValues, String propertyName, String propertyValue) {
+	private static boolean matchSingleStringValue(JMSSelectorFilter selectorFilter, Map<String, Object> mandatoryValues, String propertyName, String propertyValue) {
 		CapabilityFilter capabilityFilter = new CapabilityFilter(mandatoryValues);
 		if (propertyValue == null){
 			boolean matches = selectorFilter.matches(capabilityFilter);
