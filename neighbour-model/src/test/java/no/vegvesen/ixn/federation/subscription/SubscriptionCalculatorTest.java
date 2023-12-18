@@ -176,8 +176,8 @@ public class SubscriptionCalculatorTest {
                                     "",
                                     "NO",
                                     "1.0",
-                                    Collections.emptySet(),
-                                    ""
+                                    Collections.singleton("0122"),
+                                    "SituationPublication"
                             ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -204,8 +204,8 @@ public class SubscriptionCalculatorTest {
                                         "",
                                         "NO",
                                         "1.0",
-                                        Collections.emptySet(),
-                                        ""
+                                        Collections.singleton("0122"),
+                                        "SituationPublication"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new CapabilitySplit(
@@ -214,8 +214,8 @@ public class SubscriptionCalculatorTest {
                                 "pub-123",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
-                                Collections.emptySet()
+                                Collections.singleton("0122"),
+                                Collections.singleton(6)
                         ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
@@ -246,8 +246,8 @@ public class SubscriptionCalculatorTest {
                                         "",
                                         "NO",
                                         "1.0",
-                                        Collections.emptySet(),
-                                        ""
+                                        Collections.singleton("0122"),
+                                        "SituationPublication"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -275,11 +275,11 @@ public class SubscriptionCalculatorTest {
                         new CapabilitySplit(
                                 new DatexApplication(
                                         "NO0001",
-                                        "",
+                                        "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.emptySet(),
-                                        ""
+                                        Collections.singleton("0122"),
+                                        "SituationPublication"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new CapabilitySplit(
@@ -288,8 +288,8 @@ public class SubscriptionCalculatorTest {
                                         "pub-123",
                                         "NO",
                                         "1.0",
-                                        Collections.emptySet(),
-                                        Collections.emptySet()
+                                        Collections.singleton("0122"),
+                                        Collections.singleton(6)
                                 ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
@@ -329,7 +329,7 @@ public class SubscriptionCalculatorTest {
 
     private CapabilitySplit getDatexCapability(String country) {
         return new CapabilitySplit(
-                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.emptySet(), "SituationPublication"),
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.singleton("0122"), "SituationPublication"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 

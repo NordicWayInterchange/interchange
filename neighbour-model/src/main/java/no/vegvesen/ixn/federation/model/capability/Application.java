@@ -88,8 +88,8 @@ public abstract class Application {
 
     public abstract String messageType();
 
-    public Map<String, String> getSingleValuesBase() {
-        Map<String, String> values = new HashMap<>();
+    public Map<String, Object> getSingleValuesBase() {
+        Map<String, Object> values = new HashMap<>();
         putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
         putValue(values, MessageProperty.PUBLICATION_ID, this.getPublicationId());
         putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
@@ -98,9 +98,14 @@ public abstract class Application {
         return values;
     }
 
-    static void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
-        if (value != null && value.length() > 0) {
-            values.put(messageProperty.getName(), value);
+    static void putValue(Map<String, Object> values, MessageProperty messageProperty, Object value) {
+        if (value != null) {
+            if (value instanceof String) {
+                String sVal = (String)value;
+                if (!sVal.isEmpty()) {
+                    values.put(messageProperty.getName(), value);
+                }
+            }
         }
     }
 

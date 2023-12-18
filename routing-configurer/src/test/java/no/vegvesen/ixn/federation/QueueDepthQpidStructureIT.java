@@ -94,7 +94,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText = "{hei1}";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "5"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5));
         }
 
         String logsBefore = qpidContainer.getLogs();
@@ -104,7 +104,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText = "{hei2}";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "6"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 6));
         }
 
         String logsAfter = qpidContainer.getLogs();
@@ -141,7 +141,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText1 = "{hei1}";
             byte[] bytemessage1 = messageText1.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage1, "5"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage1, 5));
         }
 
         String logsBefore = qpidContainer.getLogs();
@@ -151,7 +151,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText2 = "{hei2}";
             byte[] bytemessage2 = messageText2.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage2, "6"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage2, 6));
         }
 
 
@@ -187,7 +187,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText = "{hei1}";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "5"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5));
         }
 
         String logsBefore = qpidContainer.getLogs();
@@ -197,14 +197,14 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.start();
             String messageText = "{hei2}";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, "7"));
+            source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 7));
         }
 
         String logsAfter = qpidContainer.getLogs();
         assertThat(logsAfter).contains("EXH-1003");
     }
 
-    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, String causeCode) throws JMSException {
+    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, Integer causeCode) throws JMSException {
         return source.createMessageBuilder()
                 .bytesMessage(bytemessage)
                 .userId("anna")
@@ -217,7 +217,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 .shardId(1)
                 .shardCount(1)
                 .causeCode(causeCode)
-                .subCauseCode("76")
+                .subCauseCode(76)
                 .build();
     }
 }

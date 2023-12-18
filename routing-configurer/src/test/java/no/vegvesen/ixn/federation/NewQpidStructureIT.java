@@ -131,8 +131,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .quadTreeTiles(",12003,")
                 .shardId(1)
                 .shardCount(1)
-                .causeCode("6")
-                .subCauseCode("76")
+                .causeCode(6)
+                .subCauseCode(76)
                 .build();
     }
 
@@ -162,7 +162,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String outQueueName = "king_gustaf";
 
         Subscription subscription = new Subscription(
-                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
                 SubscriptionStatus.CREATED
         );
 
@@ -179,7 +179,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         LocalDelivery delivery = new LocalDelivery(
-                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
                 LocalDeliveryStatus.CREATED
         );
 
@@ -244,8 +244,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .publisherId("NO-123")
                         .publicationId("pub-1")
                         .messageType(Constants.DENM)
-                        .causeCode("6")
-                        .subCauseCode("61")
+                        .causeCode(6)
+                        .subCauseCode(61)
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
@@ -272,7 +272,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(output);
 
-        String selector = "((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')";
+        String selector = "((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6)";
 
         qpidClient.addBinding(input, new Binding(input, output, new Filter(selector)));
 
@@ -292,8 +292,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .publisherId("NO-123")
                         .publicationId("NO-123-pub")
                         .messageType(Constants.DENM)
-                        .causeCode("6")
-                        .subCauseCode("61")
+                        .causeCode(6)
+                        .subCauseCode(61)
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12004,")
@@ -395,8 +395,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .publisherId("NO-123")
                         .publicationId("pub-1")
                         .messageType(Constants.DENM)
-                        .causeCode("6")
-                        .subCauseCode("61")
+                        .causeCode(6)
+                        .subCauseCode(61)
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,12002,")
@@ -432,7 +432,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         LocalDelivery delivery = new LocalDelivery(
-                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6",
                 LocalDeliveryStatus.CREATED
         );
 
@@ -473,8 +473,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .publisherId("NO-123")
                         .publicationId("pub-1")
                         .messageType(Constants.DENM)
-                        .causeCode("6")
-                        .subCauseCode("61")
+                        .causeCode(6)
+                        .subCauseCode(61)
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,")

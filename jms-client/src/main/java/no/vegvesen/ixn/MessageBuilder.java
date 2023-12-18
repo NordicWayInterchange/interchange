@@ -150,18 +150,17 @@ public class MessageBuilder {
     }
 
     //DENM message properties
-    //TODO: Input variable should be Integer for causeCode and subCauseCode
 
-    public MessageBuilder causeCode(String causeCode) throws JMSException {
+    public MessageBuilder causeCode(Integer causeCode) throws JMSException {
         if (causeCode != null) {
-            message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
+            message.setIntProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
         }
         return this;
     }
 
-    public MessageBuilder subCauseCode(String subCauseCode) throws JMSException {
+    public MessageBuilder subCauseCode(Integer subCauseCode) throws JMSException {
         if (subCauseCode != null) {
-            message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
+            message.setIntProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
         }
         return this;
     }
@@ -208,7 +207,6 @@ public class MessageBuilder {
     }
 
     //CAM message properties
-    //TODO: Both stationType and vehicleRole should be integers.
 
     public MessageBuilder stationType(Integer stationType) throws JMSException {
         if (stationType != null) {

@@ -74,8 +74,8 @@ public class JmsClientSourceApplication implements Callable<Integer> {
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,")
-                        .causeCode("6")
-                        .subCauseCode("61")
+                        .causeCode(6)
+                        .subCauseCode(61)
                         .build());
                 System.out.println(messageText);
             }
@@ -146,8 +146,8 @@ public class JmsClientSourceApplication implements Callable<Integer> {
                 .quadTreeTiles(message.getQuadTree())
                 .shardId(message.getShardId())
                 .shardCount(message.getShardCount())
-                .causeCode(message.getCauseCode().toString())
-                .subCauseCode(message.getSubCauseCode().toString())
+                .causeCode(message.getCauseCode())
+                .subCauseCode(message.getSubCauseCode())
                 .build();
     }
 
