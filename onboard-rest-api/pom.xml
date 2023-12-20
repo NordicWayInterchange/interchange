@@ -15,12 +15,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>test-ssl-utils</artifactId>
-            <scope>test</scope>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>test</scope>

@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -24,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -35,30 +33,25 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(QueueDepthQpidStructureIT.class);
 
-    private static Path testKeysPath = getTestPrefixedOutputPath(QueueDepthQpidStructureIT.class);
-
-    @Container
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath, "my_ca", "localhost", "routing_configurer", "king_gustaf");
-
+    private static KeysStructure keysStructure = generateKeys(QueueDepthQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
     SSLContext sslContext;
 
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password", "localhost")
-            .dependsOn(keyContainer);
+    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", keysStructure, "localhost");
 
 
 
     @BeforeEach
     public void setUp() {
         KeystoreDetails trust = new KeystoreDetails(
-                keyContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(),
+                keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(),
                 "password",
                 KeystoreType.JKS
         );
         KeystoreDetails keys = new KeystoreDetails(
-                keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12").toString(),
+                keysStructure.getKeysOutputPath().resolve("routing_configurer.p12").toString(),
                 "password",
                 KeystoreType.PKCS12
         );

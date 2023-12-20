@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -42,8 +41,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
 
-    @Container
-    private static KeysContainer keyContainer = getKeyContainer(NewQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+    private static KeysStructure keysStructure = generateKeys(NewQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
     @Autowired
     SSLContext sslContext;
@@ -52,8 +50,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     QpidClient qpidClient;
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
-            .dependsOn(keyContainer);
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
+            keysStructure,
+            "localhost");
 
 
     static class Initializer
@@ -66,8 +65,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12")
+                    "test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+                    "test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }

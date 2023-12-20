@@ -1,6 +1,5 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -26,36 +25,31 @@ import static org.assertj.core.api.Assertions.fail;
 public class SourceSinkIT extends QpidDockerBaseIT {
 
 
-
-	@Container
-	static KeysContainer keysContainer = getKeyContainer(SourceSinkIT.class,"my_ca","localhost","king_harald");
+	private static final String SP_NAME = "king_harald";
+	static KeysStructure keysStructure = generateKeys(SourceSinkIT.class,"my_ca","localhost", SP_NAME);
 
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-			keysContainer.getKeyFolderOnHost(),
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost").dependsOn(keysContainer);
+			keysStructure,
+			"localhost");
 
-	private String URL;
-	private SSLContext KING_HARALD_SSL_CONTEXT;
+	private String Url;
+	private SSLContext kingHaraldSSlContext;
 
 	@BeforeEach
 	public void setUp() {
-		URL = qpidContainer.getAmqpsUrl();
-		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"king_harald.p12", "truststore.jks");
+		Url = qpidContainer.getAmqpsUrl();
+		kingHaraldSSlContext = sslClientContext(keysStructure, SP_NAME);
 	}
 
 	@Test
 	public void explicitExpiryIsReceived() throws JMSException, NamingException {
-		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
 		kingHaraldTestQueueSource.start();
 		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
 
-		Sink kingHaraldTestQueueSink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receive(1000);
 		assertThat(receive).isNotNull();
@@ -64,14 +58,14 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void expiredMessageIsNotDelivered() throws JMSException, NamingException, InterruptedException {
-		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
 		kingHaraldTestQueueSource.start();
 		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 200);
 
 		Thread.sleep(1000);
 
-		Sink kingHaraldTestQueueSink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receive(1000);
 		assertThat(receive).isNull();
@@ -79,7 +73,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void queueMaxTtlIsRespected() throws JMSException, NamingException, InterruptedException {
-		Source kingHaraldTestQueueSource = new Source(URL, "expiry-queue", KING_HARALD_SSL_CONTEXT);
+		Source kingHaraldTestQueueSource = new Source(Url, "expiry-queue", kingHaraldSSlContext);
 		kingHaraldTestQueueSource.start();
 		if (null != null && !((String) null).startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
@@ -104,7 +98,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 		//Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
-		Sink kingHaraldTestQueueSink = new Sink(URL, "expiry-queue", KING_HARALD_SSL_CONTEXT);
+		Sink kingHaraldTestQueueSink = new Sink(Url, "expiry-queue", kingHaraldSSlContext);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receive();
 		assertThat(receive).isNotNull();
@@ -112,7 +106,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sourceCloseIsClosed() throws JMSException, NamingException {
-		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Source source = new Source(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		assertThat(source.isConnected()).isTrue();
 		source.close();
@@ -121,7 +115,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendNonPersistentDenmByteMessage() throws JMSException, NamingException {
-		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Source source = new Source(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
 		source.sendNonPersistentMessage(source.createMessageBuilder()
@@ -139,7 +133,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.timestamp(System.currentTimeMillis())
 				.build());
 
-		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
 		//TODO this is weird!
@@ -149,7 +143,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException {
-		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Source source = new Source(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 
 		byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
@@ -170,7 +164,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 		source.sendNonPersistentMessage(message);
 
-		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
 		//TODO this is weird!
@@ -182,12 +176,12 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	//TODO how about doing this from different threads?
 	@Test
 	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
-		ImageSource source = new ImageSource(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		ImageSource source = new ImageSource(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
 
 		//TODO this is weird!
-		try (Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT,new ImageMessageListener())) {
+		try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext,new ImageMessageListener())) {
 			MessageConsumer testConsumer = sink.createConsumer();
 			Message receive = testConsumer.receive(1000);
 			sink.getListener().onMessage(receive);

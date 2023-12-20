@@ -10,7 +10,7 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.jupiter.api.Disabled;
+import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +44,6 @@ public class ExportServiceProvidersIT {
 
 
     @Test
-    @Disabled
     public void getServiceProviders() throws IOException {
         ServiceProvider serviceProvider = new ServiceProvider("testuser");
         serviceProvider.setCapabilities(
@@ -88,14 +88,14 @@ public class ExportServiceProvidersIT {
 
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
-        List<PrivateChannel> privateChannelList = (List<PrivateChannel>) privateChannelRepository.findAll();
+        Iterable<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
         writeToFile(path, serviceProviderList, privateChannelList);
 
         ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
         assertThat(serviceProviderApis.length).isEqualTo(1);
     }
 
-    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, List<PrivateChannel> privateChannelList) throws IOException {
+    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, Iterable<PrivateChannel> privateChannelList) throws IOException {
         CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
         TypeTransformer transformer = new TypeTransformer();
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -119,7 +119,7 @@ public class ExportServiceProvidersIT {
             }
             serviceProviderApi.setDeliveries(deliveries);
 
-            Set<PrivateChannel> serviceProviderPrivateChannelList = privateChannelList.stream().filter(p -> p.getServiceProviderName().equals(serviceProvider.getName())).collect(Collectors.toSet());
+            Set<PrivateChannel> serviceProviderPrivateChannelList = Streams.stream(privateChannelList).filter(p -> p.getServiceProviderName().equals(serviceProvider.getName())).collect(Collectors.toSet());
             Set<PrivateChannelApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());

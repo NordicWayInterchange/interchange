@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -33,7 +32,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,14 +50,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+	private static KeysStructure keysStructure = generateKeys(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
-
-	@Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
-			.dependsOn(keyContainer);
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 	private static final String nodeName = "localhost";
 
 
@@ -71,8 +65,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12"),
 					"interchange.node-provider.name=" + nodeName
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
@@ -1223,7 +1217,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 }

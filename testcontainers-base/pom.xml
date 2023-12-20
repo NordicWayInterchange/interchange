@@ -41,6 +41,11 @@
             <artifactId>csr-signer</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>ssl-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 
