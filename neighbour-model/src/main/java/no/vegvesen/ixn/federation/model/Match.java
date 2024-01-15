@@ -60,7 +60,7 @@ public class Match {
     }
 
     public boolean subscriptionIsTearDown() {
-        return !subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN);
+        return subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN);
     }
 
     public boolean localSubscriptionIsTearDown() {

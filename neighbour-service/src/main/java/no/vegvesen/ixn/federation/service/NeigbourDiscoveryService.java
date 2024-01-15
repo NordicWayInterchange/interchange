@@ -290,7 +290,6 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    //TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
     public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
             Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
@@ -304,18 +303,12 @@ public class NeigbourDiscoveryService {
                             }
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                         } else {
-                            if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
+                            if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
-                                EndpointCalculator endpointCalculator = new EndpointCalculator(
-                                        subscription.getEndpoints(),
-                                        lastUpdatedSubscription.getEndpoints()
-                                );
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
-                                    //TODO: find something smart to do here
-                                    subscription.getEndpoints().removeAll(endpointCalculator.getEndpointsToRemove());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                                 }
-                                subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
+                                subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                             } else {
                                 logger.info("No subscription change for neighbour {}", neighbour.getName());
                             }
@@ -326,7 +319,6 @@ public class NeigbourDiscoveryService {
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
-                    //TODO: Should we still poll on the bi if the subscription cannot be properly polled?
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
