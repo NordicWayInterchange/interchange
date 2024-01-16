@@ -38,7 +38,8 @@ public class LocalSubscription {
     @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
     private Set<LocalConnection> connections = new HashSet<>();
 
-    // ErrorMessage is needed for sending the error back to the user.
+    // ErrorMessage is needed for sending the error message back to the user
+    // Any subscription with an error message is deleted shortly after creation
     @Column
     private String errorMessage;
 
