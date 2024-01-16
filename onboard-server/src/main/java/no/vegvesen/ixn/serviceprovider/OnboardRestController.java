@@ -161,7 +161,7 @@ public class OnboardRestController {
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId = parseInt(capabilityId);
+		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
 		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
 
@@ -179,7 +179,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId = parseInt(capabilityId);
+		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
 
 		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
 				c.getId().equals(parsedCapabilityId))
@@ -258,7 +258,7 @@ public class OnboardRestController {
 
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedDataTypeId =  parseInt(dataTypeId);
+		Integer parsedDataTypeId =  parseInt(dataTypeId, "subscription");
 
 		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
 
@@ -294,11 +294,11 @@ public class OnboardRestController {
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer subsId = parseInt(subscriptionId);
+		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getId().equals(subsId))
+				s.getId().equals(parsedSubscriptionId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
@@ -348,7 +348,7 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId);
+		Integer parsedId = parseInt(privateChannelId, "private channel");
 
 		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
 		if (privateChannelToUpdate == null) {
@@ -382,9 +382,7 @@ public class OnboardRestController {
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId);
-
-
+		Integer parsedId = parseInt(privateChannelId, "private channel");
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
@@ -474,7 +472,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedDeliveryId = parseInt(deliveryId);
+		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
 
 		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
 				d.getId().equals(parsedDeliveryId))
@@ -497,7 +495,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		Integer parsedId = parseInt(deliveryId);
+		Integer parsedId = parseInt(deliveryId, "delivery");
 
 		//Setting the Delivery to TEAR_DOWN
 		serviceProvider.removeLocalDelivery(parsedId);
@@ -508,13 +506,13 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	private Integer parseInt(String unParsedInt){
+	private Integer parseInt(String unParsedInt, String objectName){
 		Integer parsedInt;
 		try {
 			 parsedInt = Integer.parseInt(unParsedInt);
 		}
 		catch (Exception e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", unParsedInt));
+			throw new CouldNotParseIdException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
 		}
 		return parsedInt;
 	}

@@ -620,7 +620,7 @@ public class OnboardRestControllerTest {
 
 		mockMvc.perform(
 				delete(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isBadRequest());
+		).andExpect(status().isNotFound());
 
 		verify(privateChannelRepository, times(0)).save(any());
 		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndId(any(),any());
@@ -681,7 +681,7 @@ public class OnboardRestControllerTest {
 
 		mockMvc.perform(
 				get(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isBadRequest());
+		).andExpect(status().isNotFound());
 
 		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndIdAndStatusIsNot(any(),any(),any());
 	}

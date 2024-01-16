@@ -115,7 +115,7 @@ public class OnboardRestControllerIT {
            restController.getServiceProviderCapability(serviceProviderName, "notAnId");
         });
 
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
 
 
@@ -192,7 +192,7 @@ public class OnboardRestControllerIT {
         CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> {
             restController.deleteCapability(serviceProviderName, invalidId);
         });
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
 
     @Test
@@ -284,7 +284,7 @@ public class OnboardRestControllerIT {
            restController.deleteSubscription(serviceProviderName, "notAnId");
         });
 
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -394,7 +394,7 @@ public class OnboardRestControllerIT {
         CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> {
            restController.getServiceProviderSubscription(serviceProviderName, "notAnId");
         });
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
 
 	@Test
@@ -790,7 +790,7 @@ public class OnboardRestControllerIT {
         CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () ->{
             restController.getDelivery(serviceProviderName, "notAnId");
         });
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
 
     @Test
@@ -811,7 +811,7 @@ public class OnboardRestControllerIT {
             restController.deleteDelivery(serviceProviderName, "notAnId");
         });
 
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
     @Test
     public void testAddingAndDeletingChannel(){
@@ -868,7 +868,7 @@ public class OnboardRestControllerIT {
         restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)));
 
         CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.deletePrivateChannel(serviceProviderName, "notAnId"));
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
     }
 
     @Test
@@ -910,7 +910,7 @@ public class OnboardRestControllerIT {
         restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1)));
 
         CouldNotParseIdException thrown = assertThrows(CouldNotParseIdException.class, () -> restController.getPrivateChannel(serviceProviderName, "notAnId"));
-        assertThat(thrown.getMessage()).contains("invalid");
+        assertThat(thrown.getMessage()).contains("Could not find");
 
     }
     @Test

@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;
@@ -59,7 +58,7 @@ public class OnboardServerErrorAdvice {
 	}
 	@ExceptionHandler({CouldNotParseIdException.class})
 	public ResponseEntity<ErrorDetails> handleParseErrorException(CouldNotParseIdException e){
-		return error(BAD_REQUEST, e);
+		return error(NOT_FOUND, e);
 	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
