@@ -161,14 +161,7 @@ public class OnboardRestController {
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId;
-		try{
-			parsedCapabilityId = Integer.parseInt(capabilityId);
-		}
-		catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", capabilityId));
-		}
-
+		Integer parsedCapabilityId = parseInt(capabilityId);
 		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
 
@@ -186,13 +179,8 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId;
-		try{
-			parsedCapabilityId = Integer.parseInt(capabilityId);
-		}
-		catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", capabilityId));
-		}
+		Integer parsedCapabilityId = parseInt(capabilityId);
+
 		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
 				c.getId().equals(parsedCapabilityId))
 				.findFirst()
@@ -270,13 +258,7 @@ public class OnboardRestController {
 
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedDataTypeId;
-		try{
-			parsedDataTypeId = Integer.parseInt(dataTypeId);
-		}
-		catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", dataTypeId));
-		}
+		Integer parsedDataTypeId =  parseInt(dataTypeId);
 
 		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
 
@@ -312,12 +294,7 @@ public class OnboardRestController {
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer subsId;
-		try {
-			subsId = Integer.parseInt(subscriptionId);
-		} catch (NumberFormatException e) {
-			throw new CouldNotParseIdException(String.format("Id %s is invalid",subscriptionId));
-		}
+		Integer subsId = parseInt(subscriptionId);
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
@@ -371,12 +348,7 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId;
-		try{
-			parsedId = Integer.parseInt(privateChannelId);
-		}catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
-		}
+		Integer parsedId = parseInt(privateChannelId);
 
 		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
 		if (privateChannelToUpdate == null) {
@@ -410,13 +382,9 @@ public class OnboardRestController {
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId;
+		Integer parsedId = parseInt(privateChannelId);
 
-		try{
-			parsedId = Integer.parseInt(privateChannelId);
-		}catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
-		}
+
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
@@ -506,13 +474,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedDeliveryId;
-		try{
-			parsedDeliveryId = Integer.parseInt(deliveryId);
-		}
-		catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", deliveryId));
-		}
+		Integer parsedDeliveryId = parseInt(deliveryId);
 
 		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
 				d.getId().equals(parsedDeliveryId))
@@ -535,13 +497,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		Integer parsedId;
-		try{
-			parsedId = Integer.parseInt(deliveryId);
-		}
-		catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", deliveryId));
-		}
+		Integer parsedId = parseInt(deliveryId);
 
 		//Setting the Delivery to TEAR_DOWN
 		serviceProvider.removeLocalDelivery(parsedId);
@@ -550,5 +506,16 @@ public class OnboardRestController {
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		OnboardMDCUtil.removeLogVariables();
+	}
+
+	private Integer parseInt(String unParsedInt){
+		Integer parsedInt;
+		try {
+			 parsedInt = Integer.parseInt(unParsedInt);
+		}
+		catch (Exception e){
+			throw new CouldNotParseIdException(String.format("Id %s is invalid", unParsedInt));
+		}
+		return parsedInt;
 	}
 }
