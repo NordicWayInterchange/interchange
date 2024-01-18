@@ -54,9 +54,12 @@ public class OnboardRestController {
 		logger.info("Received capability POST from Service Provider: {}", serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
+		if (capabilityApi == null || capabilityApi.getCapabilities() == null || capabilityApi.getCapabilities().isEmpty()) {
+			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
+		}
 
-		if (capabilityApi == null) {
-			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
+		if (! serviceProviderName.equals(capabilityApi.getName())) {
+			throw new CapabilityPostException("Bad api object. Wrong service provider name");
 		}
 
 		Set<String> allPublicationIds = allPublicationIds();

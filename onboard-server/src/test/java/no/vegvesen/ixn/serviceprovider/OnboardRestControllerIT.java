@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -17,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,8 +25,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -87,6 +84,54 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddCapabilitiesWithNullRequest() {
+        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
+                () -> restController.addCapabilities("serviceProvider",null)
+        );
+    }
+
+    @Test
+    public void testAddCapabilitiesWithNullCapabilitySet() {
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest();
+        request.setCapabilities(null);
+        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
+                () -> restController.addCapabilities("serviceProvider",request)
+        );
+    }
+
+    @Test
+    public void testAddCapabilitiesWithEmptyCapabilitySet() {
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest("serviceProvider",new HashSet<>());
+        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
+                () -> restController.addCapabilities("serviceProvider",request)
+        );
+    }
+
+    @Test
+    public void testWrongNameInRequestResultsInError() {
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                "serviceProvider",
+                Collections.singleton(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "Publisher1",
+                                        "Publisher1:Publication1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.emptySet(),
+                                        Collections.emptySet()
+                                ),
+                                new MetadataApi()
+                        )
+                )
+        );
+        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
+                () -> restController.addCapabilities("anotherServiceProvider",request)
+        );
+
+    }
+
+
     public void testGettingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
