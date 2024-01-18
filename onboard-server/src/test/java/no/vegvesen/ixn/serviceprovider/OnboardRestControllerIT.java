@@ -132,6 +132,7 @@ public class OnboardRestControllerIT {
     }
 
 
+    @Test
     public void testGettingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
@@ -296,6 +297,47 @@ public class OnboardRestControllerIT {
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddSubscriptionNullArgument() {
+        assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
+                () -> restController.addSubscriptions("serviceProvider",null)
+        );
+    }
+
+    @Test
+    public void testAddSubscriptionsNullSubscriptionSet() {
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest();
+        request.setSubscriptions(null);
+        assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
+                () -> restController.addSubscriptions("serviceProvider",request)
+        );
+    }
+
+    @Test
+    public void testAddSubscrptionsEmptySubscriptionsSet() {
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("serviceProvider",Collections.emptySet());
+        assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
+                () -> restController.addSubscriptions("serviceProvider",request)
+        );
+
+    }
+
+    @Test
+    public void testAddSubscriptionsWrongServiceProviderName() {
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "anotherServiceProvider",
+                Collections.singleton(
+                        new AddSubscription(
+                                "a = b"
+                        )
+                )
+        );
+        assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
+                () -> restController.addSubscriptions("serviceProvider",request)
+        );
+
     }
 
     @Test

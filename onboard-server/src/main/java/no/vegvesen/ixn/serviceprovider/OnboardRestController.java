@@ -198,11 +198,15 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		//check the name of hte request
+		//check the name of the request
 		//check the version of the request
 
-		if (Objects.isNull(requestApi.getSubscriptions())) {
+		if (Objects.isNull(requestApi) || Objects.isNull(requestApi.getSubscriptions()) || requestApi.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
+
+		}
+		if (! serviceProviderName.equals(requestApi.getName())) {
+			throw new SubscriptionRequestException("Bad api object for Subscription Request. Name does not match service provider name in URL");
 
 		}
 
