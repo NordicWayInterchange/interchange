@@ -766,6 +766,33 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingNullRequest() {
+        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+                () -> restController.addDeliveries("serviceProvider",null)
+        );
+    }
+
+    @Test
+    public void testAddingNullDelivery() {
+        AddDeliveriesRequest request = new AddDeliveriesRequest();
+        request.setDeliveries(null);
+        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+                () -> restController.addDeliveries("serviceProvider",request)
+        );
+    }
+
+    @Test
+    public void testAddingEmptyDeliverySet() {
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                "serviceProvider",
+                Collections.emptySet()
+        );
+        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+                () -> restController.addDeliveries("serviceProvider",request)
+        );
+    }
+
+    @Test
     public void testAddingIllegalDelivery() {
         String serviceProviderName = "my-service-provider";
         String selector = "";

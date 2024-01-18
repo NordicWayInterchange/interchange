@@ -420,8 +420,8 @@ public class OnboardRestController {
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(Objects.isNull(request.getDeliveries())) {
-			throw new DeliveryException("Delivery cannot be null");
+		if(Objects.isNull(request) || Objects.isNull(request.getDeliveries()) || request.getDeliveries().isEmpty()) {
+			throw new DeliveryException("Bad API object. The request has no deliveries, nothing to add");
 		}
 
 		for(SelectorApi delivery : request.getDeliveries()) {
