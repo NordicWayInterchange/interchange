@@ -424,22 +424,20 @@ public class OnboardRestController {
 			throw new DeliveryException("Bad API object. The request has no deliveries, nothing to add");
 		}
 
-		for(SelectorApi delivery : request.getDeliveries()) {
-			if(delivery.getSelector() == null) {
-				throw new DeliveryException("Bad api object for adding delivery. The selector object was null.");
-			}
-		}
-
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
 
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
 		for(SelectorApi delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
-			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
-				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
-			} else {
+			String selector = localDelivery.getSelector();
+			if (delivery.getSelector() == null) {
+				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
+				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
+			} else if (! JMSSelectorFilterFactory.isValidSelector(selector)) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
+			} else {
+				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			}
 			localDeliveries.add(localDelivery);
 		}

@@ -855,8 +855,10 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
         assertThat(response.getDeliveries()).hasSize(1);
-        assertThat(response.getDeliveries().stream().findFirst().get().getErrorMessage()).isNotBlank();
-        assertThat(response.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(DeliveryStatus.ERROR);
+
+        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        assertThat(delivery.getErrorMessage()).isNotBlank();
+        assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
 
     @Test
@@ -871,11 +873,12 @@ public class OnboardRestControllerIT {
                 )
         );
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
-        DeliveryException thrown = assertThrows(DeliveryException.class, () -> {
-           restController.addDeliveries(serviceProviderName, request);
-        });
-        assertThat(thrown.getMessage()).
-                isEqualTo("Bad api object for adding delivery. The selector object was null.");
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
+        assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
 
     @Test
