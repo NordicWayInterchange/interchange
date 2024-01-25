@@ -13,7 +13,7 @@ public class SecurityConfig {
 
 	@Bean
 	protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
+		/*http
 				.authorizeRequests()
 				.anyRequest().authenticated()
 				.and()
@@ -24,6 +24,7 @@ public class SecurityConfig {
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
 				.and()
 				.csrf().disable();
+		return http.build(); */
 		return http.build();
 	}
 
