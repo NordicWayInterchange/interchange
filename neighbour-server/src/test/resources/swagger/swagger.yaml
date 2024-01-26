@@ -1,0 +1,329 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: https://localhost:54220
+  description: Generated server url
+paths:
+  /subscriptions:
+    post:
+      tags:
+      - neighbour-rest-controller
+      operationId: requestSubscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequestApi'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponseApi'
+  /capabilities:
+    post:
+      tags:
+      - neighbour-rest-controller
+      operationId: updateCapabilities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapabilitiesSplitApi'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilitiesSplitApi'
+  /{ixnName}/subscriptions:
+    get:
+      tags:
+      - neighbour-rest-controller
+      operationId: listSubscriptions
+      parameters:
+      - name: ixnName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponseApi'
+  /{ixnName}/subscriptions/{subscriptionId}:
+    get:
+      tags:
+      - neighbour-rest-controller
+      operationId: pollSubscription
+      parameters:
+      - name: ixnName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: subscriptionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPollResponseApi'
+    delete:
+      tags:
+      - neighbour-rest-controller
+      operationId: deleteSubscription
+      parameters:
+      - name: ixnName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: subscriptionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    RequestedSubscriptionApi:
+      type: object
+      properties:
+        selector:
+          type: string
+        consumerCommonName:
+          type: string
+    SubscriptionRequestApi:
+      type: object
+      properties:
+        version:
+          type: string
+        name:
+          type: string
+        subscriptions:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedSubscriptionApi'
+    RequestedSubscriptionResponseApi:
+      type: object
+      properties:
+        id:
+          type: string
+        selector:
+          type: string
+        consumerCommonName:
+          type: string
+        path:
+          type: string
+        status:
+          type: string
+          enum:
+          - REQUESTED
+          - CREATED
+          - ILLEGAL
+          - NOT_VALID
+          - NO_OVERLAP
+          - RESUBSCRIBE
+          - ERROR
+        lastUpdatedTimestamp:
+          type: integer
+          format: int64
+    SubscriptionResponseApi:
+      type: object
+      properties:
+        version:
+          type: string
+        name:
+          type: string
+        subscriptions:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedSubscriptionResponseApi'
+    ApplicationApi:
+      type: object
+      properties:
+        messageType:
+          type: string
+        publisherId:
+          type: string
+        publicationId:
+          type: string
+        originatingCountry:
+          type: string
+        protocolVersion:
+          type: string
+        quadTree:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      discriminator:
+        propertyName: messageType
+    CamApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    CapabilitiesSplitApi:
+      type: object
+      properties:
+        version:
+          type: string
+        name:
+          type: string
+        capabilities:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/CapabilitySplitApi'
+    CapabilitySplitApi:
+      type: object
+      properties:
+        application:
+          oneOf:
+          - $ref: '#/components/schemas/ApplicationApi'
+          - $ref: '#/components/schemas/CamApplicationApi'
+          - $ref: '#/components/schemas/DatexApplicationApi'
+          - $ref: '#/components/schemas/DenmApplicationApi'
+          - $ref: '#/components/schemas/IvimApplicationApi'
+          - $ref: '#/components/schemas/MapemApplicationApi'
+          - $ref: '#/components/schemas/SpatemApplicationApi'
+          - $ref: '#/components/schemas/SremApplicationApi'
+          - $ref: '#/components/schemas/SsemApplicationApi'
+        metadata:
+          $ref: '#/components/schemas/MetadataApi'
+    DatexApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+      - type: object
+        properties:
+          publicationType:
+            type: string
+    DenmApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+      - type: object
+        properties:
+          causeCodes:
+            uniqueItems: true
+            type: array
+            items:
+              type: integer
+              format: int32
+          causeCode:
+            uniqueItems: true
+            type: array
+            writeOnly: true
+            items:
+              type: integer
+              format: int32
+    IvimApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    MapemApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    MetadataApi:
+      type: object
+      properties:
+        shardCount:
+          type: integer
+          format: int32
+        infoUrl:
+          type: string
+        redirectPolicy:
+          type: string
+          enum:
+          - OPTIONAL
+          - MANDATORY
+          - NOT_AVAILABLE
+        maxBandwidth:
+          type: integer
+          format: int32
+        maxMessageRate:
+          type: integer
+          format: int32
+        repetitionInterval:
+          type: integer
+          format: int32
+    SpatemApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    SremApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    SsemApplicationApi:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ApplicationApi'
+    EndpointApi:
+      type: object
+      properties:
+        source:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+          format: int32
+        maxBandwidth:
+          type: integer
+          format: int32
+        maxMessageRate:
+          type: integer
+          format: int32
+    SubscriptionPollResponseApi:
+      type: object
+      properties:
+        id:
+          type: string
+        selector:
+          type: string
+        consumerCommonName:
+          type: string
+        path:
+          type: string
+        status:
+          type: string
+          enum:
+          - REQUESTED
+          - CREATED
+          - ILLEGAL
+          - NOT_VALID
+          - NO_OVERLAP
+          - RESUBSCRIBE
+          - ERROR
+        lastUpdatedTimestamp:
+          type: integer
+          format: int64
+        endpoints:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointApi'
