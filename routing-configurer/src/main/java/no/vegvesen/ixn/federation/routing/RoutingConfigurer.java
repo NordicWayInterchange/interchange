@@ -212,7 +212,6 @@ public class RoutingConfigurer {
 		}
 	}
 
-	//TODO: Write tests to assure that listenerEndpoints are created
 	@Scheduled(fixedRateString = "${create-subscriptions-exchange.interval}")
 	public void setUpSubscriptionExchanges() {
 		logger.debug("Looking for new subscriptions to set up exchanges for");
@@ -231,10 +230,10 @@ public class RoutingConfigurer {
 									);
 									qpidClient.createHeadersExchange(exchangeName);
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
 								}
 							}
 						}
-						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints());
 					}
 				}
 			}
@@ -242,16 +241,10 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
-		for(Endpoint endpoint : endpoints) {
-			createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), endpoint.getShard().getExchangeName(), neighbour);
-		}
-	}
-
-	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbour.getName()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
-			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName) {
+		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName));
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint);
 		}
 	}
 
