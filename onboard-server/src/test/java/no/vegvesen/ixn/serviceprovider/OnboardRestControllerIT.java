@@ -28,6 +28,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -1108,20 +1110,20 @@ public class OnboardRestControllerIT {
 
         assertThat(restController.getServiceProviders().size()).isEqualTo(3);
     }
-/*
+
     @Autowired
     WebApplicationContext context;
     @Test
     public void genSwagger() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs.yaml").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
                 .andDo((result -> {
-                    try(FileWriter fileWriter = new FileWriter("swagger.yaml")){
+                    Files.createDirectories(Paths.get("target/swagger"));
+                    try(FileWriter fileWriter = new FileWriter("target/swagger/swagger.json")){
                         fileWriter.write(result.getResponse().getContentAsString());
                     }
 
-                         }));
+                }));
     }
-*/
 
 }
