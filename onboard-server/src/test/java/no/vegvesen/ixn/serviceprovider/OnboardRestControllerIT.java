@@ -23,14 +23,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -803,7 +809,21 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.saveAll(List.of(serviceProvider_1,serviceProvider_2,serviceProvider_3));
 
         assertThat(restController.getServiceProviders().size()).isEqualTo(3);
-
     }
+/*
+    @Autowired
+    WebApplicationContext context;
+    @Test
+    public void genSwagger() throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs.yaml").accept(MediaType.APPLICATION_JSON))
+                .andDo((result -> {
+                    try(FileWriter fileWriter = new FileWriter("swagger.yaml")){
+                        fileWriter.write(result.getResponse().getContentAsString());
+                    }
+
+                         }));
+    }
+*/
 
 }
