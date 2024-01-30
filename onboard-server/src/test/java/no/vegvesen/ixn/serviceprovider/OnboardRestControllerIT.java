@@ -820,6 +820,7 @@ public class OnboardRestControllerIT {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
                 .andDo((result -> {
+                    Files.deleteIfExists(Paths.get("target/swagger/swagger.json"));
                     Files.createDirectories(Paths.get("target/swagger"));
                     try(FileWriter fileWriter = new FileWriter("target/swagger/swagger.json")){
                         fileWriter.write(result.getResponse().getContentAsString());
