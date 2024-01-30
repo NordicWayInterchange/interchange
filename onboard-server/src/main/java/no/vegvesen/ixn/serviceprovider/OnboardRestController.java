@@ -58,10 +58,6 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
 
-		if (! serviceProviderName.equals(capabilityApi.getName())) {
-			throw new CapabilityPostException("Bad api object. Wrong service provider name");
-		}
-
 		Set<String> allPublicationIds = allPublicationIds();
 		for (CapabilitySplitApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
@@ -82,9 +78,7 @@ public class OnboardRestController {
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
-		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		//TODO test this with regard to ID's
 		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
 		addedCapabilities.retainAll(newLocalCapabilities);
 
@@ -159,16 +153,9 @@ public class OnboardRestController {
 		logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId,serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
-
-		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-
 		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
-
-		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
@@ -183,11 +170,8 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
+		CapabilitySplit capability = serviceProvider.findCapabilitySplit(parsedCapabilityId);
 
-		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
-				c.getId().equals(parsedCapabilityId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
@@ -198,16 +182,9 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		//check the name of the request
-		//check the version of the request
 
 		if (Objects.isNull(requestApi) || Objects.isNull(requestApi.getSubscriptions()) || requestApi.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
-
-		}
-		if (! serviceProviderName.equals(requestApi.getName())) {
-			throw new SubscriptionRequestException("Bad api object for Subscription Request. Name does not match service provider name in URL");
-
 		}
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
@@ -232,17 +209,10 @@ public class OnboardRestController {
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
 
-		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
+		Set<LocalSubscription> savedSubscriptions = saved.findSavedSubscriptions(localSubscriptions);
 
-
-		//find the newly saved subscriptions from the database
-		Set<LocalSubscription> savedSubscriptions = saved
-				.getSubscriptions()
-				.stream()
-				.filter(subscription -> localSubscriptions.contains(subscription))
-				.collect(Collectors.toSet());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
 	}
@@ -263,16 +233,12 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		Integer parsedDataTypeId =  parseInt(dataTypeId, "subscription");
 
 		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
-
-		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
 		OnboardMDCUtil.removeLogVariables();
 	}
 
@@ -302,12 +268,9 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
-
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getId().equals(parsedSubscriptionId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
+		LocalSubscription localSubscription = serviceProvider.findSubscription(parsedSubscriptionId);
+
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);
@@ -361,8 +324,6 @@ public class OnboardRestController {
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
-
-		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		privateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
 		PrivateChannel saved = privateChannelRepository.save(privateChannelToUpdate);
 
@@ -398,7 +359,6 @@ public class OnboardRestController {
 
 		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
-
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
 
@@ -415,7 +375,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
+	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) { // se addcap
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -447,11 +407,10 @@ public class OnboardRestController {
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addDeliveries(localDeliveries);
 
-		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
-		Set<LocalDelivery> savedDeliveries = saved
+		Set<LocalDelivery> savedDeliveries = saved //sp
 				.getDeliveries()
 				.stream()
 				.filter(delivery -> localDeliveries.contains(delivery))
@@ -481,7 +440,7 @@ public class OnboardRestController {
 
 		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
 
-		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
+		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d -> //
 				d.getId().equals(parsedDeliveryId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
@@ -503,13 +462,10 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
 		Integer parsedId = parseInt(deliveryId, "delivery");
-
-		//Setting the Delivery to TEAR_DOWN
 		serviceProvider.removeLocalDelivery(parsedId);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
 		OnboardMDCUtil.removeLogVariables();
 	}
 

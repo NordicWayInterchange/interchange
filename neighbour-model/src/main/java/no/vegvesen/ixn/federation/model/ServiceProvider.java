@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -213,6 +214,28 @@ public class ServiceProvider {
 				);
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
+
+	public CapabilitySplit findCapabilitySplit(Integer capabilityId){
+		return
+				getCapabilities().getCapabilities().stream()
+				.filter(c-> c.getId().equals(capabilityId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
+	}
+	public Set<LocalSubscription> findSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
+		return this.getSubscriptions()
+				.stream()
+				.filter(subscription -> allSubscriptions.contains(subscription))
+				.collect(Collectors.toSet());
+	}
+	public LocalSubscription findSubscription(Integer subscriptionId){
+		return getSubscriptions()
+				.stream()
+				.filter(s -> s.getId().equals(subscriptionId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
+	}
+
 
 	@Override
 	public boolean equals(Object o) {
