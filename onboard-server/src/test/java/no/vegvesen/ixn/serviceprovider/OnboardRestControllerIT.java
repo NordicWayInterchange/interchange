@@ -866,6 +866,21 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingNullDeliveryRequest(){
+        AddDeliveriesRequest request = null;
+        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+                () -> restController.addDeliveries("serviceProvider", request)
+        );
+    }
+
+    @Test
+    public void testAddingEmptyDeliveriesRequest(){
+        AddDeliveriesRequest request = new AddDeliveriesRequest();
+        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+                () -> restController.addDeliveries("serviceProvider", request)
+        );
+    }
+    @Test
     public void testDeletingDelivery(){
 
         String serviceProviderName = "my-service-provider";
@@ -949,6 +964,31 @@ public class OnboardRestControllerIT {
 
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
+    }
+
+    @Test
+    public void testAddingNullChannelsRequest(){
+        AddPrivateChannelRequest request = null;
+        assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
+                () -> restController.addPrivateChannel("serviceProvider", request)
+        );
+    }
+
+    @Test
+    public void testAddingNullChannel(){
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest();
+        request.setPrivateChannels(null);
+        assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
+                () -> restController.addPrivateChannel("serviceProvider", request)
+        );
+    }
+
+    @Test
+    public void testAddingEmptyChannelsRequest(){
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest();
+        assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
+                () -> restController.addPrivateChannel("serviceProvider", request)
+        );
     }
     @Test
     public void testDeletingNonExistentChannel(){
