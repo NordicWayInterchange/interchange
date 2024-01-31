@@ -215,14 +215,14 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public CapabilitySplit findCapabilitySplit(Integer capabilityId){
+	public CapabilitySplit getCapabilitySplit(Integer capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
 				.filter(c-> c.getId().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
-	public Set<LocalSubscription> findSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
+	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
 				.filter(subscription -> allSubscriptions.contains(subscription))
@@ -236,7 +236,7 @@ public class ServiceProvider {
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
 	}
 
-	public Set<LocalDelivery> findSavedDeliveries(Set<LocalDelivery> allDeliveries){
+	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries){
 		return this.getDeliveries()
 				.stream()
 				.filter(delivery -> allDeliveries.contains(delivery))

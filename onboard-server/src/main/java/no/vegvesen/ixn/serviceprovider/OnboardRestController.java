@@ -170,7 +170,7 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		CapabilitySplit capability = serviceProvider.findCapabilitySplit(parsedCapabilityId);
+		CapabilitySplit capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
@@ -211,7 +211,7 @@ public class OnboardRestController {
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-		Set<LocalSubscription> savedSubscriptions = saved.findSavedSubscriptions(localSubscriptions);
+		Set<LocalSubscription> savedSubscriptions = saved.getSavedSubscriptions(localSubscriptions);
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
@@ -407,7 +407,7 @@ public class OnboardRestController {
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-		Set<LocalDelivery> savedDeliveries = saved.findSavedDeliveries(localDeliveries);
+		Set<LocalDelivery> savedDeliveries = saved.getSavedDeliveries(localDeliveries);
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
