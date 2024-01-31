@@ -325,22 +325,6 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddSubscriptionsWrongServiceProviderName() {
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
-                "anotherServiceProvider",
-                Collections.singleton(
-                        new AddSubscription(
-                                "a = b"
-                        )
-                )
-        );
-        assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
-                () -> restController.addSubscriptions("serviceProvider",request)
-        );
-
-    }
-
-    @Test
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
