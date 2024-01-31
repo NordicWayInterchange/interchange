@@ -269,7 +269,7 @@ public class OnboardRestController {
 
 		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.findSubscription(parsedSubscriptionId);
+		LocalSubscription localSubscription = serviceProvider.getSubscription(parsedSubscriptionId);
 
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
@@ -380,7 +380,7 @@ public class OnboardRestController {
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(Objects.isNull(request.getDeliveries())) {
+		if(request == null || request.getDeliveries() == null || request.getDeliveries().isEmpty()) {
 			throw new DeliveryException("Delivery cannot be null");
 		}
 
@@ -409,12 +409,7 @@ public class OnboardRestController {
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
-		Set<LocalDelivery> savedDeliveries = saved //sp
-				.getDeliveries()
-				.stream()
-				.filter(delivery -> localDeliveries.contains(delivery))
-				.collect(Collectors.toSet());
+		Set<LocalDelivery> savedDeliveries = saved.findSavedDeliveries(localDeliveries);
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
@@ -440,10 +435,7 @@ public class OnboardRestController {
 
 		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
 
-		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d -> //
-				d.getId().equals(parsedDeliveryId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
+		LocalDelivery localDelivery = serviceProvider.getDelivery(parsedDeliveryId);
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();

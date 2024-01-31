@@ -228,12 +228,26 @@ public class ServiceProvider {
 				.filter(subscription -> allSubscriptions.contains(subscription))
 				.collect(Collectors.toSet());
 	}
-	public LocalSubscription findSubscription(Integer subscriptionId){
+	public LocalSubscription getSubscription(Integer subscriptionId){
 		return getSubscriptions()
 				.stream()
 				.filter(s -> s.getId().equals(subscriptionId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
+	}
+
+	public Set<LocalDelivery> findSavedDeliveries(Set<LocalDelivery> allDeliveries){
+		return this.getDeliveries()
+				.stream()
+				.filter(delivery -> allDeliveries.contains(delivery))
+				.collect(Collectors.toSet());
+	}
+	public LocalDelivery getDelivery(Integer deliveryId){
+		return getDeliveries()
+				.stream()
+				.filter(d -> d.getId().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
 	}
 
 
