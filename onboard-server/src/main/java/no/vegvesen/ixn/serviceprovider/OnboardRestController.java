@@ -381,7 +381,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		if(Objects.isNull(request) || Objects.isNull(request.getDeliveries()) || request.getDeliveries().isEmpty()) {
-			throw new DeliveryException("Bad API object. The request has no deliveries, nothing to add");
+			throw new DeliveryPostException("Bad API object. The request has no deliveries, nothing to add");
 		}
 
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
@@ -465,7 +465,7 @@ public class OnboardRestController {
 			 parsedInt = Integer.parseInt(unParsedInt);
 		}
 		catch (Exception e){
-			throw new CouldNotParseIdException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
+			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
 		}
 		return parsedInt;
 	}

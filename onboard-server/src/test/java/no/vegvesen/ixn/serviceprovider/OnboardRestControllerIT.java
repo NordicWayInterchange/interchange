@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -455,7 +454,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "serviceprovider";
         String invalidId = "notAnId";
 
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteCapability(serviceProviderName, invalidId)
         );
     }
@@ -485,7 +484,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingCapabilityWithInvalidId(){
         String serviceProviderName = "serviceprovider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getServiceProviderCapability(serviceProviderName, "notAnId")
         );
     }
@@ -696,7 +695,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testDeletingSubscriptionWithInvalidId(){
         String serviceProviderName = "serviceprovider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteSubscription(serviceProviderName, "notAnId")
         );
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -738,7 +737,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingSubscriptionWithInvalidId(){
         String serviceProviderName = "serviceprovider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getServiceProviderSubscription(serviceProviderName, "notAnId")
         );
     }
@@ -842,7 +841,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testDeletingInvalidChannelId(){
         String serviceProviderName = "my-service-provider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "notAnId")
         );
     }
@@ -882,7 +881,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingChannelWithInvalidId(){
         String serviceProviderName = "my-service-provider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "notAnId")
         );
     }
@@ -906,7 +905,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingNullRequest() {
-        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+        assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
                 () -> restController.addDeliveries("serviceProvider",null)
         );
     }
@@ -915,7 +914,7 @@ public class OnboardRestControllerIT {
     public void testAddingNullDelivery() {
         AddDeliveriesRequest request = new AddDeliveriesRequest();
         request.setDeliveries(null);
-        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+        assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
                 () -> restController.addDeliveries("serviceProvider",request)
         );
     }
@@ -926,7 +925,7 @@ public class OnboardRestControllerIT {
                 "serviceProvider",
                 Collections.emptySet()
         );
-        assertThatExceptionOfType(DeliveryException.class).isThrownBy(
+        assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
                 () -> restController.addDeliveries("serviceProvider",request)
         );
     }
@@ -1059,7 +1058,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingDeliveryWithInvalidId(){
         String serviceProviderName = "my-service-provider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getDelivery(serviceProviderName, "notAnId")
         );
     }
@@ -1095,7 +1094,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testDeletingDeliveryWithInvalidId(){
         String serviceProviderName = "my-service-provider";
-        assertThatExceptionOfType(CouldNotParseIdException.class).isThrownBy(
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "notAnId")
         );
     }
