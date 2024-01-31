@@ -380,14 +380,8 @@ public class OnboardRestController {
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(request == null || request.getDeliveries() == null || request.getDeliveries().isEmpty()) {
-			throw new DeliveryException("Delivery cannot be null");
-		}
-
-		for(SelectorApi delivery : request.getDeliveries()) {
-			if(delivery.getSelector() == null) {
-				throw new DeliveryException("Bad api object for adding delivery. The selector object was null.");
-			}
+		if(Objects.isNull(request) || Objects.isNull(request.getDeliveries()) || request.getDeliveries().isEmpty()) {
+			throw new DeliveryException("Bad API object. The request has no deliveries, nothing to add");
 		}
 
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
@@ -395,11 +389,15 @@ public class OnboardRestController {
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
 		for(SelectorApi delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
-			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
-				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
-			} else {
+			String selector = localDelivery.getSelector();
+			if (delivery.getSelector() == null) {
+				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
+				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
+			} else if (! JMSSelectorFilterFactory.isValidSelector(selector)) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
+			} else {
+				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			}
 			localDeliveries.add(localDelivery);
 		}
