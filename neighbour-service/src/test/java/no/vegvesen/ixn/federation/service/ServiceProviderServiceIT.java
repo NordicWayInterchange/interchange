@@ -314,7 +314,7 @@ public class ServiceProviderServiceIT {
     }
 
     @Test
-    public void DeliveryWithErrorGetsRemovedFromServiceProvider(){
+    public void deliveryWithErrorGetsRemovedFromServiceProvider(){
         String serviceProviderName = "my-service-provider";
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
         LocalDelivery delivery = new LocalDelivery();
