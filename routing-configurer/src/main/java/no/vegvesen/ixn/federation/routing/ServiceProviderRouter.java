@@ -117,7 +117,6 @@ public class ServiceProviderRouter {
                 //needs testing.
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-                onTearDown(serviceProvider, subscription, delta);
                 break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
