@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -53,6 +55,11 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary = "Add capabilities")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			examples = @ExampleObject(
+					value = ExampleObjects.ADDCAPABILITIESREQUEST
+			)
+	))
 	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received capability POST from Service Provider: {}", serviceProviderName);
@@ -299,6 +306,13 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name="Private Channel")
 	@Operation(summary="Add private channels")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			examples = {
+					@ExampleObject(
+							value = ExampleObjects.ADDPRIVATECHANNELSREQUEST
+					)
+			}
+	))
 	public AddPrivateChannelResponse addPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);

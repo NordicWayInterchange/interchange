@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+/*
 @SpringBootTest(classes = {DNSFacade.class, DNSProperties.class})
 @EnableConfigurationProperties
 @Disabled("This test is dependent on an actual public DNS, and breaks. Need to fix")
@@ -50,3 +50,4 @@ public class DNSFacadeTest {
 	}
 
 }
+*/
