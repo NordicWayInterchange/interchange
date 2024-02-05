@@ -1,18 +1,13 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.*;
-import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,11 +17,8 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,8 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class ExportServiceProvidersIT {
 
-    @TempDir
-    Path tempDir;
 
     @Autowired
     ServiceProviderRepository repository;
@@ -45,8 +35,9 @@ public class ExportServiceProvidersIT {
 
     @Test
     public void getServiceProviders() throws IOException {
-        ServiceProvider serviceProvider = new ServiceProvider("testuser");
-        serviceProvider.setCapabilities(
+        ServiceProvider serviceProvider = new ServiceProvider(
+                1,
+                "testuser",
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.UNKNOWN,
                         Collections.singleton(
@@ -64,14 +55,31 @@ public class ExportServiceProvidersIT {
                                         )
                                 )
                         )
-                )
-        );
-        serviceProvider.setSubscriptions(Collections.singleton(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "originatingCountry = 'NO' and messageType = 'DENM'",
-                        "my-node")
-                )
+                ),
+                Collections.singleton(
+                        new LocalSubscription(
+                                1,
+                                LocalSubscriptionStatus.CREATED,
+                                "originatingCountry = 'NO' and messageType = 'DENM'",
+                                "my-node")
+                ),
+                Collections.singleton(
+                        new LocalDelivery(
+                                1,
+                                Collections.singleton(
+                                        new LocalDeliveryEndpoint(
+                                                1,
+                                                "myHost",
+                                                123,
+                                                "target"
+                                        )
+                                ),
+                                "/a/b/c",
+                                "a = b",
+                                LocalDeliveryStatus.CREATED
+                        )
+                ),
+                LocalDateTime.now()
         );
         repository.save(serviceProvider);
 
@@ -86,51 +94,14 @@ public class ExportServiceProvidersIT {
                 serviceProvider.getName()
         ));
 
-        Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
         Iterable<PrivateChannel> privateChannelList = privateChannelRepository.findAll();
-        writeToFile(path, serviceProviderList, privateChannelList);
+        ExportApi exportApi = ServiceProviderImport.getExportApi(serviceProviderList,privateChannelList);
 
-        ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
-        assertThat(serviceProviderApis.length).isEqualTo(1);
+        assertThat(exportApi.getPrivateChannels().size()).isEqualTo(1);
+        assertThat(exportApi.getPrivateChannels()).allMatch( p -> Objects.equals(p.getEndpoint().getHost(),"my-host"));
+        assertThat(exportApi.getServiceProviders().size()).isEqualTo(1);
+        assertThat(exportApi.getServiceProviders()).allMatch(s -> Objects.equals(s.getName(),"testuser"));
     }
-
-    public static void writeToFile(Path path, List<ServiceProvider> serviceProviderList, Iterable<PrivateChannel> privateChannelList) throws IOException {
-        CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
-        TypeTransformer transformer = new TypeTransformer();
-        ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
-        Set<ServiceProviderApi> serviceProviders = new HashSet<>();
-        for (ServiceProvider serviceProvider : serviceProviderList) {
-            ServiceProviderApi serviceProviderApi = new ServiceProviderApi();
-            serviceProviderApi.setName(serviceProvider.getName());
-            Set<CapabilitySplitApi> capabilityApis = capabilityApiTransformer.capabilitiesSplitToCapabilitiesSplitApi(serviceProvider.getCapabilities().getCapabilities());
-            serviceProviderApi.setCapabilities(capabilityApis);
-
-            Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();
-            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-                spSubscriptions.add(transformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProvider.getName(),subscription));
-            }
-            serviceProviderApi.setSubscriptions(spSubscriptions);
-
-            Set<GetDeliveryResponse> deliveries = new HashSet<>();
-            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                deliveries.add(transformer.transformLocalDeliveryToGetDeliveryResponse(serviceProvider.getName(),delivery));
-
-            }
-            serviceProviderApi.setDeliveries(deliveries);
-
-            Set<PrivateChannel> serviceProviderPrivateChannelList = Streams.stream(privateChannelList).filter(p -> p.getServiceProviderName().equals(serviceProvider.getName())).collect(Collectors.toSet());
-            Set<PrivateChannelApi> privateChannels = new HashSet<>();
-            for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
-                PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getId()));
-            }
-            serviceProviderApi.setPrivateChannels(privateChannels);
-            serviceProviders.add(serviceProviderApi);
-        }
-        System.out.println(writer.writeValueAsString(serviceProviders));
-        writer.writeValue(path.toFile(),serviceProviders);
-    }
-
 
 }

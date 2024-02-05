@@ -4,8 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -27,10 +26,9 @@ public class ServiceProviderImport {
         return serviceProviders;
     }
 
-    public static OldServiceProviderApi[] getOldServiceProviderApis(InputStream input) throws IOException {
+    public static ImportApi getOldServiceProviderApis(InputStream input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        OldServiceProviderApi[] serviceProviders = mapper.readValue(input,OldServiceProviderApi[].class);
-        return serviceProviders;
+        return mapper.readValue(input, ImportApi.class);
     }
 
     public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi, LocalDateTime savedTimestamp) {
@@ -106,6 +104,49 @@ public class ServiceProviderImport {
             ));
         }
         return importedPrivateChannels;
+    }
+
+    static ExportApi getExportApi(List<ServiceProvider> serviceProviderList, Iterable<PrivateChannel> privateChannelList) {
+        CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
+        TypeTransformer transformer = new TypeTransformer();
+        List<ServiceProviderApi> serviceProviders = new ArrayList<>();
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();
+            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+                spSubscriptions.add(transformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProvider.getName(),subscription));
+            }
+            Set<GetDeliveryResponse> deliveries = new HashSet<>();
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                deliveries.add(transformer.transformLocalDeliveryToGetDeliveryResponse(serviceProvider.getName(),delivery));
+
+            }
+            ServiceProviderApi serviceProviderApi = new ServiceProviderApi(
+                    serviceProvider.getName(),
+                    spSubscriptions,
+                    capabilityApiTransformer.capabilitiesSplitToCapabilitiesSplitApi(serviceProvider.getCapabilities().getCapabilities()),
+                    deliveries
+            );
+            serviceProviders.add(serviceProviderApi);
+
+        }
+        List<PrivateChannelImportExport> privateChannels = new ArrayList<>();
+        for (PrivateChannel privateChannel : privateChannelList) {
+            PrivateChannelEndpoint endpoint = privateChannel.getEndpoint();
+            PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(endpoint.getHost(),endpoint.getPort(),endpoint.getQueueName());
+            PrivateChannelImportExport result = new PrivateChannelImportExport(
+                    privateChannel.getId(),
+                    privateChannel.getServiceProviderName(),
+                    PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()),
+                    endpointApi,
+                    privateChannel.getPeerName()
+            );
+            privateChannels.add(result);
+
+        }
+        return new ExportApi(
+                serviceProviders,
+                privateChannels
+        );
     }
 
     /*

@@ -14,7 +14,16 @@ public class ServiceProviderApi {
 
     private Set<GetDeliveryResponse> deliveries;
 
-    private Set<PrivateChannelApi> privateChannels;
+    public ServiceProviderApi() {
+
+    }
+
+    public ServiceProviderApi(String name, Set<GetSubscriptionResponse> subscriptions, Set<CapabilitySplitApi> capabilities, Set<GetDeliveryResponse> deliveries) {
+        this.name = name;
+        this.subscriptions = subscriptions;
+        this.capabilities  = capabilities;
+        this.deliveries = deliveries;
+    }
 
     public Set<GetSubscriptionResponse> getSubscriptions() {
         return subscriptions;
@@ -39,14 +48,6 @@ public class ServiceProviderApi {
 
     public void setDeliveries(Set<GetDeliveryResponse> deliveries) {
         this.deliveries = deliveries;
-    }
-
-    public Set<PrivateChannelApi> getPrivateChannels() {
-        return privateChannels;
-    }
-
-    public void setPrivateChannels(Set<PrivateChannelApi> privateChannels) {
-        this.privateChannels = privateChannels;
     }
 
     public String getName() {

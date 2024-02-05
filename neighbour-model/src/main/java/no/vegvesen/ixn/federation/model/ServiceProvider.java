@@ -88,6 +88,20 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+	public ServiceProvider(Integer id,
+						   String name,
+						   Capabilities capabilities,
+						   Set<LocalSubscription> localSubscriptions,
+						   Set<LocalDelivery> localDeliveries,
+						   LocalDateTime subscriptionUpdated) {
+		this.id = id;
+		this.name = name;
+		this.capabilities = capabilities;
+		this.subscriptions.addAll(localSubscriptions);
+		this.deliveries.addAll(localDeliveries);
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}

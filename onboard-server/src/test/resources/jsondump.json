@@ -1,0 +1,58 @@
+{
+  "serviceProviders" : [ {
+    "name" : "testuser",
+    "subscriptions" : [ {
+      "id" : "1",
+      "path" : "/testuser/subscriptions/1",
+      "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
+      "consumerCommonName" : "my-node",
+      "lastUpdatedTimestamp" : 1706882259802,
+      "status" : "CREATED",
+      "endpoints" : [ ]
+    } ],
+    "capabilities" : [ {
+      "application" : {
+        "messageType" : "DENM",
+        "publisherId" : "NO-0001",
+        "publicationId" : "pub-1",
+        "originatingCountry" : "NO",
+        "protocolVersion" : "1.0",
+        "quadTree" : [ "123" ],
+        "causeCode" : [ 6 ]
+      },
+      "metadata" : {
+        "shardCount" : 1,
+        "infoUrl" : "",
+        "redirectPolicy" : "OPTIONAL",
+        "maxBandwidth" : 0,
+        "maxMessageRate" : 0,
+        "repetitionInterval" : 0
+      }
+    } ],
+    "deliveries" : [ {
+      "id" : "1",
+      "endpoints" : [ {
+        "host" : "myHost",
+        "port" : 123,
+        "target" : "target",
+        "maxBandwidth" : 0,
+        "maxMessageRate" : 0
+      } ],
+      "path" : "/testuser/deliveries/1",
+      "selector" : "a = b",
+      "lastUpdatedTimestamp" : 1706882259801,
+      "status" : "CREATED"
+    } ]
+  } ],
+  "privateChannels" : [ {
+    "id" : 1,
+    "serviceProvider" : "testuser",
+    "status" : "CREATED",
+    "endpoint" : {
+      "host" : "my-host",
+      "port" : 5671,
+      "queueName" : "my-queue"
+    },
+    "peerName" : "my-peer"
+  } ]
+}
