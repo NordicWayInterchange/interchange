@@ -31,7 +31,7 @@ jobs:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Setup helm
-        uses: azure/setup-helm@v3.5.0
+        uses: azure/setup-helm@v3.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
