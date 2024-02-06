@@ -1,16 +1,16 @@
 package no.vegvesen.ixn.serviceprovider;
 
-public class ExampleObjects {
+public class ExampleAPIObjects {
     public static final String ADDPRIVATECHANNELSREQUEST = """
             {
-              "version": "string",
-              "name": "string",
+              "version": "1.0",
+              "name": "sp-1",
               "privateChannels": [
                 {
-                  "peerName": "string"
+                  "peerName": "sp-2"
                 }
               ]
-            }    
+            }
             """;
     public static final String ADDCAPABILITIESREQUEST = """
             {
@@ -244,5 +244,22 @@ public class ExampleObjects {
               } ]
             }
             """;
-
+    public static final String GETCAPABILITYRESPONSE = """
+            {
+              "id" : "1",
+              "path" : "/sp-1/capabilities/1",
+              "definition" : {
+                "application" : {
+                  "messageType" : "DENM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ],
+                  "causeCodes" : [ 6 ]
+                },
+                "metadata" : { }
+              }
+            }
+            """;
 }
