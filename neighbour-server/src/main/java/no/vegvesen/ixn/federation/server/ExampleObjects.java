@@ -85,7 +85,6 @@ public class ExampleObjects {
               }, {
                 "id" : "1",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "createNewQueue" : false,
                 "consumerCommonName" : "node-1",
                 "path" : "/subscriptions/1",
                 "status" : "REQUESTED",
