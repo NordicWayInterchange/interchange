@@ -22,16 +22,16 @@ jobs:
 
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout (Latest)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref == ''
       - name: Checkout (Custom commit or branch)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref != ''
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Setup helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v3.5.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
