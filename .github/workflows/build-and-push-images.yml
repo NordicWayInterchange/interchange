@@ -80,8 +80,8 @@ jobs:
 
       - name: Push to github pages
         run: |
-          cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger.json
-          cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger.json
+          cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger/swagger.json
+          cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger/swagger.json
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
           git checkout -b swagger-github-pages
