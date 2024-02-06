@@ -54,7 +54,7 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Request subscriptions")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = {@ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(
 							value = ExampleObjects.REQUESTSUBSCRIPTIONSRESPONSE
 					)}
 			))
@@ -80,7 +80,7 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTSUBSCRIPTIONSRESPONSE
 			)))
 	})
@@ -103,7 +103,7 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Poll subscription")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.POLLSUBSCRIPTIONSRESPONSE
 			)))
 	})
@@ -128,7 +128,7 @@ public class NeighbourRestController {
 			value = ExampleObjects.UPDATECAPABILITIESREQUEST
 	)))
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.UPDATECAPABILITIESRESPONSE
 			)))
 	})

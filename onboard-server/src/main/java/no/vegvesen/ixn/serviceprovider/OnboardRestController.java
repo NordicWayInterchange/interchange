@@ -63,7 +63,7 @@ public class OnboardRestController {
 			)
 	))
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.ADDCAPABILITIESRESPONSE
 			)))
 	})
@@ -121,7 +121,7 @@ public class OnboardRestController {
 	@Tag(name = "Capability")
 	@Operation(summary = "List capabilities")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTCAPABILITIESRESPONSE
 			)))
 	})
@@ -139,7 +139,7 @@ public class OnboardRestController {
 	@Tag(name = "Capability")
 	@Operation(summary="List matching capabilities")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTCAPABILITIESRESPONSE
 			)))
 	})
@@ -208,6 +208,11 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities/{capabilityId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary="Get capability")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+					value = ExampleObjects.GETCAPABILITYRESPONSE
+			)))
+	})
 	public GetCapabilityResponse getServiceProviderCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
@@ -231,7 +236,7 @@ public class OnboardRestController {
 			)
 	))
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.ADDSUBSCRIPTIONSRESPONSE
 			)))
 	})
@@ -323,7 +328,7 @@ public class OnboardRestController {
 	@Tag(name = "Subscription")
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTSUBSCRIPTIONSRESPONSE
 			)))
 	})
@@ -341,7 +346,7 @@ public class OnboardRestController {
 	@Tag(name = "Subscription")
 	@Operation(summary="Get subscription")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.GETSUBSCRIPTIONRESPONSE
 			)))
 	})
@@ -376,7 +381,7 @@ public class OnboardRestController {
 			}
 	))
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.ADDPRIVATECHANNELSRESPONSE
 			)))
 	})
@@ -448,7 +453,7 @@ public class OnboardRestController {
 	@Tag(name="Private Channel")
 	@Operation(summary="List private channels")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTPRIVATECHANNELSRESPONSE
 			)))
 	})
@@ -467,7 +472,7 @@ public class OnboardRestController {
 	@Tag(name="Private Channel")
 	@Operation(summary="Get private channel")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.GETPRIVATECHANNELRESPONSE
 			)))
 	})
@@ -499,7 +504,7 @@ public class OnboardRestController {
 	@Tag(name="Private Channel")
 	@Operation(summary="List private channels with service provider as peer")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTPRIVATECHANNELSRESPONSE
 			)))
 	})
@@ -523,7 +528,7 @@ public class OnboardRestController {
 			)
 	))
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.ADDDELIVERIESRESPONSE
 			)))
 	})
@@ -576,7 +581,7 @@ public class OnboardRestController {
 	@Tag(name="Delivery")
 	@Operation(summary="List deliveries")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.LISTDELIVERIESRESPONSE
 			)))
 	})
@@ -594,7 +599,7 @@ public class OnboardRestController {
 	@Tag(name="Delivery")
 	@Operation(summary="Get delivery")
 	@ApiResponses(value={
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleObjects.GETDELIVERYRESPONSE
 			)))
 	})
