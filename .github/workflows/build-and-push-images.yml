@@ -86,7 +86,7 @@ jobs:
           git config --global user.name = "GitHub Actions"
           git checkout -b swagger-github-pages
           git add --all
-          git commit -m "Add swagger.json to resources"
+          git commit --allow-empty -m "Add swagger.json to resources"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange.git swagger-github-pages --quiet --follow-tags --force
         working-directory: ./
 
