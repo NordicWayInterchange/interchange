@@ -54,13 +54,13 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Request subscriptions")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = {@ExampleObject(
-							value = ExampleObjects.REQUESTSUBSCRIPTIONSRESPONSE
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(
+							value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE
 					)}
 			))
 	})
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(
-					value = ExampleObjects.REQUESTSUBSCRIPTIONSRESPONSE)
+					value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)
 	))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
@@ -81,8 +81,8 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
-					value = ExampleObjects.LISTSUBSCRIPTIONSRESPONSE
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+					value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE
 			)))
 	})
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
@@ -104,8 +104,8 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Poll subscription")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
-					value = ExampleObjects.POLLSUBSCRIPTIONSRESPONSE
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+					value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE
 			)))
 	})
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
@@ -126,11 +126,11 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(
-			value = ExampleObjects.UPDATECAPABILITIESREQUEST
+			value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST
 	)))
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
-					value = ExampleObjects.UPDATECAPABILITIESRESPONSE
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+					value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE
 			)))
 	})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
