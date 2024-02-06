@@ -87,7 +87,7 @@ jobs:
           git checkout -b swagger-github-pages
           git add --all
           git commit -m "Add swagger.json to resources"
-          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange.git swagger-github-pages --quiet --follow-tags --force
+          git push
         working-directory: ./
 
       - name: Persist to workspace
