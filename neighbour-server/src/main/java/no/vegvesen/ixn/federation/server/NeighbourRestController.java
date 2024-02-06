@@ -52,9 +52,16 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	@Operation(summary = "Request subscriptions")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)}))})
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))
+	@Operation(summary="Request subscriptions")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = {@ExampleObject(
+							value = ExampleObjects.REQUESTSUBSCRIPTIONSRESPONSE
+					)}
+			))
+	})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(
+					value = ExampleObjects.REQUESTSUBSCRIPTIONSRESPONSE)
+	))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
@@ -73,7 +80,11 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="List subscriptions")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE)))})
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+					value = ExampleObjects.LISTSUBSCRIPTIONSRESPONSE
+			)))
+	})
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
@@ -92,7 +103,11 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Poll subscription")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE)))})
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+					value = ExampleObjects.POLLSUBSCRIPTIONSRESPONSE
+			)))
+	})
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
@@ -110,8 +125,14 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST)))
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(
+			value = ExampleObjects.UPDATECAPABILITIESREQUEST
+	)))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(examples = @ExampleObject(
+					value = ExampleObjects.UPDATECAPABILITIESRESPONSE
+			)))
+	})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
