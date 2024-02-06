@@ -1,16 +1,16 @@
 package no.vegvesen.ixn.serviceprovider;
 
-public class ExampleObjects {
+public class ExampleAPIObjects {
     public static final String ADDPRIVATECHANNELSREQUEST = """
             {
-              "version": "string",
-              "name": "string",
+              "version": "1.0",
+              "name": "sp-1",
               "privateChannels": [
                 {
-                  "peerName": "string"
+                  "peerName": "sp-2"
                 }
               ]
-            }    
+            }
             """;
     public static final String ADDCAPABILITIESREQUEST = """
             {

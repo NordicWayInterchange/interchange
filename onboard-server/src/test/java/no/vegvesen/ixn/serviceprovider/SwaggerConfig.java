@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(info=@Info
                 (title = "Onboard API",
-                description = "Description...",
                 version = "1.0"))
 public class SwaggerConfig {
 
