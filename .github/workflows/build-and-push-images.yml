@@ -22,16 +22,16 @@ jobs:
 
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout (Latest)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref == ''
       - name: Checkout (Custom commit or branch)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref != ''
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Setup helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v3.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -49,16 +49,16 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout (Latest)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref == ''
       - name: Checkout (Custom commit or branch)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.inputs.git-ref != ''
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -67,14 +67,14 @@ jobs:
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Persist to workspace
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: interchange
           path: ./
@@ -90,18 +90,18 @@ jobs:
         shell: bash
     steps:
       - name: Download persisted workspace
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: interchange
       - name: 'Authenticate to Google Cloud'
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
       - name: Setup Google CLI
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          version: '446.0.1'
+          version: '>= 446.0.1'
           project_id: ${{ vars.PROJECT_ID }}
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
