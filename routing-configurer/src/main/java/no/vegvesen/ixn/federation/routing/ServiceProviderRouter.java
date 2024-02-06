@@ -115,6 +115,9 @@ public class ServiceProviderRouter {
                 //serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
+            case ERROR:
+                subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+                break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
         }
@@ -174,7 +177,10 @@ public class ServiceProviderRouter {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        } else {
+        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+        }
+        else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
@@ -390,7 +396,7 @@ public class ServiceProviderRouter {
                             }
                             delivery.setExchangeName("");
                         }
-                        if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
+                        if (!(delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN) || delivery.getStatus().equals(LocalDeliveryStatus.ERROR))) {
                             delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                         }
                     }

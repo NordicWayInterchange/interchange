@@ -3,7 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.CouldNotParseIdException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;
@@ -57,8 +56,9 @@ public class OnboardServerErrorAdvice {
 	public ResponseEntity<ErrorDetails> handlePrivateChannelRequestException(PrivateChannelException e) {
 		return error(BAD_REQUEST, e);
 	}
-	@ExceptionHandler({CouldNotParseIdException.class})
-	public ResponseEntity<ErrorDetails> handleParseErrorException(CouldNotParseIdException e){
+
+	@ExceptionHandler({DeliveryPostException.class})
+	public ResponseEntity<ErrorDetails> handleDeliveryChannelPostException(DeliveryPostException e) {
 		return error(BAD_REQUEST, e);
 	}
 

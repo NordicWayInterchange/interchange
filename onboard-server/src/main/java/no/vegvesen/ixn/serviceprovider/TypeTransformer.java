@@ -64,7 +64,9 @@ public class TypeTransformer {
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getErrorMessage()));
+
         }
         return result;
     }
@@ -104,7 +106,8 @@ public class TypeTransformer {
                     createDeliveryPath(serviceProviderName, delivery.getId().toString(), delivery.getStatus()),
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
-                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
+                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus()),
+                    delivery.getErrorMessage()
                     )
             );
         }
@@ -138,7 +141,8 @@ public class TypeTransformer {
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getErrorMessage()
                     )
             );
         }
@@ -228,6 +232,8 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.CREATED;
             case TEAR_DOWN:
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
+            case ERROR:
+                return LocalActorSubscriptionStatusApi.ERROR;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
         }
@@ -243,6 +249,8 @@ public class TypeTransformer {
                 return DeliveryStatus.NOT_VALID;
             case NO_OVERLAP:
                 return DeliveryStatus.NO_OVERLAP;
+            case ERROR:
+                return DeliveryStatus.ERROR;
             default:
                 return DeliveryStatus.ILLEGAL;
         }

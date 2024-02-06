@@ -4,7 +4,9 @@ public enum LocalSubscriptionStatus {
     REQUESTED,
     CREATED,
     TEAR_DOWN, //TODO ?? What about rejected?
-    RESUBSCRIBE, ILLEGAL;
+    RESUBSCRIBE,
+    ILLEGAL,
+    ERROR;
 
 
     //TODO this warrants its own test!!!!!!
