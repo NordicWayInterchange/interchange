@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class LocalActorSubscription {
@@ -10,16 +12,20 @@ public class LocalActorSubscription {
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String errorMessage;
+
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
+    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
         this.status = status;
+        this.errorMessage = errorMessage;
     }
 
     public String getId() {
@@ -66,6 +72,14 @@ public class LocalActorSubscription {
         this.status = status;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -88,6 +102,7 @@ public class LocalActorSubscription {
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp +
                 ", status=" + status +
+                ", errorMessage=" + errorMessage +
                 '}';
     }
 }

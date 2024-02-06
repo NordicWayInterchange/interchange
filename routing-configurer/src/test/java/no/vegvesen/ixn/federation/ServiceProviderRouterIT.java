@@ -230,6 +230,42 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void removeSubscriptionWhenSelectorIsInvalid(){
+		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
+		when(serviceProviderRepository.save(king_gustaf)).thenReturn(king_gustaf);
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ERROR,
+				"1=1",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				2,
+				LocalSubscriptionStatus.ERROR,
+				"messageType = 'DATEX2'",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				3,
+				LocalSubscriptionStatus.REQUESTED,
+				"messageType = 'DATEX23'",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
+		router.removeUnwantedSubscriptions(king_gustaf);
+		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
+
+	}
+	@Test
 	public void doNotRemovePeerFromGroupWhenTheyAreServiceProviderInAnotherChannel(){
 		ServiceProvider serviceProvider_1 = new ServiceProvider("service-1");
 		ServiceProvider serviceProvider_2 = new ServiceProvider("service-2");
@@ -527,7 +563,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.processSubscription(serviceProvider, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort(), client.getQpidDelta());
+		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.queueExists(queueName)).isFalse();
 	}
@@ -871,6 +907,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription subscription = new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.ILLEGAL,
+				"",
+				"myNode"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
+	}
+
+	@Test
+	public void testLocalSubscriptionWithErrorGetsRemovedFromServiceProvider(){
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ERROR,
 				"",
 				"myNode"
 		);

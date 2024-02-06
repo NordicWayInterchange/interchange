@@ -38,6 +38,11 @@ public class LocalSubscription {
     @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
     private Set<LocalConnection> connections = new HashSet<>();
 
+    // ErrorMessage is needed for sending the error message back to the user
+    // Any subscription with an error message is deleted shortly after creation
+    @Column
+    private String errorMessage;
+
     public LocalSubscription() {
     }
 
@@ -103,6 +108,14 @@ public class LocalSubscription {
         }
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     public Set<LocalConnection> getConnections() {
         return connections;
     }
@@ -149,6 +162,7 @@ public class LocalSubscription {
                 ", status=" + status +
                 ", selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +
+                ", errorMessage=" + errorMessage +
                 '}';
     }
 

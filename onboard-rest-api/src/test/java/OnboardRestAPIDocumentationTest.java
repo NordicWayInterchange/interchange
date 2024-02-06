@@ -57,13 +57,15 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
-                LocalActorSubscriptionStatusApi.REQUESTED));
+                LocalActorSubscriptionStatusApi.REQUESTED,
+                null));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
-                LocalActorSubscriptionStatusApi.REQUESTED
+                LocalActorSubscriptionStatusApi.REQUESTED,
+                null
                 ));
         AddSubscriptionsResponse response = new AddSubscriptionsResponse(
                 "serviceprovider1",
@@ -84,13 +86,15 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
-                LocalActorSubscriptionStatusApi.CREATED));
+                LocalActorSubscriptionStatusApi.CREATED,
+                null));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
-                LocalActorSubscriptionStatusApi.CREATED
+                LocalActorSubscriptionStatusApi.CREATED,
+                null
         ));
         ListSubscriptionsResponse response = new ListSubscriptionsResponse(
                 "serviceprovider1",
@@ -277,7 +281,8 @@ public class OnboardRestAPIDocumentationTest {
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
-                        DeliveryStatus.REQUESTED
+                        DeliveryStatus.REQUESTED,
+                        null
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -293,7 +298,8 @@ public class OnboardRestAPIDocumentationTest {
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
-                        DeliveryStatus.CREATED
+                        DeliveryStatus.CREATED,
+                        null
 
                 ))
         );

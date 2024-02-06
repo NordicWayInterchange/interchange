@@ -37,6 +37,9 @@ public class LocalDelivery {
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
+    @Column
+    private String errorMessage;
+
     public LocalDelivery() {
     }
 
@@ -128,6 +131,14 @@ public class LocalDelivery {
         this.endpoints.removeAll(endpointsToRemove);
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
         this.endpoints.remove(endpoint);
     }
@@ -159,6 +170,7 @@ public class LocalDelivery {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
+                ", errorMessage=" + errorMessage +
                 '}';
     }
 }

@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class Delivery {
@@ -8,18 +10,21 @@ public class Delivery {
     private String selector;
     private long lastUpdatedTimestamp;
     private DeliveryStatus status;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String errorMessage;
 
     public Delivery() {
     }
 
-    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status) {
+
+    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
+        this.errorMessage = errorMessage;
     }
-
     public String getId() {
         return id;
     }
@@ -60,6 +65,14 @@ public class Delivery {
         this.status = status;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,6 +94,7 @@ public class Delivery {
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
+                ", errorMessage=" + errorMessage +
                 '}';
     }
 }
