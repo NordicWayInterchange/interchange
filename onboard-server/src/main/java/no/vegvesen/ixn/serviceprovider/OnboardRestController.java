@@ -59,12 +59,12 @@ public class OnboardRestController {
 	@Operation(summary = "Add capabilities")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
 			examples = @ExampleObject(
-					value = ExampleObjects.ADDCAPABILITIESREQUEST
+					value = ExampleAPIObjects.ADDCAPABILITIESREQUEST
 			)
 	))
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.ADDCAPABILITIESRESPONSE
+					value = ExampleAPIObjects.ADDCAPABILITIESRESPONSE
 			)))
 	})
 	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
@@ -122,7 +122,7 @@ public class OnboardRestController {
 	@Operation(summary = "List capabilities")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTCAPABILITIESRESPONSE
+					value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE
 			)))
 	})
 	public ListCapabilitiesResponse listCapabilities(@PathVariable("serviceProviderName") String serviceProviderName) {
@@ -140,7 +140,7 @@ public class OnboardRestController {
 	@Operation(summary="List matching capabilities")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTCAPABILITIESRESPONSE
+					value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE
 			)))
 	})
 	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false) String selector) {
@@ -210,7 +210,7 @@ public class OnboardRestController {
 	@Operation(summary="Get capability")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.GETCAPABILITYRESPONSE
+					value = ExampleAPIObjects.GETCAPABILITYRESPONSE
 			)))
 	})
 	public GetCapabilityResponse getServiceProviderCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
@@ -232,12 +232,12 @@ public class OnboardRestController {
 	@Operation(summary="Add subscriptions")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
 			examples = @ExampleObject(
-					value = ExampleObjects.ADDSUBSCRIPTIONREQUEST
+					value = ExampleAPIObjects.ADDSUBSCRIPTIONREQUEST
 			)
 	))
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.ADDSUBSCRIPTIONSRESPONSE
+					value = ExampleAPIObjects.ADDSUBSCRIPTIONSRESPONSE
 			)))
 	})
 	public AddSubscriptionsResponse addSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddSubscriptionsRequest requestApi) {
@@ -329,7 +329,7 @@ public class OnboardRestController {
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTSUBSCRIPTIONSRESPONSE
+					value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE
 			)))
 	})
 	public ListSubscriptionsResponse listSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName) {
@@ -347,7 +347,7 @@ public class OnboardRestController {
 	@Operation(summary="Get subscription")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.GETSUBSCRIPTIONRESPONSE
+					value = ExampleAPIObjects.GETSUBSCRIPTIONRESPONSE
 			)))
 	})
 	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
@@ -376,13 +376,13 @@ public class OnboardRestController {
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
 			examples = {
 					@ExampleObject(
-							value = ExampleObjects.ADDPRIVATECHANNELSREQUEST
+							value = ExampleAPIObjects.ADDPRIVATECHANNELSREQUEST
 					)
 			}
 	))
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.ADDPRIVATECHANNELSRESPONSE
+					value = ExampleAPIObjects.ADDPRIVATECHANNELSRESPONSE
 			)))
 	})
 	public AddPrivateChannelResponse addPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
@@ -454,7 +454,7 @@ public class OnboardRestController {
 	@Operation(summary="List private channels")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTPRIVATECHANNELSRESPONSE
+					value = ExampleAPIObjects.LISTPRIVATECHANNELSRESPONSE
 			)))
 	})
 	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
@@ -473,7 +473,7 @@ public class OnboardRestController {
 	@Operation(summary="Get private channel")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.GETPRIVATECHANNELRESPONSE
+					value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE
 			)))
 	})
 	public GetPrivateChannelResponse getPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
@@ -505,7 +505,7 @@ public class OnboardRestController {
 	@Operation(summary="List private channels with service provider as peer")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTPRIVATECHANNELSRESPONSE
+					value = ExampleAPIObjects.LISTPRIVATECHANNELSRESPONSE
 			)))
 	})
 	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
@@ -524,12 +524,12 @@ public class OnboardRestController {
 	@Operation(summary="Add deliveries")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
 			examples = @ExampleObject(
-					value = ExampleObjects.ADDDELIVERIESREQUEST
+					value = ExampleAPIObjects.ADDDELIVERIESREQUEST
 			)
 	))
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.ADDDELIVERIESRESPONSE
+					value = ExampleAPIObjects.ADDDELIVERIESRESPONSE
 			)))
 	})
 	public AddDeliveriesResponse addDeliveries(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
@@ -582,7 +582,7 @@ public class OnboardRestController {
 	@Operation(summary="List deliveries")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.LISTDELIVERIESRESPONSE
+					value = ExampleAPIObjects.LISTDELIVERIESRESPONSE
 			)))
 	})
 	public ListDeliveriesResponse listDeliveries(@PathVariable("serviceProviderName") String serviceProviderName) {
@@ -600,7 +600,7 @@ public class OnboardRestController {
 	@Operation(summary="Get delivery")
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
-					value = ExampleObjects.GETDELIVERYRESPONSE
+					value = ExampleAPIObjects.GETDELIVERYRESPONSE
 			)))
 	})
 	public GetDeliveryResponse getDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {

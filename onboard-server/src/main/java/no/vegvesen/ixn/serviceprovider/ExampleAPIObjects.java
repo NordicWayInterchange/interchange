@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-public class ExampleObjects {
+public class ExampleAPIObjects {
     public static final String ADDPRIVATECHANNELSREQUEST = """
             {
               "version": "1.0",

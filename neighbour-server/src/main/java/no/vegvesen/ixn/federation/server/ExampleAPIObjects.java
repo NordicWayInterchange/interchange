@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.server;
 
-public class ExampleObjects {
+public class ExampleAPIObjects {
     public static final String REQUESTSUBSCRIPTIONSREQUEST = """
             {
               "version" : "1.1NW3",
