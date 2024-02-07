@@ -86,7 +86,7 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           path: interchange-swagger-docs
       - name: Push to github pages
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/swagger-api-documentation-java-17'
+        if: github.ref == 'refs/heads/federation-master'
         run: |
           cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger/swagger.json
           cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger/swagger.json
