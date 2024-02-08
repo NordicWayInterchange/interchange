@@ -6,8 +6,6 @@ permissions:
 
 on:
   push:
-    branches-ignore:
-      - 'swagger-github-pages'
   workflow_dispatch:
     inputs:
       git-ref:
@@ -44,8 +42,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -77,18 +73,24 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+        # If this job fails, it is likely because the REPO_ACCESS_TOKEN has expired. Generate a personal access token and add it to secrets
 
+      - name: Checkout to interchange-swagger-docs
+        uses: actions/checkout@v3
+        with:
+          repository: NordicWayInterchange/interchange-swagger-docs
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: interchange-swagger-docs
       - name: Push to github pages
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/swagger-api-documentation-java-17'
         run: |
-          cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger/swagger.json
-          cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger/swagger.json
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
-          git checkout -b swagger-github-pages
+          cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
+          cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
+          cd interchange-swagger-docs
           git add --all
-          git commit --allow-empty -m "Add swagger.json to resources"
-          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange.git swagger-github-pages --quiet --follow-tags --force
+          git commit --allow-empty -m "Updated swagger.json"
+          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
         working-directory: ./
 
       - name: Persist to workspace
