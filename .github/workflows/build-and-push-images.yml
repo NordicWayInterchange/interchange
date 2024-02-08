@@ -86,8 +86,7 @@ jobs:
           cp onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
           cp neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
           cd interchange-swagger-docs
-          git add onboard-server/target/swagger/swagger.json
-          git add neighbour-server/target/swagger/swagger.json
+          git add --all
           git commit --allow-empty -m "Updated swagger.json"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
         working-directory: ./
