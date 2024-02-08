@@ -6,8 +6,6 @@ permissions:
 
 on:
   push:
-    branches-ignore:
-      - 'swagger-github-pages'
   workflow_dispatch:
     inputs:
       git-ref:
