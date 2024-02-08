@@ -200,7 +200,7 @@ public class OnboardRestController {
 	@Tag(name = "Capability")
 	@Operation(summary="Get capability")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+			@ApiResponse(responseCode = "200", description = "Test", content = @Content(mediaType = "application/json", examples = @ExampleObject(
 					value = ExampleAPIObjects.GETCAPABILITYRESPONSE
 			)))
 	})
