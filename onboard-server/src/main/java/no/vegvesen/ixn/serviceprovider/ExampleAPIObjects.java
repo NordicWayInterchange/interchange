@@ -4,10 +4,10 @@ public class ExampleAPIObjects {
     public static final String ADDPRIVATECHANNELSREQUEST = """
             {
               "version": "1.0",
-              "name": "sp-1",
+              "name": "serviceprovider-1",
               "privateChannels": [
                 {
-                  "peerName": "sp-2"
+                  "peerName": "serviceprovider-2"
                 }
               ]
             }
@@ -154,11 +154,7 @@ public class ExampleAPIObjects {
                 "id" : 52,
                 "peerName" : "serviceprovider-2",
                 "status" : "REQUESTED"
-              }, {
-                "id" : 53,
-                "peerName" : "serviceprovider-3",
-                "status" : "REQUESTED"
-              } ]
+              }]
             }
             """;
 

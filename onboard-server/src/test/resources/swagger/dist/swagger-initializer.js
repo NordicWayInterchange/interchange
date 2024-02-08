@@ -14,8 +14,15 @@ window.onload = function() {
       SwaggerUIBundle.plugins.DownloadUrl
     ],
     layout: "StandaloneLayout",
-    supportedSubmitMethods: []
+    supportedSubmitMethods: [],
+    onComplete: function() {
+      Array.from(document.getElementsByClassName("scheme-container")).forEach(
+          function (element, index, array){
+            element.outerHTML = ""
+          }
+      )
+    }
   });
-
   //</editor-fold>
 };
+
