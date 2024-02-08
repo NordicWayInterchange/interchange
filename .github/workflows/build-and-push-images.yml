@@ -79,16 +79,13 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Push to github pages
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/swagger-api-documentation-java-17'
         run: |
-          cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger/swagger.json
-          cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger/swagger.json
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
-          git checkout -b swagger-github-pages
-          git add --all
-          git commit --allow-empty -m "Add swagger.json to resources"
-          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange.git swagger-github-pages --quiet --follow-tags --force
+          git add onboard-server/target/swagger/swagger.json
+          git add neighbour-server/target/swagger/swagger.json
+          git commit --allow-empty -m "Update to new "
+          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
         working-directory: ./
 
       - name: Persist to workspace

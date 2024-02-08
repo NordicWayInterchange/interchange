@@ -10,10 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(info=@Info(title = "Neighbour API",
         version = "1.0",
-        contact = @Contact(name = "", email = "email@email.no")
-        ,license = @License(url = "https://www.apache.org/licenses/LICENSE-2.0", name = "Apache 2.0"),
-        description = "Description????"),
-        servers = @Server(url="", description = "test"))
+        contact = @Contact(name = "", email = "email@email.no"),
+        license = @License(url = "https://www.apache.org/licenses/LICENSE-2.0", name = "Apache 2.0"),
+        description = "Description????"))
 public class SwaggerConfig {
 
 }
