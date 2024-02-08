@@ -75,7 +75,7 @@ jobs:
             ${{ runner.os }}-maven-
         # If this job fails, it is likely because the REPO_ACCESS_TOKEN has expired. Generate a personal access token and add it to secrets
 
-      - name: checkout to interchange-swagger-docs
+      - name: Checkout to interchange-swagger-docs
         uses: actions/checkout@v3
         with:
           repository: NordicWayInterchange/interchange-swagger-docs
@@ -83,11 +83,10 @@ jobs:
           path: interchange-swagger-docs
       - name: Push to github pages
         run: |
-          find /home/runner/work -name "*interchange*" 2>/dev/null
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
-          cp onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
-          cp neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
+          cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
+          cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
           cd interchange-swagger-docs
           git add --all
           git commit --allow-empty -m "Updated swagger.json"
