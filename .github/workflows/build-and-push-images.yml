@@ -77,14 +77,18 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
+        # If this job fails, it is likely because the REPO_ACCESS_TOKEN has expired. Generate a personal access token and add it to secrets
       - name: Push to github pages
         run: |
+          git clone https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git 
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
+          cp onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
+          cp neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
+          cp interchange-swagger-docs
           git add onboard-server/target/swagger/swagger.json
           git add neighbour-server/target/swagger/swagger.json
-          git commit --allow-empty -m "Update to new "
+          git commit --allow-empty -m "Updated swagger.json"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
         working-directory: ./
 
