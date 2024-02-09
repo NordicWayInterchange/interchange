@@ -57,10 +57,40 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary = "Add capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-			examples = @ExampleObject(
-					value = ExampleAPIObjects.ADDCAPABILITIESREQUEST
-			)
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this object is dependent on the messageType. " ,content = @Content(
+			examples = {
+					@ExampleObject(
+							description = "messageType DENM",
+							value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST
+			),
+					@ExampleObject(
+							description = "messageType DATEX",
+							value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType IVIM",
+							value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType SPATEM",
+							value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType MAPEM",
+							value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType SREM",
+							value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType SSEM",
+							value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST
+					),
+					@ExampleObject(
+							description = "messageType CAM",
+							value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST
+					)}
 	))
 	@ApiResponses(value={
 			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(

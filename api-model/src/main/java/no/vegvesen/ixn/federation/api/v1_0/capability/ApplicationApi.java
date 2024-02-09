@@ -33,7 +33,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApplicationApi {
 
-    @Schema(description = "Test to see what this does")
+    @Schema(description = "")
     private String messageType;
 
     private String publisherId;
