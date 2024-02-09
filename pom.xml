@@ -169,9 +169,7 @@
                         <!-- Integration tests are named *IT.java, Run with 'mvn verify' -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <!--
                         <version>2.22.2</version>
-                        -->
                         <configuration>
                             <includes>
                                 <include>*IT</include>
