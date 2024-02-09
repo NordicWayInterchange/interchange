@@ -26,7 +26,14 @@ public class ExampleAPIObjects {
                   "protocolVersion" : "1.0",
                   "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -44,7 +51,14 @@ public class ExampleAPIObjects {
                   "quadTree" : [ "1234" ],
                   "causeCodes" : [ 6 ]
                 },
-                "metadata" : { }
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -62,7 +76,14 @@ public class ExampleAPIObjects {
                   "protocolVersion" : "1.0",
                   "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -77,9 +98,16 @@ public class ExampleAPIObjects {
                   "publicationId" : "pub-1",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ],
+                  "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -94,9 +122,16 @@ public class ExampleAPIObjects {
                   "publicationId" : "pub-1",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ],
+                  "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : { 
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -111,9 +146,16 @@ public class ExampleAPIObjects {
                   "publicationId" : "pub-1",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ],
+                  "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : { 
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
@@ -128,9 +170,15 @@ public class ExampleAPIObjects {
                   "publicationId" : "pub-1",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ],
+                  "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : {
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0 }
               } ]
             }
             """;
@@ -145,9 +193,16 @@ public class ExampleAPIObjects {
                   "publicationId" : "pub-1",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ],
+                  "quadTree" : [ "1234" ]
                 },
-                "metadata" : { }
+                "metadata" : { 
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
               } ]
             }
             """;
