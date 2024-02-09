@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 
@@ -32,6 +33,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApplicationApi {
 
+    @Schema(description = "Test to see what this does")
     private String messageType;
 
     private String publisherId;
