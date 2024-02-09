@@ -57,7 +57,9 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary = "Add capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this object is dependent on the messageType. " ,content = @Content(
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this object is dependent on the messageType. Too review attributes for the different message types, " +
+			"click 'Schema' -> 'capabilities' -> 'CapabilitySplitApi' -> 'application' to review the different options. The object name decides messageType, i.e 'CamApplicationApi' when messageType is 'CAM'" ,
+			content = @Content(
 			examples = {
 					@ExampleObject(
 							description = "messageType DENM",

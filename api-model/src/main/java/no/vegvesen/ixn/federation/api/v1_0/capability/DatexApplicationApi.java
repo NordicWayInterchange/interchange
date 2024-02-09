@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0.capability;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.properties.CapabilityProperty;
@@ -7,7 +8,7 @@ import no.vegvesen.ixn.properties.CapabilityProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
+@Schema(hidden = true)
 public class DatexApplicationApi extends ApplicationApi {
 
     private String publicationType;
