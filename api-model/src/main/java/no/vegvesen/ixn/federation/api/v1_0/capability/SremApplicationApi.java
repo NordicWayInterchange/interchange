@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.federation.api.v1_0.capability;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import java.util.Set;
-
+@Schema(hidden = true)
 public class SremApplicationApi extends ApplicationApi {
 
     public SremApplicationApi() {
