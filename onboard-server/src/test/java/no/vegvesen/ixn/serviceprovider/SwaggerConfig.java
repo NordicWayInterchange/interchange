@@ -30,6 +30,7 @@ public class SwaggerConfig {
             ComposedSchema application = (ComposedSchema) schemas.get("CapabilitySplitApi").getProperties().get("application");
             application.getOneOf().remove(0);
 
+
             // Adds schemas for response objects
             openApi.getComponents().addSchemas("AddSubscriptionsResponse", ModelConverters.getInstance().readAllAsResolvedSchema(AddSubscriptionsResponse.class).schema);
             openApi.getComponents().addSchemas("ListSubscriptionsResponse", ModelConverters.getInstance().readAllAsResolvedSchema(ListSubscriptionsResponse.class).schema);
@@ -51,6 +52,9 @@ public class SwaggerConfig {
             openApi.getComponents().addSchemas("LocalActorSubscription", ModelConverters.getInstance().readAllAsResolvedSchema(LocalActorSubscription.class).schema);
             openApi.getComponents().addSchemas("LocalEndpointApi", ModelConverters.getInstance().readAllAsResolvedSchema(LocalEndpointApi.class).schema);
             openApi.getComponents().addSchemas("DeliveryEndpoint", ModelConverters.getInstance().readAllAsResolvedSchema(DeliveryEndpoint.class).schema);
+
+            // AddPrivateChannelResponse gets an additional list 'privateChannelApis' in addition to the expected 'privateChannels'. This is a workaround, why this happens should be explored
+            schemas.get("AddPrivateChannelResponse").getProperties().remove("privateChannelApis");
 
         };
     }
