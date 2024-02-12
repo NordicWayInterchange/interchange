@@ -8,7 +8,7 @@ services:
   mock-dns-server:
     build:
       context: ../fake-dns-server
-      dockerfile: dnsmasq-single-node.conf
+      dockerfile: dns-single-node-dockerfile
     cap_add:
     - NET_ADMIN
     container_name: mock-dns-server
@@ -170,8 +170,6 @@ services:
     container_name: a_neighbour_discoverer
     depends_on:
       - a_db
-    links:
-     - "b_neighbour_server:b.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -198,7 +196,6 @@ services:
     - a_db
     links:
     - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
     volumes:
     - "../tmp:/jks"
     environment:
@@ -214,11 +211,11 @@ services:
     - SERVER_NAME=a.bouvetinterchange.eu
     networks:
     - singletest
-    -
+
 networks:
   singletest:
     ipam:
       driver: default
       config:
-        - subnet: 172.28.1.0/16
+        - subnet: 172.28.0.0/16
 
