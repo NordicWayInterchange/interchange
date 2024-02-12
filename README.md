@@ -48,12 +48,6 @@ in order to run the integration tests.
 To build the project without integration test, use `mvn package`, and to run the integration tests, run `mvn verify`.
 
  
-### Federation docker images
-All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
-is automatically built by GitHub and published to the container registry europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/ on 
-each commit. Each component in the system has its own registry.
-
-All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
 
 ### Running the Tests
 Unit tests are run in the maven 'test' stage, and integration tests are run in the 'verify' stage.
@@ -67,6 +61,18 @@ https://junit.org/junit5/
 
 #### Assertions
 We aim at using fluent assertions using [assertj](https://assertj.github.io/doc/). We use the version of assertj-core defined by spring-boot-starter-test.
+
+### Run using Docker Compose
+## Federation docker images
+All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/
+is automatically built by GitHub and published to the container registry europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/ on
+each commit. Each component in the system has its own registry.
+
+All the images are tagged with the 7-character start of the git commit hash. Branch "federation-master" is considered to be the stable branch.
+
+
+
+
 
 ### Deploy to kubernetes 
 #### Helm
