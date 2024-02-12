@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -24,10 +25,11 @@ public class SwaggerConfig {
         return openApi -> {
             Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-            ComposedSchema application = (ComposedSchema)schemas.get("CapabilitySplitApi").getProperties().get("application");
+            ComposedSchema application = (ComposedSchema) schemas.get("CapabilitySplitApi").getProperties().get("application");
             application.getOneOf().remove(0);
 
             openApi.getComponents().addSchemas("SubscriptionPollResponseApi", ModelConverters.getInstance().readAllAsResolvedSchema(SubscriptionPollResponseApi.class).schema);
+            openApi.getComponents().addSchemas("EndpointApi", ModelConverters.getInstance().readAllAsResolvedSchema(EndpointApi.class).schema);
 
         };
     }

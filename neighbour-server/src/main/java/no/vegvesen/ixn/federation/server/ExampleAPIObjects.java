@@ -40,7 +40,7 @@ public class ExampleAPIObjects {
                     "originatingCountry" : "NO",
                     "protocolVersion" : "1.0",
                     "quadTree" : [ "1234" ],
-                    "causeCodes" : [ 6 ]
+                    "causeCode" : [ 6 ]
                   },
                   "metadata" : { }
                 }
@@ -48,7 +48,7 @@ public class ExampleAPIObjects {
             }
             """;
     public static final String UPDATECAPABILITIESRESPONSE = """
-            
+                        
             {
               "version" : "1.1NW3",
               "name" : "sp-1",
