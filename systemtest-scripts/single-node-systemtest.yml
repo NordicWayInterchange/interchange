@@ -1,20 +1,20 @@
 version: '3'
 services:
 
-# Note: now all the containers are on the same network - testing_net
+# Note: now all the containers are on the same network - singletest
 # An idea for later would be to have two separate networks, one for each node,
 # where the modules that need to communicate with each other are a part of both networks.
 
   mock-dns-server:
     build:
       context: ../fake-dns-server
-      dockerfile: dns-single-node
+      dockerfile: dnsmasq-single-node.conf
     cap_add:
     - NET_ADMIN
     container_name: mock-dns-server
     hostname: mock-dns-server
     networks:
-      testing_net:
+      singletest:
         ipv4_address: 172.28.1.1
         aliases:
           - dns.bouvetinterchange.eu
@@ -31,7 +31,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
     networks:
-    - testing_net
+    - singletest
 
   a_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
@@ -56,7 +56,7 @@ services:
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
-      - testing_net
+      - singletest
 
   a_napcore_server:
     build:
@@ -81,7 +81,7 @@ services:
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
-      - testing_net
+      - singletest
 
   a_qpid:
     build:
@@ -111,7 +111,7 @@ services:
     depends_on:
     - mock-dns-server
     networks:
-    - testing_net
+    - singletest
 
   a_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
@@ -136,7 +136,7 @@ services:
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
-    - testing_net
+    - singletest
     dns: 172.28.1.1
 
   a_routing_configurer:
@@ -161,7 +161,7 @@ services:
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
-    - testing_net
+    - singletest
 
   a_neighbour_discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
@@ -187,7 +187,7 @@ services:
       - KEY_STORE_PASSWORD=password
     dns: 172.28.1.1
     networks:
-    - testing_net
+    - singletest
 
   a_message_collector_app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
@@ -213,4 +213,12 @@ services:
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
     networks:
-    - testing_net
+    - singletest
+    -
+networks:
+  singletest:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/16
+
