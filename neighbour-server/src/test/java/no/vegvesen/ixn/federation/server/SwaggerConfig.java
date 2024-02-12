@@ -12,6 +12,7 @@ import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -30,6 +31,8 @@ public class SwaggerConfig {
 
             openApi.getComponents().addSchemas("SubscriptionPollResponseApi", ModelConverters.getInstance().readAllAsResolvedSchema(SubscriptionPollResponseApi.class).schema);
             openApi.getComponents().addSchemas("EndpointApi", ModelConverters.getInstance().readAllAsResolvedSchema(EndpointApi.class).schema);
+
+            schemas.get("RequestedSubscriptionApi").setRequired(List.of("selector"));
 
         };
     }
