@@ -9,16 +9,16 @@ public class AddPrivateChannelRequest {
 
     private String name;
 
-    private List<PrivateChannelApi> privateChannels;
+    private List<PrivateChannelRequestApi> privateChannels;
 
     public AddPrivateChannelRequest() {
     }
 
-    public AddPrivateChannelRequest(List<PrivateChannelApi> privateChannels) {
+    public AddPrivateChannelRequest(List<PrivateChannelRequestApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 
-    public AddPrivateChannelRequest(String name, List<PrivateChannelApi> privateChannels) {
+    public AddPrivateChannelRequest(String name, List<PrivateChannelRequestApi> privateChannels) {
         this.name = name;
         this.privateChannels = privateChannels;
     }
@@ -39,11 +39,11 @@ public class AddPrivateChannelRequest {
         this.name = name;
     }
 
-    public List<PrivateChannelApi> getPrivateChannels() {
+    public List<PrivateChannelRequestApi> getPrivateChannels() {
         return privateChannels;
     }
 
-    public void setPrivateChannels(List<PrivateChannelApi> privateChannels) {
+    public void setPrivateChannels(List<PrivateChannelRequestApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 
