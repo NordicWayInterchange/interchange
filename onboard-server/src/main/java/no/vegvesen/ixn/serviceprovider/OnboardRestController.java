@@ -108,7 +108,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/network/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
+	public FetchMatchingCapabilitiesResponse listMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
@@ -163,7 +163,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetCapabilityResponse getServiceProviderCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
+	public GetCapabilityResponse getCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -262,7 +262,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
+	public GetSubscriptionResponse getSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -333,7 +333,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
+	public ListPrivateChannelsResponse listPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -363,7 +363,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method=RequestMethod.GET, path= {"/{serviceProviderName}/privatechannels/peer"})
-	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
+	public ListPeerPrivateChannels listPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
