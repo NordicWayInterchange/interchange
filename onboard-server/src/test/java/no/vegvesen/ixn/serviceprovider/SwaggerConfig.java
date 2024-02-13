@@ -20,7 +20,7 @@ import java.util.Map;
         (title = "Onboard API",
                 version = "1.0",
                 license = @License(url = "https://github.com/NordicWayInterchange/interchange/blob/federation-master/license.md", name = "MIT License"),
-                description = "https://github.com/NordicWayInterchange"))
+                description = "<a href=\"https://github.com/NordicWayInterchange\">Github</a>"))
 public class SwaggerConfig {
     @Bean
     public OpenApiCustomizer openApiCustomizer() {
