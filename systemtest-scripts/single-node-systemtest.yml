@@ -17,7 +17,7 @@ services:
       singletest:
         ipv4_address: 172.28.1.1
         aliases:
-          - dns.bouvetinterchange.eu
+          - lookupdomain.com
 
   a_db:
     image: postgres:9.6
@@ -48,12 +48,12 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
       - SP_CHNL_PORT=8797
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - singletest
@@ -72,13 +72,13 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
-      - NAP_NAME=nap.bouvetinterchange.eu
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - SERVER_NAME=a.interchangedomain.com
+      - NAP_NAME=nap.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
       - NAP_CHNL_PORT=8898
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - singletest
@@ -100,7 +100,7 @@ services:
     environment:
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
@@ -128,12 +128,12 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - singletest
@@ -147,18 +147,18 @@ services:
     depends_on:
       - a_db
     links:
-      - "a_qpid:a.bouvetinterchange.eu"
+      - "a_qpid:a.interchangedomain.com"
     volumes:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a.bouvetinterchange.eu
-      - SERVER_NAME=a.bouvetinterchange.eu
+      - BASE_URL=https://a.interchangedomain.com
+      - SERVER_NAME=a.interchangedomain.com
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - singletest
@@ -176,12 +176,12 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     dns: 172.28.1.1
     networks:
@@ -195,20 +195,20 @@ services:
     depends_on:
     - a_db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
+    - "a_qpid:a.interchangedomain.com"
     volumes:
     - "../tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
-    - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+    - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
     - TRUST_STORE=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=a.bouvetinterchange.eu
+    - SERVER_NAME=a.interchangedomain.com
     networks:
     - singletest
 
