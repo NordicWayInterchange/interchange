@@ -546,7 +546,7 @@ public class OnboardRestControllerTest {
 	public void testAddingChannelWithServiceProviderAsPeerName() throws Exception {
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
-		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelApi(serviceProviderName)));
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(serviceProviderName)));
 
 		mockMvc.perform(
 				post(String.format("/%s/privatechannels", serviceProviderName))

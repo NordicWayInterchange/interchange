@@ -3,7 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelResponseApi;
 
 import java.util.Set;
 
@@ -14,7 +14,7 @@ public class ServiceProviderApi {
 
     private Set<GetDeliveryResponse> deliveries;
 
-    private Set<PrivateChannelApi> privateChannels;
+    private Set<PrivateChannelResponseApi> privateChannels;
 
     public Set<GetSubscriptionResponse> getSubscriptions() {
         return subscriptions;
@@ -41,11 +41,11 @@ public class ServiceProviderApi {
         this.deliveries = deliveries;
     }
 
-    public Set<PrivateChannelApi> getPrivateChannels() {
+    public Set<PrivateChannelResponseApi> getPrivateChannels() {
         return privateChannels;
     }
 
-    public void setPrivateChannels(Set<PrivateChannelApi> privateChannels) {
+    public void setPrivateChannels(Set<PrivateChannelResponseApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 

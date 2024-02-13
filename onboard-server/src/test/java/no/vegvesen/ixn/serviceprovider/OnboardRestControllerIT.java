@@ -782,9 +782,9 @@ public class OnboardRestControllerIT {
     public void testAddingChannels() {
         String serviceProviderName = "my-service-provider";
 
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
         restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
@@ -796,7 +796,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingChannelWithServiceProviderAsPeerName() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel = new PrivateChannelApi(serviceProviderName);
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(serviceProviderName);
 
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
@@ -830,7 +830,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingAndDeletingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi("my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
 
         AddPrivateChannelResponse response = restController.addPrivateChannel(serviceProviderName, request);
@@ -859,9 +859,9 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
         restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         ListPrivateChannelsResponse response = restController.getPrivateChannels(serviceProviderName);
         assertThat(response.getPrivateChannels().size()).isEqualTo(3);
@@ -870,9 +870,9 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
         AddPrivateChannelResponse privateChannels = restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
@@ -901,8 +901,8 @@ public class OnboardRestControllerIT {
         String serviceProviderName_1 = "my-service-provider";
         String serviceProviderName_2 = "my-service-provider2";
 
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi(serviceProviderName_1);
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(serviceProviderName_1);
 
         restController.addPrivateChannel(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
         restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
