@@ -38,16 +38,14 @@ For any questions please contact
 ## Getting Started
 
 ### Prerequisites
-* Maven 3.5.x or later
+* Maven 3.6.x or later
 * Java 11
-* Docker Engine 18.06.1-ce and Docker Compose 1.22.0 or later
+* Docker 
 
 ### Building the project with Maven
 The maven build uses [testcontainers](https://www.testcontainers.org/) in the integration test stage, so you will need Docker installed locally
 in order to run the integration tests.
 To build the project without integration test, use `mvn package`, and to run the integration tests, run `mvn verify`.
-
- 
 
 ### Running the Tests
 Unit tests are run in the maven 'test' stage, and integration tests are run in the 'verify' stage.
@@ -55,24 +53,20 @@ Unit tests are run in the maven 'test' stage, and integration tests are run in t
 The profile "IT" separates the unit tests from the integration tests by ensuring the integration tests are run in the 'verify' stage. 
 The profile "IT" is defined in the top pom and is always activated.
 
-#### Test framework
-We use junit5 in our tests.
-https://junit.org/junit5/
-
-#### Assertions
-We aim at using fluent assertions using [assertj](https://assertj.github.io/doc/). We use the version of assertj-core defined by spring-boot-starter-test.
-
 ### Run using Docker Compose
+
+*This method requires a bash-enabled terminal (Linux, Mac or Windows with WSL)*
+
+We have created a few Docker Compose configs in the `systemtest-scripts` folder, with associated startup scripts.
+The script `systemtest-single.node.sh` starts up a single-node interchange in Docker Compose, called. 
+
+
 ## Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/
 is automatically built by GitHub and published to the container registry europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/ on
 each commit. Each component in the system has its own registry.
 
 All the images are tagged with the 7-character start of the git commit hash. Branch "federation-master" is considered to be the stable branch.
-
-
-
-
 
 ### Deploy to kubernetes 
 #### Helm
