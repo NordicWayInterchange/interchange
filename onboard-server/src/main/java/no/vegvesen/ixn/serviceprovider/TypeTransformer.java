@@ -287,15 +287,15 @@ public class TypeTransformer {
     public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList){
         AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelList){
-                response.getPrivateChannels().add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+                response.getPrivateChannels().add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
         }
         return response;
     }
 
     public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList){
-        ArrayList<PrivateChannelApi> returnList = new ArrayList<>();
+        ArrayList<PrivateChannelResponseApi> returnList = new ArrayList<>();
         for(PrivateChannel privateChannel : privateChannelList){
-            returnList.add(new PrivateChannelApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+            returnList.add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
         }
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);
     }

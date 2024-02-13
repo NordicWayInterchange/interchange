@@ -10,7 +10,7 @@ public class AddPrivateChannelResponse {
 
     private String name;
 
-    private List<PrivateChannelApi> privateChannels;
+    private List<PrivateChannelResponseApi> privateChannels;
 
     public AddPrivateChannelResponse() {
         this.privateChannels = new ArrayList<>();
@@ -37,11 +37,11 @@ public class AddPrivateChannelResponse {
         this.name = name;
     }
 
-    public void setPrivateChannelApis(List<PrivateChannelApi> privateChannelApis) {
-        this.privateChannels = privateChannelApis;
+    public void setPrivateChannelApis(List<PrivateChannelResponseApi> privateChannelResponseApis) {
+        this.privateChannels = privateChannelResponseApis;
     }
 
-    public List<PrivateChannelApi> getPrivateChannels() {
+    public List<PrivateChannelResponseApi> getPrivateChannels() {
         return privateChannels;
     }
 

@@ -121,7 +121,7 @@ public class OnboardRESTClient {
     }
 
     public ListPrivateChannelsResponse getPrivateChannels() {
-        String url = String.format("%s/%s/privatechannels/", server, user);
+        String url = String.format("%s/%s/privatechannels", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
     public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){

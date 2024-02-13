@@ -58,10 +58,6 @@ public class SwaggerConfig {
             // AddPrivateChannelResponse gets an additional list 'privateChannelApis' in addition to the expected 'privateChannels'. This is a workaround, why this happens should be explored
             schemas.get("AddPrivateChannelResponse").getProperties().remove("privateChannelApis");
 
-            // addPrivateChannelRequest contains the same 'PrivateChannelApi' object as addPrivateChannelResponse. Therefore we need a description so that users are not confused when seeing this object.
-            ArraySchema addPrivateChannelRequest = (ArraySchema) schemas.get("AddPrivateChannelRequest").getProperties().get("privateChannels");
-            addPrivateChannelRequest.description("When adding private channels, 'id', 'endpoint' and 'status' should be removed from the request.");
-
             // 'consumerCommonName' is not required when adding a subscription.
             schemas.get("AddSubscription").setRequired(List.of("selector"));
             schemas.get("AddSubscription").description("consumerCommonName is not required");
