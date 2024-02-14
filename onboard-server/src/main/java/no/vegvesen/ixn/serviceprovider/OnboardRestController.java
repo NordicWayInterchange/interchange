@@ -277,7 +277,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddPrivateChannelResponse addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
+	public AddPrivateChannelResponse addPrivateChannels(@PathVariable String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
