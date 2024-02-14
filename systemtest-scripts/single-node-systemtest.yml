@@ -17,7 +17,7 @@ services:
       singletest:
         ipv4_address: 172.28.1.1
         aliases:
-          - lookupdomain.com
+          - dns.lookupdomain.com
 
   a_db:
     image: postgres:9.6
