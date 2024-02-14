@@ -272,6 +272,9 @@ public class NeigbourDiscoveryService {
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    }
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     subscription.incrementNumberOfPolls();
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
@@ -318,6 +321,9 @@ public class NeigbourDiscoveryService {
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    }
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);

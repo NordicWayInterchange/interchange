@@ -273,6 +273,24 @@ public class RoutingConfigurer {
 						subscription.getEndpoints().removeAll(endpointsToRemove);
 					}
 				}
+				Set<Subscription> ourFailedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.FAILED);
+				for (Subscription subscription : ourFailedSubscriptions) {
+					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+						for (Endpoint endpoint : subscription.getEndpoints()) {
+							if (endpoint.hasShard()) {
+								SubscriptionShard shard = endpoint.getShard();
+								if (listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(shard.getExchangeName(), endpoint.getSource(), neighbour.getName()) == null) {
+									Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+									if (exchange != null) {
+										qpidClient.removeExchange(exchange);
+										logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+									}
+									endpoint.removeShard();
+								}
+							}
+						}
+					}
+				}
 			}
 			neighbourService.saveNeighbour(neighbour);
 		}

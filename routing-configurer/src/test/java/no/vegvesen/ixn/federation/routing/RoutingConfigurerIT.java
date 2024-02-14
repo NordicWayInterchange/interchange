@@ -18,9 +18,7 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -974,6 +972,54 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownSubscriptionExchanges();
 
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
+	}
+
+	@Test
+	public void subscriptionExchangeAndSubscriptionShardIsRemovedWhenSubscriptionHasStatusFailed() {
+		String exchangeName = "failed-exchange";
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
+		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(anyString(), anyString(), anyString())).thenReturn(null);
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints().isEmpty()).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(endpoint.hasShard()).isFalse();
+	}
+
+	@Test
+	public void subscriptionExchangeAndSubscriptionShardIsNotRemovedWhenSubscriptionHasStatusFailedAndListenerEndpointExists() {
+		String exchangeName = "failed-exchange-with-listener-endpoint";
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
+		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setName("my-neighbour");
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, "my-source", "my-neighbour"))
+				.thenReturn(new ListenerEndpoint("my-neighbour", "my-source", "my-host", 5672, new Connection(), exchangeName));
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints().isEmpty()).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
+		assertThat(endpoint.hasShard()).isTrue();
 	}
 
 	@Test

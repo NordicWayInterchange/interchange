@@ -720,6 +720,76 @@ public class NeighbourDiscovererIT {
 	}
 
 	@Test
+	public void listenerEndpointsAreRemovedWhenSubscriptionPollReturnsFailedPollForCreatedSubscription() {
+		String selector = "originatingCountry = 'NO' AND messageType = 'DENM' AND publisherId = 'NO00001'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Subscription sub = new Subscription(
+				selector,
+				SubscriptionStatus.CREATED,
+				consumerCommonName
+		);
+
+		Endpoint endpoint = new Endpoint(
+				"neighbour-endpoints-failed-source",
+				"neighbour-endpoints-failed",
+				5671
+		);
+
+		SubscriptionShard shard = new SubscriptionShard("neighbour-endpoints-failed-target");
+		endpoint.setShard(shard);
+
+		sub.setEndpoints(Collections.singleton(endpoint));
+
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
+				"neighbour-endpoints-failed",
+				"neighbour-endpoints-failed-source",
+				"neighbour-endpoints-failed",
+				5671,
+				new Connection(),
+				"neighbour-endpoints-failed-target"
+		);
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour-endpoints-failed",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						Collections.singleton(
+								sub
+						)
+				)
+		);
+
+		repository.save(neighbour);
+		listenerEndpointRepository.save(listenerEndpoint);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
+				.thenThrow(new SubscriptionPollException("Subscription poll gone wrong"));
+
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated(mockNeighbourFacade);
+
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
+		assertThat(sub.getEndpoints()).isNotEmpty();
+		assertThat(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("neighbour-endpoints-failed-target", "neighbour-endpoints-failed-source", "neighbour-endpoints-failed")).isNull();
+	}
+
+	@Test
 	public void testBackoffIsIncreasedEverytimeASubscriptionFailsWithConnectionFailure() {
 		String selector1 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publisherId = 'NO00001'";
 		String selector2 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publicationId = 'pub-1'";
@@ -891,6 +961,73 @@ public class NeighbourDiscovererIT {
 		assertThat(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "source", "neighbour")).isNull();
 		assertThat(sub.getEndpoints()).hasSize(1);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+	}
+
+	@Test
+	public void subscriptionPollWithFailedInReturnRemovesListenerEndpoints() {
+		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Subscription sub = new Subscription(
+				selector,
+				SubscriptionStatus.FAILED,
+				consumerCommonName
+		);
+
+		Endpoint endpoint = new Endpoint(
+				"source",
+				"neighbour",
+				5671
+		);
+
+		SubscriptionShard shard = new SubscriptionShard("target");
+		endpoint.setShard(shard);
+
+		sub.setEndpoints(Collections.singleton(endpoint));
+
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
+				"neighbour",
+				"source",
+				"neighbour",
+				5671,
+				new Connection(),
+				"target"
+		);
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						Collections.singleton(
+								sub
+						)
+				)
+		);
+
+		listenerEndpointRepository.save(listenerEndpoint);
+
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenThrow(new SubscriptionPollException("Error in poll"));
+		neighbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour, mockNeighbourFacade);
+
+		assertThat(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "source", "neighbour")).isNull();
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 	}
 
 	private void checkForNewNeighbours() {
