@@ -1,0 +1,212 @@
+version: '3'
+services:
+
+# Note: now all the containers are on the same network - singletest
+# An idea for later would be to have two separate networks, one for each node,
+# where the modules that need to communicate with each other are a part of both networks.
+
+  mock-dns-server:
+    build:
+      context: ./
+      dockerfile: dns-single-node-dockerfile
+    cap_add:
+    - NET_ADMIN
+    container_name: mock-dns-server
+    hostname: mock-dns-server
+    networks:
+      singletest:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dns.lookupdomain.com
+
+  a_db:
+    image: postgres:9.6
+    container_name: a_db
+    depends_on:
+      - mock-dns-server
+    ports:
+      - 15432:5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+    - singletest
+
+  a_onboard_server:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:78646db
+      #build:
+      #context: ../../onboard-server-app
+    container_name: a_onboard_server
+    depends_on:
+      - a_db
+    ports:
+      - 32666:8797
+    volumes:
+    - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - singletest
+
+  #TODO remove napcore from the demo
+  a_napcore_server:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server-app:78646db
+    container_name: a_napcore_server
+    depends_on:
+      - a_db
+    ports:
+      - 32777:8898
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - NAP_NAME=nap.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
+      - NAP_CHNL_PORT=8898
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - singletest
+
+  a_qpid:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:78646db
+    container_name: a_qpid
+    ports:
+      - 8666:8080
+      - 443
+      - 63003:5671
+      - 5672
+    volumes:
+      - "../../qpid/a:/config"
+      - "../tmp:/jks"
+      - "../../qpid/messages/a:/work/a/messages"
+      - "../tmp/dump:/dump"
+    environment:
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+    depends_on:
+    - mock-dns-server
+    networks:
+    - singletest
+
+  a_neighbour_server:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app:78646db
+    container_name: a_neighbour_server
+    depends_on:
+      - a_db
+    ports:
+      - 8090
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+    - singletest
+    dns: 172.28.1.1
+
+  a_routing_configurer:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app:78646db
+    container_name: a_routing_configurer
+    depends_on:
+      - a_db
+    links:
+      - "a_qpid:a.interchangedomain.com"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - BASE_URL=https://a.interchangedomain.com
+      - SERVER_NAME=a.interchangedomain.com
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+    - singletest
+
+  a_neighbour_discoverer:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app:78646db
+    container_name: a_neighbour_discoverer
+    depends_on:
+      - a_db
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    dns: 172.28.1.1
+    networks:
+    - singletest
+
+  a_message_collector_app:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app:78646db
+    container_name: a_message_collector_app
+    depends_on:
+    - a_db
+    links:
+    - "a_qpid:a.interchangedomain.com"
+    volumes:
+    - "../tmp:/jks"
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_USER=federation
+    - POSTGRES_PASSWORD=federation
+    - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
+    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_TYPE=PKCS12
+    - TRUST_STORE=/jks/keys/truststore.jks
+    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE_TYPE=JKS
+    - SERVER_NAME=a.interchangedomain.com
+    networks:
+    - singletest
+
+networks:
+  singletest:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
