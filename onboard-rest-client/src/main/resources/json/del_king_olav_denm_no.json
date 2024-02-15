@@ -1,0 +1,7 @@
+{
+  "version" : "1.0",
+  "name" : "king_olav.bouvetinterchange.eu",
+  "deliveries" : [ {
+    "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6"
+  } ]
+}
