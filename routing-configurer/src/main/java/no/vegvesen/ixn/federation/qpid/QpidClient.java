@@ -96,7 +96,9 @@ public class QpidClient {
 	public boolean addBinding(String source, Binding binding) {
 		AddBindingRequest request = new AddBindingRequest(binding);
 		logger.info("Add binding {} from {} ", binding, source);
-		Boolean result = restTemplate.postForEntity(exchangesURL + "/" + source + "/bind", request, Boolean.class).getBody();
+		String url = exchangesURL + "/" + source + "/bind";
+		logger.debug("POSTint {} to URL {}",request,url);
+		Boolean result = restTemplate.postForEntity(url, request, Boolean.class).getBody();
 		return result.booleanValue();
 
 	}
@@ -117,13 +119,17 @@ public class QpidClient {
 
 	private Queue createQueue(CreateQueueRequest request) {
 		logger.info("Create queue {}", request.getName());
-		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
+		String url = queuesURL + "/";
+		logger.debug("POSTin {} to {}", request,url);
+		Queue result = restTemplate.postForEntity(url, request, Queue.class).getBody();
 		return result;
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
 		logger.info("Create exchange {} of type {}", request.getName(), request.getType());
-		ResponseEntity<Exchange> response = restTemplate.postForEntity(exchangesURL + "/", request, Exchange.class);
+		String url = exchangesURL + "/";
+		logger.debug("POSTing {} to {}",request,url);
+		ResponseEntity<Exchange> response = restTemplate.postForEntity(url, request, Exchange.class);
 		return response.getBody();
 
 	}
@@ -134,7 +140,9 @@ public class QpidClient {
 
 	public Queue getQueue(String queueName) {
 		try {
-			return restTemplate.getForEntity(queuesURL + "/" + queueName, Queue.class).getBody();
+			String url = queuesURL + "/" + queueName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, Queue.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
 		}
@@ -142,7 +150,9 @@ public class QpidClient {
 
 	public Exchange getExchange(String exchangeName) {
 		try {
-			return restTemplate.getForEntity(exchangesURL + "/" + exchangeName, Exchange.class).getBody();
+			String url = exchangesURL + "/" + exchangeName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, Exchange.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
 		}
@@ -155,8 +165,10 @@ public class QpidClient {
 
 
 	public List<Binding> getQueuePublishingLinks(String queueName) {
+		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
+		logger.debug("GETting from {}", url);
 		return restTemplate.exchange(
-				queuesURL + "/" + queueName + "/getPublishingLinks",
+				url,
 				HttpMethod.GET,
 				null,
 				new ParameterizedTypeReference<List<Binding>>() {
@@ -164,19 +176,25 @@ public class QpidClient {
 	}
 
 	public void removeQueue(Queue queue) {
-		restTemplate.delete(queuesURL + "/" + queue.getName());
+		String url = queuesURL + "/" + queue.getName();
+		logger.debug("DELETE to URL {}",url );
+		restTemplate.delete(url);
 		logger.info("Removed queue {}", queue.getName());
 	}
 
 
 	public void removeExchange(Exchange exchange) {
-		restTemplate.delete(exchangesURL + "/" + exchange.getName());
+		String url = exchangesURL + "/" + exchange.getName();
+		logger.debug("DELETE to URL {}",url);
+		restTemplate.delete(url);
 		logger.info("Removed exchange {}", exchange.getName());
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
 		try {
-			return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
+			String url = groupsUrl + groupName + "/" + memberName;
+			logger.debug("GETting from URL {}", url);
+			return restTemplate.getForEntity(url, GroupMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
 		}
@@ -185,15 +203,18 @@ public class QpidClient {
 
 	public void removeMemberFromGroup(GroupMember member, String groupName) {
 		String url = groupsUrl + groupName + "/" + member.getName();
+		logger.debug("DELETE to URL {}",url);
 		logger.info("Removing user {} from group {}",member.getName(),groupName);
 		restTemplate.delete(url);
 	}
 
 
+	//TODO complete the debug logging
 	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
 		logger.info("Adding member {} to group {}",memberName,groupName);
-		return restTemplate.postForEntity(groupsUrl + groupName,groupMember,GroupMember.class).getBody();
+		String url = groupsUrl + groupName;
+		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {

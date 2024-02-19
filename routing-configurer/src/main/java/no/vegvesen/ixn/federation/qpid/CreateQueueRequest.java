@@ -31,4 +31,12 @@ public class CreateQueueRequest {
     public Long getMaximumMessageTtl() {
         return maximumMessageTtl;
     }
+
+    @Override
+    public String toString() {
+        return "CreateQueueRequest{" +
+                "name='" + name + '\'' +
+                ", maximumMessageTtl=" + maximumMessageTtl +
+                '}';
+    }
 }

@@ -57,8 +57,8 @@ The profile "IT" is defined in the top pom and is always activated.
 
 *This method requires a bash-enabled terminal (Linux, Mac or Windows with WSL)*
 
-We have created a few Docker Compose configs in the `systemtest-scripts` folder, with associated startup scripts.
-The script `single-node.sh` starts up a single-node interchange in Docker Compose, called `a.interchangedomain.com`.
+We have created a few Docker Compose configs in the `demo` folder, with associated startup scripts.
+The folder `single-node` starts up a single-node interchange in Docker Compose, called `a.interchangedomain.com`.
 
 
 
