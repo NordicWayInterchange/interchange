@@ -40,8 +40,9 @@ public class JmsSource implements CommandLineRunner {
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
             s.sendNonPersistentMessage(s.createMessageBuilder()
                     .bytesMessage(bytemessage)
-                    .userId("kong_olav")
-                    .publisherId("NO-123")
+                    .userId("king_olav")
+                    .publisherId("NO00000")
+		    .publicationId("NO00000-pub-1")
                     .messageType(Constants.DENM)
                     .causeCode(6)
                     .subCauseCode(61)

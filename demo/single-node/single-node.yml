@@ -92,9 +92,9 @@ services:
       - 63003:5671
       - 5672
     volumes:
-      - "../../qpid/a:/config"
+      - "../qpid/a/config:/config"
       - "../tmp:/jks"
-      - "../../qpid/messages/a:/work/a/messages"
+      - "../../qpid/a/messages:/work/a/messages"
       - "../tmp/dump:/dump"
     environment:
       - TRUST_STORE=/jks/keys/truststore.jks
