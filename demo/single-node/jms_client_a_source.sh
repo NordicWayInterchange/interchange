@@ -6,7 +6,7 @@ docker run \
     --name jms_client_source \
     --network=single-node_singletest \
     --dns=172.28.1.1 \
-    -v ${PWD}/../tmp/keys:/keys \
+    -v ${PWD}/../keys/a:/keys \
     -e URL=amqps://a.interchangedomain.com \
     -e QUEUE=${1} \
     -e KEY_STORE_PATH=/keys/king_olav.a.interchangedomain.com.p12 \
