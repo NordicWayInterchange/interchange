@@ -58,31 +58,6 @@ services:
     networks:
       - singletest
 
-  #TODO remove napcore from the demo
-  a_napcore_server:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server-app:78646db
-    container_name: a_napcore_server
-    depends_on:
-      - a_db
-    ports:
-      - 32777:8898
-    volumes:
-      - "../tmp:/jks"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - NAP_NAME=nap.interchangedomain.com
-      - DOMAIN_NAME=lookupdomain.com
-      - NAP_CHNL_PORT=8898
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.interchangedomain.com.p12
-      - KEY_STORE_PASSWORD=password
-    networks:
-      - singletest
-
   a_qpid:
     image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:78646db
     container_name: a_qpid
