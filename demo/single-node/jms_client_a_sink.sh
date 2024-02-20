@@ -4,14 +4,14 @@ docker run \
     -it \
     --rm \
     --name jms_client_sink \
-    --network=systemtest-scripts_testing_net \
+    --network=single-node_singletest \
     --dns=172.28.1.1 \
     -v ${PWD}/../tmp/keys:/keys \
-    -e URL=amqps://a.bouvetinterchange.eu \
+    -e URL=amqps://a.interchangedomain.com \
     -e QUEUE=${1} \
-    -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
+    -e KEY_STORE_PATH=/keys/king_olav.a.interchangedomain.com.p12 \
     -e KEY_STORE_PASS=password \
     -e TRUST_STORE_PATH=/keys/truststore.jks \
     -e TRUST_STORE_PASS=password \
-    --link a_qpid:a.bouvetinterchange.eu \
+    --link a_qpid:a.interchangedomain.com \
     jms_client_sink

@@ -1,0 +1,103 @@
+{
+  "type": "BDB",
+  "name": "a.interchangedomain.com",
+  "modelVersion": "9.0",
+  "exchanges": [
+
+  ],
+  "queues": [
+    {
+      "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ],
+  "virtualhostaccesscontrolproviders": [
+    {
+      "name": "default",
+      "type": "RuleBased",
+      "defaultResult": "DENIED",
+      "rules": [
+        {
+          "objectType": "ALL",
+          "identity": "administrators",
+          "operation": "ALL",
+          "outcome": "ALLOW_LOG",
+          "attributes": {}
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "bi-consumers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "federated-interchanges",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "remote-service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "clients-private-channels",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
+          }
+        },
+        {
+          "objectType": "ALL",
+          "identity": "ALL",
+          "operation": "ALL",
+          "outcome": "DENY_LOG",
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}
