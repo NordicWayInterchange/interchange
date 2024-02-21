@@ -59,7 +59,7 @@ The profile "IT" is defined in the top pom and is always activated.
 
 We have created a few Docker Compose configs in the `demo` folder, with associated startup scripts.
 The folder `single-node` starts up a single-node interchange in Docker Compose, called `a.interchangedomain.com`.
-There's a short tutorial [here](demo/single-node)
+There's a short tutorial [here](demo/single-node/README.md)
 
 
 
