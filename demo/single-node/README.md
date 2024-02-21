@@ -20,7 +20,7 @@ We'll start by adding a Capability.
 The file `cap_king_olav_denm_no.json` contains the json structure for a request to create a Capability with the publicationId `NO00000-pub-1` with the messageType DENM.
 
 Run the command `./a_onboard_client.sh addcapability -f cap_king_olav_denm_no.json` to add the capability declared in the json file to the cluster.
-The capability is now registered. Check using the command `./a_onboard_client.sh getcapabilities`. This lists your capabilities in the system.'
+The capability is now registered. Check using the command `./a_onboard_client.sh getcapabilities`. This lists your capabilities in the system.
 
 ## Register a Delivery
 
