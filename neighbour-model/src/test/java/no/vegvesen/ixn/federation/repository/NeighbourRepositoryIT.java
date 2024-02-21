@@ -300,4 +300,24 @@ public class NeighbourRepositoryIT {
 		assertThat(repository.findByName("my-multi-neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
+	@Test
+	public void findDistinctNeighboursBySubscriptionStatus() {
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-node");
+
+		Subscription sub2 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-node");
+
+		SubscriptionRequest subscriptions1 = new SubscriptionRequest(Collections.singleton(sub1));
+		Neighbour neighbour1 = new Neighbour("my-multi-neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), subscriptions1);
+
+		SubscriptionRequest subscriptions2 = new SubscriptionRequest(Collections.singleton(sub2));
+		Neighbour neighbour2 = new Neighbour("my-multi-neighbour2", new Capabilities(), new NeighbourSubscriptionRequest(), subscriptions2);
+
+		repository.save(neighbour1);
+		repository.save(neighbour2);
+
+		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(2);
+		assertThat(repository.findByName("my-multi-neighbour1").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+		assertThat(repository.findByName("my-multi-neighbour2").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+	}
+
 }

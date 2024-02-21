@@ -413,7 +413,13 @@ public class NeighbourDiscovererIT {
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
-		Subscription responseSubscription = new Subscription(
+		Subscription responseSubscription1 = new Subscription(
+				"originatingCountry = 'NO'",
+				SubscriptionStatus.ACCEPTED,
+				nodeProperties.getName()
+		);
+
+		Subscription responseSubscription2 = new Subscription(
 				"originatingCountry = 'NO'",
 				SubscriptionStatus.ACCEPTED,
 				nodeProperties.getName()
@@ -424,7 +430,7 @@ public class NeighbourDiscovererIT {
 		repository.save(neighbourB);
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class), anySet(), anyString())).thenReturn(
-				Collections.singleton(responseSubscription)
+				Collections.singleton(responseSubscription1), Collections.singleton(responseSubscription2)
 		);
 
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
