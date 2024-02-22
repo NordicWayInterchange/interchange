@@ -79,6 +79,11 @@ jobs:
           name: interchange
           path: ./
 
+      - name: Deploy to GitHub
+        run: mvn --batch-mode -DuseGitHubPackages=true deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
