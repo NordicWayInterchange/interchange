@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.message;
 
 import java.util.List;
-import java.util.Set;
 
 public class Messages {
 

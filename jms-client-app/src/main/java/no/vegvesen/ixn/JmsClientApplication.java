@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.client.command.JmsTopCommand;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -15,7 +16,7 @@ import java.util.concurrent.Callable;
         subcommands = {
 
         })
-public class JmsClientApplication implements Callable<Integer> {
+public class JmsClientApplication implements Callable<Integer>, JmsTopCommand {
     @Override
     public Integer call() throws Exception {
         return null;
@@ -36,4 +37,28 @@ public class JmsClientApplication implements Callable<Integer> {
     @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public Path getKeystorePath() {
+        return keystorePath;
+    }
+
+    @Override
+    public String getKeystorePassword() {
+        return keystorePassword;
+    }
+
+    @Override
+    public Path getTrustStorePath() {
+        return trustStorePath;
+    }
+
+    @Override
+    public String getTrustStorePassword() {
+        return trustStorePassword;
+    }
 }
