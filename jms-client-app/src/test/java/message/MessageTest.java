@@ -1,16 +1,14 @@
-package no.vegvesen.ixn.message;
+package message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.message.*;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 
 public class MessageTest {
 
@@ -367,7 +365,7 @@ public class MessageTest {
 
     @Test
     public void jsonToMessageObject() throws IOException {
-        File jsonfile = Path.of("messages_king_olav.json").toFile();
+        File jsonfile = Path.of("src","test","resources","messages_king_olav.json").toFile();
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(jsonfile, Messages.class);
 
