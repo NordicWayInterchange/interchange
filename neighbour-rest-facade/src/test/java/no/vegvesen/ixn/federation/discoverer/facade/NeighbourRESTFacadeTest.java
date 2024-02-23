@@ -241,7 +241,7 @@ public class NeighbourRESTFacadeTest {
 		Set<Subscription> subscriptions = Collections.singleton(subscription);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
-		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+		Mockito.when(mock.getStatusCode()).thenThrow(IOException.class);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -257,7 +257,7 @@ public class NeighbourRESTFacadeTest {
 	public void capabilitiesPostServerUnexpectedlyClosesConnection() throws IOException {
 
 	    final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
-	    Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+	    Mockito.when(mock.getStatusCode()).thenThrow(IOException.class);
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -276,7 +276,7 @@ public class NeighbourRESTFacadeTest {
 		subscription.setPath("/bouvet/subscriptions/1");
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
-		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+		Mockito.when(mock.getStatusCode()).thenThrow(IOException.class);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))

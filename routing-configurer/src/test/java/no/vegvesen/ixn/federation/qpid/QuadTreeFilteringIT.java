@@ -21,8 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
 import java.util.List;
 

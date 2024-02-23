@@ -70,7 +70,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
+    public CertificateSignResponse addCsrRequest(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("CSR - signing new cert for actor {}", actorCommonName);
         List<String> certs;
@@ -87,7 +87,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Subscription addSubscription(@PathVariable String actorCommonName, @RequestBody SubscriptionRequest subscriptionRequest) {
+    public Subscription addSubscription(@PathVariable("actorCommonName") String actorCommonName, @RequestBody SubscriptionRequest subscriptionRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
 
@@ -119,7 +119,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Subscription> getSubscriptions(@PathVariable String actorCommonName) {
+    public List<Subscription> getSubscriptions(@PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing subscription for service provider {}", actorCommonName);
 
@@ -129,7 +129,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
-    public Subscription getSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
+    public Subscription getSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
 
@@ -145,7 +145,7 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
+    public void deleteSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
 
@@ -157,7 +157,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/capabilities")
-    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable String actorCommonName, @RequestParam(required = false) String selector) {
+    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false) String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 

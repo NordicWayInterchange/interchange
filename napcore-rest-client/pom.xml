@@ -12,8 +12,8 @@
     <artifactId>napcore-rest-client</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -22,13 +22,14 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>napcore-rest-api</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -42,7 +43,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

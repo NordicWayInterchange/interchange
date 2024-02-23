@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -60,7 +60,7 @@ public class Match {
     }
 
     public boolean subscriptionIsTearDown() {
-        return !subscription.isSubscriptionWanted();
+        return subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN);
     }
 
     public boolean localSubscriptionIsTearDown() {

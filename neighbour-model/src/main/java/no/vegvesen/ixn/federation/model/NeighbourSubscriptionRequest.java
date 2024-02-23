@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
