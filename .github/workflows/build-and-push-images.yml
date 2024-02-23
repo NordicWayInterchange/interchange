@@ -63,34 +63,17 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Build with Maven and run integration tests
-        run: mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
-        # Step that does cache save and restore
-      - name: Save and restore cache
-        id: maven-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Persist to workspace
-        uses: actions/upload-artifact@v4
-        with:
-          name: interchange
-          path: ./
-
-      - name: Publish to GitHub Packages Apache Maven
-        run: |
+        run:  |
           cat << EOF > ~/.m2/settings.xml
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
             http://maven.apache.org/xsd/settings-1.0.0.xsd">
-            
+          
             <activeProfiles>
             <activeProfile>github</activeProfile>
             </activeProfiles>
-            
+          
             <profiles>
             <profile>
             <id>github</id>
@@ -109,7 +92,7 @@ jobs:
             </repositories>
             </profile>
             </profiles>
-            
+          
             <servers>
             <server>
             <id>github</id>
@@ -119,10 +102,22 @@ jobs:
             </servers>
             </settings>
           EOF
-          mvn deploy -s ~/.m2/settings.xml
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
+          mvn deploy -s ~/.m2/settings.xml -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+        # Step that does cache save and restore
+      - name: Save and restore cache
+        id: maven-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Persist to workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: interchange
+          path: ./
+          
   docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
