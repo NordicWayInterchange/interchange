@@ -3,7 +3,7 @@ package no.vegvesen.ixn.client.command;
 import no.vegvesen.ixn.Sink;
 import picocli.CommandLine;
 
-import javax.jms.MessageConsumer;
+import jakarta.jms.MessageConsumer;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "drainmessages", description = "Drains the queue until there's more than 0.5 second delay")
