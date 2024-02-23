@@ -1,6 +1,8 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.client.command.JmsTopCommand;
+import no.vegvesen.ixn.client.command.ReceiveMessages;
+import no.vegvesen.ixn.client.command.SendMessage;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -14,7 +16,8 @@ import java.util.concurrent.Callable;
         description = "Jms Client Application",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-
+                SendMessage.class,
+                ReceiveMessages.class
         })
 public class JmsClientApplication implements Callable<Integer>, JmsTopCommand {
     @Override
