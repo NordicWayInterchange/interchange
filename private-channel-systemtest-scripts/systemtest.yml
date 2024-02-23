@@ -107,7 +107,7 @@ services:
   local_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-server-app
+      context: ../neighbour-server
     container_name: local_neighbour_server
     depends_on:
       - local_db
