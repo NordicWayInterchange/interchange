@@ -38,9 +38,9 @@ For any questions please contact
 ## Getting Started
 
 ### Prerequisites
-* Maven 3.5.x or later
-* Java 11
-* Docker Engine 18.06.1-ce and Docker Compose 1.22.0 or later
+* Maven 3.6
+* Java 17
+* Docker Engine and Docker Compose
 
 ### Building the project with Maven
 The maven build uses [testcontainers](https://www.testcontainers.org/) in the integration test stage, so you will need Docker installed locally
