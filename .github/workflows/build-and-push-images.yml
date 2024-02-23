@@ -79,14 +79,49 @@ jobs:
           name: interchange
           path: ./
 
-      - name: Deploy to Github Package Registry
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to GitHub Packages Apache Maven
         run: |
-          mkdir -p ~/.m2
-          echo "<settings><servers><server><id>gh</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
-          REPO="gh::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-          mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}"
+          cat << EOF > ~/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+            http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            
+            <activeProfiles>
+            <activeProfile>github</activeProfile>
+            </activeProfiles>
+            
+            <profiles>
+            <profile>
+            <id>github</id>
+            <repositories>
+            <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            </repository>
+            <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
+            <snapshots>
+            <enabled>true</enabled>
+            </snapshots>
+            </repository>
+            </repositories>
+            </profile>
+            </profiles>
+            
+            <servers>
+            <server>
+            <id>github</id>
+            <username>Github.Actions</username>
+            <password>${{ secrets.REPO_ACCESS_TOKEN }}</password>
+            </server>
+            </servers>
+            </settings>
+          EOF
+          mvn deploy -s ~/.m2/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   docker-push-svv:
     runs-on: ubuntu-latest
