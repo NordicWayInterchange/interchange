@@ -23,7 +23,7 @@ self:                                                               # ------ Gen
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/                  # Public container registry for Nordic Way where the docker images are located
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid                  # Public container registry for Nordic Way where the docker images are located
     tag: "c6b1cf8"                                                  # Image tag for the Qpid-image
   expose_amqps: true                                                # Expose the AMPQS port for incoming messages.
   persistence:                                                      # Configure persistence of queues in Qpid
@@ -36,7 +36,7 @@ qpid:                                                               # Apache Qpi
 neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -54,21 +54,12 @@ database:                                                           # Database o
 message_collector:
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app
     tag: "c6b1cf8"
-message_forwarder:                                                  # Java application that forwards local messages to neighbours.
-  image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-forwarder
-    tag: "c6b1cf8"
-  logging:
-  - logger_name: .root
-    level: info
-  key_store_type: PKCS12
-  trust_store_type: JKS
 neighbour_server:                                                   # Java application running a REST endpoints that other neighbours contact us through
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -76,7 +67,7 @@ neighbour_server:                                                   # Java appli
 routing_configurer:                                                 # Java application that uses the Qpid API to configure routing of messages
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .no.vegvesen
@@ -84,7 +75,7 @@ routing_configurer:                                                 # Java appli
 onboard_server:                                                     # Java application running a REST endpoint for managing Service Providers(create, read, update, delete)
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -92,7 +83,7 @@ onboard_server:                                                     # Java appli
 napcore_server:
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
