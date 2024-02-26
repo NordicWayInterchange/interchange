@@ -64,4 +64,11 @@ public class JmsClientApplication implements Callable<Integer>, JmsTopCommand {
     public String getTrustStorePassword() {
         return trustStorePassword;
     }
+
+
+    public static void main(String[] args) {
+        int exitCode = new CommandLine(new JmsClientApplication()).execute(args);
+        //System.exit(exitCode); Removed this to be sure that the sink is listening for messages.
+    }
+
 }
