@@ -60,6 +60,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>testcontainers-init-postgres</artifactId>
             <version>${project.version}</version>
