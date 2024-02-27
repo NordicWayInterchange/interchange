@@ -75,18 +75,18 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-        # If this job fails, it is likely because the REPO_ACCESS_TOKEN has expired. Generate a personal access token and add it to secrets
 
       - name: Checkout to interchange-swagger-docs
-        uses: actions/checkout@v3
+        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/swagger-api-documentation-java-17'
+        uses: actions/checkout@v4
         with:
           repository: NordicWayInterchange/interchange-swagger-docs
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           path: interchange-swagger-docs
+
       - name: Push to github pages
+        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/swagger-api-documentation-java-17'
         run: |
-          cp onboard-server/target/swagger/swagger.json onboard-server/src/test/resources/swagger/swagger.json
-          cp neighbour-server/target/swagger/swagger.json neighbour-server/src/test/resources/swagger/swagger.json
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
           cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
