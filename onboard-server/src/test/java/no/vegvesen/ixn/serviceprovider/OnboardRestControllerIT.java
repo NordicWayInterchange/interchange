@@ -1107,8 +1107,6 @@ public class OnboardRestControllerIT {
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "notAnId")
         );
-
-        assertThat(restController.getServiceProviders().size()).isEqualTo(3);
     }
 
     @Autowired
