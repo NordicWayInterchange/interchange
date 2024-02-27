@@ -36,7 +36,7 @@ public class SendMessage implements Callable<Integer> {
         try (Source source = new Source(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
             source.start();
             for (Message message : messages.getMessages()) {
-                MessageBuilder messageBuilder = source.createMessageBuilder()
+                MessageBuilder messageBuilder = source.createMessageBuilder();
                 if (message instanceof DenmMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
