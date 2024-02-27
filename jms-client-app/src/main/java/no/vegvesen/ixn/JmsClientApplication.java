@@ -19,11 +19,7 @@ import java.util.concurrent.Callable;
                 SendMessage.class,
                 ReceiveMessages.class
         })
-public class JmsClientApplication implements Callable<Integer>, JmsTopCommand {
-    @Override
-    public Integer call() throws Exception {
-        return 0;
-    }
+public class JmsClientApplication implements JmsTopCommand {
     @Parameters(index = "0", paramLabel = "URL" ,description = "The url to the AMQP host to connect to")
     private String url;
 
