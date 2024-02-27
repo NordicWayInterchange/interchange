@@ -230,7 +230,7 @@ public class ExampleAPIObjects {
                     "originatingCountry" : "NO",
                     "protocolVersion" : "1.0",
                     "quadTree" : [ "1234" ],
-                    "causeCodes" : [ 6 ]
+                    "causeCode" : [ 6 ]
                   },
                   "metadata" : { }
                 }
