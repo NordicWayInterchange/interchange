@@ -5,6 +5,10 @@ import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.message.*;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -12,20 +16,21 @@ import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
-@CommandLine.Command(name = "sendmessage", description = "Sending a message from JSON")
+@Command(name = "sendmessage", description = "Sending a message from JSON")
 public class SendMessage implements Callable<Integer> {
 
-    @CommandLine.Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")
+    @Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
 
-    @CommandLine.Option(names = {"-f", "--filename"}, description = "The message json file", required = true)
+    @Option(names = {"-f", "--filename"}, description = "The message json file", required = true)
     File messageFile;
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     JmsTopCommand parentCommand;
 
     @Override
     public Integer call() throws Exception {
+        System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
         try (Source source = new Source(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
