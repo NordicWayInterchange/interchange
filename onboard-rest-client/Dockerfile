@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-alpine
 RUN apk add --no-cache bash alpine-conf
 RUN setup-timezone -z Europe/Oslo
 
-COPY target/onboard-rest-client-1.0.4-SNAPSHOT.jar onboard-rest-client.jar
+COPY target/onboard-rest-client-1.0.3-SNAPSHOT.jar onboard-rest-client.jar
 ADD entrypoint.sh /
 RUN chmod u+x /entrypoint.sh
 ADD cap_king_gustaf_denm_no.json /
