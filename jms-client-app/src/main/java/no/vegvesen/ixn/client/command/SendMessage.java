@@ -37,18 +37,6 @@ public class SendMessage implements Callable<Integer> {
             source.start();
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder()
-                        .userId(message.getUserId())
-                        .publisherId(message.getPublisherId())
-                        .publicationId(message.getPublicationId())
-                        .originatingCountry(message.getOriginatingCountry())
-                        .protocolVersion(message.getProtocolVersion())
-                        .longitude(message.getLongitude())
-                        .latitude(message.getLatitude())
-                        .quadTreeTiles(message.getQuadTree())
-                        .shardId(message.getShardId())
-                        .shardCount(message.getShardCount())
-                        .baselineVersion(message.getBaselineVersion())
-                        .serviceType(message.getServiceType());
                 if (message instanceof DenmMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
@@ -99,6 +87,19 @@ public class SendMessage implements Callable<Integer> {
                 } else {
                     throw new Exception("Message is not of valid messagetype");
                 }
+                messageBuilder
+                        .userId(message.getUserId())
+                        .publisherId(message.getPublisherId())
+                        .publicationId(message.getPublicationId())
+                        .originatingCountry(message.getOriginatingCountry())
+                        .protocolVersion(message.getProtocolVersion())
+                        .longitude(message.getLongitude())
+                        .latitude(message.getLatitude())
+                        .quadTreeTiles(message.getQuadTree())
+                        .shardId(message.getShardId())
+                        .shardCount(message.getShardCount())
+                        .baselineVersion(message.getBaselineVersion())
+                        .serviceType(message.getServiceType());
                 source.send(messageBuilder.build());
 
             }

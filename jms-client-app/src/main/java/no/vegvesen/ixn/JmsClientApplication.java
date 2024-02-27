@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
         description = "Jms Client Application",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-                SendJmsClientMessage.class,
+                SendMessage.class,
                 ReceiveMessages.class
         })
 public class JmsClientApplication implements JmsTopCommand {
