@@ -17,7 +17,7 @@ public class SendPredefinedMessage implements Callable<Integer> {
     @CommandLine.ParentCommand
     JmsTopCommand parentCommand;
 
-    @CommandLine.Parameters(index = "1", paramLabel = "QUEUE", description = "The queueName to connect to")
+    @CommandLine.Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
 
     @Override
