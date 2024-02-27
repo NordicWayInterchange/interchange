@@ -237,7 +237,6 @@
         <module>onboard-server-app</module>
         <module>onboard-rest-client</module>
         <module>message-collector-app</module>
-        <module>neighbour-discoverer-app</module>
         <module>routing-configurer-app</module>
         <module>jms-client-source</module>
         <module>jms-client-sink</module>
