@@ -166,7 +166,7 @@ services:
   a_neighbour_discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-discoverer-app
+      context: ../neighbour-discoverer
     container_name: a_neighbour_discoverer
     depends_on:
       - a_db
@@ -283,7 +283,7 @@ services:
   b_neighbour_discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-discoverer-app
+      context: ../neighbour-discoverer
     container_name: b_neighbour_discoverer
     depends_on:
       - b_db
