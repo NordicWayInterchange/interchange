@@ -52,3 +52,9 @@ jobs:
         with:
           version: '>= 446.0.1'
           project_id: ${{ vars.PROJECT_ID }}
+      - name: Login to Artifact Registry
+        run: |
+            gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+      - name: helm push
+        run: |
+          helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm
