@@ -36,7 +36,7 @@ services:
   local_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: local_onboard_server
     depends_on:
       - local_db

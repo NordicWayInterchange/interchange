@@ -36,7 +36,7 @@ services:
   a_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: a_onboard_server
     depends_on:
       - a_db
@@ -232,7 +232,7 @@ services:
   b_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: b_onboard_server
     depends_on:
     - b_db
