@@ -45,7 +45,7 @@ public class NeighbourRestController {
 	}
 
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = {"/subscriptions", "/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
@@ -62,7 +62,7 @@ public class NeighbourRestController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = {"/{ixnName}/subscriptions", "/{ixnName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
@@ -79,7 +79,7 @@ public class NeighbourRestController {
 
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = {"/{ixnName}/subscriptions/{subscriptionId}", "/{ixnName}/subscriptions/{subscriptionId}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
