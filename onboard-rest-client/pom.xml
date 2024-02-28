@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>onboard-server-app</artifactId>
+            <artifactId>onboard-server</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
