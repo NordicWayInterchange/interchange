@@ -85,7 +85,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>no.vegvesen.ixn.napcore.NapCoreApplication</mainClass>
+                    <mainClass>no.vegvesen.ixn.federation.messagecollector.Application</mainClass>
                     <layout>JAR</layout>
                 </configuration>
                 <executions>
