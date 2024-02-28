@@ -321,7 +321,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		mockMvc.perform(
-				get(String.format("/%s/subscriptions/", serviceProviderName))
+				get(String.format("/%s/subscriptions", serviceProviderName))
 		).andExpect(status().isOk());
 
 		verify(serviceProviderRepository, times(1)).findByName(any());

@@ -157,7 +157,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/capabilities")
-    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false) String selector) {
+    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 

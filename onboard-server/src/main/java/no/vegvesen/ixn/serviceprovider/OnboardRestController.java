@@ -250,7 +250,7 @@ public class OnboardRestController {
 		return serviceProvider;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListSubscriptionsResponse listSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Listing subscription for service provider {}", serviceProviderName);
