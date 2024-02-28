@@ -28,7 +28,7 @@ interchange:
       level: info
 neighbour_discoverer:
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app
+    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer
     tag: "7fc5c843"
   logging:
     - logger_name: .root
@@ -47,7 +47,7 @@ database:
   pgdata: /var/lib/postgresql/data/pgdata
 message_collector:
   image:
-    repository: eu.gcr.io/nordic-way-aad182cc/message-collector-app
+    repository: eu.gcr.io/nordic-way-aad182cc/message-collector
     tag: "7fc5c843"
   logging:
     - logger_name: .root

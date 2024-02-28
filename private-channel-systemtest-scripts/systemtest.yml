@@ -131,7 +131,7 @@ services:
   local_routing_configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
-      context: ../routing-configurer-app
+      context: ../routing-configurer
     container_name: local_routing_configurer
     depends_on:
       - local_db
@@ -151,7 +151,7 @@ services:
       - testing_net
 
   local_message_collector_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector:${BRANCH_TAG}
     build:
       context: ../message-collector
     container_name: local_message_collector_app
