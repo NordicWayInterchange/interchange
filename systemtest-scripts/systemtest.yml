@@ -142,7 +142,7 @@ services:
   a_routing_configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
-      context: ../routing-configurer-app
+      context: ../routing-configurer
     container_name: a_routing_configurer
     depends_on:
       - a_db
@@ -164,7 +164,7 @@ services:
     - testing_net
 
   a_neighbour_discoverer:
-    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer
     container_name: a_neighbour_discoverer
@@ -190,7 +190,7 @@ services:
     - testing_net
 
   a_message_collector_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector:${BRANCH_TAG}
     build:
       context: ../message-collector
     container_name: a_message_collector_app
@@ -281,7 +281,7 @@ services:
     dns: 172.28.1.1
 
   b_neighbour_discoverer:
-    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer
     container_name: b_neighbour_discoverer
@@ -338,7 +338,7 @@ services:
   b_routing_configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
-      context: ../routing-configurer-app
+      context: ../routing-configurer
     container_name: b_routing_configurer
     depends_on:
       - b_db
@@ -360,7 +360,7 @@ services:
     - testing_net
 
   b_message_collector_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector:${BRANCH_TAG}
     build:
       context: ../message-collector
     container_name: b_message_collector_app
