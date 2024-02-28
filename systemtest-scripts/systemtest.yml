@@ -192,7 +192,7 @@ services:
   a_message_collector_app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
-      context: ../message-collector-app
+      context: ../message-collector
     container_name: a_message_collector_app
     depends_on:
     - a_db
