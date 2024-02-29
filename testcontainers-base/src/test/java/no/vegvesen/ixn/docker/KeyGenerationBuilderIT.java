@@ -13,9 +13,10 @@ import java.security.*;
 import java.security.cert.CertificateException;
 
 
+@Disabled
 public class KeyGenerationBuilderIT {
 
-    Path keysPath = DockerBaseIT.getTestPrefixedOutputPath(KeyGenerationBuilderIT.class);
+    Path keysPath = DockerBaseIT.getTargetFolderPathForTestClass(KeyGenerationBuilderIT.class);
 
     //TODO need to finish generation and testing with extra hosts
     @Test

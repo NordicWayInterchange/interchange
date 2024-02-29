@@ -2,8 +2,8 @@ package no.vegvesen.ixn;
 
 import org.apache.qpid.jms.message.JmsMessage;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +40,7 @@ public class ImageSource extends Source{
                 .userId("localhost")
                 .messageType("DENM")
                 .publisherId("NO-12345")
+                .publicationId("123")
                 .protocolVersion("DENM:1.2.2")
                 .originatingCountry(originatingCountry)
                 .quadTreeTiles(messageQuadTreeTiles)

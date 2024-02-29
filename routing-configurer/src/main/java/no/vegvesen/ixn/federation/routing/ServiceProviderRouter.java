@@ -115,6 +115,9 @@ public class ServiceProviderRouter {
                 //serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
+            case ERROR:
+                subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+                break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
         }
@@ -174,7 +177,10 @@ public class ServiceProviderRouter {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        } else {
+        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+        }
+        else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
@@ -390,7 +396,7 @@ public class ServiceProviderRouter {
                             }
                             delivery.setExchangeName("");
                         }
-                        if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
+                        if (!(delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN) || delivery.getStatus().equals(LocalDeliveryStatus.ERROR))) {
                             delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                         }
                     }
@@ -399,10 +405,6 @@ public class ServiceProviderRouter {
             serviceProvider = repository.save(serviceProvider);
         }
         return serviceProvider;
-    }
-
-    public String joinDeliverySelectorWithCapabilitySelector(CapabilitySplit capability, String selector) {
-        return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
     }
 
     public String joinTwoSelectors(String firstSelector, String secondSelector) {
@@ -419,14 +421,18 @@ public class ServiceProviderRouter {
                     if (!localSubscription.getLocalEndpoints().isEmpty()) {
                         List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                         for (Match match : matches) {
-                            if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
-                                Exchange exchange = delta.findByExchangeName(match.getSubscription().getExchangeName());
-                                if (exchange != null) {
-                                    for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                        Queue queue = delta.findByQueueName(queueName);
-                                        if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
-                                            bindQueueToSubscriptionExchange(queueName, exchange.getName(), localSubscription);
-                                            delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
+                            if (match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
+                                for (Endpoint endpoint : match.getSubscription().getEndpoints()) {
+                                    if (endpoint.hasShard()) {
+                                        Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
+                                        if (exchange != null) {
+                                            for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
+                                                Queue queue = delta.findByQueueName(queueName);
+                                                if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
+                                                    bindQueueToSubscriptionExchange(queueName, exchange.getName(), localSubscription);
+                                                    delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
+                                                }
+                                            }
                                         }
                                     }
                                 }

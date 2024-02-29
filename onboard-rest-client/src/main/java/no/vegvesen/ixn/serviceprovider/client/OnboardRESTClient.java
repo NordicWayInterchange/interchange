@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,11 +22,16 @@ public class OnboardRESTClient {
     private final String user;
 
     public OnboardRESTClient(SSLContext sslContext, String server, String user) {
+        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
+                .create()
+                .setSSLSocketFactory(sslConnectionSocketFactory)
+                .build();
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
                                 .custom()
-                                .setSSLContext(sslContext)
+                                .setConnectionManager(connectionManager)
                                 .build()
                 )
         );
@@ -51,7 +59,7 @@ public class OnboardRESTClient {
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
-		String url = String.format("%s/%s/subscriptions/", server, user);
+		String url = String.format("%s/%s/subscriptions", server, user);
 		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 
@@ -113,7 +121,7 @@ public class OnboardRESTClient {
     }
 
     public ListPrivateChannelsResponse getPrivateChannels() {
-        String url = String.format("%s/%s/privatechannels/", server, user);
+        String url = String.format("%s/%s/privatechannels", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
     public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){

@@ -3,14 +3,16 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.LongSummaryStatistics;
@@ -19,19 +21,20 @@ import java.util.stream.LongStream;
 
 public class FederationSystemST {
 
-	SSLContext spOneSslContext = TestKeystoreHelper.sslContext("jks/sp-one.p12", "jks/truststore.jks");
-	SSLContext spTwoSslContext = TestKeystoreHelper.sslContext("jks/sp-two.p12", "jks/truststore.jks");
-
 	int reconnectsProducer = 0;
 	int reconnectsConsumer = 0;
 
 	@Test
 	public void localMessageGetsForwardedAfterServiceDiscovery() throws JMSException, NamingException, InterruptedException {
+		KeystoreDetails truststoreDetails = new KeystoreDetails(Thread.currentThread().getContextClassLoader().getResource("jks/truststore.jks").getFile(),"password",KeystoreType.JKS);
+		KeystoreDetails spTwoKeystore = new KeystoreDetails(Thread.currentThread().getContextClassLoader().getResource("jks/sp-two.p12").getFile(), "password",KeystoreType.PKCS12);
+		SSLContext spTwoSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(spTwoKeystore,truststoreDetails);
 		Sink sinkSpTwo = new Sink("amqps://bouvet-two.bouvetinterchange.no", "sp-two.bouvetinterchange.no", spTwoSslContext);
 		MessageConsumer consumer = sinkSpTwo.createConsumer();
 		//noinspection StatementWithEmptyBody
 		while (consumer.receive(200) != null) ; //drain out queue
-
+		KeystoreDetails spOneKeystore = new KeystoreDetails(Thread.currentThread().getContextClassLoader().getResource("jks/sp-one.p12").getFile(),"password", KeystoreType.PKCS12);
+		SSLContext spOneSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(spOneKeystore, truststoreDetails);
 		Source sourceSpOne = new Source("amqps://bouvet-one.bouvetinterchange.no", "onramp", spOneSslContext);
 		sourceSpOne.start();
 		LongStream.Builder latencyStatisticsBuilder = LongStream.builder();

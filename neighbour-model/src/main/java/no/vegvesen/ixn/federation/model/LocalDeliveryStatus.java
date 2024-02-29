@@ -6,5 +6,6 @@ public enum LocalDeliveryStatus {
     ILLEGAL,
     TEAR_DOWN,
     NOT_VALID,
-    NO_OVERLAP
+    NO_OVERLAP,
+    ERROR
 }

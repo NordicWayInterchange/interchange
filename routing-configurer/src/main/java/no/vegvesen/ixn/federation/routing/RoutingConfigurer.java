@@ -118,7 +118,7 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		try {
+		//try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
@@ -132,9 +132,9 @@ public class RoutingConfigurer {
 				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 			}
 			neighbourService.saveSetupRouting(neighbour);
-		} catch (Throwable e) {
-			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		}
+		//} catch (Throwable e) {
+		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
+		//}
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
@@ -212,7 +212,6 @@ public class RoutingConfigurer {
 		}
 	}
 
-	//TODO: Write tests to assure that listenerEndpoints are created
 	@Scheduled(fixedRateString = "${create-subscriptions-exchange.interval}")
 	public void setUpSubscriptionExchanges() {
 		logger.debug("Looking for new subscriptions to set up exchanges for");
@@ -222,13 +221,19 @@ public class RoutingConfigurer {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						if (!subscription.exchangeIsCreated()) {
-							String exchangeName = "sub-" + UUID.randomUUID().toString();
-							subscription.setExchangeName(exchangeName);
-							qpidClient.createHeadersExchange(exchangeName);  //TODO need to take the delta in here
-							logger.debug("Set up exchange for subscription {}", subscription.toString());
+						if (!subscription.getEndpoints().isEmpty()) {
+							for (Endpoint endpoint : subscription.getEndpoints()) {
+								if (!endpoint.hasShard()) {
+									String exchangeName = "sub-" + UUID.randomUUID();
+									endpoint.setShard(
+											new SubscriptionShard(exchangeName)
+									);
+									qpidClient.createHeadersExchange(exchangeName);
+									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
+								}
+							}
 						}
-						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
 					}
 				}
 			}
@@ -236,16 +241,10 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
-		for(Endpoint endpoint : endpoints) {
-			createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
-		}
-	}
-
-	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbour.getName()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
-			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName) {
+		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName));
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint);
 		}
 	}
 
@@ -258,13 +257,37 @@ public class RoutingConfigurer {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						if (!subscription.exchangeIsRemoved()) {
-							Exchange exchange = qpidClient.getExchange(subscription.getExchangeName());
-							if (exchange != null) {
-								qpidClient.removeExchange(exchange);
+						Set<Endpoint> endpointsToRemove = new HashSet<>();
+						for (Endpoint endpoint : subscription.getEndpoints()) {
+							if (endpoint.hasShard()) {
+								SubscriptionShard shard = endpoint.getShard();
+								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+								if (exchange != null) {
+									qpidClient.removeExchange(exchange);
+									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+								}
+								endpoint.removeShard();
+								endpointsToRemove.add(endpoint);
 							}
-							subscription.removeExchangeName();
-							logger.debug("Removed exchange for subscription {}", subscription.toString());
+						}
+						subscription.getEndpoints().removeAll(endpointsToRemove);
+					}
+				}
+				Set<Subscription> ourFailedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.FAILED);
+				for (Subscription subscription : ourFailedSubscriptions) {
+					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+						for (Endpoint endpoint : subscription.getEndpoints()) {
+							if (endpoint.hasShard()) {
+								SubscriptionShard shard = endpoint.getShard();
+								if (listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(shard.getExchangeName(), endpoint.getSource(), neighbour.getName()) == null) {
+									Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+									if (exchange != null) {
+										qpidClient.removeExchange(exchange);
+										logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+									}
+									endpoint.removeShard();
+								}
+							}
 						}
 					}
 				}

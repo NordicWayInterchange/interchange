@@ -2,20 +2,21 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 public class AddCapabilitiesRequest {
     String name;
     String version = "1.0";
-    Set<? extends CapabilitySplitApi> capabilities;
+    Set<CapabilitySplitApi> capabilities = new HashSet<>();
 
     public AddCapabilitiesRequest() {
     }
 
-    public AddCapabilitiesRequest(String name, Set<? extends CapabilitySplitApi> capabilities) {
+    public AddCapabilitiesRequest(String name, Set<CapabilitySplitApi> capabilities) {
         this.name = name;
-        this.capabilities = capabilities;
+        this.capabilities.addAll(capabilities);
     }
 
     public String getName() {
@@ -34,11 +35,11 @@ public class AddCapabilitiesRequest {
         this.version = version;
     }
 
-    public Set<? extends CapabilitySplitApi> getCapabilities() {
+    public Set<CapabilitySplitApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<? extends CapabilitySplitApi> capabilities) {
+    public void setCapabilities(Set<CapabilitySplitApi> capabilities) {
         this.capabilities = capabilities;
     }
 

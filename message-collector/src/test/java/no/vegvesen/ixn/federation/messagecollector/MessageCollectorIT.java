@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -16,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import javax.naming.NamingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -30,38 +29,40 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
-	static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
+
+	private static final String PRODUCER_SP_NAME = "sp_producer";
+	public static final String CONSUMER_SP_NAME = "sp_consumer";
+	static KeysStructure keysStructure = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", PRODUCER_SP_NAME, CONSUMER_SP_NAME);
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer consumerContainer = getQpidTestContainer("docker/consumer",
-			testKeysPath,
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
+			keysStructure,
 			"localhost");
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer("docker/producer",
-			testKeysPath,
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
+			keysStructure,
 			"localhost");
 
-	public Sink createSink(String containerUrl, String queueName, String keyStore) {
-		return new Sink(containerUrl,
+
+
+	public Sink createSink(String containerUrl, String queueName, KeysStructure keysStructure, String spName) {
+		return new Sink(
+				containerUrl,
 				queueName,
-				TestKeystoreHelper.sslContext(testKeysPath, keyStore, "truststore.jks"));
+				sslClientContext(keysStructure,spName)
+		);
+
 	}
 
-	public Source createSource(String containerUrl, String queue, String keystore) {
-		return new Source(containerUrl,
+	public Source createSource(String containerUrl, String queue, KeysStructure keysStructure, String spName) {
+		return new Source(
+				containerUrl,
 				queue,
-				TestKeystoreHelper.sslContext(testKeysPath, keystore, "truststore.jks"));
+				sslClientContext(keysStructure,spName)
+		);
 	}
 
 	@Test
@@ -76,7 +77,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -84,10 +85,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(),"localhost",keysStructure,PRODUCER_SP_NAME);
 		source.start();
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME,keysStructure,CONSUMER_SP_NAME);
 		MessageConsumer consumer = sink.createConsumer();
 
 		source.sendNonPersistentMessage(source.createMessageBuilder()
@@ -124,7 +125,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -132,7 +133,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(),
+				"localhost",
+				keysStructure,
+				PRODUCER_SP_NAME);
 		source.start();
 		JmsMessage message1 = source.createMessageBuilder()
 				.textMessage("fishy fishy")
@@ -155,7 +159,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(),CONSUMER_SP_NAME,keysStructure,CONSUMER_SP_NAME);
 		MessageConsumer consumer = sink.createConsumer();
 		Message message = consumer.receive(1000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNull();
@@ -173,7 +177,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -181,7 +185,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
 		source.start();
 		JmsMessage message1 = source.createMessageBuilder()
 				.textMessage("Should work!")
@@ -202,7 +206,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		JmsMessage senderMessage = message1;
 		source.sendNonPersistentMessage(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer",keysStructure, "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
 		Message message = consumer.receive(1000);
@@ -222,7 +226,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				sslServerContext(keysStructure),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -230,7 +234,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", "sp_producer.p12");
+		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
 		source.start();
 		String message = "Should work!";
 		byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
@@ -254,7 +258,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		JmsMessage senderMessage = message1;
 		source.send(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", "sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", keysStructure,"sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
 		Message receiveMessage = consumer.receive(1000);

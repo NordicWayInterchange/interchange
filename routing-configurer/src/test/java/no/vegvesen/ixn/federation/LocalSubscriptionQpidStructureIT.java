@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -32,7 +30,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
@@ -59,13 +56,12 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
             String httpsUrl = qpidContainer.getHttpsUrl();
             String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpsUrl);
             logger.info("server url: " + httpUrl);
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+                    "test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+                    "test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12"),
                     "interchange.node-provider.name=" + qpidContainer.getHost(),
                     "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -75,14 +71,15 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + LocalSubscriptionQpidStructureIT.class.getSimpleName());
 
     public static final String SP_NAME = "sp-1";
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", SP_NAME);
+
+    private static KeysStructure keysStructure = generateKeys(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
-            .dependsOn(keyContainer);
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
+            keysStructure,
+            "localhost");
 
 
     //TODO would be nic to be able to do without it :-)
@@ -135,8 +132,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             }
         }
         assertThat(actualEndpoint).isNotNull();
-        Path keysFolder = keyContainer.getKeyFolderOnHost();
-        SSLContext sslContext = TestKeystoreHelper.sslContext(keysFolder,SP_NAME + ".p12","truststore.jks");
+        SSLContext sslContext = sslClientContext(keysStructure,SP_NAME);
         try (Sink sink = new Sink(
                 String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
                 actualEndpoint.getSource(),

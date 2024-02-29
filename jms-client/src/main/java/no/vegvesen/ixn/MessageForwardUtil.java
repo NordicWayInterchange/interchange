@@ -3,10 +3,10 @@ package no.vegvesen.ixn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
+import jakarta.jms.DeliveryMode;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageProducer;
 
 public class MessageForwardUtil {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);

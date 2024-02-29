@@ -48,15 +48,14 @@ public class OnboardRestController {
 		this.nodeProperties = nodeProperties;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddCapabilitiesResponse addCapabilities(@PathVariable String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
+	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received capability POST from Service Provider: {}", serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
-		if (capabilityApi == null) {
-			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
+		if (capabilityApi == null || capabilityApi.getCapabilities() == null || capabilityApi.getCapabilities().isEmpty()) {
+			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
 
 		Set<String> allPublicationIds = allPublicationIds();
@@ -79,9 +78,7 @@ public class OnboardRestController {
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
-		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		//TODO test this with regard to ID's
 		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
 		addedCapabilities.retainAll(newLocalCapabilities);
 
@@ -99,8 +96,8 @@ public class OnboardRestController {
 				.collect(Collectors.toSet());
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListCapabilitiesResponse listCapabilities(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListCapabilitiesResponse listCapabilities(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("List capabilities for service provider {}",serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -110,8 +107,8 @@ public class OnboardRestController {
 		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/network/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @RequestParam(required = false) String selector) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/network/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
@@ -149,54 +146,45 @@ public class OnboardRestController {
 		return capabilities;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/capabilities/{capabilityId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId ) {
+	public void deleteCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId ) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId,serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
-
-		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-
-		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
-		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
-
-		// Save the updated Service Provider representation in the database.
+		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
+		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities/{capabilityId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetCapabilityResponse getServiceProviderCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetCapabilityResponse getServiceProviderCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
-				c.getId().equals(Integer.parseInt(capabilityId)))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
+
+		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
+		CapabilitySplit capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
+
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public AddSubscriptionsResponse addSubscriptions(@PathVariable String serviceProviderName, @RequestBody AddSubscriptionsRequest requestApi) {
+	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/subscriptions"})
+	public AddSubscriptionsResponse addSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddSubscriptionsRequest requestApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		//check the name of hte request
-		//check the version of the request
 
-		if (Objects.isNull(requestApi.getSubscriptions())) {
+		if (Objects.isNull(requestApi) || Objects.isNull(requestApi.getSubscriptions()) || requestApi.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
-
 		}
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
@@ -208,10 +196,12 @@ public class OnboardRestController {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
 				} else {
-					localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+					localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
+					localSubscription.setErrorMessage("Bad api object. Invalid consumerCommonName");
 				}
 			} else {
-				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
+				localSubscription.setErrorMessage("Bad api object. Invalid selector.");
 			}
 			localSubscriptions.add(localSubscription);
 		}
@@ -219,17 +209,10 @@ public class OnboardRestController {
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
 
-		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
+		Set<LocalSubscription> savedSubscriptions = saved.getSavedSubscriptions(localSubscriptions);
 
-
-		//find the newly saved subscriptions from the database
-		Set<LocalSubscription> savedSubscriptions = saved
-				.getSubscriptions()
-				.stream()
-				.filter(subscription -> localSubscriptions.contains(subscription))
-				.collect(Collectors.toSet());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
 	}
@@ -243,21 +226,19 @@ public class OnboardRestController {
 	}
 
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/subscriptions/{dataTypeId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable String dataTypeId) throws NotFoundException {
+	public void deleteSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("dataTypeId") String dataTypeId) throws NotFoundException {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(dataTypeId));
+		Integer parsedDataTypeId =  parseInt(dataTypeId, "subscription");
 
-		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
+		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
 		OnboardMDCUtil.removeLogVariables();
 	}
 
@@ -269,8 +250,8 @@ public class OnboardRestController {
 		return serviceProvider;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListSubscriptionsResponse listSubscriptions(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/subscriptions"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListSubscriptionsResponse listSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Listing subscription for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -280,29 +261,23 @@ public class OnboardRestController {
 		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable String subscriptionId) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		Integer subsId;
-		try {
-			subsId = Integer.parseInt(subscriptionId);
-		} catch (NumberFormatException e) {
-			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
-		}
+
+		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getId().equals(subsId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
+		LocalSubscription localSubscription = serviceProvider.getSubscription(parsedSubscriptionId);
+
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddPrivateChannelResponse addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
+	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public AddPrivateChannelResponse addPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -336,26 +311,19 @@ public class OnboardRestController {
 		return typeTransformer.transformPrivateChannelListToAddPrivateChannelsResponse(serviceProviderName,savedChannelsList);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+	public void deletePrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId;
-		try{
-			parsedId = Integer.parseInt(privateChannelId);
-		}catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
-		}
+		Integer parsedId = parseInt(privateChannelId, "private channel");
 
 		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
-
-		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		privateChannelToUpdate.setStatus(PrivateChannelStatus.TEAR_DOWN);
 		PrivateChannel saved = privateChannelRepository.save(privateChannelToUpdate);
 
@@ -364,8 +332,8 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -376,19 +344,13 @@ public class OnboardRestController {
 		return typeTransformer.transformPrivateChannelListToListPrivateChannels(serviceProviderName, privateChannels);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public GetPrivateChannelResponse getPrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
+	public GetPrivateChannelResponse getPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId;
-
-		try{
-			parsedId = Integer.parseInt(privateChannelId);
-		}catch (NumberFormatException e){
-			throw new CouldNotParseIdException(String.format("Id %s is invalid", privateChannelId));
-		}
+		Integer parsedId = parseInt(privateChannelId, "private channel");
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
@@ -397,12 +359,11 @@ public class OnboardRestController {
 
 		logger.info("Received private channel poll from Service Provider {}", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
-
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
 
-	@RequestMapping(method=RequestMethod.GET, path="/{serviceProviderName}/privatechannels/peer")
-	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable String serviceProviderName){
+	@RequestMapping(method=RequestMethod.GET, path= {"/{serviceProviderName}/privatechannels/peer"})
+	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -413,20 +374,14 @@ public class OnboardRestController {
 		return typeTransformer.transformPrivateChannelListToListPrivateChannelsWithServiceProvider(serviceProviderName, privateChannels);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
+	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public AddDeliveriesResponse addDeliveries(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(Objects.isNull(request.getDeliveries())) {
-			throw new DeliveryException("Delivery cannot be null");
-		}
-
-		for(SelectorApi delivery : request.getDeliveries()) {
-			if(delivery.getSelector() == null) {
-				throw new DeliveryException("Bad api object for adding delivery. The selector object was null.");
-			}
+		if(Objects.isNull(request) || Objects.isNull(request.getDeliveries()) || request.getDeliveries().isEmpty()) {
+			throw new DeliveryPostException("Bad API object. The request has no deliveries, nothing to add");
 		}
 
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
@@ -434,10 +389,15 @@ public class OnboardRestController {
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
 		for(SelectorApi delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
-			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
-				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
+			String selector = localDelivery.getSelector();
+			if (delivery.getSelector() == null) {
+				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
+				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
+			} else if (! JMSSelectorFilterFactory.isValidSelector(selector)) {
+				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
+				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
 			} else {
-				localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
 			}
 			localDeliveries.add(localDelivery);
 		}
@@ -445,22 +405,16 @@ public class OnboardRestController {
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addDeliveries(localDeliveries);
 
-		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
-		Set<LocalDelivery> savedDeliveries = saved
-				.getDeliveries()
-				.stream()
-				.filter(delivery -> localDeliveries.contains(delivery))
-				.collect(Collectors.toSet());
+		Set<LocalDelivery> savedDeliveries = saved.getSavedDeliveries(localDeliveries);
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListDeliveriesResponse listDeliveries(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing deliveries for service provider ", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -470,25 +424,25 @@ public class OnboardRestController {
 		 return response;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries/{deliveryId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetDeliveryResponse getDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("get delivery {}, for service provider {}", deliveryId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
-				d.getId().equals(Integer.parseInt(deliveryId)))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
+
+		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
+
+		LocalDelivery localDelivery = serviceProvider.getDelivery(parsedDeliveryId);
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalDeliveryToGetDeliveryResponse(serviceProviderName, localDelivery);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/deliveries/{deliveryId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/deliveries/{deliveryId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
+	public void deleteDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("delete delivery {} for service provider {}", deliveryId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -497,28 +451,22 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		//Setting the Delivery to TEAR_DOWN
-		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
+		Integer parsedId = parseInt(deliveryId, "delivery");
+		serviceProvider.removeLocalDelivery(parsedId);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	// TODO: Remove
-	@RequestMapping(method = RequestMethod.GET, path = "/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ServiceProvider> getServiceProviders() {
-		logger.info("received request for getting all service providers");
-
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-		List<ServiceProvider> returnServiceProviders = new ArrayList<>();
-
-		for (ServiceProvider s : serviceProviders) {
-			returnServiceProviders.add(s);
+	private Integer parseInt(String unParsedInt, String objectName){
+		Integer parsedInt;
+		try {
+			 parsedInt = Integer.parseInt(unParsedInt);
 		}
-
-		return returnServiceProviders;
+		catch (Exception e){
+			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
+		}
+		return parsedInt;
 	}
 }

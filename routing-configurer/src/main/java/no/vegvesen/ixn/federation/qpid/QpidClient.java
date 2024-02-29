@@ -38,6 +38,13 @@ public class QpidClient {
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
+	private static final String CONNECTION_URL_PATTERN = "%s/api/latest/connection";
+
+	private static final String QUERY_ENGINE_API_PATTERN = "%s/api/latest/querybroker/broker";
+
+	//TODO this might be more configurable, since the 'connection' part is a configured object
+	private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker";
+
 	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
@@ -46,6 +53,12 @@ public class QpidClient {
 	private final String aclRulesUrl;
 	private final String allQueuesUrl;
 	private final String allExchangesUrl;
+
+	private final String queryEngineApiUrl;
+
+	private final String connectionUrl;
+	private final String queryApiUrl;
+
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -58,6 +71,9 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
+		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN,baseUrl);
+		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
+		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
 	}
 
 	/**
@@ -218,6 +234,34 @@ public class QpidClient {
 	public void postQpidAcl(VirtualHostAccessController provider) {
 		logger.info("Posting updated ACL");
 		restTemplate.postForEntity(aclRulesUrl, provider, String.class);
+	}
+
+
+	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}&orderBy={orderBy}",ConnectionQueryResult.class,select,where,orderBy).getBody();
+	}
+
+	public ConnectionQueryResult executeConnectionQuery(String select, String where, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}",ConnectionQueryResult.class,select,where).getBody();
+	}
+
+	public ConnectionQueryResult executeConnectionQuery(String select, String domain) {
+		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}",ConnectionQueryResult.class,select).getBody();
+	}
+
+
+	public QueryResult executeQuery(Query query) {
+		return restTemplate.postForEntity(queryEngineApiUrl,query,QueryResult.class).getBody();
+	}
+
+
+	public String getConnection(String port, String connectionName) {
+		return restTemplate.getForEntity(connectionUrl + "/" + port + "/" + connectionName,String.class).getBody();
+	}
+
+	public void deleteConnection(String connectionName) {
+		logger.info("Deleting connection {}", connectionName);
+		restTemplate.delete(connectionUrl + "/AMQPS/" + connectionName);
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {

@@ -6,7 +6,7 @@ import no.vegvesen.ixn.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {

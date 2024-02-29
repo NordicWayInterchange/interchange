@@ -136,7 +136,12 @@ class CapabilityMatcherTest {
 	public void testDenmCapability() {
 		Set<String> quadTreeTiles = new HashSet<>();
 		quadTreeTiles.add("12004");
-		DenmApplication application = new DenmApplication("NO-123", "pub-123", "NO", "DENM:1.2.2", quadTreeTiles, Collections.singleton(6));
+		DenmApplication application = new DenmApplication("NO-123",
+				"pub-123",
+				 "NO",
+				  "DENM:1.2.2",
+				   quadTreeTiles,
+				    Collections.singleton(6));
 
 		CapabilitySplit capability = new CapabilitySplit();
 		capability.setApplication(application);
@@ -153,6 +158,53 @@ class CapabilityMatcherTest {
 				Sets.newLinkedHashSet(capability),
 				Sets.newLinkedHashSet(subscription), ""
 		);
+		assertThat(commonInterest).hasSize(1);
+	}
+
+
+	@Test
+	public void denmNonMatching() {
+        Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Collections.singleton(new CapabilitySplit(
+                        new DenmApplication("NO-123",
+                                "pub-123",
+                                "NO",
+                                "DENM:1.2.2",
+                                Collections.singleton("12004"),
+                                Collections.singleton(5)),
+                        new Metadata(RedirectStatus.OPTIONAL)
+                )),
+				Collections.singleton(new LocalSubscription(
+                        52,
+                        LocalSubscriptionStatus.CREATED,
+                        "(publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')",
+                        ""
+                )),
+				""
+		);
+		assertThat(commonInterest).isEmpty();
+	}
+
+	@Test
+	public void denmMatchesOneOfSeveral() {
+		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+                Set.of(new CapabilitySplit(
+                                new DenmApplication("NO-123",
+                                        "pub-123",
+                                        "NO",
+                                        "DENM:1.2.2",
+                                        Set.of("12004"),
+                                        Set.of(5, 6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )),
+                        Collections.singleton(new LocalSubscription(
+                                52,
+                                LocalSubscriptionStatus.CREATED,
+                                "(publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = 6) AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')",
+                                ""
+                        )),
+                        ""
+                );
 		assertThat(commonInterest).hasSize(1);
 	}
 

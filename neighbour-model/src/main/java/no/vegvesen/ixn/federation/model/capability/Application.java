@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity()

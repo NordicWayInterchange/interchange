@@ -9,25 +9,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CapabilityFilter implements Filterable {
 
 	private static Logger logger = LoggerFactory.getLogger(CapabilityFilter.class);
 
-	private final HashMap<String, String> headers = new HashMap<>();
+	private final HashMap<String, Object> headers = new HashMap<>();
 
-	public CapabilityFilter(Map<String, String> capabilityFlat) {
+	public CapabilityFilter(Map<String, Object> capabilityFlat) {
 		headers.putAll(capabilityFlat);
 	}
 
 	@Override
-	public String getHeader(String messageHeaderName) {
+	public Object getHeader(String messageHeaderName) {
 		if (!this.headers.containsKey(messageHeaderName)) {
 			if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 				throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 			}
 		}
-		String value = this.headers.get(messageHeaderName);
+		Object value = this.headers.get(messageHeaderName);
 		logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());
 		return value;
 	}
@@ -105,7 +106,7 @@ public class CapabilityFilter implements Filterable {
 				'}';
 	}
 
-	public void putValue(String key, String value) {
+	public void putValue(String key, Object value) {
 		this.headers.put(key, value);
 	}
 }

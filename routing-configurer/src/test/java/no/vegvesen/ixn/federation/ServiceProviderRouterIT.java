@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -30,10 +29,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,14 +50,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+	private static KeysStructure keysStructure = generateKeys(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
-
-	@Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
-			.dependsOn(keyContainer);
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 	private static final String nodeName = "localhost";
 
 
@@ -71,8 +65,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12"),
 					"interchange.node-provider.name=" + nodeName
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
@@ -235,6 +229,42 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
+	@Test
+	public void removeSubscriptionWhenSelectorIsInvalid(){
+		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
+		when(serviceProviderRepository.save(king_gustaf)).thenReturn(king_gustaf);
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ERROR,
+				"1=1",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				2,
+				LocalSubscriptionStatus.ERROR,
+				"messageType = 'DATEX2'",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				3,
+				LocalSubscriptionStatus.REQUESTED,
+				"messageType = 'DATEX23'",
+				nodeName,
+				Collections.emptySet(),
+				Set.of()
+		));
+		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
+		router.removeUnwantedSubscriptions(king_gustaf);
+		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
+
+	}
 	@Test
 	public void doNotRemovePeerFromGroupWhenTheyAreServiceProviderInAnotherChannel(){
 		ServiceProvider serviceProvider_1 = new ServiceProvider("service-1");
@@ -533,7 +563,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.processSubscription(serviceProvider, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort(), client.getQpidDelta());
+		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.queueExists(queueName)).isFalse();
 	}
@@ -890,6 +920,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testLocalSubscriptionWithErrorGetsRemovedFromServiceProvider(){
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ERROR,
+				"",
+				"myNode"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
+	}
+
+	@Test
 	public void tearDownLocalSubscriptionWithEmptyMatch() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,
@@ -968,7 +1015,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -1000,10 +1049,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Subscription subscription2 = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription2.setExchangeName(exchangeName2);
+
+		Endpoint endpoint2 = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName2));
+		subscription2.setEndpoints(Collections.singleton(endpoint2));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 		Match match2 = new Match(localSubscription, subscription2, "my-service-provider");
@@ -1035,7 +1088,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -1068,7 +1123,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -1098,7 +1155,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-		subscription.setExchangeName(exchangeName);
+
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
@@ -1160,7 +1219,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"a=b"
 		);
 		String exchangeName = "this-is-my-non-existing-local-exchange";
-		subscription.setExchangeName(exchangeName);
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+
 		Match match = new Match(
 				localSubscription,
 				subscription
@@ -1206,7 +1267,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"",
 				"a=b"
 		);
-		subscription.setExchangeName(exchangeName);
+		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+
 		Match match = new Match(
 				localSubscription,
 				subscription
@@ -1223,7 +1286,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 }

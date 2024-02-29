@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
@@ -19,9 +18,7 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +33,10 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,14 +52,11 @@ import static org.mockito.Mockito.*;
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerIT.class.getSimpleName());
+
+	public static KeysStructure keysStructure = generateKeys(RoutingConfigurerIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
 	@Container
-	public static final KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
-
-	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
-            .dependsOn(keyContainer);
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
 
 	@Autowired
 	SSLContext sslContext;
@@ -88,8 +81,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 
@@ -304,13 +297,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(s2.getLastUpdatedTimestamp()).isEqualTo(0);
 	}
 
-	//TODO this test does not really make any sense. We no longer have incoming exchange (we do this through
-	//separate capability exchanges, and messageCollector. This test is old as ...
 	@Test
-	@Disabled("This test does no longer make any sense!")
-	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() {
-		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard = new Shard(1, "cap-ex14", "publicationId = 'pub-1'");
+	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
+		ServiceProvider serviceProvider = new ServiceProvider("my-sp");
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Shard shard = new Shard(1, "cap-ex34", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit cap = new CapabilitySplit(
@@ -324,125 +315,30 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				metadata
 		);
-		client.createHeadersExchange("cap-ex14");
+		client.createHeadersExchange("cap-ex34");
 
-		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		serviceProvider.setCapabilities(new Capabilities(
+				Capabilities.CapabilitiesStatus.KNOWN,
+				Collections.singleton(cap)
+		));
 
-		HashSet<NeighbourSubscription> subscriptions = new HashSet<>();
-		NeighbourSubscription subscription = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+		HashSet<NeighbourSubscription> subs = new HashSet<>();
+		NeighbourSubscription neighbourSub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'SE-1234'",
-				NeighbourSubscriptionStatus.ACCEPTED,
-				"nordea");
-		subscriptions.add(subscription);
-
-		Neighbour nordea = new Neighbour(
-				"nordea",
-				new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()),
-				new NeighbourSubscriptionRequest(subscriptions),
-				null);
-
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
-		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
-		routingConfigurer.setupNeighbourRouting(nordea, client.getQpidDelta());
-		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
-		Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
-		try {
-			writeIncomingExchange.start();
-		} catch (NamingException e) {
-            throw new RuntimeException(e);
-        } catch (JMSException e) {
-            throw new RuntimeException(e);
-        }
-		JmsMessage message = null;
-		try {
-			message = writeIncomingExchange
-						.createMessageBuilder()
-						.textMessage("Ordinary business at the Nordea office.")
-						.messageType(Constants.DATEX_2)
-						.quadTreeTiles(",123,")
-						.publicationType("Test")
-						.publisherId("NO-123")
-						.publicationId("pub-1")
-						.originatingCountry("SE")
-						.protocolVersion("1.0")
-						.build();
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-		try {
-			writeIncomingExchange.send(message);
-			fail("Should not allow neighbour nordea to write on (incomingExchange)");
-		} catch (JMSException e) {
-			//This, apparently, should fail...
-			//throw new RuntimeException(e);
-		}
-			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
-		try {
-			writeOnramp.start();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-		try {
-			message = writeOnramp.createMessageBuilder()
-						.textMessage("Make Nordea great again!")
-						.messageType(Constants.DATEX_2)
-						.publisherId("NO-123")
-						.publicationId("pub-1")
-						.publicationType("Test")
-						.quadTreeTiles(",123,")
-						.originatingCountry("NO")
-						.protocolVersion("1.0")
-						.build();
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-		try {
-			writeOnramp.send(message);
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-
-		fail("Should not allow nordea to write on (onramp)");
-		try {
-			theNodeItselfCanReadFromAnyNeighbourQueue(subscription.getEndpoints().stream().findFirst().get().getSource());
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Test
-	@Disabled("Have to write tear down all over again, does not do what it should atm")
-	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		subs.add(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour"));
+				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour");
+		subs.add(neighbourSub);
 
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
+		when(neighbourService.getNodeName()).thenReturn("my-node");
+		when(neighbourService.getMessagePort()).thenReturn("5671");
 		routingConfigurer.setupNeighbourRouting(toreDownNeighbour, client.getQpidDelta());
-		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
 
-		subs.clear();
-		subs.add(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.TEAR_DOWN, "tore-down-neighbour"));
+		neighbourSub.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 
 		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNull();
@@ -921,8 +817,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671);
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671);
+		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671, new SubscriptionShard("target"));
+		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671, new SubscriptionShard("target"));
 
 		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
 
@@ -935,35 +831,82 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		routingConfigurer.createListenerEndpointFromEndpointsList(neighbour, endpoints, "target");
+		routingConfigurer.createListenerEndpoint("host-1", 5671, "my-source-1", "target", "my-neighbour");
+		routingConfigurer.createListenerEndpoint("host-2", 5671, "my-source-2", "target", "my-neighbour");
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
 
 	@Test
-	public void setUpSubscriptionExchange() {
+	public void subscriptionShardIsNotSetUpWhenEndpointIsMissing() {
 		String selector = "a=b";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
 		subscription.setConsumerCommonName("my-node");
-		//subscription.setExchangeName("subscription-exchange");
-
 
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
 
-		assertThat(client.exchangeExists(subscription.getExchangeName())).isTrue();
+		assertThat(subscription.getEndpoints()).isEmpty();
+		verify(listenerEndpointRepository, times(0)).save(any(ListenerEndpoint.class));
 	}
 
 	@Test
-	public void tearDownSubscriptionExchange() {
+	public void setUpSubscriptionShardExchange() {
+		String selector = "a=b";
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
+		subscription.setConsumerCommonName("my-node");
+		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671)));
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
+		routingConfigurer.setUpSubscriptionExchanges();
+
+		assertThat(subscription.getEndpoints().stream().findFirst().get().hasShard()).isTrue();
+		assertThat(client.exchangeExists(subscription.getEndpoints().stream().findFirst().get().getShard().getExchangeName())).isTrue();
+		verify(listenerEndpointRepository, times(1)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void multipleEndpointsGetTheirOwnShardAndListenerEndpointsAreCreated() {
+		String selector = "a=b";
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
+		subscription.setConsumerCommonName("my-node");
+
+		Endpoint end1 = new Endpoint("my-source1", "my-host", 5671);
+		Endpoint end2 = new Endpoint("my-source2", "my-host", 5671);
+
+		subscription.setEndpoints(new HashSet<>(Arrays.asList(end1, end2)));
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
+		routingConfigurer.setUpSubscriptionExchanges();
+
+		assertThat(end1.hasShard()).isTrue();
+		assertThat(end2.hasShard()).isTrue();
+		assertThat(client.exchangeExists(end1.getShard().getExchangeName())).isTrue();
+		assertThat(client.exchangeExists(end2.getShard().getExchangeName())).isTrue();
+		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void tearDownSubscriptionShardExchange() {
 		String selector = "a=b";
 		String exchangeName = "subscription-exchange";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
-		subscription.setExchangeName(exchangeName);
+		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName))));
 		subscription.setConsumerCommonName("my-node");
 
 		client.createHeadersExchange(exchangeName);
@@ -975,8 +918,45 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
-		assertThat(subscription.exchangeIsRemoved()).isTrue();
+		assertThat(subscription.getEndpoints().isEmpty()).isTrue();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
+	}
+
+	@Test
+	public void multipleEndpointsAndSubscriptionShardExchangesAreRemoved() {
+		String selector = "originatingCountry = 'NO'";
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
+
+		Endpoint end1 = new Endpoint(
+				"my-source-1",
+				"my-host",
+				5671,
+				new SubscriptionShard("exchange1")
+		);
+
+		Endpoint end2 = new Endpoint(
+				"my-source-2",
+				"my-host",
+				5671,
+				new SubscriptionShard("exchange2")
+		);
+
+		subscription.setEndpoints(new HashSet<>(List.of(end1, end2)));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange("exchange1");
+		client.createHeadersExchange("exchange2");
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints().isEmpty()).isTrue();
+		assertThat(client.exchangeExists("exchange1")).isFalse();
+		assertThat(client.exchangeExists("exchange2")).isFalse();
 	}
 
 	@Test
@@ -992,6 +972,54 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownSubscriptionExchanges();
 
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
+	}
+
+	@Test
+	public void subscriptionExchangeAndSubscriptionShardIsRemovedWhenSubscriptionHasStatusFailed() {
+		String exchangeName = "failed-exchange";
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
+		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(anyString(), anyString(), anyString())).thenReturn(null);
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints().isEmpty()).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(endpoint.hasShard()).isFalse();
+	}
+
+	@Test
+	public void subscriptionExchangeAndSubscriptionShardIsNotRemovedWhenSubscriptionHasStatusFailedAndListenerEndpointExists() {
+		String exchangeName = "failed-exchange-with-listener-endpoint";
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
+		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
+		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour();
+		myNeighbour.setName("my-neighbour");
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, "my-source", "my-neighbour"))
+				.thenReturn(new ListenerEndpoint("my-neighbour", "my-source", "my-host", 5672, new Connection(), exchangeName));
+
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints().isEmpty()).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
+		assertThat(endpoint.hasShard()).isTrue();
 	}
 
 	@Test
@@ -1292,8 +1320,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
+				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 
 }
