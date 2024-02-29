@@ -73,7 +73,6 @@
                 <configuration>
                     <mainClass>no.vegvesen.ixn.serviceprovider.OnboardApplication</mainClass>
                     <layout>JAR</layout>
-                    <classifier>exec</classifier>
                 </configuration>
                 <executions>
                     <execution>
