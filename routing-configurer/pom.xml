@@ -81,6 +81,12 @@
             <artifactId>jackson-databind</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>onboard-rest-api</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -90,7 +96,6 @@
                 <configuration>
                     <mainClass>no.vegvesen.ixn.federation.RoutingConfigurerApplication</mainClass>
                     <layout>JAR</layout>
-                    <classifier>exec</classifier>
                 </configuration>
                 <executions>
                     <execution>

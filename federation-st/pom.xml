@@ -30,12 +30,6 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>routing-configurer</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>onboard-rest-api</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -48,6 +42,16 @@
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>jms-client-sink</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

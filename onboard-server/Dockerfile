@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-alpine
 RUN apk add --no-cache bash alpine-conf
 RUN setup-timezone -z Europe/Oslo
 
-COPY target/onboard-server-1.0.3-SNAPSHOT-exec.jar onboard-server.jar
+COPY target/onboard-server-1.0.3-SNAPSHOT.jar onboard-server.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh
