@@ -162,8 +162,8 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetCapabilityResponse getCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities/{capabilityId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetCapabilityResponse getCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
