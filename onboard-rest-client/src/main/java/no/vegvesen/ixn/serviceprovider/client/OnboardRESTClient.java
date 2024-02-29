@@ -59,7 +59,7 @@ public class OnboardRESTClient {
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
-		String url = String.format("%s/%s/subscriptions/", server, user);
+		String url = String.format("%s/%s/subscriptions", server, user);
 		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 

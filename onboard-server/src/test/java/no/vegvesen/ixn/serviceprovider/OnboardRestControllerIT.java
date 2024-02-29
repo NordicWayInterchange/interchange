@@ -266,7 +266,7 @@ public class OnboardRestControllerIT {
 
         String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), selector);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), selector);
         assertThat(response.getCapabilities()).hasSize(1);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -320,7 +320,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -362,7 +362,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -416,7 +416,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -485,7 +485,7 @@ public class OnboardRestControllerIT {
         assertThat(addedCapability).isNotNull();
         LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName, capability.getId());
+        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -495,7 +495,7 @@ public class OnboardRestControllerIT {
     public void testGettingCapabilityWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderCapability(serviceProviderName, "notAnId")
+                () -> restController.getCapability(serviceProviderName, "notAnId")
         );
     }
 
@@ -748,7 +748,7 @@ public class OnboardRestControllerIT {
     public void testGettingSubscriptionWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderSubscription(serviceProviderName, "notAnId")
+                () -> restController.getSubscription(serviceProviderName, "notAnId")
         );
     }
 
@@ -756,7 +756,7 @@ public class OnboardRestControllerIT {
     public void testGettingNonExistentSubscription() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderSubscription(serviceProviderName, "1")
+                () -> restController.getSubscription(serviceProviderName, "1")
         );
     }
 
@@ -772,7 +772,7 @@ public class OnboardRestControllerIT {
 
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
         LocalActorSubscription subscription = anySubscription.get();
-        GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
@@ -786,10 +786,10 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
         PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
-        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
         assertThat(privateChannelRepository.findAll()).hasSize(3);
-        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, null));
         assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
     }
 
@@ -798,7 +798,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(serviceProviderName);
 
-        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
     }
 
@@ -806,7 +806,7 @@ public class OnboardRestControllerIT {
     public void testAddingNullChannelsRequest() {
         AddPrivateChannelRequest request = null;
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
@@ -815,7 +815,7 @@ public class OnboardRestControllerIT {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         request.setPrivateChannels(null);
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
@@ -823,7 +823,7 @@ public class OnboardRestControllerIT {
     public void testAddingEmptyChannelsSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
@@ -833,7 +833,7 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi("my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
 
-        AddPrivateChannelResponse response = restController.addPrivateChannel(serviceProviderName, request);
+        AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
 
         System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName, response.getPrivateChannels().get(0).getId().toString());
@@ -862,8 +862,8 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
         PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
         PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
-        restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
-        ListPrivateChannelsResponse response = restController.getPrivateChannels(serviceProviderName);
+        restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        ListPrivateChannelsResponse response = restController.listPrivateChannels(serviceProviderName);
         assertThat(response.getPrivateChannels().size()).isEqualTo(3);
     }
 
@@ -874,7 +874,7 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
         PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
-        AddPrivateChannelResponse privateChannels = restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
         assertThat(channelResponse).isNotNull();
@@ -904,11 +904,11 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
         PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(serviceProviderName_1);
 
-        restController.addPrivateChannel(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
-        restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
+        restController.addPrivateChannels(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+        restController.addPrivateChannels(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
 
-        ListPeerPrivateChannels response_1 = restController.getPeerPrivateChannels(serviceProviderName_1);
-        ListPeerPrivateChannels response_2 = restController.getPeerPrivateChannels(serviceProviderName_2);
+        ListPeerPrivateChannels response_1 = restController.listPeerPrivateChannels(serviceProviderName_1);
+        ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
     }
