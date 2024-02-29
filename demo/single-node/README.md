@@ -1,9 +1,10 @@
 # Single node cluster
 
+*Note that running the examples in this demo requires a bash-enabled terminal (Linux, Mac or WSL on Windows) and Docker/Docker compose installed.*
+
 The `single-node.yml` file in this folder contains a Docker Compose dummy deployment of a single-node cluster.
 
 ## Run the cluster
-*Running the cluster requires a bash-enabled terminal (Linux, Mac or WSL on Windows) and Docker/Docker compose installed.*
 
 In a terminal, go to the `demo/single-node` directory, and run `./single-node.sh`.
 This will start the node, called `a.interchangedomain.com`.
