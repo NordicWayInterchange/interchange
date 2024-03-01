@@ -31,7 +31,7 @@ services:
     - singletest
 
   a_onboard_server:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:ecdc304
     container_name: a_onboard_server
     depends_on:
       - a_db
@@ -54,7 +54,7 @@ services:
       - singletest
 
   a_qpid:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:ecdc304
     container_name: a_qpid
     ports:
       - 8666:8080
@@ -83,7 +83,7 @@ services:
     - singletest
 
   a_neighbour_server:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app:ecdc304
     container_name: a_neighbour_server
     depends_on:
       - a_db
@@ -107,7 +107,7 @@ services:
     dns: 172.28.1.1
 
   a_routing_configurer:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app:ecdc304
     container_name: a_routing_configurer
     depends_on:
       - a_db
@@ -129,7 +129,7 @@ services:
     - singletest
 
   a_neighbour_discoverer:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app:ecdc304
     container_name: a_neighbour_discoverer
     depends_on:
       - a_db
@@ -151,7 +151,7 @@ services:
     - singletest
 
   a_message_collector_app:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app:6a8a722
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app:ecdc304
     container_name: a_message_collector_app
     depends_on:
     - a_db
