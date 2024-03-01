@@ -20,8 +20,9 @@ import java.util.concurrent.Callable;
         subcommands = {
                 SendPredefinedMessage.class,
                 SendMessage.class
-        })
-public class JmsClientSourceApplication implements Callable<Integer>, JmsTopCommand {
+        },
+        mixinStandardHelpOptions = true)
+public class JmsClientSourceApplication implements JmsTopCommand {
 
     @Parameters(index = "0", paramLabel = "URL", description = "The AMQPS url to connect to")
     private String url;
@@ -69,9 +70,5 @@ public class JmsClientSourceApplication implements Callable<Integer>, JmsTopComm
         System.exit(exitCode);
     }
 
-    @Override
-    public Integer call() {
-        return 0;
-    }
 
 }
