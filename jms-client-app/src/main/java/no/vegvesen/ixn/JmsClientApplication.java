@@ -17,7 +17,8 @@ import java.util.concurrent.Callable;
                 SendMessage.class,
                 ReceiveMessages.class,
                 CountMessages.class
-        })
+        },
+        mixinStandardHelpOptions = true)
 public class JmsClientApplication implements JmsTopCommand {
     @Parameters(index = "0", paramLabel = "URL" ,description = "The url to the AMQP host to connect to")
     private String url;

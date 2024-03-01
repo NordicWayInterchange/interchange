@@ -42,8 +42,9 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.GetPeerPrivateChannels.class,
                 OnboardRestClientApplication.DeletePrivateChannel.class,
                 OnboardRestClientApplication.FetchMatchingCapabilities.class
-        })
-public class OnboardRestClientApplication implements Callable<Integer> {
+        },
+        mixinStandardHelpOptions = true)
+public class OnboardRestClientApplication {
 
     @Parameters(index = "0", paramLabel = "SERVER", description = "The onboard server address")
     private String server;
@@ -375,10 +376,6 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         System.exit(exitCode);
     }
 
-    @Override
-    public Integer call() {
-        return 0;
-    }
 
     private SSLContext createSSLContext() {
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
