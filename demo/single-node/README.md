@@ -35,6 +35,24 @@ You might have to do this a few times until the delivery has changed from status
 When the delivery has reached status `CREATED`, the delivery should have one item in the `endpoints` list, and the entry `target` specifies the name
 of the actual endpoint to publish messages on.
 
-## Publish your first message
+## Register a Subscription
+
+In order to see messages flowing through the system, we can create a Subscription to the data stream, and listen to the associated queue.
+The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the publicationId of `NO00000-pub-1`
+Run the command `./a_onboard_client addsubscription -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
+To get the actual endpoint do receive messages on, run `./a_onboard_client.sh getsubscription <id>`, using the id from earlier.
+You might have to do this a few times until the subscription has changed from status `REQUESTED` to status `CREATED`.
+When the subscription has reached the status `CREATED`, the subscription should have one item in the `endpoints` list, and the entry `target` specifies the name
+of the actual endpoint to receive messages from.
+
+## Use the jms client
+The script `./a_jms_client.sh` runs the JMS client, a test client we provide for Service Providers for sending and receiving messages (make link to thesaurus).
+Try running `./a_jms_client.sh --help` to see the different options.
+
+## Listening to messages
+
+To listen for messages, use the `./a_`
+
+## Publish your first messag
 
 

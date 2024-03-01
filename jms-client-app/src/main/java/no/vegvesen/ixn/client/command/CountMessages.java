@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.client.command;
 
+import jakarta.jms.MessageListener;
 import no.vegvesen.ixn.Sink;
 import picocli.CommandLine;
 
@@ -15,6 +16,7 @@ public class CountMessages implements Callable<Integer> {
     @CommandLine.ParentCommand
     JmsTopCommand parentCommand;
 
+    //TODO will this wait for messages?
     @Override
     public Integer call() throws Exception {
         AtomicLong counter = new AtomicLong();
@@ -23,7 +25,7 @@ public class CountMessages implements Callable<Integer> {
                     System.out.println(String.format("Receivied %d messages", counter.get()));
                 }
         ));
-        try (Sink sink = new Sink(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
+        try (Sink sink = new Sink(parentCommand.getUrl(), queueName, parentCommand.createContext(), message -> counter.incrementAndGet())) {
             sink.start();
         }
         return 0;

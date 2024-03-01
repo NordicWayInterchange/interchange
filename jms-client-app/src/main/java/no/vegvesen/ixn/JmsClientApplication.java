@@ -1,9 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.client.command.JmsTopCommand;
-import no.vegvesen.ixn.client.command.ReceiveMessages;
-import no.vegvesen.ixn.client.command.SendJmsClientMessage;
-import no.vegvesen.ixn.client.command.SendMessage;
+import no.vegvesen.ixn.client.command.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -18,7 +15,8 @@ import java.util.concurrent.Callable;
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
                 SendMessage.class,
-                ReceiveMessages.class
+                ReceiveMessages.class,
+                CountMessages.class
         })
 public class JmsClientApplication implements JmsTopCommand {
     @Parameters(index = "0", paramLabel = "URL" ,description = "The url to the AMQP host to connect to")
