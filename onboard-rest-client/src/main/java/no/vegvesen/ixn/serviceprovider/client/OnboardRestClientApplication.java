@@ -4,7 +4,7 @@ package no.vegvesen.ixn.serviceprovider.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.CapabilitiesCommand;
-import no.vegvesen.ixn.serviceprovider.client.command.deliveries.AddDeliveries;
+import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeleteDelivery;
 import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -33,9 +33,7 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
                 OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-                OnboardRestClientApplication.ListDeliveries.class,
-                OnboardRestClientApplication.GetDelivery.class,
-                OnboardRestClientApplication.DeleteDelivery.class,
+                DeleteDelivery.class,
                 OnboardRestClientApplication.GetSubscription.class,
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
@@ -135,60 +133,6 @@ public class OnboardRestClientApplication {
             System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
-            return 0;
-        }
-    }
-
-    @Command(name = "listdeliveries", description = "List deliveries for service provider")
-    static class ListDeliveries implements Callable<Integer> {
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ObjectMapper mapper = new ObjectMapper();
-            ListDeliveriesResponse response = client.listServiceProviderDeliveries();
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
-            return 0;
-        }
-    }
-
-    @Command(name = "getdelivery", description = "Get a single delivery")
-    static class GetDelivery implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The ID of the delivery to get")
-        String deliveryId;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient  client = parentCommand.createClient();
-            GetDeliveryResponse response = client.getDelivery(deliveryId);
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
-            return 0;
-        }
-    }
-
-    @Command(name = "deletedelivery", description = "Delete a single delivery")
-    static class DeleteDelivery implements  Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The ID of the delivery to delete")
-        String deliveryId;
-
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient  client = parentCommand.createClient();
-            client.deleteDelivery(deliveryId);
-            System.out.println(String.format("Delivery %s has been deleted",deliveryId));
             return 0;
         }
     }
