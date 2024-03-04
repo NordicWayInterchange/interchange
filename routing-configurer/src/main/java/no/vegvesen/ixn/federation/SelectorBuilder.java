@@ -142,6 +142,11 @@ public class SelectorBuilder {
 		return this;
 	}
 
+	public SelectorBuilder publicationId(String publicationId) {
+		values.put(MessageProperty.PUBLICATION_ID.getName(), publicationId);
+		return this;
+	}
+
 	public SelectorBuilder protocolVersion(String protocolVersion) {
 		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
 		return this;

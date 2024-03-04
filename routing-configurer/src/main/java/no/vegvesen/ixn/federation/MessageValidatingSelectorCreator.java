@@ -12,6 +12,7 @@ public class MessageValidatingSelectorCreator {
         String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())
+                .publicationId(capability.getApplication().getPublicationId())
                 .originatingCountry(capability.getApplication().getOriginatingCountry())
                 .protocolVersion(capability.getApplication().getProtocolVersion())
                 .quadTree(capability.getApplication().getQuadTree())
