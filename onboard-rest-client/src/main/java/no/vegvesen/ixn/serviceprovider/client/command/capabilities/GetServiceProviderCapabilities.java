@@ -3,12 +3,18 @@ package no.vegvesen.ixn.serviceprovider.client.command.capabilities;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.OnboardRESTClient;
 import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "list", description = "List the service provider capabilities", mixinStandardHelpOptions = true)
+@Command(
+        name = "list",
+        description = "List the service provider capabilities",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true
+)
 public class GetServiceProviderCapabilities implements Callable<Integer> {
 
     @ParentCommand

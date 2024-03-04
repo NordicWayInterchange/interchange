@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.OnboardRESTClient;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -15,6 +16,7 @@ import java.util.concurrent.Callable;
 @Command(
         name = "add",
         description = "Add service provider capability from file",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class AddServiceProviderCapability implements Callable<Integer> {
