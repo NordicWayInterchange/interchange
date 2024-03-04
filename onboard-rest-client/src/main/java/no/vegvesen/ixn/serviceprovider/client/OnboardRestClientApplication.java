@@ -33,7 +33,6 @@ import static picocli.CommandLine.Option;
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
                 OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-                DeleteDelivery.class,
                 OnboardRestClientApplication.GetSubscription.class,
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
