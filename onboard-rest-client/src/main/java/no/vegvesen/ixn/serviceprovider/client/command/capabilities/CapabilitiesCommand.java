@@ -4,13 +4,12 @@ import no.vegvesen.ixn.serviceprovider.client.OnboardRestClientApplication;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
-import java.util.concurrent.Callable;
 
 @Command(name = "capabilities",
         description="List, add or delete capabilities for the current Service Provider",
         subcommands = {
-                GetServiceProviderCapabilities.class //,
-                //AddServiceProviderCapability.class,
+                GetServiceProviderCapabilities.class,
+                AddServiceProviderCapability.class,
                 //DeleteServiceProviderCapability.class
         },
 	defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,

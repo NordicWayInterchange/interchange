@@ -31,7 +31,7 @@ import static picocli.CommandLine.Option;
         subcommands = {
                 //GetServiceProviderCapabilities.class,
 		CapabilitiesCommand.class,
-                AddServiceProviderCapability.class,
+                //AddServiceProviderCapability.class,
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
                 DeleteServiceProviderCapability.class,
