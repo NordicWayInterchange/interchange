@@ -3,10 +3,9 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.serviceprovider.client.command.capabilities.AddServiceProviderCapability;
-import no.vegvesen.ixn.serviceprovider.client.command.capabilities.DeleteServiceProviderCapability;
-import no.vegvesen.ixn.serviceprovider.client.command.capabilities.GetServiceProviderCapabilities;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.CapabilitiesCommand;
+import no.vegvesen.ixn.serviceprovider.client.command.deliveries.AddDeliveries;
+import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -29,11 +28,11 @@ import static picocli.CommandLine.Option;
         showAtFileInUsageHelp = true,
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-		CapabilitiesCommand.class,
+                CapabilitiesCommand.class,
+                DeliveriesCommand.class,
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
                 OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-                OnboardRestClientApplication.AddDeliveries.class,
                 OnboardRestClientApplication.ListDeliveries.class,
                 OnboardRestClientApplication.GetDelivery.class,
                 OnboardRestClientApplication.DeleteDelivery.class,
@@ -136,26 +135,6 @@ public class OnboardRestClientApplication {
             System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
-            return 0;
-        }
-    }
-
-    @Command(name = "adddeliveries", description = "Add deliveries for service provider")
-    static class AddDeliveries implements Callable<Integer> {
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Option(names = {"-f","--filename"}, description = "The deliveries json file")
-        File file;
-
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ObjectMapper mapper = new ObjectMapper();
-            AddDeliveriesRequest request = mapper.readValue(file,AddDeliveriesRequest.class);
-            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
             return 0;
         }
     }
