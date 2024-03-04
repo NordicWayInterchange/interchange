@@ -36,7 +36,7 @@ services:
   a_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: a_onboard_server
     depends_on:
       - a_db
@@ -89,7 +89,7 @@ services:
   a_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-server-app
+      context: ../neighbour-server
     container_name: a_neighbour_server
     depends_on:
       - a_db
@@ -199,7 +199,7 @@ services:
   b_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: b_onboard_server
     depends_on:
       - b_db
@@ -222,7 +222,7 @@ services:
   b_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-server-app
+      context: ../neighbour-server
     container_name: b_neighbour_server
     depends_on:
       - b_db
@@ -361,7 +361,7 @@ services:
   c_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
-      context: ../onboard-server-app
+      context: ../onboard-server
     container_name: c_onboard_server
     depends_on:
       - c_db
@@ -384,7 +384,7 @@ services:
   c_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
-      context: ../neighbour-server-app
+      context: ../neighbour-server
     container_name: c_neighbour_server
     depends_on:
       - c_db

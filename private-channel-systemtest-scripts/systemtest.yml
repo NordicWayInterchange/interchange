@@ -151,7 +151,7 @@ services:
       - testing_net
 
   local_message_collector_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/message-collector:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
       context: ../message-collector
     container_name: local_message_collector_app
