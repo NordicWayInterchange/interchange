@@ -3,6 +3,9 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.serviceprovider.client.command.capabilities.AddServiceProviderCapability;
+import no.vegvesen.ixn.serviceprovider.client.command.capabilities.DeleteServiceProviderCapability;
+import no.vegvesen.ixn.serviceprovider.client.command.capabilities.GetServiceProviderCapabilities;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -25,11 +28,11 @@ import static picocli.CommandLine.Option;
         showAtFileInUsageHelp = true,
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-                OnboardRestClientApplication.GetServiceProviderCapabilities.class,
-                OnboardRestClientApplication.AddServiceProviderCapability.class,
+                GetServiceProviderCapabilities.class,
+                AddServiceProviderCapability.class,
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
-                OnboardRestClientApplication.DeleteServiceProviderCapability.class,
+                DeleteServiceProviderCapability.class,
                 OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
                 OnboardRestClientApplication.AddDeliveries.class,
                 OnboardRestClientApplication.ListDeliveries.class,
@@ -64,42 +67,6 @@ public class OnboardRestClientApplication {
     @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
-    @Command(name = "getcapabilities",description = "Get the service provider capabilities")
-    static class GetServiceProviderCapabilities implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(serviceProviderCapabilities));
-            return 0;
-        }
-    }
-
-    @Command(name = "addcapability",description = "Add service provider capability from file")
-    static class AddServiceProviderCapability implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Option(names = {"-f","--filename"}, description = "The capability json file")
-        File file;
-
-        @Override
-        public Integer call() throws IOException {
-            OnboardRESTClient client = parentCommand.createClient();
-            ObjectMapper mapper = new ObjectMapper();
-            AddCapabilitiesRequest capability = mapper.readValue(file,AddCapabilitiesRequest.class);
-            AddCapabilitiesResponse result = client.addCapability(capability);
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
-            return 0;
-        }
-    }
-
     @Command(name = "getsubscriptions", description = "Get the service provider subscriptions")
     static class GetServiceProviderSubscriptions implements Callable<Integer> {
 
@@ -132,24 +99,6 @@ public class OnboardRestClientApplication {
             AddSubscriptionsRequest requestApi = mapper.readValue(file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
-            return 0;
-        }
-    }
-
-    @Command(name = "deletecapability", description = "Delete a service provider capability")
-    static class DeleteServiceProviderCapability implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The ID of the capability to delete")
-        String capabilityId;
-
-        @Override
-        public Integer call() {
-            OnboardRESTClient client = parentCommand.createClient();
-            client.deleteCapability(capabilityId);
-            System.out.printf("Capability %s deleted successfully%n",capabilityId);
             return 0;
         }
     }
