@@ -8,7 +8,7 @@ import picocli.CommandLine.ParentCommand;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "list", description = "List the service provider capabilities")
+@Command(name = "list", description = "List the service provider capabilities", mixinStandardHelpOptions = true)
 public class GetServiceProviderCapabilities implements Callable<Integer> {
 
     @ParentCommand

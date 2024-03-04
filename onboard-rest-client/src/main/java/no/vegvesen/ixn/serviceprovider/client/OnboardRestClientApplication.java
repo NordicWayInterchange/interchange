@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.AddServiceProviderCapability;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.DeleteServiceProviderCapability;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.GetServiceProviderCapabilities;
+import no.vegvesen.ixn.serviceprovider.client.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -28,7 +29,8 @@ import static picocli.CommandLine.Option;
         showAtFileInUsageHelp = true,
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-                GetServiceProviderCapabilities.class,
+                //GetServiceProviderCapabilities.class,
+		CapabilitiesCommand.class,
                 AddServiceProviderCapability.class,
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
