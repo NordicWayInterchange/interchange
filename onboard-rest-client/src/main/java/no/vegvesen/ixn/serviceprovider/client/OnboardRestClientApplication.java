@@ -29,12 +29,9 @@ import static picocli.CommandLine.Option;
         showAtFileInUsageHelp = true,
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         subcommands = {
-                //GetServiceProviderCapabilities.class,
 		CapabilitiesCommand.class,
-                //AddServiceProviderCapability.class,
                 OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
                 OnboardRestClientApplication.AddServiceProviderSubscription.class,
-                DeleteServiceProviderCapability.class,
                 OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
                 OnboardRestClientApplication.AddDeliveries.class,
                 OnboardRestClientApplication.ListDeliveries.class,

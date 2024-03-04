@@ -10,7 +10,7 @@ import picocli.CommandLine.ParentCommand;
         subcommands = {
                 GetServiceProviderCapabilities.class,
                 AddServiceProviderCapability.class,
-                //DeleteServiceProviderCapability.class
+                DeleteServiceProviderCapability.class
         },
 	defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
 	mixinStandardHelpOptions = true
