@@ -51,8 +51,17 @@ Try running `./a_jms_client.sh --help` to see the different options.
 
 ## Listening to messages
 
-To listen for messages, use the `./a_`
+To listen for messages, use the `./a_jms_sink.sh receivemessages <endpoint>` command with the endpoint from the registered subscription. The command will 
+block, waiting for messages to arrive. Keep it running, and switch to a new console to publish messages.
 
-## Publish your first messag
+## Publish your first message
 
+Publishing messages is done using the command `./a_jms_source.sh sendmessage -f message_king_olav.json`. This will send a single message, defined in the json file used
+as an argument. 
+
+You should now see a message logged on the console of the sink command. 
+Congratulations! You have now registered a Capability with an associated Delivery, and a Subscription to receive the messages published.
+
+This is all done on one interchange, and with a single user. Of course, this being a clustered system, it is fully possible to send data on one node, 
+and receive data on another node.
 
