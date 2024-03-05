@@ -24,7 +24,7 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
     @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @Option(names = {"-f", "--filename"}, description = "The subscription json file")
+    @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
     File file;
 
     @Override

@@ -20,7 +20,7 @@ import picocli.CommandLine.Parameters;
                 CountMessages.class,
                 DrainMessages.class
         })
-public class JmsClientSinkApplication implements Callable<Integer>, JmsTopCommand {
+public class JmsClientSinkApplication implements JmsTopCommand {
 
     @Parameters(index = "0", paramLabel = "URL" ,description = "The url to the AMQP host to connect to")
     private String url;
@@ -40,13 +40,8 @@ public class JmsClientSinkApplication implements Callable<Integer>, JmsTopComman
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new JmsClientSinkApplication()).execute(args);
-        //System.exit(exitCode); Removed this to be sure that the sink is listening for messages.
     }
 
-    @Override
-    public Integer call() throws Exception {
-        return 0;
-    }
 
     @Override
     public String getUrl() {

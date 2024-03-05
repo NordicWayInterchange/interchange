@@ -23,7 +23,7 @@ public class AddDeliveries implements Callable<Integer> {
     @ParentCommand
     DeliveriesCommand parentCommand;
 
-    @Option(names = {"-f", "--filename"}, description = "The deliveries json file")
+    @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
     File file;
 
 
