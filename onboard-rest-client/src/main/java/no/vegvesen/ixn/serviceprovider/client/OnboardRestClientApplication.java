@@ -1,11 +1,10 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.CapabilitiesCommand;
-import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeleteDelivery;
 import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeliveriesCommand;
+import no.vegvesen.ixn.serviceprovider.client.command.subscriptions.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -30,10 +29,7 @@ import static picocli.CommandLine.Option;
         subcommands = {
                 CapabilitiesCommand.class,
                 DeliveriesCommand.class,
-                OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
-                OnboardRestClientApplication.AddServiceProviderSubscription.class,
-                OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-                OnboardRestClientApplication.GetSubscription.class,
+                SubscriptionsCommand.class,
                 OnboardRestClientApplication.AddPrivateChannel.class,
                 OnboardRestClientApplication.GetPrivateChannels.class,
                 OnboardRestClientApplication.GetPrivateChannel.class,
@@ -61,80 +57,6 @@ public class OnboardRestClientApplication {
 
     @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
-
-    @Command(name = "getsubscriptions", description = "Get the service provider subscriptions")
-    static class GetServiceProviderSubscriptions implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));
-            return 0;
-        }
-    }
-
-    @Command(name = "addsubscription", description = "Add a subscription for the service provider")
-    static class AddServiceProviderSubscription implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Option(names = {"-f","--filename"}, description = "The subscription json file")
-        File file;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ObjectMapper mapper = new ObjectMapper();
-            AddSubscriptionsRequest requestApi = mapper.readValue(file, AddSubscriptionsRequest.class);
-            AddSubscriptionsResponse result = client.addSubscription(requestApi);
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
-            return 0;
-        }
-    }
-
-    @Command(name = "deletesubscription", description = "Delete a service provider subscription")
-    static class DeleteServiceProviderSubscription implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The ID of the subscription to delete")
-        String subscriptionId;
-
-        @Override
-        public Integer call(){
-            OnboardRESTClient client = parentCommand.createClient();
-            client.deleteSubscriptions(subscriptionId);
-            System.out.printf("Subscription %s deleted successfully%n",subscriptionId);
-            return 0;
-        }
-    }
-
-    @Command(name = "getsubscription", description = "Retrieving brokerUrl for remote service provider subscription")
-    static class GetSubscription implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The ID of the subscription with the brokerUrl")
-        Integer subscriptionId;
-
-        @Override
-        public Integer call() throws JsonProcessingException {
-            OnboardRESTClient client = parentCommand.createClient();
-            GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
-            System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
-            return 0;
-        }
-    }
 
     @Command(name = "addprivatechannel", description = "Adding name for client to set up private channel")
     static class AddPrivateChannel implements Callable<Integer> {
