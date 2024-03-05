@@ -137,11 +137,11 @@ jobs:
         run: |
           cd ./${{ matrix.Images }}          
           docker build . -t ${{ matrix.Images }}
-      - name: Push docker image to GCP
+      - name: Push docker image to Google artifact registry
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
-      - name: Push docker image to GHCR
+      - name: Push docker image to Github container registry
         run: | 
           docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
