@@ -39,7 +39,7 @@ of the actual endpoint to publish messages on.
 
 In order to see messages flowing through the system, we can create a Subscription to the data stream, and listen to the associated queue.
 The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the publicationId of `NO00000-pub-1`
-Run the command `./a_onboard_client subscriptions add -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
+Run the command `./a_onboard_client.sh subscriptions add -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
 To get the actual endpoint do receive messages on, run `./a_onboard_client.sh subscriptions get <id>`, using the id from earlier.
 You might have to do this a few times until the subscription has changed from status `REQUESTED` to status `CREATED`.
 When the subscription has reached the status `CREATED`, the subscription should have one item in the `endpoints` list, and the entry `target` specifies the name
