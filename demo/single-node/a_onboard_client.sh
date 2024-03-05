@@ -11,4 +11,4 @@ docker run \
   -v $PWD/../keys/a:/keys \
   -v $PWD:/work \
   --link a_onboard_server:a.interchangedomain.com \
-   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-rest-client:ecdc304 -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/truststore.jks -w password https://a.interchangedomain.com:8797/ ${SERVICE_PROVIDER} "$@"
+   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-rest-client:3743e41 -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/truststore.jks -w password https://a.interchangedomain.com:8797/ ${SERVICE_PROVIDER} "$@"
