@@ -29,8 +29,8 @@ We have now declared what type of messages we want to publish, and now we have t
 In order to do this, we need to create a Delivery.
 
 The file `del_king_olav_denm_no.json` declares a Delivery to the already registered Capability. 
-Run the command `./a_onboard_client.sh adddeliveries -f del_king_olav_denm_no.json`, and make note of the id of the added delivery.
-To get the actual endpoint to deliver messages on, run the command `./a_onboard_client.sh getdelivery <id>` using the id from earlier.
+Run the command `./a_onboard_client.sh deliveries add -f del_king_olav_denm_no.json`, and make note of the id of the added delivery.
+To get the actual endpoint to deliver messages on, run the command `./a_onboard_client.sh deliveries get <id>` using the id from earlier.
 You might have to do this a few times until the delivery has changed from status `REQUESTED` to status `CREATED`.
 When the delivery has reached status `CREATED`, the delivery should have one item in the `endpoints` list, and the entry `target` specifies the name
 of the actual endpoint to publish messages on.
@@ -39,8 +39,8 @@ of the actual endpoint to publish messages on.
 
 In order to see messages flowing through the system, we can create a Subscription to the data stream, and listen to the associated queue.
 The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the publicationId of `NO00000-pub-1`
-Run the command `./a_onboard_client addsubscription -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
-To get the actual endpoint do receive messages on, run `./a_onboard_client.sh getsubscription <id>`, using the id from earlier.
+Run the command `./a_onboard_client subscriptions add -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
+To get the actual endpoint do receive messages on, run `./a_onboard_client.sh subscriptions get <id>`, using the id from earlier.
 You might have to do this a few times until the subscription has changed from status `REQUESTED` to status `CREATED`.
 When the subscription has reached the status `CREATED`, the subscription should have one item in the `endpoints` list, and the entry `target` specifies the name
 of the actual endpoint to receive messages from.
