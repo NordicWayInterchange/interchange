@@ -27,8 +27,6 @@ If a neighbour produces a message type we are interested in, we issue a subscrip
 
 Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the Message collector.
 
-More information on the concepts and the open source implementation of the interchange node is found on the [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki) 
-
 Additional information about the Nordic Way Interchange Node can be found [here](https://www.nordicway.net/).
 
 ### Contact
@@ -54,8 +52,6 @@ The profile "IT" separates the unit tests from the integration tests by ensuring
 The profile "IT" is defined in the top pom and is always activated.
 
 ### Run using Docker Compose
-
-*This method requires a bash-enabled terminal (Linux, Mac or Windows with WSL)*
 
 We have created a few Docker Compose configs in the `demo` folder, with associated startup scripts.
 The folder `single-node` starts up a single-node interchange in Docker Compose, called `a.interchangedomain.com`.
