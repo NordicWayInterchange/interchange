@@ -15,7 +15,7 @@ Try running `./a_onboard_client.sh --help` to see the different options.
 
 ## Register a Capability
 
-In order to be able to publish messages on the node, a Capability (link) and a Delivery (link) has to be created.
+In order to be able to publish messages on the node, a [Capability](../../GLOSSARY.md#capability) and a [Delivery](../../GLOSSARY.md#delivery) has to be created.
 We'll start by adding a Capability.
 
 The file `cap_king_olav_denm_no.json` contains the json structure for a request to create a Capability with the publicationId `NO00000-pub-1` with the messageType DENM.
