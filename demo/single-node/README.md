@@ -18,7 +18,7 @@ Try running `./a_onboard_client.sh --help` to see the different options.
 In order to be able to publish messages on the node, a [Capability](../../GLOSSARY.md#capability) and a [Delivery](../../GLOSSARY.md#delivery) has to be created.
 We'll start by adding a Capability.
 
-The file `cap_king_olav_denm_no.json` contains the json structure for a request to create a Capability with the publicationId `NO00000-pub-1` with the messageType DENM.
+The file `cap_king_olav_denm_no.json` contains the json structure for a request to create a Capability with the [publicationId](../../GLOSSARY.md#publicationid) `NO00000-pub-1` with the messageType DENM.
 
 Run the command `./a_onboard_client.sh capabilities add -f cap_king_olav_denm_no.json` to add the capability declared in the json file to the cluster.
 The capability is now registered. Check using the command `./a_onboard_client.sh capabilities list`. This lists your capabilities in the system.
@@ -26,24 +26,24 @@ The capability is now registered. Check using the command `./a_onboard_client.sh
 ## Register a Delivery
 
 We have now declared what type of messages we want to publish, and now we have to create somewhere to actually do the publishing.
-In order to do this, we need to create a Delivery.
+In order to do this, we need to create a [Delivery](../../GLOSSARY.md#delivery).
 
 The file `del_king_olav_denm_no.json` declares a Delivery to the already registered Capability. 
 Run the command `./a_onboard_client.sh deliveries add -f del_king_olav_denm_no.json`, and make note of the id of the added delivery.
 To get the actual endpoint to deliver messages on, run the command `./a_onboard_client.sh deliveries get <id>` using the id from earlier.
 You might have to do this a few times until the delivery has changed from status `REQUESTED` to status `CREATED`.
 When the delivery has reached status `CREATED`, the delivery should have one item in the `endpoints` list, and the entry `target` specifies the name
-of the actual endpoint to publish messages on.
+of the actual [endpoint](../../GLOSSARY.md#endpoint) to publish messages on.
 
 ## Register a Subscription
 
-In order to see messages flowing through the system, we can create a Subscription to the data stream, and listen to the associated queue.
-The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the publicationId of `NO00000-pub-1`
+In order to see messages flowing through the system, we can create a [Subscription](../../GLOSSARY.md#subscription) to the data stream, and listen to the associated queue.
+The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the [publicationId](../../GLOSSARY.md#publicationid) of `NO00000-pub-1`
 Run the command `./a_onboard_client.sh subscriptions add -f sub_king_olav_denm_no.json`, and make note of the id of the added subscription.
 To get the actual endpoint do receive messages on, run `./a_onboard_client.sh subscriptions get <id>`, using the id from earlier.
 You might have to do this a few times until the subscription has changed from status `REQUESTED` to status `CREATED`.
 When the subscription has reached the status `CREATED`, the subscription should have one item in the `endpoints` list, and the entry `target` specifies the name
-of the actual endpoint to receive messages from.
+of the actual [endpoint](../../GLOSSARY.md#endpoint) to receive messages from.
 
 ## Use the jms client
 The script `./a_jms_client.sh` runs the JMS client, a test client we provide for Service Providers for sending and receiving messages (make link to thesaurus).
