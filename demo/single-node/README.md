@@ -10,7 +10,7 @@ In a terminal, go to the `demo/single-node` directory, and run `./single-node.sh
 This will start the node, called `a.interchangedomain.com`.
 
 ## Use the onboard client
-The script `./a_onboard_client.sh` runs the onboard client, a test client we provide for Service Providers (make link to thesaurus).
+The script `./a_onboard_client.sh` runs the onboard client, a test client we provide for [Service Providers](../../GLOSSARY.md).
 Try running `./a_onboard_client.sh --help` to see the different options.
 
 ## Register a Capability
