@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.capability;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
@@ -14,6 +13,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CapabilityMatcherTest {
 
 	private static final LinkedHashSet<String> QUAD_TREE_0121_0122 = Sets.newLinkedHashSet("0121", "0122");
+
+	private final CapabilitySplit quadTreeCoverageCapability = new CapabilitySplit(
+			new DenmApplication(
+					"NO00000",
+					"NO00000-quad-tree-testing",
+					"NO",
+					"DENM:2.3.2",
+					Sets.newLinkedHashSet("1022133","1022330","102320","12003020","120030010","120012100","120030012","1023213000","1022303","12001030","12001032","1200201","12002310","12001023","12001220","12001022","12003002","12001222","120030222","120030220","12003000","12002031","12002033","12001021","12001020","1200212","1200213","1200210","1200211","1200013","12002303","120003","12002302","12001012","12002301","12002300","102322011","1023211","1023212","1023210","102231","102232","12001010","1200100","1200023","12001202","10223310","12002211","12001201","12001200","102303","102302"),
+					Collections.singleton(6)
+			),
+			new Metadata(RedirectStatus.OPTIONAL)
+	);
+
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
@@ -275,14 +287,14 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	void newMatchDenmCapabilityWithSelector() throws JsonProcessingException {
+	void newMatchDenmCapabilityWithSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
 		CapabilitySplit capability = new CapabilitySplit();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
 
-		String selector = "originatingCountry = 'NO' AND causeCodes = 6 OR causeCodes = 5";
+		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5";
 
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
 	}
@@ -296,8 +308,68 @@ class CapabilityMatcherTest {
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
 
-		String selector = "originatingCountry = 'NO' AND causeCodes = 5";
+		String selector = "originatingCountry = 'NO' AND causeCode = 5";
 
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
+	}
+
+	@Test
+	public void findSubTile() {
+		String selector = "quadTree LIKE '%,12002010%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test
+	public void findTinySubTile() {
+		String selector = "quadTree LIKE '%,120020100000000000%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test
+	public void finSuperTile() {
+		String selector = "quadTree LIKE '%,12%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test
+	public void FindTilesOutsideSubTile() {
+		String selector = "quadTree NOT LIKE '%,12002010%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test
+	public void findTilesOutsideSuperTile() {
+		String selector = "quadTree NOT LIKE '%,12%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test
+	public void findTilesOutsideSuperTileAlternateNegation() {
+		String selector = "NOT (quadTree LIKE '%,12%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+	}
+
+	@Test // Has been fixed in new Qpid version, will fail when we make the update. Just switch to isTrue() on assert.
+	public void findTilesOutsideSuperTileAlternateNegationWithoutParentheses() {
+		String selector = "NOT quadTree LIKE '%,12%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+	}
+
+	@Test
+	public void findTilesOutsideSuperTileNoMatch() {
+		String selector = "quadTree NOT LIKE '%,1%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+	}
+
+	@Test
+	public void unknownAndSuperTile() {
+		String selector = "fish = 'shark' AND quadTree NOT LIKE '%,1%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+	}
+
+	@Test
+	public void unknownOrSuperTile() {
+		String selector = "fish = 'shark' OR quadTree NOT LIKE '%,1%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
 	}
 }
