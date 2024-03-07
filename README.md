@@ -7,9 +7,10 @@ See full MIT license text [here](license.md).
 See instructions to retrieve all the third party licences [here](#third-party-licenses)
 
 ### Introduction
-The Nordic Way Interchange Node (NWIXN) is a message broker that
-enables location-based exchange of traffic data. Nordic Way partners send traffic information
-to the broker in the form of AMQP messages. These messages are distributed to subscribing partners.
+The Nordic Way Interchange Node (NWIXN) is a clustered message broker that 
+enables location-based exchange of traffic data. Clients, known as Service Providers send traffic information
+to the broker in the form of AMQP messages. These messages are distributed to subscribing partners, either on the same interchange,
+or on other interchanges in the cluster.
 
 Messages are produced and exchanged over AMQP 1.0. Message content is not examined, but all messages must provide 
 header attributes as specified in the client specification. 
@@ -18,12 +19,13 @@ Traffic message formats supported are DATEX2, DENM, IVI, SPATEM, MAPEM, SREM, SS
 
 ![Interchange architecture](/diagrams/updated_federated_node.png)
 
-Neighbour nodes registered in the DNS (domain name server) will be discovered via a control channel.
+An Interchange network consists of one or more interchanges, registered in the DNS (domain name server).
+Each Interchange has a matching SRV record, which points to the Interchanges' control channel host name and port.
 
-All neighbours must present the message types they produce - capabilities - in this discovery process.
+All interchanges must present the message types they produce - capabilities - in this discovery process.
 
-Neighbours also has a set of message types they are interested in - subscriptions. 
-If a neighbour produces a message type we are interested in, we issue a subscription request to the neighbour.
+Interchanges also has a set of message types they are interested in - subscriptions. 
+If a neighbour interchange produces a message type we are interested in, we issue a subscription request to the neighbour.
 
 Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the Message collector.
 
