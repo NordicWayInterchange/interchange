@@ -46,7 +46,7 @@ When the subscription has reached the status `CREATED`, the subscription should 
 of the actual [endpoint](../../GLOSSARY.md#endpoint) to receive messages from.
 
 ## Use the jms client
-The script `./a_jms_client.sh` runs the JMS client, a test client we provide for Service Providers for sending and receiving messages (make link to thesaurus).
+The script `./a_jms_client.sh` runs the JMS client, a test client we provide for Service Providers for sending and receiving messages.
 Try running `./a_jms_client.sh --help` to see the different options.
 
 ## Listening to messages
