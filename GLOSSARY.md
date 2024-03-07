@@ -17,4 +17,6 @@ A messageType defines the payload of a message, as well as a set of requirement 
 have a certain payload structure, and a certain set of message properties set, as defined in the Capability.
 ## PublicationId
 A publicationId is a unique ID for a stream of data, also known as publication. This must be a network-wide unique ID.
+## Endpoint
+An endpoint is the host, port and queue-name to connect to, either to send or to receive messages using AMQPS.
 
