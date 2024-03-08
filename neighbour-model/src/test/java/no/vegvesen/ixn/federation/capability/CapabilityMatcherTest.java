@@ -372,4 +372,26 @@ class CapabilityMatcherTest {
 		String selector = "fish = 'shark' OR quadTree NOT LIKE '%,1%'";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
 	}
+
+	@Test
+	//This test needs to be altered when the matcher is working correctly, this is demonstrating a bug. Both should evaluate to false.
+	public void quadTreeTileWithNumberFourIsNotAllowed() {
+		CapabilitySplit capability = new CapabilitySplit(
+			new DenmApplication(
+					"NO00000",
+					"NO00000-quad-tree-testing",
+					"NO",
+					"DENM:2.3.2",
+					Collections.singleton("12004"),
+					Collections.singleton(6)
+			),
+			new Metadata(RedirectStatus.OPTIONAL)
+		);
+
+		String selector1 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+
+		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,1200401%' and causeCode = 6";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
 }
