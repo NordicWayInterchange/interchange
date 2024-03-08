@@ -9,7 +9,11 @@ import picocli.CommandLine.ParentCommand;
         name = "privatechannels",
         description = "Manage private channels for a Service Provider",
         subcommands = {
-                AddPrivateChannel.class
+                GetPrivateChannels.class,
+                GetPrivateChannel.class,
+                AddPrivateChannel.class,
+                DeletePrivateChannel.class,
+                GetPeerPrivateChannels.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true

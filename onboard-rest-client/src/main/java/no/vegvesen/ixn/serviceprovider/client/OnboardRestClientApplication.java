@@ -31,7 +31,6 @@ import static picocli.CommandLine.Option;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelCommand.class,
-                GetPeerPrivateChannels.class,
                 OnboardRestClientApplication.FetchMatchingCapabilities.class
         },
         mixinStandardHelpOptions = true)
