@@ -57,16 +57,15 @@ public class NeighbourRestController {
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)}))})
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
+		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
+		logger.debug("Common name of certificate matched name in API object.");
 
 		if(neighbourSubscriptionRequest.getSubscriptions() == null || neighbourSubscriptionRequest.getSubscriptions().isEmpty()){
 			throw new SubscriptionRequestException("Subscriptions can not be null");
 		}
-
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
-		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
-		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
-		logger.debug("Common name of certificate matched name in API object.");
 
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
@@ -115,16 +114,16 @@ public class NeighbourRestController {
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST)))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE)))})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
+		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
+		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		if(neighbourCapabilities.getCapabilities() == null){
 			throw new CapabilityPostException("Capabilities can not be null");
 		}
 
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
-		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
-		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
-		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
