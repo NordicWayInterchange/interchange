@@ -1,7 +1,7 @@
 {
   "type": "BDB",
   "name": "qpid.test.io",
-  "modelVersion": "9.0",
+  "modelVersion": "9.2.0",
   "exchanges": [
   ],
   "queues": [
