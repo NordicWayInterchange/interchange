@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-alpine
 
 RUN apk add --no-cache bash openssl jq
 
-ENV QPID_VERSION=9.0.0
+ENV QPID_VERSION=9.2.0
 
 RUN cd /usr/local && \
     wget http://archive.apache.org/dist/qpid/broker-j/${QPID_VERSION}/binaries/apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \

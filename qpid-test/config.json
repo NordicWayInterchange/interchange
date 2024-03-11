@@ -1,6 +1,6 @@
 {
   "name": "${broker.name}",
-  "modelVersion": "9.0",
+  "modelVersion": "9.2.0",
   "authenticationproviders": [
     {
       "name": "clientCerts",
