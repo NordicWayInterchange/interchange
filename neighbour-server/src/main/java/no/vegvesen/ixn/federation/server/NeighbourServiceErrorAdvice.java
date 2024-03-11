@@ -57,6 +57,10 @@ public class NeighbourServiceErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
+	@ExceptionHandler({CapabilityPostException.class})
+	public ResponseEntity<ErrorDetails>capabilityRequestError(CapabilityPostException e){
+		return error(BAD_REQUEST, e);
+	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
