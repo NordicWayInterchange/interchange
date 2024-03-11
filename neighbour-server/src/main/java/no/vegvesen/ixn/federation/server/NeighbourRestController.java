@@ -51,7 +51,7 @@ public class NeighbourRestController {
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
-		if(neighbourSubscriptionRequest == null || neighbourSubscriptionRequest.getSubscriptions() == null || neighbourSubscriptionRequest.getSubscriptions().isEmpty()){
+		if(neighbourSubscriptionRequest.getSubscriptions() == null || neighbourSubscriptionRequest.getSubscriptions().isEmpty()){
 			throw new SubscriptionRequestException("Subscriptions can not be null");
 		}
 
@@ -81,7 +81,6 @@ public class NeighbourRestController {
 		return reponse;
 	}
 
-
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -103,7 +102,7 @@ public class NeighbourRestController {
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
-		if(neighbourCapabilities == null || neighbourCapabilities.getCapabilities() == null){
+		if(neighbourCapabilities.getCapabilities() == null){
 			throw new CapabilityPostException("Capabilities can not be null");
 		}
 

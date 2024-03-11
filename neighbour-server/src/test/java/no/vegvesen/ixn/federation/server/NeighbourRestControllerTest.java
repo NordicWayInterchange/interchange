@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -232,6 +234,41 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
+	void postingNullSubscriptionSetRequestReturnsException() throws Exception{
+		mockCertificate("ericsson");
+
+		String request = """
+				{
+				"name": "ericsson",
+				"version": "1.1"
+				}
+				""";
+
+		mockMvc.perform(post(subscriptionRequestPath)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(request))
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof SubscriptionRequestException));
+	}
+
+	@Test
+	void postingEmptySubscriptionSetReturnsException()throws Exception{
+		String name = "ericsson";
+		mockCertificate(name);
+
+		SubscriptionRequestApi request = new SubscriptionRequestApi(name, Set.of());
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(post(subscriptionRequestPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(subscriptionRequestApiToServerJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof SubscriptionRequestException));
+	}
+
+	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsClientError() throws Exception {
 		String name = "ericsson";
 		String selector = "originatingCountry = 'FI'";
@@ -320,6 +357,26 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	void postNullCapabilitiesReturnsException() throws Exception{
+		String name = "ericsson";
+		mockCertificate(name);
+
+		String request = """
+				{
+				"name": "ericsson",
+				"version": "1.1"
+				}
+				""";
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(request))
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
 	}
 
 	@Test
