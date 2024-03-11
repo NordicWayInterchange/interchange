@@ -56,7 +56,7 @@ class NeighbourRestControllerTest {
 	private String subscriptionRequestPath = "/subscriptions";
 	private String capabilityExchangePath = "/capabilities";
 
-	private Set<String> quadTree = Collections.emptySet();
+	private Set<String> quadTree = Collections.singleton("12004");
 
 	@BeforeEach
 	void setUp() {
@@ -151,7 +151,7 @@ class NeighbourRestControllerTest {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
 
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
@@ -376,6 +376,33 @@ class NeighbourRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
+	}
+
+	@Test
+	void postCapabilityWithMissingPropertiesReturnsException() throws Exception{
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		ericsson.setName("ericsson");
+
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
+		ericsson.setCapabilities(Collections.singleton(capability));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+
+		mockMvc.perform(
+						post(capabilityExchangePath)
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
 	}
 
