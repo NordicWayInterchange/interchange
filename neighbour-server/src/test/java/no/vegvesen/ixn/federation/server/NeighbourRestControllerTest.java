@@ -407,6 +407,35 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
+	void postCapabilityWithDuplicatePublicationIdReturnsException() throws Exception{
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		ericsson.setName("ericsson");
+
+		CapabilitySplitApi capability1 = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
+		CapabilitySplitApi capability2 = new CapabilitySplitApi(new IvimApplicationApi("NO-1233", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
+
+		ericsson.setCapabilities(Set.of(capability1, capability2));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+
+		mockMvc.perform(
+						post(capabilityExchangePath)
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
+	}
+
+	@Test
 	void postUnknownMessageTypeReturnsClientError() throws Exception {
 		mockCertificate("ericsson");
 
