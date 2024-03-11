@@ -119,6 +119,16 @@ public class NeighbourRestController {
 			if(allPublicationIds.contains(capability.getApplication().getPublicationId())){
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
+
+			long numberOfCapabilitiesWithSamePublicationId =
+					neighbourCapabilities.getCapabilities()
+					.stream()
+					.filter((cap) -> cap.getApplication().getPublicationId().equals(capability.getApplication().getPublicationId())).count();
+
+			if(numberOfCapabilitiesWithSamePublicationId > 1){
+				throw new CapabilityPostException("Bad api object. All posted capabilities must have unique publicationIds");
+			}
+
 			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
 			if(!capabilityProperties.isEmpty()){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
