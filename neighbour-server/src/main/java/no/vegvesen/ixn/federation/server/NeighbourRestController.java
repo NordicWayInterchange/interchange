@@ -2,10 +2,13 @@ package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -20,8 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RestController("/")
@@ -106,9 +111,19 @@ public class NeighbourRestController {
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		if(neighbourCapabilities.getCapabilities() == null){
-			throw new CapabilityPostException("Capabilities can not be null");
+			throw new CapabilityPostException("Bad api object. Capabilities can not be null");
 		}
 
+		Set<String> allPublicationIds = allPublicationIds();
+		for(CapabilitySplitApi capability: neighbourCapabilities.getCapabilities()){
+			if(allPublicationIds.contains(capability.getApplication().getPublicationId())){
+				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
+			}
+			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
+			if(!capabilityProperties.isEmpty()){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
+			}
+		}
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
@@ -116,6 +131,30 @@ public class NeighbourRestController {
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilitiesApiResponse;
+	}
+
+	private Set<CapabilitySplit> getAllLocalCapabilities() {
+		Set<CapabilitySplit> capabilities = new HashSet<>();
+		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		for (ServiceProvider otherServiceProvider : serviceProviders) {
+			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
+		}
+		return capabilities;
+	}
+	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
+		Set<CapabilitySplit> capabilities = new HashSet<>();
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		for (Neighbour neighbour : neighbours) {
+			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+		}
+		return capabilities;
+	}
+	private Set<String> allPublicationIds() {
+		Set<CapabilitySplit> allCapabilities = getAllLocalCapabilities();
+		allCapabilities.addAll(getAllNeighbourCapabilities());
+		return allCapabilities.stream()
+				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
+				.collect(Collectors.toSet());
 	}
 
 	@ResponseStatus(HttpStatus.OK)
