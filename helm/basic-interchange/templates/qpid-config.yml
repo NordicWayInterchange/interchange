@@ -18,7 +18,7 @@ data:
     {
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
-      "modelVersion": "9.2.0",
+      "modelVersion": "0.0",
       "exchanges": [
         {
           "name": "outgoingExchange",
