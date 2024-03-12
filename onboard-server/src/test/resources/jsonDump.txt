@@ -1,45 +1,19 @@
-[
-    {
-        "name": "savedusergggggg",
-        "subscriptions": [],
-        "capabilities": [
-            {
-                "path": "/spi-2/capabilities/1",
-                "application": {
-                    "messageType": "DATEX2",
-                    "publisherId": "NPRA",
-                    "publicationId": "pub-15353sg21h",
-                    "publicationType": "IDK",
-                    "originatingCountry": "NO",
-                    "protocolVersion": "1.0",
-                    "quadTree": [
-                        "1234"
-                    ],
-                    "causeCode": [
-                        66
-                    ]
-                },
-                "metadata": {}
-            },
-                        {
-                            "path": "/spi-2/capabilities/2",
-                            "application": {
-                                "messageType": "DATEX2",
-                                "publisherId": "NPRA",
-                                "publicationId": "pub-15353sg21sdh",
-                                "publicationType": "IDK",
-                                "originatingCountry": "NO",
-                                "protocolVersion": "1.0",
-                                "quadTree": [
-                                    "1234"
-                                ],
-                                "causeCode": [
-                                    66
-                                ]
-                            },
-                            "metadata": {}
-                        }
-        ],
-        "deliveries": []
-    }
-]
+[ {
+  "name" : "saveduser",
+  "subscriptions" : [ {
+    "id" : "1",
+    "path" : "/testuser/subscriptions/1",
+    "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
+    "queueConsumerUser" : null,
+    "lastUpdatedTimeStamp" : 1642162685693,
+    "status" : "CREATED"
+  } ],
+  "capabilities" : [ {
+    "messageType" : "DATEX2",
+    "publisherId" : "NO-0001",
+    "originatingCountry" : "NO",
+    "protocolVersion" : "1.0",
+    "quadTree" : [ "123" ],
+    "publicationType" : [ "6" ]
+  } ]
+} ]
