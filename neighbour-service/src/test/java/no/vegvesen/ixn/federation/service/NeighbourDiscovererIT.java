@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.*;
@@ -845,6 +846,44 @@ public class NeighbourDiscovererIT {
 
 		neighbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getControlConnection().getBackoffAttempts()).isEqualTo(2);
+	}
+
+	@Test
+	public void testConnectionStatusIsUnreachableAndBackoffIsNotResetWhenBackoffCounterExceedsLimit(){
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.singleton("0122"),
+												Collections.singleton(6)
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						new HashSet<>()
+				)
+		);
+		neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusMinutes(10));
+		neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusMinutes(10));
+
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(any(),any(), any())).thenThrow(new CapabilityPostException(""));
+
+		while(neighbour.getControlConnection().getBackoffAttempts() < 5){
+			neighbourDiscoveryService.capabilityExchange(List.of(neighbour), mockNeighbourFacade, neighbour.getCapabilities().getCapabilities(), Optional.of(LocalDateTime.now()));
+		}
+
+		assertThat(neighbour.getControlConnection().getBackoffAttempts()).isEqualTo(5);
+		assertThat(neighbour.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 	}
 
 	@Test
