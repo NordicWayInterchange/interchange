@@ -135,12 +135,12 @@ public class NeighbourRestController {
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
 
-			long numberOfCapabilitiesWithSamePublicationId =
+			long numberOfCapabilitiesInRequestWithSamePublicationId =
 					neighbourCapabilities.getCapabilities()
 					.stream()
 					.filter((cap) -> cap.getApplication().getPublicationId().equals(capability.getApplication().getPublicationId())).count();
 
-			if(numberOfCapabilitiesWithSamePublicationId > 1){
+			if(numberOfCapabilitiesInRequestWithSamePublicationId > 1){
 				throw new CapabilityPostException("Bad api object. All posted capabilities must have unique publicationIds");
 			}
 

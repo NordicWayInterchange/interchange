@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@ContextConfiguration(initializers = {ServiceProviderImport.RemoteInitializer.class})
 public class ImportServiceProvidersIT {
 
 
@@ -33,6 +33,8 @@ public class ImportServiceProvidersIT {
 
     @Autowired
     PrivateChannelRepository privateChannelRepository;
+
+
 
     @Test
     @Disabled
@@ -72,8 +74,8 @@ public class ImportServiceProvidersIT {
             ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi, saveTime);
             serviceProvidersToSave.add(serviceProvider);
 
-            List<PrivateChannel> privateChannels = ServiceProviderImport.mapPrivateChannelApiToPrivateChannels(serviceProviderApi.getName(), serviceProviderApi.getPrivateChannels());
-            privateChannelsToSave.addAll(privateChannels);
+           // List<PrivateChannel> privateChannels = ServiceProviderImport.mapPrivateChannelApiToPrivateChannels(serviceProviderApi.getName(), serviceProviderApi.getPrivateChannels());
+           // privateChannelsToSave.addAll(privateChannels);
         }
         repository.saveAll(serviceProvidersToSave);
         privateChannelRepository.saveAll(privateChannelsToSave);
