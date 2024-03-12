@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.*;
 public class QpidClientIT extends QpidDockerBaseIT {
 
 
-	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "localhost", "routing_configurer");
 
 	@Container
 	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
