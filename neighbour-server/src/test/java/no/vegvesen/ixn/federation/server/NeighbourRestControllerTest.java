@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
@@ -32,8 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -436,6 +436,42 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
+	void testUnknownPropertiesAreIgnoredWhenPostingCapabilities() throws Exception {
+		mockCertificate("ericsson");
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+		String json = """
+				    {
+				         "version": "2.0",
+				         "name": "ericsson",
+				         "capabilities": [
+				             {
+				                 "application": {
+				                     "messageType": "DATEX2",
+				                     "publisherId": "NO-12345",
+				                     "publicationId": "pub-2",
+				                     "originatingCountry": "NO",
+				                     "protocolVersion": "DATEX2:2.3",
+				                     "quadTree": ["1220"],
+				                     "publicationType": "SituationPublication"
+				                 },
+				                 "metadata": {
+				                     "shardCount": 1
+				                 }
+				             }
+				         ]
+				     }
+				""";
+		mockMvc.perform(
+						post(capabilityExchangePath)
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(json))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void postUnknownMessageTypeReturnsClientError() throws Exception {
 		mockCertificate("ericsson");
 
@@ -478,6 +514,31 @@ class NeighbourRestControllerTest {
 		)
 				.andDo(print())
 				.andExpect( result -> assertThat(result.getResponse().getStatus()).isEqualTo(404));
+	}
+
+	@Test
+	void testPollSubscriptionReturnsStatusOk() throws Exception {
+		mockCertificate("ericsson");
+
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		mockMvc.perform(get("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void testDeleteSubscriptionReturnsStatusOk() throws Exception{
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		mockMvc.perform(delete("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId))
+				.andDo(print())
+				.andExpect(status().isOk());
 	}
 
 }
