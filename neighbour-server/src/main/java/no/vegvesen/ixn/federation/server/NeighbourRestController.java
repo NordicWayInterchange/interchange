@@ -60,10 +60,6 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.debug("Common name of certificate matched name in API object.");
 
-		if(neighbourSubscriptionRequest.getSubscriptions() == null || neighbourSubscriptionRequest.getSubscriptions().isEmpty()){
-			throw new SubscriptionRequestException("Subscriptions can not be null");
-		}
-
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
 		return response;
@@ -104,36 +100,15 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
+		if(neighbourCapabilities.getCapabilities() == null){
+			throw new CapabilityPostException("");
+		}
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
-
-		if(neighbourCapabilities.getCapabilities() == null){
-			throw new CapabilityPostException("Bad api object. Capabilities can not be null");
-		}
-
-		Set<String> allPublicationIds = allPublicationIds();
-		for(CapabilitySplitApi capability: neighbourCapabilities.getCapabilities()){
-			if(allPublicationIds.contains(capability.getApplication().getPublicationId())){
-				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
-			}
-
-			long numberOfCapabilitiesWithSamePublicationId =
-					neighbourCapabilities.getCapabilities()
-					.stream()
-					.filter((cap) -> cap.getApplication().getPublicationId().equals(capability.getApplication().getPublicationId())).count();
-
-			if(numberOfCapabilitiesWithSamePublicationId > 1){
-				throw new CapabilityPostException("Bad api object. All posted capabilities must have unique publicationIds");
-			}
-
-			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
-			if(!capabilityProperties.isEmpty()){
-				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
-			}
-		}
+		List<ServiceProvider> allPublicationIds = serviceProviderService.getServiceProviders();
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
@@ -141,30 +116,6 @@ public class NeighbourRestController {
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilitiesApiResponse;
-	}
-
-	private Set<CapabilitySplit> getAllLocalCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		for (ServiceProvider otherServiceProvider : serviceProviders) {
-			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
-		}
-		return capabilities;
-	}
-	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
-		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
-		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
-		}
-		return capabilities;
-	}
-	private Set<String> allPublicationIds() {
-		Set<CapabilitySplit> allCapabilities = getAllLocalCapabilities();
-		allCapabilities.addAll(getAllNeighbourCapabilities());
-		return allCapabilities.stream()
-				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
-				.collect(Collectors.toSet());
 	}
 
 	@ResponseStatus(HttpStatus.OK)
