@@ -439,7 +439,7 @@ Expression unaryExpr() :
 	        left = UnaryExpression.createNegate(left);
 	    }
 	    |
-	    <NOT> left=unaryExpr()
+	    <NOT> left=orExpression()
 	    {
 		    left = UnaryExpression.createNOT( asTrileanExpression(left) );
 	    }

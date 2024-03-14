@@ -349,10 +349,10 @@ class CapabilityMatcherTest {
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
 	}
 
-	@Test // Has been fixed in new Qpid version, will fail when we make the update. Just switch to isTrue() on assert.
+	@Test
 	public void findTilesOutsideSuperTileAlternateNegationWithoutParentheses() {
 		String selector = "NOT quadTree LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
 	}
 
 	@Test
