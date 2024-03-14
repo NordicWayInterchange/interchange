@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.model.NeighbourSubscriptionRequest;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -522,7 +520,7 @@ class NeighbourRestControllerTest {
 
 		String ixnName = "ericsson";
 		Integer subscriptionId = 1;
-
+		when(neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId)).thenReturn(new SubscriptionPollResponseApi());
 		mockMvc.perform(get("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId)
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
@@ -530,6 +528,20 @@ class NeighbourRestControllerTest {
 				.andExpect(status().isOk());
 	}
 
+	@Test
+	void testPollSubscriptionThrowsExceptionWhenNonExistent() throws Exception {
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		when(neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId)).thenThrow(new InterchangeNotFoundException(""));
+		mockMvc.perform(get("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isNotFound());
+
+	}
 	@Test
 	void testDeleteSubscriptionReturnsStatusOk() throws Exception{
 		mockCertificate("ericsson");
@@ -539,6 +551,18 @@ class NeighbourRestControllerTest {
 		mockMvc.perform(delete("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId))
 				.andDo(print())
 				.andExpect(status().isOk());
+	}
+	@Test
+	void testDeleteSubscriptionThrowsExceptionWhenSubDoesNotExist()throws Exception{
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		doThrow(new NeighbourSubscriptionNotFound("")).when(neighbourService).incomingSubscriptionDelete(any(), any());
+		mockMvc.perform(delete("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId))
+				.andDo(print())
+				.andExpect(status().isNotFound());
+
 	}
 
 }
