@@ -4,6 +4,8 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -37,7 +39,6 @@ public class NeighbourService {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 	private InterchangeNodeProperties interchangeNodeProperties;
-
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
 							DNSFacade dnsFacade,
@@ -52,6 +53,30 @@ public class NeighbourService {
 	}
 
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
+		if(neighbourCapabilities.getCapabilities() == null){
+			throw new CapabilityPostException("Bad api object. Capabilities can not be null");
+		}
+
+		for(CapabilitySplitApi capability: neighbourCapabilities.getCapabilities()){
+			if(allPublicationIds(localCapabilities).contains(capability.getApplication().getPublicationId())){
+				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
+			}
+
+			long numberOfCapabilitiesWithSamePublicationId =
+					neighbourCapabilities.getCapabilities()
+							.stream()
+							.filter((cap) -> cap.getApplication().getPublicationId().equals(capability.getApplication().getPublicationId())).count();
+
+			if(numberOfCapabilitiesWithSamePublicationId > 1){
+				throw new CapabilityPostException("Bad api object. All posted capabilities must have unique publicationIds");
+			}
+
+			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
+			if(!capabilityProperties.isEmpty()){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
+			}
+		}
+
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -70,7 +95,20 @@ public class NeighbourService {
 
 		return capabilitiesTransformer.selfToCapabilityApi(interchangeNodeProperties.getName(), localCapabilities);
 	}
-
+	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
+		Set<CapabilitySplit> capabilities = new HashSet<>();
+		List<Neighbour> neighbours = findAllNeighbours();
+		for (Neighbour neighbour : neighbours) {
+			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+		}
+		return capabilities;
+	}
+	private Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities) {
+		Set<CapabilitySplit> allCapabilities = new HashSet<>();
+		allCapabilities.addAll(getAllNeighbourCapabilities());
+		allCapabilities.addAll(localCapabilities);
+		return allCapabilities.stream().map(a -> a.getApplication().getPublicationId()).collect(Collectors.toSet());
+	}
 	Neighbour findNeighbour(String neighbourName) {
 		return dnsFacade.lookupNeighbours().stream()
 				.filter(n -> n.getName().equals(neighbourName))
@@ -109,6 +147,9 @@ public class NeighbourService {
 	}
 
 	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
+		if(neighbourSubscriptionRequest.getSubscriptions() == null){
+			throw new SubscriptionRequestException("Neighbours can not request a null set of subscriptions");
+		}
 		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.debug("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 

@@ -241,7 +241,7 @@ class NeighbourRestControllerTest {
 				"version": "1.1"
 				}
 				""";
-
+		when(neighbourService.incomingSubscriptionRequest(any())).thenThrow(new SubscriptionRequestException(""));
 		mockMvc.perform(post(subscriptionRequestPath)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -258,6 +258,7 @@ class NeighbourRestControllerTest {
 		SubscriptionRequestApi request = new SubscriptionRequestApi(name, Set.of());
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(request);
 
+		when(neighbourService.incomingSubscriptionRequest(any())).thenThrow(new SubscriptionRequestException(""));
 		mockMvc.perform(post(subscriptionRequestPath)
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
@@ -368,7 +369,7 @@ class NeighbourRestControllerTest {
 				"version": "1.1"
 				}
 				""";
-
+		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
 		mockMvc.perform(
 				post(capabilityExchangePath)
 						.accept(MediaType.APPLICATION_JSON)
@@ -393,6 +394,7 @@ class NeighbourRestControllerTest {
 
 		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
 
 		mockMvc.perform(
 						post(capabilityExchangePath)
@@ -422,6 +424,7 @@ class NeighbourRestControllerTest {
 
 		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
 
 		mockMvc.perform(
 						post(capabilityExchangePath)
