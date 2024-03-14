@@ -106,7 +106,7 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>9.0.0</version>
+                <version>9.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
