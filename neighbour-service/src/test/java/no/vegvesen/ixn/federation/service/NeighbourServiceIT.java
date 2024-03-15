@@ -219,7 +219,7 @@ public class NeighbourServiceIT {
 
 
     @Test
-    public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInException() {
+    public void  postingCapabilityWithPublicationIdThatAlreadyExistsThrowsException() {
         Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
@@ -299,4 +299,84 @@ public class NeighbourServiceIT {
 
     }
 
+    @Test
+    public void requestingEmptySubscriptionSetThrowsException(){
+        SubscriptionRequestApi request = new SubscriptionRequestApi("Neighbour", Collections.emptySet());
+        assertThrows(SubscriptionRequestException.class, () -> service.incomingSubscriptionRequest(request));
+    }
+
+    @Test
+    public void postingNullCapabilitesThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-54";
+        neighbour.setName(name);
+        repository.save(neighbour);
+
+        CapabilitiesSplitApi neighbourCapabilities = new CapabilitiesSplitApi("neighbour-54", null);
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        assertThrows(CapabilityPostException.class,() ->  service.incomingCapabilities(neighbourCapabilities, localCapabilities));
+    }
+
+    @Test
+    public void postingCapabilitiesRequestWithDuplicatePublicationIdsThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-56";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+                name,
+                Set.of(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-123",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(1)
+                                ),
+                                new MetadataApi()
+                        ),
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-124",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(2)
+                                ),
+                                new MetadataApi()
+                                ))
+                );
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+
+        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi,localCapabilities));
+    }
+
+
+    @Test
+    public void postingCapabilityWithMissingPropertiesThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-57";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+                name,
+                Collections.singleton(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-123",
+                                        "pub-1",
+                                        "NO",
+                                        "",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(1)
+                                ),
+                                new MetadataApi()
+                        ))
+        );
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
+    }
 }
