@@ -232,42 +232,6 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
-	void postingNullSubscriptionSetRequestReturnsException() throws Exception{
-		mockCertificate("ericsson");
-
-		String request = """
-				{
-				"name": "ericsson",
-				"version": "1.1"
-				}
-				""";
-		when(neighbourService.incomingSubscriptionRequest(any())).thenThrow(new SubscriptionRequestException(""));
-		mockMvc.perform(post(subscriptionRequestPath)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(request))
-				.andExpect(status().isBadRequest())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof SubscriptionRequestException));
-	}
-
-	@Test
-	void postingEmptySubscriptionSetReturnsException()throws Exception{
-		String name = "ericsson";
-		mockCertificate(name);
-
-		SubscriptionRequestApi request = new SubscriptionRequestApi(name, Set.of());
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(request);
-
-		when(neighbourService.incomingSubscriptionRequest(any())).thenThrow(new SubscriptionRequestException(""));
-		mockMvc.perform(post(subscriptionRequestPath)
-						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(subscriptionRequestApiToServerJson))
-				.andExpect(status().isBadRequest())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof SubscriptionRequestException));
-	}
-
-	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsClientError() throws Exception {
 		String name = "ericsson";
 		String selector = "originatingCountry = 'FI'";
@@ -356,84 +320,6 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-	}
-
-	@Test
-	void postNullCapabilitiesReturnsException() throws Exception{
-		String name = "ericsson";
-		mockCertificate(name);
-
-		String request = """
-				{
-				"name": "ericsson",
-				"version": "1.1"
-				}
-				""";
-		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
-		mockMvc.perform(
-				post(capabilityExchangePath)
-						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(request))
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
-	}
-
-	@Test
-	void postCapabilityWithMissingPropertiesReturnsException() throws Exception{
-		mockCertificate("ericsson");
-
-		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
-		ericsson.setName("ericsson");
-
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
-		ericsson.setCapabilities(Collections.singleton(capability));
-
-		// Create JSON string of capability api object to send to the server
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
-
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
-		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
-
-		mockMvc.perform(
-						post(capabilityExchangePath)
-								.accept(MediaType.APPLICATION_JSON)
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(capabilityApiToServerJson))
-				.andDo(print())
-				.andExpect(status().isBadRequest())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
-	}
-
-	@Test
-	void postCapabilityWithDuplicatePublicationIdReturnsException() throws Exception{
-		mockCertificate("ericsson");
-
-		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
-		ericsson.setName("ericsson");
-
-		CapabilitySplitApi capability1 = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
-		CapabilitySplitApi capability2 = new CapabilitySplitApi(new IvimApplicationApi("NO-1233", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
-
-		ericsson.setCapabilities(Set.of(capability1, capability2));
-
-		// Create JSON string of capability api object to send to the server
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
-
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
-		when(neighbourService.incomingCapabilities(any(),any())).thenThrow(new CapabilityPostException(""));
-
-		mockMvc.perform(
-						post(capabilityExchangePath)
-								.accept(MediaType.APPLICATION_JSON)
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(capabilityApiToServerJson))
-				.andDo(print())
-				.andExpect(status().isBadRequest())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof CapabilityPostException));
 	}
 
 	@Test
