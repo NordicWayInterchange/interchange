@@ -7,7 +7,6 @@ import no.vegvesen.ixn.properties.CapabilityProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 public class DatexApplicationApi extends ApplicationApi {
 
     private String publicationType;

@@ -1,5 +1,11 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
@@ -49,6 +55,47 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Capability")
+	@Operation(summary = "Add capabilities")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this objects 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below.",
+			content = @Content(
+					examples = {
+							@ExampleObject(
+									name = "messageType DENM",
+									description = "",
+									value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType DATEX",
+									description = "",
+									value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType IVIM",
+									value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType SPATEM",
+									value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType MAPEM",
+									value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType SREM",
+									value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType SSEM",
+									value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST
+							),
+							@ExampleObject(
+									name = "messageType CAM",
+									value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST
+							)}
+			))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDCAPABILITIESRESPONSE)))})
 	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received capability POST from Service Provider: {}", serviceProviderName);
@@ -97,6 +144,9 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Capability")
+	@Operation(summary = "List capabilities")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE)))})
 	public ListCapabilitiesResponse listCapabilities(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("List capabilities for service provider {}",serviceProviderName);
@@ -108,7 +158,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/network/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
+	@Tag(name = "Capability")
+	@Operation(summary = "List matching capabilities")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE)))})
+	public FetchMatchingCapabilitiesResponse listMatchingCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
@@ -148,6 +201,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/capabilities/{capabilityId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name = "Capability")
+	@Operation(summary = "Delete capability")
 	public void deleteCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId ) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId,serviceProviderName);
@@ -163,7 +218,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetCapabilityResponse getServiceProviderCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
+	@Tag(name = "Capability")
+	@Operation(summary = "Get capability")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETCAPABILITYRESPONSE)))})
+	public GetCapabilityResponse getCapability(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("capabilityId") String capabilityId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -178,6 +236,18 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/subscriptions"})
+	@Tag(name = "Subscription")
+	@Operation(summary = "Add subscriptions")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			examples = @ExampleObject(
+					value = ExampleAPIObjects.ADDSUBSCRIPTIONREQUEST
+			)
+	))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(
+					value = ExampleAPIObjects.ADDSUBSCRIPTIONSRESPONSE
+			)))
+	})
 	public AddSubscriptionsResponse addSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddSubscriptionsRequest requestApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
@@ -228,6 +298,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/subscriptions/{dataTypeId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name = "Subscription")
+	@Operation(summary = "Delete subscription")
 	public void deleteSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("dataTypeId") String dataTypeId) throws NotFoundException {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
@@ -251,6 +323,9 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/subscriptions"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Subscription")
+	@Operation(summary = "List subscriptions")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE)))})
 	public ListSubscriptionsResponse listSubscriptions(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Listing subscription for service provider {}", serviceProviderName);
@@ -262,7 +337,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
+	@Tag(name = "Subscription")
+	@Operation(summary = "Get subscription")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETSUBSCRIPTIONRESPONSE)))})
+	public GetSubscriptionResponse getSubscription(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("subscriptionId") String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -277,7 +355,11 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddPrivateChannelResponse addPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Add private channels")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleAPIObjects.ADDPRIVATECHANNELSREQUEST)}))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDPRIVATECHANNELSRESPONSE)))})
+	public AddPrivateChannelResponse addPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddPrivateChannelRequest clientChannel) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add private channel for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -291,7 +373,7 @@ public class OnboardRestController {
 
 		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
-		for(PrivateChannelApi privateChannelToAdd : clientChannel.getPrivateChannels()){
+		for(PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()){
 
 			if(privateChannelToAdd.getPeerName().equals(serviceProviderName)){
 				throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
@@ -313,6 +395,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Delete private channel")
 	public void deletePrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
@@ -333,7 +417,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListPrivateChannelsResponse getPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
+	@Tag(name = "Private Channel")
+	@Operation(summary = "List private channels")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPRIVATECHANNELSRESPONSE)))})
+	public ListPrivateChannelsResponse listPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing private channels for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -345,6 +432,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Get private channel")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE)))})
 	public GetPrivateChannelResponse getPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
@@ -362,8 +453,11 @@ public class OnboardRestController {
 		return typeTransformer.transformPrivateChannelToGetPrivateChannelResponse(privateChannel);
 	}
 
-	@RequestMapping(method=RequestMethod.GET, path= {"/{serviceProviderName}/privatechannels/peer"})
-	public ListPeerPrivateChannels getPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/peer"})
+	@Tag(name = "Private Channel")
+	@Operation(summary = "List private channels with service provider as peer")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPRIVATECHANNELSRESPONSE)))})
+	public ListPeerPrivateChannels listPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -375,6 +469,10 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Delivery")
+	@Operation(summary = "Add deliveries")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.ADDDELIVERIESREQUEST)))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDDELIVERIESRESPONSE)))})
 	public AddDeliveriesResponse addDeliveries(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("adding deliveries for service provider {}", serviceProviderName);
@@ -414,6 +512,9 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Delivery")
+	@Operation(summary = "List deliveries")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTDELIVERIESRESPONSE)))})
 	public ListDeliveriesResponse listDeliveries(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("listing deliveries for service provider ", serviceProviderName);
@@ -425,6 +526,9 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Delivery")
+	@Operation(summary = "Get delivery")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETDELIVERYRESPONSE)))})
 	public GetDeliveryResponse getDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("get delivery {}, for service provider {}", deliveryId, serviceProviderName);
@@ -442,6 +546,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/deliveries/{deliveryId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name="Delivery")
+	@Operation(summary="Delete delivery")
 	public void deleteDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("delete delivery {} for service provider {}", deliveryId, serviceProviderName);

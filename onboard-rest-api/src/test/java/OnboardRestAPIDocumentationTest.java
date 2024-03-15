@@ -380,21 +380,20 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addPrivateChannelApi() throws JsonProcessingException {
-        PrivateChannelApi api = new PrivateChannelApi();
+        PrivateChannelResponseApi api = new PrivateChannelResponseApi();
         api.setPeerName("sp2");
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }
     @Test
     public void AddPrivateChannelRequest() throws JsonProcessingException {
-        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu");
-        privateChannel.setStatus(PrivateChannelStatusApi.REQUESTED);
+        PrivateChannelRequestApi privateChannel = new PrivateChannelRequestApi("king_olaf.bouvetinterchange.eu");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest("king_gustaf.bouvetinterchange.eu",List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
     public void addPrivateChannelResponse() throws JsonProcessingException {
-        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, 1);
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, 1);
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
         response.getPrivateChannels().add(privateChannel);
@@ -409,7 +408,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void ListPrivateChannelsResponse()throws JsonProcessingException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PrivateChannelApi privateChannel = new PrivateChannelApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,1);
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,1);
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
