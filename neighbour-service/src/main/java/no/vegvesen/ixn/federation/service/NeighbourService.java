@@ -57,8 +57,9 @@ public class NeighbourService {
 			throw new CapabilityPostException("Bad api object. Capabilities can not be null");
 		}
 
+		Set<String> allPublicationIds = allPublicationIds(localCapabilities);
 		for(CapabilitySplitApi capability: neighbourCapabilities.getCapabilities()){
-			if(allPublicationIds(localCapabilities).contains(capability.getApplication().getPublicationId())){
+			if(allPublicationIds.contains(capability.getApplication().getPublicationId())){
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
 
@@ -147,9 +148,6 @@ public class NeighbourService {
 	}
 
 	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		if(neighbourSubscriptionRequest.getSubscriptions() == null){
-			throw new SubscriptionRequestException("Neighbours can not request a null set of subscriptions");
-		}
 		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.debug("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
