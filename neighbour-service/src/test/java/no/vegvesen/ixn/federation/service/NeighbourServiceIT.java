@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
@@ -22,6 +23,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -217,7 +219,7 @@ public class NeighbourServiceIT {
 
 
     @Test
-    public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
+    public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInException() {
         Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
@@ -231,7 +233,7 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                Collections.singleton("23004"),
                                 Collections.singleton(1)
                             ),
                             new MetadataApi()
@@ -240,9 +242,9 @@ public class NeighbourServiceIT {
         Set<CapabilitySplit> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
-        //Now, try again, with the same capabilties, to simulate double post.
-        service.incomingCapabilities(capabilitiesApi,localCapabilities);
-        assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
+
+        //Now, try again, with the same capabilties, to simulate double post throws exception since publicationId already exists.
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
     }
 
     @Test
