@@ -5,8 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -378,5 +377,38 @@ public class NeighbourServiceIT {
         );
         Set<CapabilitySplit> localCapabilities = Collections.emptySet();
         assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
+    }
+
+    @Test
+    public void findSubscriptionsFromNonExistentNeighbourThrowsException(){
+        assertThrows(InterchangeNotFoundException.class, () -> service.findSubscriptions("nonexistent"));
+    }
+    @Test
+    public void processSubscriptionRequestWithInvalidSelectorSetsStatusNOT_VALID(){
+
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("my-neighbour65");
+        repository.save(neighbour);
+
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("\"", "my-neighbour66");
+        SubscriptionRequestApi request = new SubscriptionRequestApi("my-neighbour65", Set.of(sub1));
+        SubscriptionResponseApi response = service.incomingSubscriptionRequest(request);
+
+        for(RequestedSubscriptionResponseApi s : response.getSubscriptions()){
+            assertThat(s.getStatus()).isEqualTo(SubscriptionStatusApi.NOT_VALID);
+        }
+    }
+    @Test
+    public void processSubscriptionRequestWithSelectorAlwaysTrueSetsStatusILLEGAL(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("my-neighbour66");
+        repository.save(neighbour);
+
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("1=1", "my-neighbour66");
+        SubscriptionRequestApi request = new SubscriptionRequestApi("my-neighbour66", Set.of(sub1));
+        SubscriptionResponseApi response = service.incomingSubscriptionRequest(request);
+        for(RequestedSubscriptionResponseApi s : response.getSubscriptions()){
+            assertThat(s.getStatus()).isEqualTo(SubscriptionStatusApi.ILLEGAL);
+        }
     }
 }
