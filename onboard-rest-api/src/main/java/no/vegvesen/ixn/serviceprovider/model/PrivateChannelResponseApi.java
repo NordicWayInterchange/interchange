@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
 
-public class PrivateChannelApi {
+public class PrivateChannelResponseApi {
 
     private Integer id;
 
@@ -15,21 +15,21 @@ public class PrivateChannelApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
-    public PrivateChannelApi() {
+    public PrivateChannelResponseApi() {
 
     }
 
-    public PrivateChannelApi(String peerName) {
+    public PrivateChannelResponseApi(String peerName) {
         this.peerName = peerName;
     }
 
-    public PrivateChannelApi(String peerName, PrivateChannelStatusApi status, Integer id) {
+    public PrivateChannelResponseApi(String peerName, PrivateChannelStatusApi status, Integer id) {
         this.id = id;
         this.peerName = peerName;
         this.status = status;
     }
 
-    public PrivateChannelApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, Integer id) {
+    public PrivateChannelResponseApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, Integer id) {
         this.id = id;
         this.peerName = peerName;
         this.status = status;
@@ -80,13 +80,13 @@ public class PrivateChannelApi {
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        PrivateChannelApi that = (PrivateChannelApi) o;
+        PrivateChannelResponseApi that = (PrivateChannelResponseApi) o;
         return Objects.equals(endpoint, that.endpoint) && Objects.equals(id, that.id) && Objects.equals(status, that.status) && Objects.equals(peerName, that.peerName);
     }
 
     @Override
     public String toString(){
-        return "PrivateChannelApi{" +
+        return "PrivateChannelResponseApi{" +
                 "id='" + id + '\'' +
                 ", peerName='" + peerName + '\'' +
                 ", status=" + status +

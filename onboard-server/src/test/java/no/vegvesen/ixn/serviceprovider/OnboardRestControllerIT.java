@@ -18,9 +18,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -56,7 +65,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddCapabilitiesWithNullRequest() {
         assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("serviceProvider",null)
+                () -> restController.addCapabilities("serviceProvider", null)
         );
     }
 
@@ -65,15 +74,15 @@ public class OnboardRestControllerIT {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest();
         request.setCapabilities(null);
         assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("serviceProvider",request)
+                () -> restController.addCapabilities("serviceProvider", request)
         );
     }
 
     @Test
     public void testAddCapabilitiesWithEmptyCapabilitySet() {
-        AddCapabilitiesRequest request = new AddCapabilitiesRequest("serviceProvider",new HashSet<>());
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest("serviceProvider", new HashSet<>());
         assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("serviceProvider",request)
+                () -> restController.addCapabilities("serviceProvider", request)
         );
     }
 
@@ -96,7 +105,7 @@ public class OnboardRestControllerIT {
                 )
         );
         assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("anotherServiceProvider",request)
+                () -> restController.addCapabilities("anotherServiceProvider", request)
         );
     }
 
@@ -154,7 +163,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testListCapabilities(){
+    public void testListCapabilities() {
         String serviceProviderName = "serviceprovider";
 
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
@@ -168,6 +177,7 @@ public class OnboardRestControllerIT {
         assertThat(restController.listCapabilities(serviceProviderName).getCapabilities().size()).isEqualTo(1);
 
     }
+
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
@@ -256,10 +266,10 @@ public class OnboardRestControllerIT {
 
         String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), selector);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), selector);
         assertThat(response.getCapabilities()).hasSize(1);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -310,10 +320,10 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -352,10 +362,10 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -406,10 +416,10 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
+        FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -426,7 +436,7 @@ public class OnboardRestControllerIT {
                 Collections.singleton(datexNO)
         ));
         assertThat(addedCapability).isNotNull();
-		ListCapabilitiesResponse serviceProviderCapabilities = restController.listCapabilities(serviceProviderName);
+        ListCapabilitiesResponse serviceProviderCapabilities = restController.listCapabilities(serviceProviderName);
         assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
@@ -438,11 +448,11 @@ public class OnboardRestControllerIT {
         restController.deleteCapability(serviceProviderName, saved.getId());
 
         //We did four calls to the controller, thus we should have checked the cert 4 times
-        verify(certService,times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
-    public void testDeletingNonExistentCapability(){
+    public void testDeletingNonExistentCapability() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteCapability(serviceProviderName, "1")
@@ -450,7 +460,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingCapabilityWithInvalidId(){
+    public void testDeletingCapabilityWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         String invalidId = "notAnId";
 
@@ -475,22 +485,22 @@ public class OnboardRestControllerIT {
         assertThat(addedCapability).isNotNull();
         LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,capability.getId());
+        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
-        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
-    public void testGettingCapabilityWithInvalidId(){
+    public void testGettingCapabilityWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderCapability(serviceProviderName, "notAnId")
+                () -> restController.getCapability(serviceProviderName, "notAnId")
         );
     }
 
     @Test
-    public void testGettingNonExistentCapability(){
+    public void testGettingNonExistentCapability() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteCapability(serviceProviderName, "1")
@@ -519,7 +529,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddSubscriptionNullArgument() {
         assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
-                () -> restController.addSubscriptions("serviceProvider",null)
+                () -> restController.addSubscriptions("serviceProvider", null)
         );
     }
 
@@ -528,15 +538,15 @@ public class OnboardRestControllerIT {
         AddSubscriptionsRequest request = new AddSubscriptionsRequest();
         request.setSubscriptions(null);
         assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
-                () -> restController.addSubscriptions("serviceProvider",request)
+                () -> restController.addSubscriptions("serviceProvider", request)
         );
     }
 
     @Test
     public void testAddSubscrptionsEmptySubscriptionsSet() {
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest("serviceProvider",Collections.emptySet());
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("serviceProvider", Collections.emptySet());
         assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
-                () -> restController.addSubscriptions("serviceProvider",request)
+                () -> restController.addSubscriptions("serviceProvider", request)
         );
 
     }
@@ -545,12 +555,12 @@ public class OnboardRestControllerIT {
     public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         String serviceProvider = "serviceprovider";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider,Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
-        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider,request);
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
     }
 
     @Test
@@ -587,8 +597,8 @@ public class OnboardRestControllerIT {
         String serviceproviderName = "serviceprovider";
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceproviderName,
-                new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Collections.emptySet()),
-                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector,nodeProperties.getName())),
+                new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()),
+                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, nodeProperties.getName())),
                 Collections.emptySet(),
                 LocalDateTime.now()
         );
@@ -598,7 +608,7 @@ public class OnboardRestControllerIT {
                 serviceproviderName,
                 Collections.singleton(new AddSubscription(selector))
         );
-        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName,request);
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
@@ -606,19 +616,19 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingInvalidSubscriptionObject(){
+    public void testAddingInvalidSubscriptionObject() {
         String serviceProviderName = "serviceprovider";
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName,
                 null);
 
-        SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () ->{
+        SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () -> {
             restController.addSubscriptions(serviceProviderName, request);
         });
         assertThat(thrown.getMessage()).isEqualTo("Bad api object for Subscription Request. No selectors.");
     }
 
     @Test
-    public void testAddingSubscriptionWithInvalidSelector(){
+    public void testAddingSubscriptionWithInvalidSelector() {
         String selector = "Invalid selector";
         String serviceProviderName = "serviceprovider";
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
@@ -640,8 +650,8 @@ public class OnboardRestControllerIT {
     @Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
-        String selector= "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -656,21 +666,21 @@ public class OnboardRestControllerIT {
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
-        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector, serviceProviderName))));
-        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
     }
 
     @Test
     public void testDeletingSubscription() {
-		LocalDateTime beforeDeleteTime = LocalDateTime.now();
+        LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
@@ -681,19 +691,19 @@ public class OnboardRestControllerIT {
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
-		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
-		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+        ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
-		LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
-        restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
+        LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
+        restController.deleteSubscription(serviceProviderName, subscriptionApi.getId());
 
-		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
-		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
-        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
-	}
+        ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
 
     @Test
-    public void testDeletingSubscriptionWithInvalidId(){
+    public void testDeletingSubscriptionWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteSubscription(serviceProviderName, "notAnId")
@@ -702,51 +712,51 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingNonExistentSubscription(){
+    public void testDeletingNonExistentSubscription() {
         String serviceprovidername = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteSubscription(serviceprovidername, "1")
         );
     }
 
-	@Test
-	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
-		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
+    @Test
+    void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
+        String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
-		        serviceProviderName,
+                serviceProviderName,
                 Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node"))
         );
-         restController.addSubscriptions(serviceProviderName, requestApi);
+        restController.addSubscriptions(serviceProviderName, requestApi);
 
-		ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
-		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
-		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
-		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
-		assertThat(subscriptionUpdated).isPresent();
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
+        assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
+        ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
+        Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
+        assertThat(subscriptionUpdated).isPresent();
 
-		try {
-			restController.deleteSubscription(serviceProviderName, "-1");
-		} catch (NotFoundException ignore) {
-		}
-		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
+        try {
+            restController.deleteSubscription(serviceProviderName, "-1");
+        } catch (NotFoundException ignore) {
+        }
+        ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
 
-		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
-        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
-	}
+        assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
+        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
 
     @Test
-    public void testGettingSubscriptionWithInvalidId(){
+    public void testGettingSubscriptionWithInvalidId() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderSubscription(serviceProviderName, "notAnId")
+                () -> restController.getSubscription(serviceProviderName, "notAnId")
         );
     }
 
     @Test
-    public void testGettingNonExistentSubscription(){
+    public void testGettingNonExistentSubscription() {
         String serviceProviderName = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.getServiceProviderSubscription(serviceProviderName, "1")
+                () -> restController.getSubscription(serviceProviderName, "1")
         );
     }
 
@@ -762,76 +772,76 @@ public class OnboardRestControllerIT {
 
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
         LocalActorSubscription subscription = anySubscription.get();
-        GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
-        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
     }
 
     @Test
-    public void testAddingChannels(){
+    public void testAddingChannels() {
         String serviceProviderName = "my-service-provider";
 
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
-        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
         assertThat(privateChannelRepository.findAll()).hasSize(3);
-        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, null));
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, null));
         assertThat(thrown.getMessage()).isEqualTo("Private channel can not be null");
     }
 
     @Test
-    public void testAddingChannelWithServiceProviderAsPeerName(){
+    public void testAddingChannelWithServiceProviderAsPeerName() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel = new PrivateChannelApi(serviceProviderName);
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(serviceProviderName);
 
-        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannel(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
+        PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
     }
 
     @Test
-    public void testAddingNullChannelsRequest(){
+    public void testAddingNullChannelsRequest() {
         AddPrivateChannelRequest request = null;
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
     @Test
-    public void testAddingNullChannelSet(){
+    public void testAddingNullChannelSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         request.setPrivateChannels(null);
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
     @Test
-    public void testAddingEmptyChannelsSet(){
+    public void testAddingEmptyChannelsSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
-                () -> restController.addPrivateChannel("serviceProvider", request)
+                () -> restController.addPrivateChannels("serviceProvider", request)
         );
     }
 
     @Test
-    public void testAddingAndDeletingChannel(){
+    public void testAddingAndDeletingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel = new PrivateChannelApi("my-channel");
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi("my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
 
-        AddPrivateChannelResponse response = restController.addPrivateChannel(serviceProviderName, request);
+        AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
 
         System.out.println(response.getPrivateChannels().get(0));
-        restController.deletePrivateChannel(serviceProviderName,response.getPrivateChannels().get(0).getId().toString());
+        restController.deletePrivateChannel(serviceProviderName, response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.TEAR_DOWN, serviceProviderName).size()).isEqualTo(1);
     }
 
     @Test
-    public void testDeletingNonExistentChannel(){
+    public void testDeletingNonExistentChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "1")
@@ -839,7 +849,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingInvalidChannelId(){
+    public void testDeletingInvalidChannelId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "notAnId")
@@ -847,31 +857,31 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGettingPrivateChannels(){
+    public void testGettingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
-        restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
-        ListPrivateChannelsResponse response = restController.getPrivateChannels(serviceProviderName);
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        ListPrivateChannelsResponse response = restController.listPrivateChannels(serviceProviderName);
         assertThat(response.getPrivateChannels().size()).isEqualTo(3);
     }
 
     @Test
-    public void testGettingChannel(){
+    public void testGettingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi("my-channel2");
-        PrivateChannelApi clientChannel_3 = new PrivateChannelApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
-        AddPrivateChannelResponse privateChannels = restController.addPrivateChannel(serviceProviderName,new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
         assertThat(channelResponse).isNotNull();
     }
 
     @Test
-    public void testGettingNonExistentChannel(){
+    public void testGettingNonExistentChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "1")
@@ -879,7 +889,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGettingChannelWithInvalidId(){
+    public void testGettingChannelWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "notAnId")
@@ -887,18 +897,18 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGetPeerPrivateChannels(){
+    public void testGetPeerPrivateChannels() {
         String serviceProviderName_1 = "my-service-provider";
         String serviceProviderName_2 = "my-service-provider2";
 
-        PrivateChannelApi clientChannel_1 = new PrivateChannelApi("my-channel");
-        PrivateChannelApi clientChannel_2 = new PrivateChannelApi(serviceProviderName_1);
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(serviceProviderName_1);
 
-        restController.addPrivateChannel(serviceProviderName_1,new AddPrivateChannelRequest(List.of(clientChannel_1)));
-        restController.addPrivateChannel(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
+        restController.addPrivateChannels(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
+        restController.addPrivateChannels(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
 
-        ListPeerPrivateChannels response_1 = restController.getPeerPrivateChannels(serviceProviderName_1);
-        ListPeerPrivateChannels response_2 = restController.getPeerPrivateChannels(serviceProviderName_2);
+        ListPeerPrivateChannels response_1 = restController.listPeerPrivateChannels(serviceProviderName_1);
+        ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
     }
@@ -906,7 +916,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingNullRequest() {
         assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
-                () -> restController.addDeliveries("serviceProvider",null)
+                () -> restController.addDeliveries("serviceProvider", null)
         );
     }
 
@@ -915,7 +925,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest();
         request.setDeliveries(null);
         assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
-                () -> restController.addDeliveries("serviceProvider",request)
+                () -> restController.addDeliveries("serviceProvider", request)
         );
     }
 
@@ -926,7 +936,7 @@ public class OnboardRestControllerIT {
                 Collections.emptySet()
         );
         assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
-                () -> restController.addDeliveries("serviceProvider",request)
+                () -> restController.addDeliveries("serviceProvider", request)
         );
     }
 
@@ -959,18 +969,18 @@ public class OnboardRestControllerIT {
                         new SelectorApi(selector)
                 )
         );
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(response.getDeliveries()).allMatch(d -> d.getStatus().equals(DeliveryStatus.REQUESTED));
 
         //change the delivery status in the database
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(serviceProvider.getDeliveries()).hasSize(1);
-        serviceProvider.getDeliveries().stream().forEach( d -> d.setStatus(LocalDeliveryStatus.CREATED));
+        serviceProvider.getDeliveries().stream().forEach(d -> d.setStatus(LocalDeliveryStatus.CREATED));
         serviceProviderRepository.save(serviceProvider);
 
         //now, add the second delivery with original status
-        response = restController.addDeliveries(serviceProviderName,request);
+        response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
         serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
@@ -978,7 +988,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingDeliveryWithInvalidSelector(){
+    public void testAddingDeliveryWithInvalidSelector() {
 
         String serviceProviderName = "my-service-provider";
         String selector = "Invalid selector";
@@ -990,7 +1000,7 @@ public class OnboardRestControllerIT {
         );
 
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
         Delivery delivery = response.getDeliveries().stream().findFirst().get();
@@ -999,7 +1009,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingDeliveryWithNoSelector(){
+    public void testAddingDeliveryWithNoSelector() {
         String serviceProviderName = "my-service-provider";
         String selector = null;
 
@@ -1010,7 +1020,7 @@ public class OnboardRestControllerIT {
                 )
         );
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
         Delivery delivery = response.getDeliveries().stream().findFirst().get();
@@ -1019,7 +1029,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testListDeliveries(){
+    public void testListDeliveries() {
         String serviceProviderName = "my-service-provider";
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
@@ -1031,12 +1041,12 @@ public class OnboardRestControllerIT {
         ListDeliveriesResponse response = restController.listDeliveries(serviceProviderName);
 
         assertThat(response.getDeliveries().size()).isEqualTo(1);
-        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
 
     }
 
     @Test
-    public void testGettingDelivery(){
+    public void testGettingDelivery() {
         String serviceProviderName = "my-service-provider";
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
@@ -1056,7 +1066,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGettingDeliveryWithInvalidId(){
+    public void testGettingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getDelivery(serviceProviderName, "notAnId")
@@ -1064,7 +1074,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingDelivery(){
+    public void testDeletingDelivery() {
 
         String serviceProviderName = "my-service-provider";
         String selector = "messageType='DENM'";
@@ -1074,9 +1084,9 @@ public class OnboardRestControllerIT {
                         new SelectorApi(selector)
                 )
         );
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
 
-        restController.deleteDelivery(serviceProviderName,response.getDeliveries().stream().findFirst().get().getId());
+        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId());
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()
                 .stream()
                 .filter(i -> i.getStatus().equals(DeliveryStatus.ILLEGAL)))
@@ -1084,7 +1094,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingNonExistentDelivery(){
+    public void testDeletingNonExistentDelivery() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "1")
@@ -1092,20 +1102,27 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingDeliveryWithInvalidId(){
+    public void testDeletingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "notAnId")
         );
     }
 
+    @Autowired
+    WebApplicationContext context;
+    @Test
+    public void genSwagger() throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+                .andDo((result -> {
+                    Files.deleteIfExists(Paths.get("target/swagger/swagger.json"));
+                    Files.createDirectories(Paths.get("target/swagger"));
+                    try(FileWriter fileWriter = new FileWriter("target/swagger/swagger.json")){
+                        fileWriter.write(result.getResponse().getContentAsString());
+                    }
 
-
-
-
-
-
-
-
+                }));
+    }
 
 }

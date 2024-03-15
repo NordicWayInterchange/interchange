@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
-import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelResponseApi;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -90,17 +90,17 @@ public class ServiceProviderImport {
         return serviceProvider;
     }
 
-    public static List<PrivateChannel> mapPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<PrivateChannelApi> privateChannelApis) {
+    public static List<PrivateChannel> mapPrivateChannelApiToPrivateChannels(String serviceProviderName, Set<PrivateChannelResponseApi> privateChannelResponseApis) {
         List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
 
-        for (PrivateChannelApi privateChannelApi : privateChannelApis) {
+        for (PrivateChannelResponseApi privateChannelResponseApi : privateChannelResponseApis) {
             importedPrivateChannels.add(new PrivateChannel(
-                    privateChannelApi.getPeerName(),
+                    privateChannelResponseApi.getPeerName(),
                     PrivateChannelStatus.REQUESTED,
                     new PrivateChannelEndpoint(
-                            privateChannelApi.getEndpoint().getHost(),
-                            privateChannelApi.getEndpoint().getPort(),
-                            privateChannelApi.getEndpoint().getQueueName()
+                            privateChannelResponseApi.getEndpoint().getHost(),
+                            privateChannelResponseApi.getEndpoint().getPort(),
+                            privateChannelResponseApi.getEndpoint().getQueueName()
                     ),
                     serviceProviderName
             ));

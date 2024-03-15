@@ -9,12 +9,12 @@ public class ListPrivateChannelsResponse {
 
     private String name;
 
-    private List<PrivateChannelApi> privateChannels;
+    private List<PrivateChannelResponseApi> privateChannels;
 
     public ListPrivateChannelsResponse() {
     }
 
-    public ListPrivateChannelsResponse(String name, List<PrivateChannelApi> privateChannels) {
+    public ListPrivateChannelsResponse(String name, List<PrivateChannelResponseApi> privateChannels) {
         this.name = name;
         this.privateChannels = privateChannels;
     }
@@ -35,11 +35,11 @@ public class ListPrivateChannelsResponse {
         this.name = name;
     }
 
-    public List<PrivateChannelApi> getPrivateChannels() {
+    public List<PrivateChannelResponseApi> getPrivateChannels() {
         return privateChannels;
     }
 
-    public void setPrivateChannels(List<PrivateChannelApi> privateChannels) {
+    public void setPrivateChannels(List<PrivateChannelResponseApi> privateChannels) {
         this.privateChannels = privateChannels;
     }
 

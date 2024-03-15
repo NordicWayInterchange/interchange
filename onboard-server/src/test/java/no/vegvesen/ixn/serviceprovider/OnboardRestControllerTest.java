@@ -15,7 +15,6 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -390,6 +389,7 @@ public class OnboardRestControllerTest {
 				get(String.format("/%s/network/capabilities?selector=%s", serviceProviderName, selector))
 		).andExpect(status().isOk());
 	}
+
 	@Test
 	public void postingDeliveryReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
@@ -546,7 +546,7 @@ public class OnboardRestControllerTest {
 	public void testAddingChannelWithServiceProviderAsPeerName() throws Exception {
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
-		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelApi(serviceProviderName)));
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(serviceProviderName)));
 
 		mockMvc.perform(
 				post(String.format("/%s/privatechannels", serviceProviderName))
@@ -561,7 +561,6 @@ public class OnboardRestControllerTest {
 	public void testAddingInvalidRequest() throws Exception{
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
-
 
 		mockMvc.perform(
 						post(String.format("/%s/privatechannels", serviceProviderName))
@@ -618,7 +617,6 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-
 		mockMvc.perform(
 				delete(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
 		).andExpect(status().isNotFound());
@@ -639,6 +637,7 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
 	}
+
 	@Test
 	public void testGettingOneChannel() throws Exception {
 
@@ -657,7 +656,6 @@ public class OnboardRestControllerTest {
 		).andExpect(status().isOk());
 
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
-
 	}
 
 	@Test
@@ -675,6 +673,7 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
 	}
+
 	@Test
 	public void testGettingChannelWithInvalidId() throws Exception{
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
@@ -701,5 +700,4 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
-
 }

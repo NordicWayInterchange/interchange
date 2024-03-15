@@ -79,7 +79,7 @@ See the example values file helm/interchange/example_values.yml
 ### Resources
 [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki)
 
-[Nordic Way](http://vejdirektoratet.dk/EN/roadsector/Nordicway/Pages/Default.aspx)
+[Nordic Way](https://www.nordicway.net/)
 
 # Third-party licenses 
 To get a list of the third-party licenses used in the project, run (in bash):

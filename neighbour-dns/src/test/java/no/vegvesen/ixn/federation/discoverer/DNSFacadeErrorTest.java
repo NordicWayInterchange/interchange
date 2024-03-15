@@ -11,7 +11,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest(classes = {DNSFacade.class, DNSProperties.class})
 @EnableConfigurationProperties
 @ActiveProfiles("error")
