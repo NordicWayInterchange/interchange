@@ -196,13 +196,23 @@ public class QpidClient {
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
 		logger.debug("Getting member named '{}' from group '{}'",memberName,groupName);
-		try {
-			String url = groupsUrl + groupName + "/" + memberName;
-			logger.debug("GETting from URL {}", url);
-			return restTemplate.getForEntity(url, GroupMember.class).getBody();
-		} catch (HttpClientErrorException.NotFound e) {
-			return null;
+		for (GroupMember groupMember : getMembersInGroup(groupName)) {
+			if (groupMember.getName().equals(memberName)) {
+				return groupMember;
+			}
 		}
+		return null;
+	}
+
+
+	public List<GroupMember> getMembersInGroup(String groupName) {
+		logger.debug("Getting members from group '{}'",groupName);
+		return restTemplate.exchange(
+				groupsUrl + "/" + groupName,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<List<GroupMember>>() {
+				}).getBody();
 	}
 
 
