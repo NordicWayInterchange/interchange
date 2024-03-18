@@ -135,7 +135,9 @@ public class QpidClient {
 	}
 
 	public boolean queueExists(String queueName) {
-		return getQueue(queueName) != null;
+		boolean exists = getQueue(queueName) != null;
+		logger.debug("Queue '{}' exist? {}", queueName,exists);
+		return exists;
 	}
 
 	public Queue getQueue(String queueName) {
@@ -160,7 +162,9 @@ public class QpidClient {
 
 
 	public boolean exchangeExists(String exchangeName) {
-		return getExchange(exchangeName) != null;
+		boolean exist = getExchange(exchangeName) != null;
+		logger.debug("Exchange '{}' exist? {}", exchangeName,exist);
+		return exist;
 	}
 
 
@@ -191,6 +195,7 @@ public class QpidClient {
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
+		logger.debug("Getting member named '{}' from group '{}'",memberName,groupName);
 		try {
 			String url = groupsUrl + groupName + "/" + memberName;
 			logger.debug("GETting from URL {}", url);
@@ -286,6 +291,7 @@ public class QpidClient {
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {
+		logger.debug("Getting all queues");
 		ResponseEntity<List<Queue>> allQueuesResponse  = restTemplate.exchange(
 				allQueuesUrl,
 				HttpMethod.GET,
@@ -296,6 +302,7 @@ public class QpidClient {
 	}
 
 	public List<Exchange> getAllExchanges() throws JsonProcessingException {
+		logger.debug("Getting all exchanges");
 		ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
 				allExchangesUrl,
 				HttpMethod.GET,
@@ -306,6 +313,7 @@ public class QpidClient {
 	}
 
 	public QpidDelta getQpidDelta() {
+		logger.debug("Getting qpidDelta");
 		try {
 			List<Queue> allQueues = getAllQueues();
 			List<Exchange> allExchanges = getAllExchanges();
