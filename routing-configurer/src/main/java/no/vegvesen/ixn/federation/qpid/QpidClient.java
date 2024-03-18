@@ -117,8 +117,7 @@ public class QpidClient {
 
 	private Queue createQueue(CreateQueueRequest request) {
 		logger.info("Create queue {}", request.getName());
-		Queue result = restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
-		return result;
+        return restTemplate.postForEntity(queuesURL + "/", request, Queue.class).getBody();
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
@@ -129,11 +128,14 @@ public class QpidClient {
 	}
 
 	public boolean queueExists(String queueName) {
-		return getQueue(queueName) != null;
+		boolean exists = getQueue(queueName) != null;
+		logger.debug("Queue '{}' exist? {}", queueName,exists);
+		return exists;
 	}
 
 	public Queue getQueue(String queueName) {
 		try {
+            logger.debug("Getting queue '{}'", queueName);
 			return restTemplate.getForEntity(queuesURL + "/" + queueName, Queue.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
@@ -142,6 +144,7 @@ public class QpidClient {
 
 	public Exchange getExchange(String exchangeName) {
 		try {
+			logger.debug("Getting exchange '{}'", exchangeName);
 			return restTemplate.getForEntity(exchangesURL + "/" + exchangeName, Exchange.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
@@ -150,11 +153,14 @@ public class QpidClient {
 
 
 	public boolean exchangeExists(String exchangeName) {
-		return getExchange(exchangeName) != null;
+		boolean exist = getExchange(exchangeName) != null;
+		logger.debug("Exchange '{}' exist? {}", exchangeName,exist);
+		return exist;
 	}
 
 
 	public List<Binding> getQueuePublishingLinks(String queueName) {
+		logger.debug("Getting publishing links for '{}'", queueName);
 		return restTemplate.exchange(
 				queuesURL + "/" + queueName + "/getPublishingLinks",
 				HttpMethod.GET,
@@ -175,6 +181,7 @@ public class QpidClient {
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
+		logger.debug("Getting member named '{}' from group '{}'",memberName,groupName);
 		try {
 			return restTemplate.getForEntity(groupsUrl + groupName + "/" + memberName, GroupMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
@@ -265,6 +272,7 @@ public class QpidClient {
 	}
 
 	public List<Queue> getAllQueues() throws JsonProcessingException {
+		logger.debug("Getting all queues");
 		ResponseEntity<List<Queue>> allQueuesResponse  = restTemplate.exchange(
 				allQueuesUrl,
 				HttpMethod.GET,
@@ -275,6 +283,7 @@ public class QpidClient {
 	}
 
 	public List<Exchange> getAllExchanges() throws JsonProcessingException {
+		logger.debug("Getting all exchanges");
 		ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
 				allExchangesUrl,
 				HttpMethod.GET,
@@ -285,6 +294,7 @@ public class QpidClient {
 	}
 
 	public QpidDelta getQpidDelta() {
+		logger.debug("Getting qpidDelta");
 		try {
 			List<Queue> allQueues = getAllQueues();
 			List<Exchange> allExchanges = getAllExchanges();
