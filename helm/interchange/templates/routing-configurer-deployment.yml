@@ -40,7 +40,7 @@ spec:
         - name: TRUST_STORE_PASSWORD
           value: {{ .Values.trust_store_password | quote }}
         - name: KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}key_store.p12
+          value: {{ .Values.self.secret_mount_path }}{{.Values.self.key_store}}
         - name: KEY_STORE_PASSWORD
           value: {{ .Values.key_store_password | quote }}
         - name: LOG_LEVELS
