@@ -108,6 +108,8 @@ services:
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+      - INTERNAL_KEY_STORE=/jks/keys/a_qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
     depends_on:
     - mock-dns-server
     networks:
@@ -146,19 +148,19 @@ services:
     container_name: a_routing_configurer
     depends_on:
       - a_db
-    links:
-      - "a_qpid:a.bouvetinterchange.eu"
+        #links:
+        #- "a_qpid:a.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a.bouvetinterchange.eu
+      - BASE_URL=https://a_qpid
       - SERVER_NAME=a.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a_routing_configurer.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
@@ -330,6 +332,8 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
+      - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
     depends_on:
     - mock-dns-server
     networks:
@@ -343,18 +347,18 @@ services:
     depends_on:
       - b_db
     links:
-      - "b_qpid:b.bouvetinterchange.eu"
+        - "b_qpid:b.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://b.bouvetinterchange.eu
+      - BASE_URL=https://b_qpid
       - SERVER_NAME=b.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/b_routing_configurer.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
