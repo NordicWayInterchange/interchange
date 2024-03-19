@@ -1,5 +1,5 @@
 federated-interchanges.users=
-administrators.users=qpid-admin,b.bouvetinterchange.eu
+administrators.users=qpid-admin,b_routing_configurer
 service-providers.users=
 remote-service-providers.users=
 clients-private-channels.users=
