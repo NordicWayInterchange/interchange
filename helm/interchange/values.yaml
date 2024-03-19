@@ -5,6 +5,9 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
+  trust_store: "truststore.jks"                                     # Name of the truststore file name
+  key_store: "key_store.p12"                                        # Name of the key_store file name
+  tls_secret_name: "dev-no"                                         # Name of the generated Kubernetes secret
 
 qpid:
   replicas: 1
