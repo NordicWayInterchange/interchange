@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.properties.MessageProperty;
 
 import jakarta.persistence.*;
 import java.util.*;
@@ -86,28 +85,7 @@ public abstract class Application {
 
     public abstract ApplicationApi toApi();
 
-    public abstract String messageType();
-
-    public Map<String, Object> getSingleValuesBase() {
-        Map<String, Object> values = new HashMap<>();
-        putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
-        putValue(values, MessageProperty.PUBLICATION_ID, this.getPublicationId());
-        putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
-        putValue(values, MessageProperty.PROTOCOL_VERSION, this.getProtocolVersion());
-        putValue(values, MessageProperty.MESSAGE_TYPE, this.messageType());
-        return values;
-    }
-
-    static void putValue(Map<String, Object> values, MessageProperty messageProperty, Object value) {
-        if (value != null) {
-            if (value instanceof String) {
-                String sVal = (String)value;
-                if (!sVal.isEmpty()) {
-                    values.put(messageProperty.getName(), value);
-                }
-            }
-        }
-    }
+    public abstract String getMessageType();
 
     @Override
     public boolean equals(Object o) {

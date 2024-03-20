@@ -40,7 +40,7 @@ public class DenmApplication extends Application{
     }
 
     @Override
-    public String messageType() {
+    public String getMessageType() {
         return Constants.DENM;
     }
 }
