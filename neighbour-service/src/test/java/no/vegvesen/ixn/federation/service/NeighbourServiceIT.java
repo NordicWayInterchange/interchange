@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -22,6 +22,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -217,7 +218,7 @@ public class NeighbourServiceIT {
 
 
     @Test
-    public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
+    public void  postingCapabilityWithPublicationIdThatAlreadyExistsThrowsException() {
         Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
@@ -231,7 +232,7 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                Collections.singleton("23004"),
                                 Collections.singleton(1)
                             ),
                             new MetadataApi()
@@ -240,9 +241,9 @@ public class NeighbourServiceIT {
         Set<CapabilitySplit> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
-        //Now, try again, with the same capabilties, to simulate double post.
-        service.incomingCapabilities(capabilitiesApi,localCapabilities);
-        assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
+
+        //Now, try again, with the same capabilties, to simulate double post throws exception since publicationId already exists.
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
     }
 
     @Test
@@ -297,4 +298,117 @@ public class NeighbourServiceIT {
 
     }
 
+    @Test
+    public void requestingEmptySubscriptionSetThrowsException(){
+        SubscriptionRequestApi request = new SubscriptionRequestApi("Neighbour", Collections.emptySet());
+        assertThrows(SubscriptionRequestException.class, () -> service.incomingSubscriptionRequest(request));
+    }
+
+    @Test
+    public void postingNullCapabilitesThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-54";
+        neighbour.setName(name);
+        repository.save(neighbour);
+
+        CapabilitiesSplitApi neighbourCapabilities = new CapabilitiesSplitApi("neighbour-54", null);
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        assertThrows(CapabilityPostException.class,() ->  service.incomingCapabilities(neighbourCapabilities, localCapabilities));
+    }
+
+    @Test
+    public void postingCapabilitiesRequestWithDuplicatePublicationIdsThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-56";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+                name,
+                Set.of(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-123",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(1)
+                                ),
+                                new MetadataApi()
+                        ),
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-124",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(2)
+                                ),
+                                new MetadataApi()
+                                ))
+                );
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+
+        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi,localCapabilities));
+    }
+
+
+    @Test
+    public void postingCapabilityWithMissingPropertiesThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-57";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+                name,
+                Collections.singleton(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-123",
+                                        "pub-1",
+                                        "NO",
+                                        "",
+                                        Collections.singleton("23004"),
+                                        Collections.singleton(1)
+                                ),
+                                new MetadataApi()
+                        ))
+        );
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
+    }
+
+    @Test
+    public void findSubscriptionsFromNonExistentNeighbourThrowsException(){
+        assertThrows(InterchangeNotFoundException.class, () -> service.findSubscriptions("nonexistent"));
+    }
+    @Test
+    public void processSubscriptionRequestWithInvalidSelectorSetsStatusNOT_VALID(){
+
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("my-neighbour65");
+        repository.save(neighbour);
+
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("\"", "my-neighbour66");
+        SubscriptionRequestApi request = new SubscriptionRequestApi("my-neighbour65", Set.of(sub1));
+        SubscriptionResponseApi response = service.incomingSubscriptionRequest(request);
+
+        for(RequestedSubscriptionResponseApi s : response.getSubscriptions()){
+            assertThat(s.getStatus()).isEqualTo(SubscriptionStatusApi.NOT_VALID);
+        }
+    }
+    @Test
+    public void processSubscriptionRequestWithSelectorAlwaysTrueSetsStatusILLEGAL(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("my-neighbour66");
+        repository.save(neighbour);
+
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("1=1", "my-neighbour66");
+        SubscriptionRequestApi request = new SubscriptionRequestApi("my-neighbour66", Set.of(sub1));
+        SubscriptionResponseApi response = service.incomingSubscriptionRequest(request);
+        for(RequestedSubscriptionResponseApi s : response.getSubscriptions()){
+            assertThat(s.getStatus()).isEqualTo(SubscriptionStatusApi.ILLEGAL);
+        }
+    }
 }

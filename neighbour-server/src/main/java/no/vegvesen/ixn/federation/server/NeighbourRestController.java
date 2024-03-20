@@ -7,8 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -23,10 +28,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @RestController("/")
 public class NeighbourRestController {
@@ -58,8 +64,6 @@ public class NeighbourRestController {
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
-
-
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.debug("Common name of certificate matched name in API object.");
@@ -87,7 +91,6 @@ public class NeighbourRestController {
 		return reponse;
 	}
 
-
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -105,21 +108,20 @@ public class NeighbourRestController {
 		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
 	}
 
-
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST)))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE)))})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
+
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
-
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
-
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
+
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);

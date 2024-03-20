@@ -14,7 +14,7 @@ public class CapabilitiesSplitApi {
 
     private String name;
 
-    private Set<CapabilitySplitApi> capabilities = new HashSet<>();
+    private Set<CapabilitySplitApi> capabilities;
 
     public CapabilitiesSplitApi() {
 

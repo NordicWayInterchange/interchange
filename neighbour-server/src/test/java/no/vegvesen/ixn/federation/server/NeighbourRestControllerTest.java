@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.model.NeighbourSubscriptionRequest;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -28,10 +28,10 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,7 +54,7 @@ class NeighbourRestControllerTest {
 	private String subscriptionRequestPath = "/subscriptions";
 	private String capabilityExchangePath = "/capabilities";
 
-	private Set<String> quadTree = Collections.emptySet();
+	private Set<String> quadTree = Collections.singleton("12004");
 
 	@BeforeEach
 	void setUp() {
@@ -149,7 +149,7 @@ class NeighbourRestControllerTest {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
 
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", quadTree), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
@@ -323,6 +323,42 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
+	void testUnknownPropertiesAreIgnoredWhenPostingCapabilities() throws Exception {
+		mockCertificate("ericsson");
+		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
+		String json = """
+				    {
+				         "version": "2.0",
+				         "name": "ericsson",
+				         "capabilities": [
+				             {
+				                 "application": {
+				                     "messageType": "DATEX2",
+				                     "publisherId": "NO-12345",
+				                     "publicationId": "pub-2",
+				                     "originatingCountry": "NO",
+				                     "protocolVersion": "DATEX2:2.3",
+				                     "quadTree": ["1220"],
+				                     "publicationType": "SituationPublication"
+				                 },
+				                 "metadata": {
+				                     "shardCount": 1
+				                 }
+				             }
+				         ]
+				     }
+				""";
+		mockMvc.perform(
+						post(capabilityExchangePath)
+								.accept(MediaType.APPLICATION_JSON)
+								.contentType(MediaType.APPLICATION_JSON)
+								.content(json))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void postUnknownMessageTypeReturnsClientError() throws Exception {
 		mockCertificate("ericsson");
 
@@ -365,6 +401,57 @@ class NeighbourRestControllerTest {
 		)
 				.andDo(print())
 				.andExpect( result -> assertThat(result.getResponse().getStatus()).isEqualTo(404));
+	}
+
+	@Test
+	void testPollSubscriptionReturnsStatusOk() throws Exception {
+		mockCertificate("ericsson");
+
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+		when(neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId)).thenReturn(new SubscriptionPollResponseApi());
+		mockMvc.perform(get("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void testPollSubscriptionThrowsExceptionWhenNonExistent() throws Exception {
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		when(neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId)).thenThrow(new InterchangeNotFoundException(""));
+		mockMvc.perform(get("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isNotFound());
+
+	}
+	@Test
+	void testDeleteSubscriptionReturnsStatusOk() throws Exception{
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		mockMvc.perform(delete("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+	@Test
+	void testDeleteSubscriptionThrowsExceptionWhenSubDoesNotExist()throws Exception{
+		mockCertificate("ericsson");
+		String ixnName = "ericsson";
+		Integer subscriptionId = 1;
+
+		doThrow(new NeighbourSubscriptionNotFound("")).when(neighbourService).incomingSubscriptionDelete(any(), any());
+		mockMvc.perform(delete("/"+ixnName+subscriptionRequestPath+"/"+subscriptionId))
+				.andDo(print())
+				.andExpect(status().isNotFound());
+
 	}
 
 }

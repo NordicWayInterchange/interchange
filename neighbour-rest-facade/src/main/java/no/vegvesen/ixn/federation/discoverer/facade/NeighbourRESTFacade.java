@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
-
 @Component
 @Primary
 public class NeighbourRESTFacade implements NeighbourFacade {
@@ -48,7 +46,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
 	@Override
 	public Set<CapabilitySplit> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<CapabilitySplit> localCapabilities) {
-		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
+		String controlChannelUrl = neighbour.getControlChannelUrl("/capabilities");
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
 		CapabilitiesSplitApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);

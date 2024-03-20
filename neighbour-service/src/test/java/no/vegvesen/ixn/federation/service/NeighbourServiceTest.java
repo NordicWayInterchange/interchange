@@ -69,7 +69,7 @@ class NeighbourServiceTest {
 	void postDatexDataTypeCapability() {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, Sets.newSet(), "myPublicationType"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "1.1", Collections.singleton("23004"), "myPublicationType"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -108,7 +108,7 @@ class NeighbourServiceTest {
 		// incoming capabiity API
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("1", "Pub-1", "NO", "1.1", Collections.singleton("23004"), "test"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -126,7 +126,7 @@ class NeighbourServiceTest {
 		// Mock the incoming API object.
 		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi())));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("1", "pub-1", "NO", "1.1", Collections.singleton("23004"), "type"), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");

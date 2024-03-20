@@ -5,8 +5,10 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
@@ -147,7 +149,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.singleton("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub-1", "NO", "1.0", Collections.singleton("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -845,6 +847,97 @@ public class NeighbourDiscovererIT {
 
 		neighbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getControlConnection().getBackoffAttempts()).isEqualTo(2);
+	}
+
+	@Test
+	public void testConnectionStatusIsUnreachableAndBackoffIsNotResetWhenBackoffCounterExceedsLimitOnSubscriptionRequestFail(){
+		String selector1 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publisherId = 'NO0001'";
+		String selector2 = "originatingCountry = 'NO' AND messageType = 'DENM' AND publicationId = 'pub-1'";
+		String selector3 = "originatingCountry = 'NO' AND messageType = 'DENM' AND protocolVersion = '1.0'";
+		String consumerCommonName = nodeProperties.getName();
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.singleton("0122"),
+												Collections.singleton(6)
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						new HashSet<>(Arrays.asList(
+								new Subscription(
+										selector1,
+										SubscriptionStatus.CREATED,
+										consumerCommonName
+								), new Subscription(
+										selector2,
+										SubscriptionStatus.CREATED,
+										consumerCommonName
+								)
+						))
+				)
+		);
+
+		neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusMinutes(10));
+		neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusMinutes(10));
+
+		when(mockNeighbourFacade.postSubscriptionRequest(any(), any(), any())).thenThrow(new SubscriptionRequestException(""));
+
+		while(neighbour.getControlConnection().getBackoffAttempts() < 5) {
+			neighbourDiscoveryService.postSubscriptionRequest(neighbour, Set.of(new LocalSubscription(selector1, consumerCommonName), new LocalSubscription(selector2, consumerCommonName), new LocalSubscription(selector3, consumerCommonName)), mockNeighbourFacade);
+		}
+		assertThat(neighbour.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+		assertThat(neighbour.getControlConnection().getBackoffAttempts()).isEqualTo(5);
+	}
+
+	@Test
+	public void testConnectionStatusIsUnreachableAndBackoffIsNotResetWhenBackoffCounterExceedsLimitOnCapabilityPostFail(){
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.singleton("0122"),
+												Collections.singleton(6)
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
+						)),
+						LocalDateTime.now()
+				),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						new HashSet<>()
+				)
+		);
+		neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusMinutes(10));
+		neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusMinutes(10));
+
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(any(),any(), any())).thenThrow(new CapabilityPostException(""));
+
+		while(neighbour.getControlConnection().getBackoffAttempts() < 5){
+			neighbourDiscoveryService.capabilityExchange(List.of(neighbour), mockNeighbourFacade, neighbour.getCapabilities().getCapabilities(), Optional.of(LocalDateTime.now()));
+		}
+
+		assertThat(neighbour.getControlConnection().getBackoffAttempts()).isEqualTo(5);
+		assertThat(neighbour.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 	}
 
 	@Test
