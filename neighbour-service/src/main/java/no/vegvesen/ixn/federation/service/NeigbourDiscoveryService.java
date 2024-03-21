@@ -115,6 +115,10 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
+            Set<String> allPublicationIds; // Dersom publicationId er endret men ingenting annet, sjekk
+            for(CapabilitySplit capabilitySplit : capabilities){
+
+            }
             Capabilities neighbourCapabilities = neighbour.getCapabilities();
             neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
             neighbourCapabilities.setCapabilities(capabilities);
@@ -130,7 +134,10 @@ public class NeigbourDiscoveryService {
             logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
+    public Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities){
 
+        return null;
+    }
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
