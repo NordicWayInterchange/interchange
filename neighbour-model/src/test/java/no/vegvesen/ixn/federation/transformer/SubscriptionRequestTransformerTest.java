@@ -104,6 +104,13 @@ public class SubscriptionRequestTransformerTest {
 		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
 	}
 	@Test
+	public void subscriptionPollApiWithMultipleNullValues(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", null, null, SubscriptionStatusApi.REQUESTED, null);
+		Exception thrown = assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+		assertThat(thrown.getMessage().split("\r\n|\r|\n").length).isEqualTo(4);
+	}
+
+	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
 		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi(
 				"1",
@@ -182,5 +189,13 @@ public class SubscriptionRequestTransformerTest {
 				new RequestedSubscriptionResponseApi("originatingCountry='NO'", "/server/subs/1",null, "commonName")
 		);
 		assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
+	}
+	@Test
+	public void requestedSubscriptionWithMultipleNullValues(){
+		Set<RequestedSubscriptionResponseApi> requestedSubscriptions = Set.of(
+				new RequestedSubscriptionResponseApi(null, "/server/subs/1", (String) null, null)
+		);
+		Exception thrown = assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
+		assertThat(thrown.getMessage().split("\r\n|\r|\n").length).isEqualTo(4);
 	}
 }
