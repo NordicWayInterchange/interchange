@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SubscriptionRequestTransformerTest {
 
@@ -71,7 +73,36 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(result.getPath()).isEqualTo(path);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 	}
+	@Test
+	public void subscriptionPollApiWithNullSelector(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", null, "test", SubscriptionStatusApi.REQUESTED, "test");
+		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+	}
 
+	@Test
+	public void subscriptionPollApiWithNullPath(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", "test", null, SubscriptionStatusApi.REQUESTED, "test");
+		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+	}
+
+	@Test
+	public void subscriptionPollApiWithNullStatus(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", "test", "test", null, "test");
+		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+	}
+
+	@Test
+	public void subscriptionPollApiWithNullConsumerCommonName(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", "test", "test", SubscriptionStatusApi.REQUESTED, null);
+		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+	}
+	@Test
+	public void subscriptionPollApiWithNullEndpointValues(){
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", "test", "test", SubscriptionStatusApi.REQUESTED, "test");
+		api.setEndpoints(Set.of(new EndpointApi("test", "test",null)));
+		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
+
+	}
 	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
 		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi(

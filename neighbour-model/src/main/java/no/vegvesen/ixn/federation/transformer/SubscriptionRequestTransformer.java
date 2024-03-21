@@ -2,12 +2,14 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -40,7 +42,10 @@ public class SubscriptionRequestTransformer {
 		return subscriptionRequest;
 	}
 
+
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
+		validateSubscription(subscriptionApi);
+
 		Subscription subscription = new Subscription();
 		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
 		subscription.setSelector(subscriptionApi.getSelector());
@@ -111,4 +116,35 @@ public class SubscriptionRequestTransformer {
 		return response;
 	}
 
+	private void validateSubscription(SubscriptionPollResponseApi subscriptionApi){
+		StringBuilder errorMessage = new StringBuilder("Bad api object. Errors:\n");
+		boolean subscriptionIsValid = true;
+		if(subscriptionApi.getSelector() == null){
+			errorMessage.append("Selector can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionApi.getPath() == null){
+			errorMessage.append("Path can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionApi.getConsumerCommonName() == null){
+			errorMessage.append("ConsumerCommonName can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionApi.getStatus() == null){
+			errorMessage.append("Status can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionApi.getEndpoints() != null){
+			for(EndpointApi endpoint : subscriptionApi.getEndpoints()){
+				if(endpoint.getHost() == null || endpoint.getPort() == null || endpoint.getSource() == null){
+					errorMessage.append("Invalid endpoint. Values can not be null.\n");
+					subscriptionIsValid = false;
+				}
+			}
+		}
+		if(!subscriptionIsValid){
+			throw new SubscriptionPollException(errorMessage.toString());
+		}
+	}
 }
