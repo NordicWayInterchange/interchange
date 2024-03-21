@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -115,9 +116,18 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Set<String> allPublicationIds; // Dersom publicationId er endret men ingenting annet, sjekk
+            Set<CapabilitySplit> allCapabilities = allCapabilities(localCapabilities); // Dersom publicationId er endret men ingenting annet er det ok
             for(CapabilitySplit capabilitySplit : capabilities){
-
+                if(allCapabilities.contains(capabilitySplit)){
+                    throw new CapabilityResponseException("Bad api object. All capabilities must be unique");
+                }
+                if(localCapabilities.stream()
+                        .filter(a -> !a.getApplication().equals(capabilitySplit))
+                        .map(a -> a.getApplication().getPublicationId())
+                        .collect(Collectors.toSet())
+                        .contains(capabilitySplit.getApplication().getPublicationId())) {
+                    throw new CapabilityResponseException("Bad api object. All publicationIds in response must be unique");
+                }
             }
             Capabilities neighbourCapabilities = neighbour.getCapabilities();
             neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -134,9 +144,23 @@ public class NeigbourDiscoveryService {
             logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
-    public Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities){
-
-        return null;
+    private Set<CapabilitySplit> getAllNeighbourCapabilities() {
+        Set<CapabilitySplit> capabilities = new HashSet<>();
+        List<Neighbour> neighbours = neighbourRepository.findAll();
+        for (Neighbour neighbour : neighbours) {
+            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+        }
+        return capabilities;
+    }
+    private Set<CapabilitySplit> allCapabilities(Set<CapabilitySplit> localCapabilities) {
+        //neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
+        //return neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
+        localCapabilities.addAll(neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
+        return localCapabilities;
+    }
+    private Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities){
+        localCapabilities.addAll(getAllNeighbourCapabilities());
+        return localCapabilities.stream().map(a -> a.getApplication().getPublicationId()).collect(Collectors.toSet());
     }
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 

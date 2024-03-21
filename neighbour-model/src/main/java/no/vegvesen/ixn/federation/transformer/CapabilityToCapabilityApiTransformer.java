@@ -144,6 +144,18 @@ public class CapabilityToCapabilityApiTransformer {
 				errorMessage.append("PublisherId can not be null.\n");
 				capabilityIsValid = false;
 			}
+			if(application.getPublicationId() == null){
+				errorMessage.append("PublicationId can not be null.\n");
+				capabilityIsValid = false;
+			}
+			if(application.getQuadTree() == null){
+				errorMessage.append("QuadTree can not be null.\n");
+				capabilityIsValid = false;
+			}
+			if(application.getOriginatingCountry() == null){
+				errorMessage.append("OriginatingCountry can not be null.\n");
+				capabilityIsValid = false;
+			}
 		}
 		if(!capabilityIsValid){
 			throw new CapabilityResponseException(errorMessage.toString());
