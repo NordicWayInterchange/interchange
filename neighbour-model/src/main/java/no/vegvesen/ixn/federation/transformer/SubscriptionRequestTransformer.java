@@ -7,9 +7,7 @@ import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -44,7 +42,7 @@ public class SubscriptionRequestTransformer {
 
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
-		validateSubscription(subscriptionApi);
+		validateSubscriptionPollResponse(subscriptionApi);
 
 		Subscription subscription = new Subscription();
 		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
@@ -116,7 +114,7 @@ public class SubscriptionRequestTransformer {
 		return response;
 	}
 
-	private void validateSubscription(SubscriptionPollResponseApi subscriptionApi){
+	private void validateSubscriptionPollResponse(SubscriptionPollResponseApi subscriptionApi){
 		StringBuilder errorMessage = new StringBuilder("Bad api object. Errors:\n");
 		boolean subscriptionIsValid = true;
 		if(subscriptionApi.getSelector() == null){
