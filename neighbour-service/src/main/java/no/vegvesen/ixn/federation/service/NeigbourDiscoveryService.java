@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -116,9 +115,9 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Set<CapabilitySplit> allCapabilities = allCapabilities(localCapabilities); // Dersom publicationId er endret men ingenting annet er det ok
+            Set<CapabilitySplit> allNeighbourCapabilities = allNeighbourCapabilities();
             for(CapabilitySplit capabilitySplit : capabilities){
-                if(allCapabilities.contains(capabilitySplit)){
+                if(allNeighbourCapabilities.contains(capabilitySplit)){
                     throw new CapabilityResponseException("Bad api object. All capabilities must be unique");
                 }
                 if(localCapabilities.stream()
@@ -152,11 +151,8 @@ public class NeigbourDiscoveryService {
         }
         return capabilities;
     }
-    private Set<CapabilitySplit> allCapabilities(Set<CapabilitySplit> localCapabilities) {
-        //neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
-        //return neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
-        localCapabilities.addAll(neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
-        return localCapabilities;
+    private Set<CapabilitySplit> allNeighbourCapabilities() {
+        return neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
     }
     private Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities){
         localCapabilities.addAll(getAllNeighbourCapabilities());
