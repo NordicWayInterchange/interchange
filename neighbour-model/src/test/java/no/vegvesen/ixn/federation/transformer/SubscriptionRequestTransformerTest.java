@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.transformer;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -101,7 +102,6 @@ public class SubscriptionRequestTransformerTest {
 		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi("1", "test", "test", SubscriptionStatusApi.REQUESTED, "test");
 		api.setEndpoints(Set.of(new EndpointApi("test", "test",null)));
 		assertThrows(SubscriptionPollException.class, () -> subscriptionRequestTransformer.subscriptionPollApiToSubscription(api));
-
 	}
 	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
@@ -115,7 +115,6 @@ public class SubscriptionRequestTransformerTest {
 		);
 		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(api);
 		assertThat(subscription.getEndpoints()).isEmpty();
-
 	}
 
 	@Test
@@ -153,5 +152,35 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(subsResponse.getPath()).isEqualTo(path);
 		assertThat(subsResponse.getSelector()).isEqualTo(selector);
 		assertThat(subsResponse.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
+	}
+	@Test
+	public void requestedSubscriptionWithNullSelector(){
+		Set<RequestedSubscriptionResponseApi> requestedSubscriptions = Set.of(
+				new RequestedSubscriptionResponseApi(null, "/server/subs/1",SubscriptionStatusApi.REQUESTED, "CommonName")
+		);
+		assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
+	}
+	@Test
+	public void requestedSubscriptionWithNullConsumerCommonName(){
+		Set<RequestedSubscriptionResponseApi> requestedSubscriptions = Set.of(
+				new RequestedSubscriptionResponseApi("originatingCountry='NO'", "/server/subs/1",SubscriptionStatusApi.REQUESTED, null)
+		);
+		assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
+	}
+
+	@Test
+	public void requestedSubscriptionWithNullPath(){
+		Set<RequestedSubscriptionResponseApi> requestedSubscriptions = Set.of(
+				new RequestedSubscriptionResponseApi("originatingCountry='NO'", null,SubscriptionStatusApi.REQUESTED, "commonName")
+		);
+		assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
+	}
+
+	@Test
+	public void requestedSubscriptionWithNullStatus(){
+		Set<RequestedSubscriptionResponseApi> requestedSubscriptions = Set.of(
+				new RequestedSubscriptionResponseApi("originatingCountry='NO'", "/server/subs/1",null, "commonName")
+		);
+		assertThrows(SubscriptionRequestException.class, () -> subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(requestedSubscriptions));
 	}
 }

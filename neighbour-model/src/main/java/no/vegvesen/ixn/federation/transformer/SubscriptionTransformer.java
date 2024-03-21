@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.NeighbourSubscription;
 import no.vegvesen.ixn.federation.model.NeighbourSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -79,6 +80,7 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionResponseApiToSubscriptions(Set<RequestedSubscriptionResponseApi> subscriptionResponseApis) {
 		List<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
+			validateRequestedSubscriptionResponse(s);
 			Subscription subscription = new Subscription(
 					subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
 					s.getSelector(),
@@ -94,5 +96,29 @@ public class SubscriptionTransformer {
 	    return SubscriptionStatus.valueOf(status.name());
 	}
 
+	private void validateRequestedSubscriptionResponse(RequestedSubscriptionResponseApi subscriptionResponse){
+		StringBuilder errorMessage = new StringBuilder("Bad api object. Errors:\n");
+		boolean subscriptionIsValid = true;
 
+		if(subscriptionResponse.getStatus() == null){
+			errorMessage.append("Status can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionResponse.getConsumerCommonName() == null){
+			errorMessage.append("ConsumerCommonName can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionResponse.getPath() == null){
+			errorMessage.append("Path can not be null.\n");
+			subscriptionIsValid = false;
+		}
+		if(subscriptionResponse.getSelector() == null){
+			errorMessage.append("Selector can not be null.\n");
+			subscriptionIsValid = false;
+		}
+
+		if(!subscriptionIsValid){
+			throw new SubscriptionRequestException(errorMessage.toString());
+		}
+	}
 }
