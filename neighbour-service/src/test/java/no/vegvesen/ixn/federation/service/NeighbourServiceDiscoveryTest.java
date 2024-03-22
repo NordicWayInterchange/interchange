@@ -1,18 +1,13 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -739,4 +734,19 @@ public class NeighbourServiceDiscoveryTest {
 		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
 	}
 
+	@Test
+	public void receiveCapabilitiesWithDuplicatePublicationIdsSetsStatus(){
+		CapabilitySplit capabilitySplit1 = new CapabilitySplit(new DenmApplication("test","1","NO","1.1",Set.of("2"),Set.of(1)),new Metadata());
+		CapabilitySplit capabilitySplit2 = new CapabilitySplit(new DenmApplication("test","1","FI","1.1",Set.of("2"),Set.of(1)),new Metadata());
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("neighbour");
+
+		when(neighbourRepository.save(any())).thenReturn(neighbour);
+		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any(), any())).thenReturn(Set.of(capabilitySplit2, capabilitySplit1));
+		when(neighbourRepository.findAll()).thenReturn(List.of(neighbour));
+
+		neigbourDiscoveryService.capabilityExchange(List.of(neighbour),neighbourFacade, Set.of(),Optional.of(now));
+		assertThat(neighbour.getCapabilities().getStatus()).isEqualTo(Capabilities.CapabilitiesStatus.FAILED);
+
+	}
 }

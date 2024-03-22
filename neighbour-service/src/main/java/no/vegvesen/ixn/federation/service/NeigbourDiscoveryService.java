@@ -117,14 +117,15 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Set<CapabilitySplit> allCapabilities = getAllCapabilities(localCapabilities);
+            System.out.println(capabilities);
+            Set<CapabilitySplit> allCapabilities = getAllCapabilities(neighbour, localCapabilities);
             for(CapabilitySplit capabilitySplit : capabilities){
                 if(allCapabilities.contains(capabilitySplit)){
                     throw new CapabilityResponseException("Bad api object. All capabilities must be unique");
                 }
-                long capabilitiesWithSamePublicationId = allCapabilities.stream()
-                        .map(a -> a.getApplication().getPublicationId())
-                        .filter(a -> a.equals(capabilitySplit.getApplication().getPublicationId()))
+
+                long capabilitiesWithSamePublicationId = capabilities.stream()
+                        .filter(a -> a.getApplication().getPublicationId().equals(capabilitySplit.getApplication().getPublicationId()))
                         .count();
                 if(capabilitiesWithSamePublicationId > 1) {
                     throw new CapabilityResponseException("Bad api object. All publicationIds in response must be unique");
@@ -136,7 +137,7 @@ public class NeigbourDiscoveryService {
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.debug("Updated neighbour: {}", neighbour);
-        } catch (CapabilityPostException e) {
+        } catch (CapabilityPostException | CapabilityResponseException e) {
             logger.error("Capability post failed", e);
             neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
@@ -145,10 +146,10 @@ public class NeigbourDiscoveryService {
             logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
-    private Set<CapabilitySplit> getAllCapabilities(Set<CapabilitySplit> localCapabilities) {
+    private Set<CapabilitySplit> getAllCapabilities(Neighbour neighbour,Set<CapabilitySplit> localCapabilities) {
         Set<CapabilitySplit> allCapabilities = new HashSet<>();
         allCapabilities.addAll(localCapabilities);
-        allCapabilities.addAll(neighbourRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
+        allCapabilities.addAll(neighbourRepository.findAll().stream().filter(a -> !a.getName().equals(neighbour.getName())).flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
         return allCapabilities;
     }
 
