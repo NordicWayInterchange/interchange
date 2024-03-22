@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityResponseException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
@@ -41,7 +43,10 @@ public class CapabilityToCapabilityApiTransformer {
 	public Set<CapabilitySplit> capabilitiesSplitApiToCapabilitiesSplit(Set<CapabilitySplitApi> capabilitySplitApis) {
 		Set<CapabilitySplit> capabilitySplits = new HashSet<>();
 		for (CapabilitySplitApi capabilitySplitApi : capabilitySplitApis) {
-			validateCapability(capabilitySplitApi);
+			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilitySplitApi);
+			if(!capabilityProperties.isEmpty()){
+				throw new CapabilityResponseException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capabilitySplitApi, capabilityProperties));
+			}
 			logger.debug("Converting message type {}", capabilitySplitApi.getApplication().getMessageType());
 			capabilitySplits.add(new CapabilitySplit(
 					applicationApiToApplication(capabilitySplitApi.getApplication()),
@@ -107,58 +112,6 @@ public class CapabilityToCapabilityApiTransformer {
 				return RedirectStatus.NOT_AVAILABLE;
 			default:
 				return RedirectStatus.OPTIONAL;
-		}
-	}
-	private void validateCapability(CapabilitySplitApi capabilitySplitApi){
-		StringBuilder errorMessage = new StringBuilder("Bad api object. Errors: ");
-		boolean capabilityIsValid = true;
-		ApplicationApi application = capabilitySplitApi.getApplication();
-
-		if(application == null){
-			errorMessage.append("Application can not be null.\n");
-			capabilityIsValid = false;
-		}
-		else{
-			if(application instanceof DatexApplicationApi app){
-				if(app.getPublicationType() == null){
-					errorMessage.append("PublicationType can not be null.\n");
-					capabilityIsValid = false;
-				}
-			}
-			else if(application instanceof DenmApplicationApi app){
-				if(app.getCauseCode() == null){
-					errorMessage.append("CauseCode can not be null.\n");
-					capabilityIsValid = false;
-				}
-			}
-
-			if(application.getProtocolVersion() == null){
-				errorMessage.append("ProtocolVersion can not be null.\n");
-				capabilityIsValid = false;
-			}
-			if(application.getMessageType() == null){
-				errorMessage.append("MessageType can not be null.\n");
-				capabilityIsValid = false;
-			}
-			if(application.getPublisherId() == null){
-				errorMessage.append("PublisherId can not be null.\n");
-				capabilityIsValid = false;
-			}
-			if(application.getPublicationId() == null){
-				errorMessage.append("PublicationId can not be null.\n");
-				capabilityIsValid = false;
-			}
-			if(application.getQuadTree() == null){
-				errorMessage.append("QuadTree can not be null.\n");
-				capabilityIsValid = false;
-			}
-			if(application.getOriginatingCountry() == null){
-				errorMessage.append("OriginatingCountry can not be null.\n");
-				capabilityIsValid = false;
-			}
-		}
-		if(!capabilityIsValid){
-			throw new CapabilityResponseException(errorMessage.toString());
 		}
 	}
 }

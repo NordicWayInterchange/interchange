@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -10,6 +11,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,16 +117,16 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Set<CapabilitySplit> allNeighbourCapabilities = allNeighbourCapabilities();
+            Set<CapabilitySplit> allCapabilities = getAllCapabilities(localCapabilities);
             for(CapabilitySplit capabilitySplit : capabilities){
-                if(allNeighbourCapabilities.contains(capabilitySplit)){
+                if(allCapabilities.contains(capabilitySplit)){
                     throw new CapabilityResponseException("Bad api object. All capabilities must be unique");
                 }
-                if(localCapabilities.stream()
-                        .filter(a -> !a.getApplication().equals(capabilitySplit))
+                long capabilitiesWithSamePublicationId = allCapabilities.stream()
                         .map(a -> a.getApplication().getPublicationId())
-                        .collect(Collectors.toSet())
-                        .contains(capabilitySplit.getApplication().getPublicationId())) {
+                        .filter(a -> a.equals(capabilitySplit.getApplication().getPublicationId()))
+                        .count();
+                if(capabilitiesWithSamePublicationId > 1) {
                     throw new CapabilityResponseException("Bad api object. All publicationIds in response must be unique");
                 }
             }
@@ -143,21 +145,13 @@ public class NeigbourDiscoveryService {
             logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
-    private Set<CapabilitySplit> getAllNeighbourCapabilities() {
-        Set<CapabilitySplit> capabilities = new HashSet<>();
-        List<Neighbour> neighbours = neighbourRepository.findAll();
-        for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
-        }
-        return capabilities;
+    private Set<CapabilitySplit> getAllCapabilities(Set<CapabilitySplit> localCapabilities) {
+        Set<CapabilitySplit> allCapabilities = new HashSet<>();
+        allCapabilities.addAll(localCapabilities);
+        allCapabilities.addAll(neighbourRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
+        return allCapabilities;
     }
-    private Set<CapabilitySplit> allNeighbourCapabilities() {
-        return neighbourRepository.findAll().stream().flatMap(a-> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
-    }
-    private Set<String> allPublicationIds(Set<CapabilitySplit> localCapabilities){
-        localCapabilities.addAll(getAllNeighbourCapabilities());
-        return localCapabilities.stream().map(a -> a.getApplication().getPublicationId()).collect(Collectors.toSet());
-    }
+
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {

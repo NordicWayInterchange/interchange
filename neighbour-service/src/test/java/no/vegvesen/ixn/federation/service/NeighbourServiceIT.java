@@ -231,7 +231,7 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                Collections.singleton("23004"),
                                 Collections.singleton(1)
                             ),
                             new MetadataApi()
