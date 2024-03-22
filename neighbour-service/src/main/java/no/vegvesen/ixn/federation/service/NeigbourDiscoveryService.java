@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -11,7 +10,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,9 +116,9 @@ public class NeigbourDiscoveryService {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             System.out.println(capabilities);
-            Set<CapabilitySplit> allCapabilities = getAllCapabilities(neighbour, localCapabilities);
+            Set<String> allPublicationIds = getAllPublicationIds(neighbour, localCapabilities);
             for(CapabilitySplit capabilitySplit : capabilities){
-                if(allCapabilities.contains(capabilitySplit)){
+                if(allPublicationIds.contains(capabilitySplit.getApplication().getPublicationId())){
                     throw new CapabilityResponseException("Bad api object. All capabilities must be unique");
                 }
 
@@ -146,11 +144,11 @@ public class NeigbourDiscoveryService {
             logger.info("Saving updated neighbour: {}", neighbour.getName());
         }
     }
-    private Set<CapabilitySplit> getAllCapabilities(Neighbour neighbour,Set<CapabilitySplit> localCapabilities) {
+    private Set<String> getAllPublicationIds(Neighbour neighbour, Set<CapabilitySplit> localCapabilities) {
         Set<CapabilitySplit> allCapabilities = new HashSet<>();
         allCapabilities.addAll(localCapabilities);
         allCapabilities.addAll(neighbourRepository.findAll().stream().filter(a -> !a.getName().equals(neighbour.getName())).flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet()));
-        return allCapabilities;
+        return allCapabilities.stream().map(a->a.getApplication().getPublicationId()).collect(Collectors.toSet());
     }
 
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
