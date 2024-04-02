@@ -53,8 +53,8 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary = "Request subscriptions")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)}))})
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSREQUEST, description = "consumerCommonName is optional.")))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
@@ -110,8 +110,21 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST)))
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
+			content = @Content(examples = {
+			@ExampleObject(name="messageType DENM", value = ExampleAPIObjects.DENM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType DATEX", value = ExampleAPIObjects.DATEX_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType IVIM", value = ExampleAPIObjects.IVIM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType CAM", value = ExampleAPIObjects.CAM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType MAPEM", value = ExampleAPIObjects.MAPEM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SPATEM", value = ExampleAPIObjects.SPATEM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SREM", value = ExampleAPIObjects.SREM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SSEM", value = ExampleAPIObjects.SSEM_CAPABILITY_REQUEST)
+	}))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples ={
+		@ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE),
+	}
+	))})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
