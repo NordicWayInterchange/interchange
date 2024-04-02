@@ -77,7 +77,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Checkout to interchange-swagger-docs
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/update-swagger-neighbour-server'
+        if: github.ref == 'refs/heads/federation-master'
         uses: actions/checkout@v4
         with:
           repository: NordicWayInterchange/interchange-swagger-docs
@@ -85,7 +85,7 @@ jobs:
           path: interchange-swagger-docs
 
       - name: Push to github pages
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/update-swagger-neighbour-server'
+        if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
