@@ -53,8 +53,8 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary = "Request subscriptions")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))})
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSREQUEST, description = "consumerCommonName is optional.")))
+	@ApiResponses(value = {@ApiResponse(responseCode = "202", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "consumerCommonName is optional.", content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSREQUEST)))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
