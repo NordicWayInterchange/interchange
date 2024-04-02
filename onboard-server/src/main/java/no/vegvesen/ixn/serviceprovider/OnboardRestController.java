@@ -57,43 +57,17 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary = "Add capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this objects 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below.",
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
 			content = @Content(
 					examples = {
-							@ExampleObject(
-									name = "messageType DENM",
-									description = "",
-									value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType DATEX",
-									description = "",
-									value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType IVIM",
-									value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SPATEM",
-									value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType MAPEM",
-									value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SREM",
-									value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SSEM",
-									value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType CAM",
-									value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST
-							)}
+							@ExampleObject(name = "messageType DENM", value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType DATEX", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType IVIM", value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SPATEM", value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType MAPEM", value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SREM", value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SSEM", value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType CAM", value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST)}
 			))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDCAPABILITIESRESPONSE)))})
 	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
