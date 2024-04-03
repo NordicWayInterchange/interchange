@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.matcher;
 
-import lombok.Value;
 import java.util.*;
 
 class CombinationExpandingIterator<T> implements Iterator<Map<String, T>> {
@@ -15,8 +14,8 @@ class CombinationExpandingIterator<T> implements Iterator<Map<String, T>> {
         KeyValuePair<T> keyValuePair = takeNextKeyValuePairFromHeadOfMap(sourceMapCopy);
         nextIteratorInStack = prepareAnIteratorForTheRemainingEntriesInTheMap(sourceMapCopy);
         lastRetrievedValueFromNextIterator = getInitialValueFromIterator(nextIteratorInStack);
-        ownKey = keyValuePair.getKey();
-        ownValues = keyValuePair.getValue();
+        ownKey = keyValuePair.key();
+        ownValues = keyValuePair.value();
         ownValuesIterator = ownValues.iterator();
     }
 
@@ -73,9 +72,5 @@ class CombinationExpandingIterator<T> implements Iterator<Map<String, T>> {
         return stringObjectHashMap;
     }
 
-    @Value
-    private static class KeyValuePair<T> {
-        String key;
-        Collection<T> value;
-    }
+    private record KeyValuePair<T>(String key, Collection<T> value) { }
 }
