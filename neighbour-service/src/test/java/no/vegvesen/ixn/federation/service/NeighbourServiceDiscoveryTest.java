@@ -747,6 +747,19 @@ public class NeighbourServiceDiscoveryTest {
 
 		neigbourDiscoveryService.capabilityExchange(List.of(neighbour),neighbourFacade, Set.of(),Optional.of(now));
 		assertThat(neighbour.getCapabilities().getStatus()).isEqualTo(Capabilities.CapabilitiesStatus.FAILED);
-
 	}
+	@Test
+	public void receiveCapabilitiesWithMissingPropertiesSetsStatusFailed(){
+		CapabilitySplit capabilitySplit1 = new CapabilitySplit(new DenmApplication("test","1",null,"1.1",Set.of("2"),Set.of(1)),new Metadata());
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("neighbour");
+
+		when(neighbourRepository.save(any())).thenReturn(neighbour);
+		when(neighbourFacade.postCapabilitiesToCapabilities(any(),any(),any())).thenReturn(Set.of(capabilitySplit1));
+		when(neighbourRepository.findAll()).thenReturn(List.of(neighbour));
+
+		neigbourDiscoveryService.capabilityExchange(List.of(neighbour), neighbourFacade, Set.of(capabilitySplit1), Optional.of(now));
+		assertThat(neighbour.getCapabilities().getStatus()).isEqualTo(Capabilities.CapabilitiesStatus.FAILED);
+	}
+
 }
