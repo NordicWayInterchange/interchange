@@ -300,6 +300,32 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
+	void matchShardedSelectorToShardedCapability() {
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(denm_a_b_causeCode_1_2);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		capability.setMetadata(meta);
+
+		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5 AND shardId = 2";
+
+		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 2, selector)).isTrue();
+	}
+
+	@Test
+	void shardedSubscriptionDoesNotMatchShardedCapability() {
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(denm_a_b_causeCode_1_2);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		capability.setMetadata(meta);
+
+		String selector = "originatingCountry = 'NO' AND shardId = 2 AND (causeCode = 6 OR causeCode = 5)";
+
+		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 1, selector)).isFalse();
+	}
+
+	@Test
 	@Disabled
 	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.emptySet());
@@ -393,5 +419,23 @@ class CapabilityMatcherTest {
 
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,1200401%' and causeCode = 6";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
+
+	@Test
+	public void matchShardedSubscriptionToCapability() {
+		CapabilitySplit capability = new CapabilitySplit(
+				new DenmApplication(
+						"NO00000",
+						"NO00000-quad-tree-testing",
+						"NO",
+						"DENM:2.3.2",
+						Collections.singleton("12003"),
+						Collections.singleton(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
 	}
 }

@@ -121,6 +121,10 @@ public class NeighbourSubscription {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public boolean isSharded() {
+        return selector.contains("shardId=");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

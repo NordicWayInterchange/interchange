@@ -1033,7 +1033,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						Collections.singleton("0122"),
 						Collections.singleton(1)
 				),
-				new Metadata(RedirectStatus.NOT_AVAILABLE)
+				new Metadata(
+						"info",
+						3,
+						RedirectStatus.NOT_AVAILABLE,
+						0,
+						0,
+						0)
 		);
 		NeighbourSubscription neighbourSubscription = new NeighbourSubscription(
 				"publisherId = 'NO0000'",
