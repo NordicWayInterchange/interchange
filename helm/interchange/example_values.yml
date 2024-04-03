@@ -5,8 +5,10 @@ interchange_password: not-a-secure-password                       # Password for
 admin_password: not-a-secure-password                             # Password for a Qpid administrative user
 postgres_user: federation                                         # Database user
 postgres_password: federation                                     # Database password
-key_store: "test"                                                 # Name of key store file
-trust_store: truststore.jks                                       # Name of trust store file
+key_store: "test"                                                 # Contents of key store file, taken from a secret
+trust_store: truststore.jks                                       # Contents of trust store file, taken from a secret
+internal_keystore_contents: "Hello"                               # Contents of internal service keystore
+internal_truststore_contents: "Yo"                                # Contents of internal service truststore
 
 # Values:
 external_name: example-node.itsinterchange.eu
@@ -21,7 +23,8 @@ self:                                                               # ------ Gen
   nap_name: nap.example-node.itsinterchange.eu                      # Name of the napcore user connected to the napcore server
   trust_store: "truststore.jks"                                     # Name of the trust store file
   key_store: "key_store.p12"                                        # Name of the key store file
-
+  internal_keystore: internal.p12                                   # Name of internal service key store file
+  internal_truststore: internal_truststore.jks                      # Name of internal service trust store file
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
   image:

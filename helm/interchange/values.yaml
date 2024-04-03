@@ -8,6 +8,8 @@ self:                                                               # ------ Gen
   trust_store: "truststore.jks"                                     # Name of the truststore file name
   key_store: "key_store.p12"                                        # Name of the key_store file name
   tls_secret_name: "dev-no"                                         # Name of the generated Kubernetes secret
+  internal_keystore: internal.p12                                   # Name of internal service key store file
+  internal_truststore: internal_truststore.jks                      # Name of internal service trust store file
 
 qpid:
   replicas: 1
