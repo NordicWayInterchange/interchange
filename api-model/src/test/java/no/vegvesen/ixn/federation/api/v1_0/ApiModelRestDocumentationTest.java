@@ -48,7 +48,8 @@ public class ApiModelRestDocumentationTest {
                         "NO",
                         "DATEX:1.0",
                         Collections.singleton("1234"),
-                        "Roadworks"
+                        "Roadworks",
+                        "publisherName"
                 ),
                 new MetadataApi(
                         1,

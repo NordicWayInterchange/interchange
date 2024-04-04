@@ -76,7 +76,7 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		CapabilitySplitApi capabilityApi = new CapabilitySplitApi();
-		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), "SituationPublication");
+		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), "SituationPublication", "publisherName");
 		capabilityApi.setApplication(app);
 		MetadataApi meta = new MetadataApi();
 		capabilityApi.setMetadata(meta);

@@ -11,15 +11,19 @@ public class DatexApplicationApi extends ApplicationApi {
 
     private String publicationType;
 
+    private String publisherName;
+
     public DatexApplicationApi() {
 
     }
 
-    public DatexApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+
+    public DatexApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType, String publisherName) {
         super(Constants.DATEX_2, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         if (publicationType != null) {
             this.publicationType = publicationType;
         }
+        this.publisherName = publisherName;
     }
 
     public String getPublicationType() {
@@ -28,6 +32,14 @@ public class DatexApplicationApi extends ApplicationApi {
 
     public void setPublicationType(String publicationType) {
         this.publicationType = publicationType;
+    }
+
+    public String getPublisherName() {
+        return publisherName;
+    }
+
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
     }
 
     @Override
@@ -47,6 +59,7 @@ public class DatexApplicationApi extends ApplicationApi {
     public String toString() {
         return "DatexCapabilityApplicationApi{" +
                 "publicationType='" + publicationType + '\'' +
+                "publisherName='" + publisherName + '\'' +
                 '}' + super.toString();
     }
 }

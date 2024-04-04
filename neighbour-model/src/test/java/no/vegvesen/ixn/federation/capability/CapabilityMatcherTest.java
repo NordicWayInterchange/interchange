@@ -42,7 +42,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -55,7 +55,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -68,7 +68,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -81,7 +81,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -94,7 +94,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -107,7 +107,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -120,7 +120,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -133,7 +133,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction", "publisherName");
 		CapabilitySplit datexCapability = new CapabilitySplit();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);

@@ -143,6 +143,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .publisherId("NO-123")
                 .publicationId("pub-1")
                 .publicationType("Obstruction")
+                .publisherName("publishername")
                 .protocolVersion("DATEX2;2.3")
                 .shardId(1)
                 .shardCount(1)
