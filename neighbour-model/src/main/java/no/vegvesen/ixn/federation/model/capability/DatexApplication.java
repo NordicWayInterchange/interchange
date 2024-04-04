@@ -68,7 +68,7 @@ public class DatexApplication extends Application{
     public String toString() {
         return "DatexApplication{" +
                 "publicationType='" + publicationType + '\'' +
-                "publisherName='" + publisherName + '\'' +
+                ", publisherName='" + publisherName + '\'' +
                 '}' + super.toString();
     }
 }

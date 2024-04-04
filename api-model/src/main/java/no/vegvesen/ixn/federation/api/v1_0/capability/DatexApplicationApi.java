@@ -52,6 +52,7 @@ public class DatexApplicationApi extends ApplicationApi {
         putValue(values, CapabilityProperty.PROTOCOL_VERSION, this.getProtocolVersion());
         putMultiValue(values, CapabilityProperty.QUAD_TREE, this.getQuadTree());
         putValue(values, CapabilityProperty.PUBLICATION_TYPE, this.getPublicationType());
+        putValue(values, CapabilityProperty.PUBLISHER_NAME, this.getPublisherName());
         return values;
     }
 
@@ -59,7 +60,7 @@ public class DatexApplicationApi extends ApplicationApi {
     public String toString() {
         return "DatexCapabilityApplicationApi{" +
                 "publicationType='" + publicationType + '\'' +
-                "publisherName='" + publisherName + '\'' +
+                ", publisherName='" + publisherName + '\'' +
                 '}' + super.toString();
     }
 }
