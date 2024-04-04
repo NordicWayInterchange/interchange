@@ -55,6 +55,10 @@ jobs:
       - name: Login to Artifact Registry
         run: |
             gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
-      - name: helm push
+      - name: helm push to Google artifact registry
         run: |
           helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm
+      - name: helm push to Github container registry
+        run: |
+          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
+          helm push ${{ env.HELM_CHART }} oci://ghcr.io/nordicwayinterchange
