@@ -49,6 +49,22 @@ public class MessagePropertyTest {
     }
 
     @Test
+    public void mandatoryFieldsForDATEX(){
+        Set<MessageProperty> mandatoryDATEXProperties = new HashSet<>(Arrays.asList(
+                MessageProperty.PUBLISHER_NAME,
+                MessageProperty.PUBLICATION_TYPE
+        ));
+        Set<MessageProperty> optionalDATEXProperties = new HashSet<>(Arrays.asList(
+                MessageProperty.PUBLICATION_SUB_TYPE
+        ));
+
+        assertThat(filterProperties(MessageProperty.datex2ApplicationProperties, MessageProperty::isMandatory))
+                .isEqualTo(mandatoryDATEXProperties);
+
+        assertThat(filterProperties(MessageProperty.datex2ApplicationProperties, MessageProperty::isOptional))
+                .isEqualTo(optionalDATEXProperties);
+    }
+    @Test
     public void mandatoryFieldsForDENM() {
         Set<MessageProperty> mandatoryDENMProperties = new HashSet<>(Arrays.asList(
                 MessageProperty.CAUSE_CODE,

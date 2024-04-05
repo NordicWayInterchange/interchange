@@ -153,7 +153,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@NonNull
-	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
+	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType, String publisherName) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
 		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
 		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
@@ -162,6 +162,9 @@ public class NeighbourRepositoryIT {
 		}
 		if (publicationSubType != null) {
 			datexHeaders.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
+		}
+		if(publisherName != null){
+			datexHeaders.put(MessageProperty.PUBLISHER_NAME.getName(), publisherName);
 		}
 		return datexHeaders;
 	}

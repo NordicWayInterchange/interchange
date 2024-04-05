@@ -3,6 +3,7 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.model.IllegalMessageException;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
@@ -42,7 +44,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void explicitExpiryIsReceived() throws JMSException, NamingException {
+	public void invalidDatexMessageThrowsError() throws JMSException, NamingException{
 		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
 		kingHaraldTestQueueSource.start();
 		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
@@ -67,8 +69,30 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receive(1000);
-		assertThat(receive).isNotNull();
-		assertThat(receive.getJMSExpiration()).isNotNull().isGreaterThan(0);
+
+	}
+
+	@Test
+	public void explicitExpiryIsReceived() throws JMSException, NamingException {
+		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
+		kingHaraldTestQueueSource.start();
+		assertThrows(IllegalMessageException.class, () -> kingHaraldTestQueueSource.createMessageBuilder()
+				.textMessage("fisk")
+				.userId("localhost")
+				.messageType(Constants.DATEX_2)
+				.publisherId("king_harald")
+				.publicationId("NO00001")
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("SE")
+				.quadTreeTiles(",120002,")
+				.shardId(1)
+				.shardCount(1)
+				.timestamp(System.currentTimeMillis())
+				.build());
+
 	}
 
 	@Test
