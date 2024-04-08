@@ -1,0 +1,34 @@
+{
+  "topDomain": {
+    "domainName" : "lookupdomain.eu",
+    "intermediateDomains" : [ {
+      "domainName" : "ca.a.bouvetinterchange.eu",
+      "interchange" : {
+        "additionalHosts" : [ {
+          "hostname" : "a.bouvetinterchange.eu"
+        }, {
+          "hostname" : "a_qpid"
+        }],
+        "serviceProviders" : [ {
+          "name" : "king_gustaf.bouvetinterchange.eu"
+        }, {
+          "name" : "b_routing_configurer"
+        } ]
+      }
+    }, {
+      "domainName": "ca.b.bouvetinterchange.eu",
+      "interchange" : {
+        "additionalHosts" : [ {
+          "hostname": "b.bouvetinterchange.eu"
+        }, {
+          "hostname" : "b_qpid"
+        } ],
+        "serviceProviders" : [ {
+          "name" : "king_olav.bouvetinterchange.eu"
+        }, {
+          "name" : "a_routing_configurer"
+        }]
+      }
+    } ]
+  }
+}

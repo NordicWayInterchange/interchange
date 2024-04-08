@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,15 +56,15 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String keystorePassword = "password";
 		String truststorePassword = "password";
 		try {
-			ClusterKeyGenerator.KeyPairAndCertificate topCa = ClusterKeyGenerator.generateTopCa(ca, "NO");
-			ClusterKeyGenerator.makeTrustStore(truststorePassword,"myKey",topCa.getCertificate(),new FileOutputStream(truststorePath.toFile()));
-			ClusterKeyGenerator.KeyPairAndCsr intermediate = ClusterKeyGenerator.generateIntermediateKeypairAndCsr(server, "NO");
-			ClusterKeyGenerator.CertificateAndCertificateChain intermediateCertDetails = ClusterKeyGenerator.signIntermediateCsr(topCa.getCertificate(),topCa.getKeyPair() , intermediate.getCsr());
+			SecureRandom secureRandom = new SecureRandom();
+			ClusterKeyGenerator.KeyPairAndCertificate topCa = ClusterKeyGenerator.generateTopCa(ca, "NO", secureRandom);
+			ClusterKeyGenerator.makeTrustStore(truststorePassword,"myKey",topCa.certificate(),new FileOutputStream(truststorePath.toFile()));
+			ClusterKeyGenerator.CertificateCertificateChainAndKeys intermediateCA = ClusterKeyGenerator.generateIntermediateCA(server, "NO", new ArrayList<>(), topCa.certificate(), topCa.keyPair().getPrivate(), secureRandom);
 			Path serverKeystorePath = keysOutputPath.resolve(serverKeystoreName);
-			ClusterKeyGenerator.generateKeystoreBC(keystorePassword,server,intermediate.getKeyPair().getPrivate(),intermediateCertDetails.getChain().toArray(new X509Certificate[0]), new FileOutputStream(serverKeystorePath.toFile()));
+			ClusterKeyGenerator.generateKeystoreBC(keystorePassword,server,intermediateCA.getKeyPair().getPrivate(),intermediateCA.getCertificateChain().toArray(new X509Certificate[0]), new FileOutputStream(serverKeystorePath.toFile()));
 			for (String serviceProvider : serviceProviders) {
 				ClusterKeyGenerator.KeyPairAndCsr spKeys = ClusterKeyGenerator.generateCsrForServiceProviderBC(serviceProvider, "NO");
-				List<X509Certificate> certificates = ClusterKeyGenerator.generateServiceProviderCertBC(spKeys.getCsr(), topCa.getCertificate(), intermediateCertDetails.getCertificate(), intermediate.getKeyPair().getPrivate(), serviceProvider);
+				List<X509Certificate> certificates = ClusterKeyGenerator.generateServiceProviderCertBC(spKeys.getCsr(), topCa.certificate(), intermediateCA.getCertificate(), intermediateCA.getKeyPair().getPrivate(), serviceProvider);
 				String spKeystoreName = serviceProvider + ".p12";
 				Path spKeystorePath = keysOutputPath.resolve(spKeystoreName);
 				String spKeystorePassword = "password";
