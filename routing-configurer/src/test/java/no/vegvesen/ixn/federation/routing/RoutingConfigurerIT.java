@@ -516,8 +516,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		//assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		//assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
 

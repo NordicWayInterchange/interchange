@@ -149,19 +149,23 @@ public class RoutingConfigurer {
 					if (capability.hasShards()) { // Exchange(s) are set up to be bound to
 						Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
 						if (subscription.isSharded()) {
-							for (Shard shard : capability.getMetadata().getShards()) {
-								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
-									String queueName = "sub-" + UUID.randomUUID();
-									logger.debug("Creating endpoint {} for subscription with id {}", queueName,subscription.getId());
-									NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
-									createQueue(endpoint.getSource(), neighbourName, delta);
-									qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-									newEndpoints.add(endpoint);
+							if (capability.isSharded()) {
+								for (Shard shard : capability.getMetadata().getShards()) {
+									if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+										String queueName = "sub-" + UUID.randomUUID();
+										logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
+										NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+										createQueue(endpoint.getSource(), neighbourName, delta);
+										qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+										newEndpoints.add(endpoint);
+									}
 								}
-							} //Hvis cap ikke er sharded og sub er det, så vil ikke meldinger route riktig
+							} else {
+								//subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
+								logger.debug("Capability is not sharder, no match for subscription with id {}",subscription.getId());
+							}
 						} else {
-							//Capability and subscription are sharded
-							if (capability.isSharded()) { //If capability is sharded, we have to add shardId to the filter on the binding to the subscription queue
+							if (capability.isSharded()) {
 								for (Shard shard : capability.getMetadata().getShards()) {
 									String queueName = "sub-" + UUID.randomUUID();
 									logger.debug("Creating endpoint {} for subscription with id {}", queueName,subscription.getId());
@@ -170,7 +174,7 @@ public class RoutingConfigurer {
 									qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 									newEndpoints.add(endpoint);
 								}
-							} else { //No sharding
+							} else {
 								String queueName = "sub-" + UUID.randomUUID();
 								logger.debug("Creating endpoint {} for subscription {}", queueName,subscription);
 								NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
@@ -187,39 +191,12 @@ public class RoutingConfigurer {
 					}
 				}
 
-				//If the subscription has shardId in selector and the number greater than the shardCount in the matching capabilities.
-				if (subscription.getEndpoints().isEmpty()) {
+				if (!subscription.getEndpoints().isEmpty()) {
+					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
+				} else {
 					logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 				}
-
-/*				//if any of the matching caps does not have the shards set
-				logger.debug("Subscription matches {} caps", matchingCaps.size());
-				long numberOfCapsWithoutShardsSet = matchingCaps.stream().filter(m -> m.getMetadata().getShards().isEmpty()).count();
-				logger.debug("We have {} capabilities without shards set",numberOfCapsWithoutShardsSet);
-				if (numberOfCapsWithoutShardsSet == 0) {
-					if (subscription.getEndpoints().isEmpty()) {
-						String queueName = "sub-" + UUID.randomUUID();
-						logger.debug("Creating endpoint {} for subscription {}", queueName,subscription);
-						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
-						subscription.setEndpoints(Collections.singleton(endpoint));
-					}
-					//addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
-
-					for (NeighbourEndpoint endpoint : subscription.getEndpoints()) {
-						createQueue(endpoint.getSource(), neighbourName, delta);
-						for (CapabilitySplit cap : matchingCaps) {
-							if (cap.isSharded()) {
-							//TODO: if capability is sharded, check is the subscription contains chardId as well.
-						} else {
-							Shard shard = cap.getMetadata().getShards().get(0);
-							qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-							}
-						}
-					}
-
-					//subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-				}*/
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
