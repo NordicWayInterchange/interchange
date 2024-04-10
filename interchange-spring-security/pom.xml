@@ -6,7 +6,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>87.0.7-SNAPSHOT</version>
+        <version>87.0.7</version>
     </parent>
 
     <artifactId>interchange-spring-security</artifactId>
