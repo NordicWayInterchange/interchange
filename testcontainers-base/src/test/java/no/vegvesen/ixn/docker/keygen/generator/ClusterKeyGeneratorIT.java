@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.KeyPairAndCertificate;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -47,9 +46,9 @@ public class ClusterKeyGeneratorIT {
 
    @Test
    public void testGenerateTopCaCountryWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException {
-       KeyPairAndCertificate keyPairAndCertificate = ClusterKeyGenerator.generateTopCa("mydomain.com", null, new SecureRandom());
-       X500Name issuerName = new X500Name(keyPairAndCertificate.certificate().getIssuerX500Principal().getName());
-       X500Name subjectName = new X500Name(keyPairAndCertificate.certificate().getSubjectX500Principal().getName());
+       CertificateCertificateChainAndKeys ca = ClusterKeyGenerator.generateTopCa("mydomain.com", null, new SecureRandom());
+       X500Name issuerName = new X500Name(ca.certificate().getIssuerX500Principal().getName());
+       X500Name subjectName = new X500Name(ca.certificate().getSubjectX500Principal().getName());
        assertThat(getCountry(issuerName)).isEqualTo("NO");
        assertThat(getCountry(subjectName)).isEqualTo("NO");
    }
@@ -57,14 +56,29 @@ public class ClusterKeyGeneratorIT {
    @Test
    public void testGenerateIntermediateCaWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
        SecureRandom secureRandom = new SecureRandom();
-       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa_2("mydomain.com", null, secureRandom);
-       CertificateCertificateChainAndKeys intermediateCa = ClusterKeyGenerator.generateIntermediateCA("childCa",null, topCa.getCertificateChain(),topCa.getCertificate(),topCa.getKeyPair().getPrivate(),secureRandom);
-       List<X509Certificate> certificateChain = intermediateCa.getCertificateChain();
+       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("mydomain.com", null, secureRandom);
+       CertificateCertificateChainAndKeys intermediateCa = ClusterKeyGenerator.generateIntermediateCA("childCa",null, topCa.certificateChain(),topCa.certificate(),topCa.keyPair().getPrivate(),secureRandom);
+       List<X509Certificate> certificateChain = intermediateCa.certificateChain();
        assertThat(certificateChain).hasSize(2);
-       X509Certificate certificate = intermediateCa.getCertificate();
+       X509Certificate certificate = intermediateCa.certificate();
+       assertThat(certificateChain.get(0)).isEqualTo(topCa.certificate());
        assertThat(certificateChain.get(1)).isEqualTo(certificate);
        X500Name subjectName = new X500Name(certificate.getSubjectX500Principal().getName());
        assertThat(getCountry(subjectName)).isEqualTo("NO");
+   }
+
+
+   @Test
+   public void testSeveralLayersOfCa() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
+       SecureRandom secureRandom = new SecureRandom();
+       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("mydomain.com", null, secureRandom);
+       CertificateCertificateChainAndKeys intermediateCa = ClusterKeyGenerator.generateIntermediateCA("childCa",null, topCa.certificateChain(),topCa.certificate(),topCa.keyPair().getPrivate(),secureRandom);
+       CertificateCertificateChainAndKeys subCa = ClusterKeyGenerator.generateIntermediateCA("subCa", null, intermediateCa.certificateChain(), intermediateCa.certificate(), intermediateCa.keyPair().getPrivate(),secureRandom);
+       List<X509Certificate> chain = subCa.certificateChain();
+       assertThat(chain).hasSize(3);
+       assertThat(chain.get(0)).isEqualTo(topCa.certificate());
+       assertThat(chain.get(1)).isEqualTo(intermediateCa.certificate());
+       assertThat(chain.get(2)).isEqualTo(subCa.certificate());
    }
 
     private static String getCountry(X500Name name) {
