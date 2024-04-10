@@ -6,7 +6,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>87.0.3-SNAPSHOT</version>
+        <version>87.0.3</version>
     </parent>
 
     <artifactId>neighbour-dns</artifactId>
