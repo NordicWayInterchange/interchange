@@ -1,0 +1,152 @@
+name: Release new version
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        required: false
+        description: 'Specified commit hash or branch name'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout (Latest)
+        uses: actions/checkout@v4
+        if: github.event.inputs.git-ref == ''
+      - name: Checkout (Custom commit or branch)
+        uses: actions/checkout@v4
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Create settings file
+        run:  |
+          git config user.email "github@actions.github.com"
+          git config user.name "Github Actions"
+          cat << EOF > ~/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+            http://maven.apache.org/xsd/settings-1.0.0.xsd">
+          
+            <activeProfiles>
+            <activeProfile>github</activeProfile>
+            </activeProfiles>
+          
+            <profiles>
+            <profile>
+            <id>github</id>
+            <repositories>
+            <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            </repository>
+            <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
+            <snapshots>
+            <enabled>true</enabled>
+            </snapshots>
+            </repository>
+            </repositories>
+            </profile>
+            </profiles>
+          
+            <servers>
+            <server>
+            <id>github</id>
+            <username>Github.Actions</username>
+            <password>${{ secrets.REPO_ACCESS_TOKEN }}</password>
+            </server>
+            </servers>
+            </settings>
+          EOF
+      - name: Save version for release
+        run: |
+          echo "CURRENT_VERSION=$(cat pom.xml | grep SNAPSHOT | sed 's/[^0-9.]//g')" >> "$GITHUB_ENV"
+          echo "CURRENT_VERSION=$(cat pom.xml | grep SNAPSHOT | sed 's/[^0-9.]//g')" >> CURRENT_VERSION.txt
+      - name: Prepare release
+        run: |
+          mvn -B -Darguments=-DskipTests release:clean release:prepare -Dtag=${{ env.CURRENT_VERSION }}
+
+      - name: Perform release
+        run: |
+          mvn -B -Darguments=-DskipTests release:perform
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.CURRENT_VERSION }}
+          release_name: ${{ env.CURRENT_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Persist to workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: interchange
+          path: ./
+
+  docker-push-svv:
+    runs-on: ubuntu-latest
+    needs: release
+    strategy:
+      matrix:
+        Images: [ qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,onboard-rest-client,jms-client-sink-app,jms-client-source-app ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download persisted workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: interchange
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+      - name: Setup Google CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: '>= 446.0.1'
+          project_id: ${{ vars.PROJECT_ID }}
+      - name: Save version number to variable
+        run: |
+          echo "$(cat CURRENT_VERSION.txt)" >> "$GITHUB_ENV"
+
+      - name: Login to Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+
+      - name: Build the Docker image
+        run: |
+          cd ./${{ matrix.Images }}
+          docker build . -t ${{ matrix.Images }}
+      - name: Push docker image to Google artifact registry
+        run: |
+          docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.CURRENT_VERSION }}
+          docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
+      - name: Push docker image to Github container registry
+        run: |
+          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.CURRENT_VERSION }}
+          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
+          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
