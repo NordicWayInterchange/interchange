@@ -145,6 +145,21 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingCapabilityWithInvalidQuadTree(){
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", Collections.singleton("12004"), "SituationPublication");
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(application);
+
+        String serviceProviderName = "my-service-provider";
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+        System.out.println(thrown.getMessage());
+        assertThat(thrown.getMessage()).contains("quadTree outside the legal range");
+    }
+    @Test
     public void testAddingCapabilityWithMissingProperties() {
         DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);

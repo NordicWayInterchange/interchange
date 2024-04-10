@@ -88,6 +88,13 @@ public class OnboardRestController {
 			if (!capabilityProperties.isEmpty()) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
+			for(String quadTile : capability.getApplication().getQuadTree()){
+				for(char nextNumber : quadTile.toCharArray()){
+					if(Character.getNumericValue(nextNumber) > 3){
+						throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has quadTree outside the legal range", capability));
+					}
+				}
+			}
 		}
 
 		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
