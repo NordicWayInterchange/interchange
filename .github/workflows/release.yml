@@ -36,6 +36,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+          # See if this can be done through a variable
       - name: Create settings file
         run:  |
           git config user.email "github@actions.github.com"
