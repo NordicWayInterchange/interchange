@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
