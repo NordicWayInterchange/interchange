@@ -9,10 +9,13 @@ import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
 import no.vegvesen.ixn.docker.keygen.TopDomain;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
@@ -169,7 +172,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    private static CertificateCertificateChainAndKeys generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static CertificateCertificateChainAndKeys generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         KeyPair keyPair = generateKeyPair(2048);
         X500Principal subject = new X500Principal(String.format(
                 "O=Nordic Way, CN=%s",
@@ -201,6 +204,11 @@ public class ClusterKeyGenerator {
         KeyPurposeId[] keyPurposeIds = new KeyPurposeId[] {KeyPurposeId.id_kp_serverAuth, KeyPurposeId.id_kp_clientAuth};
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
         certificateBuilder.addExtension(Extension.extendedKeyUsage,false,extendedKeyUsage);
+
+        ArrayList<GeneralName> names = new ArrayList<>();
+        names.add(new GeneralName(GeneralName.dNSName,hostname));
+        GeneralNames subjectAltNames = new GeneralNames(names.toArray(new GeneralName[0]));
+        certificateBuilder.addExtension(Extension.subjectAlternativeName,false,subjectAltNames);
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
 
         ContentSigner signer = signerBuilder.build(issuerPrivateKey);

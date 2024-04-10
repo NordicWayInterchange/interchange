@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,15 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,6 +86,19 @@ public class ClusterKeyGeneratorIT {
        assertThat(chain.get(0)).isEqualTo(topCa.certificate());
        assertThat(chain.get(1)).isEqualTo(intermediateCa.certificate());
        assertThat(chain.get(2)).isEqualTo(subCa.certificate());
+   }
+
+   @Test
+   public void testCaWithHostCert() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
+       SecureRandom secureRandom = new SecureRandom();
+       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("topdomain","NO", secureRandom);
+       CertificateCertificateChainAndKeys host = ClusterKeyGenerator.generateServerCertForHost("myhost.com", topCa.certificate(), topCa.certificateChain(), topCa.keyPair().getPrivate(), secureRandom);
+       Collection<List<?>> subjectAlternativeNames = host.certificate().getSubjectAlternativeNames();
+       assertThat(subjectAlternativeNames).isNotNull().hasSize(1);
+       List<?> san = subjectAlternativeNames.iterator().next();
+       assertThat(san).hasSize(2);
+       assertThat(san.get(0)).isEqualTo(GeneralName.dNSName);
+       assertThat(san.get(1)).isEqualTo("myhost.com");
    }
 
     private static String getCountry(X500Name name) {
