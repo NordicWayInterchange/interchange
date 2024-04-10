@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>87.0.5-SNAPSHOT</version>
+        <version>87.0.5</version>
     </parent>
 
     <artifactId>neighbour-server</artifactId>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>testcontainers-init-postgres</artifactId>
-            <version>87.0.5-SNAPSHOT</version>
+            <version>87.0.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

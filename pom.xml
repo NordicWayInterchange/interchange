@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>87.0.5-SNAPSHOT</version>
+    <version>87.0.5</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -16,7 +16,7 @@
     </distributionManagement>
     <scm>
         <developerConnection>scm:git:https://github.com/NordicwayInterchange/interchange.git</developerConnection>
-        <tag>1.0.3</tag>
+        <tag>87.0.5</tag>
     </scm>
     <build>
         <pluginManagement>
