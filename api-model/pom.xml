@@ -6,7 +6,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>87.0.8-SNAPSHOT</version>
+        <version>87.0.8</version>
     </parent>
 
     <artifactId>api-model</artifactId>
