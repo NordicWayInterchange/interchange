@@ -1,7 +1,11 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity
 @Table(name = "split_capability")
@@ -20,7 +24,11 @@ public class CapabilitySplit {
     private Metadata metadata;
 
     @Enumerated(EnumType.STRING)
-    private CapabilityStatus status = CapabilityStatus.CREATED;
+    private CapabilityStatus status = CapabilityStatus.REQUESTED;
+
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime lastUpdated;
 
     public CapabilitySplit() {
 
@@ -75,6 +83,14 @@ public class CapabilitySplit {
 
     public boolean hasShards() {
         return metadata.hasShards();
+    }
+
+    public Optional<LocalDateTime> getLastUpdated() {
+        return Optional.ofNullable(lastUpdated);
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     @Override

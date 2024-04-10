@@ -206,7 +206,8 @@ public class Neighbour {
 		if (localCapabilitiesUpdated.isPresent()) {
 			logger.debug("Local capabilities updated {}, last neighbour capability exchange {}", localCapabilitiesUpdated, this.getCapabilities().getLastCapabilityExchange());
 			return this.capabilitiesNeverSeen()
-					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated.get());
+					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated.get())
+					|| this.getCapabilities().getLastCapabilityExchange().isBefore(LocalDateTime.now().minusMinutes(15));
 		} else {
 			return this.capabilitiesNeverSeen();
 		}

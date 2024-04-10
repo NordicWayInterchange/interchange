@@ -122,7 +122,7 @@ public class NeighbourRestController {
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();

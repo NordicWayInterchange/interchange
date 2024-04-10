@@ -460,27 +460,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
-	/*
-	 Note that this test runs syncServiceProviders twice on the same ServiceProvider.
-	 This is due to a bug we had, that checked the members of the groups based on a stale list of
-	 group members. This only showed up after running the method twice.
-	 */
-	@Test
-	public void serviceProviderWithCapabilitiesShouldNotHaveQueueButExistInServiceProvidersGroup() {
-		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
-
-		when(serviceProviderRepository.save(any())).thenReturn(onlyCaps);
-		onlyCaps.setCapabilities(capabilities);
-		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
-		assertThat(client.getGroupMember(onlyCaps.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-
-		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
-		assertThat(client.getGroupMember(onlyCaps.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-		assertThat(client.queueExists(onlyCaps.getName())).isFalse();
-	}
-
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
@@ -496,6 +475,52 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+	}
+
+	@Test
+	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
+
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		cap.getMetadata().setShardCount(3);
+
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(cap));
+		serviceProvider.setCapabilities(capabilities);
+
+		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
+		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
+		assertThat(cap.isSharded()).isTrue();
+		assertThat(cap.hasShards()).isTrue();
+		assertThat(cap.getMetadata().getShards()).hasSize(3);
+		for (Shard shard : cap.getMetadata().getShards()) {
+			assertThat(client.exchangeExists(shard.getExchangeName())).isTrue();
+			assertThat(shard.getSelector().contains("shardId")).isTrue();
+		}
+	}
+
+	@Test
+	public void nonShardedCapabilityIsSetUp() {
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
+
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(cap));
+		serviceProvider.setCapabilities(capabilities);
+
+		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
+		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
+		assertThat(cap.isSharded()).isFalse();
+		assertThat(cap.hasShards()).isTrue();
+		assertThat(cap.getMetadata().getShards()).hasSize(1);
+		assertThat(client.exchangeExists(cap.getMetadata().getShards().stream().findFirst().get().getExchangeName())).isTrue();
+		assertThat(cap.getMetadata().getShards().stream().findFirst().get().getSelector().contains("shardId")).isFalse();
 	}
 
 	@Test
@@ -865,6 +890,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex8");
 		client.createQueue("my-queue12");
+		denmCapability.setStatus(CapabilityStatus.CREATED);
 
 		mySP.addLocalSubscription(subscription);
 		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));

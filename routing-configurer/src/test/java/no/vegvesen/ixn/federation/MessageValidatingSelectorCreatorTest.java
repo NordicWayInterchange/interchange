@@ -23,7 +23,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 new HashSet<>(Arrays.asList(6, 5))
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("publicationId = 'pub-1'");
@@ -47,7 +47,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 new HashSet<>(Arrays.asList("122,123"))
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
@@ -71,7 +71,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 "Weather"
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("messageType = 'DATEX2'");
         assertThat(selector).contains("publisherId = 'NO-123'");

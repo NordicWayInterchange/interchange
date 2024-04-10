@@ -80,15 +80,15 @@ public class NeighbourDiscoverer {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
 		logger.debug("CapabilityExchangeWithNeighbours");
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
-		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilitiesOptional(serviceProviders);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCreatedCapabilitiesOptional(serviceProviders);
 		neigbourDiscoveryService.capabilityExchangeWithNeighbours(neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
 	public void scheduleUnreachableRetry() {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 		neigbourDiscoveryService.retryUnreachable(neighbourFacade, localCapabilities);
 	}
 

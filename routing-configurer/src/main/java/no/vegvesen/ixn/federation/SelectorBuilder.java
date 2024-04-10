@@ -147,6 +147,11 @@ public class SelectorBuilder {
 		return this;
 	}
 
+	public SelectorBuilder shardId(String shardId) {
+		values.put(MessageProperty.SHARD_ID.getName(), shardId);
+		return this;
+	}
+
 	public SelectorBuilder protocolVersion(String protocolVersion) {
 		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
 		return this;

@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 public class MessageValidatingSelectorCreator {
 
 
-    public static String makeSelector(CapabilitySplit capability) {
+    public static String makeSelector(CapabilitySplit capability, Integer shardId) {
         String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())
@@ -24,10 +24,9 @@ public class MessageValidatingSelectorCreator {
             DatexApplication datexApplication = (DatexApplication) capability.getApplication();
             builder.publicationTypes(datexApplication.getPublicationType());
         }
+        if (shardId != null) {
+            builder.shardId(shardId.toString());
+        }
         return builder.toSelector();
-    }
-
-    public static String makeSelectorJoinedWithCapabilitySelector(String selector, CapabilitySplit capability) {
-        return String.format("(%s) AND (%s)", makeSelector(capability), selector);
     }
 }

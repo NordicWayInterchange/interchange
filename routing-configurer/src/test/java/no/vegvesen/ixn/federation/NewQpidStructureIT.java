@@ -92,7 +92,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 new Metadata()
         );
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(capability);
+        String selector = creator.makeSelector(capability, null);
         System.out.println(selector);
         //3. Create a binding on exchange using the validating selector, pointing at queue
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
@@ -195,7 +195,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector = creator.makeSelector(capability);
+        String capabilitySelector = creator.makeSelector(capability, null);
         System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
@@ -363,8 +363,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String subscriptionSelector = subscription.getSelector();
 
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector1 = creator.makeSelector(capability1);
-        String capabilitySelector2 = creator.makeSelector(capability2);
+        String capabilitySelector1 = creator.makeSelector(capability1, null);
+        String capabilitySelector2 = creator.makeSelector(capability2, null);
 
         String joinedSelector1 = String.format("(%s) AND (%s)", capabilitySelector1, deliverySelector);
         System.out.println(joinedSelector1);
@@ -444,7 +444,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector = creator.makeSelector(capability);
+        String capabilitySelector = creator.makeSelector(capability, null);
 
         String deliverySelector = delivery.getSelector();
 

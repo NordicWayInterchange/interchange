@@ -33,6 +33,19 @@ public class Capabilities {
 		return Optional.ofNullable(lastUpdated);
 	}
 
+	public Optional<LocalDateTime> getLastUpdatedCreatedCapabilities() {
+		LocalDateTime result = null;
+		for (CapabilitySplit capability : getCapabilitiesByStatus(CapabilityStatus.CREATED)) {
+			Optional<LocalDateTime> lastUpdatedCreated = capability.getLastUpdated();
+			if (lastUpdatedCreated.isPresent()) {
+				if (result == null || lastUpdatedCreated.get().isAfter(result)) {
+					result = lastUpdatedCreated.get();
+				}
+			}
+		}
+		return Optional.ofNullable(result);
+	}
+
 	public void setLastUpdated(LocalDateTime lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
@@ -88,9 +101,9 @@ public class Capabilities {
 		setCapabilities(capabilities);
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
+	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilities, LocalDateTime lastUpdated) {
 		this.status = status;
-		setCapabilities(capabilties);
+		setCapabilities(capabilities);
 		this.lastUpdated = lastUpdated;
 	}
 
@@ -106,9 +119,9 @@ public class Capabilities {
 		return capabilities;
 	}
 
-	public Set<CapabilitySplit> getCreatedCapabilities() {
+	public Set<CapabilitySplit> getCapabilitiesByStatus(CapabilityStatus status) {
 		return capabilities.stream()
-				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
+				.filter(c -> c.getStatus().equals(status))
 				.collect(Collectors.toSet());
 	}
 
@@ -120,11 +133,7 @@ public class Capabilities {
 	}
 
 	public boolean hasDataTypes() {
-		Set<CapabilitySplit> createdCapabilities = capabilities.stream()
-				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
-				.collect(Collectors.toSet());
-
-		return createdCapabilities.size() > 0;
+		return !getCapabilitiesByStatus(CapabilityStatus.CREATED).isEmpty() || !getCapabilitiesByStatus(CapabilityStatus.REQUESTED).isEmpty();
 	}
 
 	@Override

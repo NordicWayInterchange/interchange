@@ -279,30 +279,26 @@ public class ServiceProviderRouter {
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         if (serviceProvider.hasCapabilities()) {
             for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
-                if (!capability.getMetadata().hasShards() && capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                    if (capability.isSharded()) {
-                        List<Shard> newShards = new ArrayList<>();
-                        int numberOfShards = capability.getMetadata().getShardCount();
-                        for (int i = 0; i<numberOfShards; i++) {
-                            String exchangeName = "cap-" + UUID.randomUUID();
-                            Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
-                            logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
-                            delta.addExchange(exchange);
-
-                            String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability) + i+1;
-                            Shard newShard = new Shard(i+1, exchangeName, capabilitySelector);
-                            newShards.add(newShard);
-                        }
-                        capability.getMetadata().setShards(newShards);
-                    } else {
+                if (!capability.getMetadata().hasShards() && capability.getStatus().equals(CapabilityStatus.REQUESTED)) {
+                    List<Shard> newShards = new ArrayList<>();
+                    int numberOfShards = capability.getMetadata().getShardCount();
+                    for (int i = 0; i<numberOfShards; i++) {
                         String exchangeName = "cap-" + UUID.randomUUID();
                         Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
                         logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
                         delta.addExchange(exchange);
 
-                        Shard newShard = new Shard(1, exchangeName, MessageValidatingSelectorCreator.makeSelector(capability));
-                        capability.getMetadata().setShards(Collections.singletonList(newShard));
+                        String capabilitySelector;
+                        if (capability.isSharded()) {
+                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
+                        } else {
+                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+                        }
+                        Shard newShard = new Shard(i+1, exchangeName, capabilitySelector);
+                        newShards.add(newShard);
                     }
+                    capability.getMetadata().setShards(newShards);
+                    capability.setStatus(CapabilityStatus.CREATED);
                 }
             }
         }

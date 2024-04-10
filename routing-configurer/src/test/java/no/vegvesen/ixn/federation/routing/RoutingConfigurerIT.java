@@ -123,6 +123,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				metadata
 		);
+		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex20");
 
 		ServiceProvider sp = new ServiceProvider("sp");
@@ -763,7 +764,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
 
 		MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-		String capabilitySelector = creator.makeSelector(cap);
+		String capabilitySelector = creator.makeSelector(cap, null);
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
