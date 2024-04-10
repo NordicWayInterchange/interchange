@@ -5,7 +5,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>87.0.4-SNAPSHOT</version>
+        <version>87.0.4</version>
     </parent>
 
     <artifactId>dns-client</artifactId>
