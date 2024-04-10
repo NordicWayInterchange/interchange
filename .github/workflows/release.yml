@@ -172,8 +172,8 @@ jobs:
       - name: Update helm version before pushing
         run: |
           echo "$(cat CURRENT_VERSION.txt)" >> "$GITHUB_ENV"
-          version=$(cat Chart.yaml | grep version)
-          sed -i s"/$version/version: $(cat CURRENT_VERSION.txt)/" Chart.yaml
+          version=$(cat helm/interchange/Chart.yaml | grep version)
+          sed -i s"/$version/version: $(cat CURRENT_VERSION.txt)/" helm/interchange/Chart.yaml
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm
