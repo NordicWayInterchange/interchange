@@ -5,7 +5,6 @@ permissions:
   id-token: write
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       git-ref:
@@ -36,53 +35,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-          # See if this can be done through a variable
       - name: Create settings file
-        run:  |
-          git config user.email "github@actions.github.com"
-          git config user.name "Github Actions"
-          cat << EOF > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-            http://maven.apache.org/xsd/settings-1.0.0.xsd">
-          
-            <activeProfiles>
-            <activeProfile>github</activeProfile>
-            </activeProfiles>
-          
-            <profiles>
-            <profile>
-            <id>github</id>
-            <repositories>
-            <repository>
-            <id>central</id>
-            <url>https://repo1.maven.org/maven2</url>
-            </repository>
-            <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-            <snapshots>
-            <enabled>true</enabled>
-            </snapshots>
-            </repository>
-            </repositories>
-            </profile>
-            </profiles>
-          
-            <servers>
-            <server>
-            <id>github</id>
-            <username>Github.Actions</username>
-            <password>${{ secrets.REPO_ACCESS_TOKEN }}</password>
-            </server>
-            </servers>
-            </settings>
-          EOF
+        run:  echo ${{ vars.SETTINGS_FILE_FOR_RELEASE }} ~/.m2/settings.xml
+
       - name: Save version for release
         run: |
           echo "CURRENT_VERSION=$(cat pom.xml | grep SNAPSHOT | sed 's/[^0-9.]//g')" >> "$GITHUB_ENV"
           echo "$(cat pom.xml | grep SNAPSHOT | sed 's/[^0-9.]//g')" >> CURRENT_VERSION.txt
+
+      - name: Git config for maven-release-plugin
+        run: |
+          git config user.email "github@actions.github.com"
+          git config user.name "Github Actions"
+
       - name: Prepare release
         run: |
           mvn -B -Darguments=-DskipTests release:clean release:prepare -Dtag=${{ env.CURRENT_VERSION }}

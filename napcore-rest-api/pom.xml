@@ -31,6 +31,6 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>87.0.9-SNAPSHOT</version>
+        <version>92.0.3-SNAPSHOT</version>
     </parent>
 </project>
