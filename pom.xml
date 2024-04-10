@@ -16,10 +16,22 @@
             <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
         </repository>
     </distributionManagement>
-
+    <scm>
+        <developerConnection>scm:git:https://github.com/NordicwayInterchange/interchange.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+                    </configuration>
+                    <version>3.0.1</version>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
