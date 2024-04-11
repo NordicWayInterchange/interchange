@@ -1,0 +1,2 @@
+"{""quadTree"":[""01220111"",""01200132""]}","NOT quadTree LIKE '%,0122%'",0,"Negating (by logic) the parent/bigger area of only one of the possible tiles should still match"
+"{""publisherId"": ""publ-id-1"", ""publicationId"": ""pub-123"", ""originatingCountry"": ""NO"", ""protocolVersion"": ""DENM:1.2.2"", ""quadTree"":[""0121"",""0122""],  ""causeCode"":[]}","originatingCountry = 'NO' AND causeCode = 6",1,"Testing match on an empty list"

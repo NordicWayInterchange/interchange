@@ -17,4 +17,11 @@ public class AddBindingRequest {
         this.binding = binding;
     }
 
+    @Override
+    public String toString() {
+        return "AddBindingRequest{" +
+                "replaceExistingArguments=" + replaceExistingArguments +
+                ", binding=" + binding +
+                '}';
+    }
 }

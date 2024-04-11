@@ -144,6 +144,18 @@
                 <artifactId>postgresql</artifactId>
                 <version>42.7.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>5.7.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>pl.pragmatists</groupId>
+                <artifactId>JUnitParams</artifactId>
+                <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -240,10 +252,7 @@
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
         <module>routing-configurer-app</module>
-        <module>jms-client-source</module>
-        <module>jms-client-sink</module>
-        <module>jms-client-image-sink</module>
-        <module>jms-client-image-source</module>
+        <module>jms-client-app</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
         <module>napcore-rest-api</module>

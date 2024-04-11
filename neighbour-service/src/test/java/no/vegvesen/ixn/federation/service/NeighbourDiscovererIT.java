@@ -547,8 +547,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												Collections.singleton("0122"),
+												Collections.singleton(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),

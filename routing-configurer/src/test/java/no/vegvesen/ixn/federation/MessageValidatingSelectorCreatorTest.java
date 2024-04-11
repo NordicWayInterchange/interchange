@@ -26,6 +26,7 @@ public class MessageValidatingSelectorCreatorTest {
                 )
         );
         assertThat(selector).contains("publisherId = 'NO-123'");
+        assertThat(selector).contains("publicationId = 'pub-1'");
         assertThat(selector).contains("messageType = 'DENM'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = 'DENM:1.2.2'");
@@ -50,6 +51,7 @@ public class MessageValidatingSelectorCreatorTest {
         );
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
+        assertThat(selector).contains("publicationId = 'pub-1'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");
@@ -73,6 +75,7 @@ public class MessageValidatingSelectorCreatorTest {
         );
         assertThat(selector).contains("messageType = 'DATEX2'");
         assertThat(selector).contains("publisherId = 'NO-123'");
+        assertThat(selector).contains("publicationId = 'pub-1'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");

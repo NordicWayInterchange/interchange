@@ -26,7 +26,7 @@ public class IvimApplication extends Application {
     }
 
     @Override
-    public String messageType() {
+    public String getMessageType() {
         return Constants.IVIM;
     }
 
