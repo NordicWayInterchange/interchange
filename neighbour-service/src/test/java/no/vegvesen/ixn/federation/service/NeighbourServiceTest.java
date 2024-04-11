@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -30,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -69,7 +71,7 @@ class NeighbourServiceTest {
 	void postDatexDataTypeCapability() {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "1.1", Collections.singleton("23004"), "myPublicationType"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "1.1", Collections.singleton("23001"), "myPublicationType"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -108,7 +110,7 @@ class NeighbourServiceTest {
 		// incoming capabiity API
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("1", "Pub-1", "NO", "1.1", Collections.singleton("23004"), "test"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("1", "Pub-1", "NO", "1.1", Collections.singleton("23001"), "test"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -126,7 +128,7 @@ class NeighbourServiceTest {
 		// Mock the incoming API object.
 		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("1", "pub-1", "NO", "1.1", Collections.singleton("23004"), "type"), new MetadataApi())));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("1", "pub-1", "NO", "1.1", Collections.singleton("23001"), "type"), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -136,6 +138,17 @@ class NeighbourServiceTest {
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		verify(dnsFacade, times(1)).lookupNeighbours();
+	}
+
+	@Test
+	public void postingCapabilitiesWithInvalidQuadtreeThrowsException(){
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		ericsson.setName("ericsson");
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("1", "Pub-1", "NO", "1.1", Collections.singleton("23004"), "test"), new MetadataApi());
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		CapabilityPostException thrown =assertThrows(CapabilityPostException.class, () -> neighbourService.incomingCapabilities(ericsson, Collections.emptySet()));
+		assertThat(thrown.getMessage()).contains("invalid quadTree");
 	}
 
 	@Test

@@ -232,7 +232,7 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("23004"),
+                                Collections.singleton("23001"),
                                 Collections.singleton(1)
                             ),
                             new MetadataApi()
@@ -244,6 +244,32 @@ public class NeighbourServiceIT {
 
         //Now, try again, with the same capabilties, to simulate double post throws exception since publicationId already exists.
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
+    }
+
+    @Test
+    public void postingCapabilityWithInvalidQuadtreeThrowsException(){
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-with-invalid-quadtree-in-capability";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+                name,
+                Collections.singleton(
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NO-123",
+                                        "pub-invalid-quadtree",
+                                        "NO",
+                                        "1.0",
+                                        Set.of("100","12312322123312", "23004"),
+                                        Collections.singleton(1)
+                                ),
+                                new MetadataApi()
+                        ))
+        );
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(capabilitiesApi, localCapabilities));
+        assertThat(thrown.getMessage()).contains("invalid quadTree");
     }
 
     @Test
