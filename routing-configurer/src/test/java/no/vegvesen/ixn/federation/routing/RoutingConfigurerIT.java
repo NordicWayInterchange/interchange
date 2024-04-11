@@ -15,9 +15,6 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,8 +30,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
-import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -107,35 +102,15 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	InterchangeNodeProperties interchangeNodeProperties;
 
 	@Test
-	public void neighbourWithOneBindingIsCreated() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex20", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
+	public void neighbourWithOneSubscriptionIsCreated() {
+		CapabilitySplit cap = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex20");
 		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex20");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
 
-		NeighbourSubscription subscription = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "flounder");
+		NeighbourSubscription subscription = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "flounder");
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(subscription);
 
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
@@ -146,63 +121,27 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(flounder, client.getQpidDelta());
 		assertThat(client.queueExists(subscription.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(subscription.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getLastUpdatedTimestamp()).isGreaterThan(0);
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
 
 	@Test
-	public void neighbourWithTwoBindingsIsCreated() {
-		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard1 = new Shard(1, "cap-ex11", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
-		CapabilitySplit cap1 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata1
-		);
+	public void neighbourWithTwoSubscriptionsIsCreated() {
+		CapabilitySplit cap1 = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex11");
+		cap1.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex11");
 
-		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard2 = new Shard(1, "cap-ex12", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
-
-		CapabilitySplit cap2 = new CapabilitySplit(
-				new DatexApplication(
-						"SE-1234",
-						"pub-1",
-						"SE",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata2
-		);
+		CapabilitySplit cap2 = getDatexCapability("pub-2", RedirectStatus.OPTIONAL, "cap-ex12");
+		cap2.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex12");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
 
-		NeighbourSubscription s1 = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
+		NeighbourSubscription s1 = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
 
-		NeighbourSubscription s2 = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'RoadBlock' " +
-						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE' " +
-						"AND protocolVersion = '1.0' " +
-						"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
+		NeighbourSubscription s2 = new NeighbourSubscription("publicationId = 'pub-2'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
@@ -213,65 +152,27 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(halibut, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(s1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(client.queueExists(s2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(s2.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
 		assertThat(s2.getLastUpdatedTimestamp()).isGreaterThan(0);
+		assertThat(s1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(s2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
 
 	@Test
-	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
-		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard1 = new Shard(1, "cap-ex32", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
-		CapabilitySplit cap1 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata1
-		);
+	public void neighbourWithTwoSubscriptionsAndOnlyOneAcceptedIsCreated() {
+		CapabilitySplit cap1 = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex32");
+		cap1.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex32");
 
-		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard2 = new Shard(1, "cap-ex13", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
-
-		CapabilitySplit cap2 = new CapabilitySplit(
-				new DatexApplication(
-						"SE-1234",
-						"pub-1",
-						"SE",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata2
-		);
-		client.createHeadersExchange("cap-ex13");
-
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap1)));
 
-		NeighbourSubscription s1 = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'RoadBlock' " +
-						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO' " +
-						"AND protocolVersion = '1.0' " +
-						"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "salmon");
+		NeighbourSubscription s1 = new NeighbourSubscription("publicationId = 'pub-1' AND quadTree like '%,01230123%'", NeighbourSubscriptionStatus.ACCEPTED, "salmon");
 
-		NeighbourSubscription s2 = new NeighbourSubscription(
-				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'RoadBlock' " +
-						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE' " +
-						"AND protocolVersion = '1.0' " +
-						"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.REJECTED, "salmon");
+		NeighbourSubscription s2 = new NeighbourSubscription("publicationId = 'pub-1' AND quadTree like '%,01230122%'", NeighbourSubscriptionStatus.ILLEGAL, "salmon");
 
 		//Just to ensure the timestamp is updated by RoutingConfigurer
 		assertThat(s1.getLastUpdatedTimestamp()).isEqualTo(0);
@@ -286,12 +187,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(salmon, client.getQpidDelta());
 		assertThat(client.queueExists(s1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		List<Binding> queueBindKeys = client.getQueuePublishingLinks(s1.getEndpoints().stream().findFirst().get().getSource());
-		assertThat(queueBindKeys).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(s1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(s2.getEndpoints()).isEmpty();
-
-		Set<NeighbourSubscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.CREATED);
-		assertThat(createdSubscriptions).hasSize(1);
+		assertThat(s1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(s2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ILLEGAL);
 
 		//Showing that the timestamp have been changed for the ACCEPTED subscription, but not for the REJECTED one
 		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
@@ -300,39 +199,16 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
-		ServiceProvider serviceProvider = new ServiceProvider("my-sp");
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex34", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"SE-1234",
-						"pub-1",
-						"SE",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
+		CapabilitySplit cap = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex34");
+		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex34");
 
-		serviceProvider.setCapabilities(new Capabilities(
-				Capabilities.CapabilitiesStatus.KNOWN,
-				Collections.singleton(cap)
-		));
+		ServiceProvider serviceProvider = new ServiceProvider("my-sp");
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
 
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		NeighbourSubscription neighbourSub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour");
-		subs.add(neighbourSub);
+		NeighbourSubscription neighbourSub = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour");
 
-		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(Collections.singleton(neighbourSub)), emptySubscriptionRequest);
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		when(neighbourService.getNodeName()).thenReturn("my-node");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
@@ -345,173 +221,22 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNull();
 	}
 
-
 	@Test
-	public void addingOneSubscriptionResultsInOneBindKey() {
-		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
-		client.createHeadersExchange("cap-ex1");
-
-		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
-
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "hammershark");
-		subs.add(sub);
-
-		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
-
-		when(neighbourService.getMessagePort()).thenReturn("5671");
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-
-		routingConfigurer.setupNeighbourRouting(hammershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-	}
-
-	@Test
-	public void addingTwoSubscriptionsResultsInTwoBindKeys() {
-		Metadata metadata1 = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
-		CapabilitySplit cap1 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata1
-		);
-		client.createHeadersExchange("cap-ex2");
-
-		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
-
-		CapabilitySplit cap2 = new CapabilitySplit(
-				new DatexApplication(
-						"SE-1234",
-						"pub-1",
-						"SE",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata2
-		);
-		client.createHeadersExchange("cap-ex3");
-
-		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
-
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
-		subs.add(sub1);
-
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
-
-		when(neighbourService.getMessagePort()).thenReturn("5671");
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-
-		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
-		subs.add(sub2);
-
-		tigershark.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(subs));
-
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
-		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
-	}
-
-	@Test
-	public void addingTwoSubscriptionsAndOneCapabilityResultsInTwoBindKeys() {
-		Metadata metadata1 = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard1 = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
-		CapabilitySplit cap1 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230123")),
-						"RoadBlock"
-				),
-				metadata1
-		);
+	public void addingOneSubscriptionAndTwoCapabilitiesResultsInTwoEndpoints() {
+		CapabilitySplit cap1 = getDatexCapability("pub-1", RedirectStatus.NOT_AVAILABLE, "cap-ex4");
+		cap1.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex4");
 
-		Metadata metadata2 = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
-
-		CapabilitySplit cap2 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122")),
-						"RoadBlock"
-				),
-				metadata2
-		);
+		CapabilitySplit cap2 = getDatexCapability("pub-2", RedirectStatus.NOT_AVAILABLE, "cap-ex5");
+		cap2.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex5");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
 
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
-		subs.add(sub);
+		NeighbourSubscription sub = new NeighbourSubscription("publicationId = 'pub-1' OR publicationId = 'pub-2'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(Collections.singleton(sub)), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -521,218 +246,55 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			assertThat(client.queueExists(endpoint.getSource())).isTrue();
 			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
 		}
-		//assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		//assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(sub.getEndpoints()).hasSize(2);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
 
 	@Test
-	public void setUpQueueForServiceProvider() {
-		Metadata metadata = new Metadata(RedirectStatus.MANDATORY);
-		Shard shard = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
-		client.createHeadersExchange("cap-ex6");
-
-		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
-
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider");
-
-		subs.add(sub);
-
-		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
-
-		when(neighbourService.getMessagePort()).thenReturn("5671");
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-	}
-
-	@Test
-	public void setUpQueueForServiceProviderAndNeighbour() {
-		Metadata metadata1 = new Metadata(RedirectStatus.MANDATORY);
-		Shard shard1 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
-		CapabilitySplit cap1 = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata1
-		);
-		client.createHeadersExchange("cap-ex7");
-
-		Metadata metadata2 = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard2 = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
-
-		CapabilitySplit cap2 = new CapabilitySplit(
-				new DatexApplication(
-						"SE-1234",
-						"pub-1",
-						"SE",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata2
-		);
+	public void routingIsNotSetUpWhenRedirectIsNotAvailable() {
+		CapabilitySplit cap = getDatexCapability("pub-1", RedirectStatus.NOT_AVAILABLE, "cap-ex8");
+		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex8");
 
-		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		NeighbourSubscription sub = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider");
 
-		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider");
+		Neighbour cod = new Neighbour("cod", emptyCapabilities, new NeighbourSubscriptionRequest(Collections.singleton(sub)), emptySubscriptionRequest);
 
-		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "neigh-true-and-false");
-
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		subs.add(sub1);
-		subs.add(sub2);
-
-		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
-
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
-		when(neighbourService.getNodeName()).thenReturn("my-name");
-		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
-		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
-		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
-	}
-
-	@Test
-	public void routingIsNotSetUpWhenTryingToRedirect() {
-		Metadata metadata = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
-		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider"));
-
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour cod = new Neighbour("cod", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-
-		ServiceProvider serviceProvider = new ServiceProvider();
+		ServiceProvider serviceProvider = new ServiceProvider("sp");
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(cod, client.getQpidDelta());
 		assertThat(client.queueExists(cod.getName())).isFalse();
-		assertThat(cod.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.NO_OVERLAP);
-	}
-
-	@Test
-	public void routingIsNotSetUpWhenRedirectIsNotAvailable() {
-		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "no-clownfish"));
-
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-
-		routingConfigurer.setupNeighbourRouting(clownfish, client.getQpidDelta());
-		assertThat(client.queueExists(clownfish.getName())).isFalse();
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.NO_OVERLAP);
+		assertThat(sub.getEndpoints()).isEmpty();
 	}
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbourForOneCapability() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex9", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
-		CapabilitySplit cap = new CapabilitySplit(
-				new DatexApplication(
-						"NO-1234",
-						"pub-1",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
-						"RoadBlock"
-				),
-				metadata
-		);
+		CapabilitySplit cap = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex9");
+		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex9");
 
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
 
-		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-sp");
+		NeighbourSubscription sub1 = new NeighbourSubscription("publicationId = 'pub-1' AND quadTree like '%,01230123%'", NeighbourSubscriptionStatus.ACCEPTED, "remote-sp");
+		NeighbourSubscription sub2 = new NeighbourSubscription("publicationId = 'pub-1' AND quadTree like '%,01230122%'", NeighbourSubscriptionStatus.ACCEPTED, "neigh-both");
 
-		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'RoadBlock' " +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO' " +
-				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "neigh-both");
-
-		HashSet<NeighbourSubscription> subs = new HashSet<>();
-		subs.add(sub1);
-		subs.add(sub2);
-
-		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2))), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neigh, client.getQpidDelta());
+		assertThat(sub1.getEndpoints()).hasSize(1);
+		assertThat(sub2.getEndpoints()).hasSize(1);
 		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
 
 	@Test
@@ -758,6 +320,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				metadata
 		);
+		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex10");
 
 		ServiceProvider sp = new ServiceProvider("sp");
@@ -965,21 +528,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void subscriptionExchangeIsNotRemovedWhenSubscriptionIsDeleted() {
-		String exchangeName = "subscription-exchange-one";
-
-		client.createHeadersExchange(exchangeName);
-
-		Neighbour myNeighbour = new Neighbour();
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
-		when(interchangeNodeProperties.getName()).thenReturn("my-node");
-
-		routingConfigurer.tearDownSubscriptionExchanges();
-
-		assertThat(client.exchangeExists(exchangeName)).isTrue();
-	}
-
-	@Test
 	public void subscriptionExchangeAndSubscriptionShardIsRemovedWhenSubscriptionHasStatusFailed() {
 		String exchangeName = "failed-exchange";
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
@@ -1025,42 +573,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(subscription.getEndpoints().isEmpty()).isFalse();
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
 		assertThat(endpoint.hasShard()).isTrue();
-	}
-
-	@Test
-	public void setupRegularRoutingWithNonExistingExchangeKeepsTheSubscriptionUnchanged() {
-		CapabilitySplit denmCapability = new CapabilitySplit(
-				new DenmApplication(
-						"NO0000",
-						"NO0000:001",
-						"NO",
-						"1.0",
-						Collections.singleton("0122"),
-						Collections.singleton(1)
-				),
-				new Metadata(
-						"info",
-						3,
-						RedirectStatus.NOT_AVAILABLE,
-						0,
-						0,
-						0)
-		);
-		NeighbourSubscription neighbourSubscription = new NeighbourSubscription(
-				"publisherId = 'NO0000'",
-				NeighbourSubscriptionStatus.ACCEPTED
-		);
-
-		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getHost());
-		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
-		routingConfigurer.setUpRegularRouting(
-				Collections.singleton(neighbourSubscription),
-				Collections.singleton(denmCapability),
-				"my_Neighbour",
-				client.getQpidDelta()
-		);
-		assertThat(neighbourSubscription.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.ACCEPTED);
-		assertThat(neighbourSubscription.getEndpoints()).isEmpty();
 	}
 
 	@Test
@@ -1322,17 +834,21 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
 
-
-	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
-		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
-		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
-		neighbourSink.start();
-	}
-
-	public SSLContext setUpTestSslContext(String s) {
-		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+	public CapabilitySplit getDatexCapability(String publicationId, RedirectStatus redirect, String exchangeName) {
+		Metadata metadata = new Metadata(redirect);
+		Shard shard = new Shard(1, exchangeName, "publicationId = '" + publicationId + "'");
+		metadata.setShards(Collections.singletonList(shard));
+		return new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						publicationId,
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				metadata
+		);
 	}
 
 }
