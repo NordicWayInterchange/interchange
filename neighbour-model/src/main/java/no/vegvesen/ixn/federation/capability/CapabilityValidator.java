@@ -55,4 +55,16 @@ public class CapabilityValidator {
         }
         return notSetProperties;
     }
+
+    public static boolean quadtreeIsValid(CapabilitySplitApi capability){
+        Set<String> quadTree = capability.getApplication().getQuadTree();
+        for(String quadTile : quadTree){
+            for(char nextNumber : quadTile.toCharArray()){
+                if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

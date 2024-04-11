@@ -157,7 +157,7 @@ public class OnboardRestControllerIT {
                         Collections.singleton(datexNO)
                 )));
         System.out.println(thrown.getMessage());
-        assertThat(thrown.getMessage()).contains("quadTree outside the legal range");
+        assertThat(thrown.getMessage()).contains("invalid quadTree");
     }
     @Test
     public void testAddingCapabilityWithMissingProperties() {
