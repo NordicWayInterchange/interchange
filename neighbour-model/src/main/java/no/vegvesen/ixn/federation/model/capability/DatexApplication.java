@@ -56,12 +56,18 @@ public class DatexApplication extends Application{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DatexApplication that = (DatexApplication) o;
-        return Objects.equals(publicationType, that.publicationType) && Objects.equals(publisherName, that.publisherName);
+        return  Objects.equals(publicationType, that.publicationType)
+                && Objects.equals(publisherName, that.publisherName)
+                && Objects.equals(getPublisherId(), that.getPublisherId())
+                && Objects.equals(getPublicationId(), that.getPublicationId())
+                && Objects.equals(getOriginatingCountry(), that.getOriginatingCountry())
+                && Objects.equals(getProtocolVersion(), that.getProtocolVersion())
+                && Objects.equals(getQuadTree(), that.getQuadTree());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), publicationType);
+        return Objects.hash(super.hashCode(), publicationType, publisherName);
     }
 
     @Override
