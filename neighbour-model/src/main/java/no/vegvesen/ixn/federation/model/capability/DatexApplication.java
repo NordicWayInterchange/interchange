@@ -56,6 +56,7 @@ public class DatexApplication extends Application{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DatexApplication that = (DatexApplication) o;
+
         return  Objects.equals(publicationType, that.publicationType)
                 && Objects.equals(publisherName, that.publisherName)
                 && Objects.equals(getPublisherId(), that.getPublisherId())
