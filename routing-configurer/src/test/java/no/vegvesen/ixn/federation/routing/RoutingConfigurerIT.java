@@ -380,7 +380,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(numMessages.get()).isEqualTo(1);
 	}
 
-	//Sharding tests
 	@Test
 	public void oneShardedCapabilityAndOneShardedSubscription() {
 		CapabilitySplit cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex11", "cap-ex12", "cap-ex13");
@@ -1011,6 +1010,192 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
+	}
+
+	@Test
+	public void oneShardedCapabilityAndOneShardedRedirectSubscription() {
+		CapabilitySplit cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex30", "cap-ex31", "cap-ex32");
+		cap.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex30");
+		client.createHeadersExchange("cap-ex31");
+		client.createHeadersExchange("cap-ex32");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+
+		NeighbourSubscription sub = new NeighbourSubscription("publicationId = 'pub-1' AND shardId = 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-1");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(Collections.singleton(sub)), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(client.getGroupMember("redirect-sp-1", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+	}
+
+	@Test
+	public void oneShardedCapabilityAndTwoShardedRedirectSubscriptions() {
+		CapabilitySplit cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex33", "cap-ex34", "cap-ex35");
+		cap.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex33");
+		client.createHeadersExchange("cap-ex34");
+		client.createHeadersExchange("cap-ex35");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+
+		NeighbourSubscription sub1 = new NeighbourSubscription("publicationId = 'pub-1' AND shardId = 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-2");
+		NeighbourSubscription sub2 = new NeighbourSubscription("publicationId = 'pub-1' AND shardId >= 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-3");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2))), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub1.getEndpoints()).hasSize(1);
+		assertThat(sub2.getEndpoints()).hasSize(2);
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(client.getGroupMember("redirect-sp-2", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getGroupMember("redirect-sp-3", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+	}
+
+	@Test
+	public void oneShardedCapabilityAndNotShardedRedirectSubscription() {
+		CapabilitySplit cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex36", "cap-ex37", "cap-ex38");
+		cap.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex36");
+		client.createHeadersExchange("cap-ex37");
+		client.createHeadersExchange("cap-ex38");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+
+		NeighbourSubscription sub = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-4");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(Collections.singleton(sub)), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub.getEndpoints()).hasSize(3);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		assertThat(client.getGroupMember("redirect-sp-4", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+	}
+
+	@Test
+	public void oneCapabilityNotShardedAndOneRedirectSubscriptionSharded() {
+		CapabilitySplit cap = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex39");
+		cap.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex39");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+
+		NeighbourSubscription sub = new NeighbourSubscription("publicationId = 'pub-1' AND shardId = 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-5");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(Collections.singleton(sub)), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub.getEndpoints()).hasSize(0);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.NO_OVERLAP);
+		assertThat(client.getGroupMember("redirect-sp-4", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+	}
+
+	@Test
+	public void oneShardedCapabilityAndOneRedirectSubscriptionShardedAndOneRedirectSubscriptionNotSharded() {
+		CapabilitySplit cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex40", "cap-ex41", "cap-ex42");
+		cap.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex40");
+		client.createHeadersExchange("cap-ex41");
+		client.createHeadersExchange("cap-ex42");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+
+		NeighbourSubscription sub1 = new NeighbourSubscription("publicationId = 'pub-1' AND shardId >= 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-6");
+		NeighbourSubscription sub2 = new NeighbourSubscription("publicationId = 'pub-1'", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-7");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(new HashSet<>(Arrays.asList(sub1, sub2))), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub1.getEndpoints()).hasSize(2);
+		assertThat(sub2.getEndpoints()).hasSize(3);
+		for (NeighbourEndpoint endpoint : sub1.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(client.getGroupMember("redirect-sp-6", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getGroupMember("redirect-sp-7", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+	}
+
+	@Test
+	public void twoCapabilitiesShardedAndOneRedirectSubscriptionSharded() {
+		CapabilitySplit cap1 = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex43", "cap-ex44", "cap-ex45");
+		cap1.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex43");
+		client.createHeadersExchange("cap-ex44");
+		client.createHeadersExchange("cap-ex45");
+
+		CapabilitySplit cap2 = getShardedCapability("pub-2", RedirectStatus.OPTIONAL, "cap-ex46", "cap-ex47", "cap-ex48");
+		cap2.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex46");
+		client.createHeadersExchange("cap-ex47");
+		client.createHeadersExchange("cap-ex48");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+
+		NeighbourSubscription sub = new NeighbourSubscription("(publicationId = 'pub-1' OR publicationId = 'pub-2') AND shardId >= 2", NeighbourSubscriptionStatus.ACCEPTED, "redirect-sp-8");
+
+		Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(Collections.singleton(sub)), new SubscriptionRequest());
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
+
+		assertThat(sub.getEndpoints()).hasSize(4);
+		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
+			assertThat(client.queueExists(endpoint.getSource())).isTrue();
+			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
+		}
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
+		assertThat(client.getGroupMember("redirect-sp-8", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 	}
 
 	public CapabilitySplit getDatexCapability(String publicationId, RedirectStatus redirect, String exchangeName) {
