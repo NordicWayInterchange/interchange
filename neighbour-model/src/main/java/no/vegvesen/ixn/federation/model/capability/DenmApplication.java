@@ -44,7 +44,8 @@ public class DenmApplication extends Application{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DenmApplication that = (DenmApplication) o;
-        return  Objects.equals(causeCode, that.causeCode);
+        return  Objects.equals(causeCode, that.causeCode)
+                && super.equals(that);
     }
     @Override
     public int hashCode(){

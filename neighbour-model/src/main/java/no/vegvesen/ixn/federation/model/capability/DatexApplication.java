@@ -58,7 +58,8 @@ public class DatexApplication extends Application{
         DatexApplication that = (DatexApplication) o;
 
         return  Objects.equals(publicationType, that.publicationType)
-                && Objects.equals(publisherName, that.publisherName);
+                && Objects.equals(publisherName, that.publisherName)
+                && super.equals(that);
     }
 
     @Override
