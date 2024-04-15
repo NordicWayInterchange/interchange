@@ -140,7 +140,7 @@ public class Subscription {
 	}
 
 	public boolean isSharded() {
-		return selector.contains("shardId=");
+		return selector.contains("shardId");
 	}
 
 	public void setEndpoints(Set<Endpoint> newEndpoints) {

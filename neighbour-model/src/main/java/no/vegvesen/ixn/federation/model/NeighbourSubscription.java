@@ -122,7 +122,7 @@ public class NeighbourSubscription {
     }
 
     public boolean isSharded() {
-        return selector.contains("shardId=");
+        return selector.contains("shardId");
     }
 
     @Override
