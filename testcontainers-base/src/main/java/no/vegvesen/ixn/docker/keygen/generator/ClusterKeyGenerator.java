@@ -63,6 +63,7 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -129,40 +130,35 @@ public class ClusterKeyGenerator {
     }
 
     //TODO this could use a List of certificates. Much easier.
-    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, SecureRandom random, X509Certificate topCaCertificate, X509Certificate intermediateCertificate, PrivateKey intermediatePrivateKey) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException {
-        KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(description.getName(), description.getCountry());
-        List<X509Certificate> spCertChain = generateServiceProviderCertBC(spCsr.csr(), topCaCertificate, intermediateCertificate, intermediatePrivateKey, description.getName());
+    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, SecureRandom random, X509Certificate topCaCertificate, X509Certificate intermediateCertificate, PrivateKey intermediatePrivateKey) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+        List<X509Certificate> issuerCertChain = Arrays.asList(intermediateCertificate,topCaCertificate);
+        String spName = description.getName();
+        String spCountry = description.getCountry();
+        String cn = description.getName();
+        KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(spName, spCountry, "test@test.com");
+        CertSigner certSigner = new CertSigner(intermediatePrivateKey, intermediateCertificate, issuerCertChain);
+        List<X509Certificate> newCertChain = certSigner.sign(spCsr.csr(),cn);
         String serviceProviderKeystorePassword = generatePassword(random,24);
         String serviceProviderKeystoreName = description.getName() + ".p12";
         Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
-        X509Certificate[] certChain = spCertChain.toArray(new X509Certificate[0]);
+        X509Certificate[] certChain = newCertChain.toArray(new X509Certificate[0]);
         generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), spCsr.keyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
         Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
-        saveCert(spCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
+        saveCert(newCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
         Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
-        saveCertChain(spCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
+        saveCertChain(newCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
         Path serviceProviderKeyPath = outputFolder.resolve(String.format("%s.key.pem", description.getName()));
         saveKeyPair(spCsr.keyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
     }
 
-    public static List<X509Certificate> generateServiceProviderCertBC(PKCS10CertificationRequest certificationRequest, X509Certificate caCertificate, X509Certificate intermediateCertificate, PrivateKey privateKey, String cn) {
-        try {
-            CertSigner certSigner = new CertSigner(privateKey, intermediateCertificate, caCertificate);
-            return certSigner.sign(certificationRequest,cn);
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | OperatorCreationException |
-                 SignatureException | InvalidKeyException | NoSuchProviderException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public static KeyPairAndCsr generateCsrForServiceProviderBC(String name, String country) throws NoSuchAlgorithmException, OperatorCreationException {
+    public static KeyPairAndCsr generateCsrForServiceProviderBC(String name, String country, String email) throws NoSuchAlgorithmException, OperatorCreationException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         X500Principal x500Principal = new X500Principal(
                 String.format(
-                        "emailAddress=test@test.com, CN=%s, O=Nordic Way, C=%s",
+                        "emailAddress=%s, CN=%s, O=Nordic Way, C=%s",
+                        email,
                         name,
                         country
                 )
@@ -193,8 +189,11 @@ public class ClusterKeyGenerator {
                 csrSubject,
                 csrSubjectPublicKeyInfo
         );
-        certificateBuilder.addExtension(Extension.basicConstraints,false,new BasicConstraints(false));
-        KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
+        //certBuilder.addExtension(Extension.basicConstraints,true,new BasicConstraints(true));
+        certificateBuilder.addExtension(Extension.basicConstraints,true,new BasicConstraints(false));
+        //KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign);
+        KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
+        //KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign);
         certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerCertificate.getPublicKey());
@@ -205,10 +204,12 @@ public class ClusterKeyGenerator {
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
         certificateBuilder.addExtension(Extension.extendedKeyUsage,false,extendedKeyUsage);
 
-        ArrayList<GeneralName> names = new ArrayList<>();
-        names.add(new GeneralName(GeneralName.dNSName,hostname));
-        GeneralNames subjectAltNames = new GeneralNames(names.toArray(new GeneralName[0]));
-        certificateBuilder.addExtension(Extension.subjectAlternativeName,false,subjectAltNames);
+        if (! "localhost".equals(hostname)) {
+            ArrayList<GeneralName> names = new ArrayList<>();
+            names.add(new GeneralName(GeneralName.dNSName, hostname));
+            GeneralNames subjectAltNames = new GeneralNames(names.toArray(new GeneralName[0]));
+            certificateBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
+        }
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
 
         ContentSigner signer = signerBuilder.build(issuerPrivateKey);
@@ -216,8 +217,13 @@ public class ClusterKeyGenerator {
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
         //TODO do we need BC here?
         certificate.verify(issuerCertificate.getPublicKey());
+        /*
         List<X509Certificate> certificateChain = new ArrayList<>(issuerCertificateChain);
-        certificateChain.add(0,certificate);
+        certificateChain.add(certificate);
+         */
+        List<X509Certificate> certificateChain = new ArrayList<>();
+        certificateChain.add(certificate);
+        certificateChain.addAll(issuerCertificateChain);
         return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
 
     }

@@ -13,6 +13,7 @@ import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -99,8 +100,37 @@ public class ClusterKeyGeneratorIT {
        assertThat(san).hasSize(2);
        assertThat(san.get(0)).isEqualTo(GeneralName.dNSName);
        assertThat(san.get(1)).isEqualTo("myhost.com");
+       assertThat(host.certificateChain()).hasSize(2);
+       assertThat(host.certificateChain().get(1)).isEqualTo(topCa.certificate());
+       assertThat(host.certificateChain().get(0)).isEqualTo(host.certificate());
    }
 
+
+   @Test
+   public void makeHostKeystore() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, IOException, SignatureException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
+       SecureRandom secureRandom = new SecureRandom();
+       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("topdomain","NO", secureRandom);
+       CertificateCertificateChainAndKeys host = ClusterKeyGenerator.generateServerCertForHost("myhost.com", topCa.certificate(), topCa.certificateChain(), topCa.keyPair().getPrivate(), secureRandom);
+       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+       X509Certificate[] certificates = host.certificateChain().toArray(new X509Certificate[0]);
+       assertThat(certificates).hasSize(2);
+       for (X509Certificate certificate : certificates) {
+           System.out.println(certificate);
+       }
+       ClusterKeyGenerator.generateKeystoreBC("password","mydomain.com",host.keyPair().getPrivate(), certificates, outputStream);
+   }
+
+
+   /*
+   @Test
+   public void testServiceProviderWithOneLevelOfCa() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException {
+        SecureRandom secureRandom = new SecureRandom();
+        CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("topDomain","NO",secureRandom);
+
+        ClusterKeyGenerator.generateServiceProviderKeys();
+
+   }
+    */
     private static String getCountry(X500Name name) {
         RDN[] rdNs = name.getRDNs(BCStyle.C);
         return IETFUtils.valueToString(rdNs[0].getFirst().getValue());

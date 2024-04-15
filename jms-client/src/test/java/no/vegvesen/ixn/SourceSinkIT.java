@@ -7,6 +7,9 @@ import no.vegvesen.ixn.model.IllegalMessageException;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,14 +28,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(SourceSinkIT.class);
 
 	private static final String SP_NAME = "king_harald";
+
 	static KeysStructure keysStructure = generateKeys(SourceSinkIT.class,"my_ca","localhost", SP_NAME);
 
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
 			keysStructure,
-			"localhost");
+			"localhost")
+			.withLogConsumer(new Slf4jLogConsumer(logger));
 
 	private String Url;
 	private SSLContext kingHaraldSSlContext;
