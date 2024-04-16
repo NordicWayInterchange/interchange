@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -272,9 +269,37 @@ public class ServiceProviderServiceIT {
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
         assertThat(savedServiceProvider.getCapabilities().getCapabilities()).hasSize(1);
-
     }
 
+    @Test
+    public void multipleCapabilitiesAreRemoved(){
+        ServiceProvider sp = new ServiceProvider("sp");
+        Capabilities capabilities = new Capabilities();
+        capabilities.getCapabilities().addAll(
+                Set.of(
+                        new CapabilitySplit(
+                            new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", Set.of("123123"),"12"),
+                            new Metadata()
+                ),
+                        new CapabilitySplit(
+                                new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", Set.of("123123"),"123"),
+                                new Metadata()
+                        ),
+                        new CapabilitySplit(
+                                new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", Set.of("123123"),"1234"),
+                                new Metadata()
+                        ))
+        );
+
+        for(CapabilitySplit i : capabilities.getCapabilities()){
+            i.setStatus(CapabilityStatus.TEAR_DOWN);
+        }
+        sp.setCapabilities(capabilities);
+        repository.save(sp);
+        service.removeTearDownCapabilities(sp.getName());
+        ServiceProvider savedServiceProvider = repository.findByName(sp.getName());
+        assertThat(savedServiceProvider.getCapabilities().getCapabilities().size()).isEqualTo(0);
+    }
     @Test
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
