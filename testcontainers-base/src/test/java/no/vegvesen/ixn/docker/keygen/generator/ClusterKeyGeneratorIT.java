@@ -53,7 +53,7 @@ public class ClusterKeyGeneratorIT {
     }
 
    @Test
-   public void testGenerateTopCaCountryWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException {
+   public void testGenerateTopCaCountryWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
        CertificateCertificateChainAndKeys ca = ClusterKeyGenerator.generateTopCa("mydomain.com", null, new SecureRandom());
        X500Name issuerName = new X500Name(ca.certificate().getIssuerX500Principal().getName());
        X500Name subjectName = new X500Name(ca.certificate().getSubjectX500Principal().getName());
