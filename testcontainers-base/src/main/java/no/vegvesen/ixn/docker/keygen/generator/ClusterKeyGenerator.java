@@ -9,7 +9,6 @@ import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
 import no.vegvesen.ixn.docker.keygen.TopDomain;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
@@ -19,7 +18,6 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX500NameUtil;
@@ -37,7 +35,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -47,7 +44,17 @@ import java.io.Writer;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -145,7 +152,7 @@ public class ClusterKeyGenerator {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        X500Principal x500Principal = new X500Principal(
+        X500Name x500Name = new X500Name(
                 String.format(
                         "emailAddress=%s, CN=%s, O=Nordic Way, C=%s",
                         email,
@@ -153,19 +160,23 @@ public class ClusterKeyGenerator {
                         country
                 )
         );
-        PKCS10CertificationRequest csr = createCertificateRequest(x500Principal, keyPair, "SHA256withRSA");
+        PKCS10CertificationRequest csr = createCertificateRequest(x500Name, keyPair);
         return new KeyPairAndCsr(keyPair,csr);
     }
 
 
     public static CertificateCertificateChainAndKeys generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         KeyPair keyPair = generateKeyPair(2048);
-        X500Principal subject = new X500Principal(String.format(
-                "O=Nordic Way, CN=%s",
-                hostname
-        ));
-        PKCS10CertificationRequest csr = createCertificateRequest(subject, keyPair, "SHA512withRSA");
-        SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
+        X500Name subject = new X500Name(
+                String.format(
+                        "O=Nordic Way, CN=%s",
+                        hostname
+                )
+
+        );
+        PKCS10CertificationRequest csr = createCertificateRequest(subject, keyPair);
+        JcaPKCS10CertificationRequest csrWrapper = new JcaPKCS10CertificationRequest(csr);
+        PublicKey subjectPublicKey = csrWrapper.getPublicKey();
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
         Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
@@ -177,7 +188,7 @@ public class ClusterKeyGenerator {
                 startDate,
                 toDate,
                 csrSubject,
-                csrSubjectPublicKeyInfo
+                subjectPublicKey
         );
         certificateBuilder.addExtension(Extension.basicConstraints,true,new BasicConstraints(false));
         KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
@@ -185,7 +196,7 @@ public class ClusterKeyGenerator {
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerCertificate.getPublicKey());
         certificateBuilder.addExtension(Extension.authorityKeyIdentifier,false, authorityKeyIdentifier);
-        SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(csrSubjectPublicKeyInfo);
+        SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(subjectPublicKey);
         certificateBuilder.addExtension(Extension.subjectKeyIdentifier,false, subjectKeyIdentifier);
         KeyPurposeId[] keyPurposeIds = new KeyPurposeId[] {KeyPurposeId.id_kp_serverAuth, KeyPurposeId.id_kp_clientAuth};
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
@@ -197,7 +208,7 @@ public class ClusterKeyGenerator {
             GeneralNames subjectAltNames = new GeneralNames(names.toArray(new GeneralName[0]));
             certificateBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
         //}
-        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
+        JcaContentSignerBuilder signerBuilder = createContentSignerBuilder();
 
         ContentSigner signer = signerBuilder.build(issuerPrivateKey);
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
@@ -212,6 +223,14 @@ public class ClusterKeyGenerator {
     }
 
 
+    /**
+     *
+     * @param keystorePassword Password, set for bothe the keystore and the key entry.
+     * @param entryName Name of key entry in the new keystore
+     * @param privateKey Private key
+     * @param certificates The chain of certificates belonging to the key
+     * @param stream The output stream to write the keystore to
+     */
     public static void generateKeystoreBC(String keystorePassword, String entryName, PrivateKey privateKey, Certificate[] certificates, OutputStream stream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null,null);
@@ -251,7 +270,7 @@ public class ClusterKeyGenerator {
     }
 
     private static X509Certificate signX509Certificate(X500Name subjectName, PublicKey subjectPublicKey, X500Name issuerName, PublicKey issuerPublicKey, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
-        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
+        JcaContentSignerBuilder signerBuilder = createContentSignerBuilder();
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
         Date toDate = Date.from(LocalDateTime.now().plusYears(1).atZone(ZoneId.systemDefault()).toInstant());
@@ -300,21 +319,26 @@ public class ClusterKeyGenerator {
         if (owningCountry == null) {
             owningCountry = "NO";
         }
-        X500Principal x500Principal = new X500Principal(
+        X500Name x500Name = new X500Name(
                 String.format(
                         "CN=%s, O=Nordic Way, C=%s",
                         domainName,
                         owningCountry
                 )
+
         );
-        return createCertificateRequest(x500Principal, keyPair, "SHA512withRSA");
+        return createCertificateRequest(x500Name, keyPair);
     }
 
-    private static PKCS10CertificationRequest createCertificateRequest(X500Principal subject, KeyPair keyPair, String signAlgorithm) throws OperatorCreationException {
+    private static PKCS10CertificationRequest createCertificateRequest(X500Name subject, KeyPair keyPair) throws OperatorCreationException {
         JcaPKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
-        JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(signAlgorithm);
+        JcaContentSignerBuilder signBuilder = createContentSignerBuilder();
         ContentSigner signer = signBuilder.build(keyPair.getPrivate());
         return builder.build(signer);
+    }
+
+    private static JcaContentSignerBuilder createContentSignerBuilder() {
+        return new JcaContentSignerBuilder("SHA512withRSA");
     }
 
 
