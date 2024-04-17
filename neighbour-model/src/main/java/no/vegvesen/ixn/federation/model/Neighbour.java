@@ -33,7 +33,7 @@ public class Neighbour {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_cap"))
-	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
+	private Capabilities capabilities = new Capabilities(new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
@@ -150,7 +150,7 @@ public class Neighbour {
 	}
 
 	public boolean hasCapabilities() {
-		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
+		return getCapabilities() != null && !getCapabilities().getCapabilities().isEmpty();
 	}
 
 	public void setDnsProperties(Neighbour dnsNeighbour) {

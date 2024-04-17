@@ -83,13 +83,11 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilities) {
-		this.status = status;
+	public Capabilities(Set<CapabilitySplit> capabilities) {
 		setCapabilities(capabilities);
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
-		this.status = status;
+	public Capabilities(Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
 	}

@@ -118,7 +118,7 @@ public class OnboardRestControllerIT {
         datexNO.setMetadata(meta);
 
         ServiceProvider other = new ServiceProvider("other-service-provider");
-        other.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+        other.setCapabilities(new Capabilities(
                 Collections.singleton(
                         new CapabilitySplit(
                                 new DatexApplication(
@@ -187,7 +187,7 @@ public class OnboardRestControllerIT {
         datexNO.setMetadata(meta);
 
         Neighbour other = new Neighbour("my-neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+                new Capabilities(
                         Collections.singleton(
                                 new CapabilitySplit(
                                         new DatexApplication(
@@ -220,7 +220,6 @@ public class OnboardRestControllerIT {
     void testFetchingAllMatchingCapabilities() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "NPRA",
@@ -234,7 +233,6 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "SPRA",
@@ -249,7 +247,6 @@ public class OnboardRestControllerIT {
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "DPRA",
@@ -276,7 +273,6 @@ public class OnboardRestControllerIT {
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "NPRA",
@@ -290,7 +286,6 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "SPRA",
@@ -305,7 +300,6 @@ public class OnboardRestControllerIT {
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "DPRA",
@@ -332,7 +326,6 @@ public class OnboardRestControllerIT {
 
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "SPRA",
@@ -347,7 +340,6 @@ public class OnboardRestControllerIT {
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "DPRA",
@@ -372,7 +364,6 @@ public class OnboardRestControllerIT {
     void testFetchingAllMatchingCapabilitiesWhenSelectorIsNull() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "NPRA",
@@ -386,7 +377,6 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "SPRA",
@@ -401,7 +391,6 @@ public class OnboardRestControllerIT {
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
                                 "DPRA",
@@ -597,7 +586,7 @@ public class OnboardRestControllerIT {
         String serviceproviderName = "serviceprovider";
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceproviderName,
-                new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()),
+                new Capabilities(Collections.emptySet()),
                 Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, nodeProperties.getName())),
                 Collections.emptySet(),
                 LocalDateTime.now()

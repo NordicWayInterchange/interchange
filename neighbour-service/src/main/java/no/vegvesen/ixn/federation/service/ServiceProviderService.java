@@ -178,11 +178,6 @@ public class ServiceProviderService {
             }
         }
 
-        if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
-            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-        } else {
-            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-        }
         serviceProviderRepository.save(serviceProvider);
     }
 

@@ -55,8 +55,6 @@ public class NeigbourDiscoveryService {
             NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbourName);
             if (neighbourRepository.findByName(neighbourName) == null && !neighbourName.equals(interchangeNodeProperties.getName())) {
 
-                // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-                neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
                 logger.info("Found new neighbour {}. Saving in database",neighbourName);
                 neighbourRepository.save(neighbour);
             }
@@ -65,10 +63,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
-        List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
-                Capabilities.CapabilitiesStatus.UNKNOWN,
-                Capabilities.CapabilitiesStatus.KNOWN,
-                Capabilities.CapabilitiesStatus.FAILED);
+        List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findAll();
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
@@ -116,14 +111,12 @@ public class NeigbourDiscoveryService {
         try {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             Capabilities neighbourCapabilities = neighbour.getCapabilities();
-            neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
             neighbourCapabilities.setCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.debug("Updated neighbour: {}", neighbour);
         } catch (CapabilityPostException e) {
             logger.error("Capability post failed", e);
-            neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
             neighbour = neighbourRepository.save(neighbour);

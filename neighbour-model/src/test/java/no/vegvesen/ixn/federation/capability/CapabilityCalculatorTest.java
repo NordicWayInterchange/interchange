@@ -29,12 +29,12 @@ public class CapabilityCalculatorTest {
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
-        Capabilities firstServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(a, b).collect(Collectors.toSet()));
+        Capabilities firstServiceProviderCapabilities = new Capabilities(Stream.of(a, b).collect(Collectors.toSet()));
         firstServiceProvider.setCapabilities(firstServiceProviderCapabilities);
 
         ServiceProvider secondServiceProvider = new ServiceProvider();
         secondServiceProvider.setName("Second Service Provider");
-        Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(b, c).collect(Collectors.toSet()));
+        Capabilities secondServiceProviderCapabilities = new Capabilities(Stream.of(b, c).collect(Collectors.toSet()));
         secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
         Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
@@ -56,7 +56,7 @@ public class CapabilityCalculatorTest {
     void calculateLastUpdatedCapabiltiesOneCap() {
         ServiceProvider serviceProvider = new ServiceProvider();
         LocalDateTime lastUpdated = LocalDateTime.now();
-        Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+        Capabilities capabilities = new Capabilities(
                 Sets.newLinkedHashSet(new CapabilitySplit(
                         new DatexApplication(
                                 "NO-123",
@@ -76,7 +76,7 @@ public class CapabilityCalculatorTest {
     void calculateLastUpdatedCapabilitiesTwoDates() {
         LocalDateTime earliest = LocalDateTime.of(2021, Month.DECEMBER,3,0,0);
         LocalDateTime latest = LocalDateTime.of(2021,Month.DECEMBER,4,0,0);
-        Capabilities earliestCap = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+        Capabilities earliestCap = new Capabilities(
                 Collections.singleton(new CapabilitySplit(
                         new DatexApplication(
                                 "NO-123",
@@ -87,7 +87,7 @@ public class CapabilityCalculatorTest {
                                 "SituationPublication"),
                         new Metadata())),
                 earliest);
-        Capabilities latestCap = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+        Capabilities latestCap = new Capabilities(
                 Collections.singleton(new CapabilitySplit(
                         new DatexApplication(
                                 "NO-123",
@@ -111,19 +111,19 @@ public class CapabilityCalculatorTest {
         CapabilitySplit aCap1 = getDatexCapability("SE");
         CapabilitySplit aCap2 = getDatexCapability("SE");
         ServiceProvider aServiceProvider = new ServiceProvider();
-        aServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
 
         LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
         CapabilitySplit bCap1 = getDatexCapability("SE");
         CapabilitySplit bCap2 = getDatexCapability("SE");
         ServiceProvider bServiceProvider = new ServiceProvider();
-        bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
+        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
         LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
         CapabilitySplit cCap1 = getDatexCapability("FI");
         CapabilitySplit cCap2 = getDatexCapability("FI");
         ServiceProvider cServiceProvider = new ServiceProvider();
-        cServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
+        cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
 
         List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
 

@@ -120,7 +120,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -129,7 +129,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new Capabilities(Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
 
@@ -165,7 +165,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -174,7 +174,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new Capabilities(Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
 
