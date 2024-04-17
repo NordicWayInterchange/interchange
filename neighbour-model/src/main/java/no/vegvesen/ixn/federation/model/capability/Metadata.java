@@ -29,7 +29,7 @@ public class Metadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "met_id", foreignKey = @ForeignKey(name="fk_met"))
-    private List<Shard> shards = new ArrayList<>();
+    private List<CapabilityShard> shards = new ArrayList<>();
 
     public Metadata() {
 
@@ -112,11 +112,11 @@ public class Metadata {
         }
     }
 
-    public List<Shard> getShards() {
+    public List<CapabilityShard> getShards() {
         return shards;
     }
 
-    public void setShards(List<Shard> shards) {
+    public void setShards(List<CapabilityShard> shards) {
         this.shards.clear();
         if (shards != null) {
             this.shards.addAll(shards);
@@ -133,7 +133,7 @@ public class Metadata {
 
     public Set<String> getExchangesFromShards() {
         Set<String> exchanges = new HashSet<>();
-        for (Shard shard : shards) {
+        for (CapabilityShard shard : shards) {
             exchanges.add(shard.getExchangeName());
         }
         return exchanges;

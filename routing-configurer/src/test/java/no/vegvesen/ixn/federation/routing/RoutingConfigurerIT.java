@@ -306,7 +306,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String deliveryExchangeName = "del-ex10";
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex10", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex10", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit cap = new CapabilitySplit(
@@ -1200,7 +1200,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	public CapabilitySplit getDatexCapability(String publicationId, RedirectStatus redirect, String exchangeName) {
 		Metadata metadata = new Metadata(redirect);
-		Shard shard = new Shard(1, exchangeName, "publicationId = '" + publicationId + "'");
+		CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = '" + publicationId + "'");
 		metadata.setShards(Collections.singletonList(shard));
 		return new CapabilitySplit(
 				new DatexApplication(
@@ -1218,9 +1218,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public CapabilitySplit getShardedCapability(String publicationId, RedirectStatus redirect, String exchangeName1, String exchangeName2, String exchangeName3) {
 		Metadata metadata = new Metadata(redirect);
 		metadata.setShardCount(3);
-		Shard shard1 = new Shard(1, exchangeName1, "publicationId = '" + publicationId + "'");
-		Shard shard2 = new Shard(2, exchangeName2, "publicationId = '" + publicationId + "'");
-		Shard shard3 = new Shard(3, exchangeName3, "publicationId = '" + publicationId + "'");
+		CapabilityShard shard1 = new CapabilityShard(1, exchangeName1, "publicationId = '" + publicationId + "'");
+		CapabilityShard shard2 = new CapabilityShard(2, exchangeName2, "publicationId = '" + publicationId + "'");
+		CapabilityShard shard3 = new CapabilityShard(3, exchangeName3, "publicationId = '" + publicationId + "'");
 		metadata.setShards(Arrays.asList(shard1, shard2, shard3));
 		return new CapabilitySplit(
 				new DatexApplication(

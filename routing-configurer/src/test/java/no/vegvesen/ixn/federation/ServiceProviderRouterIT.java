@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.proton.amqp.transport.End;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -496,7 +495,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(cap.isSharded()).isTrue();
 		assertThat(cap.hasShards()).isTrue();
 		assertThat(cap.getMetadata().getShards()).hasSize(3);
-		for (Shard shard : cap.getMetadata().getShards()) {
+		for (CapabilityShard shard : cap.getMetadata().getShards()) {
 			assertThat(client.exchangeExists(shard.getExchangeName())).isTrue();
 			assertThat(shard.getSelector().contains("shardId")).isTrue();
 		}
@@ -599,7 +598,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit denmCapability = new CapabilitySplit(
@@ -639,7 +638,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex2", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
 		CapabilitySplit denmCapability = new CapabilitySplit(
@@ -656,7 +655,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex2");
 
 		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit denmCapability2 = new CapabilitySplit(
@@ -695,7 +694,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String exchangeName = "my-exchange8";
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit denmCapability = new CapabilitySplit(
@@ -738,7 +737,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit denmCapability = new CapabilitySplit(
@@ -783,7 +782,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard1 = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex6", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
 		CapabilitySplit denmCapability1 = new CapabilitySplit(
@@ -800,7 +799,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex6");
 
 		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard2 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex7", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit denmCapability2 = new CapabilitySplit(
@@ -874,7 +873,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		subscription.setLocalEndpoints(Collections.singleton(endpoint));
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
 		CapabilitySplit denmCapability = new CapabilitySplit(

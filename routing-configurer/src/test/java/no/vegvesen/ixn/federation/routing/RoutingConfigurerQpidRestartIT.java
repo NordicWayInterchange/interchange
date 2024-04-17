@@ -7,7 +7,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -101,7 +101,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
         CapabilitySplit capability = new CapabilitySplit(
@@ -146,7 +146,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
         CapabilitySplit capability = new CapabilitySplit(

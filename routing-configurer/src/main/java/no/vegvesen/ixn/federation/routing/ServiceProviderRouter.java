@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
@@ -280,7 +280,7 @@ public class ServiceProviderRouter {
         if (serviceProvider.hasCapabilities()) {
             for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
                 if (!capability.getMetadata().hasShards() && capability.getStatus().equals(CapabilityStatus.REQUESTED)) {
-                    List<Shard> newShards = new ArrayList<>();
+                    List<CapabilityShard> newShards = new ArrayList<>();
                     int numberOfShards = capability.getMetadata().getShardCount();
                     for (int i = 0; i<numberOfShards; i++) {
                         String exchangeName = "cap-" + UUID.randomUUID();
@@ -294,7 +294,7 @@ public class ServiceProviderRouter {
                         } else {
                             capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                         }
-                        Shard newShard = new Shard(i+1, exchangeName, capabilitySelector);
+                        CapabilityShard newShard = new CapabilityShard(i+1, exchangeName, capabilitySelector);
                         newShards.add(newShard);
                     }
                     capability.getMetadata().setShards(newShards);
@@ -307,7 +307,7 @@ public class ServiceProviderRouter {
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
-            for (Shard shard : capability.getMetadata().getShards()) {
+            for (CapabilityShard shard : capability.getMetadata().getShards()) {
                 if (!delta.exchangeHasBindingToQueue(shard.getExchangeName(), "bi-queue")){
                     qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
                     delta.addBindingToExchange(shard.getExchangeName(), shard.getSelector(), "bi-queue");
@@ -324,7 +324,7 @@ public class ServiceProviderRouter {
         if (!tearDownCapabilities.isEmpty()) {
             for (CapabilitySplit capability : tearDownCapabilities) {
                 if (capability.getMetadata().hasShards()) {
-                    for (Shard shard : capability.getMetadata().getShards()) {
+                    for (CapabilityShard shard : capability.getMetadata().getShards()) {
                         Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
                         if (exchange != null) {
                             qpidClient.removeExchange(exchange);
@@ -358,7 +358,7 @@ public class ServiceProviderRouter {
                             if (capability.isSharded()) {
                                 //TODO: Sharding, check if selector is sharded as well.
                             } else {
-                                Shard shard = capability.getMetadata().getShards().get(0);
+                                CapabilityShard shard = capability.getMetadata().getShards().get(0);
                                 if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), shard.getExchangeName())) {
                                     String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
                                     qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), shard.getExchangeName(), new Filter(joinedSelector)));
@@ -464,7 +464,7 @@ public class ServiceProviderRouter {
                                     if (capability.isSharded()) {
                                         //TODO: Sharding
                                     } else {
-                                        Shard shard = capability.getMetadata().getShards().get(0);
+                                        CapabilityShard shard = capability.getMetadata().getShards().get(0);
                                         if (!existingConnections.contains(shard.getExchangeName())) {
                                             LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
                                             qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));

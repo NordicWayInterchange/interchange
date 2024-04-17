@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -301,7 +301,7 @@ public class ServiceProviderServiceIT {
         capabilitySplit.setStatus(CapabilityStatus.TEAR_DOWN);
 
         Metadata metadata = new Metadata();
-        metadata.setShards(List.of(new Shard()));
+        metadata.setShards(List.of(new CapabilityShard()));
         capabilitySplit.setMetadata(metadata);
         capabilities.setCapabilities(new HashSet<>(Arrays.asList(capabilitySplit)));
 

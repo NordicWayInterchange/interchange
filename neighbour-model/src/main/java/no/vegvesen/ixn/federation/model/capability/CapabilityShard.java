@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "shards", uniqueConstraints = @UniqueConstraint(columnNames = {"shardId", "exchangeName", "selector"}))
-public class Shard {
+@Table(name = "capability_shards", uniqueConstraints = @UniqueConstraint(columnNames = {"shardId", "exchangeName", "selector"}))
+public class CapabilityShard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "shard_seq")
@@ -18,11 +18,11 @@ public class Shard {
     @Column(columnDefinition="TEXT")
     private String selector;
 
-    public Shard() {
+    public CapabilityShard() {
 
     }
 
-    public Shard(Integer shardId, String exchangeName, String selector) {
+    public CapabilityShard(Integer shardId, String exchangeName, String selector) {
         this.shardId = shardId;
         this.exchangeName = exchangeName;
         this.selector = selector;
@@ -55,8 +55,8 @@ public class Shard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Shard)) return false;
-        Shard shard = (Shard) o;
+        if (!(o instanceof CapabilityShard)) return false;
+        CapabilityShard shard = (CapabilityShard) o;
         return shardId.equals(shard.shardId) && exchangeName.equals(shard.exchangeName) && selector.equals(shard.selector);
     }
 

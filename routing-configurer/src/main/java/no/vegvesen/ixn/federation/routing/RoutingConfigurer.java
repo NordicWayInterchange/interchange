@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
@@ -149,7 +149,7 @@ public class RoutingConfigurer {
 					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
 					if (subscription.isSharded()) {
 						if (capability.isSharded()) {
-							for (Shard shard : capability.getMetadata().getShards()) {
+							for (CapabilityShard shard : capability.getMetadata().getShards()) {
 								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
 									createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
 								}
@@ -158,7 +158,7 @@ public class RoutingConfigurer {
 							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
 						}
 					} else {
-						for (Shard shard : capability.getMetadata().getShards()) {
+						for (CapabilityShard shard : capability.getMetadata().getShards()) {
 							createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
 						}
 					}
@@ -180,7 +180,7 @@ public class RoutingConfigurer {
 		logger.debug("Set up routing for neighbour {}", neighbourName);
 	}
 
-	public void createEndpointForSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, String neighbourName, QpidDelta delta, Shard shard) {
+	public void createEndpointForSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, String neighbourName, QpidDelta delta, CapabilityShard shard) {
 		String queueName = "sub-" + UUID.randomUUID();
 		logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
 		NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
@@ -197,7 +197,7 @@ public class RoutingConfigurer {
 					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
 					if (subscription.isSharded()) {
 						if (capability.isSharded()) {
-							for (Shard shard : capability.getMetadata().getShards()) {
+							for (CapabilityShard shard : capability.getMetadata().getShards()) {
 								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
 									createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
 								}
@@ -206,7 +206,7 @@ public class RoutingConfigurer {
 							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
 						}
 					} else {
-						for (Shard shard : capability.getMetadata().getShards()) {
+						for (CapabilityShard shard : capability.getMetadata().getShards()) {
 							createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
 						}
 					}
@@ -227,7 +227,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void createEndpointForRedirectSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, QpidDelta delta, Shard shard) {
+	public void createEndpointForRedirectSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, QpidDelta delta, CapabilityShard shard) {
 		String redirectQueue = "re-" + UUID.randomUUID();
 		logger.debug("Creating endpoint {} for subscription with id {}", redirectQueue, subscription.getId());
 		NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
