@@ -39,19 +39,12 @@ public class Capabilities {
 
 	public void addDataType(CapabilitySplit newCapability) {
 		capabilities.add(newCapability);
-
-		if (hasDataTypes()) {
-			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 
 	}
@@ -66,11 +59,6 @@ public class Capabilities {
 		CapabilitySplit toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
-
-	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
-
-	@Enumerated(EnumType.STRING)
-	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
@@ -90,14 +78,6 @@ public class Capabilities {
 	public Capabilities(Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
-	}
-
-	public CapabilitiesStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(CapabilitiesStatus status) {
-		this.status = status;
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
