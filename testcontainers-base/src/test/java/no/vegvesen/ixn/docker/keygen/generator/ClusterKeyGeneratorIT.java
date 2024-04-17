@@ -87,6 +87,8 @@ public class ClusterKeyGeneratorIT {
        assertThat(chain.get(0)).isEqualTo(topCa.certificate());
        assertThat(chain.get(1)).isEqualTo(intermediateCa.certificate());
        assertThat(chain.get(2)).isEqualTo(subCa.certificate());
+       intermediateCa.certificate().verify(topCa.keyPair().getPublic());
+       subCa.certificate().verify(intermediateCa.keyPair().getPublic());
    }
 
    @Test
@@ -103,6 +105,7 @@ public class ClusterKeyGeneratorIT {
        assertThat(host.certificateChain()).hasSize(2);
        assertThat(host.certificateChain().get(1)).isEqualTo(topCa.certificate());
        assertThat(host.certificateChain().get(0)).isEqualTo(host.certificate());
+       host.certificate().verify(topCa.keyPair().getPublic());
    }
 
 
@@ -117,20 +120,18 @@ public class ClusterKeyGeneratorIT {
        for (X509Certificate certificate : certificates) {
            System.out.println(certificate);
        }
+       host.certificate().verify(topCa.keyPair().getPublic());
        ClusterKeyGenerator.generateKeystoreBC("password","mydomain.com",host.keyPair().getPrivate(), certificates, outputStream);
    }
 
 
-   /*
    @Test
-   public void testServiceProviderWithOneLevelOfCa() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException {
-        SecureRandom secureRandom = new SecureRandom();
-        CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("topDomain","NO",secureRandom);
-
-        ClusterKeyGenerator.generateServiceProviderKeys();
-
+   public void testServiceProviderWithOneLevelOfCa() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
+       SecureRandom secureRandom = new SecureRandom();
+       CertificateCertificateChainAndKeys topCa = ClusterKeyGenerator.generateTopCa("topDomain","NO",secureRandom);
+       CertificateCertificateChainAndKeys sp = ClusterKeyGenerator.generateSPKeys("sp", "NO", "sp@test.com", topCa.certificate(), topCa.keyPair().getPrivate(), topCa.certificateChain());
+       sp.certificate().verify(topCa.keyPair().getPublic());
    }
-    */
     private static String getCountry(X500Name name) {
         RDN[] rdNs = name.getRDNs(BCStyle.C);
         return IETFUtils.valueToString(rdNs[0].getFirst().getValue());

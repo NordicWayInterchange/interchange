@@ -132,20 +132,26 @@ public class ClusterKeyGenerator {
         String spName = description.getName();
         String spCountry = description.getCountry();
         String cn = description.getName();
-        KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(spName, spCountry, "test@test.com");
-        CertSigner certSigner = new CertSigner(intermediatePrivateKey, intermediateCertificate, issuerCertChain);
-        List<X509Certificate> newCertChain = certSigner.sign(spCsr.csr(),cn);
+        CertificateCertificateChainAndKeys result = generateSPKeys(cn, spCountry, "test@test.com", intermediateCertificate, intermediatePrivateKey, issuerCertChain);
+
         String serviceProviderKeystorePassword = generatePassword(random,24);
         String serviceProviderKeystoreName = description.getName() + ".p12";
         Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
-        X509Certificate[] certChain = newCertChain.toArray(new X509Certificate[0]);
-        generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), spCsr.keyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
+        X509Certificate[] certChain = result.certificateChain().toArray(new X509Certificate[0]);
+        generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), result.keyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
         Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
-        saveCert(newCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
+        saveCert(result.certificate(), new FileWriter(serviceProviderCertPath.toFile()));
         Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
-        saveCertChain(newCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
+        saveCertChain(result.certificateChain(), new FileWriter(serviceProviderChainCertPath.toFile()));
         Path serviceProviderKeyPath = outputFolder.resolve(String.format("%s.key.pem", description.getName()));
-        saveKeyPair(spCsr.keyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
+        saveKeyPair(result.keyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
+    }
+
+    public static CertificateCertificateChainAndKeys generateSPKeys(String commonName, String spCountry, String spEmail, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, List<X509Certificate> issuerCertChain) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(commonName, spCountry, spEmail);
+        CertSigner certSigner = new CertSigner(issuerPrivateKey, issuerCertificate, issuerCertChain);
+        List<X509Certificate> newCertChain = certSigner.sign(spCsr.csr(), commonName);
+        return new CertificateCertificateChainAndKeys(spCsr.keyPair(), newCertChain.get(0),newCertChain);
     }
 
     public static KeyPairAndCsr generateCsrForServiceProviderBC(String name, String country, String email) throws NoSuchAlgorithmException, OperatorCreationException {

@@ -13,7 +13,6 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX500NameUtil;
@@ -26,10 +25,12 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
@@ -43,16 +44,6 @@ public class CertSigner {
     private final X509Certificate issuerCertificate;
     private final List<X509Certificate> certificateChain;
 
-
-    public CertSigner(PrivateKey issuerPrivateKey,
-                      X509Certificate issuerCertificate,
-                      X509Certificate caCertificate) {
-        this.secureRandom = new SecureRandom();
-        this.privateKey = issuerPrivateKey;
-        this.issuerCertificate = issuerCertificate;
-        this.issuerSubject = JcaX500NameUtil.getSubject(issuerCertificate);
-        this.certificateChain = Arrays.asList(issuerCertificate, caCertificate);
-    }
 
     /**
      *
@@ -75,6 +66,14 @@ public class CertSigner {
         return (X509Certificate) keyStore.getCertificate(keyAlias);
     }
 
+    public static List<X509Certificate> getCertificateChain(KeyStore keyStore, String keyAlias) throws KeyStoreException {
+        List<X509Certificate> certificateChain = new ArrayList<>();
+        for (Certificate certificate : keyStore.getCertificateChain(keyAlias)) {
+            certificateChain.add((X509Certificate) certificate);
+        }
+        return certificateChain;
+    }
+
     public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
@@ -83,7 +82,8 @@ public class CertSigner {
     }
 
     public List<X509Certificate> sign(PKCS10CertificationRequest csr, String cn) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
-        SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
+        JcaPKCS10CertificationRequest csrWrapper = new JcaPKCS10CertificationRequest(csr);
+
         //Note: We do not save the serial number of the cert at this stage, this should probably be done.
         //But could probably just read it later from the cert.
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
@@ -100,7 +100,7 @@ public class CertSigner {
                 startDate,
                 toDate,
                 csrSubject,
-                csrSubjectPublicKeyInfo
+                csrWrapper.getPublicKey()
         );
         //NOTE basic constraints are not critical. Should they be?
         certificateBuilder.addExtension(Extension.basicConstraints,false,new BasicConstraints(false));
@@ -123,7 +123,7 @@ public class CertSigner {
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurpose);
         certificateBuilder.addExtension(Extension.extendedKeyUsage,false,extendedKeyUsage);
 
-        SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(csrSubjectPublicKeyInfo);
+        SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(csrWrapper.getPublicKey());
         certificateBuilder.addExtension(Extension.subjectKeyIdentifier,false, subjectKeyIdentifier);
 
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
