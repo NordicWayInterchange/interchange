@@ -109,7 +109,6 @@ public class Capabilities {
 	public String toString() {
 		return "Capabilities{" +
 				"id=" + id +
-				", status=" + status +
 				", dataTypes=" + capabilities +
 				", lastCapabilityExchange=" + lastCapabilityExchange +
 				'}';
