@@ -64,7 +64,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			ClusterKeyGenerator.makeTrustStore(truststorePassword,"myKey",topCa.certificate(),new FileOutputStream(truststorePath.toFile()));
 			CertificateCertificateChainAndKeys host = ClusterKeyGenerator.generateServerCertForHost(server, topCa.certificate(), topCa.certificateChain(), topCa.keyPair().getPrivate(), secureRandom);
 			Path serverKeystorePath = keysOutputPath.resolve(serverKeystoreName);
-			ClusterKeyGenerator.generateKeystoreBC(keystorePassword,server,host.keyPair().getPrivate(),host.certificateChain().toArray(new X509Certificate[0]), new FileOutputStream(serverKeystorePath.toFile()));
+			ClusterKeyGenerator.generateKeystore(keystorePassword,server,host.keyPair().getPrivate(),host.certificateChain(), new FileOutputStream(serverKeystorePath.toFile()));
 			CertSigner certSigner = new CertSigner(topCa.keyPair().getPrivate(),topCa.certificate(),topCa.certificateChain());
 			for (String serviceProvider : serviceProviders) {
 				ClusterKeyGenerator.KeyPairAndCsr spKeys = ClusterKeyGenerator.generateCsrForServiceProviderBC(serviceProvider, countryCode, "test@test.com");
@@ -72,7 +72,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				String spKeystoreName = serviceProvider + ".p12";
 				Path spKeystorePath = keysOutputPath.resolve(spKeystoreName);
 				String spKeystorePassword = "password";
-				ClusterKeyGenerator.generateKeystoreBC(spKeystorePassword,serviceProvider,spKeys.keyPair().getPrivate(),certificates.toArray(new X509Certificate[0]), new FileOutputStream(spKeystorePath.toFile()));
+				ClusterKeyGenerator.generateKeystore(spKeystorePassword,serviceProvider,spKeys.keyPair().getPrivate(),certificates, new FileOutputStream(spKeystorePath.toFile()));
 				spKeystoreNames.put(serviceProvider,spKeystoreName);
 				spKeystorePasswords.put(serviceProvider,spKeystorePassword);
 			}

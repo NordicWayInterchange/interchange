@@ -100,7 +100,7 @@ public class ClusterKeyGenerator {
             String intermediateCaKeystorePassword = generatePassword(random,24);
             String keystoreName = domain.getDomainName() + ".p12";
             Path keystorePath = outputFolder.resolve(keystoreName);
-            generateKeystoreBC(intermediateCaKeystorePassword, domain.getDomainName(), intermediateCa.keyPair().getPrivate(), intermediateCa.certificateChain().toArray(new X509Certificate[0]), new FileOutputStream(keystorePath.toFile()));
+            generateKeystore(intermediateCaKeystorePassword, domain.getDomainName(), intermediateCa.keyPair().getPrivate(), intermediateCa.certificateChain(), new FileOutputStream(keystorePath.toFile()));
             Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
             Path intermediateCertPath = outputFolder.resolve(String.format("int.%s.crt.pem", domain.getDomainName()));
             saveCert(intermediateCa.certificate(), new FileWriter(intermediateCertPath.toFile()));
@@ -137,8 +137,7 @@ public class ClusterKeyGenerator {
         String serviceProviderKeystorePassword = generatePassword(random,24);
         String serviceProviderKeystoreName = description.getName() + ".p12";
         Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
-        X509Certificate[] certChain = result.certificateChain().toArray(new X509Certificate[0]);
-        generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), result.keyPair().getPrivate(), certChain, new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
+        generateKeystore(serviceProviderKeystorePassword, description.getName(), result.keyPair().getPrivate(), result.certificateChain(), new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
         Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
         saveCert(result.certificate(), new FileWriter(serviceProviderCertPath.toFile()));
         Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
@@ -229,20 +228,14 @@ public class ClusterKeyGenerator {
     }
 
 
-    /**
-     *
-     * @param keystorePassword Password, set for bothe the keystore and the key entry.
-     * @param entryName Name of key entry in the new keystore
-     * @param privateKey Private key
-     * @param certificates The chain of certificates belonging to the key
-     * @param stream The output stream to write the keystore to
-     */
-    public static void generateKeystoreBC(String keystorePassword, String entryName, PrivateKey privateKey, Certificate[] certificates, OutputStream stream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+
+    public static void generateKeystore(String keyPassword, String entryName, PrivateKey privateKey, List<X509Certificate> certificates, OutputStream stream) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+        Certificate[] certificates1 = certificates.toArray(certificates.toArray(new X509Certificate[0]));
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null,null);
-        keyStore.setKeyEntry(entryName, privateKey,keystorePassword.toCharArray(), certificates);
+        keyStore.setKeyEntry(entryName, privateKey, keyPassword.toCharArray(), certificates1);
 
-        keyStore.store(stream,keystorePassword.toCharArray());
+        keyStore.store(stream, keyPassword.toCharArray());
     }
 
     private static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
@@ -269,9 +262,9 @@ public class ClusterKeyGenerator {
 
         X509Certificate certificate = signX509Certificate(csrSubject, subjectPublicKey, issuerSubject, caPublicKey, caPrivateKey, secureRandom);
 
-        ArrayList<X509Certificate> newCertChain = new ArrayList<>(certChain);
+        List<X509Certificate> newCertChain = new ArrayList<>();
         newCertChain.add(certificate);
-
+        newCertChain.addAll(certChain);
         return new CertificateAndCertificateChain(certificate, newCertChain);
     }
 
