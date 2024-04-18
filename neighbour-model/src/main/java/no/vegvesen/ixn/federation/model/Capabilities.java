@@ -47,11 +47,16 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
+		System.out.println("INSIDE REPLACECAPABILITIES");
+		System.out.println("Current capabilities: " + capabilities);
+		System.out.println("Incoming capabilities: " + newCapabilities);
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
+		System.out.println("Capabilities after exchange: " + capabilities);
+		System.out.println("-------------------------------------");
 		setLastUpdated(LocalDateTime.now());
 
 	}
