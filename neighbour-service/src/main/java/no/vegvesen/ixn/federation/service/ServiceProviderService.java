@@ -175,7 +175,6 @@ public class ServiceProviderService {
                 if (!capability.hasShards()) {
                     logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
                     capabilitiesToRemove.add(capability);
-                    currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
                 }
             }
         }

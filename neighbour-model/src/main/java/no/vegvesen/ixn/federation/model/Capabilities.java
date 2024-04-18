@@ -128,6 +128,7 @@ public class Capabilities {
 	}
 	public void removeCapabilities(Collection<CapabilitySplit> capabilitiesToRemove){
 		this.capabilities.removeAll(capabilitiesToRemove);
+		setLastCapabilityExchange(LocalDateTime.now());
 	}
 
 	@Override
