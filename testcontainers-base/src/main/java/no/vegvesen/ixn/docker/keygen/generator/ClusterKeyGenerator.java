@@ -1,12 +1,7 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
 import no.vegvesen.ixn.cert.CertSigner;
-import no.vegvesen.ixn.docker.keygen.AdditionalHost;
-import no.vegvesen.ixn.docker.keygen.Cluster;
-import no.vegvesen.ixn.docker.keygen.Interchange;
-import no.vegvesen.ixn.docker.keygen.IntermediateDomain;
-import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
-import no.vegvesen.ixn.docker.keygen.TopDomain;
+import no.vegvesen.ixn.docker.keygen.*;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -61,7 +56,6 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -117,23 +111,68 @@ public class ClusterKeyGenerator {
                 saveCertChain(additionalHostKeys.certificateChain(), new FileWriter(hostChainCertPath.toFile()));
                 Path hostKeyPath = outputFolder.resolve(String.format("%s.key.pem", host.getHostname()));
                 saveKeyPair(additionalHostKeys.keyPair(), new FileWriter(hostKeyPath.toFile()));
-                //TODO create keyStore for host (using chain, I expect)
+                String hostKeystorePassword = generatePassword(random,24);
+                Path hostKeyPasswordPath = outputFolder.resolve(host.getHostname() + ".p12");
+                generateKeystore(hostKeystorePassword,host.getHostname(),additionalHostKeys.keyPair().getPrivate(), additionalHostKeys.certificateChain(), new FileOutputStream(hostKeyPasswordPath.toFile()));
+                Files.writeString(outputFolder.resolve(host.getHostname() + ".txt"),hostKeystorePassword);
+
             }
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
-                generateServiceProviderKeys(outputFolder, description, random, topCa.certificate(), intermediateCa.certificate(), intermediateCa.keyPair().getPrivate());
+                generateServiceProviderKeys(outputFolder, description, intermediateCa.keyPair().getPrivate(), intermediateCa.certificate(), intermediateCa.certificateChain(), random);
             }
 
         }
     }
 
-    //TODO this could use a List of certificates. Much easier.
-    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, SecureRandom random, X509Certificate topCaCertificate, X509Certificate intermediateCertificate, PrivateKey intermediatePrivateKey) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
-        List<X509Certificate> issuerCertChain = Arrays.asList(intermediateCertificate,topCaCertificate);
-        String spName = description.getName();
-        String spCountry = description.getCountry();
-        String cn = description.getName();
-        CertificateCertificateChainAndKeys result = generateSPKeys(cn, spCountry, "test@test.com", intermediateCertificate, intermediatePrivateKey, issuerCertChain);
+    public static CaResponse generate(CARequest caRequest) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
+        SecureRandom random = new SecureRandom();
+        CertificateCertificateChainAndKeys topCa = generateTopCa(caRequest.getName(), caRequest.getCountry(), random);
+        List<HostResponse> hostResponses = getHostResponses(caRequest.getHosts(), topCa, random);
+        List<ClientResponse> clientResponses = getClientResponses(caRequest.getClients(), topCa);
 
+        List<CaResponse> responses = new ArrayList<>();
+        for (CARequest request : caRequest.getSubCas()) {
+            CaResponse response = generate(request, topCa, random);
+            responses.add(response);
+
+        }
+        return new CaResponse(topCa, caRequest.getName(), hostResponses, clientResponses,responses);
+
+    }
+
+    private static CaResponse generate(CARequest caRequest, CertificateCertificateChainAndKeys parentCa, SecureRandom random) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
+        CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.getName(), caRequest.getCountry(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
+        List<ClientResponse> clientResponses = getClientResponses(caRequest.getClients(), intermediateCa);
+        List<HostResponse> hostResponses = getHostResponses(caRequest.getHosts(),intermediateCa,random);
+        List<CaResponse> responses = new ArrayList<>();
+        for (CARequest request : caRequest.getSubCas()) {
+            CaResponse response = generate(request, intermediateCa, random);
+            responses.add(response);
+
+        }
+        return new CaResponse(intermediateCa, caRequest.getName(), hostResponses, clientResponses,responses);
+    }
+
+    private static List<ClientResponse> getClientResponses(List<ClientRequest> clients, CertificateCertificateChainAndKeys issuer) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        ArrayList<ClientResponse> clientResponses = new ArrayList<>();
+        for (ClientRequest clientRequest : clients) {
+            CertificateCertificateChainAndKeys clientDetails = generateSPKeys(clientRequest.name(), clientRequest.country(), clientRequest.email(), issuer.certificate(), issuer.keyPair().getPrivate(), issuer.certificateChain());
+            clientResponses.add(new ClientResponse(clientRequest.name(),clientDetails));
+        }
+        return clientResponses;
+    }
+
+    private static List<HostResponse> getHostResponses(List<HostRequest> hosts, CertificateCertificateChainAndKeys issuer, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+        List<HostResponse> hostResponses = new ArrayList<>();
+        for (HostRequest hostRequest : hosts) {
+            CertificateCertificateChainAndKeys hostDetails = generateServerCertForHost(hostRequest.name(), issuer.certificate(), issuer.certificateChain(), issuer.keyPair().getPrivate(), random);
+            hostResponses.add(new HostResponse(hostRequest.name(), hostDetails));
+        }
+        return hostResponses;
+    }
+
+    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, PrivateKey issuerPrivateKey, X509Certificate issuerCertificate, List<X509Certificate> issuerCertChain, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+        CertificateCertificateChainAndKeys result = generateSPKeys(description.getName(), description.getCountry(), "test@test.com", issuerCertificate, issuerPrivateKey, issuerCertChain);
         String serviceProviderKeystorePassword = generatePassword(random,24);
         String serviceProviderKeystoreName = description.getName() + ".p12";
         Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
