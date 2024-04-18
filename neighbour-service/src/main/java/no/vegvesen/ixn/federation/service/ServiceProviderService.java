@@ -162,9 +162,11 @@ public class ServiceProviderService {
 
     public void removeTearDownCapabilities(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        Set<CapabilitySplit> capabilitiesWithStatusTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
+
+        List<CapabilitySplit> capabilitiesWithStatusTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
-                .collect(Collectors.toSet());
+                .toList();
+
         Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
         HashSet<CapabilitySplit> capabilitiesToRemove = new HashSet<>();
         for (CapabilitySplit capability : capabilitiesWithStatusTearDown) {
@@ -177,7 +179,8 @@ public class ServiceProviderService {
                 }
             }
         }
-        serviceProvider.getCapabilities().getCapabilities().removeAll(capabilitiesToRemove);
+
+        currentServiceProviderCapabilities.removeCapabilities(capabilitiesToRemove);
 
         if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
             currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);

@@ -126,6 +126,9 @@ public class Capabilities {
 
 		return createdCapabilities.size() > 0;
 	}
+	public void removeCapabilities(Collection<CapabilitySplit> capabilitiesToRemove){
+		this.capabilities.removeAll(capabilitiesToRemove);
+	}
 
 	@Override
 	public String toString() {
