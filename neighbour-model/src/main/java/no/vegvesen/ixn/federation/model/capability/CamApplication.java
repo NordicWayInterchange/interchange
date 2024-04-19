@@ -34,4 +34,14 @@ public class CamApplication extends Application {
     public String toString() {
         return "CamApplication{}" + super.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

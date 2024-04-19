@@ -99,24 +99,7 @@ public class NeighbourServiceIT {
       "maxMessageRate" : 0,
       "repetitionInterval" : 0
     }
-  }, {
-    "application" : {
-      "messageType" : "SREM",
-      "publisherId" : "NO00000",
-      "publicationId" : "NO00000-SREM",
-      "originatingCountry" : "NO",
-      "protocolVersion" : "SREM",
-      "quadTree" : [ "12004" ]
-    },
-    "metadata" : {
-      "shardCount" : 1,
-      "infoUrl" : "info.com",
-      "redirectPolicy" : "OPTIONAL",
-      "maxBandwidth" : 0,
-      "maxMessageRate" : 0,
-      "repetitionInterval" : 0
-    }
-  }, {
+  },  {
     "application" : {
       "messageType" : "IVIM",
       "publisherId" : "NO00000",
