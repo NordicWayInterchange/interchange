@@ -35,6 +35,7 @@ public class ApplicationEqualsAndHashCodeTest {
         );
         assertThat(app1).isEqualTo(app3);
         assertThat(app3).isEqualTo(app1);
+        assertThat(app1.hashCode()).isEqualTo(app3.hashCode());
 
     }
 
