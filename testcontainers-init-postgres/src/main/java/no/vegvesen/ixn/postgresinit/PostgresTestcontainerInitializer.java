@@ -23,7 +23,9 @@ public class PostgresTestcontainerInitializer {
 					"spring.datasource.username: " + FEDERATION,
 					"spring.datasource.password: " + FEDERATION,
 					"spring.datasource.driver-class-name: " + postgresContainer.getDriverClassName(),
-					"spring.jpa.hibernate.ddl-auto : create-drop"
+					"spring.jpa.hibernate.ddl-auto : create-drop",
+					"spring.jpa.show-sql=true",
+					"spring.jpa.properties.hibernate.format_sql=true"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
