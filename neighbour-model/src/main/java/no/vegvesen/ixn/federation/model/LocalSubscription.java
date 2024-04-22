@@ -108,6 +108,10 @@ public class LocalSubscription {
         }
     }
 
+    public void addLocalEndpoint(LocalEndpoint newEndpoint) {
+        localEndpoints.add(newEndpoint);
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -132,9 +136,8 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
-    //TODO lag et objekt av selector??
-    public String bindKey() {
-        return "" + selector.hashCode();
+    public boolean isSharded() {
+        return selector.contains("shardId");
     }
 
     @Override

@@ -366,6 +366,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		capability.setStatus(CapabilityStatus.CREATED);
 		Capabilities capabilities = new Capabilities(
 				Capabilities.CapabilitiesStatus.KNOWN,
 				Collections.singleton(capability
@@ -868,9 +869,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
-		LocalEndpoint endpoint = new LocalEndpoint();
-		endpoint.setSource("my-queue12");
-		subscription.setLocalEndpoints(Collections.singleton(endpoint));
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
@@ -888,7 +886,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				metadata
 		);
 		client.createHeadersExchange("cap-ex8");
-		client.createQueue("my-queue12");
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
 		mySP.addLocalSubscription(subscription);
@@ -899,7 +896,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
-		assertThat(client.getQueuePublishingLinks("my-queue12")).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 	}
 

@@ -32,4 +32,24 @@ public class LocalSubscriptionTest {
 
     }
 
+    @Test
+    public void tearDownSubscriptionIsNotAlive() {
+        LocalSubscription sub = new LocalSubscription("publicationId = 'pub-1'", "neighbour");
+        sub.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+        assertThat(LocalSubscriptionStatus.isAlive(sub.getStatus())).isFalse();
+    }
+
+    @Test
+    public void illegalSubscriptionIsNotAlive() {
+        LocalSubscription sub = new LocalSubscription("publicationId = 'pub-1'", "neighbour");
+        sub.setStatus(LocalSubscriptionStatus.ILLEGAL);
+        assertThat(LocalSubscriptionStatus.isAlive(sub.getStatus())).isFalse();
+    }
+
+    @Test
+    public void createdSubscriptionIsAlive() {
+        LocalSubscription sub = new LocalSubscription("publicationId = 'pub-1'", "neighbour");
+        sub.setStatus(LocalSubscriptionStatus.CREATED);
+        assertThat(LocalSubscriptionStatus.isAlive(sub.getStatus())).isTrue();
+    }
 }
