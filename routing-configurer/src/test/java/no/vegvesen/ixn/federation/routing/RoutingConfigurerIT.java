@@ -482,13 +482,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex4");
 
 		Metadata metadata2 = new Metadata(RedirectStatus.NOT_AVAILABLE);
-		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
+		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-12'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
 		CapabilitySplit cap2 = new CapabilitySplit(
 				new DatexApplication(
 						"NO-1234",
-						"pub-1",
+						"pub-12",
 						"NO",
 						"1.0",
 						new HashSet<>(Arrays.asList("01230122")),

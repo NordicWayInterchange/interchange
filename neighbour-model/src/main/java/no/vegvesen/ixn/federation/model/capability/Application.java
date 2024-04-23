@@ -92,12 +92,12 @@ public abstract class Application {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Application that = (Application) o;
-        return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId) && Objects.equals(originatingCountry, that.originatingCountry) && Objects.equals(protocolVersion, that.protocolVersion) && Objects.equals(quadTree, that.quadTree);
+        return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId) && Objects.equals(originatingCountry, that.originatingCountry) && Objects.equals(protocolVersion, that.protocolVersion);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
+        return Objects.hash(publisherId, publicationId, originatingCountry, protocolVersion);
     }
 
     @Override
