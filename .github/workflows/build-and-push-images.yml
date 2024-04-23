@@ -65,7 +65,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven and run integration tests
-        run: mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+        run: mvn -B verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
