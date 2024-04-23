@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -38,7 +39,18 @@ public class DenmApplication extends Application{
     public ApplicationApi toApi() {
         return new DenmApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getCauseCode());
     }
-
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DenmApplication that = (DenmApplication) o;
+        return  Objects.equals(causeCode, that.causeCode)
+                && super.equals(that);
+    }
+    @Override
+    public int hashCode(){
+        return Objects.hash(super.hashCode(), causeCode);
+    }
     @Override
     public String getMessageType() {
         return Constants.DENM;

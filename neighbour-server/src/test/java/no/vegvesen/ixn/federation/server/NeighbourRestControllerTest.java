@@ -85,7 +85,8 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DATEX2:2.3",
 						quadTree,
-						"SituationPublication"
+						"SituationPublication",
+						"publisherName"
 				),
 				new MetadataApi()
 		);
@@ -183,7 +184,8 @@ class NeighbourRestControllerTest {
 								"NO",
 								"DATEX2:2.3",
 								quadTree,
-								"SituationPublication"
+								"SituationPublication",
+								"publisherName"
 						),
 						new MetadataApi()
 				)
@@ -269,7 +271,8 @@ class NeighbourRestControllerTest {
 								"NO",
 								"DATEX2:2.3",
 								quadTree,
-								"SituationPublication"
+								"SituationPublication",
+								"publisherName"
 						),
 						new MetadataApi()
 				)
@@ -301,7 +304,8 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DATEX2:2.3",
 						quadTree,
-						"SituationPublication"
+						"SituationPublication",
+						"publisherName"
 				),
 				new MetadataApi()
 		);

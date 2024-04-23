@@ -111,7 +111,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -127,7 +127,8 @@ public class OnboardRestControllerIT {
                                         "NO",
                                         "1.0",
                                         Collections.singleton("1200"),
-                                        "SituationPublication"),
+                                        "SituationPublication",
+                                        "publisherName"),
                                 new Metadata()
                         ))));
 
@@ -161,7 +162,7 @@ public class OnboardRestControllerIT {
     }
     @Test
     public void testAddingCapabilityWithMissingProperties() {
-        DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -181,7 +182,7 @@ public class OnboardRestControllerIT {
     public void testListCapabilities() {
         String serviceProviderName = "serviceprovider";
 
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -195,7 +196,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -211,7 +212,8 @@ public class OnboardRestControllerIT {
                                                 "NO",
                                                 "1.0",
                                                 Collections.singleton("1200"),
-                                                "SituationPublication"),
+                                                "SituationPublication",
+                                                "publisherName"),
                                         new Metadata()
                                 ))),
                 new NeighbourSubscriptionRequest(),
@@ -439,7 +441,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -486,7 +488,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);

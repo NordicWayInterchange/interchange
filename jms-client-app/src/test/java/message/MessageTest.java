@@ -53,7 +53,8 @@ public class MessageTest {
                 1,
                 1,
                 "SituationPublication",
-                "RoadWorks"
+                "RoadWorks",
+                "publisherName"
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -238,7 +239,8 @@ public class MessageTest {
                 1,
                 1,
                 "SituationPublication",
-                "RoadWorks"
+                "RoadWorks",
+                "publishername"
         );
 
         Message ivimMessage = new IvimMessage(

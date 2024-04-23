@@ -14,15 +14,17 @@ public class DatexApplication extends Application{
 
     private String publicationType;
 
+    private String publisherName;
+
     public DatexApplication() {
 
     }
 
-    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType, String publisherName) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         this.publicationType = publicationType;
+        this.publisherName = publisherName;
     }
-
     public String getPublicationType() {
         return publicationType;
     }
@@ -31,9 +33,17 @@ public class DatexApplication extends Application{
         this.publicationType = publicationType;
     }
 
+    public String getPublisherName() {
+        return publisherName;
+    }
+
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
+    }
+
     @Override
     public ApplicationApi toApi() {
-        return new DatexApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationType());
+        return new DatexApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationType(), getPublisherName());
     }
 
     @Override
@@ -46,18 +56,22 @@ public class DatexApplication extends Application{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DatexApplication that = (DatexApplication) o;
-        return Objects.equals(publicationType, that.publicationType);
+
+        return  Objects.equals(publicationType, that.publicationType)
+                && Objects.equals(publisherName, that.publisherName)
+                && super.equals(that);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), publicationType);
+        return Objects.hash(super.hashCode(), publicationType, publisherName);
     }
 
     @Override
     public String toString() {
         return "DatexApplication{" +
                 "publicationType='" + publicationType + '\'' +
+                ", publisherName='" + publisherName + '\'' +
                 '}' + super.toString();
     }
 }

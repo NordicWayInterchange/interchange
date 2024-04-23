@@ -39,7 +39,8 @@ public class CapabilitiesApiTest {
                         "NO",
                         "DATEX2:2.3",
                         quadTree,
-                        "SituationPublication"
+                        "SituationPublication",
+                        "publisherName"
                 ),
                 new MetadataApi()
         );

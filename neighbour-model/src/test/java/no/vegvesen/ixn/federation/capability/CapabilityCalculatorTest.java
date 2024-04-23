@@ -23,9 +23,9 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateSelfCapabilitiesTest() {
 
-        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
-        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
-        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
+        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata());
+        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication","publisherName"), new Metadata());
+        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication","publisherName"), new Metadata());
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
@@ -64,7 +64,8 @@ public class CapabilityCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
-                                "SituationPublication"),
+                                "SituationPublication",
+                                "publisherName"),
                         new Metadata())),
                 lastUpdated);
         serviceProvider.setCapabilities(capabilities);
@@ -84,7 +85,8 @@ public class CapabilityCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
-                                "SituationPublication"),
+                                "SituationPublication",
+                                "publisherName"),
                         new Metadata())),
                 earliest);
         Capabilities latestCap = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
@@ -95,7 +97,8 @@ public class CapabilityCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
-                                "SituationPublication"),
+                                "SituationPublication",
+                                "publisherName"),
                         new Metadata())),
                 latest);
         ServiceProvider earliestSP = new ServiceProvider();
@@ -134,7 +137,7 @@ public class CapabilityCalculatorTest {
     }
 
     private CapabilitySplit getDatexCapability(String originatingCountry) {
-        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
+        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata());
     }
 
 }

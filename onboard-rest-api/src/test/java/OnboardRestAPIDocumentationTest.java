@@ -451,7 +451,8 @@ public class OnboardRestAPIDocumentationTest {
                         "NO",
                         "DATEX2:2.3",
                         quadTree,
-                        "SituationPublication"
+                        "SituationPublication",
+                        "publisherName"
                 ),
                 metadataApi
         );

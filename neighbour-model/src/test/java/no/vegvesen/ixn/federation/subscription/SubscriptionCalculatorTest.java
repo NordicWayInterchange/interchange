@@ -177,7 +177,8 @@ public class SubscriptionCalculatorTest {
                                     "NO",
                                     "1.0",
                                     Collections.singleton("0122"),
-                                    "SituationPublication"
+                                    "SituationPublication",
+                                    "publisherName"
                             ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -205,7 +206,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new CapabilitySplit(
@@ -247,7 +249,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -279,7 +282,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new CapabilitySplit(
@@ -329,7 +333,7 @@ public class SubscriptionCalculatorTest {
 
     private CapabilitySplit getDatexCapability(String country) {
         return new CapabilitySplit(
-                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.singleton("0122"), "SituationPublication"),
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.singleton("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 

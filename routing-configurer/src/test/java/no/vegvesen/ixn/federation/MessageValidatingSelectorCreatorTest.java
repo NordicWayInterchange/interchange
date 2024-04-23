@@ -68,7 +68,8 @@ public class MessageValidatingSelectorCreatorTest {
                                 "NO",
                                 "1.0",
                                 new HashSet<>(Arrays.asList("1")),
-                                "Weather"
+                                "Weather",
+                                "PublisherName"
                         ),
                         new Metadata()
                 )
