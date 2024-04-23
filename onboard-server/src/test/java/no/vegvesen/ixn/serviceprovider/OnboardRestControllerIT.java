@@ -147,7 +147,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", Collections.singleton("12004"), "SituationPublication");
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", Collections.singleton("12004"), "SituationPublication", "publisherName");
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(application);
 
