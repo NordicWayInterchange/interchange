@@ -43,10 +43,7 @@ public class DatexApplication extends Application{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DatexApplication that = (DatexApplication) o;
-        return Objects.equals(publicationType, that.publicationType);
+        return super.equals(o) && Objects.equals(publicationType, ((DatexApplication) o).publicationType);
     }
 
     @Override

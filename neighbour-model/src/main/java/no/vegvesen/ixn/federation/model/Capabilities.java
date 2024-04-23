@@ -47,23 +47,14 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		capabilities.retainAll(newCapabilities);
-		capabilities.addAll(newCapabilities);
+		Set<CapabilitySplit> caps = capabilities.stream().filter(newCapabilities::contains).collect(Collectors.toSet());
+		caps.addAll(newCapabilities);
+		capabilities.clear();
+		capabilities.addAll(caps);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
-		/*
-		for (CapabilitySplit newCapability : newCapabilities) {
-			if (!capabilities.contains(newCapability)) {
-				capabilities.add(newCapability);
-			}
-		}
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
-		setLastUpdated(LocalDateTime.now());
-		 */
 	}
 
 	public void removeDataType(Integer capabilityId) {

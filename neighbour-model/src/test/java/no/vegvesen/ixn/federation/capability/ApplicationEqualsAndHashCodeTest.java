@@ -3,12 +3,8 @@ package no.vegvesen.ixn.federation.capability;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.capability.CamApplication;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import org.junit.jupiter.api.Test;
 
@@ -202,6 +198,47 @@ public class ApplicationEqualsAndHashCodeTest {
         assertThat(cap).isEqualTo(cap3);
         assertThat(cap3).isEqualTo(cap);
         assertThat(cap.hashCode()).isEqualTo(cap3.hashCode());
+    }
+
+    @Test
+    public void testDatexCapabilities() {
+        CapabilitySplit cap1   = new CapabilitySplit(
+                new DatexApplication(
+                        "pub-123",
+                        "pub-123-123",
+                        "NO",
+                        "1.0",
+                        Set.of("123"),
+                        "pubType"
+                ),
+                new Metadata()
+        );
+
+        CapabilitySplit cap2   = new CapabilitySplit(
+                new DatexApplication(
+                        "pub-124",
+                        "pub-124-123",
+                        "NO",
+                        "1.0",
+                        Set.of("122"),
+                        "pubType"
+                ),
+                new Metadata()
+        );
+        CapabilitySplit cap3   = new CapabilitySplit(
+                new DatexApplication(
+                        "pub-123",
+                        "pub-123-123",
+                        "NO",
+                        "1.0",
+                        Set.of("123"),
+                        "pubType"
+                ),
+                new Metadata()
+        );
+        assertThat(cap1).isNotEqualTo(cap2);
+        assertThat(cap1).isEqualTo(cap3);
+        assertThat(cap1.hashCode()).isEqualTo(cap3.hashCode());
     }
 
 
