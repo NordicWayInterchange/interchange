@@ -2,10 +2,8 @@ package no.vegvesen.ixn.federation.api.v1_0.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.CapabilityProperty;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 public class DenmApplicationApi extends ApplicationApi {
 
@@ -15,7 +13,7 @@ public class DenmApplicationApi extends ApplicationApi {
 
     }
 
-    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<Integer> causeCode) {
+    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, Set<Integer> causeCode) {
         super(Constants.DENM, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         if (causeCode != null) {
             this.causeCode.addAll(causeCode);

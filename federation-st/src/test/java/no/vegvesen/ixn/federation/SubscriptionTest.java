@@ -1,16 +1,13 @@
 package no.vegvesen.ixn.federation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 
 public class SubscriptionTest {
     @Test
@@ -22,7 +19,7 @@ public class SubscriptionTest {
                 .messageType("SSEM")
                 .protocolVersion("SSEM:0.0.0")
                 .publisherId("SE90009")
-                .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
+                .quadTree(List.of("0","1","2","3"))
                 .toSelector()
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -37,7 +34,7 @@ public class SubscriptionTest {
                         .messageType("SSEM")
                         .protocolVersion("SSEM:0.0.1")
                         .publisherId("SE90009")
-                        .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
+                        .quadTree(List.of("0","1","2","3"))
                         .toSelector()
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -51,7 +48,7 @@ public class SubscriptionTest {
                         .messageType("SSEM")
                         .protocolVersion("SSEM:0.0.2")
                         .publisherId("SE90009")
-                        .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
+                        .quadTree(List.of("0","1","2","3"))
                         .toSelector()
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -66,7 +63,7 @@ public class SubscriptionTest {
                         .messageType("SSEM")
                         .protocolVersion("SSEM:0.0.3")
                         .publisherId("SE90009")
-                        .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
+                        .quadTree(List.of("0","1","2","3"))
                         .toSelector()
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));

@@ -3,11 +3,11 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +19,7 @@ public class CapabilitiesApiTest {
         CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi();
         capabilitiesApi.setName("a.itsinterchange.eu");
         Set<CapabilitySplitApi> capSet = new HashSet<>();
-        Set<String> quadTree = Sets.newLinkedHashSet("01230123", "01230122");
+        List<String> quadTree = List.of("01230123", "01230122");
         CapabilitySplitApi denm = new CapabilitySplitApi(
                 new DenmApplicationApi(
                         "NO-12345",

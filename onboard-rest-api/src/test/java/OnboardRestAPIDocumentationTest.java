@@ -140,7 +140,7 @@ public class OnboardRestAPIDocumentationTest {
                 "pub-1",
                 "NO",
                 "1.0",
-                Collections.singleton("1234"),
+                List.of("1234"),
                 Collections.singleton(6)),
                 new MetadataApi(RedirectStatusApi.OPTIONAL)
         );
@@ -161,7 +161,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1234"),
+                                        List.of("1234"),
                                         Collections.singleton(6)
                                 ), new MetadataApi())
                 )
@@ -182,7 +182,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "pub-1",
                                         "SE",
                                         "1.0",
-                                        Collections.singleton("1234"),
+                                        List.of("1234"),
                                         Collections.singleton(6)
                                 ), new MetadataApi(RedirectStatusApi.OPTIONAL))
                 )
@@ -206,7 +206,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1234"),
+                                        List.of("1234"),
                                         Collections.singleton(6)
                                 ), new MetadataApi())
                         )
@@ -230,7 +230,7 @@ public class OnboardRestAPIDocumentationTest {
                                                 "pub-1",
                                                 "NO",
                                                 "1.0",
-                                                Collections.singleton("1234"),
+                                                List.of("1234"),
                                                 Collections.singleton(6)
                                         ), new MetadataApi())
                         )
@@ -251,7 +251,7 @@ public class OnboardRestAPIDocumentationTest {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
+                                List.of("1234"),
                                 Collections.singleton(6)
                         ), new MetadataApi())
         );
@@ -338,7 +338,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1234"),
+                                        List.of("1234"),
                                         Collections.singleton(6)
                                 ), new MetadataApi())
                 )
@@ -360,7 +360,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1234"),
+                                        List.of("1234"),
                                         Collections.singleton(6)
                                 ), new MetadataApi())
                         )
@@ -422,7 +422,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addMultipleCapabilitiesTest() throws JsonProcessingException {
-        Set<String> quadTree = Collections.singleton("12004");
+        List<String> quadTree = List.of("12004");
         MetadataApi metadataApi = new MetadataApi(
                 1,
                 "info.com",

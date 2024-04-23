@@ -5,9 +5,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.SpatemApplication;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -27,6 +27,31 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class NeighbourServiceIT {
 
     String inputJson = """
+            {
+  "name" : "neighbourUpdateCaps",
+  "version" : "1.0",
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "CAM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-CAM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "CAM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  } ]
+}
+            """;
+
+    String otherInput = """
             {
   "name" : "neighbourUpdateCaps",
   "version" : "1.0",
@@ -341,7 +366,7 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                List.of(),
                                 Collections.singleton(1)
                             ),
                             new MetadataApi()
@@ -410,19 +435,38 @@ public class NeighbourServiceIT {
     @Test
     public void updateCapabilities() throws IOException {
 
+        String name = "neighbourUpdateCaps";
         Neighbour neighbour = new Neighbour(
-                "neighbourUpdateCaps",
+                name,
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         );
         repository.save(neighbour);
+        neighbour = repository.findByName(name);
+        Capabilities neighbourCaps = neighbour.getCapabilities();
         ObjectMapper mapper = new ObjectMapper();
-        CapabilitiesSplitApi capabilities = mapper.readValue(inputJson,CapabilitiesSplitApi.class);
-        service.incomingCapabilities(capabilities,Set.of());
 
-        System.out.println();
+        CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
+        Capabilities incomingCapabilties = capabilitiesTransformer.capabilitiesApiToCapabilities(mapper.readValue(inputJson,CapabilitiesSplitApi.class));
+        neighbourCaps.replaceCapabilities(incomingCapabilties.getCapabilities());
+        //int size = incomingCapabilties.getCapabilities().size();
+        repository.save(neighbour);
+        neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(1);
+        int firstId = neighbour.getCapabilities().getCapabilities().stream().findFirst().get().getId(); //cast to primitive integer, thus will not change through reference
 
+
+        incomingCapabilties = capabilitiesTransformer.capabilitiesApiToCapabilities(mapper.readValue(otherInput,CapabilitiesSplitApi.class));
+        neighbour.getCapabilities().replaceCapabilities(incomingCapabilties.getCapabilities());
+
+        //assertThat(neighbour.getCapabilities().getCapabilities()).allMatch( c -> c.getId() != null);
+        //assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(size);
+        repository.save(neighbour);
+        neighbour = repository.findByName(name);
+        // assertThat(neighbour.getCapabilities().getCapabilities().stream().filter(c -> c.getId() == firstId).count()).isEqualTo(1);
+
+        CapabilitiesSplitApi capabilities;
         capabilities = mapper.readValue(inputJson,CapabilitiesSplitApi.class);
         service.incomingCapabilities(capabilities,Set.of());
 

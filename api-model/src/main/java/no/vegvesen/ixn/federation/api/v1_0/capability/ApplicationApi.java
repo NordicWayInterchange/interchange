@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -48,7 +45,7 @@ public class ApplicationApi {
 
     }
 
-    public ApplicationApi(String messageType, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public ApplicationApi(String messageType, String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         if (messageType == null) {
             throw new IllegalArgumentException("messageType can not be null");
         }

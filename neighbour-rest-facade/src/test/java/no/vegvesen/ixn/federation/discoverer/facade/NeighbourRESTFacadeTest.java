@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		CapabilitySplitApi capabilityApi = new CapabilitySplitApi();
-		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), "SituationPublication");
+		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), "SituationPublication");
 		capabilityApi.setApplication(app);
 		MetadataApi meta = new MetadataApi();
 		capabilityApi.setMetadata(meta);
@@ -104,7 +105,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
 		CapabilitySplitApi capability = new CapabilitySplitApi();
-		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet(6));
+		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), Sets.newSet(6));
 		capability.setApplication(app);
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		capability.setMetadata(meta);
@@ -132,7 +133,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
 		CapabilitySplitApi capability = new CapabilitySplitApi();
-		IvimApplicationApi dataType = new IvimApplicationApi("NO-123123", "pub-123", "NO", "P1", Sets.newSet("aaa"));
+		IvimApplicationApi dataType = new IvimApplicationApi("NO-123123", "pub-123", "NO", "P1", List.of("aaa"));
 		capability.setApplication(dataType);
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		capability.setMetadata(meta);
@@ -228,9 +229,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 
-		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver");
-		});
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver"));
 	}
 
 	@Test
@@ -248,9 +247,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptions, "localserver");
-		});
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptions, "localserver"));
 	}
 
 	@Test

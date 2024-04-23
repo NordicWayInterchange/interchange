@@ -26,7 +26,7 @@ public abstract class Application {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
     @Column(name = "quadrant_app")
-    private final Set<String> quadTree = new HashSet<>();
+    private final List<String> quadTree = new ArrayList<>();
 
     public Application() {
 
@@ -72,7 +72,7 @@ public abstract class Application {
         this.protocolVersion = protocolVersion;
     }
 
-    public Set<String> getQuadTree() {
+    public List<String> getQuadTree() {
         return quadTree;
     }
 

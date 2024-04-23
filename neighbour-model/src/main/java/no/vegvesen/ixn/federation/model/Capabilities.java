@@ -53,7 +53,17 @@ public class Capabilities {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
-
+		/*
+		for (CapabilitySplit newCapability : newCapabilities) {
+			if (!capabilities.contains(newCapability)) {
+				capabilities.add(newCapability);
+			}
+		}
+		if (hasDataTypes()) {
+			setStatus(CapabilitiesStatus.KNOWN);
+		}
+		setLastUpdated(LocalDateTime.now());
+		 */
 	}
 
 	public void removeDataType(Integer capabilityId) {
@@ -103,7 +113,7 @@ public class Capabilities {
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
-		return capabilities;
+		return Collections.unmodifiableSet(capabilities);
 	}
 
 	public Set<CapabilitySplit> getCreatedCapabilities() {
