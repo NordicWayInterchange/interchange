@@ -20,9 +20,7 @@ public class DatexApplicationApi extends ApplicationApi {
 
     public DatexApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType, String publisherName) {
         super(Constants.DATEX_2, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
-        if (publicationType != null) {
-            this.publicationType = publicationType;
-        }
+        this.publicationType = publicationType;
         this.publisherName = publisherName;
     }
 

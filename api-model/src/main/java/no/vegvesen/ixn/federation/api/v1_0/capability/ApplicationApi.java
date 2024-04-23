@@ -49,9 +49,6 @@ public class ApplicationApi {
     }
 
     public ApplicationApi(String messageType, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
-        if (messageType == null) {
-            throw new IllegalArgumentException("messageType can not be null");
-        }
         this.messageType = messageType;
         this.publisherId = publisherId;
         this.publicationId = publicationId;
@@ -67,9 +64,6 @@ public class ApplicationApi {
     }
 
     public void setMessageType(String messageType) {
-        if (messageType == null) {
-            throw new IllegalArgumentException("messageType can not be null");
-        }
         this.messageType = messageType;
     }
 
