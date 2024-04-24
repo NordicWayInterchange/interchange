@@ -245,12 +245,6 @@ public class ApplicationEqualsAndHashCodeTest {
 
 
     @Test
-    public void testArrayListOfNull() {
-        List<String> testList = new ArrayList<>(null);
-    }
-
-
-    @Test
     public void testFromJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         CapabilitiesSplitApi capabilitySplitApi = mapper.readValue(inputJson, CapabilitiesSplitApi.class);
