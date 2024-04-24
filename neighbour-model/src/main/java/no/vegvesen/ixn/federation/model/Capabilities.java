@@ -47,10 +47,8 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		Set<CapabilitySplit> caps = capabilities.stream().filter(newCapabilities::contains).collect(Collectors.toSet());
-		caps.addAll(newCapabilities);
-		capabilities.clear();
-		capabilities.addAll(caps);
+		capabilities.retainAll(newCapabilities);
+		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}

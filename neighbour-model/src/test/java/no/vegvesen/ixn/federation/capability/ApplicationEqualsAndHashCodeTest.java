@@ -244,11 +244,6 @@ public class ApplicationEqualsAndHashCodeTest {
     }
 
 
-    @Test
-    public void testArrayListOfNull() {
-        List<String> testList = new ArrayList<>(null);
-    }
-
 
     @Test
     public void testFromJson() throws JsonProcessingException {
