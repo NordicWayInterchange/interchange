@@ -8,6 +8,8 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -239,6 +241,12 @@ public class ApplicationEqualsAndHashCodeTest {
         assertThat(cap1).isNotEqualTo(cap2);
         assertThat(cap1).isEqualTo(cap3);
         assertThat(cap1.hashCode()).isEqualTo(cap3.hashCode());
+    }
+
+
+    @Test
+    public void testArrayListOfNull() {
+        List<String> testList = new ArrayList<>(null);
     }
 
 
