@@ -102,7 +102,7 @@ public class Capabilities {
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
-		return capabilities;
+		return Collections.unmodifiableSet(capabilities);
 	}
 
 	public Set<CapabilitySplit> getCreatedCapabilities() {
