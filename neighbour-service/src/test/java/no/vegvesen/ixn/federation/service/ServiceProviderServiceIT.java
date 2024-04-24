@@ -275,7 +275,7 @@ public class ServiceProviderServiceIT {
     public void multipleCapabilitiesAreRemoved(){
         ServiceProvider sp = new ServiceProvider("sp");
         Capabilities capabilities = new Capabilities();
-        capabilities.getCapabilities().addAll(
+        capabilities.setCapabilities(
                 Set.of(
                         new CapabilitySplit(
                             new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", Set.of("123123"),"12"),
