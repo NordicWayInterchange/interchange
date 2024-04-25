@@ -47,19 +47,8 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		for(CapabilitySplit i : newCapabilities){
-			System.out.println("Contains in existing set: " + capabilities.contains(i));
-			System.out.println("Contains in copy of set: " + new HashSet<>(capabilities).contains(i));
-		}
-		boolean retain = capabilities.retainAll(newCapabilities);
-		System.out.println("retainAll: " + retain);
-		boolean add = capabilities.addAll(newCapabilities);
-		System.out.println("addAll: " + add);
-
-		for(CapabilitySplit i : newCapabilities){
-			CapabilitySplit existing = capabilities.stream().filter(a -> a.getApplication().getMessageType().equals(i.getApplication().getMessageType())).findFirst().get();
-			System.out.println("Equals: " + existing.equals(i));
-		}
+		capabilities.retainAll(newCapabilities);
+		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
@@ -140,6 +129,7 @@ public class Capabilities {
 		this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());
 	}
+
 
 	@Override
 	public String toString() {
