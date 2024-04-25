@@ -51,8 +51,15 @@ public class Capabilities {
 			System.out.println("Contains in existing set: " + capabilities.contains(i));
 			System.out.println("Contains in copy of set: " + new HashSet<>(capabilities).contains(i));
 		}
-		capabilities.retainAll(newCapabilities);
-		capabilities.addAll(newCapabilities);
+		boolean retain = capabilities.retainAll(newCapabilities);
+		System.out.println("retainAll: " + retain);
+		boolean add = capabilities.addAll(newCapabilities);
+		System.out.println("addAll: " + add);
+
+		for(CapabilitySplit i : newCapabilities){
+			CapabilitySplit existing = capabilities.stream().filter(a -> a.getApplication().getMessageType().equals(i.getApplication().getMessageType())).findFirst().get();
+			System.out.println("Equals: " + existing.equals(i));
+		}
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
