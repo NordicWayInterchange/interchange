@@ -47,6 +47,10 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
+		for(CapabilitySplit i : newCapabilities){
+			System.out.println("Contains in existing set: " + capabilities.contains(i));
+			System.out.println("Contains in copy of set: " + new HashSet<>(capabilities).contains(i));
+		}
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
