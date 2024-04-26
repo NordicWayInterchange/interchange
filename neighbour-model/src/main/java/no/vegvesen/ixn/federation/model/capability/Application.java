@@ -97,8 +97,7 @@ public abstract class Application {
         return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId)
                 && Objects.equals(originatingCountry, that.originatingCountry)
                 && Objects.equals(protocolVersion, that.protocolVersion)
-                && (quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()).containsAll((that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()))
-                && (that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()).containsAll((quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()));
+
     }
 
     @Override
@@ -107,8 +106,7 @@ public abstract class Application {
                 publisherId,
                 publicationId,
                 originatingCountry,
-                protocolVersion,
-                (quadTree != null ? new ArrayList<>(quadTree).hashCode() : new ArrayList<>()).hashCode());
+                protocolVersion);
     }
 
     @Override
