@@ -26,7 +26,20 @@ public abstract class Application {
     @ElementCollection(fetch = FetchType.EAGER, targetClass = String.class)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", nullable = false, foreignKey = @ForeignKey(name="fk_quad_app")))
     @Column(name = "quadrant_app", nullable = false)
-    private final List<String> quadTree = new ArrayList<>();
+    private final List<String> quadTree = new ArrayList<>(){
+        @Override
+        public boolean equals(Object o){
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ArrayList<String> that = (ArrayList<String>) o;
+
+            return this.containsAll(that) && that.containsAll(this);
+        }
+        @Override
+        public int hashCode(){
+            return this.hashCode();
+        }
+    };
 
     public Application() {
 
