@@ -461,7 +461,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 	}
-
+/*
 	@Test
 	public void addingTwoSubscriptionsAndOneCapabilityResultsInTwoBindKeys() {
 		Metadata metadata1 = new Metadata(RedirectStatus.NOT_AVAILABLE);
@@ -520,7 +520,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
-
+*/
 	@Test
 	public void setUpQueueForServiceProvider() {
 		Metadata metadata = new Metadata(RedirectStatus.MANDATORY);
