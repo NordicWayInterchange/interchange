@@ -47,18 +47,12 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		for(CapabilitySplit i : newCapabilities){
-			System.out.println("Contains in existing set: " + capabilities.contains(i));
+		if(capabilities.equals(newCapabilities)){
+			setLastUpdated(LocalDateTime.now());
+			return;
 		}
-		boolean retainAll = capabilities.retainAll(newCapabilities);
-		System.out.println("retainAll: " + retainAll);
-		boolean addAll = capabilities.addAll(newCapabilities);
-		System.out.println("addAll: " + addAll);
-		if(retainAll || addAll){
-			System.out.println("something did not work as expected. Checking");
-		}
-		//capabilities.retainAll(newCapabilities);
-		//capabilities.addAll(newCapabilities);
+		capabilities.retainAll(newCapabilities);
+		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
