@@ -23,7 +23,7 @@ public abstract class Application {
 
     private String protocolVersion;
 
-    @ElementCollection(fetch = FetchType.EAGER, targetClass = String.class)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", nullable = false, foreignKey = @ForeignKey(name="fk_quad_app")))
     @Column(name = "quadrant_app", nullable = false)
     private final List<String> quadTree = new ArrayList<>();
@@ -77,11 +77,11 @@ public abstract class Application {
         return quadTree;
     }
 
-    public void setQuadTree(Set<String> quadTree) {
+    public void setQuadTree(List<String> quadTree) {
+        if(new HashSet<>(this.quadTree).containsAll(quadTree) && new HashSet<>(quadTree).containsAll(this.quadTree)) return;
+
         this.quadTree.clear();
-        if (quadTree != null){
-            this.quadTree.addAll(quadTree);
-        }
+        this.quadTree.addAll(quadTree);
     }
 
     public abstract ApplicationApi toApi();
