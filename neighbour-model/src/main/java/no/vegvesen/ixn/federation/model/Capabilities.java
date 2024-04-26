@@ -51,7 +51,7 @@ public class Capabilities {
 		System.out.println("Sets are identical using containsall both ways?: " + equals);
 		System.out.println("Sets are equal using equals?: " + capabilities.equals(newCapabilities));
 		if(equals){
-			//setLastUpdated(LocalDateTime.now());
+			setLastUpdated(LocalDateTime.now());
 			System.out.println("Returning without doing any operations");
 			return;
 		}
