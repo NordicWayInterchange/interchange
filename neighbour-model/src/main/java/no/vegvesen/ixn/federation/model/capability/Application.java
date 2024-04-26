@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.model.capability;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 
 import jakarta.persistence.*;
+import org.springframework.core.annotation.Order;
+
 import java.util.*;
 
 @Entity()
@@ -12,7 +14,6 @@ import java.util.*;
 public abstract class Application {
 
     @Id
-    @Column(name="app_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_seq")
     private Integer id;
 
@@ -26,6 +27,7 @@ public abstract class Application {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
+    @OrderColumn
     @Column(name = "quadrant_app")
     private final List<String> quadTree = new ArrayList<>();
 
