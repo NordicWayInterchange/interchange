@@ -47,7 +47,7 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		if(capabilities.equals(newCapabilities)){
+		if(capabilities.containsAll(newCapabilities) && newCapabilities.containsAll(capabilities)){
 			setLastUpdated(LocalDateTime.now());
 			return;
 		}
