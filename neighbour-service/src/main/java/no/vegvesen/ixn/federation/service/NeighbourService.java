@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -52,7 +51,6 @@ public class NeighbourService {
 		return neighbourRepository.findAll();
 	}
 
-	@Transactional
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
 		LocalDateTime now = LocalDateTime.now();
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
