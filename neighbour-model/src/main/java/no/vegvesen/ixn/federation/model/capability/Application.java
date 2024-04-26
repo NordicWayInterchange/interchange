@@ -12,7 +12,6 @@ import java.util.*;
 public abstract class Application {
 
     @Id
-    @Column(name="app_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_seq")
     private Integer id;
 
