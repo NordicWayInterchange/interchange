@@ -47,8 +47,12 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		if(capabilities.containsAll(newCapabilities) && newCapabilities.containsAll(capabilities)){
+		boolean equals = capabilities.containsAll(newCapabilities) && newCapabilities.containsAll(capabilities);
+		System.out.println("Sets are identical using containsall both ways?: " + equals);
+		System.out.println("Sets are equal using equals?: " + capabilities.equals(newCapabilities));
+		if(equals){
 			setLastUpdated(LocalDateTime.now());
+			System.out.println("Returning without doing any operations");
 			return;
 		}
 		capabilities.retainAll(newCapabilities);
@@ -75,7 +79,7 @@ public class Capabilities {
 	@Enumerated(EnumType.STRING)
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
