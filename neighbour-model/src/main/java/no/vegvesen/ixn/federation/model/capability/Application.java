@@ -98,7 +98,7 @@ public abstract class Application {
                 && Objects.equals(originatingCountry, that.originatingCountry)
                 && Objects.equals(protocolVersion, that.protocolVersion)
                 && (quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()).containsAll((that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()))
-                && (quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()).containsAll((quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()));
+                && (that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()).containsAll((quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()));
     }
 
     @Override
