@@ -25,7 +25,7 @@ public abstract class Application {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
-    @Column(name = "quadrant_app", nullable = false)
+    @Column(name = "quadrant_app")
     private final List<String> quadTree = new ArrayList<>();
 
     public Application() {
@@ -40,6 +40,13 @@ public abstract class Application {
         this.quadTree.addAll(quadTree);
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getPublisherId() {
         return publisherId;
