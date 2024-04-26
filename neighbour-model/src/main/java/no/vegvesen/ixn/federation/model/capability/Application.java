@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.model.capability;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 
 import jakarta.persistence.*;
+import no.vegvesen.ixn.federation.model.StringToListConverter;
+
 import java.util.*;
 
 @Entity()
@@ -23,9 +25,9 @@ public abstract class Application {
 
     private String protocolVersion;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
+
     @Column(name = "quadrant_app")
+    @Convert(converter = StringToListConverter.class)
     private final List<String> quadTree = new ArrayList<>();
 
     public Application() {
