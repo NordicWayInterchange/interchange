@@ -96,7 +96,7 @@ public abstract class Application {
 
         return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId)
                 && Objects.equals(originatingCountry, that.originatingCountry)
-                && Objects.equals(protocolVersion, that.protocolVersion);
+                && Objects.equals(protocolVersion, that.protocolVersion)
 
     }
 
