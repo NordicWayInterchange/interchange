@@ -55,10 +55,8 @@ public class Capabilities {
 			System.out.println("Returning without doing any operations");
 			return;
 		}
-		boolean retainAll = capabilities.retainAll(newCapabilities);
-		boolean addAll = capabilities.addAll(newCapabilities);
-		System.out.println("Retain: "+retainAll + " Add: " + addAll);
-
+		capabilities.retainAll(newCapabilities);
+		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
@@ -81,7 +79,7 @@ public class Capabilities {
 	@Enumerated(EnumType.STRING)
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
