@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
+@Transactional
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 

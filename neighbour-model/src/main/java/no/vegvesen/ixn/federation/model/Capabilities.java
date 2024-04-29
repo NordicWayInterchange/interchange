@@ -47,11 +47,14 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		capabilities.retainAll(newCapabilities);
-		capabilities.addAll(newCapabilities);
+		Set<CapabilitySplit> before = new HashSet<>(capabilities);
+		System.out.println("Equals: " + capabilities.equals(newCapabilities));
+		System.out.println("RetainAll: " + capabilities.retainAll(newCapabilities));
+		System.out.println("AddAll: " + capabilities.addAll(newCapabilities));
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
+		System.out.println("Before and after: " + before.equals(capabilities));
 		setLastUpdated(LocalDateTime.now());
 	}
 
