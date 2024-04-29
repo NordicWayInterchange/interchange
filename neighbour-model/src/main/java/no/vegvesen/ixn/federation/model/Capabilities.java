@@ -53,7 +53,7 @@ public class Capabilities {
 		}
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
-		if (hasDataTypes()) {
+		if (hasDataTypes() && !status.equals(CapabilitiesStatus.KNOWN)) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
