@@ -47,7 +47,8 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		setCapabilities(newCapabilities);
+		capabilities.retainAll(newCapabilities);
+		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
