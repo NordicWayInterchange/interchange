@@ -48,7 +48,21 @@ public class Capabilities {
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
 		Set<CapabilitySplit> before = new HashSet<>(capabilities);
-		System.out.println("Equals: " + capabilities.equals(newCapabilities));
+		boolean equals = capabilities.equals(newCapabilities);
+		System.out.println("Equals: " + equals);
+
+		if(!equals){
+			for(CapabilitySplit i : newCapabilities){
+				if(capabilities.stream().filter(a-> a.getApplication().getMessageType().equals(i.getApplication().getMessageType())).findFirst().isPresent()) {
+					CapabilitySplit existing = capabilities.stream().filter(a -> a.getApplication().getMessageType().equals(i.getApplication().getMessageType())).findFirst().get();
+					System.out.println("Something happened. Checking: ");
+					System.out.println("Equals? using the existing capability's equals method: " + existing.equals(i));
+					System.out.println("Equals? using the incoming capability's equals method: " + i.equals(existing));
+					System.out.println("Contains? with existing list's contains method: " + capabilities.contains(i));
+					System.out.println("Contains? With incoming list's contains method: " + newCapabilities.contains(existing));
+				}
+			}
+		}
 		System.out.println("RetainAll: " + capabilities.retainAll(newCapabilities));
 		System.out.println("AddAll: " + capabilities.addAll(newCapabilities));
 		if (hasDataTypes()) {
