@@ -77,7 +77,8 @@ public class Capabilities {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	private Set<CapabilitySplit> capabilities = new HashSet<>();
+	@OrderBy("id")
+	private Set<CapabilitySplit> capabilities = new LinkedHashSet<>();
 
 	@Column
 	@UpdateTimestamp
