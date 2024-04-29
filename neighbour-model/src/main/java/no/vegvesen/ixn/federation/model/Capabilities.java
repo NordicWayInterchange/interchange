@@ -77,8 +77,7 @@ public class Capabilities {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	@OrderBy("id")
-	private Set<CapabilitySplit> capabilities = new LinkedHashSet<>();
+	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp
@@ -107,7 +106,7 @@ public class Capabilities {
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
-		return Collections.unmodifiableSet(capabilities);
+		return capabilities;
 	}
 
 	public Set<CapabilitySplit> getCreatedCapabilities() {
