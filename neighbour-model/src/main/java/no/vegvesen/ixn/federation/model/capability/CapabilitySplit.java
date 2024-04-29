@@ -82,7 +82,7 @@ public class CapabilitySplit {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CapabilitySplit that = (CapabilitySplit) o;
-        return Objects.equals(application, that.application);
+        return that.application.equals(application);
     }
 
     @Override
