@@ -47,13 +47,9 @@ public class Capabilities {
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-		if(capabilities.containsAll(newCapabilities) && newCapabilities.containsAll(capabilities)){
-			setLastUpdated(LocalDateTime.now());
-			return;
-		}
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
-		if (hasDataTypes() && !status.equals(CapabilitiesStatus.KNOWN)) {
+		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
@@ -77,6 +73,7 @@ public class Capabilities {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	@OrderColumn
 	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
 	@Column
@@ -106,7 +103,7 @@ public class Capabilities {
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
-		return capabilities;
+		return Collections.unmodifiableSet(capabilities);
 	}
 
 	public Set<CapabilitySplit> getCreatedCapabilities() {
