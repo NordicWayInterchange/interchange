@@ -92,12 +92,11 @@ public abstract class Application {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Application that = (Application) o;
-
         return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId)
                 && Objects.equals(originatingCountry, that.originatingCountry)
                 && Objects.equals(protocolVersion, that.protocolVersion)
-                && (quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()).containsAll((that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()))
-                && (that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()).containsAll((quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()));
+                && (quadTree != null? new ArrayList<>(quadTree) : new ArrayList<>()).equals((that.quadTree != null? new ArrayList<>(that.quadTree) : new ArrayList<>()));
+
     }
 
     @Override
