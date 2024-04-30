@@ -17,6 +17,7 @@ public abstract class Application {
 
     private String publisherId;
 
+    @Column(unique = true)
     private String publicationId;
 
     private String originatingCountry;

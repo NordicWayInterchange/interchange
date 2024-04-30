@@ -60,7 +60,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         CapabilitySplit cap2 = new CapabilitySplit(
                 new DenmApplication(
                         "NPRA",
-                        "pub-1",
+                        "pub-2",
                         "SE",
                         "DENM:1.2.2",
                         Collections.singleton("1234"),
@@ -107,7 +107,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         CapabilitySplit cap2 = new CapabilitySplit(
                 new DenmApplication(
                         "NPRA",
-                        "pub-1",
+                        "pub-12",
                         "SE",
                         "DENM:1.2.2",
                         Collections.singleton("1234"),
@@ -154,7 +154,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         CapabilitySplit cap2 = new CapabilitySplit(
                 new DenmApplication(
                         "NPRA",
-                        "pub-1",
+                        "pub-2",
                         "SE",
                         "DENM:1.2.2",
                         Collections.singleton("1234"),
