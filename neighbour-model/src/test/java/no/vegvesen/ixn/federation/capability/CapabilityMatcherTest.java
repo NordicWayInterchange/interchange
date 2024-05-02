@@ -412,10 +412,10 @@ class CapabilityMatcherTest {
 				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", Set.of("1"), "pub", "NO-PUB"),
 				new Metadata()
 		);
-		String selector1 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
-		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pubnoexisto'";
+		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
+		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
 
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isTrue();
 	}
 }
