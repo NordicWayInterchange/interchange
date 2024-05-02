@@ -394,4 +394,28 @@ class CapabilityMatcherTest {
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,1200401%' and causeCode = 6";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
 	}
+
+	@Test
+	public void missingPublisherName(){
+		CapabilitySplit capability = new CapabilitySplit(
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", Set.of("1"), "pub", null),
+				new Metadata()
+		);
+		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
+		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
+	@Test
+	public void publisherNameInCapability(){
+		CapabilitySplit capability = new CapabilitySplit(
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", Set.of("1"), "pub", "NO-PUB"),
+				new Metadata()
+		);
+		String selector1 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
+		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pubnoexisto'";
+
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
 }
