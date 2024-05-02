@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -160,6 +161,7 @@ public class OnboardRestControllerIT {
         System.out.println(thrown.getMessage());
         assertThat(thrown.getMessage()).contains("invalid quadTree");
     }
+
     @Test
     public void testAddingCapabilityWithMissingProperties() {
         DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication", "publisherName");
@@ -176,6 +178,26 @@ public class OnboardRestControllerIT {
                 )));
 
         assertThat(thrown.getMessage()).contains("publisherId");
+    }
+
+    @Test
+    public void testAddingMultipleCapabilitiesWithOneInvalidCapabilityReturnsWithoutSavingAny(){
+        String serviceProviderName = "serviceProviderMissingProperties";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        Set<CapabilitySplitApi> capabilities = new HashSet<>();
+        serviceProviderRepository.save(sp);
+        for(int i = 0; i<10; i++){
+            capabilities.add(new CapabilitySplitApi(
+                    new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2", Collections.singleton("1230123"), "SituationPublication", "pubname"),
+                    new MetadataApi()));
+        }
+        capabilities.add(new CapabilitySplitApi(
+                new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", Collections.singleton("1230123"), "SituationPublication", ""),
+                new MetadataApi()
+        ));
+        assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName,capabilities)));
+
+        assertThat(serviceProviderRepository.findByName(serviceProviderName).getCapabilities().getCapabilities().size()).isEqualTo(0);
     }
 
     @Test
