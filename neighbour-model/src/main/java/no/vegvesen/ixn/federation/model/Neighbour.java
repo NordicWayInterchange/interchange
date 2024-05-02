@@ -49,6 +49,9 @@ public class Neighbour {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
+
+	private boolean ignore = false;
+
 	private String controlChannelPort;
 
 	public Neighbour() {
@@ -78,6 +81,14 @@ public class Neighbour {
 			throw new DiscoveryException(String.format("Server name '%s' shall not end with \".\"", name));
 		}
 		this.name = name;
+	}
+
+	public boolean isIgnore() {
+		return ignore;
+	}
+
+	public void setIgnore(boolean ignore) {
+		this.ignore = ignore;
 	}
 
 	public Capabilities getCapabilities() {
