@@ -50,7 +50,8 @@ public class Neighbour {
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
-	private boolean ignore = false;
+	@Column
+	private Boolean ignore = false;
 
 	private String controlChannelPort;
 
