@@ -441,39 +441,14 @@ public class NeighbourServiceIT {
                 new SubscriptionRequest()
         );
         repository.save(neighbour);
-        neighbour = repository.findByName(name);
-        Capabilities neighbourCaps = neighbour.getCapabilities();
         ObjectMapper mapper = new ObjectMapper();
-
-        CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
-        Capabilities incomingCapabilties = capabilitiesTransformer.capabilitiesApiToCapabilities(mapper.readValue(inputJson,CapabilitiesSplitApi.class));
-        neighbourCaps.replaceCapabilities(incomingCapabilties.getCapabilities());
-        //int size = incomingCapabilties.getCapabilities().size();
-        repository.save(neighbour);
+        service.incomingCapabilities(mapper.readValue(inputJson,CapabilitiesSplitApi.class), Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(1);
-        int firstId = neighbour.getCapabilities().getCapabilities().stream().findFirst().get().getId(); //cast to primitive integer, thus will not change through reference
 
-
-        incomingCapabilties = capabilitiesTransformer.capabilitiesApiToCapabilities(mapper.readValue(otherInput,CapabilitiesSplitApi.class));
-        neighbour.getCapabilities().replaceCapabilities(incomingCapabilties.getCapabilities());
-
-        //assertThat(neighbour.getCapabilities().getCapabilities()).allMatch( c -> c.getId() != null);
-        //assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(size);
-        repository.save(neighbour);
+        service.incomingCapabilities(mapper.readValue(otherInput,CapabilitiesSplitApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
-        // assertThat(neighbour.getCapabilities().getCapabilities().stream().filter(c -> c.getId() == firstId).count()).isEqualTo(1);
-
-        CapabilitiesSplitApi capabilities;
-        capabilities = mapper.readValue(inputJson,CapabilitiesSplitApi.class);
-        service.incomingCapabilities(capabilities,Set.of());
-
-        System.out.println();
-
-        capabilities = mapper.readValue(inputJson,CapabilitiesSplitApi.class);
-        service.incomingCapabilities(capabilities,Set.of());
-
-        System.out.println();
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }
 

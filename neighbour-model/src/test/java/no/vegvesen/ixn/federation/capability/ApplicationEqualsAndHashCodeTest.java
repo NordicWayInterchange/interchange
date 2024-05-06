@@ -209,6 +209,7 @@ public class ApplicationEqualsAndHashCodeTest {
         );
         assertThat(cap1).isNotEqualTo(cap2);
         assertThat(cap1).isEqualTo(cap3);
+        assertThat(cap3).isEqualTo(cap1);
         assertThat(cap1.hashCode()).isEqualTo(cap3.hashCode());
     }
 

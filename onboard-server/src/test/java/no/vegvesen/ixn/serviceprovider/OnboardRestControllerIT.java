@@ -477,8 +477,6 @@ public class OnboardRestControllerIT {
                 app,
                 meta
         );
-        //datexNO.setApplication(app);
-        //datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
