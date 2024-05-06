@@ -1036,6 +1036,39 @@ public class NeighbourDiscovererIT {
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 	}
 
+	@Test
+	public void neighbourIsIgnoredDuringCapabilityExchange(){
+		String name = "ignoredNeighbour1";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
+	}
+
+	@Test
+	public void neighbourIsIgnoredWhenPostingSubscriptionRequest(){
+		String name = "ignoredNeighbour2";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbour.getCapabilities().addDataType(new CapabilitySplit(
+				new DatexApplication(),
+				new Metadata()
+		));
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
+                List.of(neighbour),
+				Optional.of(LocalDateTime.now()),
+				localSubscriptions,
+				mockNeighbourFacade);
+		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(any(),any(),any());
+	}
+
+	@Test
+	public void neighbourIsIgnoredWhenPollingSubscription(){
+		String name = "ignoredNeighbour3";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED))));
+		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		verify(mockNeighbourFacade, times(0)).pollSubscriptionStatus(any(),any());
+	}
+
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -1064,5 +1097,20 @@ public class NeighbourDiscovererIT {
 		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
-
+	public Neighbour ignoredNeighbour(String name){
+		Neighbour neighbour = new Neighbour(
+				name,
+				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(
+						new CapabilitySplit(
+								new DatexApplication(),
+								new Metadata()
+						)
+				)),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		neighbour.setIgnore(true);
+		repository.save(neighbour);
+		return neighbour;
+	}
 }

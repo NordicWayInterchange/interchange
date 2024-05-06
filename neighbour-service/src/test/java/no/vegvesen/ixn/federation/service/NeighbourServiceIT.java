@@ -1,13 +1,15 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
@@ -16,12 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.io.IOException;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -297,4 +300,56 @@ public class NeighbourServiceIT {
 
     }
 
+    @Test
+    public void neighbourIgnoredWhenPostingCapabilities(){
+        String name = "ignoredNeighbour";
+
+        Neighbour neighbour = ignoredNeighbour(name);
+        CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
+                new DatexApplicationApi(),
+                new MetadataApi()
+        );
+        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of()));
+    }
+    @Test
+    public void neighbourIgnoredWhenPollingSubscription(){
+        String name = "ignoredNeighbour2";
+        Neighbour neighbour = ignoredNeighbour(name);
+
+        assertThrows(SubscriptionPollException.class, () -> service.incomingSubscriptionPoll(name, 1));
+    }
+
+    @Test
+    public void neighbourIgnoredWhenRequestingSubscriptions(){
+        String name = "ignoredNeighbour3";
+        Neighbour neighbour = ignoredNeighbour(name);
+
+        SubscriptionRequestApi subscriptionRequest = new SubscriptionRequestApi(name, Set.of(
+                new RequestedSubscriptionApi("originatingCountry = 'NO'", name)
+        ));
+        assertThrows(SubscriptionRequestException.class, () -> service.incomingSubscriptionRequest(subscriptionRequest));
+    }
+    @Test
+    public void neighbourIgnoredWhenDeletingSubscription(){
+        String name = "ignoredNeighbour4";
+        Neighbour neighbour = ignoredNeighbour(name);
+
+        assertThrows(SubscriptionDeleteException.class, () -> service.incomingSubscriptionDelete(name, 1));
+    }
+    public Neighbour ignoredNeighbour(String name){
+        Neighbour neighbour = new Neighbour(
+                name,
+                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(
+                        new CapabilitySplit(
+                                new DatexApplication(),
+                                new Metadata()
+                        )
+                )),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest()
+        );
+        neighbour.setIgnore(true);
+        repository.save(neighbour);
+        return neighbour;
+    }
 }

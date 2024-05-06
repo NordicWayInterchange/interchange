@@ -73,10 +73,6 @@ public class NeigbourDiscoveryService {
 
     void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
-            if(neighbour.isIgnore()){
-                logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
-                continue;
-            }
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
