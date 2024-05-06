@@ -41,6 +41,15 @@ public abstract class Application {
         this.quadTree.addAll(quadTree);
     }
 
+    public Application(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+        this.id = id;
+        this.publisherId = publisherId;
+        this.publicationId = publicationId;
+        this.originatingCountry = originatingCountry;
+        this.protocolVersion = protocolVersion;
+        this.quadTree.addAll(quadTree);
+    }
+
     public String getPublisherId() {
         return publisherId;
     }

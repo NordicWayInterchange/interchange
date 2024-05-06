@@ -23,6 +23,12 @@ public class DatexApplication extends Application{
         this.publicationType = publicationType;
     }
 
+    public  DatexApplication(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+        super(id,publisherId,publicationId,originatingCountry,protocolVersion,quadTree);
+        this.publicationType = publicationType;
+
+    }
+
     public String getPublicationType() {
         return publicationType;
     }

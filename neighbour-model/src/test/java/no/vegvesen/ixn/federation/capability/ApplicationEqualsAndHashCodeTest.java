@@ -8,8 +8,6 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -130,37 +128,6 @@ public class ApplicationEqualsAndHashCodeTest {
 
     @Test
     public void testCam() {
-        CamApplication app1 = new CamApplication(
-                "pub-1",
-                "pub-1-1",
-                "no",
-                "1.0",
-                Set.of()
-        );
-        CamApplication app2 = new CamApplication(
-                "pub2",
-                "pub-1-1",
-                "no",
-                "1.0",
-                Set.of()
-        );
-        assertThat(app1).isNotEqualTo(app2);
-        CamApplication app3 = new CamApplication(
-                "pub-1",
-                "pub-1-1",
-                "no",
-                "1.0",
-                Set.of()
-        );
-        assertThat(app1).isEqualTo(app3);
-        assertThat(app3).isEqualTo(app1);
-        assertThat(app1.hashCode()).isEqualTo(app3.hashCode());
-
-    }
-
-
-    @Test
-    public void testCapabilitySplitEquals() {
         CapabilitySplit cap = new CapabilitySplit(
                 1,
                 new CamApplication(
@@ -203,9 +170,11 @@ public class ApplicationEqualsAndHashCodeTest {
     }
 
     @Test
-    public void testDatexCapabilities() {
+    public void testDatex() {
         CapabilitySplit cap1   = new CapabilitySplit(
+                1,
                 new DatexApplication(
+                        1,
                         "pub-123",
                         "pub-123-123",
                         "NO",
@@ -243,7 +212,51 @@ public class ApplicationEqualsAndHashCodeTest {
         assertThat(cap1.hashCode()).isEqualTo(cap3.hashCode());
     }
 
+    @Test
+    public void testDenm() {
+        CapabilitySplit cap1   = new CapabilitySplit(
+                1,
+                new DenmApplication(
+                        1,
+                        "pub-123",
+                        "pub-123-123",
+                        "NO",
+                        "1.0",
+                        Set.of("123,213"),
+                        Set.of(2,3)
+                ),
+                new Metadata()
+        );
+        CapabilitySplit cap2   = new CapabilitySplit(
+                1,
+                new DenmApplication(
+                        1,
+                        "pub-123",
+                        "pub-123-123",
+                        "NO",
+                        "1.0",
+                        Set.of("123,213"),
+                        Set.of(3)
+                ),
+                new Metadata()
+        );
+        CapabilitySplit cap3   = new CapabilitySplit(
+                new DenmApplication(
+                        "pub-123",
+                        "pub-123-123",
+                        "NO",
+                        "1.0",
+                        Set.of("123,213"),
+                        Set.of(2,3)
+                ),
+                new Metadata()
+        );
+        assertThat(cap1).isNotEqualTo(cap2);
+        assertThat(cap1).isEqualTo(cap3);
+        assertThat(cap3).isEqualTo(cap1);
+        assertThat(cap1.hashCode()).isEqualTo(cap3.hashCode());
 
+    }
 
     @Test
     public void testFromJson() throws JsonProcessingException {
