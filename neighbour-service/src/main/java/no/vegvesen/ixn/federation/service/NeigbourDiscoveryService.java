@@ -54,7 +54,6 @@ public class NeigbourDiscoveryService {
             String neighbourName = neighbour.getName();
             NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbourName);
             if (neighbourRepository.findByName(neighbourName) == null && !neighbourName.equals(interchangeNodeProperties.getName())) {
-
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
                 neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
                 logger.info("Found new neighbour {}. Saving in database",neighbourName);
@@ -68,12 +67,16 @@ public class NeigbourDiscoveryService {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 Capabilities.CapabilitiesStatus.UNKNOWN,
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Capabilities.CapabilitiesStatus.FAILED);
+                Capabilities.CapabilitiesStatus.FAILED).stream().filter(a->!a.isIgnore()).toList();
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
     void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
+            if(neighbour.isIgnore()){
+                logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
+                continue;
+            }
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
@@ -95,7 +98,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void retryUnreachable(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities) {
-        List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
+        List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE).stream().filter(a->!a.isIgnore()).toList();
         if (!unreachableNeighbours.isEmpty()) {
             logger.debug("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
             for (Neighbour neighbour : unreachableNeighbours) {
@@ -134,6 +137,10 @@ public class NeigbourDiscoveryService {
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
+            if(neighbour.isIgnore()){
+                logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
+                continue;
+            }
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasCapabilities()) {
@@ -211,7 +218,7 @@ public class NeigbourDiscoveryService {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 SubscriptionStatus.REQUESTED,
                 SubscriptionStatus.ACCEPTED,
-                SubscriptionStatus.FAILED);
+                SubscriptionStatus.FAILED).stream().filter(a->!a.isIgnore()).toList();
         for (Neighbour neighbour : neighboursToPoll) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -229,7 +236,7 @@ public class NeigbourDiscoveryService {
 
     public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
-                SubscriptionStatus.CREATED);
+                SubscriptionStatus.CREATED).stream().filter(a->!a.isIgnore()).toList();
         for (Neighbour neighbour : neighboursToPoll) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -343,7 +350,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void setGiveUpSubscriptionsToTearDownForRemoval(){
-        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
+        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP).stream().filter(a->!a.isIgnore()).toList();
         for (Neighbour neighbour : neighbours) {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
                 if (!subscription.getEndpoints().isEmpty()) {
