@@ -16,6 +16,8 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 	@NonNull
 	List<Neighbour> findAll();
 
+	List<Neighbour> findAllByIgnoreIs(boolean ignore);
+
 	List<Neighbour> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
 	List<Neighbour> findByCapabilities_StatusIn(Capabilities.CapabilitiesStatus... capabilitiesStatuses);
 
