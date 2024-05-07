@@ -22,7 +22,7 @@ public class CapabilityApiTest {
                         "NO",
                         "DENM:1.2.2",
                         List.of(),
-                        Collections.singleton(6)
+                        List.of(6)
                 ),
                 new MetadataApi()
         );

@@ -157,7 +157,7 @@ public class SelectorBuilder {
 		return this;
 	}
 
-	public SelectorBuilder causeCode(Set<Integer> causeCodes) {
+	public SelectorBuilder causeCode(List<Integer> causeCodes) {
 		String strings = causeCodes.stream()
 				.map(n -> String.valueOf(n))
 				.collect(Collectors.joining(","));

@@ -14,10 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,8 +51,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(6)
+                        List.of("1234"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -63,8 +63,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-2",
                         "SE",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(5)
+                        List.of("1234"),
+                        List.of(5)
                 ),
                 new Metadata()
         );
@@ -97,8 +97,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(6)
+                        List.of("1234"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -110,8 +110,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-12",
                         "SE",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(5)
+                        List.of("1234"),
+                        List.of(5)
                 ),
                 new Metadata()
         );
@@ -144,8 +144,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(6)
+                        List.of("1234"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -157,8 +157,8 @@ public class OutgoingMatchDiscoveryServiceIT {
                         "pub-2",
                         "SE",
                         "DENM:1.2.2",
-                        Collections.singleton("1234"),
-                        Collections.singleton(5)
+                        List.of("1234"),
+                        List.of(5)
                 ),
                 new Metadata()
         );

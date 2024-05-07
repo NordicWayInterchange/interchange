@@ -98,7 +98,7 @@ public class OnboardRestControllerIT {
                                         "NO",
                                         "1.0",
                                         List.of(),
-                                        Collections.emptySet()
+                                        List.of()
                                 ),
                                 new MetadataApi()
                         )
@@ -126,7 +126,7 @@ public class OnboardRestControllerIT {
                                         "NO-pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1200"),
+                                        List.of("1200"),
                                         "SituationPublication"),
                                 new Metadata()
                         ))));
@@ -195,7 +195,7 @@ public class OnboardRestControllerIT {
                                                 "NO-pub-1",
                                                 "NO",
                                                 "1.0",
-                                                Collections.singleton("1200"),
+                                                List.of("1200"),
                                                 "SituationPublication"),
                                         new Metadata()
                                 ))),
@@ -227,8 +227,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -241,8 +241,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -256,8 +256,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -283,8 +283,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -297,8 +297,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -312,8 +312,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -339,8 +339,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -354,8 +354,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -379,8 +379,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -393,8 +393,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -408,8 +408,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);

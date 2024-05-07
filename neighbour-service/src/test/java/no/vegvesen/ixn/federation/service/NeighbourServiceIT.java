@@ -6,7 +6,6 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -24,32 +24,7 @@ import static org.assertj.core.api.Assertions.*;
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourServiceIT {
 
-    String inputJson = """
-            {
-  "name" : "neighbourUpdateCaps",
-  "version" : "1.0",
-  "capabilities" : [ {
-    "application" : {
-      "messageType" : "CAM",
-      "publisherId" : "NO00000",
-      "publicationId" : "NO00000-CAM",
-      "originatingCountry" : "NO",
-      "protocolVersion" : "CAM",
-      "quadTree" : [ "12004" ]
-    },
-    "metadata" : {
-      "shardCount" : 1,
-      "infoUrl" : "info.com",
-      "redirectPolicy" : "OPTIONAL",
-      "maxBandwidth" : 0,
-      "maxMessageRate" : 0,
-      "repetitionInterval" : 0
-    }
-  } ]
-}
-            """;
-
-    String otherInput = """
+    String jsonInput = """
             {
   "name" : "neighbourUpdateCaps",
   "version" : "1.0",
@@ -365,7 +340,7 @@ public class NeighbourServiceIT {
                                 "NO",
                                 "1.0",
                                 List.of(),
-                                Collections.singleton(1)
+                                List.of(1)
                             ),
                             new MetadataApi()
                 ))
@@ -442,12 +417,16 @@ public class NeighbourServiceIT {
         );
         repository.save(neighbour);
         ObjectMapper mapper = new ObjectMapper();
-        service.incomingCapabilities(mapper.readValue(inputJson,CapabilitiesSplitApi.class), Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
         neighbour = repository.findByName(name);
-        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(1);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
-        service.incomingCapabilities(mapper.readValue(otherInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
+        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList();
+
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }

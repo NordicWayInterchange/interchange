@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +26,7 @@ public class CapabilitiesApiTest {
                         "NO",
                         "DENM:1.2.2",
                         quadTree,
-                        Collections.singleton(3)
+                        List.of(3)
                 ),
                 new MetadataApi()
         );

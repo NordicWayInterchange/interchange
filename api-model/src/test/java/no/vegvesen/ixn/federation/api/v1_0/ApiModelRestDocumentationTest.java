@@ -24,7 +24,7 @@ public class ApiModelRestDocumentationTest {
                                         "1.0",
                                         "DENM:1.2.2",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ),
                                 new MetadataApi(
                                         1,
@@ -100,7 +100,7 @@ public class ApiModelRestDocumentationTest {
                                         "NO",
                                         "DENM:1.2.2",
                                         List.of("1224"),
-                                        Collections.singleton(5)
+                                        List.of(5)
                                 ),
                                 new MetadataApi(
                                         1,
@@ -239,7 +239,7 @@ public class ApiModelRestDocumentationTest {
                 "NO",
                 "DENM:1.3.1",
                 List.of("02312"),
-                new HashSet<>(Collections.singleton(6))
+                List.of(6)
         );
 
         MetadataApi metadata = new MetadataApi(
@@ -272,7 +272,7 @@ public class ApiModelRestDocumentationTest {
                 "NO",
                 "DENM:1.3.1",
                 List.of("02312"),
-                new HashSet<>(Collections.singleton(6))
+                List.of(6)
         );
 
         MetadataApi metadata = new MetadataApi();

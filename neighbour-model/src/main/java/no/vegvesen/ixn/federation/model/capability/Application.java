@@ -32,7 +32,7 @@ public abstract class Application {
 
     }
 
-    public Application(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public Application(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         this.publisherId = publisherId;
         this.publicationId = publicationId;
         this.originatingCountry = originatingCountry;
@@ -40,7 +40,7 @@ public abstract class Application {
         this.quadTree.addAll(quadTree);
     }
 
-    public Application(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public Application(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         this.id = id;
         this.publisherId = publisherId;
         this.publicationId = publicationId;

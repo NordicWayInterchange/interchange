@@ -57,7 +57,7 @@ public class NapCoreAPIDocumentationTest {
                         "NO",
                         "DENM:001",
                         List.of("123123"),
-                        new HashSet<>(Arrays.asList(1,2,3))
+                        List.of(1,2,3)
                 ),
                 new MetadataApi()
         );

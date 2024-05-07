@@ -39,7 +39,7 @@ public class ApplicationApi {
 
     private String protocolVersion;
 
-    private Set<String> quadTree = new HashSet<>();
+    private List<String> quadTree = new ArrayList<>();
 
     public ApplicationApi() {
 
@@ -102,7 +102,7 @@ public class ApplicationApi {
         this.protocolVersion = protocolVersion;
     }
 
-    public Set<String> getQuadTree() {
+    public List<String> getQuadTree() {
         return quadTree;
     }
 
@@ -130,7 +130,7 @@ public class ApplicationApi {
         }
     }
 
-    static void putMultiValue(Map<String, Object> values, CapabilityProperty property, Set<String> multiValue) {
+    static void putMultiValue(Map<String, Object> values, CapabilityProperty property, List<String> multiValue) {
         if (multiValue.isEmpty()) {
             values.put(property.getName(), null);
         } else {

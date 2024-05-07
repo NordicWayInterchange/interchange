@@ -5,8 +5,9 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @DiscriminatorValue(Constants.DATEX_2)
@@ -18,12 +19,12 @@ public class DatexApplication extends Application{
 
     }
 
-    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, String publicationType) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         this.publicationType = publicationType;
     }
 
-    public  DatexApplication(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+    public  DatexApplication(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, String publicationType) {
         super(id,publisherId,publicationId,originatingCountry,protocolVersion,quadTree);
         this.publicationType = publicationType;
 

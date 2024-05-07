@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +65,7 @@ public class CapabilityValidatorTest {
                         "NO",
                         "DENM:1.2.2",
                         List.of("12001"),
-                        Collections.singleton(6)
+                        List.of(6)
                 ),
                 new MetadataApi()
         );
@@ -83,7 +82,7 @@ public class CapabilityValidatorTest {
                         "NO",
                         "DENM:1.2.2",
                         List.of("12001"),
-                        Collections.emptySet()
+                        List.of()
                 ),
                 new MetadataApi()
         );

@@ -7,20 +7,20 @@ import java.util.*;
 
 public class DenmApplicationApi extends ApplicationApi {
 
-    private Set<Integer> causeCode = new HashSet<>();
+    private List<Integer> causeCode = new ArrayList<>();
 
     public DenmApplicationApi() {
 
     }
 
-    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, Set<Integer> causeCode) {
+    public DenmApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, List<Integer> causeCode) {
         super(Constants.DENM, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         if (causeCode != null) {
             this.causeCode.addAll(causeCode);
         }
     }
 
-    public Set<Integer> getCauseCode() {
+    public List<Integer> getCauseCode() {
         return causeCode;
     }
 
@@ -44,7 +44,7 @@ public class DenmApplicationApi extends ApplicationApi {
         return values;
     }
 
-    static void putIntegerMultiValue(Map<String, Object> values, CapabilityProperty property, Set<Integer> multiValue) {
+    static void putIntegerMultiValue(Map<String, Object> values, CapabilityProperty property, List<Integer> multiValue) {
         if (multiValue.isEmpty()) {
             values.put(property.getName(), null);
         } else {

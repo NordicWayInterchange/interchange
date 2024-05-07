@@ -25,6 +25,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,8 +74,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -119,8 +120,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -166,8 +167,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );

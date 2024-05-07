@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,8 +61,8 @@ public class ServiceProviderServiceTest {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("123"),
-                        Collections.singleton(1)
+                        List.of("123"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
@@ -96,8 +95,8 @@ public class ServiceProviderServiceTest {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("123"),
-                        Collections.singleton(1)
+                        List.of("123"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
@@ -110,8 +109,8 @@ public class ServiceProviderServiceTest {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("122"),
-                        Collections.singleton(1)
+                        List.of("122"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
@@ -159,8 +158,8 @@ public class ServiceProviderServiceTest {
                         "0001:0001",
                         "NO",
                         "1.0",
-                        Collections.singleton("0122"),
-                        Collections.singleton(6)
+                        List.of("0122"),
+                        List.of(6)
                 ),
                 new Metadata()
         );

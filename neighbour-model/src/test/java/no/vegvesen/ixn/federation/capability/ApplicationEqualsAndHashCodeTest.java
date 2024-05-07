@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,7 +135,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-1-1",
                         "no",
                         "1.0",
-                        Set.of()
+                        List.of()
                 ),
                 new Metadata(
 
@@ -147,7 +147,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-1-1",
                         "no",
                         "1.0",
-                        Set.of()
+                        List.of()
                 ),
                 new Metadata()
         );
@@ -157,7 +157,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-1-1",
                         "no",
                         "1.0",
-                        Set.of()
+                        List.of()
                 ),
                 new Metadata()
         );
@@ -179,7 +179,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-123-123",
                         "NO",
                         "1.0",
-                        Set.of("123"),
+                        List.of("123"),
                         "pubType"
                 ),
                 new Metadata()
@@ -191,7 +191,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-124-123",
                         "NO",
                         "1.0",
-                        Set.of("122"),
+                        List.of("122"),
                         "pubType"
                 ),
                 new Metadata()
@@ -202,7 +202,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-123-123",
                         "NO",
                         "1.0",
-                        Set.of("123"),
+                        List.of("123"),
                         "pubType"
                 ),
                 new Metadata()
@@ -223,8 +223,8 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-123-123",
                         "NO",
                         "1.0",
-                        Set.of("123,213"),
-                        Set.of(2,3)
+                        List.of("123,213"),
+                        List.of(2,3)
                 ),
                 new Metadata()
         );
@@ -236,8 +236,8 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-123-123",
                         "NO",
                         "1.0",
-                        Set.of("123,213"),
-                        Set.of(3)
+                        List.of("123,213"),
+                        List.of(3)
                 ),
                 new Metadata()
         );
@@ -247,8 +247,8 @@ public class ApplicationEqualsAndHashCodeTest {
                         "pub-123-123",
                         "NO",
                         "1.0",
-                        Set.of("123,213"),
-                        Set.of(2,3)
+                        List.of("123,213"),
+                        List.of(2,3)
                 ),
                 new Metadata()
         );

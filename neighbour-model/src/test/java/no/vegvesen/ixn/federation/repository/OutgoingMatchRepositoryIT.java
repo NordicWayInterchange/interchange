@@ -52,8 +52,8 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();
@@ -88,8 +88,8 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();
@@ -128,8 +128,8 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();

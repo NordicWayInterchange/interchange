@@ -105,7 +105,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
 		CapabilitySplitApi capability = new CapabilitySplitApi();
-		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), Sets.newSet(6));
+		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), List.of(6));
 		capability.setApplication(app);
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		capability.setMetadata(meta);

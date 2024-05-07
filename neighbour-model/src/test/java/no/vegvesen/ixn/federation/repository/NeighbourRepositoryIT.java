@@ -82,7 +82,7 @@ public class NeighbourRepositoryIT {
 						"NO-pub",
 						"NO",
 						"1.0",
-						Collections.emptySet(),
+						List.of(),
 						"SituationPublication"),
 				new Metadata()
 		);
@@ -138,8 +138,8 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
 		HashSet<CapabilitySplit> capabilities = new HashSet<>();
-		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "NO", null, Collections.emptySet(), "SituationPublication"), new Metadata()));
-		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "SE", null, Collections.emptySet(), "MeasuredDataPublication"), new Metadata()));
+		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "NO", null, List.of(), "SituationPublication"), new Metadata()));
+		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "SE", null, List.of(), "MeasuredDataPublication"), new Metadata()));
 		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(new HashSet<>()), new SubscriptionRequest(new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);

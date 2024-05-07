@@ -120,7 +120,7 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DENM:1.2.2",
 						quadTree,
-						Collections.singleton(3)
+						List.of(3)
 				),
 				new MetadataApi()
 		);

@@ -141,7 +141,7 @@ public class OnboardRestAPIDocumentationTest {
                 "NO",
                 "1.0",
                 List.of("1234"),
-                Collections.singleton(6)),
+                List.of(6)),
                 new MetadataApi(RedirectStatusApi.OPTIONAL)
         );
 
@@ -162,7 +162,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "NO",
                                         "1.0",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ), new MetadataApi())
                 )
         );
@@ -183,7 +183,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "SE",
                                         "1.0",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ), new MetadataApi(RedirectStatusApi.OPTIONAL))
                 )
         );
@@ -207,7 +207,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "NO",
                                         "1.0",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ), new MetadataApi())
                         )
                 )
@@ -231,7 +231,7 @@ public class OnboardRestAPIDocumentationTest {
                                                 "NO",
                                                 "1.0",
                                                 List.of("1234"),
-                                                Collections.singleton(6)
+                                                List.of(6)
                                         ), new MetadataApi())
                         )
                 )
@@ -252,7 +252,7 @@ public class OnboardRestAPIDocumentationTest {
                                 "NO",
                                 "1.0",
                                 List.of("1234"),
-                                Collections.singleton(6)
+                                List.of(6)
                         ), new MetadataApi())
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -339,7 +339,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "NO",
                                         "1.0",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ), new MetadataApi())
                 )
         );
@@ -361,7 +361,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "NO",
                                         "1.0",
                                         List.of("1234"),
-                                        Collections.singleton(6)
+                                        List.of(6)
                                 ), new MetadataApi())
                         )
 
@@ -439,7 +439,7 @@ public class OnboardRestAPIDocumentationTest {
                         "NO",
                         "DENM:1.2.2",
                         quadTree,
-                        Collections.singleton(6)
+                        List.of(6)
                 ),
                 metadataApi
         );
