@@ -55,11 +55,11 @@ public class DenmApplication extends Application{
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DenmApplication that = (DenmApplication) o;
-        return Objects.equals(Set.copyOf(causeCode), Set.copyOf(that.causeCode));
+        return Objects.equals(causeCode != null ? new ArrayList<>(causeCode) : new ArrayList<>(), that.causeCode != null ? new ArrayList<>(that.causeCode) : new ArrayList<>());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), Set.copyOf(causeCode).hashCode());
+        return Objects.hash(super.hashCode(), causeCode != null ? new ArrayList<>(causeCode).hashCode() : new ArrayList<>().hashCode());
     }
 }
