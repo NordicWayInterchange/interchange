@@ -5,6 +5,8 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 
 import jakarta.persistence.*;
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -56,11 +58,11 @@ public class DenmApplication extends Application{
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DenmApplication that = (DenmApplication) o;
-        return Objects.equals(causeCode, that.causeCode);
+        return Objects.equals(Set.copyOf(causeCode), Set.copyOf(that.causeCode));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), causeCode);
+        return Objects.hash(super.hashCode(), Set.copyOf(causeCode));
     }
 }
