@@ -115,7 +115,8 @@ public abstract class Application {
                 publicationId,
                 originatingCountry,
                 protocolVersion,
-                (quadTree != null ? new ArrayList<>(quadTree).hashCode() : new ArrayList<>().hashCode()));
+                (quadTree != null ? new ArrayList<>(quadTree): new ArrayList<>())
+        );
     }
 
     @Override

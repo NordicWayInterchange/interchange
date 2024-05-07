@@ -60,6 +60,6 @@ public class DenmApplication extends Application{
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), causeCode != null ? new ArrayList<>(causeCode).hashCode() : new ArrayList<>().hashCode());
+        return Objects.hash(super.hashCode(), causeCode != null ? new ArrayList<>(causeCode): new ArrayList<>());
     }
 }
