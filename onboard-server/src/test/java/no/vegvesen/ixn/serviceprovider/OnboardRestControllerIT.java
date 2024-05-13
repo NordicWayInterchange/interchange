@@ -187,7 +187,7 @@ public class OnboardRestControllerIT {
         datexNO.setMetadata(meta);
 
         Neighbour other = new Neighbour("my-neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
+                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(
                                 new CapabilitySplit(
                                         new DatexApplication(
@@ -248,7 +248,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
+        neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
@@ -304,7 +304,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
+        neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
@@ -346,7 +346,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
+        neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
@@ -400,7 +400,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
+        neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DenmApplication(
