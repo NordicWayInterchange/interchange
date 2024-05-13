@@ -4,10 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.DenmApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -189,7 +186,7 @@ public class OnboardRestControllerIT {
         Neighbour other = new Neighbour("my-neighbour",
                 new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(
-                                new CapabilitySplit(
+                                new NeighbourCapability(
                                         new DatexApplication(
                                                 "NO00000",
                                                 "NO-pub-1",
@@ -250,7 +247,7 @@ public class OnboardRestControllerIT {
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
                                 "DPRA",
                                 "pub-3",
@@ -306,7 +303,7 @@ public class OnboardRestControllerIT {
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
                                 "DPRA",
                                 "pub-3",
@@ -348,7 +345,7 @@ public class OnboardRestControllerIT {
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
                                 "DPRA",
                                 "pub-2",
@@ -402,7 +399,7 @@ public class OnboardRestControllerIT {
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new NeighbourCapabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
                                 "DPRA",
                                 "pub-3",

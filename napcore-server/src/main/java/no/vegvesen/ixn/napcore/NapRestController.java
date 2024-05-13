@@ -197,7 +197,7 @@ public class NapRestController {
         Set<CapabilitySplit> capabilities = new HashSet<>();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+            capabilities.addAll(neighbour.getCapabilities().transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
         }
         return capabilities;
     }

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name="neighbour_capabilities")
+@Table(name="neighbour_split_capability")
 public class NeighbourCapability {
 
     @Id
