@@ -41,13 +41,13 @@ public class NeighbourServiceIT {
     @Test
     public void testFetchingNeighbourWithCorrectStatus() {
         Neighbour interchangeA = new Neighbour("interchangeA",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.REQUESTED, "interchangeA"))),
@@ -64,7 +64,7 @@ public class NeighbourServiceIT {
     @Test
     public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(Collections.emptySet()));
         repository.save(neighbour);
@@ -251,7 +251,7 @@ public class NeighbourServiceIT {
         String name = "teardown-and-new-neighbour-request";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                     Collections.singleton(
                             new NeighbourSubscription(selector,NeighbourSubscriptionStatus.CREATED,name)
@@ -282,7 +282,7 @@ public class NeighbourServiceIT {
         String name = "tear-down-neighbour";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                         Collections.singleton(
                                 new NeighbourSubscription("a = 'hello'",NeighbourSubscriptionStatus.TEAR_DOWN,name)

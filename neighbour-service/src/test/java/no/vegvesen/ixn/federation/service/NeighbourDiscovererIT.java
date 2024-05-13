@@ -169,7 +169,7 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						Collections.singleton(new CapabilitySplit(
 								new DatexApplication(
@@ -214,7 +214,7 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						Collections.singleton(new CapabilitySplit(
 								new DatexApplication(
@@ -260,7 +260,7 @@ public class NeighbourDiscovererIT {
 		));
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
 								new CapabilitySplit(
@@ -322,7 +322,7 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						Collections.singleton(new CapabilitySplit(
 								new DatexApplication(
@@ -374,7 +374,7 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbourA = new Neighbour(
 				"neighbourA",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						Collections.singleton(new CapabilitySplit(
 								new DatexApplication(
@@ -395,7 +395,7 @@ public class NeighbourDiscovererIT {
 		neighbourA.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
 		Neighbour neighbourB = new Neighbour(
 				"neighbourB",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						Collections.singleton(new CapabilitySplit(
 								new DatexApplication(
@@ -460,7 +460,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -536,7 +536,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -567,7 +567,7 @@ public class NeighbourDiscovererIT {
 	public void testGiveUp() {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -631,7 +631,7 @@ public class NeighbourDiscovererIT {
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
 
-		neighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
+		neighbour.setCapabilities(new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
 		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, neighbour.getCapabilities().getCapabilities());
 
@@ -673,7 +673,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -758,7 +758,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints-failed",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -804,7 +804,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -861,7 +861,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour1",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -935,7 +935,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(
@@ -1002,7 +1002,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
+				new NeighbourCapabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new CapabilitySplit(

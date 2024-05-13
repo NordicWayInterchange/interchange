@@ -75,7 +75,7 @@ public class ServiceProviderServiceIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(Collections.singleton(subscription))
         );
@@ -116,7 +116,7 @@ public class ServiceProviderServiceIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(Collections.singleton(subscription))
         );

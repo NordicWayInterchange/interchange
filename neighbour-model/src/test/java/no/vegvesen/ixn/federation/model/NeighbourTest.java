@@ -59,7 +59,7 @@ public class NeighbourTest {
 
 	@Test
 	public void shouldCheckSubscriptionRequestsForUpdates_neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
-		Capabilities capabilities = new Capabilities();
+		NeighbourCapabilities capabilities = new NeighbourCapabilities();
 		capabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
@@ -71,7 +71,7 @@ public class NeighbourTest {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
-		Capabilities capabilities = new Capabilities();
+		NeighbourCapabilities capabilities = new NeighbourCapabilities();
 		capabilities.setLastCapabilityExchange(now.minusHours(1));
 		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn, new Connection());
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
@@ -83,7 +83,7 @@ public class NeighbourTest {
 		LocalDateTime capabilityExchangeTimeNow = LocalDateTime.now();
 		LocalDateTime localSubscriptionUpdateTimeBefore = capabilityExchangeTimeNow.minusSeconds(1);
 		fedIn.setSuccessfulRequest(capabilityExchangeTimeNow);
-		Capabilities capabilities = new Capabilities();
+		NeighbourCapabilities capabilities = new NeighbourCapabilities();
 		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
 		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBefore))).isFalse();
@@ -102,7 +102,7 @@ public class NeighbourTest {
 		LocalDateTime localSubscriptionUpdateTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(1);
 		LocalDateTime successfulSubscriptionRequestTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(2);
 		fedIn.setSuccessfulRequest(successfulSubscriptionRequestTimeBeforeCapabilityPost);
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>());
 		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
 		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBeforeCapabilityPost))).isTrue();
@@ -131,7 +131,7 @@ public class NeighbourTest {
 	private Neighbour neighbourSeenYesterday() {
 		Neighbour seenYesterday = new Neighbour();
 		seenYesterday.setName("seen-yesterday");
-		seenYesterday.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newHashSet()));
+		seenYesterday.setCapabilities(new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newHashSet()));
 		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
 		return seenYesterday;
 	}

@@ -33,7 +33,7 @@ public class Neighbour {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_cap"))
-	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
+	private NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
@@ -54,14 +54,14 @@ public class Neighbour {
 	public Neighbour() {
 	}
 
-	public Neighbour(String name, Capabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
+	public Neighbour(String name, NeighbourCapabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
+	public Neighbour(String name, NeighbourCapabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
@@ -80,11 +80,11 @@ public class Neighbour {
 		this.name = name;
 	}
 
-	public Capabilities getCapabilities() {
+	public NeighbourCapabilities getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Capabilities capabilities) {
+	public void setCapabilities(NeighbourCapabilities capabilities) {
 		this.capabilities = capabilities;
 	}
 

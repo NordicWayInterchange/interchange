@@ -27,7 +27,7 @@ public class NeighbourRepositorySelectorIT {
 
 	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus){
 		Neighbour neighbour = new Neighbour(name,
-				new Capabilities(capStatus, Collections.emptySet()),
+				new NeighbourCapabilities(capStatus, Collections.emptySet()),
 				new NeighbourSubscriptionRequest(new HashSet<>()),
 				new SubscriptionRequest(new HashSet<>()));
 		neighbour.setControlChannelPort("8080");
@@ -110,7 +110,7 @@ public class NeighbourRepositorySelectorIT {
 		subscriptionA.setSelector("originatingCountry = 'OM'");
 		subscriptionA.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
 		SubscriptionRequest fedin = new SubscriptionRequest(Sets.newSet(subscriptionA));
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 

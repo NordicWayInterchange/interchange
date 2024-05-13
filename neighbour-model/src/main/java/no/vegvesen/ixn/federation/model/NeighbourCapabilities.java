@@ -75,7 +75,7 @@ public class NeighbourCapabilities {
     private Capabilities.CapabilitiesStatus status = Capabilities.CapabilitiesStatus.UNKNOWN;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
+    @JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
     private Set<CapabilitySplit> capabilities = new HashSet<>();
 
     @Column
