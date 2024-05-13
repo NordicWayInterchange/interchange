@@ -77,9 +77,6 @@ public class Capabilities {
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<CapabilitySplit> capabilities = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name="fk_dat_neigh_cap"))
-	private Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
 	@Column
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
