@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation.model;
 import jakarta.persistence.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -39,34 +40,36 @@ public class NeighbourCapabilities {
         this.lastUpdated = lastUpdated;
     }
 
-    public void addDataType(CapabilitySplit newCapability) {
-        capabilities.add(newCapability);
 
-        if (hasDataTypes()) {
-            setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-        }
-        setLastUpdated(LocalDateTime.now());
-    }
 
     public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-        capabilities.retainAll(newCapabilities);
-        capabilities.addAll(newCapabilities);
+        Set<NeighbourCapability> caps = transformCapabilitySplitToNeighbourCapability(newCapabilities);
+        capabilities.retainAll(caps);
+        capabilities.addAll(caps);
         if (hasDataTypes()) {
             setStatus(Capabilities.CapabilitiesStatus.KNOWN);
         }
         setLastUpdated(LocalDateTime.now());
 
     }
+    public Set<NeighbourCapability> transformCapabilitySplitToNeighbourCapability(Set<CapabilitySplit> capabilities){
+        Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
+        for(CapabilitySplit i : capabilities){
+            neighbourCapabilities.add(
+                    new NeighbourCapability(i.getApplication(), i.getMetadata())
+            );
+        }
+            return neighbourCapabilities;
+    }
+    public Set<CapabilitySplit> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
+        Set<CapabilitySplit> capabilitySplits = new HashSet<>();
+        for(NeighbourCapability i : capabilities){
+            capabilitySplits.add(
+                    new CapabilitySplit(i.getApplication(), i.getMetadata())
+            );
 
-    public void removeDataType(Integer capabilityId) {
-        Set<CapabilitySplit> currentServiceProviderCapabilities = getCapabilities();
-
-        Optional<CapabilitySplit> subscriptionToDelete = currentServiceProviderCapabilities
-                .stream()
-                .filter(dataType -> dataType.getId().equals(capabilityId))
-                .findFirst();
-        CapabilitySplit toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
-        toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
+        }
+        return capabilitySplits;
     }
 
     public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
@@ -76,7 +79,7 @@ public class NeighbourCapabilities {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-    private Set<CapabilitySplit> capabilities = new HashSet<>();
+    private Set<NeighbourCapability> capabilities = new HashSet<>();
 
     @Column
     @UpdateTimestamp
@@ -85,12 +88,12 @@ public class NeighbourCapabilities {
     public NeighbourCapabilities(){
     }
 
-    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<CapabilitySplit> capabilities) {
+    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<NeighbourCapability> capabilities) {
         this.status = status;
         setCapabilities(capabilities);
     }
 
-    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
+    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<NeighbourCapability> capabilties, LocalDateTime lastUpdated) {
         this.status = status;
         setCapabilities(capabilties);
         this.lastUpdated = lastUpdated;
@@ -104,17 +107,12 @@ public class NeighbourCapabilities {
         this.status = status;
     }
 
-    public Set<CapabilitySplit> getCapabilities() {
+    public Set<NeighbourCapability> getCapabilities() {
         return capabilities;
     }
 
-    public Set<CapabilitySplit> getCreatedCapabilities() {
-        return capabilities.stream()
-                .filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
-                .collect(Collectors.toSet());
-    }
 
-    public void setCapabilities(Set<CapabilitySplit> capabilities) {
+    public void setCapabilities(Set<NeighbourCapability> capabilities) {
         this.capabilities.clear();
         if ( capabilities != null ) {
             this.capabilities.addAll(capabilities);
@@ -122,11 +120,8 @@ public class NeighbourCapabilities {
     }
 
     public boolean hasDataTypes() {
-        Set<CapabilitySplit> createdCapabilities = capabilities.stream()
-                .filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
-                .collect(Collectors.toSet());
 
-        return createdCapabilities.size() > 0;
+        return !capabilities.isEmpty();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
-import no.vegvesen.ixn.federation.model.Neighbour;
 
 import java.util.Objects;
 
