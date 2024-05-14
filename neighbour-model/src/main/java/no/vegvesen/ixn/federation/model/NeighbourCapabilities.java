@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 
 import jakarta.persistence.*;
+import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
@@ -43,7 +44,8 @@ public class NeighbourCapabilities {
 
 
     public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-        Set<NeighbourCapability> caps = transformCapabilitySplitToNeighbourCapability(newCapabilities);
+        CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+        Set<NeighbourCapability> caps = capabilityTransformer.transformCapabilitySplitToNeighbourCapability(newCapabilities);
         capabilities.retainAll(caps);
         capabilities.addAll(caps);
         if (hasDataTypes()) {
@@ -60,16 +62,6 @@ public class NeighbourCapabilities {
             );
         }
             return neighbourCapabilities;
-    }
-    public Set<CapabilitySplit> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
-        Set<CapabilitySplit> capabilitySplits = new HashSet<>();
-        for(NeighbourCapability i : capabilities){
-            capabilitySplits.add(
-                    new CapabilitySplit(i.getApplication(), i.getMetadata())
-            );
-
-        }
-        return capabilitySplits;
     }
 
     public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}

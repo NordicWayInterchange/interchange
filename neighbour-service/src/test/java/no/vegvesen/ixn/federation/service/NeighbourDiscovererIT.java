@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -61,6 +62,8 @@ public class NeighbourDiscovererIT {
 	ListenerEndpointRepository listenerEndpointRepository;
 
 	private Set<LocalSubscription> localSubscriptions;
+
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 
 	@Test
 	public void discovererIsAutowired() {
@@ -630,7 +633,7 @@ public class NeighbourDiscovererIT {
 
 		neighbour.setCapabilities(new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, neighbour.getCapabilities().transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, capabilityTransformer.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);

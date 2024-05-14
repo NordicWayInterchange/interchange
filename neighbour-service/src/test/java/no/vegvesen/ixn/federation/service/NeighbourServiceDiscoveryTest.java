@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
@@ -59,6 +60,8 @@ public class NeighbourServiceDiscoveryTest {
 	private NeigbourDiscoveryService neigbourDiscoveryService;
 
 	private LocalDateTime now = LocalDateTime.now();
+
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 
 	private NeighbourCapability getDatexCapability(String originatingCountry) {
 		return new NeighbourCapability(
@@ -564,7 +567,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED, interchangeNodeProperties.getName()));
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(neighbourFedInSubscription));
 
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, neighbour.getCapabilities().transformNeighbourCapabilityToSplitCapability(capabilitySet), interchangeNodeProperties.getName());
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilityTransformer.transformNeighbourCapabilityToSplitCapability(capabilitySet), interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in

@@ -48,6 +48,17 @@ public class CapabilityToCapabilityApiTransformer {
 		return capabilitySplits;
 	}
 
+	public Set<NeighbourCapability> capabilitySplitApiToNeighbourCapabilities(Set<CapabilitySplitApi> capabilitySplitApis){
+		Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
+		for(CapabilitySplitApi capabilitySplitApi : capabilitySplitApis){
+			neighbourCapabilities.add(new NeighbourCapability(
+					applicationApiToApplication(capabilitySplitApi.getApplication()),
+					metadataApiToMetadata(capabilitySplitApi.getMetadata())
+			));
+		}
+		return neighbourCapabilities;
+	}
+
 	public CapabilitySplitApi capabilitySplitToCapabilitySplitApi(CapabilitySplit capability) {
 		return new CapabilitySplitApi(
 				capability.getApplication().toApi(),

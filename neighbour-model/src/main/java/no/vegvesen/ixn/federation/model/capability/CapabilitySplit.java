@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "split_capability")
