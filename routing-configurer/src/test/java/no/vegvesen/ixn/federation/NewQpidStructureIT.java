@@ -30,6 +30,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,8 +87,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12","13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12","13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -171,8 +172,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12004")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12004"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -325,8 +326,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12002", "12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12002", "12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -337,8 +338,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -424,8 +425,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );

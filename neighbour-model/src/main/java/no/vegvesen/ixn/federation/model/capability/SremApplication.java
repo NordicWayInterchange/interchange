@@ -6,6 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.SremApplicationApi;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,7 +18,7 @@ public class SremApplication extends Application {
 
     }
 
-    public SremApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public SremApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
     }
 

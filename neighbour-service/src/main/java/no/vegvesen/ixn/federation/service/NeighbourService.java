@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
+@Transactional
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 
@@ -52,8 +54,9 @@ public class NeighbourService {
 	}
 
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
+		LocalDateTime now = LocalDateTime.now();
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
-		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
+		incomingCapabilities.setLastCapabilityExchange(now);
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
@@ -64,7 +67,9 @@ public class NeighbourService {
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		Capabilities capabilities = neighbourToUpdate.getCapabilities();
+		capabilities.setLastCapabilityExchange(now);
 		capabilities.replaceCapabilities(incomingCapabilities.getCapabilities());
+
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 

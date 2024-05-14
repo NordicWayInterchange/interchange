@@ -132,7 +132,7 @@ public class SelectorBuilder {
 	 * @param quadTrees
 	 * @return
 	 */
-	public SelectorBuilder quadTree(Set<String> quadTrees) {
+	public SelectorBuilder quadTree(List<String> quadTrees) {
 		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",",quadTrees));
 		return this;
 	}
@@ -157,7 +157,7 @@ public class SelectorBuilder {
 		return this;
 	}
 
-	public SelectorBuilder causeCode(Set<Integer> causeCodes) {
+	public SelectorBuilder causeCode(List<Integer> causeCodes) {
 		String strings = causeCodes.stream()
 				.map(n -> String.valueOf(n))
 				.collect(Collectors.joining(","));

@@ -90,7 +90,7 @@ public class OnboardRestController {
 			}
 		}
 
-		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		List<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
@@ -100,9 +100,12 @@ public class OnboardRestController {
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
-		addedCapabilities.retainAll(newLocalCapabilities);
-
+		Set<CapabilitySplit> addedCapabilities = new HashSet<>();
+		for (CapabilitySplit savedCapability : saved.getCapabilities().getCapabilities()) {
+			if (newLocalCapabilities.contains(savedCapability)) {
+				addedCapabilities.add(savedCapability);
+			}
+		}
 		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
