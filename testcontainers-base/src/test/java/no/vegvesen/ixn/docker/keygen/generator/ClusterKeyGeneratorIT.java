@@ -1,10 +1,6 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.*;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
@@ -15,12 +11,10 @@ import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
@@ -33,6 +27,118 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClusterKeyGeneratorIT {
 
 
+    public static final List<CARequest> CA_REQUESTS = List.of(new CARequest(
+                    "bouvetinterchange.eu",
+                    "NO",
+                    List.of(
+                            new CARequest(
+                                    "ca.a.bouvetinterchange.eu",
+                                    "NO",
+                                    List.of(),
+                                    List.of(
+                                            new HostRequest(
+                                                    "a.bouvetinterchange.eu"
+                                            )
+                                    ),
+                                    List.of(
+                                            new ClientRequest(
+                                                    "king_olaf.a.bouvetinterchange.eu",
+                                                    "NO",
+                                                    "post@slottet.no"
+                                            )
+                                    )
+                            ),
+                            new CARequest(
+                                    "ca.b.bouvetinterchange.eu",
+                                    "SE",
+                                    List.of(),
+                                    List.of(
+                                            new HostRequest(
+                                                    "b.bouvetinterchange.eu"
+                                            )
+                                    ),
+                                    List.of(
+                                            new ClientRequest(
+                                                    "king_gustav.b.bouvetinterchange.eu",
+                                                    "SE",
+                                                    "kungen@slottet.se"
+                                            )
+                                    )
+                            ),
+                            new CARequest(
+                                    "c.bouvetinterchange.eu",
+                                    "FI",
+                                    List.of(),
+                                    List.of(
+                                            new HostRequest(
+                                                    "c.bouvetinterchange.eu"
+                                            )
+                                    ),
+                                    List.of(
+                                            new ClientRequest(
+                                                    "president.c.bouvetinterechange.eu",
+                                                    "FI",
+                                                    "presidenten@repulic.fi"
+                                            )
+                                    )
+                            )),
+                    List.of(),
+                    List.of()
+            ),
+            new CARequest(
+                    "a-internal",
+                    "NO",
+                    List.of(),
+                    List.of(),
+                    List.of(
+                            new ClientRequest(
+                                    "a.routing-configurer",
+                                    "NO",
+                                    "routing-configurer@a.bouvetinterchange.eu"
+                            ),
+                            new ClientRequest(
+                                    "a.nap",
+                                    "NO",
+                                    "nap@a.bouvetinterchange.eu"
+                            )
+                    )
+            ),
+            new CARequest(
+                    "b-internal",
+                    "SE",
+                    List.of(),
+                    List.of(),
+                    List.of(
+                            new ClientRequest(
+                                    "b.routing-configurer",
+                                    "SE",
+                                    "routing-configurer@b.bouvetinterchange.eu"
+                            ),
+                            new ClientRequest(
+                                    "b.nap",
+                                    "SE",
+                                    "nap@b.bouvetinterchange.eu"
+                            )
+                    )
+            ),
+            new CARequest(
+                    "c-internal",
+                    "FI",
+                    List.of(),
+                    List.of(),
+                    List.of(
+                            new ClientRequest(
+                                    "c.routing-configurer",
+                                    "FI",
+                                    "routing-configurer@c.bouvetinterchange.eu"
+                            ),
+                            new ClientRequest(
+                                    "c.nap",
+                                    "FI",
+                                    "nap@c.bouvetinterchange.eu"
+                            )
+                    )
+            ));
     Path targetPath = DockerBaseIT.getTargetFolderPathForTestClass(ClusterKeyGeneratorIT.class);
 
     @Test
@@ -229,150 +335,20 @@ public class ClusterKeyGeneratorIT {
 
 
     @Test
-    public void saveRequests() throws IOException {
-        CARequest request = new CARequest(
-                "bouvetinterchange.eu",
-                "NO",
-                List.of(
-                        new CARequest(
-                                "ca.a.bouvetinterchange.eu",
-                                "NO",
-                                List.of(),
-                                List.of(
-                                        new HostRequest(
-                                                "a.bouvetinterchange.eu"
-                                        )
-                                ),
-                                List.of(
-                                        new ClientRequest(
-                                                "king_olaf.a.bouvetinterchange.eu",
-                                                "NO",
-                                                "post@slottet.no"
-                                        )
-                                )
-                        ),
-                        new CARequest(
-                                "ca.b.bouvetinterchange.eu",
-                                "SE",
-                                List.of(),
-                                List.of(
-                                        new HostRequest(
-                                                "b.bouvetinterchange.eu"
-                                        )
-                                ),
-                                List.of(
-                                        new ClientRequest(
-                                                "king_gustav.b.bouvetinterchange.eu",
-                                                "SE",
-                                                "kungen@slottet.se"
-                                        )
-                                )
-                        ),
-                        new CARequest(
-                                "c.bouvetinterchange.eu",
-                                "FI",
-                                List.of(),
-                                List.of(
-                                        new HostRequest(
-                                                "c.bouvetinterchange.eu"
-                                        )
-                                ),
-                                List.of(
-                                        new ClientRequest(
-                                                "president.c.bouvetinterechange.eu",
-                                                "FI",
-                                                "presidenten@repulic.fi"
-                                        )
-                                )
-                        )),
-                List.of(),
-                List.of()
-        );
-        CARequest internalA = new CARequest(
-                "a-internal",
-                "NO",
-                List.of(),
-                List.of(),
-                List.of(
-                        new ClientRequest(
-                                "a.routing-configurer",
-                                "NO",
-                                "routing-configurer@a.bouvetinterchange.eu"
-                        ),
-                        new ClientRequest(
-                                "a.nap",
-                                "NO",
-                                "nap@a.bouvetinterchange.eu"
-                        )
-                )
-        );
-        CARequest internalB = new CARequest(
-                "b-internal",
-                "SE",
-                List.of(),
-                List.of(),
-                List.of(
-                        new ClientRequest(
-                                "b.routing-configurer",
-                                "SE",
-                                "routing-configurer@b.bouvetinterchange.eu"
-                        ),
-                        new ClientRequest(
-                                "b.nap",
-                                "SE",
-                                "nap@b.bouvetinterchange.eu"
-                        )
-                )
-        );
-        CARequest internalC = new CARequest(
-                "c-internal",
-                "FI",
-                List.of(),
-                List.of(),
-                List.of(
-                        new ClientRequest(
-                                "c.routing-configurer",
-                                "FI",
-                                "routing-configurer@c.bouvetinterchange.eu"
-                        ),
-                        new ClientRequest(
-                                "c.nap",
-                                "FI",
-                                "nap@c.bouvetinterchange.eu"
-                        )
-                )
-        );
-        ObjectMapper mapper = new ObjectMapper();
-        StringWriter writer = new StringWriter();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(
-                writer,
-                List.of(request,internalA,internalB,internalC)
-        );
-    }
-
-    @Test
-    @Disabled("Work in progress")
     public void generateKeys() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException {
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(
-                CertificateCertificateChainAndKeys.class,
-                new CertificateCertificateChainAndKeysSerializer()
-        );
-        mapper.registerModule(module);
-        String jsonString = "[]";
-        List<CARequest> requests = mapper.readerForListOf(CARequest.class).readValue(jsonString);
         List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : requests) {
+        for (CARequest request : CA_REQUESTS) {
             responses.add(ClusterKeyGenerator.generate(request));
         }
-        StringWriter writer = new StringWriter();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(
-                writer,
-                responses
-        );
-    }
+        Writer responseWriter = new StringWriter();
+        ClusterKeyGenerator.writeCaReponsesToJson(responseWriter, responses);
+        String responseJson = responseWriter.toString();
+        Reader responseReader = new StringReader(responseJson);
+        List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);
+        assertThat(result).hasSize(CA_REQUESTS.size());
 
+
+    }
 
     private static String getCountry(X500Name name) {
         RDN[] rdNs = name.getRDNs(BCStyle.C);
@@ -380,25 +356,5 @@ public class ClusterKeyGeneratorIT {
     }
 
 
-    private static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<CertificateCertificateChainAndKeys> {
-
-        @Override
-        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeStartObject();
-            StringWriter keyWriter = new StringWriter();
-            Base64.Encoder encoder = Base64.getEncoder();
-            ClusterKeyGenerator.saveKeyPair(value.keyPair(), keyWriter);
-            String keypairString = encoder.encodeToString(keyWriter.toString().getBytes());
-            gen.writeStringField("keypair", keypairString);
-            StringWriter certWriter = new StringWriter();
-            ClusterKeyGenerator.saveCert(value.certificate(), certWriter);
-            String certString = encoder.encodeToString(certWriter.toString().getBytes());
-            gen.writeStringField("cert",certString);
-            StringWriter certChainWriter = new StringWriter();
-            ClusterKeyGenerator.saveCertChain(value.certificateChain(), certChainWriter);
-            String certChainString = encoder.encodeToString(certChainWriter.toString().getBytes());
-            gen.writeStringField("certChain",certChainString);
-            gen.writeEndObject();
-        }
-    }
 }
+

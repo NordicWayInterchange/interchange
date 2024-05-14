@@ -1,5 +1,9 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.keygen.*;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -30,12 +34,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,6 +55,7 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -414,33 +414,58 @@ public class ClusterKeyGenerator {
         return new CertificateCertificateChainAndKeys(intermediateCsr.keyPair(),intermediateCert.certificate(),intermediateCert.chain());
     }
 
-    public static X509Certificate loadSingleCertificate(Path certificatePath) throws IOException, CertificateException {
-        PEMParser certificateParser = new PEMParser(new FileReader(certificatePath.toFile()));
+    public static X509Certificate loadSingleCertificate(Reader reader) throws IOException, CertificateException {
+        PEMParser certificateParser = new PEMParser(reader);
         X509CertificateHolder certificateHolder = (X509CertificateHolder) certificateParser.readObject();
         return new JcaX509CertificateConverter().getCertificate(certificateHolder);
     }
 
-    public static X509Certificate[] loadCertificateChain(Path certificatePath) throws IOException, CertificateException {
-        PEMParser parser = new PEMParser(new FileReader(certificatePath.toFile()));
-        Object o = parser.readObject();
+    public static List<X509Certificate> loadCertificateChain(Reader reader) throws IOException, CertificateException {
+        PEMParser parser = new PEMParser(reader);
         List<X509Certificate> certificates = new ArrayList<>();
         JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
+        Object o = parser.readObject();
         while (o  != null) {
             certificates.add(converter.getCertificate((X509CertificateHolder) o));
             o = parser.readObject();
         }
-        return certificates.toArray(new X509Certificate[0]);
+        return certificates;
     }
 
-    public static PrivateKey loadPrivateKey(Path pemKeyPath) throws IOException {
-        PEMParser keyParser = new PEMParser(new FileReader(pemKeyPath.toFile()));
+    public static PrivateKey loadPrivateKey(Reader reader) throws IOException {
+        PEMParser keyParser = new PEMParser(reader);
         return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) keyParser.readObject());
 
     }
 
-    public static KeyPair loadKeyPair(Path pemKeyPath) throws IOException {
-        PEMParser parser = new PEMParser(new FileReader(pemKeyPath.toFile()));
+    public static KeyPair loadKeyPair(Reader reader) throws IOException {
+        PEMParser parser = new PEMParser(reader);
         return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) parser.readObject());
+    }
+
+    public static List<CaResponse> readCaResponsesFromJson(Reader reader) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(
+                CertificateCertificateChainAndKeys.class,
+                new CertificateCertificateChainAndKeysDeserializer()
+        );
+        mapper.registerModule(module);
+        return mapper.readerForListOf(CaResponse.class).readValue(reader);
+    }
+
+    public static void writeCaReponsesToJson(Writer writer, List<CaResponse> responses) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(
+                CertificateCertificateChainAndKeys.class,
+                new CertificateCertificateChainAndKeysSerializer()
+        );
+        mapper.registerModule(module);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(
+                writer,
+                responses
+        );
     }
 
 
@@ -470,5 +495,56 @@ public class ClusterKeyGenerator {
     }
 
     public record CertificateCertificateChainAndKeys(KeyPair keyPair, X509Certificate certificate, List<X509Certificate> certificateChain) {
+    }
+
+    public static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<CertificateCertificateChainAndKeys> {
+
+        @Override
+        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeStartObject();
+            StringWriter keyWriter = new StringWriter();
+            Base64.Encoder encoder = Base64.getEncoder();
+            saveKeyPair(value.keyPair(), keyWriter);
+            String keypairString = encoder.encodeToString(keyWriter.toString().getBytes());
+            gen.writeStringField("keypair", keypairString);
+            StringWriter certWriter = new StringWriter();
+            saveCert(value.certificate(), certWriter);
+            String certString = encoder.encodeToString(certWriter.toString().getBytes());
+            gen.writeStringField("cert",certString);
+            StringWriter certChainWriter = new StringWriter();
+            saveCertChain(value.certificateChain(), certChainWriter);
+            String certChainString = encoder.encodeToString(certChainWriter.toString().getBytes());
+            gen.writeStringField("certChain",certChainString);
+            gen.writeEndObject();
+        }
+    }
+
+    public static class CertificateCertificateChainAndKeysDeserializer extends JsonDeserializer<CertificateCertificateChainAndKeys> {
+
+        @Override
+        public CertificateCertificateChainAndKeys deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            Base64.Decoder decoder = Base64.getDecoder();
+            JsonNode node = p.readValueAsTree();
+            String encodedKeyPair = node.get("keypair").asText();
+            String decodedKeyPair = new String(decoder.decode(encodedKeyPair));
+            KeyPair keyPair = loadKeyPair(new StringReader(decodedKeyPair));
+            String encodedCert = node.get("cert").asText();
+            String decodedCert = new String(decoder.decode(encodedCert));
+            X509Certificate certificate;
+            try {
+                certificate = loadSingleCertificate(new StringReader(decodedCert));
+            } catch (CertificateException e) {
+                throw new RuntimeException(e);
+            }
+            String endcodedCertChain = node.get("certChain").asText();
+            String decodedCertChain = new String(decoder.decode(endcodedCertChain));
+            List<X509Certificate> certificateChain;
+            try {
+                certificateChain = loadCertificateChain(new StringReader(decodedCertChain));
+            } catch (CertificateException e) {
+                throw new RuntimeException(e);
+            }
+            return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
+        }
     }
 }
