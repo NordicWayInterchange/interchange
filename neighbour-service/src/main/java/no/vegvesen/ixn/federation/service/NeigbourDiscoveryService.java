@@ -119,7 +119,7 @@ public class NeigbourDiscoveryService {
 
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
-            Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
+            Set<NeighbourCapability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
             neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
             neighbourCapabilities.replaceCapabilities(capabilities);

@@ -43,27 +43,15 @@ public class NeighbourCapabilities {
 
 
 
-    public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
-        CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-        Set<NeighbourCapability> caps = capabilityTransformer.transformCapabilitySplitToNeighbourCapability(newCapabilities);
-        capabilities.retainAll(caps);
-        capabilities.addAll(caps);
+    public void replaceCapabilities(Set<NeighbourCapability> newCapabilities) {
+        capabilities.retainAll(newCapabilities);
+        capabilities.addAll(newCapabilities);
         if (hasDataTypes()) {
             setStatus(Capabilities.CapabilitiesStatus.KNOWN);
         }
         setLastUpdated(LocalDateTime.now());
 
     }
-    public Set<NeighbourCapability> transformCapabilitySplitToNeighbourCapability(Set<CapabilitySplit> capabilities){
-        Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
-        for(CapabilitySplit i : capabilities){
-            neighbourCapabilities.add(
-                    new NeighbourCapability(i.getApplication(), i.getMetadata())
-            );
-        }
-            return neighbourCapabilities;
-    }
-
     public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
     @Enumerated(EnumType.STRING)

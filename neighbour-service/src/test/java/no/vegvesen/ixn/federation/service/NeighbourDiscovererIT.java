@@ -81,9 +81,9 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour2 = new Neighbour();
 		neighbour2.setName("neighbour-two");
 
-		Capabilities c1 = new Capabilities(
+		NeighbourCapabilities c1 = new NeighbourCapabilities(
 				Capabilities.CapabilitiesStatus.KNOWN,
-				Sets.newLinkedHashSet(new CapabilitySplit(
+				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"NO" + "-123",
 								"NO" + "-pub",
@@ -93,8 +93,8 @@ public class NeighbourDiscovererIT {
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 
-		Capabilities c2 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
-				Sets.newLinkedHashSet(new CapabilitySplit(
+		NeighbourCapabilities c2 = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN,
+				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"FI" + "-123",
 								"FI" + "-pub",
@@ -1043,7 +1043,7 @@ public class NeighbourDiscovererIT {
 		assertThat(repository.findAll()).hasSize(2);
 	}
 
-	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
+	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, NeighbourCapabilities c1, NeighbourCapabilities c2) {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1.getCapabilities());
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2.getCapabilities());
 

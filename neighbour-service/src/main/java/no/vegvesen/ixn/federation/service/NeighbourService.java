@@ -52,7 +52,7 @@ public class NeighbourService {
 	}
 
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
-		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
+		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");

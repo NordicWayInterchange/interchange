@@ -17,14 +17,4 @@ public class CapabilityTransformer {
         }
         return capabilitySplits;
     }
-
-    public Set<NeighbourCapability> transformCapabilitySplitToNeighbourCapability(Set<CapabilitySplit> capabilities){
-        Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
-        for(CapabilitySplit i : capabilities){
-            neighbourCapabilities.add(
-                    new NeighbourCapability(i.getApplication(), i.getMetadata())
-            );
-        }
-        return neighbourCapabilities;
-    }
 }
