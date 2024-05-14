@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -34,7 +33,6 @@ public class NeigbourDiscoveryService {
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
 
-    private final CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 
     @Autowired
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
@@ -61,7 +59,7 @@ public class NeigbourDiscoveryService {
             if (neighbourRepository.findByName(neighbourName) == null && !neighbourName.equals(interchangeNodeProperties.getName())) {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-                neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+                neighbour.getCapabilities().setStatus(CapabilitiesStatus.UNKNOWN);
                 logger.info("Found new neighbour {}. Saving in database",neighbourName);
                 neighbourRepository.save(neighbour);
             }
@@ -71,9 +69,9 @@ public class NeigbourDiscoveryService {
 
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
-                Capabilities.CapabilitiesStatus.UNKNOWN,
-                Capabilities.CapabilitiesStatus.KNOWN,
-                Capabilities.CapabilitiesStatus.FAILED);
+                CapabilitiesStatus.UNKNOWN,
+                CapabilitiesStatus.KNOWN,
+                CapabilitiesStatus.FAILED);
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
@@ -121,14 +119,14 @@ public class NeigbourDiscoveryService {
         try {
             Set<NeighbourCapability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
-            neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+            neighbourCapabilities.setStatus(CapabilitiesStatus.KNOWN);
             neighbourCapabilities.replaceCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.debug("Updated neighbour: {}", neighbour);
         } catch (CapabilityPostException e) {
             logger.error("Capability post failed", e);
-            neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+            neighbour.getCapabilities().setStatus(CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
             neighbour = neighbourRepository.save(neighbour);
@@ -172,7 +170,7 @@ public class NeigbourDiscoveryService {
         String neighbourName = neighbour.getName();
         Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilityTransformer.transformNeighbourCapabilityToSplitCapability(neighbourCapabilities), interchangeNodeProperties.getName());
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, CapabilitySplit.transformNeighbourCapabilityToSplitCapability(neighbourCapabilities), interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {

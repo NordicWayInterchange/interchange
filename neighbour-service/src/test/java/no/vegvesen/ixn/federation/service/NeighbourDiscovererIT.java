@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -63,8 +62,6 @@ public class NeighbourDiscovererIT {
 
 	private Set<LocalSubscription> localSubscriptions;
 
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-
 	@Test
 	public void discovererIsAutowired() {
 		assertThat(neighbourService).isNotNull();
@@ -82,7 +79,7 @@ public class NeighbourDiscovererIT {
 		neighbour2.setName("neighbour-two");
 
 		NeighbourCapabilities c1 = new NeighbourCapabilities(
-				Capabilities.CapabilitiesStatus.KNOWN,
+				CapabilitiesStatus.KNOWN,
 				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"NO" + "-123",
@@ -93,7 +90,7 @@ public class NeighbourDiscovererIT {
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 
-		NeighbourCapabilities c2 = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN,
+		NeighbourCapabilities c2 = new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
 				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"FI" + "-123",
@@ -170,7 +167,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
@@ -215,7 +212,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
@@ -261,7 +258,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
 								new NeighbourCapability(
 										new DatexApplication(
@@ -323,7 +320,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
@@ -375,7 +372,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbourA = new Neighbour(
 				"neighbourA",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
@@ -396,7 +393,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbourB = new Neighbour(
 				"neighbourB",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0002",
@@ -461,7 +458,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -537,7 +534,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -568,7 +565,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -631,9 +628,9 @@ public class NeighbourDiscovererIT {
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
 
-		neighbour.setCapabilities(new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
+		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, capabilityTransformer.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, CapabilitySplit.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
@@ -674,7 +671,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -759,7 +756,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints-failed",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -805,7 +802,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -862,7 +859,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour1",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -936,7 +933,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -1003,7 +1000,7 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
 				new NeighbourCapabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new NeighbourCapability(
 										new DenmApplication(
@@ -1038,7 +1035,7 @@ public class NeighbourDiscovererIT {
 
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
-		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> unknown = repository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAll()).hasSize(2);
 	}
@@ -1050,7 +1047,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
-		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		List<Neighbour> known = repository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}
 

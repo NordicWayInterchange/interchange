@@ -102,7 +102,7 @@ public class NeighbourTest {
 		LocalDateTime localSubscriptionUpdateTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(1);
 		LocalDateTime successfulSubscriptionRequestTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(2);
 		fedIn.setSuccessfulRequest(successfulSubscriptionRequestTimeBeforeCapabilityPost);
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, new HashSet<>());
 		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
 		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBeforeCapabilityPost))).isTrue();
@@ -131,7 +131,7 @@ public class NeighbourTest {
 	private Neighbour neighbourSeenYesterday() {
 		Neighbour seenYesterday = new Neighbour();
 		seenYesterday.setName("seen-yesterday");
-		seenYesterday.setCapabilities(new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newHashSet()));
+		seenYesterday.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newHashSet()));
 		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
 		return seenYesterday;
 	}

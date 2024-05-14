@@ -2,11 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 
 import jakarta.persistence.*;
-import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
-import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -47,15 +43,14 @@ public class NeighbourCapabilities {
         capabilities.retainAll(newCapabilities);
         capabilities.addAll(newCapabilities);
         if (hasDataTypes()) {
-            setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+            setStatus(CapabilitiesStatus.KNOWN);
         }
         setLastUpdated(LocalDateTime.now());
 
     }
-    public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
     @Enumerated(EnumType.STRING)
-    private Capabilities.CapabilitiesStatus status = Capabilities.CapabilitiesStatus.UNKNOWN;
+    private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name="fk_neigh_dat_cap"))
@@ -68,22 +63,22 @@ public class NeighbourCapabilities {
     public NeighbourCapabilities(){
     }
 
-    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<NeighbourCapability> capabilities) {
+    public NeighbourCapabilities(CapabilitiesStatus status, Set<NeighbourCapability> capabilities) {
         this.status = status;
         setCapabilities(capabilities);
     }
 
-    public NeighbourCapabilities(Capabilities.CapabilitiesStatus status, Set<NeighbourCapability> capabilties, LocalDateTime lastUpdated) {
+    public NeighbourCapabilities(CapabilitiesStatus status, Set<NeighbourCapability> capabilties, LocalDateTime lastUpdated) {
         this.status = status;
         setCapabilities(capabilties);
         this.lastUpdated = lastUpdated;
     }
 
-    public Capabilities.CapabilitiesStatus getStatus() {
+    public CapabilitiesStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Capabilities.CapabilitiesStatus status) {
+    public void setStatus(CapabilitiesStatus status) {
         this.status = status;
     }
 

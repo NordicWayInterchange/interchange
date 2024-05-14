@@ -63,7 +63,7 @@ public class OutgoingMatchRepositoryIT {
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
+                        CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -99,7 +99,7 @@ public class OutgoingMatchRepositoryIT {
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
+                        CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -139,7 +139,7 @@ public class OutgoingMatchRepositoryIT {
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
+                        CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),

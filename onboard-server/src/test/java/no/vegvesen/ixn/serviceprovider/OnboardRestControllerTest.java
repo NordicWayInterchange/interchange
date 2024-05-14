@@ -123,7 +123,7 @@ public class OnboardRestControllerTest {
 		CapabilitySplit capability42 = mock(CapabilitySplit.class);
 		when(capability42.getId()).thenReturn(42);
 		Set<CapabilitySplit> capabilities = Sets.newLinkedHashSet(capability42, mock(CapabilitySplit.class), mock(CapabilitySplit.class));
-		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
+		Capabilities secondServiceProviderCapabilities = new Capabilities(CapabilitiesStatus.KNOWN, capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);

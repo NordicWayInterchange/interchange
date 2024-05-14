@@ -41,13 +41,13 @@ public class NeighbourServiceIT {
     @Test
     public void testFetchingNeighbourWithCorrectStatus() {
         Neighbour interchangeA = new Neighbour("interchangeA",
-                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
-                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.REQUESTED, "interchangeA"))),
@@ -64,7 +64,7 @@ public class NeighbourServiceIT {
     @Test
     public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
-                new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(Collections.emptySet()));
         repository.save(neighbour);

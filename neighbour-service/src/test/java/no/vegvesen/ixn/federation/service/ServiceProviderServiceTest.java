@@ -167,7 +167,7 @@ public class ServiceProviderServiceTest {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
+                        CapabilitiesStatus.KNOWN,
                         Collections.singleton(
                                 capability
                         )

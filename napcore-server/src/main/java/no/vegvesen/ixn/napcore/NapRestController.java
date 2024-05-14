@@ -3,7 +3,6 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
@@ -13,7 +12,6 @@ import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.Capability;
 import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
@@ -54,7 +52,6 @@ public class NapRestController {
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
 
-    private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
     private CertSigner certSigner;
 
     @Autowired
@@ -199,7 +196,7 @@ public class NapRestController {
         Set<CapabilitySplit> capabilities = new HashSet<>();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(capabilityTransformer.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+            capabilities.addAll(CapabilitySplit.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
         }
         return capabilities;
     }

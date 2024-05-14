@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.capability.CapabilityTransformer;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -42,8 +41,6 @@ public class OnboardRestController {
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
-
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
@@ -171,7 +168,7 @@ public class OnboardRestController {
 		Set<CapabilitySplit> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(capabilityTransformer.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+			capabilities.addAll(CapabilitySplit.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 		}
 		return capabilities;
 	}

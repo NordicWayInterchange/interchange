@@ -80,6 +80,17 @@ public class CapabilitySplit {
         return metadata.hasShards();
     }
 
+    public static Set<CapabilitySplit> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
+        Set<CapabilitySplit> capabilitySplits = new HashSet<>();
+        for(NeighbourCapability i : capabilities){
+            capabilitySplits.add(
+                    new CapabilitySplit(i.getApplication(), i.getMetadata())
+            );
+
+        }
+        return capabilitySplits;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

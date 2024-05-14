@@ -47,7 +47,7 @@ public class ExportServiceProvidersIT {
         ServiceProvider serviceProvider = new ServiceProvider("testuser");
         serviceProvider.setCapabilities(
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.UNKNOWN,
+                        CapabilitiesStatus.UNKNOWN,
                         Collections.singleton(
                                 new CapabilitySplit(
                                         new DenmApplication(

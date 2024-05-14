@@ -149,7 +149,7 @@ class NeighbourServiceTest {
 		));
 
 		// Mock saving Neighbour to Neighbour repository
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		NeighbourSubscription firstSubscription = new NeighbourSubscription("originatingCountry = 'FI'", NeighbourSubscriptionStatus.REQUESTED, "ericsson");
 		firstSubscription.setId(1);
 		firstSubscription.setPath("/ericsson/");
@@ -236,7 +236,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatexNeighbourCapability("NO")));
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.singleton(getDatexNeighbourCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), subscriptionRequest);
 
 		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
@@ -254,7 +254,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
 
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
 
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
@@ -277,7 +277,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
@@ -312,7 +312,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE"), getDatexNeighbourCapability("FI")));
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE"), getDatexNeighbourCapability("FI")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new HashSet<>(Collections.singleton(subscription3)));

@@ -42,7 +42,7 @@ public class Capabilities {
 		capabilities.add(newCapability);
 
 		if (hasDataTypes()) {
-			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
 	}
@@ -67,8 +67,6 @@ public class Capabilities {
 		CapabilitySplit toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
-
-	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
 	@Enumerated(EnumType.STRING)
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;

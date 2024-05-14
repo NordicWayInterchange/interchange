@@ -177,7 +177,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		return neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {

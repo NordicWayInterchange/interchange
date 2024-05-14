@@ -25,7 +25,7 @@ public class NeighbourRepositorySelectorIT {
 	@Autowired
 	private NeighbourRepository neighbourRepository;
 
-	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus){
+	private Neighbour createNeighbourObject(String name, CapabilitiesStatus capStatus){
 		Neighbour neighbour = new Neighbour(name,
 				new NeighbourCapabilities(capStatus, Collections.emptySet()),
 				new NeighbourSubscriptionRequest(new HashSet<>()),
@@ -66,31 +66,31 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithKnownCapabilitiesAndEmptySubscriptionIsSelectedForSubscriptionRequest(){
-		Neighbour ericsson = createNeighbourObject("ericsson-1", Capabilities.CapabilitiesStatus.KNOWN);
+		Neighbour ericsson = createNeighbourObject("ericsson-1", CapabilitiesStatus.KNOWN);
 
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest)).isTrue();
 	}
 
 	@Test
 	public void interchangeWithUnknownCapabilitiesIsSelectedForCapabilityExchange(){
-		Neighbour ericsson = createNeighbourObject("ericsson-2", Capabilities.CapabilitiesStatus.UNKNOWN);
+		Neighbour ericsson = createNeighbourObject("ericsson-2", CapabilitiesStatus.UNKNOWN);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangesForCapabilityExchange)).isTrue();
 	}
 
 	@Test
 	public void interchangeWithFailedCapabilityExchangeIsSelectedForGracefulBackoff(){
-		Neighbour ericsson = createNeighbourObject("ericsson-4", Capabilities.CapabilitiesStatus.FAILED);
+		Neighbour ericsson = createNeighbourObject("ericsson-4", CapabilitiesStatus.FAILED);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.FAILED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange)).isTrue();
 	}
@@ -98,7 +98,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithRequestedSubscriptionsInFedInIsSelectedForPolling(){
-		Neighbour ericsson = createNeighbourObject("ericsson-5-R", Capabilities.CapabilitiesStatus.UNKNOWN);
+		Neighbour ericsson = createNeighbourObject("ericsson-5-R", CapabilitiesStatus.UNKNOWN);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
@@ -110,7 +110,7 @@ public class NeighbourRepositorySelectorIT {
 		subscriptionA.setSelector("originatingCountry = 'OM'");
 		subscriptionA.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
 		SubscriptionRequest fedin = new SubscriptionRequest(Sets.newSet(subscriptionA));
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 
@@ -123,7 +123,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedSubscriptionInFedInIsSelectedForBackoff() {
-		Neighbour ericsson = createNeighbourObject("ericsson-6", Capabilities.CapabilitiesStatus.UNKNOWN);
+		Neighbour ericsson = createNeighbourObject("ericsson-6", CapabilitiesStatus.UNKNOWN);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");

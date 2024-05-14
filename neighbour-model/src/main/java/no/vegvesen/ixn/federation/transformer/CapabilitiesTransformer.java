@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.CapabilitiesStatus;
 import no.vegvesen.ixn.federation.model.NeighbourCapabilities;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import org.springframework.stereotype.Component;
@@ -16,13 +17,13 @@ public class CapabilitiesTransformer {
 	public Capabilities capabilitiesApiToCapabilities(CapabilitiesSplitApi capabilitiesApi) {
 		Capabilities capabilities = new Capabilities();
 		capabilities.setCapabilities(dataTypeTransformer.capabilitiesSplitApiToCapabilitiesSplit(capabilitiesApi.getCapabilities()));
-		capabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+		capabilities.setStatus(CapabilitiesStatus.KNOWN);
 		return capabilities;
 	}
 	public NeighbourCapabilities capabilitiesApiToNeighbourCapabilities(CapabilitiesSplitApi capabilitiesApi){
 		NeighbourCapabilities capabilities = new NeighbourCapabilities();
 		capabilities.setCapabilities(dataTypeTransformer.capabilitySplitApiToNeighbourCapabilities(capabilitiesApi.getCapabilities()));
-		capabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+		capabilities.setStatus(CapabilitiesStatus.KNOWN);
 		return capabilities;
 	}
 
