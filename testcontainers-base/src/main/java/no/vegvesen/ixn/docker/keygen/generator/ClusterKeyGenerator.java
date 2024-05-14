@@ -126,31 +126,31 @@ public class ClusterKeyGenerator {
 
     public static CaResponse generate(CARequest caRequest) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
         SecureRandom random = new SecureRandom();
-        CertificateCertificateChainAndKeys topCa = generateTopCa(caRequest.getName(), caRequest.getCountry(), random);
-        List<HostResponse> hostResponses = getHostResponses(caRequest.getHosts(), topCa, random);
-        List<ClientResponse> clientResponses = getClientResponses(caRequest.getClients(), topCa);
+        CertificateCertificateChainAndKeys topCa = generateTopCa(caRequest.name(), caRequest.country(), random);
+        List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(), topCa, random);
+        List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), topCa);
 
         List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : caRequest.getSubCas()) {
+        for (CARequest request : caRequest.subCaRequests()) {
             CaResponse response = generate(request, topCa, random);
             responses.add(response);
 
         }
-        return new CaResponse(topCa, caRequest.getName(), hostResponses, clientResponses,responses);
+        return new CaResponse(topCa, caRequest.name(), hostResponses, clientResponses,responses);
 
     }
 
     private static CaResponse generate(CARequest caRequest, CertificateCertificateChainAndKeys parentCa, SecureRandom random) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
-        CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.getName(), caRequest.getCountry(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
-        List<ClientResponse> clientResponses = getClientResponses(caRequest.getClients(), intermediateCa);
-        List<HostResponse> hostResponses = getHostResponses(caRequest.getHosts(),intermediateCa,random);
+        CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.name(), caRequest.country(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
+        List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), intermediateCa);
+        List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(),intermediateCa,random);
         List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : caRequest.getSubCas()) {
+        for (CARequest request : caRequest.subCaRequests()) {
             CaResponse response = generate(request, intermediateCa, random);
             responses.add(response);
 
         }
-        return new CaResponse(intermediateCa, caRequest.getName(), hostResponses, clientResponses,responses);
+        return new CaResponse(intermediateCa, caRequest.name(), hostResponses, clientResponses,responses);
     }
 
     private static List<ClientResponse> getClientResponses(List<ClientRequest> clients, CertificateCertificateChainAndKeys issuer) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
@@ -277,7 +277,7 @@ public class ClusterKeyGenerator {
         keyStore.store(stream, keyPassword.toCharArray());
     }
 
-    private static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
+    public static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
         try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)){
             for (X509Certificate cert : certificateChain) {
                 pemWriter.writeObject(cert);
@@ -285,7 +285,7 @@ public class ClusterKeyGenerator {
         }
     }
 
-    private static void saveCert(X509Certificate certificate, Writer writer) throws IOException {
+    public static void saveCert(X509Certificate certificate, Writer writer) throws IOException {
         try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)) {
             pemWriter.writeObject(certificate);
         }
@@ -340,7 +340,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    private static void saveKeyPair(KeyPair keyPair, Writer keyWriter) throws IOException {
+    public static void saveKeyPair(KeyPair keyPair, Writer keyWriter) throws IOException {
         JcaPEMWriter pemWriter;
         pemWriter = new JcaPEMWriter(keyWriter);
         pemWriter.writeObject(keyPair);
