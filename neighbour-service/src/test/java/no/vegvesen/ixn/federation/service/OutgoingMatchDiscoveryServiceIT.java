@@ -71,7 +71,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
@@ -118,7 +117,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
@@ -165,7 +163,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));

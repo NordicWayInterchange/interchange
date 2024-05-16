@@ -35,7 +35,7 @@ public class ServiceProviderImport {
 
     public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi, LocalDateTime savedTimestamp) {
         Set<CapabilitySplit> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
-        Capabilities capabilities = new Capabilities(CapabilitiesStatus.KNOWN,capabilitySet);
+        Capabilities capabilities = new Capabilities(capabilitySet);
         capabilities.setLastUpdated(LocalDateTime.now());
         Set<LocalSubscription> subscriptions = new HashSet<>();
         for (OldLocalActorSubscription subscriptionApi : serviceProviderApi.getSubscriptions()) {

@@ -40,19 +40,12 @@ public class Capabilities {
 
 	public void addDataType(CapabilitySplit newCapability) {
 		capabilities.add(newCapability);
-
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 	}
 
 	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 	}
 
@@ -85,13 +78,15 @@ public class Capabilities {
 		this.status = status;
 		setCapabilities(capabilities);
 	}
-
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
+	public Capabilities(Set<CapabilitySplit> capabilities) {
 		this.status = status;
+		setCapabilities(capabilities);
+	}
+
+	public Capabilities(Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
 	}
-
 	public CapabilitiesStatus getStatus() {
 		return status;
 	}

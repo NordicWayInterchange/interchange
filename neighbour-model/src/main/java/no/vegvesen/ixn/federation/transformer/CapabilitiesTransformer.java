@@ -17,7 +17,6 @@ public class CapabilitiesTransformer {
 	public Capabilities capabilitiesApiToCapabilities(CapabilitiesSplitApi capabilitiesApi) {
 		Capabilities capabilities = new Capabilities();
 		capabilities.setCapabilities(dataTypeTransformer.capabilitiesSplitApiToCapabilitiesSplit(capabilitiesApi.getCapabilities()));
-		capabilities.setStatus(CapabilitiesStatus.KNOWN);
 		return capabilities;
 	}
 	public NeighbourCapabilities capabilitiesApiToNeighbourCapabilities(CapabilitiesSplitApi capabilitiesApi){

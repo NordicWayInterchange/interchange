@@ -21,7 +21,6 @@ public class CapabilitiesTest {
         CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata(RedirectStatus.OPTIONAL));
         secondCapability.setId(2);
         Capabilities capabilities = new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 new HashSet<>(Arrays.asList(
                         firstCapability,
                         secondCapability
@@ -38,7 +37,6 @@ public class CapabilitiesTest {
 
         CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
         Capabilities capabilities = new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Collections.singleton(
                         firstCapability
                 ));
@@ -53,7 +51,6 @@ public class CapabilitiesTest {
 
         CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
         Capabilities capabilities = new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Collections.singleton(
                         firstCapability
                 ));
@@ -68,7 +65,6 @@ public class CapabilitiesTest {
     @Test
     public void testAddingSeveralCapabilitiesToEmptySet() {
         Capabilities capabilities = new Capabilities(
-                CapabilitiesStatus.KNOWN,
                 Collections.emptySet());
         CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
         CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata());

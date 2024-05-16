@@ -117,7 +117,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -162,7 +162,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());

@@ -180,12 +180,6 @@ public class ServiceProviderService {
         }
 
         currentServiceProviderCapabilities.removeCapabilities(capabilitiesToRemove);
-
-        if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
-            currentServiceProviderCapabilities.setStatus(CapabilitiesStatus.UNKNOWN);
-        } else {
-            currentServiceProviderCapabilities.setStatus(CapabilitiesStatus.KNOWN);
-        }
         serviceProviderRepository.save(serviceProvider);
     }
 
