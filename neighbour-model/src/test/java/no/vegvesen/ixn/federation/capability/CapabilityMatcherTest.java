@@ -398,7 +398,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void missingPublisherName(){
 		CapabilitySplit capability = new CapabilitySplit(
-				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", Set.of("1"), "pub", null),
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", List.of("1"), "pub", null),
 				new Metadata()
 		);
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
@@ -409,7 +409,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void publisherNameInCapability(){
 		CapabilitySplit capability = new CapabilitySplit(
-				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", Set.of("1"), "pub", "NO-PUB"),
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", List.of("1"), "pub", "NO-PUB"),
 				new Metadata()
 		);
 		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";

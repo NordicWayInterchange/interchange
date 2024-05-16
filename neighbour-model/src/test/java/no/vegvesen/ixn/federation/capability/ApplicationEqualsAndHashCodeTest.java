@@ -174,13 +174,13 @@ public class ApplicationEqualsAndHashCodeTest {
         CapabilitySplit cap1   = new CapabilitySplit(
                 1,
                 new DatexApplication(
-                        1,
                         "pub-123",
                         "pub-123-123",
                         "NO",
                         "1.0",
                         List.of("123"),
-                        "pubType"
+                        "pubType",
+                        "publishername"
                 ),
                 new Metadata()
         );
@@ -192,7 +192,8 @@ public class ApplicationEqualsAndHashCodeTest {
                         "NO",
                         "1.0",
                         List.of("122"),
-                        "pubType"
+                        "pubType",
+                        "publishername"
                 ),
                 new Metadata()
         );
@@ -203,7 +204,8 @@ public class ApplicationEqualsAndHashCodeTest {
                         "NO",
                         "1.0",
                         List.of("123"),
-                        "pubType"
+                        "pubType",
+                        "publishername"
                 ),
                 new Metadata()
         );

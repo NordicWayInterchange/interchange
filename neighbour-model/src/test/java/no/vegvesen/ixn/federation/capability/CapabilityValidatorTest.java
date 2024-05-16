@@ -17,7 +17,7 @@ public class CapabilityValidatorTest {
                         "N000000-pub-1",
                         "NO",
                         "DATEX2:3.2",
-                        Collections.singleton("12001"),
+                        List.of("12001"),
                         "SituationPublication",
                         null
                 ),

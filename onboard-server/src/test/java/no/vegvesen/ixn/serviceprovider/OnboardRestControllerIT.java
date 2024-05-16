@@ -148,7 +148,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", Collections.singleton("12004"), "SituationPublication", "publisherName");
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(application);
 
@@ -188,11 +188,11 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(sp);
         for(int i = 0; i<10; i++){
             capabilities.add(new CapabilitySplitApi(
-                    new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2", Collections.singleton("1230123"), "SituationPublication", "pubname"),
+                    new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2",List.of("1230123"), "SituationPublication", "pubname"),
                     new MetadataApi()));
         }
         capabilities.add(new CapabilitySplitApi(
-                new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", Collections.singleton("1230123"), "SituationPublication", ""),
+                new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", List.of("1230123"), "SituationPublication", ""),
                 new MetadataApi()
         ));
         assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName,capabilities)));
