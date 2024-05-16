@@ -60,9 +60,6 @@ public class Capabilities {
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
-	@Enumerated(EnumType.STRING)
-	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<CapabilitySplit> capabilities = new HashSet<>();
@@ -75,24 +72,15 @@ public class Capabilities {
 	}
 
 	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilities) {
-		this.status = status;
 		setCapabilities(capabilities);
 	}
 	public Capabilities(Set<CapabilitySplit> capabilities) {
-		this.status = status;
 		setCapabilities(capabilities);
 	}
 
 	public Capabilities(Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
-	}
-	public CapabilitiesStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(CapabilitiesStatus status) {
-		this.status = status;
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
@@ -129,7 +117,6 @@ public class Capabilities {
 	public String toString() {
 		return "Capabilities{" +
 				"id=" + id +
-				", status=" + status +
 				", dataTypes=" + capabilities +
 				", lastCapabilityExchange=" + lastCapabilityExchange +
 				'}';
