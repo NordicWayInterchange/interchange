@@ -6,7 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MapemApplicationApi;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import java.util.Set;
+
+import java.util.List;
 
 @Entity
 @DiscriminatorValue(Constants.MAPEM)
@@ -16,7 +17,7 @@ public class MapemApplication extends Application {
 
     }
 
-    public MapemApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public MapemApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
     }
 

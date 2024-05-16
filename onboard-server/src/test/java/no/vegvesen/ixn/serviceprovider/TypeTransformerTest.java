@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.model.capability.MapemApplication;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +18,7 @@ public class TypeTransformerTest {
                 "pub-1",
                 "NO",
                 "MAPEM:1.1.0",
-                Collections.emptySet()
+                List.of()
         );
 
         ApplicationApi appApi = app.toApi();

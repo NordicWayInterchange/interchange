@@ -18,7 +18,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
-import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -68,7 +67,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 	private CapabilitySplit getDatexCapabilitySplit(String originatingCountry) {
 		return new CapabilitySplit(
-				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.singleton("0122"),"SituationPublication"),
+				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
 

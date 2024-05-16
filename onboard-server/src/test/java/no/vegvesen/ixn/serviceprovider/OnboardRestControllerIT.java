@@ -94,8 +94,8 @@ public class OnboardRestControllerIT {
                                         "Publisher1:Publication1",
                                         "NO",
                                         "1.0",
-                                        Collections.emptySet(),
-                                        Collections.emptySet()
+                                        List.of(),
+                                        List.of()
                                 ),
                                 new MetadataApi()
                         )
@@ -108,7 +108,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -123,7 +123,7 @@ public class OnboardRestControllerIT {
                                         "NO-pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("1200"),
+                                        List.of("1200"),
                                         "SituationPublication"),
                                 new Metadata()
                         ))));
@@ -143,7 +143,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithMissingProperties() {
-        DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -163,7 +163,7 @@ public class OnboardRestControllerIT {
     public void testListCapabilities() {
         String serviceProviderName = "serviceprovider";
 
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -177,7 +177,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -192,7 +192,7 @@ public class OnboardRestControllerIT {
                                                 "NO-pub-1",
                                                 "NO",
                                                 "1.0",
-                                                Collections.singleton("1200"),
+                                                List.of("1200"),
                                                 "SituationPublication"),
                                         new Metadata()
                                 ))),
@@ -224,8 +224,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -238,8 +238,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -253,8 +253,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -280,8 +280,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -294,8 +294,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -309,8 +309,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -336,8 +336,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -351,8 +351,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -376,8 +376,8 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
@@ -390,8 +390,8 @@ public class OnboardRestControllerIT {
                                 "pub-2",
                                 "SE",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
@@ -405,8 +405,8 @@ public class OnboardRestControllerIT {
                                 "pub-3",
                                 "DK",
                                 "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton(6)),
+                                List.of("1234"),
+                                List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
@@ -421,7 +421,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
@@ -468,11 +468,12 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
-        datexNO.setApplication(app);
-        datexNO.setMetadata(meta);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi(
+                app,
+                meta
+        );
         String serviceProviderName = "serviceprovider";
 
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
@@ -480,7 +481,9 @@ public class OnboardRestControllerIT {
                 Collections.singleton(datexNO)
         ));
         assertThat(addedCapability).isNotNull();
-        LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
+        Set<LocalActorCapability> capabilities = addedCapability.getCapabilities();
+        assertThat(capabilities).hasSize(1);
+        LocalActorCapability capability = capabilities.stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
         GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());

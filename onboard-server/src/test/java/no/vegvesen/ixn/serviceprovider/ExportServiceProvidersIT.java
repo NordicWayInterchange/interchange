@@ -55,8 +55,8 @@ public class ExportServiceProvidersIT {
                                                 "pub-1",
                                                 "NO",
                                                 "1.0",
-                                                Collections.singleton("123"),
-                                                Collections.singleton(6)
+                                                List.of("123"),
+                                                List.of(6)
                                         ),
                                         new Metadata(
                                                 RedirectStatus.OPTIONAL

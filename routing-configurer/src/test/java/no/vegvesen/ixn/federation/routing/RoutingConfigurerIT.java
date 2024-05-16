@@ -119,7 +119,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -161,7 +161,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata1
@@ -178,7 +178,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"SE",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata2
@@ -230,7 +230,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata1
@@ -247,7 +247,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"SE",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata2
@@ -311,7 +311,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"SE",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -358,7 +358,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -399,7 +399,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata1
@@ -416,7 +416,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"SE",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata2
@@ -424,7 +424,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex3");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -475,7 +475,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230123")),
+						List.of("01230123"),
 						"RoadBlock"
 				),
 				metadata1
@@ -492,7 +492,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122")),
+						List.of("01230122"),
 						"RoadBlock"
 				),
 				metadata2
@@ -500,7 +500,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex5");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -534,7 +534,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -574,7 +574,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata1
@@ -591,7 +591,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"SE",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata2
@@ -599,7 +599,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex8");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
 
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -641,7 +641,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -693,7 +693,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						List.of("01230122", "01230123"),
 						"RoadBlock"
 				),
 				metadata
@@ -749,8 +749,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"DENM:1.2.2",
-						new HashSet<>(Arrays.asList("12004")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("12004"),
+						List.of(6)
 				),
 				metadata
 		);
@@ -1031,8 +1031,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO0000:001",
 						"NO",
 						"1.0",
-						Collections.singleton("0122"),
-						Collections.singleton(1)
+						List.of("0122"),
+						List.of(1)
 				),
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);

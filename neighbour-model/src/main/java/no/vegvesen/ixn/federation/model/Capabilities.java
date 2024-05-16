@@ -54,7 +54,6 @@ public class Capabilities {
 			setStatus(CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
-
 	}
 
 	public void removeDataType(Integer capabilityId) {
@@ -102,7 +101,7 @@ public class Capabilities {
 	}
 
 	public Set<CapabilitySplit> getCapabilities() {
-		return capabilities;
+		return Collections.unmodifiableSet(capabilities);
 	}
 
 	public Set<CapabilitySplit> getCreatedCapabilities() {
@@ -125,6 +124,11 @@ public class Capabilities {
 
 		return createdCapabilities.size() > 0;
 	}
+	public void removeCapabilities(Collection<CapabilitySplit> capabilitiesToRemove){
+		this.capabilities.removeAll(capabilitiesToRemove);
+		setLastCapabilityExchange(LocalDateTime.now());
+	}
+
 
 	@Override
 	public String toString() {

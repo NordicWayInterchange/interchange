@@ -75,6 +75,12 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+	public ServiceProvider(String name,
+						   Capabilities capabilities) {
+		this.name = name;
+		this.capabilities = capabilities;
+	}
+
 
 	public ServiceProvider(String name,
 						   Capabilities capabilities,

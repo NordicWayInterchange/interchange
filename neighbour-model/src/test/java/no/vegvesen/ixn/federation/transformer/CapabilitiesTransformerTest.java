@@ -8,8 +8,8 @@ import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ public class CapabilitiesTransformerTest {
     @Test
     public void addMetadataWithoutShardCount() {
         HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
-        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", Collections.emptySet(), "myPublicationType"), new MetadataApi()));
+        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType"), new MetadataApi()));
         CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);
@@ -35,7 +35,7 @@ public class CapabilitiesTransformerTest {
         HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
         MetadataApi metadataApi = new MetadataApi();
         metadataApi.setShardCount(3);
-        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", Collections.emptySet(), "myPublicationType"), metadataApi));
+        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType"), metadataApi));
         CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);

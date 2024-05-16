@@ -53,7 +53,7 @@ public class NeighbourService {
 
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
 		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
-		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
+		LocalDateTime now = LocalDateTime.now();
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
@@ -64,7 +64,9 @@ public class NeighbourService {
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		NeighbourCapabilities capabilities = neighbourToUpdate.getCapabilities();
+		capabilities.setLastCapabilityExchange(now);
 		capabilities.replaceCapabilities(incomingCapabilities.getCapabilities());
+
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
