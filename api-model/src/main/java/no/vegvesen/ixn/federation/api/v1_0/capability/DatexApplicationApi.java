@@ -1,12 +1,11 @@
 package no.vegvesen.ixn.federation.api.v1_0.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 public class DatexApplicationApi extends ApplicationApi {
 
     private String publicationType;
@@ -18,7 +17,7 @@ public class DatexApplicationApi extends ApplicationApi {
     }
 
 
-    public DatexApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType, String publisherName) {
+    public DatexApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, String publicationType, String publisherName) {
         super(Constants.DATEX_2, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         this.publicationType = publicationType;
         this.publisherName = publisherName;

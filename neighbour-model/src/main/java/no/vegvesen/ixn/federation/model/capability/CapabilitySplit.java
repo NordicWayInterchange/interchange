@@ -82,12 +82,12 @@ public class CapabilitySplit {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CapabilitySplit that = (CapabilitySplit) o;
-        return Objects.equals(application, that.application) && status == that.status;
+        return Objects.equals(application, that.application);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(application, status);
+        return Objects.hash(application);
     }
 
     @Override

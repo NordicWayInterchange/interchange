@@ -256,8 +256,8 @@ public class TypeTransformer {
         }
     }
 
-    public Set<CapabilitySplit> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
-        Set<CapabilitySplit> capabilities = new HashSet<>();
+    public List<CapabilitySplit> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
+        List<CapabilitySplit> capabilities = new ArrayList<>();
         for (CapabilitySplitApi capabilityApi : capabilitiesRequest.getCapabilities()) {
             CapabilitySplit capability = capabilityApiTransformer.capabilitySplitApiToCapabilitySplit(capabilityApi);
             capabilities.add(capability);

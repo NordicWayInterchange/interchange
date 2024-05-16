@@ -69,7 +69,7 @@ class NeighbourServiceTest {
 	void postDatexDataTypeCapability() {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, Sets.newSet(), "myPublicationType", "publisherName"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, List.of(), "myPublicationType", "publisherName"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -108,7 +108,7 @@ class NeighbourServiceTest {
 		// incoming capabiity API
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), "", "publisherName"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), "", "publisherName"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -126,7 +126,7 @@ class NeighbourServiceTest {
 		// Mock the incoming API object.
 		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), "", "publisherName"), new MetadataApi())));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), "", "publisherName"), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -348,7 +348,7 @@ class NeighbourServiceTest {
 	}
 
 	private CapabilitySplit getDatexCapability(String country) {
-		return new CapabilitySplit(new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.singleton("0122"), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL));
+		return new CapabilitySplit(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 
 }

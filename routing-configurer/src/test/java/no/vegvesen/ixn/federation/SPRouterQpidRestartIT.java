@@ -28,10 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -240,8 +237,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
@@ -267,8 +264,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
@@ -294,8 +291,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
@@ -340,8 +337,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
@@ -381,8 +378,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );

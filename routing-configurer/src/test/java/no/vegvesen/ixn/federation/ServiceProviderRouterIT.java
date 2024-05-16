@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.proton.amqp.transport.End;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -362,7 +361,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						Collections.singleton("0122"),
+						List.of("0122"),
 						"publicationType",
 						"publisherName"
 				),
@@ -470,7 +469,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderWithCapabilitiesShouldNotHaveQueueButExistInServiceProvidersGroup() {
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 
 		when(serviceProviderRepository.save(any())).thenReturn(onlyCaps);
 		onlyCaps.setCapabilities(capabilities);
@@ -486,7 +485,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -531,7 +530,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -584,8 +583,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata
 		);
@@ -624,8 +623,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata1
 		);
@@ -641,8 +640,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(5))
+						List.of("1234"),
+						List.of(5)
 				),
 				metadata2
 		);
@@ -680,8 +679,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata
 		);
@@ -689,7 +688,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
-		serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+		serviceProvider.addDeliveries(Set.of(delivery));
 		delivery.setExchangeName(exchangeName);
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
@@ -723,8 +722,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata
 		);
@@ -768,8 +767,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata1
 		);
@@ -785,8 +784,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1233")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1233"),
+						List.of(6)
 				),
 				metadata2
 		);
@@ -859,8 +858,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"pub-1",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("1234")),
-						new HashSet<>(Arrays.asList(6))
+						List.of("1234"),
+						List.of(6)
 				),
 				metadata
 		);

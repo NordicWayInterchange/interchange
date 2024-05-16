@@ -23,9 +23,9 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateSelfCapabilitiesTest() {
 
-        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata());
-        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication","publisherName"), new Metadata());
-        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication","publisherName"), new Metadata());
+        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
+        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
+        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
@@ -63,7 +63,7 @@ public class CapabilityCalculatorTest {
                                 "no-pub",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                List.of(),
                                 "SituationPublication",
                                 "publisherName"),
                         new Metadata())),
@@ -84,7 +84,7 @@ public class CapabilityCalculatorTest {
                                 "no-pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                List.of(),
                                 "SituationPublication",
                                 "publisherName"),
                         new Metadata())),
@@ -96,7 +96,7 @@ public class CapabilityCalculatorTest {
                                 "no-pub-2",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
+                                List.of(),
                                 "SituationPublication",
                                 "publisherName"),
                         new Metadata())),
@@ -137,7 +137,7 @@ public class CapabilityCalculatorTest {
     }
 
     private CapabilitySplit getDatexCapability(String originatingCountry) {
-        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(), "SituationPublication", "publisherName"), new Metadata());
+        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
     }
 
 }

@@ -8,8 +8,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ public class CapabilitiesApiJsonTest {
 	@Test
 	public void capabilitiesApiDatexTransformedToJsonAndBackToCapabilitiesApi() throws IOException {
 		HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
-		capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", Collections.emptySet(), "myPublicationType", "publisherName"), new MetadataApi()));
+		capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType", "publisherName"), new MetadataApi()));
 		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();
