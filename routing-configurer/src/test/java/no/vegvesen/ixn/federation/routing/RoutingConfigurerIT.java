@@ -112,7 +112,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex20", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -154,7 +154,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex11", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -171,7 +171,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex12", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -223,7 +223,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex32", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -240,7 +240,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex13", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -304,7 +304,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex34", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -350,7 +350,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -391,7 +391,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -408,7 +408,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -467,7 +467,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -484,7 +484,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -526,7 +526,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -566,7 +566,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -583,7 +583,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -633,7 +633,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -685,7 +685,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex9", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -741,7 +741,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex10", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"pub-1",
@@ -1023,7 +1023,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setupRegularRoutingWithNonExistingExchangeKeepsTheSubscriptionUnchanged() {
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NO0000",
 						"NO0000:001",

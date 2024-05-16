@@ -4,7 +4,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.Shard;
@@ -101,7 +101,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -146,7 +146,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO2345",
                         "pub-1",

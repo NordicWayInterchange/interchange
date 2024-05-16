@@ -10,7 +10,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
@@ -65,8 +65,8 @@ public class NeighbourServiceDiscoveryTest {
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
-	private CapabilitySplit getDatexCapabilitySplit(String originatingCountry) {
-		return new CapabilitySplit(
+	private Capability getDatexCapabilitySplit(String originatingCountry) {
+		return new Capability(
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
@@ -88,7 +88,7 @@ public class NeighbourServiceDiscoveryTest {
 		return selfSubscriptions;
 	}
 
-	private Set<CapabilitySplit> getSelfCapabilities() {
+	private Set<Capability> getSelfCapabilities() {
 		return Collections.singleton(getDatexCapabilitySplit("NO"));
 	}
 
@@ -521,7 +521,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.postSubscriptionRequest(eq(neighbourB),anySet(), anyString())).thenThrow(new SubscriptionRequestException("time-out"));
 		when(neighbourFacade.postSubscriptionRequest(eq(neighbourC),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
 
-		Set<CapabilitySplit> selfCapabilities = new HashSet<>();
+		Set<Capability> selfCapabilities = new HashSet<>();
 		selfCapabilities.add(getDatexCapabilitySplit("NO"));
 
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
@@ -564,7 +564,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED, interchangeNodeProperties.getName()));
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(neighbourFedInSubscription));
 
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, CapabilitySplit.transformNeighbourCapabilityToSplitCapability(capabilitySet), interchangeNodeProperties.getName());
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, Capability.transformNeighbourCapabilityToSplitCapability(capabilitySet), interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in

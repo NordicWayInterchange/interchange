@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -48,7 +48,7 @@ public class ExportServiceProvidersIT {
         serviceProvider.setCapabilities(
                 new Capabilities(
                         Collections.singleton(
-                                new CapabilitySplit(
+                                new Capability(
                                         new DenmApplication(
                                                 "NO-0001",
                                                 "pub-1",

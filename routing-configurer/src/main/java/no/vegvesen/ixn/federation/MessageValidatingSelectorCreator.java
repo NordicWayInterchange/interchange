@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 
 public class MessageValidatingSelectorCreator {
 
 
-    public static String makeSelector(CapabilitySplit capability) {
+    public static String makeSelector(Capability capability) {
         String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())
@@ -27,7 +27,7 @@ public class MessageValidatingSelectorCreator {
         return builder.toSelector();
     }
 
-    public static String makeSelectorJoinedWithCapabilitySelector(String selector, CapabilitySplit capability) {
+    public static String makeSelectorJoinedWithCapabilitySelector(String selector, Capability capability) {
         return String.format("(%s) AND (%s)", makeSelector(capability), selector);
     }
 }

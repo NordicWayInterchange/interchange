@@ -231,7 +231,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -258,7 +258,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -285,7 +285,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -331,7 +331,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -372,7 +372,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",

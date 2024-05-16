@@ -355,7 +355,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				)
 		));
 
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DatexApplication(
 						"NO-123",
 						"pub-1",
@@ -467,7 +467,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderWithCapabilitiesShouldNotHaveQueueButExistInServiceProvidersGroup() {
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
 
 		when(serviceProviderRepository.save(any())).thenReturn(onlyCaps);
 		onlyCaps.setCapabilities(capabilities);
@@ -483,7 +483,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -528,7 +528,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -575,7 +575,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -615,7 +615,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -632,7 +632,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit denmCapability2 = new CapabilitySplit(
+		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -671,7 +671,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -714,7 +714,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -759,7 +759,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit denmCapability1 = new CapabilitySplit(
+		Capability denmCapability1 = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -776,7 +776,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit denmCapability2 = new CapabilitySplit(
+		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -850,7 +850,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",

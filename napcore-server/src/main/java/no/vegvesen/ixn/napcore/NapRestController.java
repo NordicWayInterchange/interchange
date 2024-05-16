@@ -9,11 +9,10 @@ import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.Capability;
 import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
 import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
 import no.vegvesen.ixn.napcore.model.Subscription;
@@ -156,11 +155,11 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" })
-    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
+    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 
-        Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
+        Set<Capability> allCapabilities = getAllNeighbourCapabilities();
         allCapabilities.addAll(getAllLocalCapabilities());
         if (selector != null) {
             if (!selector.isEmpty()) {
@@ -179,12 +178,12 @@ public class NapRestController {
         return serviceProvider;
     }
 
-    private Set<CapabilitySplit> getAllMatchingCapabilities(String selector, Set<CapabilitySplit> allCapabilities) {
+    private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
         return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
     }
 
-    private Set<CapabilitySplit> getAllLocalCapabilities() {
-        Set<CapabilitySplit> capabilities = new HashSet<>();
+    private Set<Capability> getAllLocalCapabilities() {
+        Set<Capability> capabilities = new HashSet<>();
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for (ServiceProvider otherServiceProvider : serviceProviders) {
             capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
@@ -192,11 +191,11 @@ public class NapRestController {
         return capabilities;
     }
 
-    private Set<CapabilitySplit> getAllNeighbourCapabilities() {
-        Set<CapabilitySplit> capabilities = new HashSet<>();
+    private Set<Capability> getAllNeighbourCapabilities() {
+        Set<Capability> capabilities = new HashSet<>();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(CapabilitySplit.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+            capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
         }
         return capabilities;
     }

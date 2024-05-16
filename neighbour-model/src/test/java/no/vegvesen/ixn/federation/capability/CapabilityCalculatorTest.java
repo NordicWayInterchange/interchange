@@ -1,9 +1,8 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.CapabilitiesStatus;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import org.assertj.core.util.Sets;
@@ -24,9 +23,9 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateSelfCapabilitiesTest() {
 
-        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", List.of(), "SituationPublication"), new Metadata());
-        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication"), new Metadata());
-        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication"), new Metadata());
+        Capability a = new Capability(new DatexApplication("SE-213", "se-pub", "SE", "1.0", List.of(), "SituationPublication"), new Metadata());
+        Capability b = new Capability(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication"), new Metadata());
+        Capability c = new Capability(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication"), new Metadata());
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
@@ -40,7 +39,7 @@ public class CapabilityCalculatorTest {
 
         Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-        Set<CapabilitySplit> selfCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+        Set<Capability> selfCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 
         assertThat(selfCapabilities).hasSize(3);
         assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
@@ -58,7 +57,7 @@ public class CapabilityCalculatorTest {
         ServiceProvider serviceProvider = new ServiceProvider();
         LocalDateTime lastUpdated = LocalDateTime.now();
         Capabilities capabilities = new Capabilities(
-                Sets.newLinkedHashSet(new CapabilitySplit(
+                Sets.newLinkedHashSet(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub",
@@ -78,7 +77,7 @@ public class CapabilityCalculatorTest {
         LocalDateTime earliest = LocalDateTime.of(2021, Month.DECEMBER,3,0,0);
         LocalDateTime latest = LocalDateTime.of(2021,Month.DECEMBER,4,0,0);
         Capabilities earliestCap = new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub-1",
@@ -89,7 +88,7 @@ public class CapabilityCalculatorTest {
                         new Metadata())),
                 earliest);
         Capabilities latestCap = new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub-2",
@@ -109,20 +108,20 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateGetLastUpdatedLocalCapabilities() {
         LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-        CapabilitySplit aCap1 = getDatexCapability("SE");
-        CapabilitySplit aCap2 = getDatexCapability("SE");
+        Capability aCap1 = getDatexCapability("SE");
+        Capability aCap2 = getDatexCapability("SE");
         ServiceProvider aServiceProvider = new ServiceProvider();
         aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
 
         LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
-        CapabilitySplit bCap1 = getDatexCapability("SE");
-        CapabilitySplit bCap2 = getDatexCapability("SE");
+        Capability bCap1 = getDatexCapability("SE");
+        Capability bCap2 = getDatexCapability("SE");
         ServiceProvider bServiceProvider = new ServiceProvider();
         bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
         LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-        CapabilitySplit cCap1 = getDatexCapability("FI");
-        CapabilitySplit cCap2 = getDatexCapability("FI");
+        Capability cCap1 = getDatexCapability("FI");
+        Capability cCap2 = getDatexCapability("FI");
         ServiceProvider cServiceProvider = new ServiceProvider();
         cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
 
@@ -134,8 +133,8 @@ public class CapabilityCalculatorTest {
         assertThat(lastUpdatedCapabilities).isEqualTo(bCapDate);
     }
 
-    private CapabilitySplit getDatexCapability(String originatingCountry) {
-        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of(), "SituationPublication"), new Metadata());
+    private Capability getDatexCapability(String originatingCountry) {
+        return new Capability(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of(), "SituationPublication"), new Metadata());
     }
 
 }

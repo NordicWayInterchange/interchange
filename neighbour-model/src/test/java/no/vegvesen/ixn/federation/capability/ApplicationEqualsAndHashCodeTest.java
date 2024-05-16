@@ -128,7 +128,7 @@ public class ApplicationEqualsAndHashCodeTest {
 
     @Test
     public void testCam() {
-        CapabilitySplit cap = new CapabilitySplit(
+        Capability cap = new Capability(
                 1,
                 new CamApplication(
                         "pub-1",
@@ -141,7 +141,7 @@ public class ApplicationEqualsAndHashCodeTest {
 
                 )
         );
-        CapabilitySplit cap2 = new CapabilitySplit(
+        Capability cap2 = new Capability(
                 new CamApplication(
                         "pub2",
                         "pub-1-1",
@@ -151,7 +151,7 @@ public class ApplicationEqualsAndHashCodeTest {
                 ),
                 new Metadata()
         );
-        CapabilitySplit cap3 = new CapabilitySplit(
+        Capability cap3 = new Capability(
                 new CamApplication(
                         "pub-1",
                         "pub-1-1",
@@ -171,7 +171,7 @@ public class ApplicationEqualsAndHashCodeTest {
 
     @Test
     public void testDatex() {
-        CapabilitySplit cap1   = new CapabilitySplit(
+        Capability cap1   = new Capability(
                 1,
                 new DatexApplication(
                         1,
@@ -185,7 +185,7 @@ public class ApplicationEqualsAndHashCodeTest {
                 new Metadata()
         );
 
-        CapabilitySplit cap2   = new CapabilitySplit(
+        Capability cap2   = new Capability(
                 new DatexApplication(
                         "pub-124",
                         "pub-124-123",
@@ -196,7 +196,7 @@ public class ApplicationEqualsAndHashCodeTest {
                 ),
                 new Metadata()
         );
-        CapabilitySplit cap3   = new CapabilitySplit(
+        Capability cap3   = new Capability(
                 new DatexApplication(
                         "pub-123",
                         "pub-123-123",
@@ -215,7 +215,7 @@ public class ApplicationEqualsAndHashCodeTest {
 
     @Test
     public void testDenm() {
-        CapabilitySplit cap1   = new CapabilitySplit(
+        Capability cap1   = new Capability(
                 1,
                 new DenmApplication(
                         1,
@@ -228,7 +228,7 @@ public class ApplicationEqualsAndHashCodeTest {
                 ),
                 new Metadata()
         );
-        CapabilitySplit cap2   = new CapabilitySplit(
+        Capability cap2   = new Capability(
                 1,
                 new DenmApplication(
                         1,
@@ -241,7 +241,7 @@ public class ApplicationEqualsAndHashCodeTest {
                 ),
                 new Metadata()
         );
-        CapabilitySplit cap3   = new CapabilitySplit(
+        Capability cap3   = new Capability(
                 new DenmApplication(
                         "pub-123",
                         "pub-123-123",

@@ -7,8 +7,8 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "split_capability")
-public class CapabilitySplit {
+@Table(name = "capability")
+public class Capability {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
@@ -25,16 +25,16 @@ public class CapabilitySplit {
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.CREATED;
 
-    public CapabilitySplit() {
+    public Capability() {
 
     }
 
-    public CapabilitySplit(Application application, Metadata metadata) {
+    public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
     }
 
-    public CapabilitySplit(Integer id, Application application, Metadata metadata) {
+    public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
@@ -80,11 +80,11 @@ public class CapabilitySplit {
         return metadata.hasShards();
     }
 
-    public static Set<CapabilitySplit> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
-        Set<CapabilitySplit> capabilitySplits = new HashSet<>();
+    public static Set<Capability> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
+        Set<Capability> capabilitySplits = new HashSet<>();
         for(NeighbourCapability i : capabilities){
             capabilitySplits.add(
-                    new CapabilitySplit(i.getApplication(), i.getMetadata())
+                    new Capability(i.getApplication(), i.getMetadata())
             );
 
         }
@@ -95,7 +95,7 @@ public class CapabilitySplit {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CapabilitySplit that = (CapabilitySplit) o;
+        Capability that = (Capability) o;
         return Objects.equals(application, that.application);
     }
 
@@ -106,7 +106,7 @@ public class CapabilitySplit {
 
     @Override
     public String toString() {
-        return "CapabilitySplit{" +
+        return "Capability{" +
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +

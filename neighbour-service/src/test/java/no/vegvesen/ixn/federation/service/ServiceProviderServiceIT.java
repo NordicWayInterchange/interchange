@@ -256,11 +256,11 @@ public class ServiceProviderServiceIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
         Capabilities capabilities = new Capabilities();
-        CapabilitySplit capabilitySplit = new CapabilitySplit();
-        capabilitySplit.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capabilitySplit)));
+        Capability capability = new Capability();
+        capability.setStatus(CapabilityStatus.TEAR_DOWN);
+        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
-        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capabilitySplit, serviceProvider.getName());
+        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, serviceProvider.getName());
         outgoingMatchRepository.save(outgoingMatch);
 
         serviceProvider.setCapabilities(capabilities);
@@ -277,21 +277,21 @@ public class ServiceProviderServiceIT {
         Capabilities capabilities = new Capabilities();
         capabilities.setCapabilities(
                 Set.of(
-                        new CapabilitySplit(
+                        new Capability(
                             new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12"),
                             new Metadata()
                 ),
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123"),
                                 new Metadata()
                         ),
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234"),
                                 new Metadata()
                         ))
         );
 
-        for(CapabilitySplit i : capabilities.getCapabilities()){
+        for(Capability i : capabilities.getCapabilities()){
             i.setStatus(CapabilityStatus.TEAR_DOWN);
         }
         sp.setCapabilities(capabilities);
@@ -305,9 +305,9 @@ public class ServiceProviderServiceIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
         Capabilities capabilities = new Capabilities();
-        CapabilitySplit capabilitySplit = new CapabilitySplit(null, new Metadata());
-        capabilitySplit.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capabilitySplit)));
+        Capability capability = new Capability(null, new Metadata());
+        capability.setStatus(CapabilityStatus.TEAR_DOWN);
+        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
         serviceProvider.setCapabilities(capabilities);
         repository.save(serviceProvider);
@@ -322,13 +322,13 @@ public class ServiceProviderServiceIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
         Capabilities capabilities = new Capabilities();
-        CapabilitySplit capabilitySplit = new CapabilitySplit();
-        capabilitySplit.setStatus(CapabilityStatus.TEAR_DOWN);
+        Capability capability = new Capability();
+        capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
         Metadata metadata = new Metadata();
         metadata.setShards(List.of(new Shard()));
-        capabilitySplit.setMetadata(metadata);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capabilitySplit)));
+        capability.setMetadata(metadata);
+        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
         serviceProvider.setCapabilities(capabilities);
         repository.save(serviceProvider);

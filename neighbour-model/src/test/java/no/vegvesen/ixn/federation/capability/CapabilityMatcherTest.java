@@ -14,7 +14,7 @@ class CapabilityMatcherTest {
 
 	private static final List<String> QUAD_TREE_0121_0122 = List.of("0121", "0122");
 
-	private final CapabilitySplit quadTreeCoverageCapability = new CapabilitySplit(
+	private final Capability quadTreeCoverageCapability = new Capability(
 			new DenmApplication(
 					"NO00000",
 					"NO00000-quad-tree-testing",
@@ -30,7 +30,7 @@ class CapabilityMatcherTest {
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, List.of(6));
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -43,7 +43,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -56,7 +56,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -69,7 +69,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -82,7 +82,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -95,7 +95,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -108,7 +108,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -121,7 +121,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -134,7 +134,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction");
-		CapabilitySplit datexCapability = new CapabilitySplit();
+		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -155,7 +155,7 @@ class CapabilityMatcherTest {
 				   quadTreeTiles,
 				    List.of(6));
 
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -177,7 +177,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void denmNonMatching() {
         Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-				Collections.singleton(new CapabilitySplit(
+				Collections.singleton(new Capability(
                         new DenmApplication("NO-123",
                                 "pub-123",
                                 "NO",
@@ -200,7 +200,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void denmMatchesOneOfSeveral() {
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-                Set.of(new CapabilitySplit(
+                Set.of(new Capability(
                                 new DenmApplication("NO-123",
                                         "pub-123",
                                         "NO",
@@ -223,7 +223,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void matchIviSelectorWithQuadTree() {
 		IvimApplication application = new IvimApplication("NO-12345", "pub-2131", "NO", "IVI:1.0", List.of("12004"));
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -242,7 +242,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -256,7 +256,7 @@ class CapabilityMatcherTest {
 	@Test
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		CamApplication camApplication = new CamApplication("publ-id-1", "pub-1", "NO", "1.0", QUAD_TREE_0121_0122);
-		CapabilitySplit camCapability = new CapabilitySplit();
+		Capability camCapability = new Capability();
 		camCapability.setApplication(camApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		camCapability.setMetadata(meta);
@@ -275,7 +275,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -289,7 +289,7 @@ class CapabilityMatcherTest {
 	@Test
 	void newMatchDenmCapabilityWithSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, List.of(6));
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -303,7 +303,7 @@ class CapabilityMatcherTest {
 	@Disabled
 	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, List.of());
-		CapabilitySplit capability = new CapabilitySplit();
+		Capability capability = new Capability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -376,7 +376,7 @@ class CapabilityMatcherTest {
 	@Test
 	//This test needs to be altered when the matcher is working correctly, this is demonstrating a bug. Both should evaluate to false.
 	public void quadTreeTileWithNumberFourIsNotAllowed() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 			new DenmApplication(
 					"NO00000",
 					"NO00000-quad-tree-testing",

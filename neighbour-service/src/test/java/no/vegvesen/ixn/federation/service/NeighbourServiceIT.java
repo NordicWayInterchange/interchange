@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -17,7 +17,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -346,7 +345,7 @@ public class NeighbourServiceIT {
                             new MetadataApi()
                 ))
         );
-        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        Set<Capability> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
         //Now, try again, with the same capabilties, to simulate double post.

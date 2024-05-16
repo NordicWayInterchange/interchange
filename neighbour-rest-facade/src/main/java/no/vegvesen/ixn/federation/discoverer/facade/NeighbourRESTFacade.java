@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -48,7 +48,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
 
 	@Override
-	public Set<NeighbourCapability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<CapabilitySplit> localCapabilities) {
+	public Set<NeighbourCapability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);

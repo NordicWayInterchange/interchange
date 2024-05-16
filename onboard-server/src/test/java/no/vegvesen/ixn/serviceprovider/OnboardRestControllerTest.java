@@ -7,7 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -93,9 +93,9 @@ public class OnboardRestControllerTest {
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
 			Object argument = i.getArgument(0);
 			ServiceProvider s = (ServiceProvider) argument;
-			Set<CapabilitySplit> capabilities = s.getCapabilities().getCapabilities();
+			Set<Capability> capabilities = s.getCapabilities().getCapabilities();
 			int id = 0;
-			for (CapabilitySplit capability : capabilities) {
+			for (Capability capability : capabilities) {
 				if (capability.getId() == null) {
 					capability.setId(id++);
 				}
@@ -120,9 +120,9 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
 		// Mock existing service provider with three capabilities in database
-		CapabilitySplit capability42 = mock(CapabilitySplit.class);
+		Capability capability42 = mock(Capability.class);
 		when(capability42.getId()).thenReturn(42);
-		Set<CapabilitySplit> capabilities = Sets.newLinkedHashSet(capability42, mock(CapabilitySplit.class), mock(CapabilitySplit.class));
+		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42, mock(Capability.class), mock(Capability.class));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);

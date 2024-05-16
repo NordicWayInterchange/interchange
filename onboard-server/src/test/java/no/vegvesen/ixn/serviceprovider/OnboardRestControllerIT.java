@@ -117,7 +117,7 @@ public class OnboardRestControllerIT {
         ServiceProvider other = new ServiceProvider("other-service-provider");
         other.setCapabilities(new Capabilities(
                 Collections.singleton(
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(
                                         "NO00000",
                                         "NO-pub-1",
@@ -217,7 +217,7 @@ public class OnboardRestControllerIT {
     void testFetchingAllMatchingCapabilities() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "NPRA",
                                 "pub-1",
@@ -230,7 +230,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "SPRA",
                                 "pub-2",
@@ -271,7 +271,7 @@ public class OnboardRestControllerIT {
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "NPRA",
                                 "pub-1",
@@ -284,7 +284,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "SPRA",
                                 "pub-2",
@@ -325,7 +325,7 @@ public class OnboardRestControllerIT {
 
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "SPRA",
                                 "pub-1",
@@ -364,7 +364,7 @@ public class OnboardRestControllerIT {
     void testFetchingAllMatchingCapabilitiesWhenSelectorIsNull() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "NPRA",
                                 "pub-1",
@@ -377,7 +377,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new CapabilitySplit(
+                Collections.singleton(new Capability(
                         new DenmApplication(
                                 "SPRA",
                                 "pub-2",

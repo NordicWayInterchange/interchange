@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name="neighbour_split_capability")
+@Table(name="neighbour_capability")
 public class NeighbourCapability {
 
     @Id

@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.util.collections.Sets;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -115,7 +114,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+		Set<Capability> localCapabilities = Collections.emptySet();
 		Set<NeighbourCapability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res).hasSize(1);
@@ -143,7 +142,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+		Set<Capability> localCapabilities = Collections.emptySet();
 		Set<NeighbourCapability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res).hasSize(1);
@@ -186,7 +185,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+			Set<Capability> localCapabilities = Collections.emptySet();
 			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
@@ -258,7 +257,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+			Set<Capability> localCapabilities = Collections.emptySet();
 			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
