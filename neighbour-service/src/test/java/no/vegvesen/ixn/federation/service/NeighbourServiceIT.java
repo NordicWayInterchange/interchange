@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
@@ -411,7 +412,7 @@ public class NeighbourServiceIT {
         String name = "neighbourUpdateCaps";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         );
@@ -422,11 +423,11 @@ public class NeighbourServiceIT {
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
         //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
-        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList();
+        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
 
         service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
-        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList()).isEqualTo(ids);
+        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }
