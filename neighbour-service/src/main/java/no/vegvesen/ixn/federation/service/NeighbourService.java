@@ -67,7 +67,8 @@ public class NeighbourService {
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		if(neighbourToUpdate.isIgnore()){
-			throw new CapabilityPostException("Ignore flag is set on neighbour, will not process request.");
+			logger.info("Ignore flag is set on neighbour, will not update capabilities");
+			return null;
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		Capabilities capabilities = neighbourToUpdate.getCapabilities();
@@ -132,7 +133,8 @@ public class NeighbourService {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
 		if(neighbour.isIgnore()){
-			throw new SubscriptionRequestException("Ignore flag is set on Neighbour, will not process request");
+			logger.info("Ignore flag is set on neighbour, will not process request");
+			return null;
 		}
 
 		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
@@ -170,7 +172,8 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 			if(neighbour.isIgnore()){
-				throw new SubscriptionPollException("Ignore flag is set on neighbour, will not process request");
+				logger.info("Ignore flag is set on neighbour, will not process request");
+				return null;
 			}
 			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
 			//TODO logging. What do we log on poll?
@@ -190,7 +193,8 @@ public class NeighbourService {
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		if(neighbour.isIgnore()){
-			throw new SubscriptionDeleteException("Ignore flag is set on neighbour, will not process request");
+			logger.info("Ignore flag is set on neighbour, will not process request");
+			return;
 		}
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
@@ -237,7 +241,8 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 			if(neighbour.isIgnore()){
-				throw new SubscriptionRequestException("Ignore flag is set on neighbour, will not process request");
+				logger.info("Ignore flag is set on neighbour, will not process request");
+				return null;
 			}
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);

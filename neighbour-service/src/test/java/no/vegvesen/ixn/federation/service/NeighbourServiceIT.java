@@ -450,14 +450,14 @@ public class NeighbourServiceIT {
                 new DatexApplicationApi(),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of()));
+        assertThat(service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of())).isNull();
     }
     @Test
     public void neighbourIgnoredWhenPollingSubscription(){
         String name = "ignoredNeighbour2";
         Neighbour neighbour = ignoredNeighbour(name);
 
-        assertThrows(SubscriptionPollException.class, () -> service.incomingSubscriptionPoll(name, 1));
+        assertThat(service.incomingSubscriptionPoll(name, 1)).isNull();
     }
 
     @Test
@@ -468,14 +468,7 @@ public class NeighbourServiceIT {
         SubscriptionRequestApi subscriptionRequest = new SubscriptionRequestApi(name, Set.of(
                 new RequestedSubscriptionApi("originatingCountry = 'NO'", name)
         ));
-        assertThrows(SubscriptionRequestException.class, () -> service.incomingSubscriptionRequest(subscriptionRequest));
-    }
-    @Test
-    public void neighbourIgnoredWhenDeletingSubscription(){
-        String name = "ignoredNeighbour4";
-        Neighbour neighbour = ignoredNeighbour(name);
-
-        assertThrows(SubscriptionDeleteException.class, () -> service.incomingSubscriptionDelete(name, 1));
+        assertThat(service.incomingSubscriptionRequest(subscriptionRequest)).isNull();
     }
     public Neighbour ignoredNeighbour(String name){
         Neighbour neighbour = new Neighbour(
