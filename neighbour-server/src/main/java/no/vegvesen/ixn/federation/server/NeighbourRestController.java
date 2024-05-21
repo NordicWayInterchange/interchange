@@ -69,7 +69,7 @@ public class NeighbourRestController {
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
 		if(response != null){
-			return new ResponseEntity<>(response, HttpStatusCode.valueOf(200));
+			return new ResponseEntity<>(response, HttpStatusCode.valueOf(202));
 		}
 		else{
 			return new ResponseEntity<>(HttpStatusCode.valueOf(403));
