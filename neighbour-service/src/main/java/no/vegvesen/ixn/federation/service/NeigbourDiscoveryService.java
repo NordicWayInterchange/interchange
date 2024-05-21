@@ -116,7 +116,7 @@ public class NeigbourDiscoveryService {
             Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             Capabilities neighbourCapabilities = neighbour.getCapabilities();
             neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-            neighbourCapabilities.setCapabilities(capabilities);
+            neighbourCapabilities.replaceCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.debug("Updated neighbour: {}", neighbour);

@@ -56,8 +56,8 @@ public class NapCoreAPIDocumentationTest {
                         "ID0001:0001",
                         "NO",
                         "DENM:001",
-                        Collections.singleton("123123"),
-                        new HashSet<>(Arrays.asList(1,2,3))
+                        List.of("123123"),
+                        List.of(1,2,3)
                 ),
                 new MetadataApi()
         );

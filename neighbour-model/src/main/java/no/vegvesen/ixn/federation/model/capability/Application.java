@@ -26,13 +26,22 @@ public abstract class Application {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
     @Column(name = "quadrant_app")
-    private final Set<String> quadTree = new HashSet<>();
+    private final List<String> quadTree = new ArrayList<>();
 
     public Application() {
 
     }
 
-    public Application(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public Application(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
+        this.publisherId = publisherId;
+        this.publicationId = publicationId;
+        this.originatingCountry = originatingCountry;
+        this.protocolVersion = protocolVersion;
+        this.quadTree.addAll(quadTree);
+    }
+
+    public Application(int id, String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
+        this.id = id;
         this.publisherId = publisherId;
         this.publicationId = publicationId;
         this.originatingCountry = originatingCountry;
@@ -72,7 +81,7 @@ public abstract class Application {
         this.protocolVersion = protocolVersion;
     }
 
-    public Set<String> getQuadTree() {
+    public List<String> getQuadTree() {
         return quadTree;
     }
 
@@ -92,12 +101,22 @@ public abstract class Application {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Application that = (Application) o;
-        return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId) && Objects.equals(originatingCountry, that.originatingCountry) && Objects.equals(protocolVersion, that.protocolVersion) && Objects.equals(quadTree, that.quadTree);
+        return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId)
+                && Objects.equals(originatingCountry, that.originatingCountry)
+                && Objects.equals(protocolVersion, that.protocolVersion)
+                && (quadTree != null? new ArrayList<>(quadTree) : new ArrayList<>()).equals((that.quadTree != null? new ArrayList<>(that.quadTree) : new ArrayList<>()));
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
+        return Objects.hash(
+                publisherId,
+                publicationId,
+                originatingCountry,
+                protocolVersion,
+                (quadTree != null ? new ArrayList<>(quadTree): new ArrayList<>())
+        );
     }
 
     @Override

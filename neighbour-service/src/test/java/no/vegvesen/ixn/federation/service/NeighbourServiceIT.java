@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
@@ -22,6 +23,7 @@ import org.testcontainers.shaded.org.checkerframework.common.reflection.qual.New
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +31,117 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourServiceIT {
+
+    String jsonInput = """
+            {
+  "name" : "neighbourUpdateCaps",
+  "version" : "1.0",
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "DENM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-DENM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "DENM:1.2.2",
+      "quadTree" : [ "12004" ],
+      "causeCode" : [ 6 ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "SSEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-SSEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "SSEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "SPATEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-SPATEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "SPATEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "MAPEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-MAPEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "MAPEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  },  {
+    "application" : {
+      "messageType" : "IVIM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-IVIM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "IVI:1.2",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "CAM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-CAM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "CAM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  } ]
+}
+            """;
 
     @Autowired
     private NeighbourRepository repository;
@@ -234,8 +347,8 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
-                                Collections.singleton(1)
+                                List.of(),
+                                List.of(1)
                             ),
                             new MetadataApi()
                 ))
@@ -299,6 +412,34 @@ public class NeighbourServiceIT {
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
 
     }
+
+    @Test
+    public void updateCapabilities() throws IOException {
+
+        String name = "neighbourUpdateCaps";
+        Neighbour neighbour = new Neighbour(
+                name,
+                new Capabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest()
+        );
+        repository.save(neighbour);
+        ObjectMapper mapper = new ObjectMapper();
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
+        neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
+
+        //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
+        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList();
+
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList()).isEqualTo(ids);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
+
+    }
+
+
 
     @Test
     public void neighbourIgnoredWhenPostingCapabilities(){

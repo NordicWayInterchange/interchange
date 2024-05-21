@@ -6,6 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,7 +18,7 @@ public class CamApplication extends Application {
 
     }
 
-    public CamApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public CamApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
     }
 
@@ -34,4 +36,5 @@ public class CamApplication extends Application {
     public String toString() {
         return "CamApplication{}" + super.toString();
     }
+
 }

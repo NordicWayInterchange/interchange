@@ -89,7 +89,7 @@ public class NeighbourDiscovererIT {
 								"NO" + "-pub",
 								"NO",
 								"1.0",
-								Collections.emptySet(),
+								List.of(),
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 
@@ -100,7 +100,7 @@ public class NeighbourDiscovererIT {
 								"FI" + "-pub",
 								"FI",
 								"1.0",
-								Collections.emptySet(),
+								List.of(),
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 		when(mockDnsFacade.lookupNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
@@ -147,7 +147,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.singleton("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", List.of("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -177,7 +177,7 @@ public class NeighbourDiscovererIT {
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -222,7 +222,7 @@ public class NeighbourDiscovererIT {
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -269,7 +269,7 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
+												List.of("0122"),
 												"SituationPublication"
 										),
 										new Metadata(RedirectStatus.OPTIONAL)
@@ -280,8 +280,8 @@ public class NeighbourDiscovererIT {
 												"pub-2",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 									),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -330,7 +330,7 @@ public class NeighbourDiscovererIT {
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -382,7 +382,7 @@ public class NeighbourDiscovererIT {
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -403,7 +403,7 @@ public class NeighbourDiscovererIT {
 										"pub-2",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -469,8 +469,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -545,8 +545,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -576,8 +576,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -682,8 +682,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -767,8 +767,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -813,8 +813,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -870,8 +870,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -944,8 +944,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -1011,8 +1011,8 @@ public class NeighbourDiscovererIT {
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
