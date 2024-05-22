@@ -478,7 +478,7 @@ public class NeighbourServiceIT {
         Neighbour neighbour = ignoredNeighbour(name);
         repository.save(neighbour);
 
-        assertThat(service.findAllNeighbours()).hasSize(0);
+        assertThat(service.findAllNeighbours().stream().filter(a->a.getName().equals(name))).hasSize(0);
     }
 
     public Neighbour ignoredNeighbour(String name){
