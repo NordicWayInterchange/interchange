@@ -133,10 +133,6 @@ public class NeigbourDiscoveryService {
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-            if(neighbour.isIgnore()){
-                logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
-                continue;
-            }
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasCapabilities()) {
