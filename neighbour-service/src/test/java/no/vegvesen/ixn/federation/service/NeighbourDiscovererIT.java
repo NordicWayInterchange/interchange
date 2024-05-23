@@ -1045,7 +1045,7 @@ public class NeighbourDiscovererIT {
 	public void neighbourIsIgnoredWhenPostingSubscriptionRequest(){
 		String name = "ignoredNeighbour2";
 		Neighbour neighbour = ignoredNeighbour(name);
-		neighbour.getCapabilities().addDataType(new CapabilitySplit(
+		neighbour.getCapabilities().getCapabilities().add(new NeighbourCapability(
 				new DatexApplication(),
 				new Metadata()
 		));
@@ -1097,8 +1097,8 @@ public class NeighbourDiscovererIT {
 	public Neighbour ignoredNeighbour(String name){
 		Neighbour neighbour = new Neighbour(
 				name,
-				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(
-						new CapabilitySplit(
+				new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Set.of(
+						new NeighbourCapability(
 								new DatexApplication(),
 								new Metadata()
 						)

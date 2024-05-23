@@ -476,8 +476,8 @@ public class NeighbourServiceIT {
     public Neighbour ignoredNeighbour(String name){
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(
-                        new CapabilitySplit(
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Set.of(
+                        new NeighbourCapability(
                                 new DatexApplication(),
                                 new Metadata()
                         )
