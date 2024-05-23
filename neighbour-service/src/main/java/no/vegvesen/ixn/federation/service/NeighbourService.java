@@ -67,7 +67,7 @@ public class NeighbourService {
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		if(neighbourToUpdate.isIgnore()){
-			throw new CapabilityPostException("Ignore flag is set on neighbour, will not process request.");
+			throw new NeighbourIgnoredException("Ignore flag is set on neighbour, will not process request.");
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		Capabilities capabilities = neighbourToUpdate.getCapabilities();
