@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -278,7 +278,7 @@ public class ServiceProviderRouter {
 
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         if (serviceProvider.hasCapabilities()) {
-            for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
+            for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
                 if (!capability.getMetadata().hasShards() && capability.getStatus().equals(CapabilityStatus.CREATED)) {
                     if (capability.isSharded()) {
                         List<Shard> newShards = new ArrayList<>();
@@ -310,7 +310,7 @@ public class ServiceProviderRouter {
     }
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
-        for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
+        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
             for (Shard shard : capability.getMetadata().getShards()) {
                 if (!delta.exchangeHasBindingToQueue(shard.getExchangeName(), "bi-queue")){
                     qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
@@ -321,12 +321,12 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider tearDownCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
-        Set<CapabilitySplit> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
+        Set<Capability> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
         if (!tearDownCapabilities.isEmpty()) {
-            for (CapabilitySplit capability : tearDownCapabilities) {
+            for (Capability capability : tearDownCapabilities) {
                 if (capability.getMetadata().hasShards()) {
                     for (Shard shard : capability.getMetadata().getShards()) {
                         Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
@@ -357,7 +357,7 @@ public class ServiceProviderRouter {
                     }
 
                     for (OutgoingMatch match : matches) {
-                        CapabilitySplit capability = match.getCapability();
+                        Capability capability = match.getCapability();
                         if (capability.hasShards()) {
                             if (capability.isSharded()) {
                                 //TODO: Sharding, check if selector is sharded as well.
@@ -451,7 +451,7 @@ public class ServiceProviderRouter {
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
         if (serviceProvider.hasActiveSubscriptions()) {
-            Set<CapabilitySplit> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+            Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
@@ -462,8 +462,8 @@ public class ServiceProviderRouter {
                                     .map(LocalConnection::getSource)
                                     .collect(Collectors.toSet());
 
-                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
-                            for (CapabilitySplit capability : matchingCapabilities) {
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
+                            for (Capability capability : matchingCapabilities) {
                                 if (capability.hasShards()) {
                                     if (capability.isSharded()) {
                                         //TODO: Sharding
@@ -488,9 +488,9 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
-    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<CapabilitySplit> capabilities) {
+    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
         Set<String> existingConnections = new HashSet<>();
-        for (CapabilitySplit cap : capabilities) {
+        for (Capability cap : capabilities) {
             existingConnections.addAll(cap.getMetadata().getExchangesFromShards());
         }
 

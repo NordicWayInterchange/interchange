@@ -19,9 +19,9 @@ public class CapabilityMatcher {
 
 	private static SelectorCapabilityMatcher matcher = new SelectorCapabilityMatcher();
 
-	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<CapabilitySplit> capabilities, Set<LocalSubscription> subscriptionSelectors, String ixnName) {
+	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<LocalSubscription> subscriptionSelectors, String ixnName) {
 		Set<LocalSubscription> matches = new HashSet<>();
-		for (CapabilitySplit capability : capabilities) {
+		for (Capability capability : capabilities) {
 			for (LocalSubscription selector : subscriptionSelectors) {
 				if (!selector.getSelector().isEmpty()) {
 					if (matchConsumerCommonNameToRedirectPolicy(selector.getConsumerCommonName(), capability.getMetadata().getRedirectPolicy(), ixnName)) {
@@ -45,9 +45,9 @@ public class CapabilityMatcher {
 		}
 	}
 
-	public static Set<CapabilitySplit> matchCapabilitiesToSelector(Set<CapabilitySplit> capabilities, String selector) {
-		Set<CapabilitySplit> matches = new HashSet<>();
-		for (CapabilitySplit capability : capabilities) {
+	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
+		Set<Capability> matches = new HashSet<>();
+		for (Capability capability : capabilities) {
 			boolean match = matchCapabilityToSelector(capability, selector);
 			if (match) {
 				logger.debug("Selector [{}] matches capability {}", selector, capability);
@@ -57,7 +57,7 @@ public class CapabilityMatcher {
 		return matches;
 	}
 
-	public static boolean matchCapabilityToSelector(CapabilitySplit capability, String selector) {
+	public static boolean matchCapabilityToSelector(Capability capability, String selector) {
 		ObjectMapper mapper = new ObjectMapper();
 		String capabilityJson = null;
 		try {

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -58,12 +58,11 @@ public class OutgoingMatchRepositoryIT {
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -94,12 +93,11 @@ public class OutgoingMatchRepositoryIT {
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -134,12 +132,11 @@ public class OutgoingMatchRepositoryIT {
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),

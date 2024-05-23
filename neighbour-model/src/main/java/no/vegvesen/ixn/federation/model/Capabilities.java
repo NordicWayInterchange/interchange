@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -37,43 +37,31 @@ public class Capabilities {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public void addDataType(CapabilitySplit newCapability) {
+	public void addDataType(Capability newCapability) {
 		capabilities.add(newCapability);
-
-		if (hasDataTypes()) {
-			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 	}
 
-	public void replaceCapabilities(Set<CapabilitySplit> newCapabilities) {
+	public void replaceCapabilities(Set<Capability> newCapabilities) {
 		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
 		setLastUpdated(LocalDateTime.now());
 	}
 
 	public void removeDataType(Integer capabilityId) {
-		Set<CapabilitySplit> currentServiceProviderCapabilities = getCapabilities();
+		Set<Capability> currentServiceProviderCapabilities = getCapabilities();
 
-		Optional<CapabilitySplit> subscriptionToDelete = currentServiceProviderCapabilities
+		Optional<Capability> subscriptionToDelete = currentServiceProviderCapabilities
 				.stream()
 				.filter(dataType -> dataType.getId().equals(capabilityId))
 				.findFirst();
-		CapabilitySplit toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
-	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
-
-	@Enumerated(EnumType.STRING)
-	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	private Set<CapabilitySplit> capabilities = new HashSet<>();
+	private Set<Capability> capabilities = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp
@@ -82,36 +70,29 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilities) {
-		this.status = status;
+	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
+		setCapabilities(capabilities);
+	}
+	public Capabilities(Set<Capability> capabilities) {
 		setCapabilities(capabilities);
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<CapabilitySplit> capabilties, LocalDateTime lastUpdated) {
-		this.status = status;
+	public Capabilities(Set<Capability> capabilties, LocalDateTime lastUpdated) {
 		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
 	}
 
-	public CapabilitiesStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(CapabilitiesStatus status) {
-		this.status = status;
-	}
-
-	public Set<CapabilitySplit> getCapabilities() {
+	public Set<Capability> getCapabilities() {
 		return Collections.unmodifiableSet(capabilities);
 	}
 
-	public Set<CapabilitySplit> getCreatedCapabilities() {
+	public Set<Capability> getCreatedCapabilities() {
 		return capabilities.stream()
 				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
 				.collect(Collectors.toSet());
 	}
 
-	public void setCapabilities(Set<CapabilitySplit> capabilities) {
+	public void setCapabilities(Set<Capability> capabilities) {
 		this.capabilities.clear();
 		if ( capabilities != null ) {
 			this.capabilities.addAll(capabilities);
@@ -119,13 +100,13 @@ public class Capabilities {
 	}
 
 	public boolean hasDataTypes() {
-		Set<CapabilitySplit> createdCapabilities = capabilities.stream()
+		Set<Capability> createdCapabilities = capabilities.stream()
 				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
 				.collect(Collectors.toSet());
 
 		return createdCapabilities.size() > 0;
 	}
-	public void removeCapabilities(Collection<CapabilitySplit> capabilitiesToRemove){
+	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
 		this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());
 	}
@@ -135,7 +116,6 @@ public class Capabilities {
 	public String toString() {
 		return "Capabilities{" +
 				"id=" + id +
-				", status=" + status +
 				", dataTypes=" + capabilities +
 				", lastCapabilityExchange=" + lastCapabilityExchange +
 				'}';

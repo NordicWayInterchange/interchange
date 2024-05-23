@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -9,7 +8,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
-@Transactional
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 
@@ -53,10 +51,9 @@ public class NeighbourService {
 		return neighbourRepository.findAllByIgnoreIs(false);
 	}
 
-	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
+	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
+		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		LocalDateTime now = LocalDateTime.now();
-		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
-		incomingCapabilities.setLastCapabilityExchange(now);
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
@@ -70,7 +67,7 @@ public class NeighbourService {
 			throw new NeighbourIgnoredException("Ignore flag is set on neighbour, will not process request.");
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-		Capabilities capabilities = neighbourToUpdate.getCapabilities();
+		NeighbourCapabilities capabilities = neighbourToUpdate.getCapabilities();
 		capabilities.setLastCapabilityExchange(now);
 		capabilities.replaceCapabilities(incomingCapabilities.getCapabilities());
 
@@ -197,7 +194,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN).stream().filter(a -> !a.isIgnore()).toList();
+		return neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN).stream().filter(a -> !a.isIgnore()).toList();
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {

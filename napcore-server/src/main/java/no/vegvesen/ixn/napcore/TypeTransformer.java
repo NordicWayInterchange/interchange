@@ -1,14 +1,11 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.federation.model.LocalEndpoint;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -72,10 +69,10 @@ public class TypeTransformer {
         }
     }
 
-    public List<Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<CapabilitySplit> capabilities) {
-        List<Capability> matchingCapabilities = new ArrayList<>();
-        for (CapabilitySplit capability : capabilities) {
-            matchingCapabilities.add(new Capability(
+    public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities) {
+        List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
+        for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
+            matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi()
             ));

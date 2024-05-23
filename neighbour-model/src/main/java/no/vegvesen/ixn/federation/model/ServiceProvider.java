@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class ServiceProvider {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
-	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
+	private Capabilities capabilities = new Capabilities(new HashSet<>());
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
@@ -221,7 +221,7 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public CapabilitySplit getCapabilitySplit(Integer capabilityId){
+	public Capability getCapabilitySplit(Integer capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
 				.filter(c-> c.getId().equals(capabilityId))

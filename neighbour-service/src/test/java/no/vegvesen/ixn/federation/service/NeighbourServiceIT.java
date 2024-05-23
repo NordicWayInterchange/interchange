@@ -4,7 +4,8 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -19,7 +20,6 @@ import org.testcontainers.shaded.org.checkerframework.common.reflection.qual.New
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -153,13 +153,13 @@ public class NeighbourServiceIT {
     @Test
     public void testFetchingNeighbourWithCorrectStatus() {
         Neighbour interchangeA = new Neighbour("interchangeA",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.REQUESTED, "interchangeA"))),
@@ -176,7 +176,7 @@ public class NeighbourServiceIT {
     @Test
     public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(Collections.emptySet()));
         repository.save(neighbour);
@@ -349,7 +349,7 @@ public class NeighbourServiceIT {
                             new MetadataApi()
                 ))
         );
-        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        Set<Capability> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
         //Now, try again, with the same capabilties, to simulate double post.
@@ -363,7 +363,7 @@ public class NeighbourServiceIT {
         String name = "teardown-and-new-neighbour-request";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                     Collections.singleton(
                             new NeighbourSubscription(selector,NeighbourSubscriptionStatus.CREATED,name)
@@ -394,7 +394,7 @@ public class NeighbourServiceIT {
         String name = "tear-down-neighbour";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                         Collections.singleton(
                                 new NeighbourSubscription("a = 'hello'",NeighbourSubscriptionStatus.TEAR_DOWN,name)
@@ -415,7 +415,7 @@ public class NeighbourServiceIT {
         String name = "neighbourUpdateCaps";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         );
@@ -426,11 +426,11 @@ public class NeighbourServiceIT {
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
         //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
-        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList();
+        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
 
         service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
-        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(CapabilitySplit::getId).sorted().toList()).isEqualTo(ids);
+        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }

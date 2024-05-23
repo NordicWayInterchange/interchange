@@ -17,38 +17,49 @@ public class CapabilityToCapabilityApiTransformer {
 	public CapabilityToCapabilityApiTransformer() {
 	}
 
-	public Set<CapabilitySplitApi> capabilitiesSplitToCapabilitiesSplitApi(Set<CapabilitySplit> capabilitySplits) {
+	public Set<CapabilitySplitApi> capabilitiesSplitToCapabilitiesSplitApi(Set<Capability> capabilities) {
 		Set<CapabilitySplitApi> capabilitySplitApis = new HashSet<>();
-		for (CapabilitySplit capabilitySplit : capabilitySplits) {
+		for (Capability capability : capabilities) {
 			CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
-					capabilitySplit.getApplication().toApi(),
-					capabilitySplit.getMetadata().toApi()
+					capability.getApplication().toApi(),
+					capability.getMetadata().toApi()
 			);
 			capabilitySplitApis.add(capabilitySplitApi);
 		}
 		return capabilitySplitApis;
 	}
 
-	public CapabilitySplit capabilitySplitApiToCapabilitySplit(CapabilitySplitApi capabilitySplitApi) {
-		return new CapabilitySplit(
+	public Capability capabilitySplitApiToCapabilitySplit(CapabilitySplitApi capabilitySplitApi) {
+		return new Capability(
 				applicationApiToApplication(capabilitySplitApi.getApplication()),
 				metadataApiToMetadata(capabilitySplitApi.getMetadata())
 		);
 	}
 
-	public Set<CapabilitySplit> capabilitiesSplitApiToCapabilitiesSplit(Set<CapabilitySplitApi> capabilitySplitApis) {
-		Set<CapabilitySplit> capabilitySplits = new HashSet<>();
+	public Set<Capability> capabilitiesSplitApiToCapabilitiesSplit(Set<CapabilitySplitApi> capabilitySplitApis) {
+		Set<Capability> capabilities = new HashSet<>();
 		for (CapabilitySplitApi capabilitySplitApi : capabilitySplitApis) {
 			logger.debug("Converting message type {}", capabilitySplitApi.getApplication().getMessageType());
-			capabilitySplits.add(new CapabilitySplit(
+			capabilities.add(new Capability(
 					applicationApiToApplication(capabilitySplitApi.getApplication()),
 					metadataApiToMetadata(capabilitySplitApi.getMetadata())
 			));
 		}
-		return capabilitySplits;
+		return capabilities;
 	}
 
-	public CapabilitySplitApi capabilitySplitToCapabilitySplitApi(CapabilitySplit capability) {
+	public Set<NeighbourCapability> capabilitySplitApiToNeighbourCapabilities(Set<CapabilitySplitApi> capabilitySplitApis){
+		Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
+		for(CapabilitySplitApi capabilitySplitApi : capabilitySplitApis){
+			neighbourCapabilities.add(new NeighbourCapability(
+					applicationApiToApplication(capabilitySplitApi.getApplication()),
+					metadataApiToMetadata(capabilitySplitApi.getMetadata())
+			));
+		}
+		return neighbourCapabilities;
+	}
+
+	public CapabilitySplitApi capabilitySplitToCapabilitySplitApi(Capability capability) {
 		return new CapabilitySplitApi(
 				capability.getApplication().toApi(),
 				capability.getMetadata().toApi()

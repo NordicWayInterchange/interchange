@@ -11,7 +11,7 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void testCreatingDENMValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new DenmApplication(
                                 "NO-123",
                                 "pub-1",
@@ -36,7 +36,7 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createIviMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new IvimApplication(
                                 "NO-123",
                                 "pub-1",
@@ -59,7 +59,7 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createDatexMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "pub-1",
