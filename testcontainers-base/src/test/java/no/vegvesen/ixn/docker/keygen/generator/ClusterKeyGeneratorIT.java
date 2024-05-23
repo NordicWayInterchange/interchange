@@ -21,13 +21,15 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClusterKeyGeneratorIT {
 
 
-    public static final List<CARequest> CA_REQUESTS = List.of(new CARequest(
+    public static final List<CARequest> CA_REQUESTS = List.of(
+            new CARequest(
                     "bouvetinterchange.eu",
                     "NO",
                     List.of(
@@ -346,8 +348,25 @@ public class ClusterKeyGeneratorIT {
         Reader responseReader = new StringReader(responseJson);
         List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);
         assertThat(result).hasSize(CA_REQUESTS.size());
+    }
 
 
+    @Test
+    public void saveKeystores() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
+        Path basePath = Files.createTempDirectory("keystoreTest");
+        System.out.println(basePath);
+        List<CaResponse> responses = new ArrayList<>();
+        for (CARequest request : CA_REQUESTS) {
+            responses.add(ClusterKeyGenerator.generate(request));
+        }
+        for(CaResponse response : responses) {
+            ClusterKeyGenerator.store(response,basePath);
+        }
+        try (Stream<Path> list = Files.list(basePath)) {
+            assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(4);
+        }
+        //TODO check the actual names of the jks and p12's and see if we can load the key from them using the passwords
+        //assertThat(Files.list(basePath).filter(p -> !Files.isDirectory(p)).toList()).hasSize(2);
     }
 
     private static String getCountry(X500Name name) {
