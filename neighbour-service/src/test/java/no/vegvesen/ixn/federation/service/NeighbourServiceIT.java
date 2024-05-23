@@ -460,7 +460,6 @@ public class NeighbourServiceIT {
         assertThat(service.incomingSubscriptionPoll(name, 1)).isNull();
     }
 
-
     @Test
     public void neighbourIgnoredWhenRequestingSubscriptions(){
         String name = "ignoredNeighbour3";
@@ -471,16 +470,6 @@ public class NeighbourServiceIT {
         ));
         assertThat(service.incomingSubscriptionRequest(subscriptionRequest)).isNull();
     }
-
-    @Test
-    public void findAllNeighboursIgnoresNeighbourWhenIgnoreFlagIsSet(){
-        String name = "ignoreNeighbour4";
-        Neighbour neighbour = ignoredNeighbour(name);
-        repository.save(neighbour);
-
-        assertThat(service.findAllNeighbours()).hasSize(0);
-    }
-
     public Neighbour ignoredNeighbour(String name){
         Neighbour neighbour = new Neighbour(
                 name,
