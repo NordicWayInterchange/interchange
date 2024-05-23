@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,7 +122,7 @@ public class ServiceProviderService {
                         if (! delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
                             delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                         } else {
-                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
                             if (matchingCapabilities.isEmpty()) {
                                 delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                             }
@@ -163,13 +162,13 @@ public class ServiceProviderService {
     public void removeTearDownCapabilities(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 
-        List<CapabilitySplit> capabilitiesWithStatusTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
+        List<Capability> capabilitiesWithStatusTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .toList();
 
         Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
-        HashSet<CapabilitySplit> capabilitiesToRemove = new HashSet<>();
-        for (CapabilitySplit capability : capabilitiesWithStatusTearDown) {
+        HashSet<Capability> capabilitiesToRemove = new HashSet<>();
+        for (Capability capability : capabilitiesWithStatusTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByCapability_Id(capability.getId());
             if (possibleMatches.isEmpty()) {
                 if (!capability.hasShards()) {
@@ -180,12 +179,6 @@ public class ServiceProviderService {
         }
 
         currentServiceProviderCapabilities.removeCapabilities(capabilitiesToRemove);
-
-        if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
-            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-        } else {
-            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-        }
         serviceProviderRepository.save(serviceProvider);
     }
 

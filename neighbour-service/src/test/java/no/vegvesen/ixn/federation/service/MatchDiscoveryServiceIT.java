@@ -67,7 +67,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         Collections.singleton(subscription)
@@ -91,7 +91,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         Collections.singleton(subscription)
@@ -116,7 +116,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         Collections.singleton(subscription)
@@ -160,7 +160,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.TEAR_DOWN, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         Collections.singleton(subscription)

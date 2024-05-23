@@ -231,7 +231,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -245,7 +245,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -258,7 +258,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -273,7 +273,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -285,7 +285,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -299,7 +299,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider1 = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -331,7 +331,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -345,7 +345,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -372,7 +372,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -386,7 +386,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import org.slf4j.Logger;
@@ -34,8 +34,8 @@ public class OutgoingMatchDiscoveryService {
                         if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
-                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
-                            for (CapabilitySplit capability : matchingCapabilities) {
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
+                            for (Capability capability : matchingCapabilities) {
                                 if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) == null) {
                                     if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
                                         OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName());

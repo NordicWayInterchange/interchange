@@ -39,7 +39,7 @@ For any questions please contact
 
 ### Prerequisites
 * Maven 3.6.x or later
-* Java 11
+* Java 21
 * Docker 
 
 ### Building the project with Maven

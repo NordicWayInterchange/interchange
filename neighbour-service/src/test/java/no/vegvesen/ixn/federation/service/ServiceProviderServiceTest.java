@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -55,7 +55,7 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
@@ -89,7 +89,7 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
@@ -103,7 +103,7 @@ public class ServiceProviderServiceTest {
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        CapabilitySplit capability1 = new CapabilitySplit(
+        Capability capability1 = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
@@ -151,7 +151,7 @@ public class ServiceProviderServiceTest {
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 1,
                 new DenmApplication(
                         "0001",
@@ -166,7 +166,6 @@ public class ServiceProviderServiceTest {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(
                                 capability
                         )
