@@ -69,6 +69,15 @@ public class Neighbour {
 		this.controlConnection = controlConnection;
 	}
 
+	public Neighbour(String name, Capabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection, String controlChannelPort) {
+		this.setName(name);
+		this.capabilities = capabilities;
+		this.neighbourRequestedSubscriptions = subscriptions;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
+		this.controlConnection = controlConnection;
+		this.controlChannelPort = controlChannelPort;
+	}
+
 	public String getName() {
 		return name;
 	}

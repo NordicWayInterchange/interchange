@@ -263,5 +263,6 @@
         <module>napcore-server-app</module>
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
+        <module>import-export-service</module>
     </modules>
 </project>
