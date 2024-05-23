@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +55,7 @@ public class NeighbourRestController {
 	@Operation(summary = "Request subscriptions")
 	@ApiResponses(value = {@ApiResponse(responseCode = "202", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))})
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "consumerCommonName is optional.", content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSREQUEST)))
-	public ResponseEntity<SubscriptionResponseApi> requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
+	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
@@ -68,12 +66,7 @@ public class NeighbourRestController {
 
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
-		if(response != null){
-			return new ResponseEntity<>(response, HttpStatusCode.valueOf(200));
-		}
-		else{
-			return new ResponseEntity<>(HttpStatusCode.valueOf(403));
-		}
+		return response;
 	}
 
 	@ResponseStatus(HttpStatus.OK)
@@ -81,21 +74,17 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE)))})
-	public ResponseEntity<SubscriptionResponseApi> listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
+	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
 
 		//fetch the list of neighbours
-		SubscriptionResponseApi response = neighbourService.findSubscriptions(ixnName);
+		SubscriptionResponseApi reponse = neighbourService.findSubscriptions(ixnName);
 		NeighbourMDCUtil.removeLogVariables();
-		if(response != null){
-			return new ResponseEntity<>(response, HttpStatusCode.valueOf(200));
-		}
-		else {
-			return new ResponseEntity<>(HttpStatusCode.valueOf(403));
-		}
+
+		return reponse;
 	}
 
 
@@ -104,7 +93,7 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Poll subscription")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE)))})
-	public ResponseEntity<SubscriptionPollResponseApi> pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
 
@@ -113,13 +102,7 @@ public class NeighbourRestController {
 		logger.debug("Common name matches Neighbour name in path.");
 
 		NeighbourMDCUtil.removeLogVariables();
-		SubscriptionPollResponseApi responseApi = neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
-		if(responseApi != null){
-			return new ResponseEntity<>(HttpStatusCode.valueOf(200));
-		}
-		else{
-			return new ResponseEntity<>(new SubscriptionPollResponseApi(), HttpStatusCode.valueOf(403));
-		}
+		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
 	}
 
 
@@ -142,7 +125,7 @@ public class NeighbourRestController {
 		@ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE),
 	}
 	))})
-	public ResponseEntity<CapabilitiesSplitApi> updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
+	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
@@ -154,14 +137,9 @@ public class NeighbourRestController {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
+		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
-		if(capabilitiesApiResponse != null) {
-			logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
-			return new ResponseEntity<>(capabilitiesApiResponse, HttpStatusCode.valueOf(200));
-		}
-		else{
-			return new ResponseEntity<>(HttpStatusCode.valueOf(403));
-		}
+		return capabilitiesApiResponse;
 	}
 
 	@ResponseStatus(HttpStatus.OK)
