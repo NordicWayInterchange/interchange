@@ -30,7 +30,6 @@ public class CapabilitiesTest {
         assertThat(capabilities.getCapabilities()).hasSize(1);
         //Test that the original object is the one retained
         assertThat(capabilities.getCapabilities().stream().findFirst().get().getId()).isEqualTo(1);
-
     }
 
     @Test

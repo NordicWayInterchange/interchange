@@ -2,11 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
-import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
@@ -450,14 +446,14 @@ public class NeighbourServiceIT {
                 new DatexApplicationApi(),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of()));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of()));
     }
     @Test
     public void neighbourIgnoredWhenPollingSubscription(){
         String name = "ignoredNeighbour2";
         Neighbour neighbour = ignoredNeighbour(name);
 
-        assertThrows(SubscriptionPollException.class, () -> service.incomingSubscriptionPoll(name, 1));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionPoll(name, 1));
     }
 
     @Test
@@ -468,14 +464,14 @@ public class NeighbourServiceIT {
         SubscriptionRequestApi subscriptionRequest = new SubscriptionRequestApi(name, Set.of(
                 new RequestedSubscriptionApi("originatingCountry = 'NO'", name)
         ));
-        assertThrows(SubscriptionRequestException.class, () -> service.incomingSubscriptionRequest(subscriptionRequest));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionRequest(subscriptionRequest));
     }
     @Test
     public void neighbourIgnoredWhenDeletingSubscription(){
         String name = "ignoredNeighbour4";
         Neighbour neighbour = ignoredNeighbour(name);
 
-        assertThrows(SubscriptionDeleteException.class, () -> service.incomingSubscriptionDelete(name, 1));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionDelete(name, 1));
     }
     public Neighbour ignoredNeighbour(String name){
         Neighbour neighbour = new Neighbour(

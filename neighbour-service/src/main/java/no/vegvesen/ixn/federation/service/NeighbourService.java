@@ -132,7 +132,7 @@ public class NeighbourService {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
 		if(neighbour.isIgnore()){
-			throw new SubscriptionRequestException("Ignore flag is set on Neighbour, will not process request");
+			throw new NeighbourIgnoredException("Ignore flag is set on Neighbour, will not process request");
 		}
 
 		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
@@ -170,7 +170,7 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 			if(neighbour.isIgnore()){
-				throw new SubscriptionPollException("Ignore flag is set on neighbour, will not process request");
+				throw new NeighbourIgnoredException("Ignore flag is set on neighbour, will not process request");
 			}
 			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
 			//TODO logging. What do we log on poll?
@@ -190,7 +190,7 @@ public class NeighbourService {
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		if(neighbour.isIgnore()){
-			throw new SubscriptionDeleteException("Ignore flag is set on neighbour, will not process request");
+			throw new NeighbourIgnoredException("Ignore flag is set on neighbour, will not process request");
 		}
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
@@ -237,7 +237,7 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 			if(neighbour.isIgnore()){
-				throw new SubscriptionRequestException("Ignore flag is set on neighbour, will not process request");
+				throw new NeighbourIgnoredException("Ignore flag is set on neighbour, will not process request");
 			}
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
