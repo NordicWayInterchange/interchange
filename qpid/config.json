@@ -109,7 +109,7 @@
       "authenticationProvider" : "clientCerts",
       "bindingAddress" : "*",
       "port" : "443",
-      "trustStores": ["default"],
+      "trustStores": ["internal_truststore"],
       "keyStore": "internal-service",
       "needClientAuth": true,
       "wantClientAuth": false,
@@ -127,6 +127,14 @@
       "trustAnchorValidityEnforced": false,
       "storeUrl": "${TRUST_STORE}",
       "password": "${TRUST_STORE_PASSWORD}"
+    },
+    {
+      "name": "internal_truststore",
+      "type": "FileTrustStore",
+      "exposedAsMessageSource": false,
+      "trustAnchorValidityEnforced": false,
+      "storeUrl": "${INTERNAL_TRUST_STORE}",
+      "password": "${INTERNAL_TRUST_STORE_PASSWORD}"
     }
   ],
   "virtualhostnodes": [

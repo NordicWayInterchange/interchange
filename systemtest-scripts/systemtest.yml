@@ -51,13 +51,14 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=Sw405VRAvGt2
     networks:
       - testing_net
 
+        #TODO need to look over the meaning of each of these settings, and document them
   a_napcore_server:
     build:
       context: ../napcore-server-app
@@ -73,20 +74,20 @@ services:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
-      - NAP_NAME=nap.bouvetinterchange.eu
+      - NAP_NAME=nap.bouvetinterchange.eu #a.nap.bouvetinterchange.eu?
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/internal_a.jks
+      - TRUST_STORE_PASSWORD=gQmJ5mQu83Pt
+      - KEY_STORE=/jks/keys/a.nap.p12
+      - KEY_STORE_PASSWORD=CBcdd4tORiYP
     networks:
       - testing_net
 
   a_qpid:
     build:
       context: ../qpid
-    container_name: a_qpid
+    hostname: a_qpid
     ports:
       - 8666:8080
       - 443
@@ -98,18 +99,21 @@ services:
       - "../qpid/messages/a:/work/a/messages"
       - "../tmp/dump:/dump"
     environment:
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=Sw405VRAvGt2
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+        #internal trust store?
       - INTERNAL_KEY_STORE=/jks/keys/a_qpid.p12
-      - INTERNAL_KEY_STORE_PASSWORD=password
+      - INTERNAL_KEY_STORE_PASSWORD=Bwucl72IdLGn
+      - INTERNAL_TRUST_STORE=/jks/keys/internal_a.jks
+      - INTERNAL_TRUST_STORE_PASSWORD=gQmJ5mQu83Pt
     depends_on:
     - mock-dns-server
     networks:
@@ -133,10 +137,10 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=Sw405VRAvGt2
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -158,10 +162,10 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a_qpid
       - SERVER_NAME=a.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/internal_a.jks
+      - TRUST_STORE_PASSWORD=gQmJ5mQu83Pt
       - KEY_STORE=/jks/keys/a_routing_configurer.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=hkgHDNdsf79g
     networks:
     - testing_net
 
@@ -183,10 +187,10 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=Sw405VRAvGt2
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -208,10 +212,10 @@ services:
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
     - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_PASSWORD=Sw405VRAvGt2
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/jks/keys/truststore.jks
-    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+    - TRUST_STORE_PASSWORD=ma9+jz78gHHy
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
     networks:
@@ -249,10 +253,10 @@ services:
     - SERVER_NAME=b.bouvetinterchange.eu
     - DOMAIN_NAME=bouvetinterchange.eu
     - SP_CHNL_PORT=8696
-    - TRUST_STORE=/jks/keys/truststore.jks
-    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+    - TRUST_STORE_PASSWORD=ma9+jz78gHHy
     - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_PASSWORD=FbLeD3NzofRw
     networks:
     - testing_net
 
@@ -274,10 +278,10 @@ services:
       - SERVER_NAME=b.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=FbLeD3NzofRw
     networks:
       - testing_net
     dns: 172.28.1.1
@@ -301,10 +305,10 @@ services:
       #- NODE_PROVIDER_NAME=b.bouvetinterchange.eu # "my name"
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=FbLeD3NzofRw
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -312,7 +316,7 @@ services:
   b_qpid:
     build:
       context: ../qpid
-    container_name: b_qpid
+    hostname: b_qpid
     ports:
       - 8555:8080
       - 443
@@ -323,17 +327,19 @@ services:
       - "../tmp:/jks"
       - "../qpid/messages/b:/work/b/messages"
     environment:
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=FbLeD3NzofRw
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
       - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
-      - INTERNAL_KEY_STORE_PASSWORD=password
+      - INTERNAL_KEY_STORE_PASSWORD=VwlewgXOxNIL
+      - INTERNAL_TRUST_STORE=/jks/keys/internal_b.jks
+      - INTERNAL_TRUST_STORE_PASSWORD=_I3Vvm7pyM$$P #NOTE actual password only has one dollar sign, but we're using two due to docker-compose's variable substitution
     depends_on:
     - mock-dns-server
     networks:
@@ -356,10 +362,10 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://b_qpid
       - SERVER_NAME=b.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/internal_b.jks
+      - TRUST_STORE_PASSWORD=_I3Vvm7pyM$$P #Note that the actual password has one dollar sign, but escaped due to variables in docker-compose
       - KEY_STORE=/jks/keys/b_routing_configurer.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=-4U-rAKRymc7
     networks:
     - testing_net
 
@@ -380,10 +386,10 @@ services:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_PASSWORD=FbLeD3NzofRw
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE=/jks/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=ma9+jz78gHHy
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
     networks:
