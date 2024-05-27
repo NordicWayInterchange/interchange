@@ -9,7 +9,9 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -29,6 +31,9 @@ public class NeigbourDiscoveryService {
     private final DNSFacade dnsFacade;
     private final NeighbourRepository neighbourRepository;
     private final ListenerEndpointRepository listenerEndpointRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
+
+    private final MatchRepository matchRepository;
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
@@ -38,12 +43,14 @@ public class NeigbourDiscoveryService {
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
                                     NeighbourRepository neighbourRepository,
                                     ListenerEndpointRepository listenerEndpointRepository,
-                                    InterchangeNodeProperties interchangeNodeProperties,
+                                    ServiceProviderRepository serviceProviderRepository, MatchRepository matchRepository, InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
                                     NeighbourDiscovererProperties discovererProperties) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.matchRepository = matchRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
@@ -304,10 +311,17 @@ public class NeigbourDiscoveryService {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
+                            System.out.println("INNI RESUBSCRIBE SJEKKEN");
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                                List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                                for(Match i : matches){
+                                    System.out.println("HER");
+                                    i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
+                                }
+                                matchRepository.saveAll(matches);
                             }
-                            subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                            subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
