@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -25,7 +25,7 @@ public class CapabilitiesTransformerTest {
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);
 
-        CapabilitySplit cap = caps.getCapabilities().stream().findFirst().get();
+        Capability cap = caps.getCapabilities().stream().findFirst().get();
 
         assertThat(cap.getMetadata().getShardCount()).isEqualTo(1);
     }
@@ -40,7 +40,7 @@ public class CapabilitiesTransformerTest {
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);
 
-        CapabilitySplit cap = caps.getCapabilities().stream().findFirst().get();
+        Capability cap = caps.getCapabilities().stream().findFirst().get();
 
         assertThat(cap.getMetadata().getShardCount()).isEqualTo(3);
     }

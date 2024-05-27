@@ -64,7 +64,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(emptySet());
-	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
+	private final NeighbourCapabilities emptyNeighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet());
 
 	private static String AMQPS_URL;
 
@@ -112,7 +112,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex20", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -127,7 +127,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex20");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		sp.setCapabilities(new Capabilities(singleton(cap)));
 
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -139,7 +139,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(subscription);
 
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour flounder = new Neighbour("flounder", emptyNeighbourCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
@@ -155,7 +155,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex11", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -173,7 +173,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex12", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -188,7 +188,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex12");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(cap1, cap2))));
 
 		NeighbourSubscription s1 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -208,7 +208,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour halibut = new Neighbour("halibut", emptyNeighbourCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
@@ -226,7 +226,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex32", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -244,7 +244,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex13", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -259,7 +259,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex13");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
+		sp.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(cap1, cap2))));
 
 		NeighbourSubscription s1 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -283,7 +283,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour salmon = new Neighbour("salmon", emptyNeighbourCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getvHostName());
@@ -309,7 +309,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex34", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -324,7 +324,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex34");
 
 		serviceProvider.setCapabilities(new Capabilities(
-				Capabilities.CapabilitiesStatus.KNOWN,
 				Collections.singleton(cap)
 		));
 
@@ -337,7 +336,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour");
 		subs.add(neighbourSub);
 
-		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyNeighbourCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		when(neighbourService.getNodeName()).thenReturn("my-node");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
@@ -357,7 +356,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex1", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -372,7 +371,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex1");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		sp.setCapabilities(new Capabilities(singleton(cap)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -383,7 +382,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "hammershark");
 		subs.add(sub);
 
-		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour hammershark = new Neighbour("hammershark", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -399,7 +398,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex2", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -417,7 +416,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex3", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -432,7 +431,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex3");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
+		sp.setCapabilities(new Capabilities(Set.of(cap1, cap2)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -443,7 +442,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub1);
 
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour tigershark = new Neighbour("tigershark", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -477,7 +476,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex4", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -495,7 +494,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex5", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -510,7 +509,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex5");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
+		sp.setCapabilities(new Capabilities(Set.of(cap1, cap2)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -521,7 +520,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub);
 
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour tigershark = new Neighbour("tigershark", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -538,7 +537,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex6", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -553,7 +552,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex6");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		sp.setCapabilities(new Capabilities(singleton(cap)));
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
@@ -565,7 +564,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		subs.add(sub);
 
-		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("negih-true", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -579,7 +578,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard1 = new Shard(1, "cap-ex7", "publicationId = 'pub-1'");
 		metadata1.setShards(Collections.singletonList(shard1));
 
-		CapabilitySplit cap1 = new CapabilitySplit(
+		Capability cap1 = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -597,7 +596,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard2 = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata2.setShards(Collections.singletonList(shard2));
 
-		CapabilitySplit cap2 = new CapabilitySplit(
+		Capability cap2 = new Capability(
 				new DatexApplication(
 						"SE-1234",
 						"pub-1",
@@ -612,7 +611,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex8");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Set.of(cap1, cap2)));
+		sp.setCapabilities(new Capabilities(Set.of(cap1, cap2)));
 
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -632,7 +631,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subs.add(sub1);
 		subs.add(sub2);
 
-		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh-true-and-false", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -648,7 +647,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex8", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -668,10 +667,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider"));
 
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour cod = new Neighbour("cod", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour cod = new Neighbour("cod", emptyNeighbourCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		serviceProvider.setCapabilities(new Capabilities(singleton(cap)));
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(cod, client.getQpidDelta());
@@ -689,7 +688,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "no-clownfish"));
 
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
-		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour clownfish = new Neighbour("clownfish", emptyNeighbourCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		routingConfigurer.setupNeighbourRouting(clownfish, client.getQpidDelta());
 		assertThat(client.queueExists(clownfish.getName())).isFalse();
@@ -701,7 +700,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex9", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						"pub-1",
@@ -716,7 +715,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex9");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		sp.setCapabilities(new Capabilities(singleton(cap)));
 
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'RoadBlock' " +
@@ -736,7 +735,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subs.add(sub1);
 		subs.add(sub2);
 
-		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh-both", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -758,7 +757,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Shard shard = new Shard(1, "cap-ex10", "publicationId = 'pub-1'");
 		metadata.setShards(Collections.singletonList(shard));
 
-		CapabilitySplit cap = new CapabilitySplit(
+		Capability cap = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"pub-1",
@@ -772,7 +771,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex10");
 
 		ServiceProvider sp = new ServiceProvider("sp");
-		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, singleton(cap)));
+		sp.setCapabilities(new Capabilities(singleton(cap)));
 
 		MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
 		String capabilitySelector = creator.makeSelector(cap);
@@ -789,7 +788,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		subs.add(sub);
 
-		Neighbour neigh = new Neighbour("neigh10", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh10", new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -1040,7 +1039,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setupRegularRoutingWithNonExistingExchangeKeepsTheSubscriptionUnchanged() {
-		CapabilitySplit denmCapability = new CapabilitySplit(
+		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NO0000",
 						"NO0000:001",
@@ -1085,7 +1084,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subscription.setEndpoints(Collections.singleton(endpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
 						Collections.singleton(subscription)
 				),
@@ -1132,7 +1131,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		nonTearDownSubscription.setEndpoints(Collections.singleton(nonTearDownEndpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
 						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
 				),
@@ -1180,7 +1179,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
 						Collections.singleton(subscription)
 				),
@@ -1230,7 +1229,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
 						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
 				),
@@ -1292,7 +1291,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String neighbourName = "redirect-neighbour-xx";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
 						new HashSet<>(Arrays.asList(subscription,nonTearDownSubscription))
 				),

@@ -10,7 +10,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -135,7 +135,7 @@ public class NeighbourRestController {
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();

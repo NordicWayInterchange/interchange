@@ -36,7 +36,7 @@ public class MatchDiscoveryServiceTest {
     public void noServiceProvidersAndOneNeighbourShouldNotCreateAMatch() {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.singletonList(new Neighbour(
                 "test",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         )));
@@ -70,7 +70,7 @@ public class MatchDiscoveryServiceTest {
                 )),
                 Collections.singletonList(new Neighbour(
                         "neighbour",
-                        new Capabilities(),
+                        new NeighbourCapabilities(),
                         new NeighbourSubscriptionRequest(),
                         new SubscriptionRequest(
                                 Collections.singleton(
@@ -105,7 +105,7 @@ public class MatchDiscoveryServiceTest {
        );
        Neighbour neighbour = new Neighbour(
                "neighbour",
-               new Capabilities(),
+               new NeighbourCapabilities(),
                new NeighbourSubscriptionRequest(),
                new SubscriptionRequest(
                        new HashSet<>(Arrays.asList(
@@ -120,7 +120,7 @@ public class MatchDiscoveryServiceTest {
        );
         Neighbour otherNeighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         new HashSet<>(Arrays.asList(
@@ -158,7 +158,7 @@ public class MatchDiscoveryServiceTest {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         new HashSet<>(Arrays.asList(
@@ -197,7 +197,7 @@ public class MatchDiscoveryServiceTest {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         new HashSet<>(Arrays.asList(

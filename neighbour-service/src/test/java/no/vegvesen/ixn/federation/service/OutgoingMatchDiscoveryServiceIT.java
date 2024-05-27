@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -45,7 +45,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        CapabilitySplit cap1 = new CapabilitySplit(
+        Capability cap1 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-1",
@@ -57,7 +57,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                 new Metadata()
         );
 
-        CapabilitySplit cap2 = new CapabilitySplit(
+        Capability cap2 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-2",
@@ -71,7 +71,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
@@ -91,7 +90,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        CapabilitySplit cap1 = new CapabilitySplit(
+        Capability cap1 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-1",
@@ -104,7 +103,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
-        CapabilitySplit cap2 = new CapabilitySplit(
+        Capability cap2 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-12",
@@ -118,7 +117,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
@@ -138,7 +136,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        CapabilitySplit cap1 = new CapabilitySplit(
+        Capability cap1 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-1",
@@ -151,7 +149,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
-        CapabilitySplit cap2 = new CapabilitySplit(
+        Capability cap2 = new Capability(
                 new DenmApplication(
                         "NPRA",
                         "pub-2",
@@ -165,7 +163,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         cap2.setStatus(CapabilityStatus.CREATED);
 
         serviceProvider.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
                 Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));

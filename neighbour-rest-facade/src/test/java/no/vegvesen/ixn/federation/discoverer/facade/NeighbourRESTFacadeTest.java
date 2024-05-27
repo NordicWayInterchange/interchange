@@ -6,10 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.DenmApplication;
-import no.vegvesen.ixn.federation.model.capability.IvimApplication;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -17,7 +14,6 @@ import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.util.collections.Sets;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -91,12 +87,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Set<CapabilitySplit> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", Collections.emptySet());
+		Set<NeighbourCapability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", Collections.emptySet());
 
 		assertThat(res).hasSize(1);
 
-		Iterator<CapabilitySplit> dataTypes = res.iterator();
-		CapabilitySplit capability = dataTypes.next();
+		Iterator<NeighbourCapability> dataTypes = res.iterator();
+		NeighbourCapability capability = dataTypes.next();
 
 		assertThat(capability.getApplication()).isInstanceOf(DatexApplication.class);
 		assertThat(capability.getApplication().getOriginatingCountry()).isEqualTo(capabilityApi.getApplication().getOriginatingCountry());
@@ -118,13 +114,13 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Set<CapabilitySplit> localCapabilities = Collections.emptySet();
-		Set<CapabilitySplit> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
+		Set<Capability> localCapabilities = Collections.emptySet();
+		Set<NeighbourCapability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res).hasSize(1);
 
-		Iterator<CapabilitySplit> dataTypes = res.iterator();
-		CapabilitySplit capabilityNext = dataTypes.next();
+		Iterator<NeighbourCapability> dataTypes = res.iterator();
+		NeighbourCapability capabilityNext = dataTypes.next();
 
 		assertThat(capability.getApplication()).isInstanceOf(DenmApplicationApi.class);
 		assertThat(capabilityNext.getApplication().getOriginatingCountry()).isEqualTo(capability.getApplication().getOriginatingCountry());
@@ -146,13 +142,13 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Set<CapabilitySplit> localCapabilities = Collections.emptySet();
-		Set<CapabilitySplit> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
+		Set<Capability> localCapabilities = Collections.emptySet();
+		Set<NeighbourCapability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res).hasSize(1);
 
-		Iterator<CapabilitySplit> dataTypes = res.iterator();
-		CapabilitySplit remoteServerResponse = dataTypes.next();
+		Iterator<NeighbourCapability> dataTypes = res.iterator();
+		NeighbourCapability remoteServerResponse = dataTypes.next();
 
 		assertThat(remoteServerResponse.getApplication()).isInstanceOf(IvimApplication.class);
 	}
@@ -189,7 +185,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+			Set<Capability> localCapabilities = Collections.emptySet();
 			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
@@ -261,7 +257,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+			Set<Capability> localCapabilities = Collections.emptySet();
 			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
