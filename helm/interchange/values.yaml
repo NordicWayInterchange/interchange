@@ -42,10 +42,6 @@ qpid:
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
 
-haproxy:
-  image_version: haproxy:2.3
-  replicas: 1
-
 message_collector:
   replicas: 1
 
