@@ -28,9 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClusterKeyGeneratorIT {
 
 
+    //TODO denne vil bruke samme cert for host cert og for client cert mot nabo. Dette burde skilles!
     public static final List<CARequest> CA_REQUESTS = List.of(
             new CARequest(
-                    "bouvetinterchange.eu",
+                    "ca.bouvetinterchange.eu",
                     "NO",
                     List.of(
                             new CARequest(
@@ -44,7 +45,7 @@ public class ClusterKeyGeneratorIT {
                                     ),
                                     List.of(
                                             new ClientRequest(
-                                                    "king_olaf.a.bouvetinterchange.eu",
+                                                    "king_olav.bouvetinterchange.eu",
                                                     "NO",
                                                     "post@slottet.no"
                                             )
@@ -61,7 +62,7 @@ public class ClusterKeyGeneratorIT {
                                     ),
                                     List.of(
                                             new ClientRequest(
-                                                    "king_gustav.b.bouvetinterchange.eu",
+                                                    "king_gustaf.bouvetinterchange.eu",
                                                     "SE",
                                                     "kungen@slottet.se"
                                             )
@@ -69,7 +70,7 @@ public class ClusterKeyGeneratorIT {
                             ),
                             new CARequest(
                                     "c.bouvetinterchange.eu",
-                                    "FI",
+                                    "UK",
                                     List.of(),
                                     List.of(
                                             new HostRequest(
@@ -78,9 +79,9 @@ public class ClusterKeyGeneratorIT {
                                     ),
                                     List.of(
                                             new ClientRequest(
-                                                    "president.c.bouvetinterechange.eu",
-                                                    "FI",
-                                                    "presidenten@repulic.fi"
+                                                    "king_charles.bouvetinterechange.eu",
+                                                    "UK",
+                                                    "king_charles@buckingham.uk"
                                             )
                                     )
                             )),
@@ -88,13 +89,15 @@ public class ClusterKeyGeneratorIT {
                     List.of()
             ),
             new CARequest(
-                    "a-internal",
+                    "internal_a",
                     "NO",
                     List.of(),
-                    List.of(),
+                    List.of(new HostRequest(
+                            "a_qpid"
+                    )),
                     List.of(
                             new ClientRequest(
-                                    "a.routing-configurer",
+                                    "a_routing_configurer",
                                     "NO",
                                     "routing-configurer@a.bouvetinterchange.eu"
                             ),
@@ -106,13 +109,15 @@ public class ClusterKeyGeneratorIT {
                     )
             ),
             new CARequest(
-                    "b-internal",
+                    "internal_b",
                     "SE",
                     List.of(),
-                    List.of(),
+                    List.of(new HostRequest(
+                            "b_qpid"
+                    )),
                     List.of(
                             new ClientRequest(
-                                    "b.routing-configurer",
+                                    "b_routing_configurer",
                                     "SE",
                                     "routing-configurer@b.bouvetinterchange.eu"
                             ),
@@ -124,19 +129,19 @@ public class ClusterKeyGeneratorIT {
                     )
             ),
             new CARequest(
-                    "c-internal",
-                    "FI",
+                    "internal_c",
+                    "UK",
                     List.of(),
                     List.of(),
                     List.of(
                             new ClientRequest(
-                                    "c.routing-configurer",
-                                    "FI",
+                                    "c_routing_configurer",
+                                    "UK",
                                     "routing-configurer@c.bouvetinterchange.eu"
                             ),
                             new ClientRequest(
                                     "c.nap",
-                                    "FI",
+                                    "UK",
                                     "nap@c.bouvetinterchange.eu"
                             )
                     )
