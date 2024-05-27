@@ -313,12 +313,13 @@ public class NeigbourDiscoveryService {
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
-                                List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
-                                for(Match i : matches){
-                                    i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
-                                }
-                                matchRepository.saveAll(matches);
                             }
+                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                            for(Match i : matches){
+                                i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
+                            }
+                            matchRepository.saveAll(matches);
+                            System.out.println("HER");
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
