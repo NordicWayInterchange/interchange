@@ -73,7 +73,7 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
+      - SERVER_NAME=a.nap
       - NAP_NAME=nap.bouvetinterchange.eu #a.nap.bouvetinterchange.eu?
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
