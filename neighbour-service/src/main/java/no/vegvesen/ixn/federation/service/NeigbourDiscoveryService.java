@@ -311,12 +311,10 @@ public class NeigbourDiscoveryService {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
-                            System.out.println("INNI RESUBSCRIBE SJEKKEN");
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                                 List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                                 for(Match i : matches){
-                                    System.out.println("HER");
                                     i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
                                 }
                                 matchRepository.saveAll(matches);

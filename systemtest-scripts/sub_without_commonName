@@ -1,0 +1,14 @@
+{	
+  "version" : "1.0",
+  "subscriptions" : [
+    {
+      "selector" : "originatingCountry = 'NO'"
+
+    },
+    {
+	"selector" : "originatingCountry='SE'"
+},
+    {
+        "selector" : "originatingCountry='FI'"
+}]
+}
