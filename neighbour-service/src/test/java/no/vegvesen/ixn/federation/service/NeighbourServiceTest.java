@@ -17,9 +17,7 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,8 +41,6 @@ class NeighbourServiceTest {
 	@Mock
 	ListenerEndpointRepository listenerEndpointRepository;
 	@Mock
-	ServiceProviderRepository serviceProviderRepository;
-	@Mock
 	DNSFacade dnsFacade;
 	@Mock
 	NeighbourFacade neighbourFacade;
@@ -61,7 +57,7 @@ class NeighbourServiceTest {
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository, serviceProviderRepository, interchangeNodeProperties,backoffProperties,discovererProperties);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository, interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test

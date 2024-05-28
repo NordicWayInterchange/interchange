@@ -80,6 +80,7 @@ public class ServiceProviderRouter {
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
     }
+
     public ServiceProvider subscriptionsForResubscribe(ServiceProvider serviceProvider){
         for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
             List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
@@ -91,6 +92,7 @@ public class ServiceProviderRouter {
         }
         return repository.save(serviceProvider);
     }
+
     public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
         if (!serviceProvider.getSubscriptions().isEmpty()) {
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {

@@ -323,7 +323,6 @@ public class RoutingConfigurer {
 		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
 	}
 
-
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		if (!delta.queueExists(queueName)) {
 			Queue queue = qpidClient.createQueue(queueName);

@@ -9,9 +9,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -40,7 +38,7 @@ public class NeigbourDiscoveryService {
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
                                     NeighbourRepository neighbourRepository,
                                     ListenerEndpointRepository listenerEndpointRepository,
-                                    ServiceProviderRepository serviceProviderRepository, InterchangeNodeProperties interchangeNodeProperties,
+                                    InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
                                     NeighbourDiscovererProperties discovererProperties) {
         this.dnsFacade = dnsFacade;
