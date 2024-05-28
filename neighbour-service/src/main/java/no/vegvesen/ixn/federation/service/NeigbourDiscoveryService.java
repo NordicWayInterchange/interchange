@@ -187,7 +187,6 @@ public class NeigbourDiscoveryService {
                         tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                     }
                 }
-                System.out.println("FJERNES HER");
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
             Connection controlConnection = neighbour.getControlConnection();
@@ -316,11 +315,9 @@ public class NeigbourDiscoveryService {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                             }
                             List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
-                            for(Match i : matches){
-                                i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
-                            }
-                            matchRepository.saveAll(matches);
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
+                            matches.forEach(a->a.getSubscription().setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE));
+                            matchRepository.saveAll(matches);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());

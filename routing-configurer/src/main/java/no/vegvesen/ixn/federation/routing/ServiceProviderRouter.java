@@ -60,6 +60,7 @@ public class ServiceProviderRouter {
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
             serviceProvider = syncSubscriptions(serviceProvider, delta);
+            serviceProvider = subscriptionsForResubscribe(serviceProvider);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
             GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
@@ -79,7 +80,19 @@ public class ServiceProviderRouter {
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
     }
-
+    public ServiceProvider subscriptionsForResubscribe(ServiceProvider serviceProvider){
+        for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
+            List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+            for(Match i : matches){
+                if(i.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)){
+                    i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
+                    serviceProvider.getSubscriptions().stream().filter(a->a.getId().equals(i.getId())).findFirst().get().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
+                }
+            }
+            matchRepository.saveAll(matches);
+        }
+        return serviceProvider;
+    }
     public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
         if (!serviceProvider.getSubscriptions().isEmpty()) {
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
@@ -169,6 +182,7 @@ public class ServiceProviderRouter {
 
     public void processRedirectSubscription(LocalSubscription subscription) {
         if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
+            System.out.println("SETTES HER!");
             subscription.setStatus(LocalSubscriptionStatus.CREATED);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
             //Just skip
