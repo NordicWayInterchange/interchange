@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     @MockBean
     ListenerEndpointRepository listenerEndpointRepository;
+
+    @MockBean
+    MatchRepository matchRepository;
 
     @Autowired
     QpidClient client;

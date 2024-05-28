@@ -31,9 +31,6 @@ public class NeigbourDiscoveryService {
     private final DNSFacade dnsFacade;
     private final NeighbourRepository neighbourRepository;
     private final ListenerEndpointRepository listenerEndpointRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-
-    private final MatchRepository matchRepository;
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
@@ -43,14 +40,12 @@ public class NeigbourDiscoveryService {
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
                                     NeighbourRepository neighbourRepository,
                                     ListenerEndpointRepository listenerEndpointRepository,
-                                    ServiceProviderRepository serviceProviderRepository, MatchRepository matchRepository, InterchangeNodeProperties interchangeNodeProperties,
+                                    ServiceProviderRepository serviceProviderRepository, InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
                                     NeighbourDiscovererProperties discovererProperties) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.matchRepository = matchRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
@@ -74,17 +69,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void setSubscriptionsToTearDown(){
-        List<Neighbour> neighbours = neighbourRepository.findAll();
-        List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
-        for(Subscription i : subscriptions){
-            List<Match> matches = matchRepository.findAllBySubscriptionId(i.getId());
-            if(matches.isEmpty()) {
-                i.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-            }
-        }
-        neighbourRepository.saveAll(neighbours);
-    }
+
 
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(

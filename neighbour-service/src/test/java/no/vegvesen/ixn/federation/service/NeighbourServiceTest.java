@@ -44,9 +44,6 @@ class NeighbourServiceTest {
 	ListenerEndpointRepository listenerEndpointRepository;
 	@Mock
 	ServiceProviderRepository serviceProviderRepository;
-
-	@Mock
-	MatchRepository matchRepository;
 	@Mock
 	DNSFacade dnsFacade;
 	@Mock
@@ -64,7 +61,7 @@ class NeighbourServiceTest {
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository, serviceProviderRepository, matchRepository, interchangeNodeProperties,backoffProperties,discovererProperties);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository, serviceProviderRepository, interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test

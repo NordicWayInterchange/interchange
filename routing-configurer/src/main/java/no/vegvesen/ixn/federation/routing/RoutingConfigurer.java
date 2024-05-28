@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +39,16 @@ public class RoutingConfigurer {
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
+	private final MatchRepository matchRepository;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchRepository matchRepository) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
+		this.matchRepository = matchRepository;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -57,6 +61,18 @@ public class RoutingConfigurer {
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
+	}
+	@Scheduled(fixedRateString = "10000")
+	public void setSubscriptionsToTearDown(){
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
+		for(Subscription i : subscriptions){
+			List<Match> matches = matchRepository.findAllBySubscriptionId(i.getId());
+			if(matches.isEmpty()) {
+				i.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+			}
+		}
+		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
 	void tearDownRouting(Set<Neighbour> readyToTearDownRouting) {
