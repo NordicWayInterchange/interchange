@@ -106,7 +106,7 @@ public class ServiceProviderRouter {
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription, delta);
                 break;
-            case TEAR_DOWN:
+            case TEAR_DOWN, RESUBSCRIBE:
                 //	Check that the binding exist, if so, delete it
                 onTearDown(serviceProvider, subscription, delta);
                 break;
@@ -117,8 +117,6 @@ public class ServiceProviderRouter {
                 //needs testing.
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-                break;
-            case RESUBSCRIBE:
                 break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");

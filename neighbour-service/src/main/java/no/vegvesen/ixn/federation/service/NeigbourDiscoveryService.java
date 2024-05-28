@@ -187,6 +187,7 @@ public class NeigbourDiscoveryService {
                         tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                     }
                 }
+                System.out.println("FJERNES HER");
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
             Connection controlConnection = neighbour.getControlConnection();
@@ -319,7 +320,6 @@ public class NeigbourDiscoveryService {
                                 i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
                             }
                             matchRepository.saveAll(matches);
-                            System.out.println("HER");
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {

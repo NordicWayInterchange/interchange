@@ -234,6 +234,8 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
             case ERROR:
                 return LocalActorSubscriptionStatusApi.ERROR;
+            case RESUBSCRIBE:
+                return LocalActorSubscriptionStatusApi.RESUBSCRIBE;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
         }
