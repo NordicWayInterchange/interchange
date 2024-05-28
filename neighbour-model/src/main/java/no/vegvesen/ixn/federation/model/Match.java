@@ -67,6 +67,12 @@ public class Match {
         return !localSubscription.isSubscriptionWanted();
     }
 
+    public boolean localSubscriptionAndSubscriptionIsResubscribe(){
+        System.out.println("LOCAL:" + localSubscription.getStatus());
+        System.out.println("SUB: " + subscription.getSubscriptionStatus());
+        return localSubscription.getStatus().equals(LocalSubscriptionStatus.RESUBSCRIBE) && subscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

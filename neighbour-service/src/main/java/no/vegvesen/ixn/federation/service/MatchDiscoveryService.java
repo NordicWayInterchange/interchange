@@ -52,16 +52,20 @@ public class MatchDiscoveryService {
         Set<Match> matchesToDelete = new HashSet<>();
         for (Match match : existingMatches) {
             if (match.subscriptionIsTearDown()) {
-                if ( match.getSubscription().getEndpoints().isEmpty()) {
-                    logger.info("Removing Match {}", match);
-                    matchesToDelete.add(match);
-                }
-            } else {
-                if (match.localSubscriptionIsTearDown()) {
+                if (match.getSubscription().getEndpoints().isEmpty()) {
                     logger.info("Removing Match {}", match);
                     matchesToDelete.add(match);
                 }
             }
+            else if(match.localSubscriptionIsTearDown()){
+                    logger.info("Removing Match {}", match);
+                    matchesToDelete.add(match);
+            }
+            else if(match.localSubscriptionAndSubscriptionIsResubscribe()){
+                logger.info("Removing Match {}", match);
+                matchesToDelete.add(match);
+            }
+
         }
         matchRepository.deleteAll(matchesToDelete);
     }
