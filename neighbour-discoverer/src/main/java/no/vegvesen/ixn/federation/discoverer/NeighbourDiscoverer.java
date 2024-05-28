@@ -74,7 +74,10 @@ public class NeighbourDiscoverer {
 	public void scheduleCheckForNewNeighbours() {
 		neigbourDiscoveryService.checkForNewNeighbours();
 	}
-
+	@Scheduled(fixedRateString = "10000")
+	public void scheduleTearDownSubsriptions(){
+		neigbourDiscoveryService.setSubscriptionsToTearDown();
+	}
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before

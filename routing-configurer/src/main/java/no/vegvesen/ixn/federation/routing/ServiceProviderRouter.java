@@ -87,9 +87,9 @@ public class ServiceProviderRouter {
                 if(i.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)){
                     i.getLocalSubscription().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
                     serviceProvider.getSubscriptions().stream().filter(a->a.getId().equals(i.getId())).findFirst().get().setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
-                }
+                    matchRepository.save(i);
+                    }
             }
-            matchRepository.saveAll(matches);
         }
         return serviceProvider;
     }
@@ -182,7 +182,6 @@ public class ServiceProviderRouter {
 
     public void processRedirectSubscription(LocalSubscription subscription) {
         if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
-            System.out.println("SETTES HER!");
             subscription.setStatus(LocalSubscriptionStatus.CREATED);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
             //Just skip

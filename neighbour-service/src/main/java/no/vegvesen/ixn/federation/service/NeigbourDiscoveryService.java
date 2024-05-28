@@ -74,6 +74,18 @@ public class NeigbourDiscoveryService {
         }
     }
 
+    public void setSubscriptionsToTearDown(){
+        List<Neighbour> neighbours = neighbourRepository.findAll();
+        List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
+        for(Subscription i : subscriptions){
+            List<Match> matches = matchRepository.findAllBySubscriptionId(i.getId());
+            if(matches.isEmpty()) {
+                i.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+            }
+        }
+        neighbourRepository.saveAll(neighbours);
+    }
+
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 CapabilitiesStatus.UNKNOWN,
@@ -314,10 +326,7 @@ public class NeigbourDiscoveryService {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                             }
-                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
-                            matches.forEach(a->a.getSubscription().setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE));
-                            matchRepository.saveAll(matches);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());

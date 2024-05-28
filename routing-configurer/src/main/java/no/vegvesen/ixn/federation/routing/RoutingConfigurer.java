@@ -305,13 +305,6 @@ public class RoutingConfigurer {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
-		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
-		for(Neighbour neighbour : neighbours) {
-			neighbour.getOurRequestedSubscriptions()
-					.getSubscriptionsByStatus(SubscriptionStatus.RESUBSCRIBE).stream()
-					.forEach(a -> a.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN));
-			neighbourService.saveNeighbour(neighbour);
-		}
 	}
 
 
