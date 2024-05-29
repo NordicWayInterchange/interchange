@@ -307,6 +307,9 @@ public class NeigbourDiscoveryService {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                             }
+                            else{
+                                lastUpdatedSubscription.setEndpoints(Collections.emptySet());
+                            }
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
