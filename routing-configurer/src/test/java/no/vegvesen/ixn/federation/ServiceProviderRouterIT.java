@@ -93,6 +93,28 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	OutgoingMatchRepository outgoingMatchRepository;
 
 	@Test
+	public void endPointsAreRemovedForLocalSubscriptionWhenStatusIsResubscribe(){
+		ServiceProvider sp = new ServiceProvider("test");
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.RESUBSCRIBE, "originatingCountry='NO'", "ixnName");
+		localSubscription.setLocalEndpoints(Set.of(
+				new LocalEndpoint("ixnName", "ixnName", 1111)
+		));
+		LocalSubscription localSubscriptionRedirect = new LocalSubscription(LocalSubscriptionStatus.RESUBSCRIBE, "originatingCountry='NO'", "test");
+		localSubscriptionRedirect.setLocalEndpoints(Set.of(
+				new LocalEndpoint("test", "ixnName", 1112)
+		));
+		sp.addLocalSubscriptions(Set.of(localSubscriptionRedirect, localSubscription));
+		when(serviceProviderRepository.findAll()).thenReturn(List.of(sp));
+
+		router.syncSubscriptions(sp, client.getQpidDelta());
+
+		sp = serviceProviderRepository.findAll().get(0);
+		for(LocalSubscription subscription : sp.getSubscriptions()){
+			assertThat(subscription.getLocalEndpoints()).isEmpty();
+		}
+	}
+
+	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
 		ServiceProvider nordea = new ServiceProvider("nordea");
 		LocalSubscription localSubscription1 = new LocalSubscription(

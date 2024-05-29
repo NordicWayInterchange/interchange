@@ -50,6 +50,51 @@ public class MatchDiscoveryServiceIT {
     }
 
     @Test
+    public void matchIsDeletedIfLocalSubAndSubIsResubscribe(){
+        Neighbour nb = new Neighbour();
+        Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.RESUBSCRIBE);
+        nb.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription)));
+        neighbourRepository.save(nb);
+
+        ServiceProvider sp = new ServiceProvider();
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.RESUBSCRIBE, "originatingCountry = 'NO'", "test");
+        sp.addLocalSubscription(localSubscription);
+        serviceProviderRepository.save(sp);
+
+        Match match = new Match(
+                localSubscription,
+                subscription
+        );
+        matchRepository.save(match);
+
+        matchDiscoveryService.syncMatchesToDelete();
+        List<Match> matches = matchRepository.findAll();
+        assertThat(matches).isEmpty();
+    }
+    @Test
+    public void matchIsNotDeletedIfOnlyOneIsResubscribe(){
+        Neighbour nb = new Neighbour();
+        Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED);
+        nb.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription)));
+        neighbourRepository.save(nb);
+
+        ServiceProvider sp = new ServiceProvider();
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.RESUBSCRIBE, "originatingCountry = 'NO'", "test");
+        sp.addLocalSubscription(localSubscription);
+        serviceProviderRepository.save(sp);
+
+        Match match = new Match(
+                localSubscription,
+                subscription
+        );
+        matchRepository.save(match);
+
+        matchDiscoveryService.syncMatchesToDelete();
+        List<Match> matches = matchRepository.findAll();
+        assertThat(matches.size()).isEqualTo(1);
+    }
+
+    @Test
     public void twoLocalSubscriptionsCanHaveMatchToTheSameSubscription() {
         String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
         String consumerCommonName = "my-node";
