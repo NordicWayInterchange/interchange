@@ -66,10 +66,10 @@ public class RoutingConfigurer {
 	public void setSubscriptionsToTearDown(){
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
-		for(Subscription i : subscriptions){
-			List<Match> matches = matchRepository.findAllBySubscriptionId(i.getId());
+		for(Subscription subscription : subscriptions){
+			List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
 			if(matches.isEmpty()) {
-				i.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+				subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 			}
 		}
 		neighbours.forEach(neighbourService::saveNeighbour);
