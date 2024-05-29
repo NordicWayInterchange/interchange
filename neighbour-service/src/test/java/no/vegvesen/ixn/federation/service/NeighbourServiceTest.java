@@ -52,12 +52,11 @@ class NeighbourServiceTest {
 	NeighbourService neighbourService;
 	NeigbourDiscoveryService neigbourDiscoveryService;
 
-
 	@BeforeEach
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository, interchangeNodeProperties,backoffProperties,discovererProperties);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test

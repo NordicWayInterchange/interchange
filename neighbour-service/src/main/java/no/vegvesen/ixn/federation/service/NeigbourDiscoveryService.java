@@ -67,8 +67,6 @@ public class NeigbourDiscoveryService {
         }
     }
 
-
-
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 CapabilitiesStatus.UNKNOWN,
