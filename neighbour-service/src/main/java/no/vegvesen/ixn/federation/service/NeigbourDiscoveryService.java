@@ -221,8 +221,8 @@ public class NeigbourDiscoveryService {
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
                     pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
                 }
-            } catch (Exception e) {
-                logger.error("Unknown error while polling subscriptions for one neighbour",e);
+            //} catch (Exception e) {
+            //    logger.error("Unknown error while polling subscriptions for one neighbour",e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
