@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.service.IncomingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -105,6 +106,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@MockBean
 	InterchangeNodeProperties interchangeNodeProperties;
+
+	@MockBean
+	IncomingMatchDiscoveryService incomingMatchDiscoveryService;
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {

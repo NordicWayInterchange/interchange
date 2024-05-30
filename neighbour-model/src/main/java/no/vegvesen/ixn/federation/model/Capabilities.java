@@ -60,7 +60,7 @@ public class Capabilities {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	@JoinColumn(name="capabilities_id")
 	private Set<Capability> capabilities = new HashSet<>();
 
 	@Column

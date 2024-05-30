@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.service.IncomingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +39,16 @@ public class RoutingConfigurer {
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
+	private final IncomingMatchDiscoveryService incomingMatchDiscoveryService;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, IncomingMatchDiscoveryService incomingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
+		this.incomingMatchDiscoveryService = incomingMatchDiscoveryService;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -57,6 +61,12 @@ public class RoutingConfigurer {
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
+	}
+
+	@Scheduled(fixedRateString = "10000")
+	public void checkIncomingMatches(){
+		incomingMatchDiscoveryService.syncNeighbourSubscriptionsAndCapabilitiesToCreateMatch(neighbourService.findAllNeighbours());
+		incomingMatchDiscoveryService.syncMatchesToDelete();
 	}
 
 	void tearDownRouting(Set<Neighbour> readyToTearDownRouting) {
