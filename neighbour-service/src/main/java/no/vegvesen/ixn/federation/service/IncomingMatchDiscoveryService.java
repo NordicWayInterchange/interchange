@@ -12,60 +12,44 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class IncomingMatchDiscoveryService {
 
-    private IncomingMatchRepository incomingMatchRepository;
+    private final IncomingMatchRepository incomingMatchRepository;
 
-    private ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
-    private NeighbourRepository neighbourRepository;
     @Autowired
-    public IncomingMatchDiscoveryService(IncomingMatchRepository incomingMatchRepository, ServiceProviderRepository serviceProviderRepository, NeighbourRepository neighbourRepository){
+    public IncomingMatchDiscoveryService(IncomingMatchRepository incomingMatchRepository, ServiceProviderRepository serviceProviderRepository){
         this.incomingMatchRepository = incomingMatchRepository;
         this.serviceProviderRepository = serviceProviderRepository;
-        this.neighbourRepository = neighbourRepository;
     }
 
-    public void syncNeighbourSubscriptionsAndCapabilitiesToCreateMatch(List<Neighbour> neighbours){
-        List<Capability> capabilities = serviceProviderRepository.findAll().stream().flatMap(a->a.getCapabilities().getCapabilities().stream()).toList();
-        for(Neighbour neighbour : neighbours){
-            for(NeighbourSubscription neighbourSubscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()){
-                IncomingMatch match = incomingMatchRepository.findByNeighbourSubscriptionId(neighbourSubscription.getId());
-                if(match == null){
-                    IncomingMatch incomingMatch = new IncomingMatch();
-                    incomingMatch.setNeighbourSubscription(neighbourSubscription);
-                    for(Capability capability : capabilities){
-                        if(CapabilityMatcher.matchCapabilityToSelector(capability, neighbourSubscription.getSelector())){
-                            incomingMatch.addCapability(capability);
-                        }
-                    }
-                    incomingMatchRepository.save(incomingMatch);
-                }
-                else{
-                    Set<Capability> existingCapabilities = match.getCapabilities();
-                    Set<Capability> allCapabilities = new HashSet<>();
-                    for(Capability capability : capabilities){
-                        if(CapabilityMatcher.matchCapabilityToSelector(capability, match.getNeighbourSubscription().getSelector())){
-                            allCapabilities.add(capability);
-                        }
-                    }
-                    if(!existingCapabilities.equals(allCapabilities)){
-                        neighbourSubscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
-                        neighbourRepository.save(neighbour);
-                    }
-                }
-            }
+    public void createMatches(NeighbourSubscription neighbourSubscription, Set<Capability> matchingCaps){
+        for(Capability capability : matchingCaps){
+            IncomingMatch match = new IncomingMatch(neighbourSubscription, capability);
+            incomingMatchRepository.save(match);
         }
     }
-    public void syncMatchesToDelete(){
-        List<IncomingMatch> incomingMatches = incomingMatchRepository.findAll();
-        for(IncomingMatch incomingMatch : incomingMatches){
-            NeighbourSubscriptionStatus status = incomingMatch.getNeighbourSubscription().getSubscriptionStatus();
-            if(status.equals(NeighbourSubscriptionStatus.TEAR_DOWN) || status.equals(NeighbourSubscriptionStatus.RESUBSCRIBE)){
-                incomingMatchRepository.delete(incomingMatch);
-            }
+    public void deleteMatches(NeighbourSubscription neighbourSubscription){
+        List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
+        incomingMatchRepository.deleteAll(matches);
+    }
+    public boolean newMatchExists(NeighbourSubscription neighbourSubscription){
+
+        List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
+
+        if(!matches.isEmpty()) {
+            Set<Capability> capabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
+            Set<Capability> existingMatches = matches.stream().map(IncomingMatch::getCapability).collect(Collectors.toSet());
+            List<Capability> allMatches = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, neighbourSubscription.getSelector()).stream().toList();
+            return !(new HashSet<>(existingMatches).containsAll(allMatches));
+        }
+        else{
+            return false;
         }
     }
+
 }

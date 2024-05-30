@@ -41,6 +41,7 @@ public class RoutingConfigurer {
 
 	private final IncomingMatchDiscoveryService incomingMatchDiscoveryService;
 
+
 	@Autowired
 	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, IncomingMatchDiscoveryService incomingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
@@ -49,6 +50,22 @@ public class RoutingConfigurer {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
 		this.incomingMatchDiscoveryService = incomingMatchDiscoveryService;
+	}
+
+	@Scheduled(fixedRateString = "10000")
+	public void handleNewMatches(){
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		List<NeighbourSubscription> subscriptions = neighbours.stream()
+				.flatMap(a->a.getNeighbourRequestedSubscriptions()
+						.getSubscriptions().stream()).toList();
+
+		for(NeighbourSubscription subscription : subscriptions){
+			if(incomingMatchDiscoveryService.newMatchExists(subscription)){
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
+				incomingMatchDiscoveryService.deleteMatches(subscription);
+			}
+		}
+		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -61,12 +78,6 @@ public class RoutingConfigurer {
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
-	}
-
-	@Scheduled(fixedRateString = "10000")
-	public void checkIncomingMatches(){
-		incomingMatchDiscoveryService.syncNeighbourSubscriptionsAndCapabilitiesToCreateMatch(neighbourService.findAllNeighbours());
-		incomingMatchDiscoveryService.syncMatchesToDelete();
 	}
 
 	void tearDownRouting(Set<Neighbour> readyToTearDownRouting) {
@@ -93,6 +104,7 @@ public class RoutingConfigurer {
 						redirectedServiceProviders.add(consumerCommonName);
 					}
 				}
+				incomingMatchDiscoveryService.deleteMatches(sub);
 			}
 
 			//If it is the last subscription of the SP, we need to remove them from the remote_sp group
@@ -178,6 +190,7 @@ public class RoutingConfigurer {
 					}
 
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
+					incomingMatchDiscoveryService.createMatches(subscription, matchingCaps);
 				}
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
@@ -212,6 +225,7 @@ public class RoutingConfigurer {
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
+					incomingMatchDiscoveryService.createMatches(subscription, matchingCaps);
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 			} else {
