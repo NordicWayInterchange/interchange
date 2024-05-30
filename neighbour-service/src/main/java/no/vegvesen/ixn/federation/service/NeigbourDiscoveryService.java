@@ -222,8 +222,8 @@ public class NeigbourDiscoveryService {
                     pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
                 }
                 //TODO find a better solution to this
-            //} catch (Exception e) {
-            //    logger.error("Unknown error while polling subscriptions for one neighbour",e);
+            } catch (Exception e) {
+                logger.error("Unknown error while polling subscriptions for one neighbour",e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
