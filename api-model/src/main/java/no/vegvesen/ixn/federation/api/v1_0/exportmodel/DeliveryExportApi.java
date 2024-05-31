@@ -7,8 +7,6 @@ public class DeliveryExportApi {
 
     private Set<DeliveryEndpointExportApi> endpoints;
 
-    private String path;
-
     private String selector;
 
     private long lastUpdatedTimestamp;
@@ -24,12 +22,10 @@ public class DeliveryExportApi {
     }
 
     public DeliveryExportApi(Set<DeliveryEndpointExportApi> endpoints,
-                             String path,
                              String selector,
                              long lastUpdatedTimestamp,
                              DeliveryStatusExportApi status) {
         this.endpoints = endpoints;
-        this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
@@ -41,14 +37,6 @@ public class DeliveryExportApi {
 
     public void setEndpoints(Set<DeliveryEndpointExportApi> endpoints) {
         this.endpoints = endpoints;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getSelector() {
@@ -80,19 +68,18 @@ public class DeliveryExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryExportApi that = (DeliveryExportApi) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, path, selector, lastUpdatedTimestamp, status);
+        return Objects.hash(endpoints, selector, lastUpdatedTimestamp, status);
     }
 
     @Override
     public String toString() {
         return "DeliveryExportApi{" +
                 "endpoints=" + endpoints +
-                ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +

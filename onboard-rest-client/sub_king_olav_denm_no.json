@@ -1,8 +1,8 @@
 {	"name" : "king_olav.bouvetinterchange.eu",
-  "version" : "1.0",
-  "subscriptions" : [
-    {
-      "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6"
-
+    "version" : "1.0",
+    "subscriptions" : [ {
+        "selector" : "publicationId = 'NO00001-pub-1'"
+    }, {
+        "selector" : "publicationId = 'NO00001-pub-2'"
     }]
 }

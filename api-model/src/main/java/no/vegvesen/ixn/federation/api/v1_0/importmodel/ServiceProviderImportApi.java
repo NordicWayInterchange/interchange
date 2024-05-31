@@ -9,7 +9,7 @@ public class ServiceProviderImportApi {
 
     private Set<LocalSubscriptionImportApi> subscriptions;
 
-    private Set<CapabilityImportApi> capabilities;
+    private CapabilitiesImportApi capabilities;
 
     private Set<DeliveryImportApi> deliveries;
 
@@ -21,7 +21,7 @@ public class ServiceProviderImportApi {
 
     public ServiceProviderImportApi(String name,
                                     Set<LocalSubscriptionImportApi> subscriptions,
-                                    Set<CapabilityImportApi> capabilities,
+                                    CapabilitiesImportApi capabilities,
                                     Set<DeliveryImportApi> deliveries,
                                     long subscriptionsUpdated) {
         this.name = name;
@@ -47,11 +47,11 @@ public class ServiceProviderImportApi {
         this.subscriptions = subscriptions;
     }
 
-    public Set<CapabilityImportApi> getCapabilities() {
+    public CapabilitiesImportApi getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilityImportApi> capabilities) {
+    public void setCapabilities(CapabilitiesImportApi capabilities) {
         this.capabilities = capabilities;
     }
 

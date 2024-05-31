@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0.importmodel;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class PrivateChannelImportApi {
 

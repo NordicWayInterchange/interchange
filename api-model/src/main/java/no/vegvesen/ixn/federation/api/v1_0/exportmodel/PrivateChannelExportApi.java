@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0.exportmodel;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class PrivateChannelExportApi {
 
@@ -11,7 +10,7 @@ public class PrivateChannelExportApi {
 
     private PrivateChannelStatusExportApi status;
 
-    private Set<PrivateChannelEndpointExportApi> endpoints;
+    private PrivateChannelEndpointExportApi endpoint;
 
     public enum PrivateChannelStatusExportApi {
         REQUESTED, CREATED, TEAR_DOWN
@@ -24,11 +23,11 @@ public class PrivateChannelExportApi {
     public PrivateChannelExportApi(String serviceProviderName,
                                    String peerName,
                                    PrivateChannelStatusExportApi status,
-                                   Set<PrivateChannelEndpointExportApi> endpoints) {
+                                   PrivateChannelEndpointExportApi endpoint) {
         this.serviceProviderName = serviceProviderName;
         this.peerName = peerName;
         this.status = status;
-        this.endpoints = endpoints;
+        this.endpoint = endpoint;
     }
 
     public String getServiceProviderName() {
@@ -55,12 +54,12 @@ public class PrivateChannelExportApi {
         this.status = status;
     }
 
-    public Set<PrivateChannelEndpointExportApi> getEndpoints() {
-        return endpoints;
+    public PrivateChannelEndpointExportApi getEndpoint() {
+        return endpoint;
     }
 
-    public void setEndpoints(Set<PrivateChannelEndpointExportApi> endpoints) {
-        this.endpoints = endpoints;
+    public void setEndpoints(PrivateChannelEndpointExportApi endpoint) {
+        this.endpoint = endpoint;
     }
 
     @Override
@@ -68,12 +67,12 @@ public class PrivateChannelExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelExportApi that = (PrivateChannelExportApi) o;
-        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoints, that.endpoints);
+        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceProviderName, peerName, status, endpoints);
+        return Objects.hash(serviceProviderName, peerName, status, endpoint);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class PrivateChannelExportApi {
                 "serviceProviderName='" + serviceProviderName + '\'' +
                 ", peerName='" + peerName + '\'' +
                 ", status=" + status +
-                ", endpoints=" + endpoints +
+                ", endpoint=" + endpoint +
                 '}';
     }
 }
