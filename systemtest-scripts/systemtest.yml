@@ -20,7 +20,7 @@ services:
           - dns.bouvetinterchange.eu
 
   a_db:
-    image: postgres:9.6
+    image: postgres:15.1
     container_name: a_db
     depends_on:
       - mock-dns-server

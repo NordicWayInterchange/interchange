@@ -72,6 +72,5 @@ class CombinationExpandingIterator<T> implements Iterator<Map<String, T>> {
         return stringObjectHashMap;
     }
 
-    private record KeyValuePair<T>(String key, Collection<T> value) {
-    }
+    private record KeyValuePair<T>(String key, Collection<T> value) { }
 }

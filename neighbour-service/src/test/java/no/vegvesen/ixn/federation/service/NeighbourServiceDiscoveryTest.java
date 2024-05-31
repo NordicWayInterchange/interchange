@@ -10,14 +10,14 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
-import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -59,9 +59,15 @@ public class NeighbourServiceDiscoveryTest {
 
 	private LocalDateTime now = LocalDateTime.now();
 
-	private CapabilitySplit getDatexCapability(String originatingCountry) {
-		return new CapabilitySplit(
-				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.singleton("0122"),"SituationPublication"),
+
+	private NeighbourCapability getDatexCapability(String originatingCountry) {
+		return new NeighbourCapability(
+				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication"),
+				new Metadata(RedirectStatus.OPTIONAL));
+	}
+	private Capability getDatexCapabilitySplit(String originatingCountry) {
+		return new Capability(
+				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
 
@@ -82,8 +88,8 @@ public class NeighbourServiceDiscoveryTest {
 		return selfSubscriptions;
 	}
 
-	private Set<CapabilitySplit> getSelfCapabilities() {
-		return Collections.singleton(getDatexCapability("NO"));
+	private Set<Capability> getSelfCapabilities() {
+		return Collections.singleton(getDatexCapabilitySplit("NO"));
 	}
 
 	@Test
@@ -152,7 +158,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourFacade).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
-		Capabilities no = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
+		NeighbourCapabilities no = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
 		no.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		ericsson.setCapabilities(no);
 
@@ -189,7 +195,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.getControlConnection().setBackoffStart(futureTime);
 		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
-		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("FI"))));
+		ericsson.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("FI"))));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(invocationOnMock -> {
 			Neighbour answer = invocationOnMock.getArgument(0);
 			answer.setNeighbour_id(1);
@@ -239,8 +245,8 @@ public class NeighbourServiceDiscoveryTest {
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
 
-		CapabilitySplit firstDataType = getDatexCapability("NO");
-		Set<CapabilitySplit> capabilities = Collections.singleton(firstDataType);
+		NeighbourCapability firstDataType = getDatexCapability("NO");
+		Set<NeighbourCapability> capabilities = Collections.singleton(firstDataType);
 
 		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 
@@ -261,7 +267,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
-		Capabilities noCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
+		NeighbourCapabilities noCapabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
 		noCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		ericsson.setCapabilities(noCapabilities);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
@@ -346,7 +352,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.getControlConnection().setBackoffAttempts(4);
 
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(getDatexCapability("NO")));
+		NeighbourCapabilities ericssonCapabilities = new NeighbourCapabilities(CapabilitiesStatus.FAILED, Collections.singleton(getDatexCapability("NO")));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
@@ -495,9 +501,9 @@ public class NeighbourServiceDiscoveryTest {
 	// To introduce error make sure part 1 and part 2 below has same selector filter
 	@Test
 	public void subscriptionRequestProcessesAllNeighboursDespiteNetworkError() {
-		HashSet<CapabilitySplit> capabilitiesNo = new HashSet<>();
+		HashSet<NeighbourCapability> capabilitiesNo = new HashSet<>();
 		capabilitiesNo.add(getDatexCapability("NO"));
-		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilitiesNo);
+		NeighbourCapabilities capabilitiesNO = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, capabilitiesNo);
 		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, getEmptyNeighSR(), getEmptySR());
 		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, getEmptyNeighSR(), getEmptySR());
 		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, getEmptyNeighSR(), getEmptySR());
@@ -515,8 +521,8 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.postSubscriptionRequest(eq(neighbourB),anySet(), anyString())).thenThrow(new SubscriptionRequestException("time-out"));
 		when(neighbourFacade.postSubscriptionRequest(eq(neighbourC),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
 
-		Set<CapabilitySplit> selfCapabilities = new HashSet<>();
-		selfCapabilities.add(getDatexCapability("NO"));
+		Set<Capability> selfCapabilities = new HashSet<>();
+		selfCapabilities.add(getDatexCapabilitySplit("NO"));
 
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
 		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", interchangeNodeProperties.getName()));
@@ -548,22 +554,22 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(Collections.emptySet());
-		CapabilitySplit neighbourCapability = getDatexCapability("NO");
-		Set<CapabilitySplit> capabilitySet = new HashSet<>();
+		NeighbourCapability neighbourCapability = getDatexCapability("NO");
+		Set<NeighbourCapability> capabilitySet = new HashSet<>();
 		capabilitySet.add(neighbourCapability);
-		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
+		NeighbourCapabilities neighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN,capabilitySet);
 		neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
 		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED, interchangeNodeProperties.getName()));
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(neighbourFedInSubscription));
 
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, Capability.transformNeighbourCapabilityToSplitCapability(capabilitySet), interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		Capabilities otherNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
+		NeighbourCapabilities otherNeighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
 		otherNeighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
 				otherNeighbourCapabilities,
@@ -616,7 +622,7 @@ public class NeighbourServiceDiscoveryTest {
 		);
 		Neighbour  neighbour = new Neighbour(
 				"test",
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
 						Collections.singleton(
@@ -655,7 +661,7 @@ public class NeighbourServiceDiscoveryTest {
 		);
 		Neighbour  neighbour = new Neighbour(
 				"test",
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
 						Collections.singleton(
@@ -694,7 +700,7 @@ public class NeighbourServiceDiscoveryTest {
 		);
 		Neighbour  neighbour = new Neighbour(
 				"test",
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
 						Collections.singleton(
@@ -723,7 +729,7 @@ public class NeighbourServiceDiscoveryTest {
 		);
 		Neighbour  neighbour = new Neighbour(
 				"test",
-				new Capabilities(),
+				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
 						Collections.singleton(

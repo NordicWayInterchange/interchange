@@ -7,7 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -79,7 +79,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.singleton("1200"), "SituationPublication");
+		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexNo = new CapabilitySplitApi();
 		datexNo.setApplication(app);
@@ -93,9 +93,9 @@ public class OnboardRestControllerTest {
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
 			Object argument = i.getArgument(0);
 			ServiceProvider s = (ServiceProvider) argument;
-			Set<CapabilitySplit> capabilities = s.getCapabilities().getCapabilities();
+			Set<Capability> capabilities = s.getCapabilities().getCapabilities();
 			int id = 0;
-			for (CapabilitySplit capability : capabilities) {
+			for (Capability capability : capabilities) {
 				if (capability.getId() == null) {
 					capability.setId(id++);
 				}
@@ -120,10 +120,10 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
 		// Mock existing service provider with three capabilities in database
-		CapabilitySplit capability42 = mock(CapabilitySplit.class);
+		Capability capability42 = mock(Capability.class);
 		when(capability42.getId()).thenReturn(42);
-		Set<CapabilitySplit> capabilities = Sets.newLinkedHashSet(capability42, mock(CapabilitySplit.class), mock(CapabilitySplit.class));
-		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
+		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42, mock(Capability.class), mock(Capability.class));
+		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
@@ -145,7 +145,7 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication");
+		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", List.of(), "SituationPublication");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexFi = new CapabilitySplitApi();
 		datexFi.setApplication(app);
@@ -251,7 +251,6 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Set<LocalSubscription> serviceProviderSubscriptionRequest = new HashSet<>();
 		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
 		String fi = "originatingCountry = 'FI'";

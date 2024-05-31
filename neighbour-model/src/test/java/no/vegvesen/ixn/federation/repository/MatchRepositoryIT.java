@@ -55,7 +55,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -74,7 +74,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -104,7 +104,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription(SubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "path/1", "my-interchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -132,10 +132,10 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         Subscription sub1 = new Subscription();
-        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
+        Neighbour neighbour1 = new Neighbour("neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
 
         neighbourRepository.save(neighbour);
         neighbourRepository.save(neighbour1);
@@ -160,7 +160,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
         neighbourRepository.save(neighbour);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
@@ -182,7 +182,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
         neighbourRepository.save(neighbour);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
@@ -206,10 +206,10 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         Subscription sub1 = new Subscription("a=b", SubscriptionStatus.CREATED);
-        Neighbour neighbour1 = new Neighbour("neighbour1", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
+        Neighbour neighbour1 = new Neighbour("neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub1)));
 
         neighbourRepository.save(neighbour);
         neighbourRepository.save(neighbour1);
@@ -239,7 +239,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -270,7 +270,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -301,7 +301,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -335,7 +335,7 @@ public class MatchRepositoryIT {
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED, "");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
@@ -383,7 +383,7 @@ public class MatchRepositoryIT {
         Subscription sub = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-interchange");
         Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard());
         sub.setEndpoints(Collections.singleton(endpoint));
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 

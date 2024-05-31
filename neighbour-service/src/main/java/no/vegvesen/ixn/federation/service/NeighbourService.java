@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
@@ -51,9 +51,9 @@ public class NeighbourService {
 		return neighbourRepository.findAll();
 	}
 
-	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<CapabilitySplit> localCapabilities) {
-		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
-		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
+	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
+		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
+		LocalDateTime now = LocalDateTime.now();
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
@@ -63,8 +63,10 @@ public class NeighbourService {
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-		Capabilities capabilities = neighbourToUpdate.getCapabilities();
+		NeighbourCapabilities capabilities = neighbourToUpdate.getCapabilities();
+		capabilities.setLastCapabilityExchange(now);
 		capabilities.replaceCapabilities(incomingCapabilities.getCapabilities());
+
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
@@ -177,7 +179,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		return neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {

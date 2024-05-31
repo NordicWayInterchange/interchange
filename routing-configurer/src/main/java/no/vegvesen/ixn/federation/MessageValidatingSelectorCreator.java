@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 
 public class MessageValidatingSelectorCreator {
 
 
-    public static String makeSelector(CapabilitySplit capability, Integer shardId) {
+    public static String makeSelector(Capability capability, Integer shardId) {
         String messageType = capability.getApplication().getMessageType();
         SelectorBuilder builder = new SelectorBuilder()
                 .publisherId(capability.getApplication().getPublisherId())

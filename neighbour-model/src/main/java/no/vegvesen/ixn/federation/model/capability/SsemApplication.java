@@ -6,7 +6,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.SsemApplicationApi;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import java.util.Set;
+
+import java.util.List;
 
 @Entity
 @DiscriminatorValue(Constants.SSEM)
@@ -16,7 +17,7 @@ public class SsemApplication extends Application {
 
     }
 
-    public SsemApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+    public SsemApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
     }
 

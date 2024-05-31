@@ -3,9 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,14 +11,14 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void testCreatingDENMValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new DenmApplication(
                                 "NO-123",
                                 "pub-1",
                                 "NO",
                                 "DENM:1.2.2",
-                                new HashSet<>(Arrays.asList("123","122")),
-                                new HashSet<>(Arrays.asList(6, 5))
+                                List.of("123","122"),
+                                List.of(6, 5)
                         ),
                         new Metadata()
                 ), null
@@ -38,13 +36,13 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createIviMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new IvimApplication(
                                 "NO-123",
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                new HashSet<>(Arrays.asList("122,123"))
+                                List.of("122,123")
                         ),
                         new Metadata()
                 ), null
@@ -61,13 +59,13 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createDatexMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new CapabilitySplit(
+                new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                new HashSet<>(Arrays.asList("1")),
+                                List.of("1"),
                                 "Weather"
                         ),
                         new Metadata()

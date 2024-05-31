@@ -1,13 +1,11 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
@@ -21,12 +19,122 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourServiceIT {
+
+    String jsonInput = """
+            {
+  "name" : "neighbourUpdateCaps",
+  "version" : "1.0",
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "DENM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-DENM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "DENM:1.2.2",
+      "quadTree" : [ "12004" ],
+      "causeCode" : [ 6 ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "SSEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-SSEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "SSEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "SPATEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-SPATEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "SPATEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "MAPEM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-MAPEM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "MAPEM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  },  {
+    "application" : {
+      "messageType" : "IVIM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-IVIM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "IVI:1.2",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }, {
+    "application" : {
+      "messageType" : "CAM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-CAM",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "CAM",
+      "quadTree" : [ "12004" ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "info.com",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  } ]
+}
+            """;
 
     @Autowired
     private NeighbourRepository repository;
@@ -42,13 +150,13 @@ public class NeighbourServiceIT {
     @Test
     public void testFetchingNeighbourWithCorrectStatus() {
         Neighbour interchangeA = new Neighbour("interchangeA",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(
                         Sets.newLinkedHashSet(
                                 new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.REQUESTED, "interchangeA"))),
@@ -65,7 +173,7 @@ public class NeighbourServiceIT {
     @Test
     public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
                 new SubscriptionRequest(Collections.emptySet()));
         repository.save(neighbour);
@@ -232,13 +340,13 @@ public class NeighbourServiceIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                Collections.emptySet(),
-                                Collections.singleton(1)
+                                List.of(),
+                                List.of(1)
                             ),
                             new MetadataApi()
                 ))
         );
-        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
+        Set<Capability> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
         //Now, try again, with the same capabilties, to simulate double post.
@@ -253,7 +361,7 @@ public class NeighbourServiceIT {
         String name = "teardown-and-new-neighbour-request";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                     Collections.singleton(
                             new NeighbourSubscription(selector,NeighbourSubscriptionStatus.CREATED,name)
@@ -284,7 +392,7 @@ public class NeighbourServiceIT {
         String name = "tear-down-neighbour";
         Neighbour neighbour = new Neighbour(
                 name,
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(
                         Collections.singleton(
                                 new NeighbourSubscription("a = 'hello'",NeighbourSubscriptionStatus.TEAR_DOWN,name)
@@ -298,5 +406,33 @@ public class NeighbourServiceIT {
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
 
     }
+
+    @Test
+    public void updateCapabilities() throws IOException {
+
+        String name = "neighbourUpdateCaps";
+        Neighbour neighbour = new Neighbour(
+                name,
+                new NeighbourCapabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest()
+        );
+        repository.save(neighbour);
+        ObjectMapper mapper = new ObjectMapper();
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
+        neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
+
+        //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
+        List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
+
+        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        neighbour = repository.findByName(name);
+        assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
+        assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
+
+    }
+
+
 
 }

@@ -8,10 +8,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.DenmApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -81,26 +78,26 @@ public class NeighbourDiscovererIT {
 		Neighbour neighbour2 = new Neighbour();
 		neighbour2.setName("neighbour-two");
 
-		Capabilities c1 = new Capabilities(
-				Capabilities.CapabilitiesStatus.KNOWN,
-				Sets.newLinkedHashSet(new CapabilitySplit(
+		NeighbourCapabilities c1 = new NeighbourCapabilities(
+				CapabilitiesStatus.KNOWN,
+				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"NO" + "-123",
 								"NO" + "-pub",
 								"NO",
 								"1.0",
-								Collections.emptySet(),
+								List.of(),
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 
-		Capabilities c2 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
-				Sets.newLinkedHashSet(new CapabilitySplit(
+		NeighbourCapabilities c2 = new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
+				Sets.newLinkedHashSet(new NeighbourCapability(
 						new DatexApplication(
 								"FI" + "-123",
 								"FI" + "-pub",
 								"FI",
 								"1.0",
-								Collections.emptySet(),
+								List.of(),
 								"SituationPublication"),
 						new Metadata(RedirectStatus.OPTIONAL))));
 		when(mockDnsFacade.lookupNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
@@ -147,7 +144,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.singleton("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", List.of("0122"), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -169,15 +166,15 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(new CapabilitySplit(
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
+						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -214,15 +211,15 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(new CapabilitySplit(
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
+						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -260,28 +257,28 @@ public class NeighbourDiscovererIT {
 		));
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DatexApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
+												List.of("0122"),
 												"SituationPublication"
 										),
 										new Metadata(RedirectStatus.OPTIONAL)
 								),
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-2",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 									),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -322,15 +319,15 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(new CapabilitySplit(
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
+						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -374,15 +371,15 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbourA = new Neighbour(
 				"neighbourA",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(new CapabilitySplit(
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
+						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0001",
 										"pub-1",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -395,15 +392,15 @@ public class NeighbourDiscovererIT {
 		neighbourA.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
 		Neighbour neighbourB = new Neighbour(
 				"neighbourB",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(new CapabilitySplit(
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
+						Collections.singleton(new NeighbourCapability(
 								new DatexApplication(
 										"NO0002",
 										"pub-2",
 										"NO",
 										"1.0",
-										Collections.singleton("0122"),
+										List.of("0122"),
 										"SituationPublication"
 								),
 								new Metadata(RedirectStatus.OPTIONAL)
@@ -460,17 +457,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -536,17 +533,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -567,17 +564,17 @@ public class NeighbourDiscovererIT {
 	public void testGiveUp() {
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -631,9 +628,9 @@ public class NeighbourDiscovererIT {
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
 
-		neighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
+		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, neighbour.getCapabilities().getCapabilities());
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
@@ -673,17 +670,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -758,17 +755,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour-endpoints-failed",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -804,17 +801,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -861,17 +858,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour1",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0002",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.singleton("0122"),
-												Collections.singleton(6)
+												List.of("0122"),
+												List.of(6)
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -935,17 +932,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -1002,17 +999,17 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new CapabilitySplit(
+								new NeighbourCapability(
 										new DenmApplication(
 												"NO0001",
 												"pub-1",
 												"NO",
 												"1.0",
-												Collections.emptySet(),
-												Collections.emptySet()
+												List.of(),
+												List.of()
 										),
 										new Metadata(RedirectStatus.OPTIONAL))
 						)),
@@ -1038,19 +1035,19 @@ public class NeighbourDiscovererIT {
 
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
-		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> unknown = repository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAll()).hasSize(2);
 	}
 
-	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
+	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, NeighbourCapabilities c1, NeighbourCapabilities c2) {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1.getCapabilities());
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2.getCapabilities());
 
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
-		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		List<Neighbour> known = repository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}
 

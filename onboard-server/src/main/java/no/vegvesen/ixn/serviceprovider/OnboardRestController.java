@@ -13,7 +13,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -57,43 +57,17 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
 	@Operation(summary = "Add capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for this objects 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below.",
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
 			content = @Content(
 					examples = {
-							@ExampleObject(
-									name = "messageType DENM",
-									description = "",
-									value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType DATEX",
-									description = "",
-									value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType IVIM",
-									value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SPATEM",
-									value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType MAPEM",
-									value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SREM",
-									value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType SSEM",
-									value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST
-							),
-							@ExampleObject(
-									name = "messageType CAM",
-									value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST
-							)}
+							@ExampleObject(name = "messageType DENM", value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType DATEX", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType IVIM", value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SPATEM", value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType MAPEM", value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SREM", value = ExampleAPIObjects.ADD_SREM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType SSEM", value = ExampleAPIObjects.ADD_SSEM_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType CAM", value = ExampleAPIObjects.ADD_CAM_CAPABILITIESREQUEST)}
 			))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDCAPABILITIESRESPONSE)))})
 	public AddCapabilitiesResponse addCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
@@ -116,19 +90,22 @@ public class OnboardRestController {
 			}
 		}
 
-		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		List<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
-		for (CapabilitySplit newLocalCapability : newLocalCapabilities) {
+		for (Capability newLocalCapability : newLocalCapabilities) {
 			capabilities.addDataType(newLocalCapability);
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
-		addedCapabilities.retainAll(newLocalCapabilities);
-
+		Set<Capability> addedCapabilities = new HashSet<>();
+		for (Capability savedCapability : saved.getCapabilities().getCapabilities()) {
+			if (newLocalCapabilities.contains(savedCapability)) {
+				addedCapabilities.add(savedCapability);
+			}
+		}
 		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
@@ -136,7 +113,7 @@ public class OnboardRestController {
 	}
 
 	private Set<String> allPublicationIds() {
-		Set<CapabilitySplit> allCapabilities = getAllLocalCapabilities();
+		Set<Capability> allCapabilities = getAllLocalCapabilities();
 		allCapabilities.addAll(getAllNeighbourCapabilities());
 		return allCapabilities.stream()
 				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
@@ -165,7 +142,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
-		Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
+		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
 			if (!selector.isEmpty()) {
@@ -177,12 +154,12 @@ public class OnboardRestController {
 		return response;
 	}
 
-	private Set<CapabilitySplit> getAllMatchingCapabilities(String selector, Set<CapabilitySplit> allCapabilities) {
+	private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
 		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
-	private Set<CapabilitySplit> getAllLocalCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
+	private Set<Capability> getAllLocalCapabilities() {
+		Set<Capability> capabilities = new HashSet<>();
 		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		for (ServiceProvider otherServiceProvider : serviceProviders) {
 			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
@@ -190,11 +167,11 @@ public class OnboardRestController {
 		return capabilities;
 	}
 
-	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
+	private Set<Capability> getAllNeighbourCapabilities() {
+		Set<Capability> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 		}
 		return capabilities;
 	}
@@ -228,7 +205,7 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		CapabilitySplit capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
+		Capability capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();

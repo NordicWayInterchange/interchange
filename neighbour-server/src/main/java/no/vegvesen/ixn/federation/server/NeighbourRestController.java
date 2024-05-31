@@ -10,7 +10,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -53,8 +53,8 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary = "Request subscriptions")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {@ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)}))})
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))
+	@ApiResponses(value = {@ApiResponse(responseCode = "202", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "consumerCommonName is optional.", content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.REQUESTSUBSCRIPTIONSREQUEST)))
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
@@ -110,8 +110,21 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESREQUEST)))
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE)))})
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
+			content = @Content(examples = {
+			@ExampleObject(name="messageType DENM", value = ExampleAPIObjects.DENM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType DATEX", value = ExampleAPIObjects.DATEX_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType IVIM", value = ExampleAPIObjects.IVIM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType CAM", value = ExampleAPIObjects.CAM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType MAPEM", value = ExampleAPIObjects.MAPEM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SPATEM", value = ExampleAPIObjects.SPATEM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SREM", value = ExampleAPIObjects.SREM_CAPABILITY_REQUEST),
+			@ExampleObject(name="messageType SSEM", value = ExampleAPIObjects.SSEM_CAPABILITY_REQUEST)
+	}))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples ={
+		@ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE),
+	}
+	))})
 	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
@@ -122,7 +135,7 @@ public class NeighbourRestController {
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+		Set<Capability> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();

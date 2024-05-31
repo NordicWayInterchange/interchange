@@ -29,4 +29,12 @@ public class CreateExchangeRequest {
         return type;
     }
 
+
+    @Override
+    public String toString() {
+        return "CreateExchangeRequest{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

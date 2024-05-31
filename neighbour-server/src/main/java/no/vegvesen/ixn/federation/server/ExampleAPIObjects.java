@@ -20,12 +20,13 @@ public class ExampleAPIObjects {
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "consumerCommonName" : "node-1",
                 "path" : "/subscriptions/1",
+                
                 "status" : "REQUESTED",
                 "lastUpdatedTimestamp" : 1633525221175
               } ]
             }
             """;
-    public static final String UPDATECAPABILITIESREQUEST = """
+    public static final String DENM_CAPABILITY_REQUEST = """
             {
               "version" : "1.1NW3",
               "name" : "sp-1",
@@ -47,6 +48,173 @@ public class ExampleAPIObjects {
               } ]
             }
             """;
+    public static final String DATEX_CAPABILITY_REQUEST = """
+            "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "DATEX",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "publicationType" : "publicationType",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
+    public static final String IVIM_CAPABILITY_REQUEST = """
+                        {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "IVIM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
+    public static final String SPATEM_CAPABILITY_REQUEST = """
+            {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "SPATEM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
+    public static final String MAPEM_CAPABILITY_REQUEST = """
+            {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "MAPEM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : {
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
+    public static final String SREM_CAPABILITY_REQUEST = """
+            {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "SREM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : { 
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
+    public static final String SSEM_CAPABILITY_REQUEST = """
+            {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "SSEM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : {
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0 }
+              } ]
+            }
+            """;
+    public static final String CAM_CAPABILITY_REQUEST = """
+            {
+              "name" : "sp-1",
+              "version" : "1.0",
+              "capabilities" : [ {
+                "application" : {
+                  "messageType" : "CAM",
+                  "publisherId" : "NPRA",
+                  "publicationId" : "pub-1",
+                  "originatingCountry" : "NO",
+                  "protocolVersion" : "1.0",
+                  "quadTree" : [ "1234" ]
+                },
+                "metadata" : { 
+                "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
+              } ]
+            }
+            """;
     public static final String UPDATECAPABILITIESRESPONSE = """
                         
             {
@@ -63,7 +231,7 @@ public class ExampleAPIObjects {
                     "originatingCountry" : "NO",
                     "protocolVersion" : "1.0",
                     "quadTree" : [ "1234" ],
-                    "causeCodes" : [ 6 ]
+                    "causeCode" : [ 6 ]
                   },
                   "metadata" : { }
                 }

@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CapabilityValidatorTest {
@@ -16,7 +17,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DATEX2:3.2",
-                        Collections.singleton("12001"),
+                        List.of("12001"),
                         "SituationPublication"
                 ),
                 new MetadataApi()
@@ -33,7 +34,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DATEX2:3.2",
-                        Collections.singleton("12001"),
+                        List.of("12001"),
                         ""
                 ),
                 new MetadataApi()
@@ -45,7 +46,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DATEX2:3.2",
-                        Collections.singleton("12001"),
+                        List.of("12001"),
                         null
                 ),
                 new MetadataApi()
@@ -63,8 +64,8 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("12001"),
-                        Collections.singleton(6)
+                        List.of("12001"),
+                        List.of(6)
                 ),
                 new MetadataApi()
         );
@@ -80,8 +81,8 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("12001"),
-                        Collections.emptySet()
+                        List.of("12001"),
+                        List.of()
                 ),
                 new MetadataApi()
         );
@@ -92,7 +93,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("12001"),
+                        List.of("12001"),
                         null
                 ),
                 new MetadataApi()
@@ -110,7 +111,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -126,7 +127,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "SPATEM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -142,7 +143,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "MAPEM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -158,7 +159,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "SSEM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -174,7 +175,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "SREM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -190,7 +191,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "CAM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -206,7 +207,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -217,7 +218,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -234,7 +235,7 @@ public class CapabilityValidatorTest {
                         "",
                         "NO",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -245,7 +246,7 @@ public class CapabilityValidatorTest {
                         null,
                         "NO",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -262,7 +263,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "",
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -273,7 +274,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         null,
                         "IVIM",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -290,7 +291,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "",
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -301,7 +302,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         null,
-                        Collections.singleton("12001")
+                        List.of("12001")
                 ),
                 new MetadataApi()
         );
@@ -318,7 +319,7 @@ public class CapabilityValidatorTest {
                         "NO00000-pub-1",
                         "NO",
                         "IVIM",
-                        Collections.emptySet()
+                        List.of()
                 ),
                 new MetadataApi()
         );
