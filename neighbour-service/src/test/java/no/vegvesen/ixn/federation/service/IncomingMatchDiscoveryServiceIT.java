@@ -1,12 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
 import jakarta.transaction.Transactional;
-import no.vegvesen.ixn.federation.model.IncomingMatch;
-import no.vegvesen.ixn.federation.model.NeighbourSubscription;
-import no.vegvesen.ixn.federation.model.NeighbourSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.IncomingMatchRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
@@ -34,6 +32,9 @@ public class IncomingMatchDiscoveryServiceIT {
     @Autowired
     IncomingMatchDiscoveryService incomingMatchDiscoveryService;
 
+    @Autowired
+    NeighbourRepository neighbourRepository;
+
     @Test
     public void repositoriesAreAutowired(){
         assertThat(incomingMatchRepository).isNotNull();
@@ -43,10 +44,17 @@ public class IncomingMatchDiscoveryServiceIT {
 
     @Test
     public void testCreatingMatches(){
+        Neighbour neighbour = new Neighbour();
         NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "test1");
+        neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider sp = new ServiceProvider();
         Capability capability1 = new Capability(new DatexApplication(), new Metadata());
         Capability capability2 = new Capability(new DenmApplication(), new Metadata());
         Capability capability3 = new Capability(new SsemApplication(), new Metadata());
+        sp.getCapabilities().setCapabilities(Set.of(capability1, capability2, capability3));
+        serviceProviderRepository.save(sp);
 
         incomingMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2, capability3));
         assertThat(incomingMatchRepository.findAll()).hasSize(3);
@@ -54,34 +62,53 @@ public class IncomingMatchDiscoveryServiceIT {
 
     @Test
     public void shouldNotCreateMatchesIfStatusIsNotCreated(){
+        Neighbour neighbour = new Neighbour();
         NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.RESUBSCRIBE, "test2");
+        neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
+        neighbourRepository.save(neighbour);
+
         Capability capability1 = new Capability(new DatexApplication(), new Metadata());
         Capability capability2 = new Capability(new DenmApplication(), new Metadata());
         Capability capability3 = new Capability(new SsemApplication(), new Metadata());
-
         incomingMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2, capability3));
         assertThat(incomingMatchRepository.findAll()).hasSize(0);
     }
 
     @Test
     public void newMatchExistsReturnsTrueWhenNewMatchIsFound(){
+        Neighbour neighbour = new Neighbour();
         NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "test3");
-        Capability capability1 = new Capability(new DatexApplication(), new Metadata());
-        Capability capability2 = new Capability(new DenmApplication(), new Metadata());
-        incomingMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2));
+        neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
+        neighbourRepository.save(neighbour);
 
         ServiceProvider sp = new ServiceProvider();
-        Capability capability3 = new Capability(new SsemApplication("publisherId", "publicationId", "NO", "SSEM:1.1", List.of("12002")), new Metadata());
-        sp.getCapabilities().setCapabilities(Set.of(capability3));
+        Capability capability1 = new Capability(new DatexApplication(), new Metadata());
+        Capability capability2 = new Capability(new DenmApplication(), new Metadata());
+        sp.getCapabilities().setCapabilities(Set.of(capability1, capability2));
         serviceProviderRepository.save(sp);
+
+        incomingMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2));
+
+        ServiceProvider sp2 = new ServiceProvider();
+        Capability capability3 = new Capability(new SsemApplication("publisherId", "publicationId", "NO", "SSEM:1.1", List.of("12002")), new Metadata());
+        sp2.getCapabilities().setCapabilities(Set.of(capability3));
+        serviceProviderRepository.save(sp2);
 
         assertThat(incomingMatchDiscoveryService.newMatchExists(neighbourSubscription)).isTrue();
     }
     @Test
     public void newMatchExistsReturnsFalseWhenNoNewMatchIsFound(){
+        Neighbour neighbour = new Neighbour();
         NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "test4");
+        neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider sp = new ServiceProvider();
         Capability capability1 = new Capability(new DatexApplication(), new Metadata());
         Capability capability2 = new Capability(new DenmApplication(), new Metadata());
+        sp.getCapabilities().setCapabilities(Set.of(capability1, capability2));
+        serviceProviderRepository.save(sp);
+
         incomingMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2));
 
         assertThat(incomingMatchDiscoveryService.newMatchExists(neighbourSubscription)).isFalse();

@@ -13,10 +13,10 @@ public class IncomingMatch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inc_match_seq")
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private NeighbourSubscription neighbourSubscription;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name="incoming_match_id")
     private Capability capability;
 
