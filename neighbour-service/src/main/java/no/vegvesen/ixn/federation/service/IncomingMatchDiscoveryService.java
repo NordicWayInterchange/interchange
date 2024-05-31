@@ -39,9 +39,7 @@ public class IncomingMatchDiscoveryService {
     }
 
     public boolean newMatchExists(NeighbourSubscription neighbourSubscription){
-
         List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
-
         if(!matches.isEmpty()) {
             Set<Capability> allCapabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
             Set<Capability> existingMatches = matches.stream().map(IncomingMatch::getCapability).collect(Collectors.toSet());

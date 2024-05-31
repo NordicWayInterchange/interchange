@@ -94,7 +94,7 @@ public class NeighbourSubscriptionRequest {
         for(NeighbourSubscriptionStatus status : statuses){
             subscriptions.addAll(getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(status)).collect(Collectors.toSet()));
         }
-        return null;
+        return subscriptions;
     }
 
     public boolean hasTearDownSubscriptions() {
