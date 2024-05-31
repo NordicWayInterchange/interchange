@@ -83,10 +83,12 @@ public class NeighbourSubscriptionRequest {
                 '}';
     }
 
-    public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus status) {
-        return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(status))
-                .collect(Collectors.toSet());
+    public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus ... statuses){
+        Set<NeighbourSubscription> subscriptions = new HashSet<>();
+        for(NeighbourSubscriptionStatus status : statuses){
+            subscriptions.addAll(getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(status)).collect(Collectors.toSet()));
+        }
+        return subscriptions;
     }
 
     public boolean hasTearDownSubscriptions() {
