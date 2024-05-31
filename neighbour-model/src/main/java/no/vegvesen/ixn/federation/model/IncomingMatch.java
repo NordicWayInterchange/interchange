@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.model;
 import jakarta.persistence.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 
+import java.util.Objects;
+
 @Entity
 @Table(name="incoming_matches")
 public class IncomingMatch {
@@ -11,10 +13,10 @@ public class IncomingMatch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inc_match_seq")
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private NeighbourSubscription neighbourSubscription;
 
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="incoming_match_id")
     private Capability capability;
 
@@ -47,5 +49,24 @@ public class IncomingMatch {
 
     public Integer getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof IncomingMatch)) return false;
+        IncomingMatch that = (IncomingMatch) o;
+        return Objects.equals(neighbourSubscription, that.neighbourSubscription) && Objects.equals(capability, that.capability);
+    }
+    @Override
+    public int hashCode(){
+        return Objects.hash(neighbourSubscription, capability);
+    }
+    @Override
+    public String toString() {
+        return "Match{" +
+                "neighbourSubscription=" + neighbourSubscription +
+                ", capability=" + capability +
+                '}';
     }
 }

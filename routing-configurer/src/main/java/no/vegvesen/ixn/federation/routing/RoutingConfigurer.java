@@ -52,20 +52,8 @@ public class RoutingConfigurer {
 		this.incomingMatchDiscoveryService = incomingMatchDiscoveryService;
 	}
 
-	@Scheduled(fixedRateString = "10000")
-	public void handleNewMatches(){
-		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
-		List<NeighbourSubscription> subscriptions = neighbours.stream()
-				.flatMap(a->a.getNeighbourRequestedSubscriptions()
-						.getSubscriptions().stream()).toList();
 
-		for(NeighbourSubscription subscription : subscriptions){
-			if(incomingMatchDiscoveryService.newMatchExists(subscription)){
-				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
-			}
-		}
-		neighbours.forEach(neighbourService::saveNeighbour);
-	}
+
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
@@ -74,9 +62,26 @@ public class RoutingConfigurer {
 		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
 		setupRouting(readyToSetupRouting, delta);
 
+		logger.debug("Checking for new capabilities matching existing subscriptions");
+		handleNewMatches();
+
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
+	}
+
+	public void handleNewMatches(){
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		List<NeighbourSubscription> subscriptions = neighbours.stream()
+				.flatMap(a->a.getNeighbourRequestedSubscriptions()
+						.getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)).toList();
+
+		for(NeighbourSubscription subscription : subscriptions){
+			if(incomingMatchDiscoveryService.newMatchExists(subscription)){
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
+			}
+		}
+		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
 	void tearDownRouting(Set<Neighbour> readyToTearDownRouting) {

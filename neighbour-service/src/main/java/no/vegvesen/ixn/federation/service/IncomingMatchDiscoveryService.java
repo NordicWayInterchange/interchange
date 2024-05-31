@@ -5,6 +5,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.IncomingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ public class IncomingMatchDiscoveryService {
     private final IncomingMatchRepository incomingMatchRepository;
 
     private final ServiceProviderRepository serviceProviderRepository;
+    private Logger logger = LoggerFactory.getLogger(IncomingMatchDiscoveryService.class);
+
 
     @Autowired
     public IncomingMatchDiscoveryService(IncomingMatchRepository incomingMatchRepository, ServiceProviderRepository serviceProviderRepository){
@@ -27,14 +31,18 @@ public class IncomingMatchDiscoveryService {
     }
 
     public void createMatches(NeighbourSubscription neighbourSubscription, Set<Capability> matchingCaps){
+        if(!neighbourSubscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) return;
+
         for(Capability capability : matchingCaps){
             IncomingMatch match = new IncomingMatch(neighbourSubscription, capability);
             incomingMatchRepository.save(match);
+            logger.info("Saved new match {}", match);
         }
     }
 
     public void deleteMatches(NeighbourSubscription neighbourSubscription){
         List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
+        logger.info("Removing matches {}", matches);
         incomingMatchRepository.deleteAll(matches);
     }
 
