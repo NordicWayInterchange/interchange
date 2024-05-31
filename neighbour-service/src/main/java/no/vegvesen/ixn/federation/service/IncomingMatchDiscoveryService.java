@@ -32,10 +32,12 @@ public class IncomingMatchDiscoveryService {
             incomingMatchRepository.save(match);
         }
     }
+
     public void deleteMatches(NeighbourSubscription neighbourSubscription){
         List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
         incomingMatchRepository.deleteAll(matches);
     }
+
     public boolean newMatchExists(NeighbourSubscription neighbourSubscription){
 
         List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
@@ -50,5 +52,4 @@ public class IncomingMatchDiscoveryService {
             return false;
         }
     }
-
 }

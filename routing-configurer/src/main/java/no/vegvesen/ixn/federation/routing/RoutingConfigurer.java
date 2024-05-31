@@ -62,7 +62,6 @@ public class RoutingConfigurer {
 		for(NeighbourSubscription subscription : subscriptions){
 			if(incomingMatchDiscoveryService.newMatchExists(subscription)){
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
-				incomingMatchDiscoveryService.deleteMatches(subscription);
 			}
 		}
 		neighbours.forEach(neighbourService::saveNeighbour);
@@ -88,7 +87,7 @@ public class RoutingConfigurer {
 
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
-		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
+		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatusIn(NeighbourSubscriptionStatus.TEAR_DOWN, NeighbourSubscriptionStatus.RESUBSCRIBE);
 		Set<String> redirectedServiceProviders = new HashSet<>();
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
@@ -108,7 +107,7 @@ public class RoutingConfigurer {
 			}
 
 			//If it is the last subscription of the SP, we need to remove them from the remote_sp group
-			neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
+			neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions.stream().filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.TEAR_DOWN)).collect(Collectors.toSet()));
 			neighbourService.saveNeighbour(neighbour);
 			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
