@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.IncomingMatchRepository;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,9 +41,9 @@ public class IncomingMatchDiscoveryService {
         List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
 
         if(!matches.isEmpty()) {
-            Set<Capability> capabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
+            Set<Capability> allCapabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
             Set<Capability> existingMatches = matches.stream().map(IncomingMatch::getCapability).collect(Collectors.toSet());
-            List<Capability> allMatches = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, neighbourSubscription.getSelector()).stream().toList();
+            List<Capability> allMatches = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, neighbourSubscription.getSelector()).stream().toList();
             return !(new HashSet<>(existingMatches).containsAll(allMatches));
         }
         else{
