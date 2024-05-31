@@ -98,12 +98,12 @@ public class RoutingConfigurer {
 			for (NeighbourSubscription sub : subscriptions) {
 				for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
 					Queue queue = qpidClient.getQueue(endpoint.getSource());
+					String consumerCommonName = sub.getConsumerCommonName();
 					if (queue != null) {
 						qpidClient.removeQueue(queue);
+						qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 					}
 
-					String consumerCommonName = sub.getConsumerCommonName();
-					qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 					if (! consumerCommonName.equals(neighbour.getName())) {
 						redirectedServiceProviders.add(consumerCommonName);
 					}
