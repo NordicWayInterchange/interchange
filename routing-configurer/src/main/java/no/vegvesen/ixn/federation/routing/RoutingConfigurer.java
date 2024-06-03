@@ -272,23 +272,22 @@ public class RoutingConfigurer {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
-					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						Set<Endpoint> endpointsToRemove = new HashSet<>();
-						for (Endpoint endpoint : subscription.getEndpoints()) {
-							if (endpoint.hasShard()) {
-								SubscriptionShard shard = endpoint.getShard();
-								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
-								if (exchange != null) {
-									qpidClient.removeExchange(exchange);
-									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
-								}
-								endpoint.removeShard();
-								endpointsToRemove.add(endpoint);
+					Set<Endpoint> endpointsToRemove = new HashSet<>();
+					for (Endpoint endpoint : subscription.getEndpoints()) {
+						if (endpoint.hasShard()) {
+							SubscriptionShard shard = endpoint.getShard();
+							Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+							if (exchange != null) {
+								qpidClient.removeExchange(exchange);
+								logger.debug("Removed exchange for subscription with id {}", subscription.getId());
 							}
+							endpoint.removeShard();
+							endpointsToRemove.add(endpoint);
 						}
-						subscription.getEndpoints().removeAll(endpointsToRemove);
 					}
+					subscription.getEndpoints().removeAll(endpointsToRemove);
 				}
+
 				Set<Subscription> ourFailedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.FAILED);
 				for (Subscription subscription : ourFailedSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
