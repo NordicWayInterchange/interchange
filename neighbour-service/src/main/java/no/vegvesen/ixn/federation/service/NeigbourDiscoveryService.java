@@ -308,7 +308,6 @@ public class NeigbourDiscoveryService {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                             }
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
-
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
