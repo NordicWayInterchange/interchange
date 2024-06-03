@@ -119,7 +119,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -161,7 +162,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -178,7 +180,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -230,7 +233,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -247,7 +251,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -311,7 +316,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -357,7 +363,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -398,7 +405,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -415,7 +423,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -474,7 +483,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -491,7 +501,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -533,7 +544,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -573,7 +585,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -590,7 +603,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -640,7 +654,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -692,7 +707,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -971,6 +987,38 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownSubscriptionExchanges();
 
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
+	}
+
+	@Test
+	public void teardownSubscriptionWhereEndpointHasNoShard() {
+		Subscription subscritption = new Subscription(
+				SubscriptionStatus.TEAR_DOWN,
+				"a = b",
+				"/subscriptoins/foo",
+				"my-node",
+				Set.of(
+						new Endpoint(
+								"source",
+								"host",
+								1234
+						)
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						Set.of(
+								subscritption
+						)
+				)
+		);
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscritption.getEndpoints()).isEmpty();
+		verify(neighbourService,times(1)).saveNeighbour(neighbour);
 	}
 
 	@Test
