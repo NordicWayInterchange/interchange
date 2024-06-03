@@ -308,7 +308,7 @@ public class NeigbourDiscoveryService {
                                 tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                             }
                             else{
-                                lastUpdatedSubscription.setEndpoints(Collections.emptySet());
+                                subscription.setEndpoints(Collections.emptySet());
                             }
                             subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
                         } else {
