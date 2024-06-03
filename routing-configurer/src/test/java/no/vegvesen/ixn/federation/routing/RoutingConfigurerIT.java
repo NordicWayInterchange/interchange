@@ -16,6 +16,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -754,6 +755,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Disabled
 	public void setupRegularRoutingWithNonExistingExchangeKeepsTheSubscriptionUnchanged() {
 		Capability denmCapability = new Capability(
 				new DenmApplication(

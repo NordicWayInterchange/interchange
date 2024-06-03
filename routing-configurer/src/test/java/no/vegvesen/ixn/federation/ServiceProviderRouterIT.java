@@ -509,6 +509,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication"),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
+
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
 		serviceProvider.setCapabilities(capabilities);

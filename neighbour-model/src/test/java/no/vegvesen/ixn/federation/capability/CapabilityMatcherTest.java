@@ -301,8 +301,8 @@ class CapabilityMatcherTest {
 
 	@Test
 	void matchShardedSelectorToShardedCapability() {
-		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
-		CapabilitySplit capability = new CapabilitySplit();
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singletonList(6));
+		Capability capability = new Capability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -314,8 +314,8 @@ class CapabilityMatcherTest {
 
 	@Test
 	void shardedSubscriptionDoesNotMatchShardedCapability() {
-		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singleton(6));
-		CapabilitySplit capability = new CapabilitySplit();
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singletonList(6));
+		Capability capability = new Capability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -423,14 +423,14 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchShardedSubscriptionToCapability() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
 						"NO00000-quad-tree-testing",
 						"NO",
 						"DENM:2.3.2",
-						Collections.singleton("12003"),
-						Collections.singleton(6)
+						Collections.singletonList("12003"),
+						Collections.singletonList(6)
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);

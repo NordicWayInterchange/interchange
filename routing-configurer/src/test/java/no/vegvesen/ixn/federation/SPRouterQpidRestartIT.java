@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,6 +285,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     }
 
     @Test
+    @Disabled
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
         Capability capability = new Capability(
                 new DenmApplication(

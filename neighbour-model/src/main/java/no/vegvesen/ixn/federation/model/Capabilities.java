@@ -111,14 +111,6 @@ public class Capabilities {
 			this.capabilities.addAll(capabilities);
 		}
 	}
-
-	public boolean hasDataTypes() {
-		Set<Capability> createdCapabilities = capabilities.stream()
-				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
-				.collect(Collectors.toSet());
-
-		return createdCapabilities.size() > 0;
-	}
 	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
 		this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());

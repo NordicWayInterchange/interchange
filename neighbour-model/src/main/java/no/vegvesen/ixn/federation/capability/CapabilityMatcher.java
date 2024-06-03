@@ -68,7 +68,7 @@ public class CapabilityMatcher {
 		return matcher.match(selector, capabilityJson);
 	}
 
-	public static boolean matchCapabilityShardToSelector(CapabilitySplit capability, Integer shardId, String selector) {
+	public static boolean matchCapabilityShardToSelector(Capability capability, Integer shardId, String selector) {
 		ObjectMapper mapper = new ObjectMapper();
 		String capabilityJson = null;
 		try {
