@@ -990,6 +990,38 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void teardownSubscriptionWhereEndpointHasNoShard() {
+		Subscription subscritption = new Subscription(
+				SubscriptionStatus.TEAR_DOWN,
+				"a = b",
+				"/subscriptoins/foo",
+				"my-node",
+				Set.of(
+						new Endpoint(
+								"source",
+								"host",
+								1234
+						)
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						Set.of(
+								subscritption
+						)
+				)
+		);
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscritption.getEndpoints()).isEmpty();
+		verify(neighbourService,times(1)).saveNeighbour(neighbour);
+	}
+
+	@Test
 	public void subscriptionExchangeAndSubscriptionShardIsRemovedWhenSubscriptionHasStatusFailed() {
 		String exchangeName = "failed-exchange";
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
