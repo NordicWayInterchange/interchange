@@ -111,6 +111,18 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	IncomingMatchDiscoveryService incomingMatchDiscoveryService;
 
 	@Test
+	public void subscriptionIsSetToResubscribeWhenNewMatchExists(){
+		Neighbour nb = new Neighbour();
+		nb.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'",NeighbourSubscriptionStatus.CREATED))));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(nb));
+		when(incomingMatchDiscoveryService.newMatchExists(any())).thenReturn(true);
+		neighbourService.saveNeighbour(nb);
+
+		routingConfigurer.handleNewMatches();
+		assertThat(nb.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))).hasSize(1);
+	}
+
+	@Test
 	public void neighbourWithOneBindingIsCreated() {
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		Shard shard = new Shard(1, "cap-ex20", "publicationId = 'pub-1'");
