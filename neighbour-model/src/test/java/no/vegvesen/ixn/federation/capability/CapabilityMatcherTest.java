@@ -42,7 +42,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -55,7 +55,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -68,7 +68,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -81,7 +81,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -94,7 +94,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -107,7 +107,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -120,7 +120,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -133,7 +133,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
-		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction");
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction", "publisherName");
 		Capability datexCapability = new Capability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
@@ -393,5 +393,29 @@ class CapabilityMatcherTest {
 
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,1200401%' and causeCode = 6";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
+
+	@Test
+	public void missingPublisherName(){
+		Capability capability = new Capability(
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", List.of("1"), "pub", null),
+				new Metadata()
+		);
+		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
+		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+	}
+	@Test
+	public void publisherNameInCapability(){
+		Capability capability = new Capability(
+				new DatexApplication("pub-1111", "NO-pub-1111","NO", "DATEX2:2.3", List.of("1"), "pub", "NO-PUB"),
+				new Metadata()
+		);
+		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
+		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
+
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isTrue();
 	}
 }

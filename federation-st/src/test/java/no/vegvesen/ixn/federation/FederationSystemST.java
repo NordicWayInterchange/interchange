@@ -128,6 +128,7 @@ public class FederationSystemST {
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
+				.publisherName("publishername")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)
 				.longitude(13.334253)

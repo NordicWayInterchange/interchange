@@ -83,7 +83,8 @@ public class NeighbourRepositoryIT {
 						"NO",
 						"1.0",
 						List.of(),
-						"SituationPublication"),
+						"SituationPublication",
+						"publisherName"),
 				new Metadata()
 		);
 		NeighbourCapabilities firstCapabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
@@ -138,8 +139,8 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
 		HashSet<NeighbourCapability> capabilities = new HashSet<>();
-		capabilities.add(new NeighbourCapability(new DatexApplication(null, null, "NO", null, List.of(), "SituationPublication"), new Metadata()));
-		capabilities.add(new NeighbourCapability(new DatexApplication(null, null, "SE", null, List.of(), "MeasuredDataPublication"), new Metadata()));
+		capabilities.add(new NeighbourCapability(new DatexApplication(null, null, "NO", null, List.of(), "SituationPublication", "publisherName"), new Metadata()));
+		capabilities.add(new NeighbourCapability(new DatexApplication(null, null, "SE", null, List.of(), "MeasuredDataPublication", "publisherName"), new Metadata()));
 		Neighbour anyNeighbour = new Neighbour("any", new NeighbourCapabilities(CapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(new HashSet<>()), new SubscriptionRequest(new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);
@@ -152,7 +153,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@NonNull
-	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
+	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType, String publisherName) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
 		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
 		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
@@ -161,6 +162,9 @@ public class NeighbourRepositoryIT {
 		}
 		if (publicationSubType != null) {
 			datexHeaders.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
+		}
+		if(publisherName != null){
+			datexHeaders.put(MessageProperty.PUBLISHER_NAME.getName(), publisherName);
 		}
 		return datexHeaders;
 	}

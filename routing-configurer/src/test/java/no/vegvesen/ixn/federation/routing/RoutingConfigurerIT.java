@@ -141,7 +141,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -183,7 +184,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -200,7 +202,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -252,7 +255,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -269,7 +273,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -333,7 +338,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -379,7 +385,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -420,7 +427,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -437,7 +445,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -496,7 +505,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -513,7 +523,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -555,7 +566,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -595,7 +607,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata1
 		);
@@ -612,7 +625,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"SE",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata2
 		);
@@ -662,7 +676,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);
@@ -714,7 +729,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+						"publisherName"
 				),
 				metadata
 		);

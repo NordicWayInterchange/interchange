@@ -88,6 +88,9 @@ public class OnboardRestController {
 			if (!capabilityProperties.isEmpty()) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
+			if(!CapabilityValidator.quadtreeIsValid(capability)){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
+			}
 		}
 
 		List<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
