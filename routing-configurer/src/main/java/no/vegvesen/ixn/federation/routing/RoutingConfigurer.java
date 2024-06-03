@@ -70,7 +70,7 @@ public class RoutingConfigurer {
 		tearDownRouting(readyToTearDownRouting);
 	}
 
-	public void handleNewMatches(){
+	void handleNewMatches(){
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		List<NeighbourSubscription> subscriptions = neighbours.stream()
 				.flatMap(a->a.getNeighbourRequestedSubscriptions()
