@@ -9,10 +9,9 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +43,17 @@ public class RoutingConfigurer {
 	private final SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
 
 
-	private final MatchRepository matchRepository;
+	private final SubscriptionMatchRepository SubscriptionMatchRepository;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchRepository matchRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, SubscriptionMatchRepository SubscriptionMatchRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
 		this.subscriptionCapabilityMatchDiscoveryService = subscriptionCapabilityMatchDiscoveryService;
-		this.matchRepository = matchRepository;
-        this.subscriptionCapabilityMatchDiscoveryService = subscriptionCapabilityMatchDiscoveryService;
+		this.SubscriptionMatchRepository = SubscriptionMatchRepository;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -77,7 +75,7 @@ public class RoutingConfigurer {
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
 		for(Subscription subscription : subscriptions){
-			List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+			List<SubscriptionMatch> matches = SubscriptionMatchRepository.findAllBySubscriptionId(subscription.getId());
 			if(matches.isEmpty()) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 			}

@@ -48,20 +48,24 @@ public class SubscriptionMatchDiscoveryService {
     }
 
     public void syncMatchesToDelete() {
-        List<SubscriptionMatch> existingSubscriptionMatches = subscriptionMatchRepository.findAll();
+        List<SubscriptionMatch> existingMatches = subscriptionMatchRepository.findAll();
         Set<SubscriptionMatch> matchesToDelete = new HashSet<>();
-        for (SubscriptionMatch subscriptionMatch : existingSubscriptionMatches) {
-            if (subscriptionMatch.subscriptionIsTearDown()) {
-                if ( subscriptionMatch.getSubscription().getEndpoints().isEmpty()) {
-                    logger.info("Removing SubscriptionMatch {}", subscriptionMatch);
-                    matchesToDelete.add(subscriptionMatch);
-                }
-            } else {
-                if (subscriptionMatch.localSubscriptionIsTearDown()) {
-                    logger.info("Removing SubscriptionMatch {}", subscriptionMatch);
-                    matchesToDelete.add(subscriptionMatch);
+        for (SubscriptionMatch match : existingMatches) {
+            if (match.subscriptionIsTearDown()) {
+                if (match.getSubscription().getEndpoints().isEmpty()) {
+                    logger.info("Removing Match {}", match);
+                    matchesToDelete.add(match);
                 }
             }
+            else if(match.localSubscriptionIsTearDown()){
+                logger.info("Removing Match {}", match);
+                matchesToDelete.add(match);
+            }
+            else if(match.localSubscriptionAndSubscriptionIsResubscribe()){
+                logger.info("Removing Match {}", match);
+                matchesToDelete.add(match);
+            }
+
         }
         subscriptionMatchRepository.deleteAll(matchesToDelete);
     }

@@ -83,8 +83,8 @@ public class ServiceProviderRouter {
 
     public ServiceProvider subscriptionsForResubscribe(ServiceProvider serviceProvider){
         for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
-            List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-            for(Match match : matches){
+            List<SubscriptionMatch> matches = subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+            for(SubscriptionMatch match : matches){
                 if(match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)){
                     localSubscription.setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
                     }

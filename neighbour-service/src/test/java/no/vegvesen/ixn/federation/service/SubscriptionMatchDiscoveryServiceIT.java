@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,14 +60,14 @@ public class SubscriptionMatchDiscoveryServiceIT {
         sp.addLocalSubscription(localSubscription);
         serviceProviderRepository.save(sp);
 
-        Match match = new Match(
+        SubscriptionMatch match = new SubscriptionMatch(
                 localSubscription,
                 subscription
         );
-        matchRepository.save(match);
+        subscriptionMatchRepository.save(match);
 
-        matchDiscoveryService.syncMatchesToDelete();
-        List<Match> matches = matchRepository.findAll();
+        subscriptionMatchDiscoveryService.syncMatchesToDelete();
+        List<SubscriptionMatch> matches = subscriptionMatchRepository.findAll();
         assertThat(matches).isEmpty();
     }
     @Test
@@ -80,14 +82,14 @@ public class SubscriptionMatchDiscoveryServiceIT {
         sp.addLocalSubscription(localSubscription);
         serviceProviderRepository.save(sp);
 
-        Match match = new Match(
+        SubscriptionMatch match = new SubscriptionMatch(
                 localSubscription,
                 subscription
         );
-        matchRepository.save(match);
+        subscriptionMatchRepository.save(match);
 
-        matchDiscoveryService.syncMatchesToDelete();
-        List<Match> matches = matchRepository.findAll();
+        subscriptionMatchDiscoveryService.syncMatchesToDelete();
+        List<SubscriptionMatch> matches = subscriptionMatchRepository.findAll();
         assertThat(matches.size()).isEqualTo(1);
     }
 
