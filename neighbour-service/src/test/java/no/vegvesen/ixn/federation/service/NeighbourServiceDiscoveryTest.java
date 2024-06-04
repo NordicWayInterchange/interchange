@@ -684,7 +684,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenReturn(returnSubscription);
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
 
-		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.RESUBSCRIBE);
 		verify(neighbourFacade,times(1)).pollSubscriptionStatus(any(),any());
 	}
 

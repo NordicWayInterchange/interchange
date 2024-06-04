@@ -10,7 +10,9 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,18 +44,19 @@ public class RoutingConfigurer {
 	private final SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
 
 
+	private final MatchRepository matchRepository;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchRepository matchRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
 		this.subscriptionCapabilityMatchDiscoveryService = subscriptionCapabilityMatchDiscoveryService;
+		this.matchRepository = matchRepository;
+        this.subscriptionCapabilityMatchDiscoveryService = subscriptionCapabilityMatchDiscoveryService;
 	}
-
-
-
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
@@ -68,6 +71,18 @@ public class RoutingConfigurer {
 		logger.debug("Checking for neighbours to tear down routing");
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
+	}
+	@Scheduled(fixedRateString = "10000")
+	public void setSubscriptionsToTearDown(){
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		List<Subscription> subscriptions = neighbours.stream().flatMap(a->a.getOurRequestedSubscriptions().getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)).toList();
+		for(Subscription subscription : subscriptions){
+			List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+			if(matches.isEmpty()) {
+				subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+			}
+		}
+		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
 	void handleNewMatches(){
@@ -284,22 +299,20 @@ public class RoutingConfigurer {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
-					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						Set<Endpoint> endpointsToRemove = new HashSet<>();
-						for (Endpoint endpoint : subscription.getEndpoints()) {
-							if (endpoint.hasShard()) {
-								SubscriptionShard shard = endpoint.getShard();
-								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
-								if (exchange != null) {
-									qpidClient.removeExchange(exchange);
-									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
-								}
-								endpoint.removeShard();
+					Set<Endpoint> endpointsToRemove = new HashSet<>();
+					for (Endpoint endpoint : subscription.getEndpoints()) {
+						if (endpoint.hasShard()) {
+							SubscriptionShard shard = endpoint.getShard();
+							Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
+							if (exchange != null) {
+								qpidClient.removeExchange(exchange);
+								logger.debug("Removed exchange for subscription with id {}", subscription.getId());
 							}
-							endpointsToRemove.add(endpoint);
-						}
-						subscription.getEndpoints().removeAll(endpointsToRemove);
+							endpoint.removeShard();
+							}endpointsToRemove.add(endpoint);
+
 					}
+					subscription.getEndpoints().removeAll(endpointsToRemove);
 				}
 				Set<Subscription> ourFailedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.FAILED);
 				for (Subscription subscription : ourFailedSubscriptions) {

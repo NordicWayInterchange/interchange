@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -105,6 +106,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	ListenerEndpointRepository listenerEndpointRepository;
 
 	@MockBean
+	MatchRepository matchRepository;
+
+	@MockBean
 	InterchangeNodeProperties interchangeNodeProperties;
 
 	@MockBean
@@ -120,6 +124,24 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.handleNewMatches();
 		assertThat(nb.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))).hasSize(1);
+	}
+
+	@Test
+	public void subscriptionInResubscribeAndNoMatchIsRemoved(){
+		Neighbour neighbour = new Neighbour();
+		Subscription sp = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.RESUBSCRIBE);
+		SubscriptionRequest request = new SubscriptionRequest(Collections.singleton(sp));
+		neighbour.setOurRequestedSubscriptions(request);
+		neighbourService.saveNeighbour(neighbour);
+
+		when(matchRepository.findAllBySubscriptionId(any())).thenReturn(List.of());
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+
+		routingConfigurer.setSubscriptionsToTearDown();
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		Subscription subscription = neighbours.get(0).getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 	}
 
 	@Test

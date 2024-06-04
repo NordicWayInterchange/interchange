@@ -60,6 +60,7 @@ public class ServiceProviderRouter {
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
             serviceProvider = syncSubscriptions(serviceProvider, delta);
+            serviceProvider = subscriptionsForResubscribe(serviceProvider);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
             GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
@@ -78,6 +79,18 @@ public class ServiceProviderRouter {
             serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
+    }
+
+    public ServiceProvider subscriptionsForResubscribe(ServiceProvider serviceProvider){
+        for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
+            List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+            for(Match match : matches){
+                if(match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)){
+                    localSubscription.setStatus(LocalSubscriptionStatus.RESUBSCRIBE);
+                    }
+            }
+        }
+        return repository.save(serviceProvider);
     }
 
     public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
@@ -106,7 +119,7 @@ public class ServiceProviderRouter {
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription, delta);
                 break;
-            case TEAR_DOWN:
+            case TEAR_DOWN, RESUBSCRIBE:
                 //	Check that the binding exist, if so, delete it
                 onTearDown(serviceProvider, subscription, delta);
                 break;
@@ -179,6 +192,9 @@ public class ServiceProviderRouter {
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+        }
+        else if(subscription.getStatus().equals(LocalSubscriptionStatus.RESUBSCRIBE)){
+            subscription.getLocalEndpoints().clear();
         }
         else {
             throw new IllegalStateException("Unknown subscription status encountered");
