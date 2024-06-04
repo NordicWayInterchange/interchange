@@ -5,9 +5,6 @@ permissions:
   id-token: write
 
 on:
-  push:
-    branches:
-      - federation-master
   workflow_dispatch:
     inputs:
       git-ref:
@@ -151,8 +148,8 @@ jobs:
         run: |
           cd ./${{ matrix.Images }}
           docker build . -t ${{ matrix.Images }}
-      - name: Push docker image to Google artifact registry
 
+      - name: Push docker image to Google artifact registry
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.CURRENT_VERSION }}
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}

@@ -6,8 +6,6 @@ permissions:
 
 on:
   push:
-    branches-ignore:
-      - federation-master
   workflow_dispatch:
     inputs:
       git-ref:
