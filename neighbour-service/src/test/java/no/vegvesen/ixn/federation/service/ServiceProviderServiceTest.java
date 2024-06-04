@@ -5,8 +5,8 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
+import no.vegvesen.ixn.federation.repository.DeliveryCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,16 +29,16 @@ public class ServiceProviderServiceTest {
     ServiceProviderRepository serviceProviderRepository;
 
     @Mock
-    OutgoingMatchRepository outgoingMatchRepository;
+    DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
     @Mock
-    MatchRepository matchRepository;
+    SubscriptionMatchRepository subscriptionMatchRepository;
 
     ServiceProviderService service;
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchRepository, matchRepository);
+        service = new ServiceProviderService(serviceProviderRepository, deliveryCapabilityMatchRepository, subscriptionMatchRepository);
     }
 
     @Test
@@ -179,12 +179,12 @@ public class ServiceProviderServiceTest {
         );
 
         when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-        when(outgoingMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
+        when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
         service.updateDeliveryStatus(serviceProvider.getName());
         //The status for the delivery should not have changed
         assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
         verify(serviceProviderRepository).findByName(serviceProvider.getName());
-        verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
+        verify(deliveryCapabilityMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
 
     }
 
@@ -209,10 +209,10 @@ public class ServiceProviderServiceTest {
 
         );
         when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-        when(outgoingMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
+        when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
         service.updateDeliveryStatus(serviceProvider.getName());
         assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
         verify(serviceProviderRepository).findByName(serviceProvider.getName());
-        verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
+        verify(deliveryCapabilityMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
     }
 }

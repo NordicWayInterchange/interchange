@@ -2,9 +2,9 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.DeliveryCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
@@ -34,13 +34,13 @@ public class ServiceProviderServiceIT {
     OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Autowired
-    MatchRepository matchRepository;
+    SubscriptionMatchRepository subscriptionMatchRepository;
 
     @Autowired
     ServiceProviderService service;
 
     @Autowired
-    OutgoingMatchRepository outgoingMatchRepository;
+    DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
 
     @Test
@@ -79,8 +79,8 @@ public class ServiceProviderServiceIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(localSubscription, subscription, serviceProviderName);
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, serviceProviderName);
+        subscriptionMatchRepository.save(subscriptionMatch);
 
         service.syncServiceProviders("my-node", 5671);
 
@@ -120,8 +120,8 @@ public class ServiceProviderServiceIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(localSubscription, subscription, serviceProviderName);
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, serviceProviderName);
+        subscriptionMatchRepository.save(subscriptionMatch);
 
         service.syncServiceProviders("my-node", 5671);
 
@@ -130,7 +130,7 @@ public class ServiceProviderServiceIT {
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
 
         neighbourRepository.deleteAll();
-        matchRepository.deleteAll();
+        subscriptionMatchRepository.deleteAll();
 
         service.syncServiceProviders("my-node", 5671);
 
@@ -169,8 +169,8 @@ public class ServiceProviderServiceIT {
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         // Will only receive Exchange Name if outgoing match(es) exist
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
-        outgoingMatchRepository.save(outgoingMatch);
+        DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(delivery, null, serviceProvider.getName());
+        deliveryCapabilityMatchRepository.save(deliveryCapabilityMatch);
 
         repository.save(serviceProvider);
         service.updateDeliveryStatus(serviceProvider.getName());
@@ -218,8 +218,8 @@ public class ServiceProviderServiceIT {
         delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
 
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
-        outgoingMatchRepository.save(outgoingMatch);
+        DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(delivery, null, serviceProvider.getName());
+        deliveryCapabilityMatchRepository.save(deliveryCapabilityMatch);
         repository.save(serviceProvider);
 
         service.updateTearDownLocalDeliveryEndpoints(serviceProvider.getName());
@@ -239,9 +239,9 @@ public class ServiceProviderServiceIT {
         delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
 
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
+        DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(delivery, null, serviceProvider.getName());
 
-        outgoingMatchRepository.save(outgoingMatch);
+        deliveryCapabilityMatchRepository.save(deliveryCapabilityMatch);
         repository.save(serviceProvider);
 
         service.updateTearDownLocalDeliveryEndpoints(serviceProvider.getName());
@@ -260,8 +260,8 @@ public class ServiceProviderServiceIT {
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
         capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
-        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, serviceProvider.getName());
-        outgoingMatchRepository.save(outgoingMatch);
+        DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(null, capability, serviceProvider.getName());
+        deliveryCapabilityMatchRepository.save(deliveryCapabilityMatch);
 
         serviceProvider.setCapabilities(capabilities);
         repository.save(serviceProvider);

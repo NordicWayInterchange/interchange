@@ -13,7 +13,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.IncomingMatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -108,14 +108,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	InterchangeNodeProperties interchangeNodeProperties;
 
 	@MockBean
-	IncomingMatchDiscoveryService incomingMatchDiscoveryService;
+    SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
 
 	@Test
 	public void subscriptionIsSetToResubscribeWhenNewMatchExists(){
 		Neighbour nb = new Neighbour();
 		nb.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'",NeighbourSubscriptionStatus.CREATED))));
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(nb));
-		when(incomingMatchDiscoveryService.newMatchExists(any())).thenReturn(true);
+		when(subscriptionCapabilityMatchDiscoveryService.newMatchExists(any())).thenReturn(true);
 		neighbourService.saveNeighbour(nb);
 
 		routingConfigurer.handleNewMatches();

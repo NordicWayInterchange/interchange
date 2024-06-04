@@ -84,13 +84,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	ServiceProviderRouter router;
 
 	@MockBean
-	MatchRepository matchRepository;
+	SubscriptionMatchRepository subscriptionMatchRepository;
 
 	@MockBean
 	ListenerEndpointRepository listenerEndpointRepository;
 
 	@MockBean
-	OutgoingMatchRepository outgoingMatchRepository;
+	DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
@@ -388,12 +388,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		));
 		king_gustaf.addDeliveries(Collections.singleton(localDelivery));
 
-		OutgoingMatch outgoingMatch = new OutgoingMatch(
+		DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(
 				localDelivery,
 				capability,
 				king_gustaf.getName()
 		);
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(outgoingMatch));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(deliveryCapabilityMatch));
 		when(serviceProviderRepository.save(any())).thenReturn(king_gustaf);
 		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
 
@@ -452,7 +452,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						.map(localSubscription1 -> localSubscription1.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
 						.collect(Collectors.toSet()));
 
-		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
@@ -560,7 +560,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(queueName);
 
-		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
 
@@ -594,9 +594,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 		delivery.setExchangeName("my-exchange5");
 
-		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+		DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, denmCapability, serviceProviderName);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
@@ -650,11 +650,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		delivery.setExchangeName("my-exchange6");
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
-		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+		DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, denmCapability, serviceProviderName);
 
-		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName);
+		DeliveryCapabilityMatch match2 = new DeliveryCapabilityMatch(delivery, denmCapability2, serviceProviderName);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match, match2));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match, match2));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
@@ -690,15 +690,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addDeliveries(Set.of(delivery));
 		delivery.setExchangeName(exchangeName);
 
-		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+		DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, denmCapability, serviceProviderName);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
 		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
@@ -734,9 +734,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
-		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+		DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, denmCapability, serviceProviderName);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
@@ -744,7 +744,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		assertThat(delivery.exchangeExists()).isFalse();
@@ -796,17 +796,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
-		OutgoingMatch match1 = new OutgoingMatch(delivery, denmCapability1, serviceProviderName);
+		DeliveryCapabilityMatch match1 = new DeliveryCapabilityMatch(delivery, denmCapability1, serviceProviderName);
 
-		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName);
+		DeliveryCapabilityMatch match2 = new DeliveryCapabilityMatch(delivery, denmCapability2, serviceProviderName);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match1, match2));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match1, match2));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match2));
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match2));
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
@@ -831,7 +831,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				null
 		);
 		QpidDelta delta = client.getQpidDelta();
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(1)).thenReturn(new ArrayList<>());
+		when(deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(1)).thenReturn(new ArrayList<>());
 		router.tearDownDeliveryQueues(serviceProvider,delta);
 		assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
 	}
@@ -947,7 +947,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(new ArrayList<>());
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(new ArrayList<>());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
@@ -965,13 +965,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		Match match = new Match(
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(
 				subscription,
 				new Subscription("",SubscriptionStatus.TEAR_DOWN),
 				"sp-1"
 		);
 
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(subscriptionMatch));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
@@ -990,7 +990,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(subscription)
 		);
 
-		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
@@ -1018,10 +1018,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, "my-service-provider");
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(subscriptionMatch));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
@@ -1057,11 +1057,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint2 = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName2));
 		subscription2.setEndpoints(Collections.singleton(endpoint2));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
-		Match match2 = new Match(localSubscription, subscription2, "my-service-provider");
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, "my-service-provider");
+		SubscriptionMatch subscriptionMatch2 = new SubscriptionMatch(localSubscription, subscription2, "my-service-provider");
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(subscriptionMatch, subscriptionMatch2));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
@@ -1091,13 +1091,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, "my-service-provider");
 
 		//Mocking that binding already exists and isn't created again
 		client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(subscriptionMatch));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
@@ -1126,10 +1126,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, "my-service-provider");
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(subscriptionMatch));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
@@ -1158,10 +1158,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, subscription, "my-service-provider");
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(subscriptionMatch));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
@@ -1180,7 +1180,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
@@ -1221,12 +1221,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(
 				localSubscription,
 				subscription
 		);
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(subscriptionMatch));
 		router.createBindingsWithMatches();
 		//TODO asserts, verify that the methods are called
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
@@ -1269,12 +1269,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(
 				localSubscription,
 				subscription
 		);
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(subscriptionMatch));
 		router.createBindingsWithMatches();
 		//TODO asserts, verify that the methods are called
 		assertThat(client.queueExists(source)).isFalse();

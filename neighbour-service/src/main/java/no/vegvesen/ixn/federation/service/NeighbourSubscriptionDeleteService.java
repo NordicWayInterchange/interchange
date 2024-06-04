@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +21,14 @@ public class NeighbourSubscriptionDeleteService {
     private Logger logger = LoggerFactory.getLogger(NeighbourSubscriptionDeleteService.class);
     private final NeighbourRepository neighbourRepository;
     private final GracefulBackoffProperties backoffProperties;
-    private final MatchRepository matchRepository;
+    private final SubscriptionMatchRepository subscriptionMatchRepository;
 
 
     @Autowired
-    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository) {
+    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, GracefulBackoffProperties backoffProperties, SubscriptionMatchRepository subscriptionMatchRepository) {
         this.neighbourRepository = neighbourRepository;
         this.backoffProperties = backoffProperties;
-        this.matchRepository = matchRepository;
+        this.subscriptionMatchRepository = subscriptionMatchRepository;
     }
 
     public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
@@ -38,8 +38,8 @@ public class NeighbourSubscriptionDeleteService {
                 Set<Subscription> subscriptionsToDelete = new HashSet<>();
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (SubscriptionStatus.shouldTearDown(subscription.getSubscriptionStatus())) {
-                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
-                        if (matches.isEmpty()) {
+                        List<SubscriptionMatch> subscriptionMatches = subscriptionMatchRepository.findAllBySubscriptionId(subscription.getId());
+                        if (subscriptionMatches.isEmpty()) {
                             try{
                                 if (subscription.getEndpoints().isEmpty()) {
                                     neighbourFacade.deleteSubscription(neighbour, subscription);

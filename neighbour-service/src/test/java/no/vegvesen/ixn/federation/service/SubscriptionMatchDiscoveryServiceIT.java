@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class MatchDiscoveryServiceIT {
+public class SubscriptionMatchDiscoveryServiceIT {
 
     @Autowired
-    private MatchRepository matchRepository;
+    private SubscriptionMatchRepository subscriptionMatchRepository;
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
@@ -32,16 +32,16 @@ public class MatchDiscoveryServiceIT {
     private NeighbourRepository neighbourRepository;
 
     @Autowired
-    private MatchDiscoveryService matchDiscoveryService;
+    private SubscriptionMatchDiscoveryService subscriptionMatchDiscoveryService;
 
     @Test
     public void matchDiscovereryServiceIsAutowired() {
-        assertThat(matchDiscoveryService).isNotNull();
+        assertThat(subscriptionMatchDiscoveryService).isNotNull();
     }
 
     @Test
     public void repositoriesAreAutowired() {
-        assertThat(matchRepository).isNotNull();
+        assertThat(subscriptionMatchRepository).isNotNull();
         assertThat(serviceProviderRepository).isNotNull();
         assertThat(neighbourRepository).isNotNull();
     }
@@ -72,8 +72,8 @@ public class MatchDiscoveryServiceIT {
         );
         neighbourRepository.save(neighbour);
 
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
-        assertThat(matchRepository.findAll()).hasSize(2);
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(2);
     }
 
     @Test
@@ -95,9 +95,9 @@ public class MatchDiscoveryServiceIT {
                 )
         );
         neighbourRepository.save(neighbour);
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -121,8 +121,8 @@ public class MatchDiscoveryServiceIT {
         );
         neighbourRepository.save(neighbour);
 
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider1), Collections.singletonList(neighbour));
-        assertThat(matchRepository.findAll()).hasSize(1);
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider1), Collections.singletonList(neighbour));
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
 
         Neighbour savedNeighbour = neighbourRepository.findByName(neighbour.getName());
 
@@ -130,7 +130,7 @@ public class MatchDiscoveryServiceIT {
                 .findFirst()
                 .get();
 
-        assertThat(matchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(1);
 
         LocalSubscription localSubscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
@@ -138,10 +138,10 @@ public class MatchDiscoveryServiceIT {
         serviceProvider2.addLocalSubscription(localSubscription2);
         serviceProviderRepository.save(serviceProvider2);
 
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
 
-        assertThat(matchRepository.findAll()).hasSize(2);
-        assertThat(matchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(2);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(2);
+        assertThat(subscriptionMatchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(2);
     }
 
     @Test
@@ -165,8 +165,8 @@ public class MatchDiscoveryServiceIT {
         );
         neighbourRepository.save(neighbour);
 
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
-        assertThat(matchRepository.findAll()).hasSize(0);
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(0);
     }
 
 }

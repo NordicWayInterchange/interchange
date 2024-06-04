@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class MatchRepositoryIT {
+public class SubscriptionMatchRepositoryIT {
 
     @Autowired
-    MatchRepository matchRepository;
+    SubscriptionMatchRepository subscriptionMatchRepository;
 
     @Autowired
     NeighbourRepository neighbourRepository;
@@ -34,7 +34,7 @@ public class MatchRepositoryIT {
 
     @AfterEach
     public void tearDown() {
-        matchRepository.deleteAll();
+        subscriptionMatchRepository.deleteAll();
         serviceProviderRepository.deleteAll();
         neighbourRepository.deleteAll();
     }
@@ -42,7 +42,7 @@ public class MatchRepositoryIT {
 
     @BeforeEach
     public void setUp() {
-        assertThat(matchRepository.findAll()).isEmpty();
+        assertThat(subscriptionMatchRepository.findAll()).isEmpty();
         assertThat(serviceProviderRepository.findAll()).isEmpty();
         assertThat(neighbourRepository.findAll()).isEmpty();
     }
@@ -59,11 +59,11 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(locSub, sub, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(1);
+        List<SubscriptionMatch> allSubscriptionMatches = subscriptionMatchRepository.findAll();
+        assertThat(allSubscriptionMatches).hasSize(1);
     }
 
     @Test
@@ -78,10 +78,10 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub,sub,"my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(locSub,sub,"my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        matchRepository.delete(match);
+        subscriptionMatchRepository.delete(subscriptionMatch);
 
         ServiceProvider serviceProvider = serviceProviderRepository.findByName("my-sp");
         assertThat(serviceProvider.getSubscriptions()).isNotEmpty();
@@ -92,8 +92,8 @@ public class MatchRepositoryIT {
 
     @Test
     public void findOnUnsavedMatch() {
-        List<Match> noMatch = matchRepository.findAllBySubscriptionId(1);
-        assertThat(noMatch).isEmpty();
+        List<SubscriptionMatch> noSubscriptionMatches = subscriptionMatchRepository.findAllBySubscriptionId(1);
+        assertThat(noSubscriptionMatches).isEmpty();
     }
 
     @Test
@@ -108,10 +108,10 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(locSub, sub, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        matchRepository.deleteAll();
+        subscriptionMatchRepository.deleteAll();
 
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Set<Subscription> requestedSubscriptions = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions();
@@ -119,8 +119,8 @@ public class MatchRepositoryIT {
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
         Set<LocalSubscription> localSubscriptions = savedServiceProvider.getSubscriptions();
 
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(0);
+        List<SubscriptionMatch> allSubscriptionMatches = subscriptionMatchRepository.findAll();
+        assertThat(allSubscriptionMatches).hasSize(0);
         assertThat(requestedSubscriptions).hasSize(1);
         assertThat(localSubscriptions).hasSize(1);
     }
@@ -142,15 +142,15 @@ public class MatchRepositoryIT {
 
         assertThat(locSub.getId()).isNotNull(); //in other words, no need to assign it to a new variable, the original one has been updated.
 
-        Match match = new Match(locSub, sub, "my-sp");
-        Match match1 = new Match(locSub, sub1, "my-sp");
-        matchRepository.save(match);
-        matchRepository.save(match1);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(locSub, sub, "my-sp");
+        SubscriptionMatch subscriptionMatch1 = new SubscriptionMatch(locSub, sub1, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
+        subscriptionMatchRepository.save(subscriptionMatch1);
 
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(2);
+        List<SubscriptionMatch> allSubscriptionMatches = subscriptionMatchRepository.findAll();
+        assertThat(allSubscriptionMatches).hasSize(2);
 
-        List<Match> byLocalSubscriptionId = matchRepository.findAllByLocalSubscriptionId(locSub.getId());
+        List<SubscriptionMatch> byLocalSubscriptionId = subscriptionMatchRepository.findAllByLocalSubscriptionId(locSub.getId());
         assertThat(byLocalSubscriptionId).hasSize(2);
     }
 
@@ -169,11 +169,11 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
 
-        matchRepository.save(match);
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -191,11 +191,11 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
 
-        matchRepository.save(match);
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED)).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED)).hasSize(1);
 
     }
 
@@ -224,12 +224,12 @@ public class MatchRepositoryIT {
         Subscription savedSubscription1 = savedNeighbour1.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        Match match1 = new Match(savedLocalSubscription, savedSubscription1, "my-sp");
-        matchRepository.save(match);
-        matchRepository.save(match1);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
+        SubscriptionMatch subscriptionMatch1 = new SubscriptionMatch(savedLocalSubscription, savedSubscription1, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
+        subscriptionMatchRepository.save(subscriptionMatch1);
 
-        assertThat(matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED)).hasSize(2);
+        assertThat(subscriptionMatchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED)).hasSize(2);
     }
 
     @Test
@@ -249,14 +249,14 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
 
-        Match savedMatch = matchRepository.findAll().get(0);
+        SubscriptionMatch savedSubscriptionMatch = subscriptionMatchRepository.findAll().get(0);
 
-        matchRepository.delete(savedMatch);
+        subscriptionMatchRepository.delete(savedSubscriptionMatch);
 
         ServiceProvider getServiceProvider = serviceProviderRepository.findByName("my-sp");
 
@@ -280,14 +280,14 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
 
-        Match savedMatch = matchRepository.findAll().get(0);
+        SubscriptionMatch savedSubscriptionMatch = subscriptionMatchRepository.findAll().get(0);
 
-        matchRepository.delete(savedMatch);
+        subscriptionMatchRepository.delete(savedSubscriptionMatch);
 
         Neighbour getNeighbour = neighbourRepository.findByName("neighbour");
 
@@ -311,10 +311,10 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
 
         ServiceProvider getServiceProvider = serviceProviderRepository.findByName("my-sp");
         LocalSubscription getLocalSubscription = getServiceProvider.getSubscriptions().stream().findFirst().get();
@@ -323,9 +323,9 @@ public class MatchRepositoryIT {
 
         serviceProviderRepository.save(getServiceProvider);
 
-        Match savedMatch = matchRepository.findAll().get(0);
+        SubscriptionMatch savedSubscriptionMatch = subscriptionMatchRepository.findAll().get(0);
 
-        assertThat(savedMatch).isNotNull();
+        assertThat(savedSubscriptionMatch).isNotNull();
     }
 
     @Test
@@ -345,10 +345,10 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        matchRepository.save(match);
+        SubscriptionMatch subscriptionMatch = new SubscriptionMatch(savedLocalSubscription, savedSubscription, "my-sp");
+        subscriptionMatchRepository.save(subscriptionMatch);
 
-        assertThat(matchRepository.findAll()).hasSize(1);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(1);
 
         Neighbour getNeighbour = neighbourRepository.findByName("neighbour");
         Subscription getSubscription = getNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
@@ -358,9 +358,9 @@ public class MatchRepositoryIT {
         //TODO: Have to do something with this test, it fails in database when saved to neighbourRepository
         //neighbourRepository.save(getNeighbour);
 
-        Match savedMatch = matchRepository.findAll().get(0);
+        SubscriptionMatch savedSubscriptionMatch = subscriptionMatchRepository.findAll().get(0);
 
-        assertThat(savedMatch).isNotNull();
+        assertThat(savedSubscriptionMatch).isNotNull();
     }
 
     @Test
@@ -387,13 +387,13 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match1 = new Match(locSub1, sub, serviceProviderName1);
-        Match match2 = new Match(locSub2, sub, serviceProviderName2);
+        SubscriptionMatch subscriptionMatch1 = new SubscriptionMatch(locSub1, sub, serviceProviderName1);
+        SubscriptionMatch subscriptionMatch2 = new SubscriptionMatch(locSub2, sub, serviceProviderName2);
 
-        matchRepository.save(match1);
-        matchRepository.save(match2);
+        subscriptionMatchRepository.save(subscriptionMatch1);
+        subscriptionMatchRepository.save(subscriptionMatch2);
 
-        assertThat(matchRepository.findAll()).hasSize(2);
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(2);
     }
 
 }

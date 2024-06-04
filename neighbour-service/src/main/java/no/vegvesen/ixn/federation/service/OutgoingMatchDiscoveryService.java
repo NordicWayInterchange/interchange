@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.DeliveryCapabilityMatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ import java.util.Set;
 @Component
 public class OutgoingMatchDiscoveryService {
 
-    private OutgoingMatchRepository repository;
+    private DeliveryCapabilityMatchRepository repository;
 
     private Logger logger = LoggerFactory.getLogger(OutgoingMatchDiscoveryService.class);
 
     @Autowired
-    public OutgoingMatchDiscoveryService(OutgoingMatchRepository repository) {
+    public OutgoingMatchDiscoveryService(DeliveryCapabilityMatchRepository repository) {
         this.repository = repository;
     }
 
@@ -38,9 +38,9 @@ public class OutgoingMatchDiscoveryService {
                             for (Capability capability : matchingCapabilities) {
                                 if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) == null) {
                                     if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                                        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName());
-                                        logger.info("Match saved for delivery with id {}", delivery.getId());
-                                        repository.save(outgoingMatch);
+                                        DeliveryCapabilityMatch deliveryCapabilityMatch = new DeliveryCapabilityMatch(delivery, capability, serviceProvider.getName());
+                                        logger.info("SubscriptionMatch saved for delivery with id {}", delivery.getId());
+                                        repository.save(deliveryCapabilityMatch);
                                     }
                                 }
                             }
@@ -52,14 +52,14 @@ public class OutgoingMatchDiscoveryService {
     }
 
     public void syncOutgoingMatchesToDelete() {
-        List<OutgoingMatch> existingMatches = repository.findAll();
-        Set<OutgoingMatch> matchesToDelete = new HashSet<>();
-        for (OutgoingMatch match : existingMatches) {
+        List<DeliveryCapabilityMatch> existingMatches = repository.findAll();
+        Set<DeliveryCapabilityMatch> matchesToDelete = new HashSet<>();
+        for (DeliveryCapabilityMatch match : existingMatches) {
             if (match.capabilityIsTearDown()) {
-                logger.info("Removing OutgoingMatch {}", match);
+                logger.info("Removing DeliveryCapabilityMatch {}", match);
                 matchesToDelete.add(match);
             } else if (match.deliveryIsTearDown()) {
-                logger.info("Removing OutgoingMatch {}", match);
+                logger.info("Removing DeliveryCapabilityMatch {}", match);
                 matchesToDelete.add(match);
             }
         }

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,47 +15,47 @@ import java.util.HashSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {MatchDiscoveryService.class})
-public class MatchDiscoveryServiceTest {
+@SpringBootTest(classes = {SubscriptionMatchDiscoveryService.class})
+public class SubscriptionMatchDiscoveryServiceTest {
 
     @MockBean
-    private MatchRepository matchRepository;
+    private SubscriptionMatchRepository subscriptionMatchRepository;
 
     @Autowired
-    private MatchDiscoveryService matchDiscoveryService;
+    private SubscriptionMatchDiscoveryService subscriptionMatchDiscoveryService;
 
     @Test
     public void noServiceProvidersAndNoNeighboursShouldNotCreateMatches() {
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
+        verify(subscriptionMatchRepository,never()).findAllBySubscriptionId(any());
+        verify(subscriptionMatchRepository,never()).save(any(SubscriptionMatch.class));
 
     }
 
     @Test
     public void noServiceProvidersAndOneNeighbourShouldNotCreateAMatch() {
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.singletonList(new Neighbour(
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.singletonList(new Neighbour(
                 "test",
                 new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         )));
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        verify(subscriptionMatchRepository,never()).findAllBySubscriptionId(any());
+        verify(subscriptionMatchRepository,never()).save(any(SubscriptionMatch.class));
     }
 
     @Test
     public void aServiceProviderAndNoNeighboursShouldNotCreateMatch() {
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(new ServiceProvider("SP")),
                 Collections.emptyList());
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        verify(subscriptionMatchRepository,never()).findAllBySubscriptionId(any());
+        verify(subscriptionMatchRepository,never()).save(any(SubscriptionMatch.class));
     }
 
     @Test
     public void serviceProviderAndNeighbourMatches() {
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(new ServiceProvider(
                         "SP",
                         new Capabilities(),
@@ -84,8 +84,8 @@ public class MatchDiscoveryServiceTest {
                         new Connection()
                 ))
         );
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
-        verify(matchRepository,times(1)).save(any(Match.class));
+        verify(subscriptionMatchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
+        verify(subscriptionMatchRepository,times(1)).save(any(SubscriptionMatch.class));
     }
 
     //NOTE A localsubscription matching several capabilities at neighbour will only create one subscription on the neighbour.
@@ -133,12 +133,12 @@ public class MatchDiscoveryServiceTest {
                 ),
                 new Connection()
         );
-       matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+       subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                Collections.singletonList(sp),
                Arrays.asList(neighbour,otherNeighbour)
        );
-       verify(matchRepository,times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
-       verify(matchRepository,times(2)).save(any(Match.class));
+       verify(subscriptionMatchRepository,times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
+       verify(subscriptionMatchRepository,times(2)).save(any(SubscriptionMatch.class));
     }
 
     @Test
@@ -171,13 +171,13 @@ public class MatchDiscoveryServiceTest {
                 ),
                 new Connection()
         );
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(sp),
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
-        verify(matchRepository,times(1)).save(any(Match.class));
+        verify(subscriptionMatchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
+        verify(subscriptionMatchRepository,times(1)).save(any(SubscriptionMatch.class));
     }
 
     @Test
@@ -210,12 +210,12 @@ public class MatchDiscoveryServiceTest {
                 ),
                 new Connection()
         );
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(sp),
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(0)).findAllBySubscriptionId(any());
-        verify(matchRepository,times(0)).save(any(Match.class));
+        verify(subscriptionMatchRepository,times(0)).findAllBySubscriptionId(any());
+        verify(subscriptionMatchRepository,times(0)).save(any(SubscriptionMatch.class));
     }
 }

@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
     NeighbourRepository neighbourRepository;
 
     @Autowired
-    MatchRepository matchRepository;
+    SubscriptionMatchRepository subscriptionMatchRepository;
 
     @Autowired
     ListenerEndpointRepository listenerEndpointRepository;

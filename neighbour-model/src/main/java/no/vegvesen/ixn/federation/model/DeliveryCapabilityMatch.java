@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "outgoing_matches")
-public class OutgoingMatch {
+@Table(name = "del_cap_matches")
+public class DeliveryCapabilityMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "out_matches_seq")
     private Integer id;
@@ -23,11 +23,11 @@ public class OutgoingMatch {
 
     private String serviceProviderName;
 
-    public OutgoingMatch() {
+    public DeliveryCapabilityMatch() {
 
     }
 
-    public OutgoingMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName) {
+    public DeliveryCapabilityMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName) {
         this.localDelivery = localDelivery;
         this.capability = capability;
         this.serviceProviderName = serviceProviderName;
@@ -73,7 +73,7 @@ public class OutgoingMatch {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OutgoingMatch that = (OutgoingMatch) o;
+        DeliveryCapabilityMatch that = (DeliveryCapabilityMatch) o;
         return localDelivery.equals(that.localDelivery) && capability.equals(that.capability);
     }
 
@@ -84,7 +84,7 @@ public class OutgoingMatch {
 
     @Override
     public String toString() {
-        return "OutgoingMatch{" +
+        return "DeliveryCapabilityMatch{" +
                 "localDelivery=" + localDelivery +
                 ", capability=" + capability +
                 '}';

@@ -33,17 +33,17 @@ public class ServiceProviderRouter {
     private final ServiceProviderRepository repository;
     private final PrivateChannelRepository privateChannelRepository;
     private final QpidClient qpidClient;
-    private final MatchRepository matchRepository;
-    private final OutgoingMatchRepository outgoingMatchRepository;
+    private final SubscriptionMatchRepository subscriptionMatchRepository;
+    private final DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
     private final InterchangeNodeProperties nodeProperties;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, SubscriptionMatchRepository subscriptionMatchRepository, DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository, InterchangeNodeProperties nodeProperties) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
-        this.matchRepository = matchRepository;
-        this.outgoingMatchRepository = outgoingMatchRepository;
+        this.subscriptionMatchRepository = subscriptionMatchRepository;
+        this.deliveryCapabilityMatchRepository = deliveryCapabilityMatchRepository;
         this.nodeProperties = nodeProperties;
     }
 
@@ -147,7 +147,7 @@ public class ServiceProviderRouter {
             Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
             for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
                 if (!localSubscription.isSubscriptionWanted()) {
-                    List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+                    List<SubscriptionMatch> matches = subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                     if (matches.isEmpty() && localSubscription.getLocalEndpoints().isEmpty()) {
                         subscriptionsToRemove.add(localSubscription);
                     }
@@ -348,7 +348,7 @@ public class ServiceProviderRouter {
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
+                    List<DeliveryCapabilityMatch> matches = deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
                     if (!delta.exchangeExists(delivery.getExchangeName())) {
                         String exchangeName = delivery.getExchangeName();
                         Exchange exchange = qpidClient.createDirectExchange(exchangeName);
@@ -356,7 +356,7 @@ public class ServiceProviderRouter {
                         delta.addExchange(exchange);
                     }
 
-                    for (OutgoingMatch match : matches) {
+                    for (DeliveryCapabilityMatch match : matches) {
                         Capability capability = match.getCapability();
                         if (capability.hasShards()) {
                             if (capability.isSharded()) {
@@ -383,7 +383,7 @@ public class ServiceProviderRouter {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
                         && !delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
+                    List<DeliveryCapabilityMatch> matches = deliveryCapabilityMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
                     if (matches.isEmpty()) {
                         if (delivery.exchangeExists()) {
                             String target = delivery.getExchangeName();
@@ -419,8 +419,8 @@ public class ServiceProviderRouter {
             for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
                 if (localSubscription.isSubscriptionWanted() && !localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
                     if (!localSubscription.getLocalEndpoints().isEmpty()) {
-                        List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                        for (Match match : matches) {
+                        List<SubscriptionMatch> matches = subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+                        for (SubscriptionMatch match : matches) {
                             if (match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
                                 for (Endpoint endpoint : match.getSubscription().getEndpoints()) {
                                     if (endpoint.hasShard()) {

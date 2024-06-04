@@ -24,23 +24,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class OutgoingMatchRepositoryIT {
+public class DeliveryCapabilityMatchRepositoryIT {
 
     @Autowired
-    OutgoingMatchRepository outgoingMatchRepository;
+    DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
     @AfterEach
     public void tearDown() {
-        outgoingMatchRepository.deleteAll();
+        deliveryCapabilityMatchRepository.deleteAll();
         serviceProviderRepository.deleteAll();
     }
 
     @BeforeEach
     public void setUp() {
-        assertThat(outgoingMatchRepository.findAll()).isEmpty();
+        assertThat(deliveryCapabilityMatchRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -71,10 +71,10 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
-        outgoingMatchRepository.save(match);
+        DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, cap, "my-sp");
+        deliveryCapabilityMatchRepository.save(match);
 
-        List<OutgoingMatch> allMatches = outgoingMatchRepository.findAll();
+        List<DeliveryCapabilityMatch> allMatches = deliveryCapabilityMatchRepository.findAll();
         assertThat(allMatches).hasSize(1);
     }
 
@@ -106,10 +106,10 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
-        outgoingMatchRepository.save(match);
+        DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, cap, "my-sp");
+        deliveryCapabilityMatchRepository.save(match);
 
-        outgoingMatchRepository.delete(match);
+        deliveryCapabilityMatchRepository.delete(match);
 
         ServiceProvider savedSp = serviceProviderRepository.findByName("my-sp");
         assertThat(savedSp.getCapabilities().getCapabilities()).isNotEmpty();
@@ -147,14 +147,14 @@ public class OutgoingMatchRepositoryIT {
 
         Integer capabilityId = sp.getCapabilities().getCapabilities().stream().findFirst().get().getId();
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
-        outgoingMatchRepository.save(match);
+        DeliveryCapabilityMatch match = new DeliveryCapabilityMatch(delivery, cap, "my-sp");
+        deliveryCapabilityMatchRepository.save(match);
 
         sp.setCapabilities(new Capabilities());
         serviceProviderRepository.save(sp);
 
-        assertThat(outgoingMatchRepository.findAll()).hasSize(1);
-        assertThat(outgoingMatchRepository.findAllByCapability_Id(capabilityId)).hasSize(0);
+        assertThat(deliveryCapabilityMatchRepository.findAll()).hasSize(1);
+        assertThat(deliveryCapabilityMatchRepository.findAllByCapability_Id(capabilityId)).hasSize(0);
     }
 
 

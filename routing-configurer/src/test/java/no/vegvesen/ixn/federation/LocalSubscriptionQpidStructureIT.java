@@ -9,8 +9,8 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionMatchRepository;
+import no.vegvesen.ixn.federation.repository.DeliveryCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
@@ -87,10 +87,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @MockBean
-    MatchRepository matchRepository;
+    SubscriptionMatchRepository subscriptionMatchRepository;
 
     @MockBean
-    OutgoingMatchRepository outgoingMatchRepository;
+    DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
     @MockBean
     PrivateChannelRepository privateChannelRepository;

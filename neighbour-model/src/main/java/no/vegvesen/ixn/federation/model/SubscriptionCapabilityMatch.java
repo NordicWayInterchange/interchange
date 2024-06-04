@@ -6,8 +6,8 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import java.util.Objects;
 
 @Entity
-@Table(name="incoming_matches")
-public class IncomingMatch {
+@Table(name="sub_cap_matches")
+public class SubscriptionCapabilityMatch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inc_match_seq")
@@ -17,12 +17,12 @@ public class IncomingMatch {
     private NeighbourSubscription neighbourSubscription;
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name="incoming_match_id")
+    @JoinColumn(name="sub_cap_match_id")
     private Capability capability;
 
-    public IncomingMatch(){}
+    public SubscriptionCapabilityMatch(){}
 
-    public IncomingMatch(NeighbourSubscription neighbourSubscription, Capability capability){
+    public SubscriptionCapabilityMatch(NeighbourSubscription neighbourSubscription, Capability capability){
         this.neighbourSubscription = neighbourSubscription;
         this.capability = capability;
     }
@@ -54,8 +54,8 @@ public class IncomingMatch {
     @Override
     public boolean equals(Object o){
         if(this == o) return true;
-        if(!(o instanceof IncomingMatch)) return false;
-        IncomingMatch that = (IncomingMatch) o;
+        if(!(o instanceof SubscriptionCapabilityMatch)) return false;
+        SubscriptionCapabilityMatch that = (SubscriptionCapabilityMatch) o;
         return Objects.equals(neighbourSubscription, that.neighbourSubscription) && Objects.equals(capability, that.capability);
     }
     @Override
@@ -64,7 +64,7 @@ public class IncomingMatch {
     }
     @Override
     public String toString() {
-        return "Match{" +
+        return "SubscriptionMatch{" +
                 "neighbourSubscription=" + neighbourSubscription +
                 ", capability=" + capability +
                 '}';

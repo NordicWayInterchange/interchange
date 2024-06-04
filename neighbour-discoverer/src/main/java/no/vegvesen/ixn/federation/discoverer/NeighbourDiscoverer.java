@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.SubscriptionMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -45,7 +45,7 @@ public class NeighbourDiscoverer {
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
-	private final MatchDiscoveryService matchDiscoveryService;
+	private final SubscriptionMatchDiscoveryService subscriptionMatchDiscoveryService;
 	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 	private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
@@ -56,7 +56,7 @@ public class NeighbourDiscoverer {
 						ServiceProviderService serviceProviderService,
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
-						MatchDiscoveryService matchDiscoveryService,
+						SubscriptionMatchDiscoveryService subscriptionMatchDiscoveryService,
 						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
 						OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
@@ -64,7 +64,7 @@ public class NeighbourDiscoverer {
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
-		this.matchDiscoveryService = matchDiscoveryService;
+		this.subscriptionMatchDiscoveryService = subscriptionMatchDiscoveryService;
 		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
 		this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
@@ -139,7 +139,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createMatches() {
-		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighbours());
+		subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighbours());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
@@ -154,7 +154,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void syncMatchesToDelete() {
-		matchDiscoveryService.syncMatchesToDelete();
+		subscriptionMatchDiscoveryService.syncMatchesToDelete();
 	}
 
 }

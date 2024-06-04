@@ -9,7 +9,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.IncomingMatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.SubscriptionCapabilityMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,17 +39,17 @@ public class RoutingConfigurer {
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
-	private final IncomingMatchDiscoveryService incomingMatchDiscoveryService;
+	private final SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
 
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, IncomingMatchDiscoveryService incomingMatchDiscoveryService) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
-		this.incomingMatchDiscoveryService = incomingMatchDiscoveryService;
+		this.subscriptionCapabilityMatchDiscoveryService = subscriptionCapabilityMatchDiscoveryService;
 	}
 
 
@@ -77,7 +77,7 @@ public class RoutingConfigurer {
 						.getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)).toList();
 
 		for(NeighbourSubscription subscription : subscriptions){
-			if(incomingMatchDiscoveryService.newMatchExists(subscription)){
+			if(subscriptionCapabilityMatchDiscoveryService.newMatchExists(subscription)){
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
 			}
 		}
@@ -108,7 +108,7 @@ public class RoutingConfigurer {
 						redirectedServiceProviders.add(consumerCommonName);
 					}
 				}
-				incomingMatchDiscoveryService.deleteMatches(sub);
+				subscriptionCapabilityMatchDiscoveryService.deleteMatches(sub);
 			}
 
 			//If it is the last subscription of the SP, we need to remove them from the remote_sp group
@@ -194,7 +194,7 @@ public class RoutingConfigurer {
 					}
 
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					incomingMatchDiscoveryService.createMatches(subscription, matchingCaps);
+					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);
 				}
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
@@ -229,7 +229,7 @@ public class RoutingConfigurer {
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					incomingMatchDiscoveryService.createMatches(subscription, matchingCaps);
+					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 			} else {

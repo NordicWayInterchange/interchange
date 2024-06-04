@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.repository.IncomingMatchRepository;
+import no.vegvesen.ixn.federation.repository.SubscriptionCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +16,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class IncomingMatchDiscoveryService {
+public class SubscriptionCapabilityMatchDiscoveryService {
 
-    private final IncomingMatchRepository incomingMatchRepository;
+    private final SubscriptionCapabilityMatchRepository subscriptionCapabilityMatchRepository;
 
     private final ServiceProviderRepository serviceProviderRepository;
-    private Logger logger = LoggerFactory.getLogger(IncomingMatchDiscoveryService.class);
+    private Logger logger = LoggerFactory.getLogger(SubscriptionCapabilityMatchDiscoveryService.class);
 
 
     @Autowired
-    public IncomingMatchDiscoveryService(IncomingMatchRepository incomingMatchRepository, ServiceProviderRepository serviceProviderRepository){
-        this.incomingMatchRepository = incomingMatchRepository;
+    public SubscriptionCapabilityMatchDiscoveryService(SubscriptionCapabilityMatchRepository subscriptionCapabilityMatchRepository, ServiceProviderRepository serviceProviderRepository){
+        this.subscriptionCapabilityMatchRepository = subscriptionCapabilityMatchRepository;
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
@@ -34,23 +34,23 @@ public class IncomingMatchDiscoveryService {
         if(!neighbourSubscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) return;
 
         for(Capability capability : matchingCaps){
-            IncomingMatch match = new IncomingMatch(neighbourSubscription, capability);
-            incomingMatchRepository.save(match);
+            SubscriptionCapabilityMatch match = new SubscriptionCapabilityMatch(neighbourSubscription, capability);
+            subscriptionCapabilityMatchRepository.save(match);
             logger.info("Saved new match {}", match);
         }
     }
 
     public void deleteMatches(NeighbourSubscription neighbourSubscription){
-        List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
+        List<SubscriptionCapabilityMatch> matches = subscriptionCapabilityMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
         logger.info("Removing matches {}", matches);
-        incomingMatchRepository.deleteAll(matches);
+        subscriptionCapabilityMatchRepository.deleteAll(matches);
     }
 
     public boolean newMatchExists(NeighbourSubscription neighbourSubscription){
-        List<IncomingMatch> matches = incomingMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
+        List<SubscriptionCapabilityMatch> matches = subscriptionCapabilityMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
         if(!matches.isEmpty()) {
             Set<Capability> allCapabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
-            Set<Capability> existingMatches = matches.stream().map(IncomingMatch::getCapability).collect(Collectors.toSet());
+            Set<Capability> existingMatches = matches.stream().map(SubscriptionCapabilityMatch::getCapability).collect(Collectors.toSet());
             List<Capability> allMatches = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, neighbourSubscription.getSelector()).stream().toList();
             return !(new HashSet<>(existingMatches).containsAll(allMatches));
         }

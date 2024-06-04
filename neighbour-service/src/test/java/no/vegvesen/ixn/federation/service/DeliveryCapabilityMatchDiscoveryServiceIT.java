@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.DeliveryCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
@@ -23,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class OutgoingMatchDiscoveryServiceIT {
+public class DeliveryCapabilityMatchDiscoveryServiceIT {
 
     @Autowired
-    private OutgoingMatchRepository repository;
+    private DeliveryCapabilityMatchRepository repository;
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;

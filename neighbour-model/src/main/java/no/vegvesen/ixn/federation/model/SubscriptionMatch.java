@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "matches")
-public class Match {
+@Table(name = "loc_sub_matches")
+public class SubscriptionMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "matches_seq")
     private Integer id;
@@ -20,16 +20,16 @@ public class Match {
 
     private String serviceProviderName;
 
-    public Match() {
+    public SubscriptionMatch() {
 
     }
 
-    public Match(LocalSubscription localSubscription, Subscription subscription) {
+    public SubscriptionMatch(LocalSubscription localSubscription, Subscription subscription) {
         this.localSubscription = localSubscription;
         this.subscription = subscription;
     }
 
-    public Match(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName) {
+    public SubscriptionMatch(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName) {
         this.localSubscription = localSubscription;
         this.subscription = subscription;
         this.serviceProviderName = serviceProviderName;
@@ -70,11 +70,11 @@ public class Match {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Match)) return false;
-        Match match = (Match) o;
-        return localSubscription.equals(match.localSubscription) &&
-                subscription.equals(match.subscription) &&
-                serviceProviderName.equals(match.serviceProviderName);
+        if (!(o instanceof SubscriptionMatch)) return false;
+        SubscriptionMatch subscriptionMatch = (SubscriptionMatch) o;
+        return localSubscription.equals(subscriptionMatch.localSubscription) &&
+                subscription.equals(subscriptionMatch.subscription) &&
+                serviceProviderName.equals(subscriptionMatch.serviceProviderName);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Match {
 
     @Override
     public String toString() {
-        return "Match{" +
+        return "SubscriptionMatch{" +
                 "localSubscription=" + localSubscription +
                 ", subscription=" + subscription +
                 '}';
