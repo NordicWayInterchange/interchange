@@ -30,10 +30,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Create settings file
@@ -76,6 +76,7 @@ jobs:
           </servers>
           </settings>
           EOF
+
       - name: Save version for release
         run: |
           echo "CURRENT_VERSION=$(cat pom.xml | grep SNAPSHOT | sed 's/[^0-9.]//g')" >> "$GITHUB_ENV"
@@ -95,12 +96,12 @@ jobs:
           mvn -B -Darguments=-DskipTests release:perform
 
       - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ env.CURRENT_VERSION }}
-          release_name: ${{ env.CURRENT_VERSION }}
+          tag: ${{ env.CURRENT_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ env.CURRENT_VERSION }}
+          makeLatest: true
           draft: false
           prerelease: false
 
@@ -176,28 +177,34 @@ jobs:
         run: |
           version=$(cat helm/interchange/Chart.yaml | grep version)
           sed -i s"/$version/version: $(cat CURRENT_VERSION.txt)/" helm/interchange/Chart.yaml
+
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
           echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
+
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
       - name: Setup Google CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
           version: '>= 446.0.1'
           project_id: ${{ vars.PROJECT_ID }}
+
       - name: Login to Artifact Registry
         run: |
           gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+
       - name: helm push to Google artifact registry
         run: |
           helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm
+
       - name: helm push to Github container registry
         run: |
           echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
