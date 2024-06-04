@@ -177,7 +177,8 @@ public class SubscriptionCalculatorTest {
                                     "NO",
                                     "1.0",
                                     List.of("0122"),
-                                    "SituationPublication"
+                                    "SituationPublication",
+                                    "publisherName"
                             ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -205,7 +206,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         List.of("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new Capability(
@@ -247,7 +249,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         List.of("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -279,7 +282,8 @@ public class SubscriptionCalculatorTest {
                                         "NO",
                                         "1.0",
                                         List.of("0122"),
-                                        "SituationPublication"
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
                         new Capability(
@@ -329,7 +333,7 @@ public class SubscriptionCalculatorTest {
 
     private Capability getDatexCapability(String country) {
         return new Capability(
-                new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication"),
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 

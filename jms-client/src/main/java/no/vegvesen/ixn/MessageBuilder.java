@@ -148,6 +148,12 @@ public class MessageBuilder {
         }
         return this;
     }
+    public MessageBuilder publisherName(String publisherName) throws JMSException{
+        if(publisherName != null){
+            message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), publisherName);
+        }
+        return this;
+    }
 
     //DENM message properties
 

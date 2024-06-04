@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -54,5 +55,17 @@ public class CapabilityValidator {
             }
         }
         return notSetProperties;
+    }
+
+    public static boolean quadtreeIsValid(CapabilitySplitApi capability){
+        List<String> quadTree = capability.getApplication().getQuadTree();
+        for(String quadTile : quadTree){
+            for(char nextNumber : quadTile.toCharArray()){
+                if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

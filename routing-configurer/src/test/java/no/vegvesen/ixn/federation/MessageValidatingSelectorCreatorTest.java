@@ -66,7 +66,8 @@ public class MessageValidatingSelectorCreatorTest {
                                 "NO",
                                 "1.0",
                                 List.of("1"),
-                                "Weather"
+                                "Weather",
+                                "PublisherName"
                         ),
                         new Metadata()
                 )

@@ -69,7 +69,7 @@ class NeighbourServiceTest {
 	void postDatexDataTypeCapability() {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, List.of(), "myPublicationType"), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, List.of(), "myPublicationType", "publisherName"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -108,7 +108,7 @@ class NeighbourServiceTest {
 		// incoming capabiity API
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), ""), new MetadataApi());
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), "", "publisherName"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -126,7 +126,7 @@ class NeighbourServiceTest {
 		// Mock the incoming API object.
 		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), ""), new MetadataApi())));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", List.of(), "", "publisherName"), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -325,8 +325,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void listenerEndpointsAreRemovedFromEndpointsList() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("my-neighbour");
+		String neighbourName = "my-neighbour";
 
 		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
 		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-2", 5671, new SubscriptionShard("target"));
@@ -336,18 +335,27 @@ class NeighbourServiceTest {
 		Subscription subscription = new Subscription();
 		subscription.setEndpoints(endpoints);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
 
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(listenerEndpoint2);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", neighbourName)).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", neighbourName)).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbourName, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}
 
+
+	@Test
+	public void teardownListenerEndpointsWithNullShard() {
+		Endpoint endpoint = new Endpoint("my-source-1", "my-endpoint-1", 5671);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList("neighbour",Set.of(endpoint));
+		verify(listenerEndpointRepository,never()).delete(any(ListenerEndpoint.class));
+
+	}
+
 	private NeighbourCapability getDatexNeighbourCapability(String country) {
-		return new NeighbourCapability(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL));
+		return new NeighbourCapability(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 }

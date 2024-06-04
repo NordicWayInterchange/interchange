@@ -10,6 +10,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CapabilityValidatorTest {
 
     @Test
+    public void testDatexCapabilityWithMissingPublisherName(){
+        CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
+                new DatexApplicationApi(
+                        "N000000",
+                        "N000000-pub-1",
+                        "NO",
+                        "DATEX2:3.2",
+                        List.of("12001"),
+                        "SituationPublication",
+                        null
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.capabilityIsValid(capabilitySplitApi)).isNotEmpty();
+    }
+    @Test
     public void testDatexCapabilityIsValid() {
         CapabilitySplitApi capability = new CapabilitySplitApi(
                 new DatexApplicationApi(
@@ -18,7 +34,8 @@ public class CapabilityValidatorTest {
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
-                        "SituationPublication"
+                        "SituationPublication",
+                        "publisherName"
                 ),
                 new MetadataApi()
         );
@@ -35,7 +52,8 @@ public class CapabilityValidatorTest {
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
-                        ""
+                        "",
+                        "publisherName"
                 ),
                 new MetadataApi()
         );
@@ -47,7 +65,8 @@ public class CapabilityValidatorTest {
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
-                        null
+                        null,
+                        "publisherName"
                 ),
                 new MetadataApi()
         );
