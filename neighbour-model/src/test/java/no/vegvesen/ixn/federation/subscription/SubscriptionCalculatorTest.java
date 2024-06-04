@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -151,7 +151,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-        Set<CapabilitySplit> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
                 capabilities, ""
@@ -170,14 +170,15 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 Collections.singleton(
-                        new CapabilitySplit(
+                        new Capability(
                             new DatexApplication(
                                     "NO0001",
                                     "",
                                     "NO",
                                     "1.0",
-                                    Collections.singleton("0122"),
-                                    "SituationPublication"
+                                    List.of("0122"),
+                                    "SituationPublication",
+                                    "publisherName"
                             ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -198,24 +199,25 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 new HashSet<>(Arrays.asList(
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        List.of("0122"),
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new CapabilitySplit(
+                        new Capability(
                             new DenmApplication(
                                 "NO0001",
                                 "pub-123",
                                 "NO",
                                 "1.0",
-                                Collections.singleton("0122"),
-                                Collections.singleton(6)
+                                List.of("0122"),
+                                List.of(6)
                         ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
@@ -240,14 +242,15 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 Collections.singleton(
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        List.of("0122"),
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
@@ -272,24 +275,25 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 new HashSet<>(Arrays.asList(
-                        new CapabilitySplit(
+                        new Capability(
                                 new DatexApplication(
                                         "NO0001",
                                         "pub-1",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("0122"),
-                                        "SituationPublication"
+                                        List.of("0122"),
+                                        "SituationPublication",
+                                        "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new CapabilitySplit(
+                        new Capability(
                                 new DenmApplication(
                                         "NO0001",
                                         "pub-123",
                                         "NO",
                                         "1.0",
-                                        Collections.singleton("0122"),
-                                        Collections.singleton(6)
+                                        List.of("0122"),
+                                        List.of(6)
                                 ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
@@ -303,7 +307,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
-        Set<CapabilitySplit> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
@@ -315,7 +319,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
-        Set<CapabilitySplit> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
                 capabilities, "");
@@ -327,9 +331,9 @@ public class SubscriptionCalculatorTest {
                 .contains("messageType = 'DATEX2'");
     }
 
-    private CapabilitySplit getDatexCapability(String country) {
-        return new CapabilitySplit(
-                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.singleton("0122"), "SituationPublication"),
+    private Capability getDatexCapability(String country) {
+        return new Capability(
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 

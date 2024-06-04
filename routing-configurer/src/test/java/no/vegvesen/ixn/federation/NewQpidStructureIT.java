@@ -6,7 +6,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
@@ -28,8 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,14 +79,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         //2. Create a queue
         qpidClient.createQueue(queueName);
         //2.1 Create a Capability to base a Validating selector on
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12","13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12","13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -143,6 +142,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .publisherId("NO-123")
                 .publicationId("pub-1")
                 .publicationType("Obstruction")
+                .publisherName("publishername")
                 .protocolVersion("DATEX2;2.3")
                 .shardId(1)
                 .shardCount(1)
@@ -165,14 +165,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 SubscriptionStatus.CREATED
         );
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12004")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12004"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -319,26 +319,26 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 SubscriptionStatus.CREATED
         );
 
-        CapabilitySplit capability1 = new CapabilitySplit(
+        Capability capability1 = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12002", "12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12002", "12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
 
-        CapabilitySplit capability2 = new CapabilitySplit(
+        Capability capability2 = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
@@ -418,14 +418,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12003")),
-                        new HashSet<>(Arrays.asList(6))
+                        List.of("12003"),
+                        List.of(6)
                 ),
                 new Metadata()
         );

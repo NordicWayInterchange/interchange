@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -52,18 +52,17 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -88,18 +87,17 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),
@@ -128,18 +126,17 @@ public class OutgoingMatchRepositoryIT {
                 "publisher-1-0123",
                 "NO",
                 "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton(1)
+                List.of("123"),
+                List.of(1)
         );
 
         Metadata meta = new Metadata();
 
-        CapabilitySplit cap = new CapabilitySplit(app, meta);
+        Capability cap = new Capability(app, meta);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(cap)),
                 new HashSet<>(),
                 new HashSet<>(),

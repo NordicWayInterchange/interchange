@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -42,16 +39,13 @@ public class ApplicationApi {
 
     private String protocolVersion;
 
-    private Set<String> quadTree = new HashSet<>();
+    private List<String> quadTree = new ArrayList<>();
 
     public ApplicationApi() {
 
     }
 
-    public ApplicationApi(String messageType, String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
-        if (messageType == null) {
-            throw new IllegalArgumentException("messageType can not be null");
-        }
+    public ApplicationApi(String messageType, String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
         this.messageType = messageType;
         this.publisherId = publisherId;
         this.publicationId = publicationId;
@@ -67,9 +61,6 @@ public class ApplicationApi {
     }
 
     public void setMessageType(String messageType) {
-        if (messageType == null) {
-            throw new IllegalArgumentException("messageType can not be null");
-        }
         this.messageType = messageType;
     }
 
@@ -105,7 +96,7 @@ public class ApplicationApi {
         this.protocolVersion = protocolVersion;
     }
 
-    public Set<String> getQuadTree() {
+    public List<String> getQuadTree() {
         return quadTree;
     }
 
@@ -133,7 +124,7 @@ public class ApplicationApi {
         }
     }
 
-    static void putMultiValue(Map<String, Object> values, CapabilityProperty property, Set<String> multiValue) {
+    static void putMultiValue(Map<String, Object> values, CapabilityProperty property, List<String> multiValue) {
         if (multiValue.isEmpty()) {
             values.put(property.getName(), null);
         } else {

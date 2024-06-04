@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +54,7 @@ class NeighbourRestControllerTest {
 	private String subscriptionRequestPath = "/subscriptions";
 	private String capabilityExchangePath = "/capabilities";
 
-	private Set<String> quadTree = Collections.emptySet();
+	private List<String> quadTree = List.of();
 
 	@BeforeEach
 	void setUp() {
@@ -85,7 +85,8 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DATEX2:2.3",
 						quadTree,
-						"SituationPublication"
+						"SituationPublication",
+						"publisherName"
 				),
 				new MetadataApi()
 		);
@@ -120,7 +121,7 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DENM:1.2.2",
 						quadTree,
-						Collections.singleton(3)
+						List.of(3)
 				),
 				new MetadataApi()
 		);
@@ -149,7 +150,7 @@ class NeighbourRestControllerTest {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
 
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", List.of()), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
@@ -183,7 +184,8 @@ class NeighbourRestControllerTest {
 								"NO",
 								"DATEX2:2.3",
 								quadTree,
-								"SituationPublication"
+								"SituationPublication",
+								"publisherName"
 						),
 						new MetadataApi()
 				)
@@ -269,7 +271,8 @@ class NeighbourRestControllerTest {
 								"NO",
 								"DATEX2:2.3",
 								quadTree,
-								"SituationPublication"
+								"SituationPublication",
+								"publisherName"
 						),
 						new MetadataApi()
 				)
@@ -301,7 +304,8 @@ class NeighbourRestControllerTest {
 						"NO",
 						"DATEX2:2.3",
 						quadTree,
-						"SituationPublication"
+						"SituationPublication",
+						"publisherName"
 				),
 				new MetadataApi()
 		);

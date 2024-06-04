@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.routing;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
@@ -121,7 +121,7 @@ public class RoutingConfigurer {
 		//try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+			Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
 			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
@@ -137,10 +137,10 @@ public class RoutingConfigurer {
 		//}
 	}
 
-	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName, QpidDelta delta) {
+	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			logger.debug("Checking subscription {}", subscription);
-			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				//if any of the matching caps does not have the shards set
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
@@ -157,7 +157,7 @@ public class RoutingConfigurer {
 
 					for (NeighbourEndpoint endpoint : subscription.getEndpoints()) {
 						createQueue(endpoint.getSource(), neighbourName, delta);
-						for (CapabilitySplit cap : matchingCaps) {
+						for (Capability cap : matchingCaps) {
 							if (cap.isSharded()) {
 							//TODO: if capability is sharded, check is the subscription contains chardId as well.
 						} else {
@@ -178,9 +178,9 @@ public class RoutingConfigurer {
 		logger.debug("Set up routing for neighbour {}", neighbourName);
 	}
 
-	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities, QpidDelta delta) {
+	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
-			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
 					if (subscription.getEndpoints().isEmpty()) {
@@ -191,7 +191,7 @@ public class RoutingConfigurer {
 
 					for (NeighbourEndpoint endpoint : subscription.getEndpoints()) {
 						createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);
-						for (CapabilitySplit cap : matchingCaps) {
+						for (Capability cap : matchingCaps) {
 							if (cap.isSharded()) {
 								//TODO: if capability is sharded, check is the subscription contains chardId as well.
 							} else {
@@ -250,7 +250,7 @@ public class RoutingConfigurer {
 
 	@Scheduled(fixedRateString = "${tear-down-subscriptions-exchange.interval}")
 	public void tearDownSubscriptionExchanges() {
-		logger.debug("Looking for new subscriptions to set up exchanges for");
+		logger.debug("Looking for new subscriptions to tear down exchanges for");
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
@@ -267,8 +267,8 @@ public class RoutingConfigurer {
 									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
 								}
 								endpoint.removeShard();
-								endpointsToRemove.add(endpoint);
 							}
+							endpointsToRemove.add(endpoint);
 						}
 						subscription.getEndpoints().removeAll(endpointsToRemove);
 					}

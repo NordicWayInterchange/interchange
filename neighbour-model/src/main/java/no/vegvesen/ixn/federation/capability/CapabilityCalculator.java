@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -12,19 +12,19 @@ import java.util.Set;
 
 public class CapabilityCalculator {
 
-    public static Set<CapabilitySplit> allServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
-        Set<CapabilitySplit> localCapabilities = new HashSet<>();
+    public static Set<Capability> allServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
+        Set<Capability> localCapabilities = new HashSet<>();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            Set<CapabilitySplit> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilities();
+            Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilities();
             localCapabilities.addAll(serviceProviderCapabilities);
         }
         return localCapabilities;
     }
 
-    public static Set<CapabilitySplit> allCreatedServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
-        Set<CapabilitySplit> localCapabilities = new HashSet<>();
+    public static Set<Capability> allCreatedServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
+        Set<Capability> localCapabilities = new HashSet<>();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            Set<CapabilitySplit> serviceProviderCapabilities = serviceProvider.getCapabilities().getCreatedCapabilities();
+            Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCreatedCapabilities();
             localCapabilities.addAll(serviceProviderCapabilities);
         }
         return localCapabilities;

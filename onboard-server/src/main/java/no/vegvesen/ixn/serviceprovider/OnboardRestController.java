@@ -13,7 +13,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -88,21 +88,27 @@ public class OnboardRestController {
 			if (!capabilityProperties.isEmpty()) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
+			if(!CapabilityValidator.quadtreeIsValid(capability)){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
+			}
 		}
 
-		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		List<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
-		for (CapabilitySplit newLocalCapability : newLocalCapabilities) {
+		for (Capability newLocalCapability : newLocalCapabilities) {
 			capabilities.addDataType(newLocalCapability);
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
-		addedCapabilities.retainAll(newLocalCapabilities);
-
+		Set<Capability> addedCapabilities = new HashSet<>();
+		for (Capability savedCapability : saved.getCapabilities().getCapabilities()) {
+			if (newLocalCapabilities.contains(savedCapability)) {
+				addedCapabilities.add(savedCapability);
+			}
+		}
 		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
@@ -110,7 +116,7 @@ public class OnboardRestController {
 	}
 
 	private Set<String> allPublicationIds() {
-		Set<CapabilitySplit> allCapabilities = getAllLocalCapabilities();
+		Set<Capability> allCapabilities = getAllLocalCapabilities();
 		allCapabilities.addAll(getAllNeighbourCapabilities());
 		return allCapabilities.stream()
 				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
@@ -139,7 +145,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
-		Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
+		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
 			if (!selector.isEmpty()) {
@@ -151,12 +157,12 @@ public class OnboardRestController {
 		return response;
 	}
 
-	private Set<CapabilitySplit> getAllMatchingCapabilities(String selector, Set<CapabilitySplit> allCapabilities) {
+	private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
 		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
-	private Set<CapabilitySplit> getAllLocalCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
+	private Set<Capability> getAllLocalCapabilities() {
+		Set<Capability> capabilities = new HashSet<>();
 		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		for (ServiceProvider otherServiceProvider : serviceProviders) {
 			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
@@ -164,11 +170,11 @@ public class OnboardRestController {
 		return capabilities;
 	}
 
-	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
-		Set<CapabilitySplit> capabilities = new HashSet<>();
+	private Set<Capability> getAllNeighbourCapabilities() {
+		Set<Capability> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 		}
 		return capabilities;
 	}
@@ -202,7 +208,7 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		CapabilitySplit capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
+		Capability capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();

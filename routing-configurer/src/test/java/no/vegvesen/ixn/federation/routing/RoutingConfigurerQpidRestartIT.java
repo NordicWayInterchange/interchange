@@ -4,7 +4,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.Shard;
@@ -31,10 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -104,14 +101,14 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 metadata
         );
@@ -120,7 +117,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -129,7 +126,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
 
@@ -149,14 +146,14 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
         metadata.setShards(Collections.singletonList(shard));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO2345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 metadata
         );
@@ -165,7 +162,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -174,7 +171,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
 

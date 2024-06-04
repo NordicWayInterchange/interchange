@@ -5,7 +5,8 @@ import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -31,6 +32,8 @@ public class NeigbourDiscoveryService {
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
+
+
     @Autowired
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
                                     NeighbourRepository neighbourRepository,
@@ -56,7 +59,7 @@ public class NeigbourDiscoveryService {
             if (neighbourRepository.findByName(neighbourName) == null && !neighbourName.equals(interchangeNodeProperties.getName())) {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-                neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+                neighbour.getCapabilities().setStatus(CapabilitiesStatus.UNKNOWN);
                 logger.info("Found new neighbour {}. Saving in database",neighbourName);
                 neighbourRepository.save(neighbour);
             }
@@ -64,15 +67,15 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
-                Capabilities.CapabilitiesStatus.UNKNOWN,
-                Capabilities.CapabilitiesStatus.KNOWN,
-                Capabilities.CapabilitiesStatus.FAILED);
+                CapabilitiesStatus.UNKNOWN,
+                CapabilitiesStatus.KNOWN,
+                CapabilitiesStatus.FAILED);
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -94,7 +97,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities) {
+    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
         if (!unreachableNeighbours.isEmpty()) {
             logger.debug("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
@@ -112,18 +115,18 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
+    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
-            Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Capabilities neighbourCapabilities = neighbour.getCapabilities();
-            neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-            neighbourCapabilities.setCapabilities(capabilities);
+            Set<NeighbourCapability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
+            NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
+            neighbourCapabilities.setStatus(CapabilitiesStatus.KNOWN);
+            neighbourCapabilities.replaceCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.debug("Updated neighbour: {}", neighbour);
         } catch (CapabilityPostException e) {
             logger.error("Capability post failed", e);
-            neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+            neighbour.getCapabilities().setStatus(CapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
             neighbour = neighbourRepository.save(neighbour);
@@ -165,16 +168,16 @@ public class NeigbourDiscoveryService {
                 //So, this is really a n-to-1 relationship.
     public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
         String neighbourName = neighbour.getName();
-        Set<CapabilitySplit> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+        Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, Capability.transformNeighbourCapabilityToSplitCapability(neighbourCapabilities), interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbourName, subscription.getEndpoints());
                     }
                 }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -218,6 +221,7 @@ public class NeigbourDiscoveryService {
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
                     pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
                 }
+                //TODO find a better solution to this
             } catch (Exception e) {
                 logger.error("Unknown error while polling subscriptions for one neighbour",e);
             }
@@ -273,7 +277,7 @@ public class NeigbourDiscoveryService {
                     }
                 } catch (SubscriptionPollException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     subscription.incrementNumberOfPolls();
@@ -281,7 +285,7 @@ public class NeigbourDiscoveryService {
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                     logger.error("Subscription {} is gone from neighbour", subscription,e);
@@ -302,14 +306,14 @@ public class NeigbourDiscoveryService {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                                tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                             }
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                         } else {
                             if (!subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                                 }
                                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                             } else {
@@ -322,14 +326,14 @@ public class NeigbourDiscoveryService {
                     }
                 } catch (SubscriptionPollException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                     logger.error("Subscription {} is gone from neighbour {}", subscription,neighbour.getName());
@@ -348,7 +352,7 @@ public class NeigbourDiscoveryService {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
                 if (!subscription.getEndpoints().isEmpty()) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                 }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -357,13 +361,16 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void tearDownListenerEndpointsFromEndpointsList(String neighbourName, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(endpoint.getShard().getExchangeName(), endpoint.getSource(), neighbour.getName());
-            if (listenerEndpoint != null) {
-                listenerEndpointRepository.delete(listenerEndpoint);
+            SubscriptionShard shard = endpoint.getShard();
+            if (shard != null) {
+                ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(shard.getExchangeName(), endpoint.getSource(), neighbourName);
+                if (listenerEndpoint != null) {
+                    listenerEndpointRepository.delete(listenerEndpoint);
+                }
+                logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbourName, endpoint.getHost(), endpoint.getSource());
             }
-            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
         }
     }
 }

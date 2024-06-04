@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelResponseApi;
@@ -34,8 +34,8 @@ public class ServiceProviderImport {
     }
 
     public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi, LocalDateTime savedTimestamp) {
-        Set<CapabilitySplit> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
-        Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
+        Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
+        Capabilities capabilities = new Capabilities(capabilitySet);
         capabilities.setLastUpdated(LocalDateTime.now());
         Set<LocalSubscription> subscriptions = new HashSet<>();
         for (OldLocalActorSubscription subscriptionApi : serviceProviderApi.getSubscriptions()) {

@@ -4,7 +4,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
@@ -23,8 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,14 +66,14 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(exchangeName);
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -113,14 +112,14 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(exchangeName);
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );
@@ -160,14 +159,14 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(exchangeName);
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
                         "pub-1",
                         "NO",
                         "1.0",
-                        new HashSet<>(Arrays.asList("12", "13")),
-                        new HashSet<>(Arrays.asList(5, 6))
+                        List.of("12", "13"),
+                        List.of(5, 6)
                 ),
                 new Metadata()
         );

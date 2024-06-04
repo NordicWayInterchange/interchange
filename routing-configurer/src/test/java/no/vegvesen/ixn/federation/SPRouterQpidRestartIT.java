@@ -28,10 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -234,21 +231,21 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -261,14 +258,14 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
@@ -276,7 +273,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -288,21 +285,21 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
         ServiceProvider serviceProvider1 = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -334,21 +331,21 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -375,21 +372,21 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
                         "NO",
                         "1.2.2",
-                        new HashSet<>(Arrays.asList("0123")),
-                        new HashSet<>(Arrays.asList(5))
+                        List.of("0123"),
+                        List.of(5)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());

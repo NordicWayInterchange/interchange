@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,14 +55,14 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("123"),
-                        Collections.singleton(1)
+                        List.of("123"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
@@ -90,28 +89,28 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("123"),
-                        Collections.singleton(1)
+                        List.of("123"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        CapabilitySplit capability1 = new CapabilitySplit(
+        Capability capability1 = new Capability(
                 new DenmApplication(
                         "publisher-1",
                         "pub-1",
                         "NO",
                         "DENM:1.2.2",
-                        Collections.singleton("122"),
-                        Collections.singleton(1)
+                        List.of("122"),
+                        List.of(1)
                 ),
                 new Metadata()
         );
@@ -152,22 +151,21 @@ public class ServiceProviderServiceTest {
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );
-        CapabilitySplit capability = new CapabilitySplit(
+        Capability capability = new Capability(
                 1,
                 new DenmApplication(
                         "0001",
                         "0001:0001",
                         "NO",
                         "1.0",
-                        Collections.singleton("0122"),
-                        Collections.singleton(6)
+                        List.of("0122"),
+                        List.of(6)
                 ),
                 new Metadata()
         );
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(
-                        Capabilities.CapabilitiesStatus.KNOWN,
                         Collections.singleton(
                                 capability
                         )

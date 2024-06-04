@@ -5,8 +5,9 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @DiscriminatorValue(Constants.DATEX_2)
@@ -14,13 +15,16 @@ public class DatexApplication extends Application{
 
     private String publicationType;
 
+    private String publisherName;
+
     public DatexApplication() {
 
     }
 
-    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, Set<String> quadTree, String publicationType) {
+    public DatexApplication(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree, String publicationType, String publisherName) {
         super(publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
         this.publicationType = publicationType;
+        this.publisherName = publisherName;
     }
 
     public String getPublicationType() {
@@ -31,9 +35,17 @@ public class DatexApplication extends Application{
         this.publicationType = publicationType;
     }
 
+    public String getPublisherName() {
+        return publisherName;
+    }
+
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
+    }
+
     @Override
     public ApplicationApi toApi() {
-        return new DatexApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationType());
+        return new DatexApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationType(), getPublisherName());
     }
 
     @Override
@@ -43,21 +55,19 @@ public class DatexApplication extends Application{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DatexApplication that = (DatexApplication) o;
-        return Objects.equals(publicationType, that.publicationType);
+        return super.equals(o) && Objects.equals(publicationType, ((DatexApplication) o).publicationType) && Objects.equals(publisherName, ((DatexApplication) o).publisherName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), publicationType);
+        return Objects.hash(super.hashCode(), publicationType, publisherName);
     }
 
     @Override
     public String toString() {
         return "DatexApplication{" +
                 "publicationType='" + publicationType + '\'' +
+                ", publisherName='" + publisherName + '\'' +
                 '}' + super.toString();
     }
 }

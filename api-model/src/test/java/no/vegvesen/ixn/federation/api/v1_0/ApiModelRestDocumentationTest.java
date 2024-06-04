@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 public class ApiModelRestDocumentationTest {
 
@@ -22,8 +23,8 @@ public class ApiModelRestDocumentationTest {
                                         "NO",
                                         "1.0",
                                         "DENM:1.2.2",
-                                        Collections.singleton("1234"),
-                                        Collections.singleton(6)
+                                        List.of("1234"),
+                                        List.of(6)
                                 ),
                                 new MetadataApi(
                                         1,
@@ -47,8 +48,9 @@ public class ApiModelRestDocumentationTest {
                         "pub-1",
                         "NO",
                         "DATEX:1.0",
-                        Collections.singleton("1234"),
-                        "Roadworks"
+                        List.of("1234"),
+                        "Roadworks",
+                        "publisherName"
                 ),
                 new MetadataApi(
                         1,
@@ -71,7 +73,7 @@ public class ApiModelRestDocumentationTest {
                         "pub-1",
                         "NO",
                         "IVIM:1.0",
-                        Collections.singleton("1234")
+                        List.of("1234")
                 ),
                 new MetadataApi(
                         1,
@@ -98,8 +100,8 @@ public class ApiModelRestDocumentationTest {
                                         "pub-1",
                                         "NO",
                                         "DENM:1.2.2",
-                                        Collections.singleton("1224"),
-                                        Collections.singleton(5)
+                                        List.of("1224"),
+                                        List.of(5)
                                 ),
                                 new MetadataApi(
                                         1,
@@ -205,7 +207,7 @@ public class ApiModelRestDocumentationTest {
                 "BOUV01",
                 "NO",
                 "DENM:1.3.1",
-                new HashSet<>(Collections.singleton("02312"))
+                List.of("02312")
         );
 
         MetadataApi metadata = new MetadataApi(
@@ -237,8 +239,8 @@ public class ApiModelRestDocumentationTest {
                 "BOUV01",
                 "NO",
                 "DENM:1.3.1",
-                new HashSet<>(Collections.singleton("02312")),
-                new HashSet<>(Collections.singleton(6))
+                List.of("02312"),
+                List.of(6)
         );
 
         MetadataApi metadata = new MetadataApi(
@@ -270,8 +272,8 @@ public class ApiModelRestDocumentationTest {
                 "BOUV01",
                 "NO",
                 "DENM:1.3.1",
-                new HashSet<>(Collections.singleton("02312")),
-                new HashSet<>(Collections.singleton(6))
+                List.of("02312"),
+                List.of(6)
         );
 
         MetadataApi metadata = new MetadataApi();
