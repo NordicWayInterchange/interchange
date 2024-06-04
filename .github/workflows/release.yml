@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - federation-master
-      - release-pipeline
   workflow_dispatch:
     inputs:
       git-ref:
@@ -96,7 +95,7 @@ jobs:
 
       - name: Perform release
         run: |
-          mvn -B -Darguments=-DskipTests release:perform
+          mvn -B release:perform
 
       - name: Create release
         uses: ncipollo/release-action@v1
@@ -128,16 +127,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: interchange
+
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
       - name: Setup Google CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
           version: '>= 446.0.1'
           project_id: ${{ vars.PROJECT_ID }}
+
       - name: Save version number to variable
         run: |
           echo "CURRENT_VERSION=$(cat CURRENT_VERSION.txt)" >> "$GITHUB_ENV"
@@ -150,10 +152,12 @@ jobs:
           cd ./${{ matrix.Images }}
           docker build . -t ${{ matrix.Images }}
       - name: Push docker image to Google artifact registry
+
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.CURRENT_VERSION }}
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
       - name: Push docker image to Github container registry
+
         run: |
           docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.CURRENT_VERSION }}
           echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
