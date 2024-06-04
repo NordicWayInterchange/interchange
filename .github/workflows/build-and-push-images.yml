@@ -6,8 +6,10 @@ permissions:
 
 on:
   push:
+    branches-ignore:
+      - federation-master
+      - release-pipelines
   workflow_dispatch:
-    if: "github.ref != 'refs/heads/federation-master' || github.ref != 'refs/heads/release-pipeline'"
     inputs:
       git-ref:
         required: false
@@ -118,26 +120,32 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: interchange
+
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
       - name: Setup Google CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
           version: '>= 446.0.1'
           project_id: ${{ vars.PROJECT_ID }}
+
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
+
       - name: Create tag
         run: |
           echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
           echo "BRANCH_TAG=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_ENV"
+
       - name: Build the Docker image
         run: |
           cd ./${{ matrix.Images }}          
           docker build . -t ${{ matrix.Images }}
+
       - name: Push docker image to Google artifact registry
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }}

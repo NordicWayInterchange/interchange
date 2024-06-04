@@ -6,6 +6,9 @@ permissions:
 
 on:
   push:
+    branches:
+      - federation-master
+      - release-pipeline
   workflow_dispatch:
     inputs:
       git-ref:
@@ -156,56 +159,3 @@ jobs:
           echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
           docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
 
-  push-helm-charts:
-    runs-on: ubuntu-latest
-    needs: release
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Download persisted workspace
-        uses: actions/download-artifact@v4
-        with:
-          name: interchange
-
-      - name: Setup helm
-        uses: azure/setup-helm@v3.5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update helm version before pushing
-        run: |
-          version=$(cat helm/interchange/Chart.yaml | grep version)
-          sed -i s"/$version/version: $(cat CURRENT_VERSION.txt)/" helm/interchange/Chart.yaml
-
-      - name: Package charts
-        run: |
-          helm package helm/interchange -d target/helm
-          helm package helm/basic-interchange -d target/helm
-          helm repo index target/helm
-          echo "HELM_CHART=$(ls target/helm/interchange-*.tgz)" >> "$GITHUB_ENV"
-
-      - name: 'Authenticate to Google Cloud'
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.SERVICE_ACCOUNT }}
-
-      - name: Setup Google CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          version: '>= 446.0.1'
-          project_id: ${{ vars.PROJECT_ID }}
-
-      - name: Login to Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
-
-      - name: helm push to Google artifact registry
-        run: |
-          helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm
-
-      - name: helm push to Github container registry
-        run: |
-          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
-          helm push ${{ env.HELM_CHART }} oci://ghcr.io/nordicwayinterchange
