@@ -456,7 +456,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled("This does not work at the moment, throwing SelectorAlwaysTrueException")
 	public void selectorWithOnlyQuadTree() {
 		Capability capability = new Capability(
 				new DenmApplication(
@@ -474,7 +473,24 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled("quadTree not like does not work at the moment")
+	public void selectorWithOnlyQuadTreeNotLike() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "quadTree not like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
+
+
+	@Test
 	public void selectorWithNegatedQuadTreeOtherThanTheOneFromCapability() {
 		Capability capability = new Capability(
 				new DenmApplication(
@@ -487,7 +503,7 @@ class CapabilityMatcherTest {
 				),
 				new Metadata()
 		);
-		String selector = "messageType = 'DENM' and quadTree not like '%,124%'";
+		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
 	}
 
@@ -526,7 +542,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	//@Disabled("This test passes, but due to other reasons. Should we explicitly remove selectors with not like?")
 	public void selectorWithNegatedQuadTreeSameAsCapabilityShouldNotMatch() {
 		Capability capability = new Capability(
 				new DenmApplication(
@@ -561,13 +576,11 @@ class CapabilityMatcherTest {
 				CapabilityMatcher.matchCapabilityToSelector(
 						capability2,
 						"messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')"
-				)
-		).isFalse();
+				)).isFalse();
 	}
 
 	@Test
-	@Disabled("Cannot match against a subset at the moment")
-	public void foo() {
+	public void mathcAgainstSubTile() {
 		Capability capability1 = new Capability(
 				new DenmApplication(
 						"NO-123",
@@ -580,7 +593,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 
-		String selector = "messageType = 'DENM' and not (quadTree like '%,1234%')";
+		String selector = "messageType = 'DENM' and not (quadTree like '%,1233%')";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector)).isTrue();
 	}
 
