@@ -56,7 +56,7 @@ public class JmsSelectorFilterTest {
     }
 
     @Test
-    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
+    @Disabled("This fails, but parses. Should it be this way?")
     public void notLikeWithoutParenthesisTrue() throws ParseException {
         assertThat(new JMSSelectorFilter("NOT entry LIKE '%aaa%'").matches(new SimpleStringFilterable("entry","bbbb"))).isTrue();
     }
@@ -77,17 +77,36 @@ public class JmsSelectorFilterTest {
     }
 
     @Test
-    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
+    @Disabled("Fails without parenthesis. It parses, but should it?")
     public void doubleNotLikeWithoutParenthesisFalse() throws ParseException {
         assertThat(new JMSSelectorFilter("NOT entry not LIKE '%aaa%'").matches(new SimpleStringFilterable("entry","bbbb"))).isFalse();
     }
 
     @Test
-    @Disabled("This fails right now. Reported at https://issues.apache.org/jira/browse/QPID-8656")
-    public void quadTreeSpscificVersion() throws ParseException {
+    public void severalTrueAndFalseParts() throws ParseException {
+        assertThat(new JMSSelectorFilter("true and true and false").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("true and not (false) and false").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("true and not (false) and not (true)").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("entry = 'bbb' and not (false) and not (true)").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("entry = 'bbb' and not (entry like '%aaa%') and not (entry like '%bbb%' )").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("entry = 'bbb' and not entry like '%aaa%' and not entry like '%bbb%' ").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+        assertThat(new JMSSelectorFilter("entry = 'bbb' and entry not like '%aaa%' and entry not like '%bbb%' ").matches(new SimpleStringFilterable("entry","bbb"))).isFalse();
+    }
+
+
+    @Test
+    @Disabled("This fails, but parses. Should it be this way?")
+    public void quadTreeSpecificVersionNoParenthesis() throws ParseException {
         assertThat(new JMSSelectorFilter("not quadTree like '%,12%'")
                 .matches(new SimpleStringFilterable("quadTree",",1011,1311,"))).isTrue();
     }
+
+    @Test
+    public void quadTreeSpecificVersionWithParenthesis() throws ParseException {
+        assertThat(new JMSSelectorFilter("not (quadTree like '%,12%')")
+                .matches(new SimpleStringFilterable("quadTree",",1011,1311,"))).isTrue();
+    }
+
     private static class SimpleStringFilterable implements Filterable {
         private final String variableName;
         private final String variableValue;
@@ -97,6 +116,7 @@ public class JmsSelectorFilterTest {
             this.variableName = variableName;
             this.variableValue = variableValue;
         }
+
         @Override
         public AMQMessageHeader getMessageHeader() {
             return null;

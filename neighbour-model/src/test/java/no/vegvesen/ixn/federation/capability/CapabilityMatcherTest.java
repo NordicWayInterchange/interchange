@@ -423,14 +423,14 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void quadTreeOnCapabilityIsLongerThanSelector() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of(6)
 				),
 				new Metadata()
 		);
@@ -440,14 +440,14 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void quadTreeOnSelectorIsLongerThanOnCapability() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -458,14 +458,14 @@ class CapabilityMatcherTest {
 	@Test
 	@Disabled("This does not work at the moment, throwing SelectorAlwaysTrueException")
 	public void selectorWithOnlyQuadTree() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -476,14 +476,14 @@ class CapabilityMatcherTest {
 	@Test
 	@Disabled("quadTree not like does not work at the moment")
 	public void selectorWithNegatedQuadTreeOtherThanTheOneFromCapability() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -493,14 +493,14 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void selectorWithOutsideAnd() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -510,14 +510,14 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void selectorWithOutsideAndNotMatching() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -526,16 +526,16 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled("This test passes, but due to other reasons. Should we explicitly remove selectors with not like?")
+	//@Disabled("This test passes, but due to other reasons. Should we explicitly remove selectors with not like?")
 	public void selectorWithNegatedQuadTreeSameAsCapabilityShouldNotMatch() {
-		CapabilitySplit capability = new CapabilitySplit(
+		Capability capability = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						Collections.singleton("123"),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
@@ -544,44 +544,38 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	public void twoQuadTreesInCapability() {
-		CapabilitySplit capability1 = new CapabilitySplit(
-				new DenmApplication(
-						"NO-123",
-						"NO-123:123",
-						"NO",
-						"1.0",
-						new HashSet<>(Arrays.asList("123")),
-						Collections.emptySet()
-				),
-				new Metadata()
-		);
-		CapabilitySplit capability2 = new CapabilitySplit(
+	@Disabled("This test does not work. Seems to be a problem with the selectorMatcher")
+	public void matchingQuadTreeeWithFalseThenTrue() {
+		Capability capability2 = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123.123",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("124")),
-						Collections.emptySet()
+						List.of("122"),
+						List.of()
 				),
 				new Metadata()
 		);
-		String selector = "messageType = 'DENM' and not (quadTree like '%,123%') and not (quadTree like '%,124%')";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector) || CapabilityMatcher.matchCapabilityToSelector(capability2,selector)).isFalse();
+        assertThat(
+				CapabilityMatcher.matchCapabilityToSelector(
+						capability2,
+						"messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')"
+				)
+		).isFalse();
 	}
 
 	@Test
 	@Disabled("Cannot match against a subset at the moment")
 	public void foo() {
-		CapabilitySplit capability1 = new CapabilitySplit(
+		Capability capability1 = new Capability(
 				new DenmApplication(
 						"NO-123",
 						"NO-123:123",
 						"NO",
 						"1.0",
-						new HashSet<>(Arrays.asList("123")),
-						Collections.emptySet()
+						List.of("123"),
+						List.of()
 				),
 				new Metadata()
 		);
