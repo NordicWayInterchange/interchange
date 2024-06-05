@@ -4,8 +4,6 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -16,7 +14,6 @@ import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
-    private static Logger logger = LoggerFactory.getLogger(MessageCollectorRemoteListenerIT.class);
 
     static KeysStructure keysStructure = generateKeys(MessageCollectorRemoteListenerIT.class,"my_ca","localhost");
 
@@ -33,7 +30,7 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 	@Test
     public void stoppingRemoteContainerStopsListener() {
 		SSLContext sslContext = sslServerContext(keysStructure);
-		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
+		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString());
         ListenerEndpoint remote = mock(ListenerEndpoint.class);
         when(remote.getTarget()).thenReturn("subscriptionExchange");
         when(remote.getHost()).thenReturn("localhost");
