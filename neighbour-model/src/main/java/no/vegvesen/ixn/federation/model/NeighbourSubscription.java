@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "neighbour_subscriptions")
@@ -12,6 +13,9 @@ public class NeighbourSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_sub_seq")
     private Integer id;
+
+
+    private UUID uuid = UUID.randomUUID();
 
     @Enumerated(EnumType.STRING)
     private NeighbourSubscriptionStatus subscriptionStatus;
@@ -46,7 +50,6 @@ public class NeighbourSubscription {
     }
 
     public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -61,6 +64,14 @@ public class NeighbourSubscription {
         this.path = path;
         this.consumerCommonName = consumerCommonName;
     }
+    public NeighbourSubscription(UUID uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+        this.subscriptionStatus = subscriptionStatus;
+        this.selector = selector;
+        this.path = path;
+        this.consumerCommonName = consumerCommonName;
+        this.endpoints.addAll(endpoints);
+        this.uuid = uuid;
+    }
 
     public Integer getId() {
         return id;
@@ -68,6 +79,14 @@ public class NeighbourSubscription {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public NeighbourSubscriptionStatus getSubscriptionStatus() {
@@ -138,7 +157,7 @@ public class NeighbourSubscription {
     @Override
     public String toString() {
         return "NeighbourSubscription{" +
-                "id=" + id +
+                "id=" + uuid +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +
                 ", path='" + path + '\'' +

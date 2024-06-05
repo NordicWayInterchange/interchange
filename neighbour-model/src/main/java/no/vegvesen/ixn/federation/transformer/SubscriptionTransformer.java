@@ -7,10 +7,7 @@ import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class SubscriptionTransformer {
@@ -47,7 +44,7 @@ public class SubscriptionTransformer {
 		List<RequestedSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (NeighbourSubscription s : subscriptions) {
 			RequestedSubscriptionResponseApi responseApi = new RequestedSubscriptionResponseApi(
-					s.getId().toString(),
+					s.getUuid(),
 					s.getSelector(),
 					s.getPath(),
 					neighbourSubscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),

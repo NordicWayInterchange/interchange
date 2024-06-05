@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -222,7 +223,7 @@ class NeighbourRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
-				Collections.singleton(new RequestedSubscriptionResponseApi("1",selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
+				Collections.singleton(new RequestedSubscriptionResponseApi(UUID.randomUUID(),selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -74,7 +75,16 @@ public class NeighbourSubscriptionRequest {
 
         throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
     }
+    public NeighbourSubscription getSubscriptionByUuid(UUID id) throws NeighbourSubscriptionNotFound {
 
+        for (NeighbourSubscription subscription : subscription) {
+            if (subscription.getUuid().equals(id)) {
+                return subscription;
+            }
+        }
+
+        throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
+    }
     @Override
     public String toString() {
         return "SubscriptionRequest{" +

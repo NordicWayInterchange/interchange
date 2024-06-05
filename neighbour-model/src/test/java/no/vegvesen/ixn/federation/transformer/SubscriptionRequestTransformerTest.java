@@ -5,10 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +72,7 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
 		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi(
-				"1",
+				UUID.randomUUID(),
 				"t = b",
 				"/mynode/1",
 				SubscriptionStatusApi.REQUESTED,
@@ -105,7 +102,8 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void canTransformSubscriptionsToSubscriptionResponseApi() {
 		NeighbourSubscription subscription = new NeighbourSubscription();
-		subscription.setId(1);
+		UUID uuid = UUID.randomUUID();
+		subscription.setUuid(uuid);
 		String path = "bouvet/subscriptions/1";
 		subscription.setPath(path);
 		String selector = "originatingCountry = 'NO'";
@@ -118,7 +116,7 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(response.getSubscriptions()).hasSize(1);
 
 		RequestedSubscriptionResponseApi subsResponse = response.getSubscriptions().iterator().next();
-		assertThat(subsResponse.getId()).isEqualTo("1");
+		assertThat(subsResponse.getId()).isEqualTo(uuid);
 		assertThat(subsResponse.getPath()).isEqualTo(path);
 		assertThat(subsResponse.getSelector()).isEqualTo(selector);
 		assertThat(subsResponse.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);

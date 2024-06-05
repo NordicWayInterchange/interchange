@@ -6,10 +6,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
-    private String id;
+    private UUID id;
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -27,7 +28,7 @@ public class SubscriptionPollResponseApi {
     public SubscriptionPollResponseApi() {
     }
 
-    public SubscriptionPollResponseApi(String id,
+    public SubscriptionPollResponseApi(UUID id,
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
@@ -39,7 +40,7 @@ public class SubscriptionPollResponseApi {
         this.status = status;
     }
 
-    public SubscriptionPollResponseApi(String id,
+    public SubscriptionPollResponseApi(UUID id,
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
@@ -53,11 +54,11 @@ public class SubscriptionPollResponseApi {
         this.endpoints = endpoints;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

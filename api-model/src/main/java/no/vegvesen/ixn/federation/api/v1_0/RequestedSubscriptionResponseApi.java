@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedSubscriptionResponseApi {
 
-    private String id;
+    private UUID id;
     private String selector;
 
     @JsonInclude(Include.NON_NULL)
@@ -22,14 +23,14 @@ public class RequestedSubscriptionResponseApi {
     public RequestedSubscriptionResponseApi() {
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status) {
+    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
+    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
         this.id = id;
         this.selector = selector;
         this.path = path;
@@ -37,14 +38,7 @@ public class RequestedSubscriptionResponseApi {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
-        this.selector = selector;
-        this.path = path;
-        this.status = status;
-        this.consumerCommonName = consumerCommonName;
-    }
-
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
+    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.path = path;
@@ -53,11 +47,11 @@ public class RequestedSubscriptionResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

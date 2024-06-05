@@ -63,6 +63,7 @@ public class SubscriptionRequestTransformer {
 
 	public SubscriptionPollResponseApi neighbourSubscriptionToSubscriptionPollResponseApi(NeighbourSubscription subscription) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
+		response.setId(subscription.getUuid());
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());

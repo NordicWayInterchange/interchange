@@ -238,7 +238,7 @@ public class NeighbourServiceIT {
         service.saveSetupRouting(neighbour);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
-        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour = repository.findByName(neighbour.getName());
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
@@ -265,7 +265,7 @@ public class NeighbourServiceIT {
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
         neighbour = repository.findByName(neighbour.getName());
-        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
         service.saveNeighbour(neighbour);

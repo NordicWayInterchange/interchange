@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class ApiModelRestDocumentationTest {
 
@@ -139,7 +136,7 @@ public class ApiModelRestDocumentationTest {
                 "node-1",
                 Collections.singleton(
                         new RequestedSubscriptionResponseApi(
-                                "1",
+                                UUID.randomUUID(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
@@ -158,7 +155,7 @@ public class ApiModelRestDocumentationTest {
                 "node-1",
                 new HashSet<>(Arrays.asList(
                         new RequestedSubscriptionResponseApi(
-                                "1",
+                                UUID.randomUUID(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
@@ -166,7 +163,7 @@ public class ApiModelRestDocumentationTest {
                                 System.currentTimeMillis()
                         ),
                         new RequestedSubscriptionResponseApi(
-                                "2",
+                                UUID.randomUUID(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/2",
                                 SubscriptionStatusApi.REQUESTED,
@@ -182,7 +179,7 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void subscriptionPollResponse() throws JsonProcessingException {
         SubscriptionPollResponseApi response = new SubscriptionPollResponseApi(
-                "1",
+                UUID.randomUUID(),
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
