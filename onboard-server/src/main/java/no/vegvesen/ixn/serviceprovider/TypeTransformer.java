@@ -57,7 +57,7 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
-            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
+            UUID sub_id = subscription.getUuid() == null ? null : subscription.getUuid();
             result.add(new LocalActorSubscription(
                     sub_id,
                     createSubscriptionPath(name,sub_id, subscription.getStatus()),
@@ -134,7 +134,7 @@ public class TypeTransformer {
     public Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            String subscriptionId = subscription.getId().toString();
+            UUID subscriptionId = subscription.getUuid();
             result.add(new LocalActorSubscription(
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId, subscription.getStatus()),
@@ -149,7 +149,7 @@ public class TypeTransformer {
         return result;
     }
 
-    private String createSubscriptionPath(String serviceProviderName, String subscriptionId, LocalSubscriptionStatus status) {
+    private String createSubscriptionPath(String serviceProviderName, UUID subscriptionId, LocalSubscriptionStatus status) {
         if (!status.equals(LocalSubscriptionStatus.ILLEGAL)) {
             return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
         } else {
@@ -176,7 +176,7 @@ public class TypeTransformer {
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
                 localSubscription.getId().toString(),
-                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString(), localSubscription.getStatus()),
+                createSubscriptionPath(serviceProviderName,localSubscription.getUuid(), localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),

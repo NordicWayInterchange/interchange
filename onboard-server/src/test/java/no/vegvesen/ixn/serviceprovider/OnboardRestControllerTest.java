@@ -265,7 +265,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, fiSubs.getUuid());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -285,7 +285,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "3");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, UUID.randomUUID());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -304,7 +304,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, UUID.randomUUID());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)

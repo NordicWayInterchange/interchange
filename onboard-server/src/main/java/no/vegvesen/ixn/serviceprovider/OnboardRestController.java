@@ -286,9 +286,8 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedDataTypeId =  parseInt(dataTypeId, "subscription");
-
-		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
+		UUID uuid = parseUuid(dataTypeId, "subscription");
+		serviceProviderToUpdate.removeLocalSubscription(uuid);
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
@@ -325,9 +324,10 @@ public class OnboardRestController {
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
+		UUID uuid = parseUuid(subscriptionId, "subscription");
+
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscription(parsedSubscriptionId);
+		LocalSubscription localSubscription = serviceProvider.getSubscription(uuid);
 
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
@@ -545,6 +545,16 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 	}
 
+	private UUID parseUuid(String unparsedUuid, String objectName){
+		UUID parsedUuid;
+		try{
+			parsedUuid = UUID.fromString(unparsedUuid);
+		}
+		catch (IllegalArgumentException e){
+			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unparsedUuid));
+		}
+		return parsedUuid;
+	}
 	private Integer parseInt(String unParsedInt, String objectName){
 		Integer parsedInt;
 		try {

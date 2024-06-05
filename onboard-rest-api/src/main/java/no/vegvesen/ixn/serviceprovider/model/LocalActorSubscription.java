@@ -3,9 +3,10 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class LocalActorSubscription {
-    String id;
+    UUID id;
     String path;
     String selector;
     String consumerCommonName;
@@ -18,7 +19,7 @@ public class LocalActorSubscription {
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
+    public LocalActorSubscription(UUID id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -28,11 +29,11 @@ public class LocalActorSubscription {
         this.errorMessage = errorMessage;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

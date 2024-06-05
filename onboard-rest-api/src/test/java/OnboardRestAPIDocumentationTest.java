@@ -52,14 +52,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription("1",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED,
                 null));
-        subscriptions.add(new LocalActorSubscription("2",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
@@ -81,14 +81,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription("1",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
                 null));
-        subscriptions.add(new LocalActorSubscription("2",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",

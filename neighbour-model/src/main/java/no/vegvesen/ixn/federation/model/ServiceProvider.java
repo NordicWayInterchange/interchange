@@ -6,10 +6,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -152,6 +149,18 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void removeLocalSubscription(UUID uuid){
+		LocalSubscription subscriptionToDelete = subscriptions
+				.stream()
+				.filter(subscription -> subscription.getUuid().equals(uuid))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
+				);
+		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
 		this.setSubscriptions(newSubscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
@@ -234,10 +243,10 @@ public class ServiceProvider {
 				.filter(subscription -> allSubscriptions.contains(subscription))
 				.collect(Collectors.toSet());
 	}
-	public LocalSubscription getSubscription(Integer subscriptionId){
+	public LocalSubscription getSubscription(UUID subscriptionId){
 		return getSubscriptions()
 				.stream()
-				.filter(s -> s.getId().equals(subscriptionId))
+				.filter(s -> s.getUuid().equals(subscriptionId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
 	}

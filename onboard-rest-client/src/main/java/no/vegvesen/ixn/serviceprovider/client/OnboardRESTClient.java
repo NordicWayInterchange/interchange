@@ -79,8 +79,8 @@ public class OnboardRESTClient {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
-        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
+    public GetSubscriptionResponse getSubscription(String localSubscriptionId) {
+        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId);
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 

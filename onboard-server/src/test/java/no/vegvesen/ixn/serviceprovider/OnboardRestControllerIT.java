@@ -727,7 +727,7 @@ public class OnboardRestControllerIT {
         assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
         LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
-        restController.deleteSubscription(serviceProviderName, subscriptionApi.getId());
+        restController.deleteSubscription(serviceProviderName, subscriptionApi.getId().toString());
 
         ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
@@ -747,7 +747,7 @@ public class OnboardRestControllerIT {
     public void testDeletingNonExistentSubscription() {
         String serviceprovidername = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.deleteSubscription(serviceprovidername, "1")
+                () -> restController.deleteSubscription(serviceprovidername, UUID.randomUUID().toString())
         );
     }
 
@@ -767,7 +767,7 @@ public class OnboardRestControllerIT {
         assertThat(subscriptionUpdated).isPresent();
 
         try {
-            restController.deleteSubscription(serviceProviderName, "-1");
+            restController.deleteSubscription(serviceProviderName, UUID.randomUUID().toString());
         } catch (NotFoundException ignore) {
         }
         ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
@@ -804,7 +804,7 @@ public class OnboardRestControllerIT {
 
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
         LocalActorSubscription subscription = anySubscription.get();
-        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId().toString());
         assertThat(getSubscriptionResponse).isNotNull();
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
