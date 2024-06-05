@@ -19,7 +19,6 @@ import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import javax.naming.NamingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,13 +83,11 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-        MessageConsumer consumer;
         try (Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", keysStructure, PRODUCER_SP_NAME)) {
             source.start();
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, keysStructure, CONSUMER_SP_NAME)) {
-                consumer = sink.createConsumer();
-				source.sendNonPersistentMessage(source.createMessageBuilder()
+                source.sendNonPersistentMessage(source.createMessageBuilder()
 						.textMessage("fishy fishy")
 						.userId("localhost")
 						.messageType(Constants.DATEX_2)
@@ -108,7 +105,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						.timestamp(System.currentTimeMillis())
 						.build(), 8000L);
 
-				Message message = consumer.receive(2000);
+				Message message = sink.createConsumer().receive(2000);
 				assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
 				assertThat(message.getJMSExpiration()).withFailMessage("Routed message has noe expiry specified").isNotEqualTo(0L);
             } catch (Exception e) {
@@ -140,37 +137,41 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(),
-				"localhost",
-				keysStructure,
-				PRODUCER_SP_NAME);
-		source.start();
-		JmsMessage message1 = source.createMessageBuilder()
-				.textMessage("fishy fishy")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publisherId("Test")
-				.publicationId("pub-1")
-				.quadTreeTiles(",3232,")
-				.publicationType("Obstruction")
-				.publisherName("publishername")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("SE")
-				.shardId(1)
-				.shardCount(1)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		JmsMessage senderMessage = message1;
-		source.sendNonPersistentMessage(senderMessage);
+        try (Source source = createSource(producerContainer.getAmqpsUrl(),
+                "localhost",
+                keysStructure,
+                PRODUCER_SP_NAME)) {
+            source.start();
+            JmsMessage message1 = source.createMessageBuilder()
+                    .textMessage("fishy fishy")
+                    .userId("localhost")
+                    .messageType(Constants.DATEX_2)
+                    .publisherId("Test")
+                    .publicationId("pub-1")
+                    .quadTreeTiles(",3232,")
+                    .publicationType("Obstruction")
+                    .publisherName("publishername")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("SE")
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
 
-		Thread.sleep(2000); // wait for the message to expire with extra margin
+            source.sendNonPersistentMessage(message1);
+			Thread.sleep(2000); // wait for the message to expire with extra margin
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(),CONSUMER_SP_NAME,keysStructure,CONSUMER_SP_NAME);
-		MessageConsumer consumer = sink.createConsumer();
-		Message message = consumer.receive(1000);
-		assertThat(message).withFailMessage("Expected message is not routed").isNull();
+            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, keysStructure, CONSUMER_SP_NAME)) {
+                Message message = sink.createConsumer().receive(1000);
+				assertThat(message).withFailMessage("Expected message is not routed").isNull();
+			} catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
 	}
 
 	@Test
@@ -181,7 +182,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -193,34 +194,38 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
-		source.start();
-		JmsMessage message1 = source.createMessageBuilder()
-				.textMessage("Should work!")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publisherId("Test")
-				.publicationId("pub-1")
-				.quadTreeTiles(",3232,")
-				.publicationType("Obstruction")
-				.publisherName("publishername")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("SE")
-				.shardId(1)
-				.shardCount(1)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		JmsMessage senderMessage = message1;
-		source.sendNonPersistentMessage(senderMessage);
+        try (Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", keysStructure, "sp_producer.p12")) {
+            source.start();
+            JmsMessage senderMessage = source.createMessageBuilder()
+                    .textMessage("Should work!")
+                    .userId("localhost")
+                    .messageType(Constants.DATEX_2)
+                    .publisherId("Test")
+                    .publicationId("pub-1")
+                    .quadTreeTiles(",3232,")
+                    .publicationType("Obstruction")
+                    .publisherName("publishername")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("SE")
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            source.sendNonPersistentMessage(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer",keysStructure, "sp_consumer.p12");
-		MessageConsumer consumer = sink.createConsumer();
+            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", keysStructure, "sp_consumer.p12")) {
+                MessageConsumer consumer = sink.createConsumer();
+				Message message = consumer.receive(1000);
 
-		Message message = consumer.receive(1000);
+				assertThat(message).isNotNull();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
-		assertThat(message).isNotNull();
+        }
+
 	}
 
 	@Test
@@ -231,7 +236,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -243,36 +248,40 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerContainer.getAmqpsUrl(), "localhost",keysStructure, "sp_producer.p12");
-		source.start();
-		String message = "Should work!";
-		byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message1 = source.createMessageBuilder()
-				.bytesMessage(bytemessage)
-				.userId("localhost")
-				.messageType(Constants.DENM)
-				.publisherId("Test")
-				.publicationId("pub-1")
-				.quadTreeTiles(",3232,")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("SE")
-				.causeCode(1)
-				.subCauseCode(1)
-				.shardId(1)
-				.shardCount(1)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		JmsMessage senderMessage = message1;
-		source.send(senderMessage);
+        try (Source source = createSource(producerContainer.getAmqpsUrl(), "localhost", keysStructure, "sp_producer.p12")) {
+            source.start();
+            String message = "Should work!";
+            byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
+            JmsMessage senderMessage = source.createMessageBuilder()
+                    .bytesMessage(bytemessage)
+                    .userId("localhost")
+                    .messageType(Constants.DENM)
+                    .publisherId("Test")
+                    .publicationId("pub-1")
+                    .quadTreeTiles(",3232,")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("SE")
+                    .causeCode(1)
+                    .subCauseCode(1)
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            source.send(senderMessage);
 
-		Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", keysStructure,"sp_consumer.p12");
-		MessageConsumer consumer = sink.createConsumer();
+            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", keysStructure, "sp_consumer.p12")) {
+                MessageConsumer consumer = sink.createConsumer();
+				Message receiveMessage = consumer.receive(1000);
 
-		Message receiveMessage = consumer.receive(1000);
+				assertThat(receiveMessage).isNotNull();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
-		assertThat(receiveMessage).isNotNull();
+        }
+
 	}
 
 }
