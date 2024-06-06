@@ -51,7 +51,7 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status, UUID uuid) {
+    public LocalDelivery( UUID uuid, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
         this.uuid = uuid;
         this.endpoints.addAll(endpoints);
         this.path = path;
@@ -64,15 +64,21 @@ public class LocalDelivery {
     }
 
     public LocalDelivery(UUID id, String path, String selector, LocalDeliveryStatus status) {
-        this(Collections.emptySet(),path,selector,status, id);
+        this(id, Collections.emptySet(),path,selector,status);
     }
 
     public LocalDelivery(String path, String selector, LocalDeliveryStatus status) {
-        this(null,Collections.emptySet(),path,selector,status);
+        this.endpoints = Collections.emptySet();
+        this.path = path;
+        this.selector = selector;
+        this.status = status;
     }
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
-        this(null,Collections.emptySet(),null,selector,status);
+        this.endpoints = Collections.emptySet();
+        this.path = null;
+        this.selector = selector;
+        this.status = status;
     }
 
     public Integer getId() {

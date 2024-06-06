@@ -488,11 +488,11 @@ public class OnboardRestControllerTest {
 		);
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
+						uuid,
 						Collections.emptySet(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
-						LocalDeliveryStatus.REQUESTED,
-						uuid
+						LocalDeliveryStatus.REQUESTED
 				)
 		));
 
