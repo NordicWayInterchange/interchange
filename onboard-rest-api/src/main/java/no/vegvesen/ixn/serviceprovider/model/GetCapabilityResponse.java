@@ -3,26 +3,27 @@ package no.vegvesen.ixn.serviceprovider.model;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class GetCapabilityResponse {
-    private String id;
+    private UUID id;
     private String path;
     private CapabilitySplitApi definition;
 
     public GetCapabilityResponse() {
     }
 
-    public GetCapabilityResponse(String id, String path, CapabilitySplitApi definition) {
+    public GetCapabilityResponse(UUID id, String path, CapabilitySplitApi definition) {
         this.id = id;
         this.path = path;
         this.definition = definition;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

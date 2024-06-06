@@ -2,9 +2,10 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 public class GetDeliveryResponse {
-    private String id;
+    private UUID id;
     private Set<DeliveryEndpoint> endpoints;
     private String path;
     private String selector;
@@ -14,7 +15,7 @@ public class GetDeliveryResponse {
     public GetDeliveryResponse() {
     }
 
-    public GetDeliveryResponse(String id, Set<DeliveryEndpoint> endpoints, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status) {
+    public GetDeliveryResponse(UUID id, Set<DeliveryEndpoint> endpoints, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status) {
         this.id = id;
         this.endpoints = endpoints;
         this.path = path;
@@ -23,11 +24,11 @@ public class GetDeliveryResponse {
         this.status = status;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

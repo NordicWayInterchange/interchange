@@ -3,26 +3,27 @@ package no.vegvesen.ixn.serviceprovider.model;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class LocalActorCapability {
-    private String id;
+    private UUID id;
     private String path;
     CapabilitySplitApi definition;
 
     public LocalActorCapability() {
     }
 
-    public LocalActorCapability(String id, String path, CapabilitySplitApi definition) {
+    public LocalActorCapability(UUID id, String path, CapabilitySplitApi definition) {
         this.id = id;
         this.path = path;
         this.definition = definition;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -230,12 +230,31 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
+	public void removeLocalDelivery(UUID deliveryId) {
+		LocalDelivery localDeliveryToDelete = deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
+				);
+		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+	}
+
 	public Capability getCapabilitySplit(Integer capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
 				.filter(c-> c.getId().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
+	}
+
+	public Capability getCapability(UUID capabilityId){
+		return
+				getCapabilities().getCapabilities().stream()
+						.filter(c-> c.getUuid().equals(capabilityId))
+						.findFirst()
+						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
@@ -261,6 +280,13 @@ public class ServiceProvider {
 		return getDeliveries()
 				.stream()
 				.filter(d -> d.getId().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
+	}
+	public LocalDelivery getDelivery(UUID deliveryId){
+		return getDeliveries()
+				.stream()
+				.filter(d -> d.getUuid().equals(deliveryId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
 	}

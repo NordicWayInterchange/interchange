@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "private_channels")
@@ -11,6 +12,9 @@ public class PrivateChannel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "privchannel_seq")
     @Column(name="id")
     private Integer id;
+
+    @Column
+    private UUID uuid = UUID.randomUUID();
 
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
@@ -39,7 +43,13 @@ public class PrivateChannel {
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
     }
-
+    public PrivateChannel(UUID uuid, String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+        this.peerName = peerName;
+        this.status = status;
+        this.endpoint = privateChannelEndpoint;
+        this.serviceProviderName = serviceProviderName;
+        this.uuid = uuid;
+    }
 
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
@@ -55,6 +65,14 @@ public class PrivateChannel {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getPeerName() {

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
@@ -13,6 +14,8 @@ public class Capability {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
     private Integer id;
+
+    private UUID uuid = UUID.randomUUID();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "app", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_cap_app"))
@@ -34,6 +37,12 @@ public class Capability {
         this.metadata = metadata;
     }
 
+    public Capability(UUID uuid, Application application, Metadata metadata) {
+        this.application = application;
+        this.metadata = metadata;
+        this.uuid = uuid;
+    }
+
     public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
@@ -46,6 +55,14 @@ public class Capability {
 
     public Integer getId() {
         return id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public Application getApplication() {
@@ -107,7 +124,7 @@ public class Capability {
     @Override
     public String toString() {
         return "Capability{" +
-                "id=" + id +
+                "id=" + uuid +
                 ", application=" + application +
                 ", metadata=" + metadata +
                 ", status=" + status + '\'' +

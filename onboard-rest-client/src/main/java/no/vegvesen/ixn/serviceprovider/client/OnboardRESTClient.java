@@ -116,7 +116,7 @@ public class OnboardRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelResponse.class).getBody();
     }
 
-    public void deletePrivateChannel(Integer privateChannelId) {
+    public void deletePrivateChannel(String privateChannelId) {
         restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
     }
 
@@ -124,7 +124,7 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/privatechannels", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
-    public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){
+    public GetPrivateChannelResponse getPrivateChannel(String privateChannelId){
        String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }

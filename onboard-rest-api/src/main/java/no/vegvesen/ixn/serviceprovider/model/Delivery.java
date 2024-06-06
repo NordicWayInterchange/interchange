@@ -3,9 +3,10 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Delivery {
-    private String id;
+    private UUID id;
     private String path;
     private String selector;
     private long lastUpdatedTimestamp;
@@ -17,7 +18,7 @@ public class Delivery {
     }
 
 
-    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
+    public Delivery(UUID id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -25,11 +26,11 @@ public class Delivery {
         this.status = status;
         this.errorMessage = errorMessage;
     }
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

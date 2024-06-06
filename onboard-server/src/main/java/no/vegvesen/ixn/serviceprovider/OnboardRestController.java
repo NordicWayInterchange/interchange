@@ -189,8 +189,8 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
+		UUID parsedUuid = parseUuid(capabilityId, "capability");
+		serviceProviderToUpdate.getCapabilities().removeDataType(parsedUuid);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
@@ -207,8 +207,8 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		Capability capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
+		UUID uuid = parseUuid(capabilityId, "capability");
+		Capability capability = serviceProvider.getCapability(uuid);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
@@ -382,9 +382,9 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId, "private channel");
+		UUID uuid = parseUuid(privateChannelId, "private channel");
 
-		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, uuid);
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
@@ -414,16 +414,15 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
 	@Tag(name = "Private Channel")
 	@Operation(summary = "Get private channel")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE)))})
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE)))})
 	public GetPrivateChannelResponse getPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId, "private channel");
+		UUID uuid = parseUuid(privateChannelId, "private channel");
 
-		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, uuid, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}
@@ -515,9 +514,9 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
+		UUID uuid = parseUuid(deliveryId, "delivery");
 
-		LocalDelivery localDelivery = serviceProvider.getDelivery(parsedDeliveryId);
+		LocalDelivery localDelivery = serviceProvider.getDelivery(uuid);
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
@@ -537,8 +536,8 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		Integer parsedId = parseInt(deliveryId, "delivery");
-		serviceProvider.removeLocalDelivery(parsedId);
+		UUID uuid = parseUuid(deliveryId, "delivery");
+		serviceProvider.removeLocalDelivery(uuid);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
@@ -554,15 +553,5 @@ public class OnboardRestController {
 			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unparsedUuid));
 		}
 		return parsedUuid;
-	}
-	private Integer parseInt(String unParsedInt, String objectName){
-		Integer parsedInt;
-		try {
-			 parsedInt = Integer.parseInt(unParsedInt);
-		}
-		catch (Exception e){
-			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
-		}
-		return parsedInt;
 	}
 }

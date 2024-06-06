@@ -3,9 +3,10 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class PeerPrivateChannelApi {
-    private Integer id;
+    private UUID id;
 
     private String serviceProviderName;
 
@@ -17,24 +18,24 @@ public class PeerPrivateChannelApi {
     public PeerPrivateChannelApi() {
     }
 
-    public PeerPrivateChannelApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
+    public PeerPrivateChannelApi(UUID id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.endpoint = endpoint;
         this.id = id;
     }
 
-    public PeerPrivateChannelApi(Integer id, String serviceProviderName, PrivateChannelStatusApi status) {
+    public PeerPrivateChannelApi(UUID id, String serviceProviderName, PrivateChannelStatusApi status) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.id = id;
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

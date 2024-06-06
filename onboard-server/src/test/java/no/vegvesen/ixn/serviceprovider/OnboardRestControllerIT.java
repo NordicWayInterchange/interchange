@@ -474,7 +474,7 @@ public class OnboardRestControllerIT {
 
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, saved.getId());
+        restController.deleteCapability(serviceProviderName, saved.getId().toString());
 
         //We did four calls to the controller, thus we should have checked the cert 4 times
         verify(certService, times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -517,7 +517,7 @@ public class OnboardRestControllerIT {
         assertThat(capabilities).hasSize(1);
         LocalActorCapability capability = capabilities.stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId());
+        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId().toString());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -907,6 +907,7 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
         AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
+        System.out.println(privateChannels);
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
         assertThat(channelResponse).isNotNull();
@@ -941,6 +942,7 @@ public class OnboardRestControllerIT {
 
         ListPeerPrivateChannels response_1 = restController.listPeerPrivateChannels(serviceProviderName_1);
         ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
+        System.out.println(response_1);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
     }
@@ -1088,7 +1090,7 @@ public class OnboardRestControllerIT {
         );
         AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
 
-        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId();
+        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId().toString();
         GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
 
         assertThat(getDeliveryResponse).isNotNull();
@@ -1118,7 +1120,7 @@ public class OnboardRestControllerIT {
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
 
-        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId());
+        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId().toString());
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()
                 .stream()
                 .filter(i -> i.getStatus().equals(DeliveryStatus.ILLEGAL)))

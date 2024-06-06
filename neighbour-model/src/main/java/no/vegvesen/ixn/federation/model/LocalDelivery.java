@@ -4,10 +4,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "local_deliveries")
@@ -16,6 +13,9 @@ public class LocalDelivery {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
     @Column(name="id")
     private Integer id;
+
+    @Column
+    private UUID uuid = UUID.randomUUID();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
@@ -51,8 +51,20 @@ public class LocalDelivery {
         this.status = status;
     }
 
+    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status, UUID uuid) {
+        this.uuid = uuid;
+        this.endpoints.addAll(endpoints);
+        this.path = path;
+        this.selector = selector;
+        this.status = status;
+    }
+
     public LocalDelivery(Integer id, String path, String selector, LocalDeliveryStatus status) {
         this(id, Collections.emptySet(),path,selector,status);
+    }
+
+    public LocalDelivery(UUID id, String path, String selector, LocalDeliveryStatus status) {
+        this(Collections.emptySet(),path,selector,status, id);
     }
 
     public LocalDelivery(String path, String selector, LocalDeliveryStatus status) {
@@ -69,6 +81,14 @@ public class LocalDelivery {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public Set<LocalDeliveryEndpoint> getEndpoints() {
