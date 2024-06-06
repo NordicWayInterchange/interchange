@@ -70,6 +70,7 @@ public class SubscriptionMatchDiscoveryServiceIT {
         List<SubscriptionMatch> matches = subscriptionMatchRepository.findAll();
         assertThat(matches).isEmpty();
     }
+
     @Test
     public void matchIsNotDeletedIfOnlyOneIsResubscribe(){
         Neighbour nb = new Neighbour();
@@ -215,5 +216,4 @@ public class SubscriptionMatchDiscoveryServiceIT {
         subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
         assertThat(subscriptionMatchRepository.findAll()).hasSize(0);
     }
-
 }
