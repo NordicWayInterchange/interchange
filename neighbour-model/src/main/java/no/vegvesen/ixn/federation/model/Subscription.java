@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions")
@@ -14,6 +15,7 @@ public class Subscription {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_seq")
 	private Integer id;
 
+	private UUID uuid = UUID.randomUUID();
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
 
@@ -72,6 +74,15 @@ public class Subscription {
 		this.endpoints.addAll(endpoints);
 	}
 
+	public Subscription(UUID uuid, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
+		this.uuid = uuid;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.consumerCommonName = consumerCommonName;
+		this.endpoints.addAll(endpoints);
+	}
+
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
@@ -101,6 +112,14 @@ public class Subscription {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getPath() {

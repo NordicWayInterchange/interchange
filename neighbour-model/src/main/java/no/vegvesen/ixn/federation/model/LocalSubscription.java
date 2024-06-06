@@ -177,7 +177,8 @@ public class LocalSubscription {
     @Override
     public String toString() {
         return "LocalSubscription{" +
-                "id=" + uuid +
+                "id=" + id +
+                "uuid=" + uuid +
                 ", status=" + status +
                 ", selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +

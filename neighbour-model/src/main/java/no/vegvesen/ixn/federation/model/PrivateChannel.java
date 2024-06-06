@@ -118,6 +118,7 @@ public class PrivateChannel {
     public String toString() {
         return "PrivateChannel{" +
                 "id=" + id +
+                "uuid=" + uuid +
                 ", status=" + status +
                 ", peerName='" + peerName + '\'' +
                 ", serviceProviderName='"+serviceProviderName + '\'' +

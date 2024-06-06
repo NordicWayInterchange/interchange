@@ -124,7 +124,8 @@ public class Capability {
     @Override
     public String toString() {
         return "Capability{" +
-                "id=" + uuid +
+                "id=" + id +
+                "uuid="+uuid +
                 ", application=" + application +
                 ", metadata=" + metadata +
                 ", status=" + status + '\'' +

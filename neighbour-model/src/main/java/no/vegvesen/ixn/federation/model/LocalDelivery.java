@@ -184,6 +184,7 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
+                "uuid=" + uuid +
                 ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
