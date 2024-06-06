@@ -229,6 +229,7 @@ public class RoutingConfigurer {
 											new SubscriptionShard(exchangeName)
 									);
 									qpidClient.createHeadersExchange(exchangeName);
+									qpidClient.addMessageCollectorWriteAccess(exchangeName);
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
 								}
