@@ -149,7 +149,7 @@ public class RoutingConfigurer {
 					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
 					if (subscription.isSharded()) {
 						if (capability.isSharded()) {
-							for (CapabilityShard shard : capability.getMetadata().getShards()) {
+							for (CapabilityShard shard : capability.getShards()) {
 								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
 									createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
 								}
@@ -158,7 +158,7 @@ public class RoutingConfigurer {
 							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
 						}
 					} else {
-						for (CapabilityShard shard : capability.getMetadata().getShards()) {
+						for (CapabilityShard shard : capability.getShards()) {
 							createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
 						}
 					}
@@ -197,7 +197,7 @@ public class RoutingConfigurer {
 					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
 					if (subscription.isSharded()) {
 						if (capability.isSharded()) {
-							for (CapabilityShard shard : capability.getMetadata().getShards()) {
+							for (CapabilityShard shard : capability.getShards()) {
 								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
 									createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
 								}
@@ -206,7 +206,7 @@ public class RoutingConfigurer {
 							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
 						}
 					} else {
-						for (CapabilityShard shard : capability.getMetadata().getShards()) {
+						for (CapabilityShard shard : capability.getShards()) {
 							createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
 						}
 					}

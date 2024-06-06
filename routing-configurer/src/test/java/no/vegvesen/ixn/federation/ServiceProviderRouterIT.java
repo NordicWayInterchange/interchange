@@ -494,8 +494,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
 		assertThat(cap.isSharded()).isTrue();
 		assertThat(cap.hasShards()).isTrue();
-		assertThat(cap.getMetadata().getShards()).hasSize(3);
-		for (CapabilityShard shard : cap.getMetadata().getShards()) {
+		assertThat(cap.getShards()).hasSize(3);
+		for (CapabilityShard shard : cap.getShards()) {
 			assertThat(client.exchangeExists(shard.getExchangeName())).isTrue();
 			assertThat(shard.getSelector().contains("shardId")).isTrue();
 		}
@@ -518,9 +518,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
 		assertThat(cap.isSharded()).isFalse();
 		assertThat(cap.hasShards()).isTrue();
-		assertThat(cap.getMetadata().getShards()).hasSize(1);
-		assertThat(client.exchangeExists(cap.getMetadata().getShards().stream().findFirst().get().getExchangeName())).isTrue();
-		assertThat(cap.getMetadata().getShards().stream().findFirst().get().getSelector().contains("shardId")).isFalse();
+		assertThat(cap.getShards()).hasSize(1);
+		assertThat(client.exchangeExists(cap.getShards().stream().findFirst().get().getExchangeName())).isTrue();
+		assertThat(cap.getShards().stream().findFirst().get().getSelector().contains("shardId")).isFalse();
 	}
 
 	@Test
@@ -598,10 +598,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -611,8 +607,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard));
 
 		client.createHeadersExchange("cap-ex1");
 
@@ -638,10 +636,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex2", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -651,13 +645,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata1
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex2", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard1));
 		client.createHeadersExchange("cap-ex2");
-
-		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
 
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
@@ -668,8 +660,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(5)
 				),
-				metadata2
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
+		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex3");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
@@ -694,10 +688,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String exchangeName = "my-exchange8";
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -707,8 +697,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
@@ -737,10 +729,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -750,8 +738,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex5");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
@@ -782,10 +772,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex6", "publicationId = 'pub-1'");
-		metadata1.setShards(Collections.singletonList(shard1));
-
 		Capability denmCapability1 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -795,13 +781,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata1
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex6", "publicationId = 'pub-1'");
+		denmCapability1.setShards(Collections.singletonList(shard1));
 		client.createHeadersExchange("cap-ex6");
-
-		Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex7", "publicationId = 'pub-1'");
-		metadata2.setShards(Collections.singletonList(shard2));
 
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
@@ -812,8 +796,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1233"),
 						List.of(6)
 				),
-				metadata2
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex7", "publicationId = 'pub-1'");
+		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex7");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
@@ -870,10 +856,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -883,8 +865,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex8");
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 

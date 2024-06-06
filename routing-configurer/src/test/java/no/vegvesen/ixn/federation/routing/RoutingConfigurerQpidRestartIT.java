@@ -97,10 +97,6 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
-        metadata.setShards(Collections.singletonList(shard));
-
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
@@ -110,9 +106,10 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                metadata
+                new Metadata(RedirectStatus.OPTIONAL)
         );
-
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
+        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -142,10 +139,6 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRedirectNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
-        metadata.setShards(Collections.singletonList(shard));
-
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO2345",
@@ -155,9 +148,10 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                metadata
+                new Metadata(RedirectStatus.OPTIONAL)
         );
-
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
+        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(

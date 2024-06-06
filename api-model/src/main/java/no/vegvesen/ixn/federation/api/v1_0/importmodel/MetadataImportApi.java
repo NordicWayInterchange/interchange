@@ -17,8 +17,6 @@ public class MetadataImportApi {
 
     private Integer repetitionInterval;
 
-    private Set<CapabilityShardImportApi> shards;
-
     public enum RedirectStatusImportApi {
         OPTIONAL, MANDATORY, NOT_AVAILABLE
     }
@@ -32,15 +30,13 @@ public class MetadataImportApi {
                              RedirectStatusImportApi redirectPolicy,
                              Integer maxBandwidth,
                              Integer maxMessageRate,
-                             Integer repetitionInterval,
-                             Set<CapabilityShardImportApi> shards) {
+                             Integer repetitionInterval) {
         this.shardCount = shardCount;
         this.infoUrl = infoUrl;
         this.redirectPolicy = redirectPolicy;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
         this.repetitionInterval = repetitionInterval;
-        this.shards = shards;
     }
 
     public Integer getShardCount() {
@@ -91,25 +87,17 @@ public class MetadataImportApi {
         this.repetitionInterval = repetitionInterval;
     }
 
-    public Set<CapabilityShardImportApi> getShards() {
-        return shards;
-    }
-
-    public void setShards(Set<CapabilityShardImportApi> shards) {
-        this.shards = shards;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MetadataImportApi that = (MetadataImportApi) o;
-        return Objects.equals(shardCount, that.shardCount) && Objects.equals(infoUrl, that.infoUrl) && redirectPolicy == that.redirectPolicy && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(repetitionInterval, that.repetitionInterval) && Objects.equals(shards, that.shards);
+        return Objects.equals(shardCount, that.shardCount) && Objects.equals(infoUrl, that.infoUrl) && redirectPolicy == that.redirectPolicy && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(repetitionInterval, that.repetitionInterval);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(shardCount, infoUrl, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval, shards);
+        return Objects.hash(shardCount, infoUrl, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval);
     }
 
     @Override
@@ -121,7 +109,6 @@ public class MetadataImportApi {
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 ", repetitionInterval=" + repetitionInterval +
-                ", shards=" + shards +
                 '}';
     }
 }

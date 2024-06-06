@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.exportmodel.*;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
-import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -69,10 +67,30 @@ public class ExportTransformer {
                 endpoint.getMaxMessageRate());
     }
 
-    public CapabilityExportApi transformCapabilityToCapabilityExportApi(CapabilitySplit capability) {
+    public LocalConnectionExportApi transformLocalConnectionToLocalConnectionExportApi(LocalConnection localConnection) {
+        return new LocalConnectionExportApi(localConnection.getSource(),
+                localConnection.getDestination());
+    }
+
+    public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {
         return new CapabilityExportApi(capability.getApplication().toApi(),
-                transformMetadataToMetadataExportApi(capability.getMetadata()
-                ));
+                transformMetadataToMetadataExportApi(capability.getMetadata()),
+                transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
+                capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
+    }
+
+    public CapabilityExportApi.CapabilityStatusExportApi transformCapabilityStatusToCapabilityStatusExportApi(CapabilityStatus status) {
+        switch (status) {
+            case CREATED -> {
+                return CapabilityExportApi.CapabilityStatusExportApi.CREATED;
+            }
+            case TEAR_DOWN -> {
+                return CapabilityExportApi.CapabilityStatusExportApi.TEAR_DOWN;
+            }
+            default -> {
+                return CapabilityExportApi.CapabilityStatusExportApi.REQUESTED;
+            }
+        }
     }
 
     public MetadataExportApi transformMetadataToMetadataExportApi(Metadata metadata) {
@@ -81,8 +99,7 @@ public class ExportTransformer {
                 transformRedirectStatusToRedirectStatusExportApi(metadata.getRedirectPolicy()),
                 metadata.getMaxBandwidth(),
                 metadata.getMaxMessageRate(),
-                metadata.getRepetitionInterval(),
-                metadata.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet())
+                metadata.getRepetitionInterval()
         );
     }
 
@@ -109,7 +126,6 @@ public class ExportTransformer {
     public DeliveryExportApi transformDeliveryToDeliveryExportApi(LocalDelivery delivery) {
         return new DeliveryExportApi(delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                 transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus())
                 );
     }
@@ -146,39 +162,39 @@ public class ExportTransformer {
         }
     }
 
-    public LocalConnectionExportApi transformLocalConnectionToLocalConnectionExportApi(LocalConnection localConnection) {
-        return new LocalConnectionExportApi(localConnection.getSource(),
-                localConnection.getDestination());
-    }
-
     public NeighbourExportApi transformNeighbourToNeighbourExportApi(Neighbour neighbour) {
         return new NeighbourExportApi(neighbour.getName(),
-                transformCapabilitiesToCapabilitiesExportApi(neighbour.getCapabilities()),
+                transformNeighbourCapabilitiesToNeighbourCapabilitiesExportApi(neighbour.getCapabilities()),
                 neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().map(this::transformNeighbourSubscriptionToNeighbourSubscriptionExportApi).collect(Collectors.toSet()),
                 neighbour.getOurRequestedSubscriptions().getSubscriptions().stream().map(this::transformSubscriptionToSubscriptionExportApi).collect(Collectors.toSet()),
-                transformConnectionToConnectionExportApi(neighbour.getControlConnection()),
                 neighbour.getControlChannelPort()
         );
     }
 
-    public CapabilitiesExportApi transformCapabilitiesToCapabilitiesExportApi(Capabilities capabilities) {
-        return new CapabilitiesExportApi(transformLocalDateTimeToEpochMili(capabilities.getLastCapabilityExchange()),
-                transformCapabilitiesStatusToCapabilitiesStatusExportApi(capabilities.getStatus()),
-                capabilities.getCapabilities().stream().map(this::transformCapabilityToCapabilityExportApi).collect(Collectors.toSet()),
-                transformLocalDateTimeToEpochMili(capabilities.getLastUpdated().get())
-                );
+    public NeighbourCapabilitiesExportApi transformNeighbourCapabilitiesToNeighbourCapabilitiesExportApi(NeighbourCapabilities neighbourCapabilities) {
+        return new NeighbourCapabilitiesExportApi(transformLocalDateTimeToEpochMili(neighbourCapabilities.getLastCapabilityExchange()),
+                neighbourCapabilities.getCapabilities().stream().map(this::transformNeighbourCapabilityToNeighbourCapabilityExportApi).collect(Collectors.toSet()),
+                transformCapabilitiesStatusToCapabilitiesStatusExportApi(neighbourCapabilities.getStatus()),
+                transformLocalDateTimeToEpochMili(neighbourCapabilities.getLastUpdated().get())
+        );
     }
 
-    public CapabilitiesExportApi.CapabilitiesStatusExportApi transformCapabilitiesStatusToCapabilitiesStatusExportApi(Capabilities.CapabilitiesStatus status) {
+    public NeighbourCapabilityExportApi transformNeighbourCapabilityToNeighbourCapabilityExportApi(NeighbourCapability neighbourCapability) {
+        return new NeighbourCapabilityExportApi(neighbourCapability.getApplication().toApi(),
+                transformMetadataToMetadataExportApi(neighbourCapability.getMetadata())
+        );
+    }
+
+    public NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi transformCapabilitiesStatusToCapabilitiesStatusExportApi(CapabilitiesStatus status) {
         switch (status) {
             case KNOWN -> {
-                return CapabilitiesExportApi.CapabilitiesStatusExportApi.KNOWN;
+                return NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi.KNOWN;
             }
             case FAILED -> {
-                return CapabilitiesExportApi.CapabilitiesStatusExportApi.FAILED;
+                return NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi.FAILED;
             }
             default -> {
-                return CapabilitiesExportApi.CapabilitiesStatusExportApi.UNKNOWN;
+                return NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi.UNKNOWN;
             }
         }
     }
@@ -243,7 +259,6 @@ public class ExportTransformer {
                 subscription.getSelector(),
                 subscription.getConsumerCommonName(),
                 transformSubscriptionStatusToSubscriptionStatusExportApi(subscription.getSubscriptionStatus()),
-                subscription.getLastUpdatedTimestamp(),
                 subscription.getEndpoints().stream().map(this::transformEndpointToEndpointExportApi).collect(Collectors.toSet())
                 );
     }
@@ -290,27 +305,6 @@ public class ExportTransformer {
                 endpoint.getMaxBandwidth(),
                 endpoint.getMaxMessageRate()
         );
-    }
-
-    public ConnectionExportApi transformConnectionToConnectionExportApi(Connection connection) {
-        return new ConnectionExportApi(transformLocalDateTimeToEpochMili(connection.getBackoffStartTime()),
-                connection.getBackoffAttempts(),
-                transformConnectionStatusToConnectionStatusExportApi(connection.getConnectionStatus()),
-                transformLocalDateTimeToEpochMili(connection.getLastFailedConnectionAttempt()));
-    }
-
-    public ConnectionExportApi.ConnectionStatusExportApi transformConnectionStatusToConnectionStatusExportApi(ConnectionStatus status) {
-        switch (status) {
-            case FAILED -> {
-                return ConnectionExportApi.ConnectionStatusExportApi.FAILED;
-            }
-            case UNREACHABLE -> {
-                return ConnectionExportApi.ConnectionStatusExportApi.UNREACHABLE;
-            }
-            default -> {
-                return ConnectionExportApi.ConnectionStatusExportApi.CONNECTED;
-            }
-        }
     }
 
     public PrivateChannelExportApi transformPrivateChannelToPrivateChannelExportApi(PrivateChannel privateChannel) {

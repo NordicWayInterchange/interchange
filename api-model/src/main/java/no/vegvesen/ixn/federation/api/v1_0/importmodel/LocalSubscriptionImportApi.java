@@ -13,8 +13,10 @@ public class LocalSubscriptionImportApi {
 
     private Set<LocalEndpointImportApi> localEndpoints;
 
+    private Set<LocalConnectionImportApi> localConnections;
+
     public enum LocalSubscriptionStatusImportApi {
-        REQUESTED, CREATED, ILLEGAL, NOT_VALID, RESUBSCRIBE, ERROR
+        REQUESTED, CREATED, TEAR_DOWN, ILLEGAL, NOT_VALID, RESUBSCRIBE, ERROR
     }
 
     public LocalSubscriptionImportApi() {
@@ -23,11 +25,13 @@ public class LocalSubscriptionImportApi {
     public LocalSubscriptionImportApi(String selector,
                                       String consumerCommonName,
                                       LocalSubscriptionStatusImportApi status,
-                                      Set<LocalEndpointImportApi> localEndpoints) {
+                                      Set<LocalEndpointImportApi> localEndpoints,
+                                      Set<LocalConnectionImportApi> localConnections) {
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.status = status;
         this.localEndpoints = localEndpoints;
+        this.localConnections = localConnections;
     }
 
     public String getSelector() {
@@ -62,17 +66,25 @@ public class LocalSubscriptionImportApi {
         this.localEndpoints = localEndpoints;
     }
 
+    public Set<LocalConnectionImportApi> getLocalConnections() {
+        return localConnections;
+    }
+
+    public void setLocalConnections(Set<LocalConnectionImportApi> localConnections) {
+        this.localConnections = localConnections;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscriptionImportApi that = (LocalSubscriptionImportApi) o;
-        return Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints);
+        return Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints) && Objects.equals(localConnections, that.localConnections);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, consumerCommonName, status, localEndpoints);
+        return Objects.hash(selector, consumerCommonName, status, localEndpoints, localConnections);
     }
 
     @Override
@@ -82,6 +94,7 @@ public class LocalSubscriptionImportApi {
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", status=" + status +
                 ", localEndpoints=" + localEndpoints +
+                ", localConnections=" + localConnections +
                 '}';
     }
 }

@@ -27,10 +27,6 @@ public class Metadata {
 
     private Integer repetitionInterval;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "met_id", foreignKey = @ForeignKey(name="fk_met"))
-    private List<CapabilityShard> shards = new ArrayList<>();
-
     public Metadata() {
 
     }
@@ -110,33 +106,6 @@ public class Metadata {
             default:
                 return RedirectStatusApi.OPTIONAL;
         }
-    }
-
-    public List<CapabilityShard> getShards() {
-        return shards;
-    }
-
-    public void setShards(List<CapabilityShard> shards) {
-        this.shards.clear();
-        if (shards != null) {
-            this.shards.addAll(shards);
-        }
-    }
-
-    public boolean hasShards() {
-        return !shards.isEmpty();
-    }
-
-    public void removeShards() {
-        this.shards.clear();
-    }
-
-    public Set<String> getExchangesFromShards() {
-        Set<String> exchanges = new HashSet<>();
-        for (CapabilityShard shard : shards) {
-            exchanges.add(shard.getExchangeName());
-        }
-        return exchanges;
     }
 
     @Override

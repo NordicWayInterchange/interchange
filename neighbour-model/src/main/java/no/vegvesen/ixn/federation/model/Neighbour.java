@@ -69,12 +69,11 @@ public class Neighbour {
 		this.controlConnection = controlConnection;
 	}
 
-	public Neighbour(String name, NeighbourCapabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection, String controlChannelPort) {
+	public Neighbour(String name, NeighbourCapabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, String controlChannelPort) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
-		this.controlConnection = controlConnection;
 		this.controlChannelPort = controlChannelPort;
 	}
 

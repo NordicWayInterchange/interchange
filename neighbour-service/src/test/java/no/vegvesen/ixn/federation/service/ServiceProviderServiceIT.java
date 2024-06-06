@@ -325,9 +325,7 @@ public class ServiceProviderServiceIT {
         Capability capability = new Capability();
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
-        Metadata metadata = new Metadata();
-        metadata.setShards(List.of(new CapabilityShard()));
-        capability.setMetadata(metadata);
+        capability.setShards(List.of(new CapabilityShard()));
         capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
         serviceProvider.setCapabilities(capabilities);

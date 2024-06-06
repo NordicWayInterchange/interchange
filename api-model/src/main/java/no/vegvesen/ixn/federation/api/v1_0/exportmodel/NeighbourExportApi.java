@@ -7,13 +7,11 @@ public class NeighbourExportApi {
 
     private String name;
 
-    private CapabilitiesExportApi capabilities;
+    private NeighbourCapabilitiesExportApi capabilities;
 
     private Set<NeighbourSubscriptionExportApi> neighbourSubscriptions;
 
     private Set<SubscriptionExportApi> ourSubscriptions;
-
-    private ConnectionExportApi connection;
 
     private String controlChannelPort;
 
@@ -22,16 +20,14 @@ public class NeighbourExportApi {
     }
 
     public NeighbourExportApi(String name,
-                              CapabilitiesExportApi capabilities,
+                              NeighbourCapabilitiesExportApi capabilities,
                               Set<NeighbourSubscriptionExportApi> neighbourSubscriptions,
                               Set<SubscriptionExportApi> ourSubscriptions,
-                              ConnectionExportApi connection,
                               String controlChannelPort) {
         this.name = name;
         this.capabilities = capabilities;
         this.neighbourSubscriptions = neighbourSubscriptions;
         this.ourSubscriptions = ourSubscriptions;
-        this.connection = connection;
         this.controlChannelPort = controlChannelPort;
     }
 
@@ -43,11 +39,11 @@ public class NeighbourExportApi {
         this.name = name;
     }
 
-    public CapabilitiesExportApi getCapabilities() {
+    public NeighbourCapabilitiesExportApi getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(CapabilitiesExportApi capabilities) {
+    public void setCapabilities(NeighbourCapabilitiesExportApi capabilities) {
         this.capabilities = capabilities;
     }
 
@@ -67,14 +63,6 @@ public class NeighbourExportApi {
         this.ourSubscriptions = ourSubscriptions;
     }
 
-    public ConnectionExportApi getConnection() {
-        return connection;
-    }
-
-    public void setConnection(ConnectionExportApi connection) {
-        this.connection = connection;
-    }
-
     public String getControlChannelPort() {
         return controlChannelPort;
     }
@@ -88,12 +76,12 @@ public class NeighbourExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NeighbourExportApi that = (NeighbourExportApi) o;
-        return Objects.equals(name, that.name) && Objects.equals(capabilities, that.capabilities) && Objects.equals(neighbourSubscriptions, that.neighbourSubscriptions) && Objects.equals(ourSubscriptions, that.ourSubscriptions) && Objects.equals(connection, that.connection) && Objects.equals(controlChannelPort, that.controlChannelPort);
+        return Objects.equals(name, that.name) && Objects.equals(capabilities, that.capabilities) && Objects.equals(neighbourSubscriptions, that.neighbourSubscriptions) && Objects.equals(ourSubscriptions, that.ourSubscriptions) && Objects.equals(controlChannelPort, that.controlChannelPort);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, capabilities, neighbourSubscriptions, ourSubscriptions, connection, controlChannelPort);
+        return Objects.hash(name, capabilities, neighbourSubscriptions, ourSubscriptions, controlChannelPort);
     }
 
     @Override
@@ -103,7 +91,6 @@ public class NeighbourExportApi {
                 ", capabilities=" + capabilities +
                 ", neighbourSubscriptions=" + neighbourSubscriptions +
                 ", ourSubscriptions=" + ourSubscriptions +
-                ", connection=" + connection +
                 ", controlChannelPort='" + controlChannelPort + '\'' +
                 '}';
     }

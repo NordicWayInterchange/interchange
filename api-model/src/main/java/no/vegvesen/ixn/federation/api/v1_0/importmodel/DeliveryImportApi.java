@@ -11,8 +11,6 @@ public class DeliveryImportApi {
 
     private String selector;
 
-    private long lastUpdatedTimestamp;
-
     private DeliveryStatusImportApi status;
 
     public enum DeliveryStatusImportApi {
@@ -26,12 +24,10 @@ public class DeliveryImportApi {
     public DeliveryImportApi(Set<DeliveryEndpointImportApi> endpoints,
                              String path,
                              String selector,
-                             long lastUpdatedTimestamp,
                              DeliveryStatusImportApi status) {
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
     }
 
@@ -59,14 +55,6 @@ public class DeliveryImportApi {
         this.selector = selector;
     }
 
-    public long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
-    }
-
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    }
-
     public DeliveryStatusImportApi getStatus() {
         return status;
     }
@@ -80,12 +68,12 @@ public class DeliveryImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, path, selector, lastUpdatedTimestamp, status);
+        return Objects.hash(endpoints, path, selector, status);
     }
 
     @Override
@@ -94,7 +82,6 @@ public class DeliveryImportApi {
                 "endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
                 '}';
     }

@@ -63,6 +63,10 @@ public class LocalDelivery {
         this(null,Collections.emptySet(),null,selector,status);
     }
 
+    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
+        this(null, endpoints, null, selector, status);
+    }
+
     public Integer getId() {
         return id;
     }

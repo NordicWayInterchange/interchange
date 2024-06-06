@@ -2,13 +2,11 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
 
-import java.util.HashSet;
+import java.util.*;
+
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 @Entity
 @Table(name = "capability")
@@ -28,6 +26,10 @@ public class Capability {
 
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.REQUESTED;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name="fk_cap_shard"))
+    private List<CapabilityShard> shards = new ArrayList<>();
 
     @Column
     @UpdateTimestamp
@@ -84,10 +86,6 @@ public class Capability {
         return metadata.getShardCount() > 1;
     }
 
-    public boolean hasShards() {
-        return metadata.hasShards();
-    }
-
     public Optional<LocalDateTime> getLastUpdated() {
         return Optional.ofNullable(lastUpdated);
     }
@@ -105,6 +103,33 @@ public class Capability {
 
         }
         return capabilitySplits;
+    }
+
+    public List<CapabilityShard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<CapabilityShard> shards) {
+        this.shards.clear();
+        if (shards != null) {
+            this.shards.addAll(shards);
+        }
+    }
+
+    public boolean hasShards() {
+        return !shards.isEmpty();
+    }
+
+    public void removeShards() {
+        this.shards.clear();
+    }
+
+    public Set<String> getExchangesFromShards() {
+        Set<String> exchanges = new HashSet<>();
+        for (CapabilityShard shard : shards) {
+            exchanges.add(shard.getExchangeName());
+        }
+        return exchanges;
     }
 
     @Override
@@ -126,7 +151,8 @@ public class Capability {
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +
-                ", status=" + status + '\'' +
+                ", status=" + status +
+                ", shards=" + shards +
                 '}';
     }
 }

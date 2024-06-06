@@ -83,9 +83,6 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
-		setCapabilities(capabilities);
-	}
 	public Capabilities(Set<Capability> capabilities) {
 		setCapabilities(capabilities);
 	}

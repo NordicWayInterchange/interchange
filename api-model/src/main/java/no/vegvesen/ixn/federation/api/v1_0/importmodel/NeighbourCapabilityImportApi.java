@@ -3,28 +3,19 @@ package no.vegvesen.ixn.federation.api.v1_0.importmodel;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 
 import java.util.Objects;
-import java.util.Set;
 
-public class CapabilityImportApi {
+public class NeighbourCapabilityImportApi {
 
     private ApplicationApi application;
 
     private MetadataImportApi metadata;
 
-    private CapabilityStatusImportApi status;
-
-    private Set<CapabilityShardImportApi> shards;
-
-    public enum CapabilityStatusImportApi {
-        REQUESTED, CREATED, TEAR_DOWN
-    }
-
-    public CapabilityImportApi() {
+    public NeighbourCapabilityImportApi() {
 
     }
 
-    public CapabilityImportApi(ApplicationApi application,
-                               MetadataImportApi metadata) {
+    public NeighbourCapabilityImportApi(ApplicationApi application,
+                                        MetadataImportApi metadata) {
         this.application = application;
         this.metadata = metadata;
     }
@@ -45,27 +36,11 @@ public class CapabilityImportApi {
         this.metadata = metadata;
     }
 
-    public CapabilityStatusImportApi getStatus() {
-        return status;
-    }
-
-    public void setStatus(CapabilityStatusImportApi status) {
-        this.status = status;
-    }
-
-    public Set<CapabilityShardImportApi> getShards() {
-        return shards;
-    }
-
-    public void setShards(Set<CapabilityShardImportApi> shards) {
-        this.shards = shards;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CapabilityImportApi that = (CapabilityImportApi) o;
+        NeighbourCapabilityImportApi that = (NeighbourCapabilityImportApi) o;
         return Objects.equals(application, that.application) && Objects.equals(metadata, that.metadata);
     }
 
@@ -76,7 +51,7 @@ public class CapabilityImportApi {
 
     @Override
     public String toString() {
-        return "CapabilityImportApi{" +
+        return "NeighbourCapabilityImportApi{" +
                 "application=" + application +
                 ", metadata=" + metadata +
                 '}';

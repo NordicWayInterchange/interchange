@@ -13,8 +13,6 @@ public class SubscriptionImportApi {
 
     private SubscriptionStatusImportApi status;
 
-    private long lastUpdatedTimestamp;
-
     private Set<EndpointImportApi> endpoints;
 
     public enum SubscriptionStatusImportApi {
@@ -29,13 +27,11 @@ public class SubscriptionImportApi {
                                  String path,
                                  SubscriptionStatusImportApi status,
                                  String consumerCommonName,
-                                 long lastUpdatedTimestamp,
                                  Set<EndpointImportApi> endpoints) {
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.consumerCommonName = consumerCommonName;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.endpoints = endpoints;
     }
 
@@ -71,14 +67,6 @@ public class SubscriptionImportApi {
         this.status = status;
     }
 
-    public long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
-    }
-
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    }
-
     public Set<EndpointImportApi> getEndpoints() {
         return endpoints;
     }
@@ -92,12 +80,12 @@ public class SubscriptionImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubscriptionImportApi that = (SubscriptionImportApi) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(endpoints, that.endpoints);
+        return Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(endpoints, that.endpoints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, selector, consumerCommonName, status, lastUpdatedTimestamp, endpoints);
+        return Objects.hash(path, selector, consumerCommonName, status, endpoints);
     }
 
     @Override
@@ -107,7 +95,6 @@ public class SubscriptionImportApi {
                 ", selector='" + selector + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", status=" + status +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", endpoints=" + endpoints +
                 '}';
     }

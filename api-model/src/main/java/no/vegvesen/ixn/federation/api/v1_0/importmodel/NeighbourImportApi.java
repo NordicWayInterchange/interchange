@@ -7,13 +7,11 @@ public class NeighbourImportApi {
 
     private String name;
 
-    private CapabilitiesImportApi capabilities;
+    private NeighbourCapabilitiesImportApi capabilities;
 
     private Set<NeighbourSubscriptionImportApi> neighbourSubscriptions;
 
     private Set<SubscriptionImportApi> ourSubscriptions;
-
-    private ConnectionImportApi connection;
 
     private String controlChannelPort;
 
@@ -22,16 +20,14 @@ public class NeighbourImportApi {
     }
 
     public NeighbourImportApi(String name,
-                              CapabilitiesImportApi capabilities,
+                              NeighbourCapabilitiesImportApi capabilities,
                               Set<NeighbourSubscriptionImportApi> neighbourSubscriptions,
                               Set<SubscriptionImportApi> ourSubscriptions,
-                              ConnectionImportApi connection,
                               String controlChannelPort) {
         this.name = name;
         this.capabilities = capabilities;
         this.neighbourSubscriptions = neighbourSubscriptions;
         this.ourSubscriptions = ourSubscriptions;
-        this.connection = connection;
         this.controlChannelPort = controlChannelPort;
     }
 
@@ -43,11 +39,11 @@ public class NeighbourImportApi {
         this.name = name;
     }
 
-    public CapabilitiesImportApi getCapabilities() {
+    public NeighbourCapabilitiesImportApi getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(CapabilitiesImportApi capabilities) {
+    public void setCapabilities(NeighbourCapabilitiesImportApi capabilities) {
         this.capabilities = capabilities;
     }
 
@@ -67,14 +63,6 @@ public class NeighbourImportApi {
         this.ourSubscriptions = ourSubscriptions;
     }
 
-    public ConnectionImportApi getConnection() {
-        return connection;
-    }
-
-    public void setConnection(ConnectionImportApi connection) {
-        this.connection = connection;
-    }
-
     public String getControlChannelPort() {
         return controlChannelPort;
     }
@@ -88,12 +76,12 @@ public class NeighbourImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NeighbourImportApi that = (NeighbourImportApi) o;
-        return Objects.equals(name, that.name) && Objects.equals(capabilities, that.capabilities) && Objects.equals(neighbourSubscriptions, that.neighbourSubscriptions) && Objects.equals(ourSubscriptions, that.ourSubscriptions) && Objects.equals(connection, that.connection) && Objects.equals(controlChannelPort, that.controlChannelPort);
+        return Objects.equals(name, that.name) && Objects.equals(capabilities, that.capabilities) && Objects.equals(neighbourSubscriptions, that.neighbourSubscriptions) && Objects.equals(ourSubscriptions, that.ourSubscriptions) && Objects.equals(controlChannelPort, that.controlChannelPort);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, capabilities, neighbourSubscriptions, ourSubscriptions, connection, controlChannelPort);
+        return Objects.hash(name, capabilities, neighbourSubscriptions, ourSubscriptions, controlChannelPort);
     }
 
     @Override
@@ -103,7 +91,6 @@ public class NeighbourImportApi {
                 ", capabilities=" + capabilities +
                 ", neighbourSubscriptions=" + neighbourSubscriptions +
                 ", ourSubscriptions=" + ourSubscriptions +
-                ", connection=" + connection +
                 ", controlChannelPort='" + controlChannelPort + '\'' +
                 '}';
     }

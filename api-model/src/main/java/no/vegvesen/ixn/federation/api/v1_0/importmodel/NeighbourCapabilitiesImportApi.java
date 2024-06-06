@@ -1,30 +1,29 @@
-package no.vegvesen.ixn.federation.api.v1_0.exportmodel;
+package no.vegvesen.ixn.federation.api.v1_0.importmodel;
 
 import java.util.Objects;
 import java.util.Set;
 
-public class CapabilitiesExportApi {
-
+public class NeighbourCapabilitiesImportApi {
     private long lastCapabilityExchange;
 
-    private CapabilitiesStatusExportApi status;
+    private CapabilitiesStatusImportApi status;
 
-    private Set<CapabilityExportApi> capabilities;
+    private Set<NeighbourCapabilityImportApi> capabilities;
 
     private long lastUpdated;
 
-    public enum CapabilitiesStatusExportApi {
+    public enum CapabilitiesStatusImportApi {
         UNKNOWN, KNOWN, FAILED
     }
 
-    public CapabilitiesExportApi() {
+    public NeighbourCapabilitiesImportApi() {
 
     }
 
-    public CapabilitiesExportApi(long lastCapabilityExchange,
-                                 CapabilitiesStatusExportApi status,
-                                 Set<CapabilityExportApi> capabilities,
-                                 long lastUpdated) {
+    public NeighbourCapabilitiesImportApi(long lastCapabilityExchange,
+                                          CapabilitiesStatusImportApi status,
+                                          Set<NeighbourCapabilityImportApi> capabilities,
+                                          long lastUpdated) {
         this.lastCapabilityExchange = lastCapabilityExchange;
         this.status = status;
         this.capabilities = capabilities;
@@ -39,19 +38,19 @@ public class CapabilitiesExportApi {
         this.lastCapabilityExchange = lastCapabilityExchange;
     }
 
-    public CapabilitiesStatusExportApi getStatus() {
+    public CapabilitiesStatusImportApi getStatus() {
         return status;
     }
 
-    public void setStatus(CapabilitiesStatusExportApi status) {
+    public void setStatus(CapabilitiesStatusImportApi status) {
         this.status = status;
     }
 
-    public Set<CapabilityExportApi> getCapabilities() {
+    public Set<NeighbourCapabilityImportApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilityExportApi> capabilities) {
+    public void setCapabilities(Set<NeighbourCapabilityImportApi> capabilities) {
         this.capabilities = capabilities;
     }
 
@@ -67,7 +66,7 @@ public class CapabilitiesExportApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CapabilitiesExportApi that = (CapabilitiesExportApi) o;
+        NeighbourCapabilitiesImportApi that = (NeighbourCapabilitiesImportApi) o;
         return lastCapabilityExchange == that.lastCapabilityExchange && lastUpdated == that.lastUpdated && status == that.status && Objects.equals(capabilities, that.capabilities);
     }
 
@@ -78,7 +77,7 @@ public class CapabilitiesExportApi {
 
     @Override
     public String toString() {
-        return "CapabilitiesExportApi{" +
+        return "CapabilitiesImportApi{" +
                 "lastCapabilityExchange=" + lastCapabilityExchange +
                 ", status=" + status +
                 ", capabilities=" + capabilities +

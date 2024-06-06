@@ -306,10 +306,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		String deliveryExchangeName = "del-ex10";
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex10", "publicationId = 'pub-1'");
-		metadata.setShards(Collections.singletonList(shard));
-
 		Capability cap = new Capability(
 				new DenmApplication(
 						"NO-123",
@@ -319,8 +315,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						List.of("12004"),
 						List.of(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex10", "publicationId = 'pub-1'");
+		cap.setShards(Collections.singletonList(shard));
 		cap.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex10");
 
@@ -335,7 +333,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
-		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getMetadata().getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
+		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 
 		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
 
@@ -1231,10 +1229,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	public Capability getDatexCapability(String publicationId, RedirectStatus redirect, String exchangeName) {
-		Metadata metadata = new Metadata(redirect);
-		CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = '" + publicationId + "'");
-		metadata.setShards(Collections.singletonList(shard));
-		return new Capability(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						publicationId,
@@ -1243,8 +1238,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						Arrays.asList("01230122", "01230123"),
 						"RoadBlock"
 				),
-				metadata
+				new Metadata(redirect)
 		);
+		CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = '" + publicationId + "'");
+		cap.setShards(Collections.singletonList(shard));
+		return cap;
 	}
 
 	public Capability getShardedCapability(String publicationId, RedirectStatus redirect, String exchangeName1, String exchangeName2, String exchangeName3) {
@@ -1253,8 +1251,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		CapabilityShard shard1 = new CapabilityShard(1, exchangeName1, "publicationId = '" + publicationId + "'");
 		CapabilityShard shard2 = new CapabilityShard(2, exchangeName2, "publicationId = '" + publicationId + "'");
 		CapabilityShard shard3 = new CapabilityShard(3, exchangeName3, "publicationId = '" + publicationId + "'");
-		metadata.setShards(Arrays.asList(shard1, shard2, shard3));
-		return new Capability(
+		Capability cap = new Capability(
 				new DatexApplication(
 						"NO-1234",
 						publicationId,
@@ -1265,5 +1262,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				),
 				metadata
 		);
+		cap.setShards(Arrays.asList(shard1, shard2, shard3));
+		return cap;
 	}
 }

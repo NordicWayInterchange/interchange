@@ -253,7 +253,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
-        assertThat(client.exchangeExists(capability.getMetadata().getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
         assertThat(client.getQueuePublishingLinks("bi-queue")).hasSize(1);
     }
 
@@ -309,7 +309,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider1);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1), client.getQpidDelta());
 
-        assertThat(client.exchangeExists(capability.getMetadata().getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
 
         String queueName = "loc-" + UUID.randomUUID().toString();
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);

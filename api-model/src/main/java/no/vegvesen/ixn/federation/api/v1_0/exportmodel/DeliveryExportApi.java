@@ -9,8 +9,6 @@ public class DeliveryExportApi {
 
     private String selector;
 
-    private long lastUpdatedTimestamp;
-
     private DeliveryStatusExportApi status;
 
     public enum DeliveryStatusExportApi{
@@ -23,11 +21,9 @@ public class DeliveryExportApi {
 
     public DeliveryExportApi(Set<DeliveryEndpointExportApi> endpoints,
                              String selector,
-                             long lastUpdatedTimestamp,
                              DeliveryStatusExportApi status) {
         this.endpoints = endpoints;
         this.selector = selector;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
     }
 
@@ -47,14 +43,6 @@ public class DeliveryExportApi {
         this.selector = selector;
     }
 
-    public long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
-    }
-
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    }
-
     public DeliveryStatusExportApi getStatus() {
         return status;
     }
@@ -68,12 +56,12 @@ public class DeliveryExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryExportApi that = (DeliveryExportApi) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, selector, lastUpdatedTimestamp, status);
+        return Objects.hash(endpoints, selector, status);
     }
 
     @Override
@@ -81,7 +69,6 @@ public class DeliveryExportApi {
         return "DeliveryExportApi{" +
                 "endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
                 '}';
     }

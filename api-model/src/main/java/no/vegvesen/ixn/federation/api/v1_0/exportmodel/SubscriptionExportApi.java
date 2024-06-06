@@ -13,8 +13,6 @@ public class SubscriptionExportApi {
 
     private SubscriptionStatusExportApi status;
 
-    private long lastUpdatedTimestamp;
-
     private Set<EndpointExportApi> endpoints;
 
     public enum SubscriptionStatusExportApi {
@@ -29,13 +27,11 @@ public class SubscriptionExportApi {
                                  String selector,
                                  String consumerCommonName,
                                  SubscriptionStatusExportApi status,
-                                 long lastUpdatedTimestamp,
                                  Set<EndpointExportApi> endpoints) {
         this.path = path;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.status = status;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.endpoints = endpoints;
     }
 
@@ -71,14 +67,6 @@ public class SubscriptionExportApi {
         this.status = status;
     }
 
-    public long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
-    }
-
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    }
-
     public Set<EndpointExportApi> getEndpoints() {
         return endpoints;
     }
@@ -92,12 +80,12 @@ public class SubscriptionExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubscriptionExportApi that = (SubscriptionExportApi) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(endpoints, that.endpoints);
+        return Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(endpoints, that.endpoints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, selector, consumerCommonName, status, lastUpdatedTimestamp, endpoints);
+        return Objects.hash(path, selector, consumerCommonName, status, endpoints);
     }
 
     @Override
@@ -107,7 +95,6 @@ public class SubscriptionExportApi {
                 ", selector='" + selector + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", status=" + status +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", endpoints=" + endpoints +
                 '}';
     }

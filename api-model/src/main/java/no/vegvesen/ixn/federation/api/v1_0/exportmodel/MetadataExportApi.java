@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0.exportmodel;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class MetadataExportApi {
 
@@ -17,8 +16,6 @@ public class MetadataExportApi {
 
     private Integer repetitionInterval;
 
-    private Set<CapabilityShardExportApi> shards;
-
     public enum RedirectStatusExportApi {
         OPTIONAL, MANDATORY, NOT_AVAILABLE
     }
@@ -32,15 +29,13 @@ public class MetadataExportApi {
                              RedirectStatusExportApi redirectPolicy,
                              Integer maxBandwidth,
                              Integer maxMessageRate,
-                             Integer repetitionInterval,
-                             Set<CapabilityShardExportApi> shards) {
+                             Integer repetitionInterval) {
         this.shardCount = shardCount;
         this.infoUrl = infoUrl;
         this.redirectPolicy = redirectPolicy;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
         this.repetitionInterval = repetitionInterval;
-        this.shards = shards;
     }
 
     public Integer getShardCount() {
@@ -91,25 +86,17 @@ public class MetadataExportApi {
         this.repetitionInterval = repetitionInterval;
     }
 
-    public Set<CapabilityShardExportApi> getShards() {
-        return shards;
-    }
-
-    public void setShards(Set<CapabilityShardExportApi> shards) {
-        this.shards = shards;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MetadataExportApi that = (MetadataExportApi) o;
-        return Objects.equals(shardCount, that.shardCount) && Objects.equals(infoUrl, that.infoUrl) && redirectPolicy == that.redirectPolicy && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(repetitionInterval, that.repetitionInterval) && Objects.equals(shards, that.shards);
+        return Objects.equals(shardCount, that.shardCount) && Objects.equals(infoUrl, that.infoUrl) && redirectPolicy == that.redirectPolicy && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(repetitionInterval, that.repetitionInterval);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(shardCount, infoUrl, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval, shards);
+        return Objects.hash(shardCount, infoUrl, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval);
     }
 
     @Override
@@ -121,7 +108,6 @@ public class MetadataExportApi {
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 ", repetitionInterval=" + repetitionInterval +
-                ", shards=" + shards +
                 '}';
     }
 }
