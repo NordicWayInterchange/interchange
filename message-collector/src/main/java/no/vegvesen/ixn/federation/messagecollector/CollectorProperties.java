@@ -11,10 +11,6 @@ public class CollectorProperties {
 	 * Amqp message port on the local node. Collector will connect to this port to write messages on the writequeue (specified in separate property "writequeue".
 	 */
 	private String localIxnFederationPort = "5671";
-	/**
-	 * Write queue on he local node. Collector will write messages to this queue or exchange
-	 */
-	private String writequeue = "incomingExchange";
 
 	/**
 	 * Time, in milliseconds, how often the message collector service will look for new or existing neighbours to connect or reconnect to.<br/>
@@ -33,14 +29,6 @@ public class CollectorProperties {
 		this.localIxnFederationPort = localIxnFederationPort;
 	}
 
-	public String getWritequeue() {
-		return writequeue;
-	}
-
-	public void setWritequeue(String writequeue) {
-		this.writequeue = writequeue;
-	}
-
 	public String getFixeddelay() {
 		return fixeddelay;
 	}
@@ -53,7 +41,6 @@ public class CollectorProperties {
 	public String toString() {
 		return "CollectorProperties{" +
 				", localIxnFederationPort='" + localIxnFederationPort + '\'' +
-				", writequeue='" + writequeue + '\'' +
 				", fixeddelay='" + fixeddelay + '\'' +
 				'}';
 	}
