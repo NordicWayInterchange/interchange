@@ -183,6 +183,7 @@ public class Subscription {
 	public String toString() {
 		return "Subscription{" +
 				"id=" + id +
+				"uuid=" + uuid +
 				", subscriptionStatus=" + subscriptionStatus +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +

@@ -140,7 +140,7 @@ public class NeighbourService {
 		logger.info("Paths for requested subscriptions created.");
 		// Create a path for each subscription
 		for (NeighbourSubscription subscription : persistentRequest.getSubscriptions()) {
-			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
+			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getUuid();
 			subscription.setPath(path);
 			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 		}
@@ -152,29 +152,41 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, String subscriptionId) {
 		logger.debug("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
+			try {
+				UUID uuid = UUID.fromString(subscriptionId);
+				NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(uuid);
+				//TODO logging. What do we log on poll?
+				logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
+				logger.info("Returning: {}", subscription.toString());
 
-			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
-			//TODO logging. What do we log on poll?
-			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
-			logger.info("Returning: {}", subscription.toString());
-
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
-			NeighbourMDCUtil.removeLogVariables();
-			return subscriptionApi;
+				SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
+				NeighbourMDCUtil.removeLogVariables();
+				return subscriptionApi;
+			}
+			catch (IllegalArgumentException e){
+				throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + subscriptionId);
+			}
 		} else {
 			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 
 
-	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
+	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
+		try {
+			UUID uuid = UUID.fromString(subscriptionId);
+			neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(uuid);
+		}
+		catch (IllegalArgumentException e){
+			throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + subscriptionId);
+		}
+
 		neighbourRepository.save(neighbour);
 	}
 

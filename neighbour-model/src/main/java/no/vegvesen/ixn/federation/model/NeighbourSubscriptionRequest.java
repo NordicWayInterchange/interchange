@@ -47,8 +47,8 @@ public class NeighbourSubscriptionRequest {
         }
     }
 
-    public void deleteSubscription (Integer subscriptionId) {
-        NeighbourSubscription subscriptionToRemove = getSubscriptionById(subscriptionId);
+    public void deleteSubscription (UUID subscriptionId) {
+        NeighbourSubscription subscriptionToRemove = getSubscriptionByUuid(subscriptionId);
         subscription.remove(subscriptionToRemove);
     }
 
@@ -56,25 +56,14 @@ public class NeighbourSubscriptionRequest {
         subscription.removeAll(subscriptionsToDelete);
     }
 
-    public void setTearDownSubscription(Integer subscriptionId) {
-        NeighbourSubscription subscriptionToTearDown = getSubscriptionById(subscriptionId);
+    public void setTearDownSubscription(UUID subscriptionId) {
+        NeighbourSubscription subscriptionToTearDown = getSubscriptionByUuid(subscriptionId);
         subscriptionToTearDown.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
     }
-
     public void addNewSubscriptions (Set<NeighbourSubscription> newSubscriptions) {
         subscription.addAll(newSubscriptions);
     }
 
-    public NeighbourSubscription getSubscriptionById(Integer id) throws NeighbourSubscriptionNotFound {
-
-        for (NeighbourSubscription subscription : subscription) {
-            if (subscription.getId().equals(id)) {
-                return subscription;
-            }
-        }
-
-        throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
-    }
     public NeighbourSubscription getSubscriptionByUuid(UUID id) throws NeighbourSubscriptionNotFound {
 
         for (NeighbourSubscription subscription : subscription) {
@@ -82,7 +71,6 @@ public class NeighbourSubscriptionRequest {
                 return subscription;
             }
         }
-
         throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
     }
     @Override

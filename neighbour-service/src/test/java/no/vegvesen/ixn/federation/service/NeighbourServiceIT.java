@@ -400,7 +400,7 @@ public class NeighbourServiceIT {
         );
         Neighbour saved = repository.save(neighbour);
         NeighbourSubscription subscription = saved.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getId());
+        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getUuid().toString());
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
 
     }
