@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class CollectorProperties {
 
 	/**
-	 * Amqp message port on the local node. Collector will connect to this port to write messages on the writequeue (specified in separate property "writequeue".
+	 * Amqp message port on the local node.
 	 */
 	private String localIxnFederationPort = "5671";
 
