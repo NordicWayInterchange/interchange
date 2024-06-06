@@ -139,7 +139,27 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createMatches() {
-		subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighbours());
+		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		syncResubscribeSubscriptions(serviceProviders, neighbours);
+		subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviders, neighbours);
+	}
+
+	public void syncResubscribeSubscriptions(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours){
+		for(ServiceProvider serviceProvider : serviceProviders){
+			List<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions().stream().toList();
+			for(Neighbour neighbour : neighbours){
+				List<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions().stream().toList();
+				for(LocalSubscription localSubscription : localSubscriptions){
+					for(Subscription subscription : subscriptions){
+						if(subscriptionMatchDiscoveryService.checkIfSubscriptionShouldResubscribe(localSubscription, subscription)){
+							subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
+						}
+					}
+				}
+			}
+		}
+		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

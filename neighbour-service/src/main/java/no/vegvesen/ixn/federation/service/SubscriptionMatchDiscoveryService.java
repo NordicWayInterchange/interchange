@@ -24,6 +24,21 @@ public class SubscriptionMatchDiscoveryService {
         this.subscriptionMatchRepository = subscriptionMatchRepository;
     }
 
+    public boolean checkIfSubscriptionShouldResubscribe(LocalSubscription localSubscription, Subscription subscription) {
+        if(Objects.equals(subscription.getSelector(), localSubscription.getSelector()) && Objects.equals(subscription.getConsumerCommonName(), localSubscription.getConsumerCommonName())){
+            return false;
+        }
+
+        List<SubscriptionMatch> matches = subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+        if (!matches.isEmpty()) {
+            SubscriptionMatch match = subscriptionMatchRepository.findBySubscriptionIdAndLocalSubscriptionId(subscription.getId(), localSubscription.getId());
+            return match == null;
+        }
+        else {
+            return false;
+        }
+    }
+
     public void syncLocalSubscriptionAndSubscriptionsToCreateMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
