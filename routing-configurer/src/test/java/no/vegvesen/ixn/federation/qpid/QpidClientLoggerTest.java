@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -41,8 +40,8 @@ public class QpidClientLoggerTest {
         client = new QpidClient(
                 "thisisaUrl",
                 "thisisiaVhost",
-                template
-        );
+                template,
+                "message_collector");
     }
 
     @Test

@@ -58,12 +58,15 @@ public class QpidClient {
 
 	private final String connectionUrl;
 	private final String queryApiUrl;
+	private final String messageCollectorUser;
 
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
-					  RestTemplate restTemplate) {
-		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
+					  RestTemplate restTemplate,
+					  String messageCollectorUser) {
+        this.messageCollectorUser = messageCollectorUser;
+        this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
@@ -84,7 +87,7 @@ public class QpidClient {
 	 */
 	@Autowired
 	public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
-		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
+		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate, routingConfigurerProperties.getCollectorUser());
 	}
 
 	int ping() {
@@ -259,6 +262,11 @@ public class QpidClient {
 		logger.info("Removing write access for {} to queue {}", subscriberName,queue);
 		postQpidAcl(provider);
 
+	}
+
+	public void addMessageCollectorWriteAccess(String exchangeName) {
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.addExchangeWriteAccess(messageCollectorUser,exchangeName);
 	}
 
 	public VirtualHostAccessController getQpidAcl() {

@@ -22,6 +22,8 @@ public class RoutingConfigurerProperties {
 	 */
 	private String vhost;
 
+	private String collectorUser = "message_collector";
+
 	public Integer getInterval() {
 		return interval;
 	}
@@ -44,5 +46,13 @@ public class RoutingConfigurerProperties {
 
 	public void setVhost(String vhost) {
 		this.vhost = vhost;
+	}
+
+	public String getCollectorUser() {
+		return collectorUser;
+	}
+
+	public void setCollectorUser(String collectorUser) {
+		this.collectorUser = collectorUser;
 	}
 }

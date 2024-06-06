@@ -61,7 +61,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         );
         sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keys,trust);
         QpidClientConfig config = new QpidClientConfig(sslContext);
-        qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
+        qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate(), "message_collector");
     }
 
     @Test
