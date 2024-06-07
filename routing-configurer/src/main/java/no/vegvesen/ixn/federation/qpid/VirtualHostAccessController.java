@@ -75,6 +75,10 @@ public class VirtualHostAccessController {
 
     }
 
+    public boolean containsExchangeWriteAccess(String subscriberName, String exchange) {
+        return rules.contains(createExchangeWriteAccessRule(subscriberName,exchange));
+    }
+
     protected void addRule(AclRule rule) {
         rules.add(rule);
     }

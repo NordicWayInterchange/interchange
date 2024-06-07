@@ -265,8 +265,11 @@ public class QpidClient {
 	}
 
 	public void addMessageCollectorWriteAccess(String exchangeName) {
-		VirtualHostAccessController provider = getQpidAcl();
-		provider.addExchangeWriteAccess(messageCollectorUser,exchangeName);
+		addWriteAccess(messageCollectorUser,exchangeName);
+	}
+
+	public String getMessageCollectorUser() {
+		return messageCollectorUser;
 	}
 
 	public VirtualHostAccessController getQpidAcl() {

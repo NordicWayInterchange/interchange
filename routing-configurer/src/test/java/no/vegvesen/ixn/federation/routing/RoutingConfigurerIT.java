@@ -888,7 +888,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setUpSubscriptionExchanges();
 
 		assertThat(subscription.getEndpoints().stream().findFirst().get().hasShard()).isTrue();
-		assertThat(client.exchangeExists(subscription.getEndpoints().stream().findFirst().get().getShard().getExchangeName())).isTrue();
+		Optional<Endpoint> optionalEndpoint = subscription.getEndpoints().stream().findFirst();
+		assertThat(optionalEndpoint.isPresent()).isTrue();
+		String exchangeName = optionalEndpoint.get().getShard().getExchangeName();
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsExchangeWriteAccess(client.getMessageCollectorUser(),exchangeName)).isTrue();
 		verify(listenerEndpointRepository, times(1)).save(any(ListenerEndpoint.class));
 	}
 
@@ -913,8 +918,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		assertThat(end1.hasShard()).isTrue();
 		assertThat(end2.hasShard()).isTrue();
-		assertThat(client.exchangeExists(end1.getShard().getExchangeName())).isTrue();
-		assertThat(client.exchangeExists(end2.getShard().getExchangeName())).isTrue();
+		String shard1ExchangeName = end1.getShard().getExchangeName();
+		String exchange2ExchangeName = end2.getShard().getExchangeName();
+		assertThat(client.exchangeExists(shard1ExchangeName)).isTrue();
+		assertThat(client.exchangeExists(exchange2ExchangeName)).isTrue();
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsExchangeWriteAccess(client.getMessageCollectorUser(),shard1ExchangeName)).isTrue();
+		assertThat(acl.containsExchangeWriteAccess(client.getMessageCollectorUser(),exchange2ExchangeName)).isTrue();
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
 
