@@ -24,8 +24,8 @@ public class SubscriptionMatchDiscoveryService {
         this.subscriptionMatchRepository = subscriptionMatchRepository;
     }
 
-    public boolean checkIfSubscriptionShouldResubscribe(LocalSubscription localSubscription, Subscription subscription) {
-        if(Objects.equals(subscription.getSelector(), localSubscription.getSelector()) && Objects.equals(subscription.getConsumerCommonName(), localSubscription.getConsumerCommonName())){
+    public boolean syncLocalSubscriptionAndSubscriptionsToCreateMatchOrResubscribe(String serviceProviderName, LocalSubscription localSubscription, Subscription subscription) {
+        if(!(Objects.equals(subscription.getSelector(), localSubscription.getSelector()) && Objects.equals(subscription.getConsumerCommonName(), localSubscription.getConsumerCommonName()))){
             return false;
         }
 
@@ -35,6 +35,8 @@ public class SubscriptionMatchDiscoveryService {
             return match == null;
         }
         else {
+            SubscriptionMatch match = new SubscriptionMatch(localSubscription, subscription, serviceProviderName);
+            subscriptionMatchRepository.save(match);
             return false;
         }
     }
