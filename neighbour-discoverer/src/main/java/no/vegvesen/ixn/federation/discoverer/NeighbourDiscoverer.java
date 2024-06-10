@@ -153,7 +153,7 @@ public class NeighbourDiscoverer {
 				for(LocalSubscription localSubscription : localSubscriptions){
 					for(Subscription subscription : subscriptions){
 						if(subscriptionMatchDiscoveryService.checkIfSubscriptionShouldResubscribe(localSubscription, subscription)){
-							subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
+							subscriptions.stream().filter(a->a.equals(subscription)).forEach(a->a.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE));
 						}
 					}
 				}
