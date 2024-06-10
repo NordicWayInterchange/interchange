@@ -47,10 +47,19 @@
   ],
   "ports": [
     {
-      "name": "AMQP",
+      "name": "INTERNAL_AMQPS",
       "type": "AMQP",
-      "authenticationProvider": "passwordFile",
-      "port": "5672",
+      "authenticationProvider": "clientCerts",
+      "port": "5673",
+      "bindingAddress": "*",
+      "keyStore": "default",
+      "needClientAuth": true,
+      "transports": [
+        "SSL",
+        "TCP"
+      ],
+      "trustStores": ["internal_truststore"],
+      "wantClientAuth": false,
       "protocols": ["AMQP_1_0"],
       "virtualhostaliases": [
         {

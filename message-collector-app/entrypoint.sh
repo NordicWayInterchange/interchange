@@ -3,13 +3,13 @@
 echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
 LOG_LEVELS=${LOG_LEVELS:-" "}
-
+LOCAL_IXN_PORT=${LOCAL_IXN_PORT:-5671}
 java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect \
      -Dspring.datasource.url=${POSTGRES_URI} \
      -Dspring.datasource.username=${POSTGRES_USER} \
      -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
-     -Dcollector.localIxnFederationPort=5671 \
+     -Dcollector.localIxnFederationPort=LOCAL_IXN_PORT \
      -Dspring.ssl.bundle.jks.external-service.truststore.location=${TRUST_STORE} \
      -Dspring.ssl.bundle.jks.external-service.truststore.password=${TRUST_STORE_PASSWORD} \
      -Dspring.ssl.bundle.jks.external-service.truststore.type=${TRUST_STORE_TYPE} \
