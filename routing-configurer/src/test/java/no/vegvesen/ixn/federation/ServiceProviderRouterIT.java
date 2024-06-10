@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.ITERABLE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -91,6 +92,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@MockBean
 	DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
+
+	@Test
+	public void capabilitiesLastUpdated(){
+		ServiceProvider sp = new ServiceProvider("Test");
+		sp.setCapabilities(new Capabilities(Set.of(
+				new Capability(new DatexApplication(), new Metadata("test", 1, RedirectStatus.OPTIONAL, 1, 2,3))
+		)));
+		when(serviceProviderRepository.save(any())).thenReturn(sp);
+		when(serviceProviderRepository.findAll()).thenReturn(List.of(sp));
+		sp.getCapabilities().setLastUpdated(LocalDateTime.now());
+		System.out.println(sp.getCapabilities().getLastUpdated());
+		router.syncServiceProviders(List.of(sp), client.getQpidDelta());
+		System.out.print(sp.getCapabilities().getLastUpdated());
+	}
 
 	@Test
 	public void endPointsAreRemovedForLocalSubscriptionWhenStatusIsResubscribe(){

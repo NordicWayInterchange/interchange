@@ -71,16 +71,13 @@ public class SubscriptionMatchDiscoveryService {
                     logger.info("Removing Match {}", match);
                     matchesToDelete.add(match);
                 }
-            }
-            else if(match.localSubscriptionIsTearDown()){
+            } else if(match.localSubscriptionIsTearDown()){
+                logger.info("Removing Match {}", match);
+                matchesToDelete.add(match);
+            } else if(match.localSubscriptionAndSubscriptionIsResubscribe()){
                 logger.info("Removing Match {}", match);
                 matchesToDelete.add(match);
             }
-            else if(match.localSubscriptionAndSubscriptionIsResubscribe()){
-                logger.info("Removing Match {}", match);
-                matchesToDelete.add(match);
-            }
-
         }
         subscriptionMatchRepository.deleteAll(matchesToDelete);
     }

@@ -90,7 +90,8 @@ public class LocalSubscription {
 
     public boolean isSubscriptionWanted() {
         return status.equals(LocalSubscriptionStatus.REQUESTED)
-                || status.equals(LocalSubscriptionStatus.CREATED) || status.equals(LocalSubscriptionStatus.RESUBSCRIBE);
+                || status.equals(LocalSubscriptionStatus.CREATED)
+                || status.equals(LocalSubscriptionStatus.RESUBSCRIBE);
     }
 
     public String getSelector() {

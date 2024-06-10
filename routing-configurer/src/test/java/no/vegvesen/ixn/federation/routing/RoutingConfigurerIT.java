@@ -36,9 +36,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -116,10 +119,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void subscriptionIsSetToResubscribeWhenNewMatchExists(){
+		ServiceProvider sp = new ServiceProvider();
+		sp.getCapabilities().setLastUpdated(LocalDateTime.now());
+		sp.getCapabilities().addDataType(new Capability());
 		Neighbour nb = new Neighbour();
 		nb.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'",NeighbourSubscriptionStatus.CREATED))));
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(nb));
-		when(subscriptionCapabilityMatchDiscoveryService.newMatchExists(any())).thenReturn(true);
+		when(subscriptionCapabilityMatchDiscoveryService.newMatchExists(any(), anySet())).thenReturn(true);
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(List.of(sp));
 		neighbourService.saveNeighbour(nb);
 
 		routingConfigurer.handleNewMatches();

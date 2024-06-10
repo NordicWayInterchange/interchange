@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -19,14 +18,35 @@ public class Capabilities {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
 	private Integer id;
 
-	private LocalDateTime lastCapabilityExchange;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	private Set<Capability> capabilities = new HashSet<>();
 
-	public LocalDateTime getLastCapabilityExchange() {
-		return lastCapabilityExchange;
+	@Column
+	private LocalDateTime lastUpdated;
+
+	public Capabilities(){
 	}
 
-	public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
-		this.lastCapabilityExchange = lastCapabilityExchange;
+	public Capabilities(Set<Capability> capabilities) {
+		this.capabilities.addAll(capabilities);
+	}
+
+	public Capabilities(Set<Capability> capabilties, LocalDateTime lastUpdated) {
+		this.capabilities.addAll(capabilties);
+		this.lastUpdated = lastUpdated;
+	}
+
+	public Set<Capability> getCapabilities() {
+		return Collections.unmodifiableSet(capabilities);
+	}
+
+	public void setCapabilities(Set<Capability> capabilities) {
+		this.capabilities.clear();
+		if ( capabilities != null ) {
+			this.capabilities.addAll(capabilities);
+		}
+		setLastUpdated(LocalDateTime.now());
 	}
 
 	public Optional<LocalDateTime> getLastUpdated() {
@@ -57,46 +77,13 @@ public class Capabilities {
 				.findFirst();
 		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
-	}
-
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name="capabilities_id")
-	private Set<Capability> capabilities = new HashSet<>();
-
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
-
-	public Capabilities(){
-	}
-
-	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
-		setCapabilities(capabilities);
-	}
-	public Capabilities(Set<Capability> capabilities) {
-		setCapabilities(capabilities);
-	}
-
-	public Capabilities(Set<Capability> capabilties, LocalDateTime lastUpdated) {
-		setCapabilities(capabilties);
-		this.lastUpdated = lastUpdated;
-	}
-
-	public Set<Capability> getCapabilities() {
-		return Collections.unmodifiableSet(capabilities);
+		setLastUpdated(LocalDateTime.now());
 	}
 
 	public Set<Capability> getCreatedCapabilities() {
 		return capabilities.stream()
 				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
 				.collect(Collectors.toSet());
-	}
-
-	public void setCapabilities(Set<Capability> capabilities) {
-		this.capabilities.clear();
-		if ( capabilities != null ) {
-			this.capabilities.addAll(capabilities);
-		}
 	}
 
 	public boolean hasDataTypes() {
@@ -106,18 +93,20 @@ public class Capabilities {
 
 		return createdCapabilities.size() > 0;
 	}
-	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
-		this.capabilities.removeAll(capabilitiesToRemove);
-		setLastCapabilityExchange(LocalDateTime.now());
-	}
 
+	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
+		boolean updated = this.capabilities.removeAll(capabilitiesToRemove);
+		if(updated){
+			setLastUpdated(LocalDateTime.now());
+		}
+	}
 
 	@Override
 	public String toString() {
 		return "Capabilities{" +
 				"id=" + id +
 				", dataTypes=" + capabilities +
-				", lastCapabilityExchange=" + lastCapabilityExchange +
+				", lastUpdated=" + lastUpdated +
 				'}';
 	}
 }
