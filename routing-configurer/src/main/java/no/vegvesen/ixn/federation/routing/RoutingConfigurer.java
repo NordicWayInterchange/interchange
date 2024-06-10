@@ -35,7 +35,9 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourService neighbourService;
+
 	private final QpidClient qpidClient;
+
 	private final ServiceProviderRouter serviceProviderRouter;
 
 	private final InterchangeNodeProperties interchangeNodeProperties;
@@ -43,7 +45,6 @@ public class RoutingConfigurer {
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
 	private final SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
-
 
 	private final SubscriptionMatchRepository SubscriptionMatchRepository;
 
@@ -74,6 +75,7 @@ public class RoutingConfigurer {
 		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
 	}
+
 	@Scheduled(fixedRateString = "10000")
 	public void setSubscriptionsToTearDown(){
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
@@ -317,9 +319,9 @@ public class RoutingConfigurer {
 								qpidClient.removeExchange(exchange);
 								logger.debug("Removed exchange for subscription with id {}", subscription.getId());
 							}
-							endpoint.removeShard();
-							}endpointsToRemove.add(endpoint);
-
+						}
+						endpoint.removeShard();
+						endpointsToRemove.add(endpoint);
 					}
 					subscription.getEndpoints().removeAll(endpointsToRemove);
 				}

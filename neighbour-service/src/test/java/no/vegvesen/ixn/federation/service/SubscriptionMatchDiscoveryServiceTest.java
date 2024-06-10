@@ -29,7 +29,6 @@ public class SubscriptionMatchDiscoveryServiceTest {
         subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
         verify(subscriptionMatchRepository,never()).findAllBySubscriptionId(any());
         verify(subscriptionMatchRepository,never()).save(any(SubscriptionMatch.class));
-
     }
 
     @Test

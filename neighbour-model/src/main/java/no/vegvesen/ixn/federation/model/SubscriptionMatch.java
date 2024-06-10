@@ -93,8 +93,4 @@ public class SubscriptionMatch {
                 ", subscription=" + subscription +
                 '}';
     }
-
-    public Integer getId() {
-        return id;
-    }
 }

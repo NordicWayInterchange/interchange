@@ -58,10 +58,12 @@ public class SubscriptionCapabilityMatch {
         SubscriptionCapabilityMatch that = (SubscriptionCapabilityMatch) o;
         return Objects.equals(neighbourSubscription, that.neighbourSubscription) && Objects.equals(capability, that.capability);
     }
+
     @Override
     public int hashCode(){
         return Objects.hash(neighbourSubscription, capability);
     }
+
     @Override
     public String toString() {
         return "SubscriptionMatch{" +
