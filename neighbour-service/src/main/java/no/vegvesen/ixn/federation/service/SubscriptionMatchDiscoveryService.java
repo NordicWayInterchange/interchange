@@ -25,7 +25,7 @@ public class SubscriptionMatchDiscoveryService {
     }
 
     public boolean checkIfSubscriptionShouldResubscribe(LocalSubscription localSubscription, Subscription subscription) {
-        if(Objects.equals(subscription.getSelector(), localSubscription.getSelector()) && Objects.equals(subscription.getConsumerCommonName(), localSubscription.getConsumerCommonName())){
+        if(!(Objects.equals(subscription.getSelector(), localSubscription.getSelector()) && Objects.equals(subscription.getConsumerCommonName(), localSubscription.getConsumerCommonName()))){
             return false;
         }
 
