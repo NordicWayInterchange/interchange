@@ -141,17 +141,18 @@ public class NeighbourDiscoverer {
 	public void createMatches() {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
-		createMatchesAndSyncResubscribeSubscriptions(serviceProviders, neighbours);
+		syncResubscribeSubscriptions(serviceProviders, neighbours);
+		subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviders, neighbours);
 	}
 
-	public void createMatchesAndSyncResubscribeSubscriptions(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours){
+	public void syncResubscribeSubscriptions(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours){
 		for(ServiceProvider serviceProvider : serviceProviders){
 			List<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions().stream().toList();
 			for(Neighbour neighbour : neighbours){
 				List<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions().stream().toList();
 				for(LocalSubscription localSubscription : localSubscriptions){
 					for(Subscription subscription : subscriptions){
-						if(subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatchOrResubscribe(serviceProvider.getName(), localSubscription, subscription)){
+						if(subscriptionMatchDiscoveryService.checkIfSubscriptionShouldResubscribe(localSubscription, subscription)){
 							subscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
 						}
 					}
