@@ -28,6 +28,56 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClusterKeyGeneratorIT {
 
 
+    public static final CARequest INTERNAL_A = new CARequest(
+            "internal_a",
+            "NO",
+            List.of(),
+            List.of(new HostRequest(
+                    "a-qpid"
+            )),
+            List.of(
+                    new ClientRequest(
+                            "a_routing_configurer",
+                            "NO",
+                            "routing-configurer@a.bouvetinterchange.eu"
+                    ),
+                    new ClientRequest(
+                            "a.nap",
+                            "NO",
+                            "nap@a.bouvetinterchange.eu"
+                    ),
+                    new ClientRequest(
+                            "a_message_collector",
+                            "NO",
+                            "message-collector@a.bouvetinterchange.eu"
+                    )
+            )
+    );
+    public static final CARequest INTERNAL_B = new CARequest(
+            "internal_b",
+            "SE",
+            List.of(),
+            List.of(new HostRequest(
+                    "b-qpid"
+            )),
+            List.of(
+                    new ClientRequest(
+                            "b_routing_configurer",
+                            "SE",
+                            "routing-configurer@b.bouvetinterchange.eu"
+                    ),
+                    new ClientRequest(
+                            "b.nap",
+                            "SE",
+                            "nap@b.bouvetinterchange.eu"
+                    ),
+                    new ClientRequest(
+                            "b_message_collector",
+                            "SE",
+                            "message-collector@b.bouvetinterchange.eu"
+                    )
+            )
+    );
     //TODO denne vil bruke samme cert for host cert og for client cert mot nabo. Dette burde skilles!
     public static final List<CARequest> CA_REQUESTS = List.of(
             new CARequest(
@@ -88,46 +138,8 @@ public class ClusterKeyGeneratorIT {
                     List.of(),
                     List.of()
             ),
-            new CARequest(
-                    "internal_a",
-                    "NO",
-                    List.of(),
-                    List.of(new HostRequest(
-                            "a_qpid"
-                    )),
-                    List.of(
-                            new ClientRequest(
-                                    "a_routing_configurer",
-                                    "NO",
-                                    "routing-configurer@a.bouvetinterchange.eu"
-                            ),
-                            new ClientRequest(
-                                    "a.nap",
-                                    "NO",
-                                    "nap@a.bouvetinterchange.eu"
-                            )
-                    )
-            ),
-            new CARequest(
-                    "internal_b",
-                    "SE",
-                    List.of(),
-                    List.of(new HostRequest(
-                            "b_qpid"
-                    )),
-                    List.of(
-                            new ClientRequest(
-                                    "b_routing_configurer",
-                                    "SE",
-                                    "routing-configurer@b.bouvetinterchange.eu"
-                            ),
-                            new ClientRequest(
-                                    "b.nap",
-                                    "SE",
-                                    "nap@b.bouvetinterchange.eu"
-                            )
-                    )
-            ),
+            INTERNAL_A,
+            INTERNAL_B,
             new CARequest(
                     "internal_c",
                     "UK",
@@ -246,7 +258,7 @@ public class ClusterKeyGeneratorIT {
     }
 
     @Test
-    public void testCaWithHostCert() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, IOException, SignatureException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
+    public void testCaWithHostCert() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, IOException, SignatureException, InvalidKeyException, NoSuchProviderException {
         CaResponse response = ClusterKeyGenerator.generate(
                 new CARequest(
                         "topdomain",

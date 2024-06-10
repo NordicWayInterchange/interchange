@@ -22,5 +22,6 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Dspring.ssl.bundle.jks.internal-service.keyStore.location=${INTERNAL_KEY_STORE} \
      -Dspring.ssl.bundle.jks.internal-service.keyStore.type=${INTERNAL_KEY_STORE_TYPE} \
      -Dspring.ssl.bundle.jks.internal-service.keyStore.password=${INTERNAL_KEY_STORE_PASSWORD} \
+     -Dspring.ssl.bundle.jks.internal-service.key.alias=${INTERNAL_KEY_STORE_ALIAS} \
      ${LOG_LEVELS} \
      -jar message-collector.jar
