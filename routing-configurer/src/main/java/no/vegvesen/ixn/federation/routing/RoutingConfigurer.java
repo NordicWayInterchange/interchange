@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.routing;
 
+import com.google.common.collect.Streams;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
@@ -20,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,8 @@ public class RoutingConfigurer {
 
 
 	private final SubscriptionMatchRepository SubscriptionMatchRepository;
+
+	private LocalDateTime lastUpdated = LocalDateTime.now();
 
 	@Autowired
 	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, SubscriptionMatchRepository SubscriptionMatchRepository, SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService) {
@@ -85,12 +89,19 @@ public class RoutingConfigurer {
 
 	void handleNewMatches(){
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		Set<Capability> capabilities = Streams.stream(serviceProviderRouter.findServiceProviders()).filter(a->a.getCapabilities().getLastUpdated().orElseGet(() -> LocalDateTime.MIN).isAfter(lastUpdated)).flatMap(a->a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
+		if(!capabilities.isEmpty()){
+			lastUpdated = LocalDateTime.now();
+		}
+		else {
+			return;
+		}
 		List<NeighbourSubscription> subscriptions = neighbours.stream()
 				.flatMap(a->a.getNeighbourRequestedSubscriptions()
 						.getSubscriptions().stream()).filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)).toList();
 
 		for(NeighbourSubscription subscription : subscriptions){
-			if(subscriptionCapabilityMatchDiscoveryService.newMatchExists(subscription)){
+			if(subscriptionCapabilityMatchDiscoveryService.newMatchExists(subscription, capabilities)){
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.RESUBSCRIBE);
 			}
 		}

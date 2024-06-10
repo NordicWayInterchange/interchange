@@ -80,7 +80,7 @@ public class SubscriptionCapabilityMatchDiscoveryServiceIT {
         neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
         neighbourRepository.save(neighbour);
 
-        ServiceProvider sp = new ServiceProvider();
+        ServiceProvider sp = new ServiceProvider("test");
         Capability capability1 = new Capability(new DatexApplication(), new Metadata());
         Capability capability2 = new Capability(new DenmApplication(), new Metadata());
         sp.getCapabilities().setCapabilities(Set.of(capability1, capability2));
@@ -93,24 +93,24 @@ public class SubscriptionCapabilityMatchDiscoveryServiceIT {
         sp2.getCapabilities().setCapabilities(Set.of(capability3));
         serviceProviderRepository.save(sp2);
 
-        assertThat(subscriptionCapabilityMatchDiscoveryService.newMatchExists(neighbourSubscription)).isTrue();
+        assertThat(subscriptionCapabilityMatchDiscoveryService.newMatchExists(neighbourSubscription, sp2.getCapabilities().getCapabilities())).isTrue();
     }
     @Test
     public void newMatchExistsReturnsFalseWhenNoNewMatchIsFound(){
         Neighbour neighbour = new Neighbour();
-        NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "test4");
+        NeighbourSubscription neighbourSubscription = new NeighbourSubscription("originatingCountry='FI'", NeighbourSubscriptionStatus.CREATED, "test4");
         neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(neighbourSubscription)));
         neighbourRepository.save(neighbour);
 
-        ServiceProvider sp = new ServiceProvider();
+        ServiceProvider sp = new ServiceProvider("test2");
         Capability capability1 = new Capability(new DatexApplication(), new Metadata());
         Capability capability2 = new Capability(new DenmApplication(), new Metadata());
         sp.getCapabilities().setCapabilities(Set.of(capability1, capability2));
-        serviceProviderRepository.save(sp);
+        sp = serviceProviderRepository.save(sp);
 
         subscriptionCapabilityMatchDiscoveryService.createMatches(neighbourSubscription, Set.of(capability1, capability2));
 
-        assertThat(subscriptionCapabilityMatchDiscoveryService.newMatchExists(neighbourSubscription)).isFalse();
+        assertThat(subscriptionCapabilityMatchDiscoveryService.newMatchExists(neighbourSubscription, sp.getCapabilities().getCapabilities())).isFalse();
     }
 
 }

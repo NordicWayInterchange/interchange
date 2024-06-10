@@ -57,14 +57,14 @@ public class Capabilities {
 				.findFirst();
 		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
+		setLastUpdated(LocalDateTime.now());
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name="capabilities_id")
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<Capability> capabilities = new HashSet<>();
 
 	@Column
-	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
 	public Capabilities(){
@@ -74,13 +74,14 @@ public class Capabilities {
 		setCapabilities(capabilities);
 	}
 	public Capabilities(Set<Capability> capabilities) {
-		setCapabilities(capabilities);
+		this.capabilities.addAll(capabilities);
 	}
 
 	public Capabilities(Set<Capability> capabilties, LocalDateTime lastUpdated) {
-		setCapabilities(capabilties);
+		this.capabilities.addAll(capabilties);
 		this.lastUpdated = lastUpdated;
 	}
+
 
 	public Set<Capability> getCapabilities() {
 		return Collections.unmodifiableSet(capabilities);
@@ -97,6 +98,7 @@ public class Capabilities {
 		if ( capabilities != null ) {
 			this.capabilities.addAll(capabilities);
 		}
+		setLastUpdated(LocalDateTime.now());
 	}
 
 	public boolean hasDataTypes() {
@@ -107,8 +109,11 @@ public class Capabilities {
 		return createdCapabilities.size() > 0;
 	}
 	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
-		this.capabilities.removeAll(capabilitiesToRemove);
+		boolean updated = this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());
+		if(updated){
+			setLastUpdated(LocalDateTime.now());
+		}
 	}
 
 

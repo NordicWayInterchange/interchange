@@ -3,11 +3,13 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.SubscriptionCapabilityMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -46,13 +48,13 @@ public class SubscriptionCapabilityMatchDiscoveryService {
         subscriptionCapabilityMatchRepository.deleteAll(matches);
     }
 
-    public boolean newMatchExists(NeighbourSubscription neighbourSubscription){
+    public boolean newMatchExists(NeighbourSubscription neighbourSubscription, Set<Capability> capabilities){
         List<SubscriptionCapabilityMatch> matches = subscriptionCapabilityMatchRepository.findAllByNeighbourSubscriptionId(neighbourSubscription.getId());
         if(!matches.isEmpty()) {
-            Set<Capability> allCapabilities = serviceProviderRepository.findAll().stream().flatMap(a -> a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet());
             Set<Capability> existingMatches = matches.stream().map(SubscriptionCapabilityMatch::getCapability).collect(Collectors.toSet());
-            List<Capability> allMatches = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, neighbourSubscription.getSelector()).stream().toList();
-            return !(new HashSet<>(existingMatches).containsAll(allMatches));
+            Set<Capability> newCapabilities = capabilities.stream().filter(a->!existingMatches.contains(a)).collect(Collectors.toSet());
+            List<Capability> newMatches = CapabilityMatcher.matchCapabilitiesToSelector(newCapabilities, neighbourSubscription.getSelector()).stream().toList();
+            return !newMatches.isEmpty();
         }
         else{
             return false;
