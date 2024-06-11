@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.*;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.PasswordGenerator;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.RandomPasswordGenerator;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -117,47 +119,13 @@ public class ClusterKeyGeneratorIT {
                                                     "kungen@slottet.se"
                                             )
                                     )
-                            ),
-                            new CARequest(
-                                    "c.bouvetinterchange.eu",
-                                    "UK",
-                                    List.of(),
-                                    List.of(
-                                            new HostRequest(
-                                                    "c.bouvetinterchange.eu"
-                                            )
-                                    ),
-                                    List.of(
-                                            new ClientRequest(
-                                                    "king_charles.bouvetinterechange.eu",
-                                                    "UK",
-                                                    "king_charles@buckingham.uk"
-                                            )
-                                    )
                             )),
                     List.of(),
                     List.of()
             ),
             INTERNAL_A,
-            INTERNAL_B,
-            new CARequest(
-                    "internal_c",
-                    "UK",
-                    List.of(),
-                    List.of(),
-                    List.of(
-                            new ClientRequest(
-                                    "c_routing_configurer",
-                                    "UK",
-                                    "routing-configurer@c.bouvetinterchange.eu"
-                            ),
-                            new ClientRequest(
-                                    "c.nap",
-                                    "UK",
-                                    "nap@c.bouvetinterchange.eu"
-                            )
-                    )
-            ));
+            INTERNAL_B
+    );
     Path targetPath = DockerBaseIT.getTargetFolderPathForTestClass(ClusterKeyGeneratorIT.class);
 
     @Test
@@ -167,14 +135,14 @@ public class ClusterKeyGeneratorIT {
         assertThat(cluster.getTopDomain().getDomainName()).isEqualTo("top-domain.eu");
         assertThat(cluster.getTopDomain().getIntermediateDomains()).hasSize(1);
         assertThat(cluster.getTopDomain().getIntermediateDomains().get(0).getInterchange().getServiceProviders()).hasSize(2);
-        ClusterKeyGenerator.generateKeys(cluster,targetPath);
+        ClusterKeyGenerator.generateKeys(cluster,targetPath, new RandomPasswordGenerator(new SecureRandom(), 24));
     }
 
     @Test
     public void readClusterFromAnotherJson() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, NoSuchProviderException, InvalidKeyException {
         Path jsonPath = Paths.get("src", "test", "resources", "systemtest-cluster.json");
         Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
-        ClusterKeyGenerator.generateKeys(cluster,targetPath);
+        ClusterKeyGenerator.generateKeys(cluster,targetPath, new RandomPasswordGenerator(new SecureRandom(), 24));
     }
 
     @Test
@@ -376,11 +344,12 @@ public class ClusterKeyGeneratorIT {
         for (CARequest request : CA_REQUESTS) {
             responses.add(ClusterKeyGenerator.generate(request));
         }
+        PasswordGenerator passwordGenerator = () -> "password";
         for(CaResponse response : responses) {
-            ClusterKeyGenerator.store(response,basePath);
+            ClusterKeyGenerator.store(response,basePath, passwordGenerator);
         }
         try (Stream<Path> list = Files.list(basePath)) {
-            assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(4);
+            assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(5);
         }
         //TODO check the actual names of the jks and p12's and see if we can load the key from them using the passwords
         //assertThat(Files.list(basePath).filter(p -> !Files.isDirectory(p)).toList()).hasSize(2);

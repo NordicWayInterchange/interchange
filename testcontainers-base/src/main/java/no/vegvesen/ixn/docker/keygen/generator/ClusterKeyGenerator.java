@@ -69,7 +69,7 @@ public class ClusterKeyGenerator {
     };
 
 
-    public static void generateKeys(Cluster cluster, Path outputFolder) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
+    public static void generateKeys(Cluster cluster, Path outputFolder, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
         Files.createDirectories(outputFolder);
         SecureRandom random = new SecureRandom();
         TopDomain topDomain = cluster.getTopDomain();
@@ -78,7 +78,7 @@ public class ClusterKeyGenerator {
         saveKeyPair(topCa.keyPair(), new FileWriter(caKeyPath.toFile()));
         Path caCertPath = outputFolder.resolve(String.format("ca.%s.crt.pem", topDomain.getDomainName()));
         saveCert(topCa.certificate(), new FileWriter(caCertPath.toFile()));
-        String topDomainTrustStorePassword = generatePassword(random,24);
+        String topDomainTrustStorePassword = passwordGenerator.generatePassword();
         String caCertAlias = "myKey";
         Path truststorePath = outputFolder.resolve(topDomain.getDomainName() + "_truststore.jks");
         makeTrustStore(topDomainTrustStorePassword, caCertAlias,topCa.certificate(), new FileOutputStream(truststorePath.toFile()));
@@ -91,7 +91,7 @@ public class ClusterKeyGenerator {
             //One for the CA
             //One for the host at the intermediate domain.
             CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(domain.getDomainName(), domain.getOwningCountry(), new ArrayList<>(), topCa.certificate(), topCa.keyPair().getPrivate(), random);
-            String intermediateCaKeystorePassword = generatePassword(random,24);
+            String intermediateCaKeystorePassword = passwordGenerator.generatePassword();
             String keystoreName = domain.getDomainName() + ".p12";
             Path keystorePath = outputFolder.resolve(keystoreName);
             generateKeystore(intermediateCaKeystorePassword, domain.getDomainName(), intermediateCa.keyPair().getPrivate(), intermediateCa.certificateChain(), new FileOutputStream(keystorePath.toFile()));
@@ -111,14 +111,14 @@ public class ClusterKeyGenerator {
                 saveCertChain(additionalHostKeys.certificateChain(), new FileWriter(hostChainCertPath.toFile()));
                 Path hostKeyPath = outputFolder.resolve(String.format("%s.key.pem", host.getHostname()));
                 saveKeyPair(additionalHostKeys.keyPair(), new FileWriter(hostKeyPath.toFile()));
-                String hostKeystorePassword = generatePassword(random,24);
+                String hostKeystorePassword = passwordGenerator.generatePassword();
                 Path hostKeyPasswordPath = outputFolder.resolve(host.getHostname() + ".p12");
                 generateKeystore(hostKeystorePassword,host.getHostname(),additionalHostKeys.keyPair().getPrivate(), additionalHostKeys.certificateChain(), new FileOutputStream(hostKeyPasswordPath.toFile()));
                 Files.writeString(outputFolder.resolve(host.getHostname() + ".txt"),hostKeystorePassword);
 
             }
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
-                generateServiceProviderKeys(outputFolder, description, intermediateCa.keyPair().getPrivate(), intermediateCa.certificate(), intermediateCa.certificateChain(), random);
+                generateServiceProviderKeys(outputFolder, description, intermediateCa.keyPair().getPrivate(), intermediateCa.certificate(), intermediateCa.certificateChain(), passwordGenerator);
             }
 
         }
@@ -152,38 +152,32 @@ public class ClusterKeyGenerator {
     }
 
     /* Makes a truststore for the top CA, and keystores for each host and client in the chain */
-    public static void store(CaResponse response, Path basePath) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-        SecureRandom secureRandom = new SecureRandom();
-        String password = generatePassword(secureRandom,12);
+    public static void store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
+        trustStoreForCa(response, basePath, passwordGenerator);
+        for (CaResponse subResponses : response.caResponses()) {
+            store(subResponses,basePath, passwordGenerator);
+        }
+        storeHostAndClientStores(response, basePath, passwordGenerator);
+    }
+
+    private static void trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        String password = passwordGenerator.generatePassword();
         Files.writeString(basePath.resolve(response.name() + ".txt"),password);
         try (OutputStream outputStream = Files.newOutputStream(basePath.resolve(response.name() + ".jks"))) {
             makeTrustStore(response, password,outputStream);
         }
-        for (CaResponse subResponses : response.caResponses()) {
-            store(subResponses,basePath,secureRandom);
-        }
-        storeHostAndClientStores(response, basePath, secureRandom);
     }
 
-    /* Only creates host and client stores for each host and client in the chain, ie no truststores */
-    private static void store(CaResponse response, Path basePath, SecureRandom random) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
-        for (CaResponse subResponse : response.caResponses()) {
-            store(subResponse,basePath,random);
-        }
-        storeHostAndClientStores(response,basePath,random);
 
-
-    }
-
-    private static void storeHostAndClientStores(CaResponse response, Path basePath, SecureRandom secureRandom) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    private static void storeHostAndClientStores(CaResponse response, Path basePath, PasswordGenerator randomPasswordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
 
         for (HostResponse hostResponse : response.hostResponses()) {
-            String hostPassword = generatePassword(secureRandom,12);
+            String hostPassword = randomPasswordGenerator.generatePassword();
             Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
             makeKeystore(hostResponse,hostPassword,Files.newOutputStream(basePath.resolve(hostResponse.host() + ".p12")));
         }
         for (ClientResponse clientResponse : response.clientResponses()) {
-            String clientPassword = generatePassword(secureRandom,12);
+            String clientPassword = randomPasswordGenerator.generatePassword();
             Files.writeString(basePath.resolve(clientResponse.name() + ".txt"),clientPassword);
             makeKeystore(clientResponse,clientPassword,Files.newOutputStream(basePath.resolve(clientResponse.name() + ".p12")));
         }
@@ -207,9 +201,9 @@ public class ClusterKeyGenerator {
         return hostResponses;
     }
 
-    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, PrivateKey issuerPrivateKey, X509Certificate issuerCertificate, List<X509Certificate> issuerCertChain, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static void generateServiceProviderKeys(Path outputFolder, ServicProviderDescription description, PrivateKey issuerPrivateKey, X509Certificate issuerCertificate, List<X509Certificate> issuerCertChain, PasswordGenerator passwordGenerator) throws NoSuchAlgorithmException, OperatorCreationException, IOException, KeyStoreException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         CertificateCertificateChainAndKeys result = generateSPKeys(description.getName(), description.getCountry(), "test@test.com", issuerCertificate, issuerPrivateKey, issuerCertChain);
-        String serviceProviderKeystorePassword = generatePassword(random,24);
+        String serviceProviderKeystorePassword = passwordGenerator.generatePassword();
         String serviceProviderKeystoreName = description.getName() + ".p12";
         Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
         generateKeystore(serviceProviderKeystorePassword, description.getName(), result.keyPair().getPrivate(), result.certificateChain(), new FileOutputStream(outputFolder.resolve(serviceProviderKeystoreName).toFile()));
@@ -535,14 +529,30 @@ public class ClusterKeyGenerator {
         return keyPairGenerator.generateKeyPair();
     }
 
-    public static String generatePassword(SecureRandom random, int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i =  0; i < length; i++) {
-            builder.append(allowedChars[random.nextInt(allowedChars.length)]);
-        }
-        return builder.toString();
-    }
 
+    public interface PasswordGenerator {
+        String generatePassword();
+    }
+    
+    public static class RandomPasswordGenerator implements PasswordGenerator {
+
+        private final SecureRandom random;
+        private final int length;
+
+        public RandomPasswordGenerator(SecureRandom random, int length) {
+            this.random = random;
+            this.length = length;
+        }
+
+        @Override
+        public String generatePassword() {
+            StringBuilder builder = new StringBuilder();
+            for (int i =  0; i < length; i++) {
+                builder.append(allowedChars[random.nextInt(allowedChars.length)]);
+            }
+            return builder.toString();
+        }
+    }
 
 
     public record KeyPairAndCsr(KeyPair keyPair, PKCS10CertificationRequest csr) {
