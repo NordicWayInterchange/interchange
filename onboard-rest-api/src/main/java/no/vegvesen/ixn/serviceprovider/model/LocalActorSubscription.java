@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class LocalActorSubscription {
-    UUID id;
+    String id;
 
     String path;
 
@@ -24,7 +24,7 @@ public class LocalActorSubscription {
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(UUID id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
+    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -34,11 +34,11 @@ public class LocalActorSubscription {
         this.errorMessage = errorMessage;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

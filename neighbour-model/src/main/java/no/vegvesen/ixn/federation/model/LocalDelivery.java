@@ -16,7 +16,7 @@ public class LocalDelivery {
     private Integer id;
 
     @Column
-    private UUID uuid = UUID.randomUUID();
+    private String uuid = UUID.randomUUID().toString();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
@@ -52,7 +52,7 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery( UUID uuid, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
         this.uuid = uuid;
         this.endpoints.addAll(endpoints);
         this.path = path;
@@ -64,7 +64,7 @@ public class LocalDelivery {
         this(id, Collections.emptySet(),path,selector,status);
     }
 
-    public LocalDelivery(UUID id, String path, String selector, LocalDeliveryStatus status) {
+    public LocalDelivery(String id, String path, String selector, LocalDeliveryStatus status) {
         this(id, Collections.emptySet(),path,selector,status);
     }
 
@@ -90,11 +90,11 @@ public class LocalDelivery {
         this.id = id;
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

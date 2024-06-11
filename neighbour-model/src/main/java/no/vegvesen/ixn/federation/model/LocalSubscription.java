@@ -17,7 +17,7 @@ public class LocalSubscription {
     @Column(name="id")
     private Integer id;
 
-    private UUID uuid = UUID.randomUUID();
+    private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
@@ -83,7 +83,7 @@ public class LocalSubscription {
         this.localEndpoints.addAll(localEndpoints);
     }
 
-    public LocalSubscription(UUID uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+    public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.uuid = uuid;
         this.status = status;
         this.selector = selector;
@@ -105,11 +105,11 @@ public class LocalSubscription {
                 || status.equals(LocalSubscriptionStatus.CREATED);
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

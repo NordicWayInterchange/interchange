@@ -15,7 +15,7 @@ public class Subscription {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_seq")
 	private Integer id;
 
-	private UUID uuid = UUID.randomUUID();
+	private String uuid = UUID.randomUUID().toString();
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
@@ -75,7 +75,7 @@ public class Subscription {
 		this.endpoints.addAll(endpoints);
 	}
 
-	public Subscription(UUID uuid, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
+	public Subscription(String uuid, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
 		this.uuid = uuid;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
@@ -115,11 +115,11 @@ public class Subscription {
 		this.id = id;
 	}
 
-	public UUID getUuid() {
+	public String getUuid() {
 		return uuid;
 	}
 
-	public void setUuid(UUID uuid) {
+	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 

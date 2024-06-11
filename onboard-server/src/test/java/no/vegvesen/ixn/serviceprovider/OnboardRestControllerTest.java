@@ -121,7 +121,7 @@ public class OnboardRestControllerTest {
 
 		// Mock existing service provider with three capabilities in database
 		Capability capability42 = mock(Capability.class);
-		when(capability42.getUuid()).thenReturn(uuid);
+		when(capability42.getUuid()).thenReturn(uuid.toString());
 		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
@@ -457,7 +457,7 @@ public class OnboardRestControllerTest {
 		);
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
-						uuid,
+						uuid.toString(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
 						LocalDeliveryStatus.REQUESTED
@@ -488,7 +488,7 @@ public class OnboardRestControllerTest {
 		);
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
-						uuid,
+						uuid.toString(),
 						Collections.emptySet(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
@@ -576,7 +576,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setUuid(UUID.randomUUID());
+		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuid(any(),any())).thenReturn(savedPrivateChannel);
 
@@ -610,20 +610,6 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void testDeletingChannelWithInvalidId()throws Exception{
-		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		mockCertificate(serviceProviderName);
-
-		mockMvc.perform(
-				delete(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isNotFound());
-
-		verify(privateChannelRepository, times(0)).save(any());
-		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndUuid(any(),any());
-
-	}
-
-	@Test
 	public void testGettingPrivateChannelsReturnsStatusOk() throws Exception{
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
@@ -642,7 +628,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setUuid(UUID.randomUUID());
+		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any())).thenReturn(savedPrivateChannel);
 
@@ -668,18 +654,6 @@ public class OnboardRestControllerTest {
 		).andExpect(status().isNotFound());
 
 		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any());
-	}
-
-	@Test
-	public void testGettingChannelWithInvalidId() throws Exception{
-		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		mockCertificate(serviceProviderName);
-
-		mockMvc.perform(
-				get(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isNotFound());
-
-		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndUuidAndStatusIsNot(any(),any(),any());
 	}
 
 	@Test

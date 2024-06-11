@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Delivery {
-    private UUID id;
+    private String id;
 
     private String path;
 
@@ -23,7 +23,7 @@ public class Delivery {
     }
 
 
-    public Delivery(UUID id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
+    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -31,11 +31,11 @@ public class Delivery {
         this.status = status;
         this.errorMessage = errorMessage;
     }
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -50,14 +50,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED,
                 null));
-        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
@@ -79,14 +79,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
                 null));
-        subscriptions.add(new LocalActorSubscription(UUID.randomUUID(),
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
@@ -196,7 +196,7 @@ public class OnboardRestAPIDocumentationTest {
                 "sp-1",
                 Collections.singleton(
                         new LocalActorCapability(
-                                UUID.randomUUID(),
+                                UUID.randomUUID().toString(),
                                 "/sp-1/capabilities/1",
                                 new CapabilitySplitApi(
                                     new DenmApplicationApi(
@@ -220,7 +220,7 @@ public class OnboardRestAPIDocumentationTest {
                 "sp-1",
                 Collections.singleton(
                         new LocalActorCapability(
-                                UUID.randomUUID(),
+                                UUID.randomUUID().toString(),
                                 "/spi-1/capabilities/1",
                                 new CapabilitySplitApi(
                                         new DenmApplicationApi(
@@ -241,7 +241,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getCapabilityResponse() throws JsonProcessingException {
         GetCapabilityResponse response = new GetCapabilityResponse(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "/sp-1/capabilities/1",
                 new CapabilitySplitApi(
                         new DenmApplicationApi(
@@ -275,7 +275,7 @@ public class OnboardRestAPIDocumentationTest {
         AddDeliveriesResponse response = new AddDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
-                        UUID.randomUUID(),
+                        UUID.randomUUID().toString(),
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
@@ -292,7 +292,7 @@ public class OnboardRestAPIDocumentationTest {
         ListDeliveriesResponse response = new ListDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
-                        UUID.randomUUID(),
+                        UUID.randomUUID().toString(),
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
@@ -309,7 +309,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getDeliveryResponse() throws JsonProcessingException {
         GetDeliveryResponse response = new GetDeliveryResponse(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 Collections.singleton(new DeliveryEndpoint(
                         "amqps://sp-1",
                         5671,
@@ -391,7 +391,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addPrivateChannelResponse() throws JsonProcessingException {
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, UUID.randomUUID());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, UUID.randomUUID().toString());
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
         response.getPrivateChannels().add(privateChannel);
@@ -400,20 +400,20 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getPrivateChannelResponse() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID(), "king_olaf.bouvetinterchange.eu",endpoint,"king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
+        GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID().toString(), "king_olaf.bouvetinterchange.eu",endpoint,"king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
     @Test
     public void ListPrivateChannelsResponse()throws JsonProcessingException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,UUID.randomUUID());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,UUID.randomUUID().toString());
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
     @Test
     public void ListPeerPrivateChannels() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID(),"king_olaf.bouvetinterchange.eu" ,PrivateChannelStatusApi.CREATED, endpoint);
+        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID().toString(),"king_olaf.bouvetinterchange.eu" ,PrivateChannelStatusApi.CREATED, endpoint);
         ListPeerPrivateChannels response = new ListPeerPrivateChannels("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }

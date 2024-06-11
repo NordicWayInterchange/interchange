@@ -48,7 +48,7 @@ public class Capabilities {
 		setLastUpdated(LocalDateTime.now());
 	}
 
-	public void removeDataType(UUID capabilityId) {
+	public void removeDataType(String capabilityId) {
 		Set<Capability> currentServiceProviderCapabilities = getCapabilities();
 		Optional<Capability> subscriptionToDelete = currentServiceProviderCapabilities
 				.stream()

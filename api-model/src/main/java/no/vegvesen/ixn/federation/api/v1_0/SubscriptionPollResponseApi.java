@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
-    private UUID id;
+    private String id;
 
     private String selector;
 
@@ -29,7 +29,7 @@ public class SubscriptionPollResponseApi {
     public SubscriptionPollResponseApi() {
     }
 
-    public SubscriptionPollResponseApi(UUID id,
+    public SubscriptionPollResponseApi(String id,
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
@@ -41,7 +41,7 @@ public class SubscriptionPollResponseApi {
         this.status = status;
     }
 
-    public SubscriptionPollResponseApi(UUID id,
+    public SubscriptionPollResponseApi(String id,
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
@@ -55,11 +55,11 @@ public class SubscriptionPollResponseApi {
         this.endpoints = endpoints;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

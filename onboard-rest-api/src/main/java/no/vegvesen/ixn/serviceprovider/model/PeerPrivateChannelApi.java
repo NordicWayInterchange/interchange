@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PeerPrivateChannelApi {
-    private UUID id;
+    private String id;
 
     private String serviceProviderName;
 
@@ -18,24 +18,24 @@ public class PeerPrivateChannelApi {
     public PeerPrivateChannelApi() {
     }
 
-    public PeerPrivateChannelApi(UUID id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
+    public PeerPrivateChannelApi(String id, String serviceProviderName, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.endpoint = endpoint;
         this.id = id;
     }
 
-    public PeerPrivateChannelApi(UUID id, String serviceProviderName, PrivateChannelStatusApi status) {
+    public PeerPrivateChannelApi(String id, String serviceProviderName, PrivateChannelStatusApi status) {
         this.serviceProviderName = serviceProviderName;
         this.status = status;
         this.id = id;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

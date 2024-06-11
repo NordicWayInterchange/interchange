@@ -10,7 +10,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedSubscriptionResponseApi {
 
-    private UUID id;
+    private String id;
 
     private String selector;
 
@@ -24,14 +24,14 @@ public class RequestedSubscriptionResponseApi {
     public RequestedSubscriptionResponseApi() {
     }
 
-    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
     }
 
-    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
         this.id = id;
         this.selector = selector;
         this.path = path;
@@ -39,7 +39,7 @@ public class RequestedSubscriptionResponseApi {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(UUID id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.path = path;
@@ -48,11 +48,11 @@ public class RequestedSubscriptionResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

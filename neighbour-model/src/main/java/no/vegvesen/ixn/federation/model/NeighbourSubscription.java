@@ -14,7 +14,7 @@ public class NeighbourSubscription {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_sub_seq")
     private Integer id;
 
-    private UUID uuid = UUID.randomUUID();
+    private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
     private NeighbourSubscriptionStatus subscriptionStatus;
@@ -64,7 +64,7 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public NeighbourSubscription(UUID uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+    public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -81,11 +81,11 @@ public class NeighbourSubscription {
         this.id = id;
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

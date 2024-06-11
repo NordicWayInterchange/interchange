@@ -28,7 +28,7 @@ public class TypeTransformer {
     }
 
     private static LocalActorCapability capabilityToLocalCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
-        UUID id = capability.getUuid();
+        String id = capability.getUuid();
         return new LocalActorCapability(
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
@@ -57,7 +57,7 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
-            UUID sub_id = subscription.getUuid() == null ? null : subscription.getUuid();
+            String sub_id = subscription.getUuid() == null ? null : subscription.getUuid();
             result.add(new LocalActorSubscription(
                     sub_id,
                     createSubscriptionPath(name,sub_id, subscription.getStatus()),
@@ -134,7 +134,7 @@ public class TypeTransformer {
     public Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            UUID subscriptionId = subscription.getUuid();
+            String subscriptionId = subscription.getUuid();
             result.add(new LocalActorSubscription(
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId, subscription.getStatus()),
@@ -149,7 +149,7 @@ public class TypeTransformer {
         return result;
     }
 
-    private String createSubscriptionPath(String serviceProviderName, UUID subscriptionId, LocalSubscriptionStatus status) {
+    private String createSubscriptionPath(String serviceProviderName, String subscriptionId, LocalSubscriptionStatus status) {
         if (!status.equals(LocalSubscriptionStatus.ILLEGAL)) {
             return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
         } else {
@@ -157,11 +157,11 @@ public class TypeTransformer {
         }
     }
 
-    private static String createCapabilitiesPath(String serviceProviderName, UUID capabilityId) {
+    private static String createCapabilitiesPath(String serviceProviderName, String capabilityId) {
         return String.format("/%s/capabilities/%s", serviceProviderName, capabilityId);
     }
 
-    private static String createDeliveryPath(String serviceProviderName, UUID deliveryId, LocalDeliveryStatus status) {
+    private static String createDeliveryPath(String serviceProviderName, String deliveryId, LocalDeliveryStatus status) {
         if (!status.equals(LocalDeliveryStatus.ILLEGAL)) {
             return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
         } else {
@@ -175,7 +175,7 @@ public class TypeTransformer {
 
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
-                localSubscription.getId().toString(),
+                localSubscription.getUuid(),
                 createSubscriptionPath(serviceProviderName,localSubscription.getUuid(), localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
@@ -186,7 +186,7 @@ public class TypeTransformer {
     }
 
     public GetDeliveryResponse transformLocalDeliveryToGetDeliveryResponse(String serviceProviderName, LocalDelivery localDelivery) {
-        UUID uuid = localDelivery.getUuid();
+        String uuid = localDelivery.getUuid();
         return new GetDeliveryResponse(
                 uuid,
                 transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
@@ -274,7 +274,7 @@ public class TypeTransformer {
     }
 
     public GetCapabilityResponse getCapabilityResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
-        UUID capabilityId = capability.getUuid();
+        String capabilityId = capability.getUuid();
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),

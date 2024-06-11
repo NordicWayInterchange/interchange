@@ -157,20 +157,14 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-			try {
-				UUID uuid = UUID.fromString(subscriptionId);
-				NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(uuid);
-				//TODO logging. What do we log on poll?
-				logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
-				logger.info("Returning: {}", subscription.toString());
+			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(subscriptionId);
+			//TODO logging. What do we log on poll?
+			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
+			logger.info("Returning: {}", subscription.toString());
 
-				SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
-				NeighbourMDCUtil.removeLogVariables();
-				return subscriptionApi;
-			}
-			catch (IllegalArgumentException e){
-				throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + subscriptionId);
-			}
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
+			NeighbourMDCUtil.removeLogVariables();
+			return subscriptionApi;
 		} else {
 			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
@@ -179,14 +173,7 @@ public class NeighbourService {
 
 	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		try {
-			UUID uuid = UUID.fromString(subscriptionId);
-			neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(uuid);
-		}
-		catch (IllegalArgumentException e){
-			throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + subscriptionId);
-		}
-
+		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
 	}
 

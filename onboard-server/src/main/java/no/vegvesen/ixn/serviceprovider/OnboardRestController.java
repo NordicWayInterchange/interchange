@@ -189,8 +189,7 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		UUID parsedUuid = parseUuid(capabilityId, "capability");
-		serviceProviderToUpdate.getCapabilities().removeDataType(parsedUuid);
+		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
@@ -207,8 +206,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		UUID uuid = parseUuid(capabilityId, "capability");
-		Capability capability = serviceProvider.getCapability(uuid);
+		Capability capability = serviceProvider.getCapability(capabilityId);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
@@ -286,8 +284,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		UUID uuid = parseUuid(dataTypeId, "subscription");
-		serviceProviderToUpdate.removeLocalSubscription(uuid);
+		serviceProviderToUpdate.removeLocalSubscription(dataTypeId);
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
@@ -324,10 +321,9 @@ public class OnboardRestController {
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		UUID uuid = parseUuid(subscriptionId, "subscription");
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscription(uuid);
+		LocalSubscription localSubscription = serviceProvider.getSubscription(subscriptionId);
 
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
@@ -382,9 +378,7 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		UUID uuid = parseUuid(privateChannelId, "private channel");
-
-		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, uuid);
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, privateChannelId);
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
@@ -420,9 +414,7 @@ public class OnboardRestController {
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		UUID uuid = parseUuid(privateChannelId, "private channel");
-
-		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, uuid, PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, privateChannelId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}
@@ -514,9 +506,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		UUID uuid = parseUuid(deliveryId, "delivery");
-
-		LocalDelivery localDelivery = serviceProvider.getDelivery(uuid);
+		LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
@@ -536,22 +526,10 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		UUID uuid = parseUuid(deliveryId, "delivery");
-		serviceProvider.removeLocalDelivery(uuid);
+		serviceProvider.removeLocalDelivery(deliveryId);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
-	}
-
-	private UUID parseUuid(String unparsedUuid, String objectName){
-		UUID parsedUuid;
-		try{
-			parsedUuid = UUID.fromString(unparsedUuid);
-		}
-		catch (IllegalArgumentException e){
-			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unparsedUuid));
-		}
-		return parsedUuid;
 	}
 }

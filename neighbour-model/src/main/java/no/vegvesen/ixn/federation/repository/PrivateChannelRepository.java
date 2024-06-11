@@ -12,9 +12,9 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
 
     List<PrivateChannel> findAllByStatusAndServiceProviderName(PrivateChannelStatus privateChannelStatus, String serviceProviderName);
 
-    PrivateChannel findByServiceProviderNameAndUuidAndStatusIsNot(String serviceProviderName, UUID uuid, PrivateChannelStatus status);
+    PrivateChannel findByServiceProviderNameAndUuidAndStatusIsNot(String serviceProviderName, String uuid, PrivateChannelStatus status);
 
-    PrivateChannel findByServiceProviderNameAndUuid(String serviceProviderName, UUID uuid);
+    PrivateChannel findByServiceProviderNameAndUuid(String serviceProviderName, String uuid);
 
     List<PrivateChannel> findAllByPeerName(String peerName);
 

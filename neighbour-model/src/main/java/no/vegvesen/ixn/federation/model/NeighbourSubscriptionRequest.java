@@ -47,7 +47,7 @@ public class NeighbourSubscriptionRequest {
         }
     }
 
-    public void deleteSubscription (UUID subscriptionId) {
+    public void deleteSubscription (String subscriptionId) {
         NeighbourSubscription subscriptionToRemove = getSubscriptionByUuid(subscriptionId);
         subscription.remove(subscriptionToRemove);
     }
@@ -56,7 +56,7 @@ public class NeighbourSubscriptionRequest {
         subscription.removeAll(subscriptionsToDelete);
     }
 
-    public void setTearDownSubscription(UUID subscriptionId) {
+    public void setTearDownSubscription(String subscriptionId) {
         NeighbourSubscription subscriptionToTearDown = getSubscriptionByUuid(subscriptionId);
         subscriptionToTearDown.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
     }
@@ -65,14 +65,13 @@ public class NeighbourSubscriptionRequest {
         subscription.addAll(newSubscriptions);
     }
 
-    public NeighbourSubscription getSubscriptionByUuid(UUID id) throws NeighbourSubscriptionNotFound {
-
+    public NeighbourSubscription getSubscriptionByUuid(String uuid) throws NeighbourSubscriptionNotFound {
         for (NeighbourSubscription subscription : subscription) {
-            if (subscription.getUuid().equals(id)) {
+            if (subscription.getUuid().equals(uuid)) {
                 return subscription;
             }
         }
-        throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
+        throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + uuid);
     }
 
     public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus status) {

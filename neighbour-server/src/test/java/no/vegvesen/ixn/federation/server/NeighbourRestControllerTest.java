@@ -223,7 +223,7 @@ class NeighbourRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
-				Collections.singleton(new RequestedSubscriptionResponseApi(UUID.randomUUID(),selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
+				Collections.singleton(new RequestedSubscriptionResponseApi(UUID.randomUUID().toString(),selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 

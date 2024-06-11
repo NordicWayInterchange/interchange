@@ -6,24 +6,24 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class GetCapabilityResponse {
-    private UUID id;
+    private String id;
     private String path;
     private CapabilitySplitApi definition;
 
     public GetCapabilityResponse() {
     }
 
-    public GetCapabilityResponse(UUID id, String path, CapabilitySplitApi definition) {
+    public GetCapabilityResponse(String id, String path, CapabilitySplitApi definition) {
         this.id = id;
         this.path = path;
         this.definition = definition;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -17,7 +17,7 @@ public class SubscriptionPollResponseApiTest {
     public void createValidJson() throws JsonProcessingException {
         EndpointApi endpoint = new EndpointApi("client1queue","b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
@@ -44,7 +44,7 @@ public class SubscriptionPollResponseApiTest {
         EndpointApi endpoint1 = new EndpointApi("client1source", "a.c-its-interchange.eu", 5671);
         EndpointApi endpoint2 = new EndpointApi("client2source", "b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,

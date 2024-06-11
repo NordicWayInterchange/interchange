@@ -148,7 +148,7 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void removeLocalSubscription(UUID uuid){
+	public void removeLocalSubscription(String uuid){
 		LocalSubscription subscriptionToDelete = subscriptions
 				.stream()
 				.filter(subscription -> subscription.getUuid().equals(uuid))
@@ -218,7 +218,7 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-	public void removeLocalDelivery(UUID deliveryId) {
+	public void removeLocalDelivery(String deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
 				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryId))
@@ -229,7 +229,7 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public Capability getCapability(UUID capabilityId){
+	public Capability getCapability(String capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
 						.filter(c-> c.getUuid().equals(capabilityId))
@@ -244,7 +244,7 @@ public class ServiceProvider {
 				.collect(Collectors.toSet());
 	}
 
-	public LocalSubscription getSubscription(UUID subscriptionId){
+	public LocalSubscription getSubscription(String subscriptionId){
 		return getSubscriptions()
 				.stream()
 				.filter(s -> s.getUuid().equals(subscriptionId))
@@ -259,7 +259,7 @@ public class ServiceProvider {
 				.collect(Collectors.toSet());
 	}
 
-	public LocalDelivery getDelivery(UUID deliveryId){
+	public LocalDelivery getDelivery(String deliveryId){
 		return getDeliveries()
 				.stream()
 				.filter(d -> d.getUuid().equals(deliveryId))

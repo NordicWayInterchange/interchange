@@ -15,7 +15,7 @@ public class Capability {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
     private Integer id;
 
-    private UUID uuid = UUID.randomUUID();
+    private String uuid = UUID.randomUUID().toString();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "app", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_cap_app"))
@@ -37,7 +37,7 @@ public class Capability {
         this.metadata = metadata;
     }
 
-    public Capability(UUID uuid, Application application, Metadata metadata) {
+    public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
@@ -57,11 +57,11 @@ public class Capability {
         return id;
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

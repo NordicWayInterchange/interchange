@@ -4,10 +4,9 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class GetPrivateChannelResponse {
-    private UUID id;
+    private String id;
 
     private String peerName;
 
@@ -21,7 +20,7 @@ public class GetPrivateChannelResponse {
     public GetPrivateChannelResponse() {
     }
 
-    public GetPrivateChannelResponse(UUID id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
@@ -29,7 +28,7 @@ public class GetPrivateChannelResponse {
         this.status = status;
     }
 
-    public GetPrivateChannelResponse(UUID id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
@@ -52,7 +51,7 @@ public class GetPrivateChannelResponse {
         this.endpoint = endpoint;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

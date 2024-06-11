@@ -136,7 +136,7 @@ public class ApiModelRestDocumentationTest {
                 "node-1",
                 Collections.singleton(
                         new RequestedSubscriptionResponseApi(
-                                UUID.randomUUID(),
+                                UUID.randomUUID().toString(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
@@ -155,7 +155,7 @@ public class ApiModelRestDocumentationTest {
                 "node-1",
                 new HashSet<>(Arrays.asList(
                         new RequestedSubscriptionResponseApi(
-                                UUID.randomUUID(),
+                                UUID.randomUUID().toString(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
@@ -163,7 +163,7 @@ public class ApiModelRestDocumentationTest {
                                 System.currentTimeMillis()
                         ),
                         new RequestedSubscriptionResponseApi(
-                                UUID.randomUUID(),
+                                UUID.randomUUID().toString(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/2",
                                 SubscriptionStatusApi.REQUESTED,
@@ -179,7 +179,7 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void subscriptionPollResponse() throws JsonProcessingException {
         SubscriptionPollResponseApi response = new SubscriptionPollResponseApi(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,

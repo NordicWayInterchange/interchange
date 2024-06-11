@@ -13,7 +13,7 @@ public class RequestedSubscriptionResponseApiTest {
     @Test
     public void testUnknownFieldsInJson() throws JsonProcessingException {
         UUID uuid = UUID.randomUUID();
-        RequestedSubscriptionResponseApi example = new RequestedSubscriptionResponseApi(uuid,"originatingCountry = 'NO'","/1",SubscriptionStatusApi.CREATED);
+        RequestedSubscriptionResponseApi example = new RequestedSubscriptionResponseApi(uuid.toString(),"originatingCountry = 'NO'","/1",SubscriptionStatusApi.CREATED);
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(example));
         String input = "{\"selector\":\"originatingCountry = 'NO'\",\"foo\":\"bar\",\"path\":\"/1\",\"status\":\"CREATED\"}";
