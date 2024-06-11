@@ -10,5 +10,5 @@ docker run \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
   -v $PWD:/work \
-  --link a_onboard_server:a.bouvetinterchange.eu \
-  onboard_rest_client -k /keys/${SERVICE_PROVIDER}.p12 -s Pi+TS1I17pNK -t /keys/ca.bouvetinterchange.eu.jks -w ma9+jz78gHHy https://a.bouvetinterchange.eu:8797/ ${SERVICE_PROVIDER} "$@"
+  --link a-onboard-server:a.bouvetinterchange.eu \
+  onboard_rest_client -k /keys/${SERVICE_PROVIDER}.p12 -s NJfOF7VxznOe -t /keys/ca.bouvetinterchange.eu.jks -w dRnrxu3pSKA6 https://a.bouvetinterchange.eu:8797/ ${SERVICE_PROVIDER} "$@"

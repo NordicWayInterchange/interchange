@@ -1,4 +1,3 @@
-version: '3'
 services:
 
 # Note: now all the containers are on the same network - testing_net
@@ -19,9 +18,9 @@ services:
         aliases:
           - dns.bouvetinterchange.eu
 
-  a_db:
+  a-db:
     image: postgres:15.1
-    container_name: a_db
+    container_name: a-db
     depends_on:
       - mock-dns-server
     ports:
@@ -33,19 +32,19 @@ services:
     networks:
     - testing_net
 
-  a_onboard_server:
+  a-onboard-server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
       context: ../onboard-server-app
-    container_name: a_onboard_server
+    container_name: a-onboard-server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 32666:8797
     volumes:
     - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -59,18 +58,18 @@ services:
       - testing_net
 
         #TODO need to look over the meaning of each of these settings, and document them
-  a_napcore_server:
+  a-napcore-server:
     build:
       context: ../napcore-server-app
-    container_name: a_napcore_server
+    container_name: a-napcore-server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 32777:8898
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.nap
@@ -78,16 +77,16 @@ services:
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
       - TRUST_STORE=/jks/keys/internal_a.jks
-      - TRUST_STORE_PASSWORD=MiQ6jMAevt0H
+      - TRUST_STORE_PASSWORD=wLMKfNnCWM8L
       - KEY_STORE=/jks/keys/a.nap.p12
-      - KEY_STORE_PASSWORD=F41l-+JTLtKf
+      - KEY_STORE_PASSWORD=nr7qo88KUOpq
     networks:
       - testing_net
 
-  a_qpid:
+  a-qpid:
     build:
       context: ../qpid
-    hostname: a_qpid
+    hostname: a-qpid
     ports:
       - 8666:8080
       - 443
@@ -110,28 +109,28 @@ services:
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
         #internal trust store?
-      - INTERNAL_KEY_STORE=/jks/keys/a_qpid.p12
-      - INTERNAL_KEY_STORE_PASSWORD=YI7KSR7-L0eu
+      - INTERNAL_KEY_STORE=/jks/keys/a-qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=TAVYb-NQ28w8
       - INTERNAL_TRUST_STORE=/jks/keys/internal_a.jks
-      - INTERNAL_TRUST_STORE_PASSWORD=MiQ6jMAevt0H
+      - INTERNAL_TRUST_STORE_PASSWORD=wLMKfNnCWM8L
     depends_on:
     - mock-dns-server
     networks:
     - testing_net
 
-  a_neighbour_server:
+  a-neighbour-server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
       context: ../neighbour-server-app
-    container_name: a_neighbour_server
+    container_name: a-neighbour-server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 8090
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -145,43 +144,44 @@ services:
     - testing_net
     dns: 172.28.1.1
 
-  a_routing_configurer:
+  a-routing-configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
       context: ../routing-configurer-app
-    container_name: a_routing_configurer
+    container_name: a-routing-configurer
     depends_on:
-      - a_db
+      - a-db
         #links:
         #- "a_qpid:a.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a_qpid
+      - BASE_URL=https://a-qpid
       - SERVER_NAME=a.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/internal_a.jks
-      - TRUST_STORE_PASSWORD=MiQ6jMAevt0H
+      - TRUST_STORE_PASSWORD=wLMKfNnCWM8L
       - KEY_STORE=/jks/keys/a_routing_configurer.p12
-      - KEY_STORE_PASSWORD=Na65dIWH8+M-
+      - KEY_STORE_PASSWORD=zQgiAllpvvmM
+      - COLLECTOR_USER=a_message_collector
     networks:
     - testing_net
 
-  a_neighbour_discoverer:
+  a-neighbour-discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer-app
-    container_name: a_neighbour_discoverer
+    container_name: a-neighbour-discoverer
     depends_on:
-      - a_db
+      - a-db
     links:
-     - "b_neighbour_server:b.bouvetinterchange.eu"
+     - "b-neighbour-server:b.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -195,20 +195,20 @@ services:
     networks:
     - testing_net
 
-  a_message_collector_app:
+  a-message-collector-app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
       context: ../message-collector-app
-    container_name: a_message_collector_app
+    container_name: a-message-collector-app
     depends_on:
-    - a_db
+    - a-db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
+    - "a-qpid:a.bouvetinterchange.eu"
+    - "b-qpid:b.bouvetinterchange.eu"
     volumes:
     - "../tmp:/jks"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
     - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
@@ -217,13 +217,21 @@ services:
     - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
     - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=a.bouvetinterchange.eu
+    - SERVER_NAME=a-qpid
+    - INTERNAL_KEY_STORE=/jks/keys/a_message_collector.p12
+    - INTERNAL_KEY_STORE_PASSWORD=2AO2hEuGsrsa
+    - INTERNAL_KEY_STORE_TYPE=PKCS12
+    - INTERNAL_KEY_STORE_ALIAS=a_message_collector
+    - INTERNAL_TRUST_STORE=/jks/keys/internal_a.jks
+    - INTERNAL_TRUST_STORE_PASSWORD=wLMKfNnCWM8L
+    - INTERNAL_TRUST_STORE_TYPE=JKS
+    - LOCAL_IXN_PORT=5673
     networks:
     - testing_net
 
-  b_db:
+  b-db:
     image: postgres:9.6
-    container_name: b_db
+    container_name: b-db
     depends_on:
     - mock-dns-server
     ports:
@@ -235,19 +243,19 @@ services:
     networks:
     - testing_net
 
-  b_onboard_server:
+  b-onboard-server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
       context: ../onboard-server-app
-    container_name: b_onboard_server
+    container_name: b-onboard-server
     depends_on:
-    - b_db
+    - b-db
     ports:
     - 32555:8696
     volumes:
     - "../tmp:/jks"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+    - POSTGRES_URI=jdbc:postgresql://b-db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
     - SERVER_NAME=b.bouvetinterchange.eu
@@ -256,23 +264,23 @@ services:
     - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
     - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-    - KEY_STORE_PASSWORD=FbLeD3NzofRw
+    - KEY_STORE_PASSWORD=7u7ZhjNg21Fd
     networks:
     - testing_net
 
-  b_neighbour_server:
+  b-neighbour-server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
       context: ../neighbour-server-app
-    container_name: b_neighbour_server
+    container_name: b-neighbour-server
     depends_on:
-      - b_db
+      - b-db
     ports:
       - 8090
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://b-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=b.bouvetinterchange.eu
@@ -281,24 +289,24 @@ services:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=FbLeD3NzofRw
+      - KEY_STORE_PASSWORD=7u7ZhjNg21Fd
     networks:
       - testing_net
     dns: 172.28.1.1
 
-  b_neighbour_discoverer:
+  b-neighbour-discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer-app
-    container_name: b_neighbour_discoverer
+    container_name: b-neighbour-discoverer
     depends_on:
-      - b_db
+      - b-db
     links:
-      - "a_neighbour_server:a.bouvetinterchange.eu"
+      - "a-neighbour-server:a.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://b-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=b.bouvetinterchange.eu
@@ -308,15 +316,15 @@ services:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=FbLeD3NzofRw
+      - KEY_STORE_PASSWORD=7u7ZhjNg21Fd
     networks:
     - testing_net
     dns: 172.28.1.1
 
-  b_qpid:
+  b-qpid:
     build:
       context: ../qpid
-    hostname: b_qpid
+    hostname: b-qpid
     ports:
       - 8555:8080
       - 443
@@ -330,68 +338,75 @@ services:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=FbLeD3NzofRw
+      - KEY_STORE_PASSWORD=7u7ZhjNg21Fd
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
-      - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
-      - INTERNAL_KEY_STORE_PASSWORD=VwlewgXOxNIL
+      - INTERNAL_KEY_STORE=/jks/keys/b-qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=Ld9W-3JGHSuW 
       - INTERNAL_TRUST_STORE=/jks/keys/internal_b.jks
-      - INTERNAL_TRUST_STORE_PASSWORD=_I3Vvm7pyM$$P #NOTE actual password only has one dollar sign, but we're using two due to docker-compose's variable substitution
+      - INTERNAL_TRUST_STORE_PASSWORD=gWislXSye5Xd 
     depends_on:
     - mock-dns-server
     networks:
     - testing_net
 
-  b_routing_configurer:
+  b-routing-configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
       context: ../routing-configurer-app
-    container_name: b_routing_configurer
+    container_name: b-routing-configurer
     depends_on:
-      - b_db
-    links:
-        - "b_qpid:b.bouvetinterchange.eu"
+      - b-db
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://b-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://b_qpid
+      - BASE_URL=https://b-qpid
       - SERVER_NAME=b.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/internal_b.jks
-      - TRUST_STORE_PASSWORD=_I3Vvm7pyM$$P #Note that the actual password has one dollar sign, but escaped due to variables in docker-compose
+      - TRUST_STORE_PASSWORD=gWislXSye5Xd 
       - KEY_STORE=/jks/keys/b_routing_configurer.p12
-      - KEY_STORE_PASSWORD=-4U-rAKRymc7
+      - KEY_STORE_PASSWORD=CH4Yhyr-iSLV
+      - COLLECTOR_USER=b_message_collector
     networks:
     - testing_net
 
-  b_message_collector_app:
+  b-message-collector-app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
       context: ../message-collector-app
-    container_name: b_message_collector_app
+    container_name: b-message-collector-app
     depends_on:
-      - b_db
+      - b-db
     links:
-      - "a_qpid:a.bouvetinterchange.eu"
-      - "b_qpid:b.bouvetinterchange.eu"
+      - "a-qpid:a.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://b-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-      - KEY_STORE_PASSWORD=FbLeD3NzofRw
+      - KEY_STORE_PASSWORD=7u7ZhjNg21Fd
       - KEY_STORE_TYPE=PKCS12
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=dRnrxu3pSKA6
       - TRUST_STORE_TYPE=JKS
-      - SERVER_NAME=b.bouvetinterchange.eu
+      - INTERNAL_KEY_STORE=/jks/keys/b_message_collector.p12
+      - INTERNAL_KEY_STORE_PASSWORD=pBOzThO9GZ+Y
+      - INTERNAL_KEY_STORE_TYPE=PKCS12
+      - INTERNAL_KEY_STORE_ALIAS=b_message_collector
+      - INTERNAL_TRUST_STORE=/jks/keys/internal_b.jks
+      - INTERNAL_TRUST_STORE_PASSWORD=gWislXSye5Xd
+      - INTERNAL_TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=b-qpid
+      - LOCAL_IXN_PORT=5673
+      - LOG_LEVELS=-Djavax.net.debug=ssl:handshake:verbose
     networks:
     - testing_net
 

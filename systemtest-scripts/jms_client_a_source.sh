@@ -8,5 +8,5 @@ docker run \
     --dns=172.28.1.1 \
     -v ${PWD}/../tmp/keys:/keys \
     -v ${PWD}:/work \
-    --link a_qpid:a.bouvetinterchange.eu \
-    jms_client_source_app -k /keys/king_olav.bouvetinterchange.eu.p12 -s Pi+TS1I17pNK -t /keys/ca.bouvetinterchange.eu.jks -w  ma9+jz78gHHy amqps://a.bouvetinterchange.eu "$@" #sendpredefinedmessage $1
+    --link a-qpid:a.bouvetinterchange.eu \
+    jms_client_source_app -k /keys/king_olav.bouvetinterchange.eu.p12 -s NJfOF7VxznOe -t /keys/ca.bouvetinterchange.eu.jks -w dRnrxu3pSKA6 amqps://a.bouvetinterchange.eu "$@" 
