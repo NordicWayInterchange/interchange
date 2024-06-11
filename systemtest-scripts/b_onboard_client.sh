@@ -11,4 +11,4 @@ docker run \
   -v $PWD/../tmp/keys:/keys \
   -v $PWD:/work \
   --link b-onboard-server:b.bouvetinterchange.eu \
-  onboard_rest_client -k /keys/${SERVICE_PROVIDER}.p12 -s 2v78NcXLRkh1 -t /keys/ca.bouvetinterchange.eu.jks  -w dRnrxu3pSKA6 https://b.bouvetinterchange.eu:8696/ ${SERVICE_PROVIDER} "$@"
+  onboard_rest_client -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks  -w password https://b.bouvetinterchange.eu:8696/ ${SERVICE_PROVIDER} "$@"

@@ -9,4 +9,4 @@ docker run \
     -v ${PWD}/../tmp/keys:/keys \
     -v ${PWD}:/work \
     --link b-qpid:b.bouvetinterchange.eu \
-    jms_client_sink_app amqps://b.bouvetinterchange.eu -k /keys/king_gustaf.bouvetinterchange.eu.p12 -s 2v78NcXLRkh1 -t /keys/ca.bouvetinterchange.eu.jks -w dRnrxu3pSKA6 "$@"
+    jms_client_sink_app amqps://b.bouvetinterchange.eu -k /keys/king_gustaf.bouvetinterchange.eu.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks -w password "$@"
