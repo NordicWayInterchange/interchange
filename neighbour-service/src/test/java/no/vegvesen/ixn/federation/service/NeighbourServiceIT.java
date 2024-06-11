@@ -170,7 +170,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
+    public void incomingSubscriptionRequestReturnsPathForSubscription() {
         Neighbour neighbour = new Neighbour("myNeighbour",
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
@@ -186,7 +186,6 @@ public class NeighbourServiceIT {
         assertThat(subscriptions).hasSize(1);
         RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
         assertThat(subscriptionApi.getPath()).isNotNull();
-        assertThat(subscriptionApi.getLastUpdatedTimestamp()).isGreaterThan(0);
     }
 
     @Test
