@@ -76,9 +76,9 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+		CapabilityApi ericssonDataType = new CapabilityApi(
 				new DatexApplicationApi(
 						"NO-12345",
 						"pub-2",
@@ -95,7 +95,7 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -112,9 +112,9 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+		CapabilityApi ericssonDataType = new CapabilityApi(
 				new DenmApplicationApi(
 						"NO-12345",
 						"pub-1",
@@ -130,7 +130,7 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -147,16 +147,16 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
 
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", List.of()), new MetadataApi());
+		CapabilityApi capability = new CapabilityApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", List.of()), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -174,10 +174,10 @@ class NeighbourRestControllerTest {
 		mockCertificate("unknownNeighbour");
 
 		// Mock the incoming API object.
-		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
+		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
 		unknownNeighbour.setName("unknownNeighbour");
 		unknownNeighbour.setCapabilities(Collections.singleton(
-				new CapabilitySplitApi(
+				new CapabilityApi(
 						new DatexApplicationApi(
 								"NO-12345",
 								"pub-2",
@@ -261,10 +261,10 @@ class NeighbourRestControllerTest {
 		mockCertificate("bouvet");
 
 		// Create incoming capability api object.
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
 		ericsson.setCapabilities(Collections.singleton(
-				new CapabilitySplitApi(
+				new CapabilityApi(
 						new DatexApplicationApi(
 								"NO-12345",
 								"pub-2",
@@ -295,9 +295,9 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+		CapabilityApi ericssonDataType = new CapabilityApi(
 				new DatexApplicationApi(
 						"NO-12345",
 						"pub-2",
@@ -314,7 +314,7 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		CapabilitiesSplitApi selfCapabilities = new CapabilitiesSplitApi("bouvet", Sets.newLinkedHashSet());
+		CapabilitiesApi selfCapabilities = new CapabilitiesApi("bouvet", Sets.newLinkedHashSet());
 		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
@@ -331,9 +331,9 @@ class NeighbourRestControllerTest {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
-		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(
+		CapabilityApi ericssonDataType = new CapabilityApi(
 				new ApplicationApi(
 						"unknown",
 						"NO-12345",

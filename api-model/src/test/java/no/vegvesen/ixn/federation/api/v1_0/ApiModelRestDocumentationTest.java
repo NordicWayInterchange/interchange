@@ -14,10 +14,10 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void postCapabilitiesRequest() throws JsonProcessingException {
-        CapabilitiesSplitApi request = new CapabilitiesSplitApi(
+        CapabilitiesApi request = new CapabilitiesApi(
                 "sp-1",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "NO",
@@ -42,7 +42,7 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void datexCapability() throws JsonProcessingException {
-        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(
                         "NPRA",
                         "pub-1",
@@ -67,7 +67,7 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void iviCapability() throws JsonProcessingException {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NPRA",
                         "pub-1",
@@ -91,10 +91,10 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void CapabilitiesResponse() throws JsonProcessingException {
-        CapabilitiesSplitApi response = new CapabilitiesSplitApi(
+        CapabilitiesApi response = new CapabilitiesApi(
                 "",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -219,12 +219,12 @@ public class ApiModelRestDocumentationTest {
                 0
         );
 
-        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 application,
                 metadata
         );
 
-        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilities = new CapabilitiesApi(
                 "my-node",
                 new HashSet<>(Collections.singleton(capabilityApi))
         );
@@ -252,12 +252,12 @@ public class ApiModelRestDocumentationTest {
                 0
         );
 
-        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 application,
                 metadata
         );
 
-        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilities = new CapabilitiesApi(
                 "my-node",
                 new HashSet<>(Collections.singleton(capabilityApi))
         );
@@ -279,12 +279,12 @@ public class ApiModelRestDocumentationTest {
         MetadataApi metadata = new MetadataApi();
         metadata.setInfoUrl("https://info.no");
 
-        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 application,
                 metadata
         );
 
-        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilities = new CapabilitiesApi(
                 "my-node",
                 new HashSet<>(Collections.singleton(capabilityApi))
         );

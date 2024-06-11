@@ -1,18 +1,18 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 
 import java.util.Objects;
 
 public class GetCapabilityResponse {
     private String id;
     private String path;
-    private CapabilitySplitApi definition;
+    private CapabilityApi definition;
 
     public GetCapabilityResponse() {
     }
 
-    public GetCapabilityResponse(String id, String path, CapabilitySplitApi definition) {
+    public GetCapabilityResponse(String id, String path, CapabilityApi definition) {
         this.id = id;
         this.path = path;
         this.definition = definition;
@@ -34,11 +34,11 @@ public class GetCapabilityResponse {
         this.path = path;
     }
 
-    public CapabilitySplitApi getDefinition() {
+    public CapabilityApi getDefinition() {
         return definition;
     }
 
-    public void setDefinition(CapabilitySplitApi definition) {
+    public void setDefinition(CapabilityApi definition) {
         this.definition = definition;
     }
 

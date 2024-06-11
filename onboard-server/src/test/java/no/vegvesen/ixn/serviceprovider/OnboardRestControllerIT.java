@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -89,7 +88,7 @@ public class OnboardRestControllerIT {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "serviceProvider",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "Publisher1",
                                         "Publisher1:Publication1",
@@ -111,7 +110,7 @@ public class OnboardRestControllerIT {
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -146,7 +145,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
         DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(application);
 
         String serviceProviderName = "my-service-provider";
@@ -163,7 +162,7 @@ public class OnboardRestControllerIT {
     public void testAddingCapabilityWithMissingProperties() {
         DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -181,14 +180,14 @@ public class OnboardRestControllerIT {
     public void testAddingMultipleCapabilitiesWithOneInvalidCapabilityReturnsWithoutSavingAny(){
         String serviceProviderName = "serviceProviderMissingProperties";
         ServiceProvider sp = new ServiceProvider(serviceProviderName);
-        Set<CapabilitySplitApi> capabilities = new HashSet<>();
+        Set<CapabilityApi> capabilities = new HashSet<>();
         serviceProviderRepository.save(sp);
         for(int i = 0; i<10; i++){
-            capabilities.add(new CapabilitySplitApi(
+            capabilities.add(new CapabilityApi(
                     new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2",List.of("1230123"), "SituationPublication", "pubname"),
                     new MetadataApi()));
         }
-        capabilities.add(new CapabilitySplitApi(
+        capabilities.add(new CapabilityApi(
                 new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", List.of("1230123"), "SituationPublication", ""),
                 new MetadataApi()
         ));
@@ -203,7 +202,7 @@ public class OnboardRestControllerIT {
 
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -217,7 +216,7 @@ public class OnboardRestControllerIT {
     public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -455,7 +454,7 @@ public class OnboardRestControllerIT {
     public void testDeletingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
@@ -502,7 +501,7 @@ public class OnboardRestControllerIT {
     public void testGettingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi(
+        CapabilityApi datexNO = new CapabilityApi(
                 app,
                 meta
         );

@@ -221,7 +221,7 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public Capability getCapabilitySplit(Integer capabilityId){
+	public Capability getCapability(Integer capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
 				.filter(c-> c.getId().equals(capabilityId))

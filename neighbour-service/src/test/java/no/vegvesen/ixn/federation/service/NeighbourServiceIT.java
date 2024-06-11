@@ -330,10 +330,10 @@ public class NeighbourServiceIT {
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
         repository.save(neighbour);
-        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
                 name,
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                             new DenmApplicationApi(
                                 "NO-123",
                                 "pub-1",
@@ -417,14 +417,14 @@ public class NeighbourServiceIT {
         );
         repository.save(neighbour);
         ObjectMapper mapper = new ObjectMapper();
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class), Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
         //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
         List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
 
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);

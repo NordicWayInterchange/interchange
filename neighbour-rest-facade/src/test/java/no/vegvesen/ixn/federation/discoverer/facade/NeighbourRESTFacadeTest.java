@@ -72,13 +72,13 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
-		CapabilitySplitApi capabilityApi = new CapabilitySplitApi();
+		CapabilityApi capabilityApi = new CapabilityApi();
 		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), "SituationPublication", "publisherName");
 		capabilityApi.setApplication(app);
 		MetadataApi meta = new MetadataApi();
 		capabilityApi.setMetadata(meta);
 
-		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("ericsson.itsinterchange.eu", Collections.singleton(capabilityApi));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("ericsson.itsinterchange.eu", Collections.singleton(capabilityApi));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -100,12 +100,12 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
-		CapabilitySplitApi capability = new CapabilitySplitApi();
+		CapabilityApi capability = new CapabilityApi();
 		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", List.of("aaa"), List.of(6));
 		capability.setApplication(app);
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		capability.setMetadata(meta);
-		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("ericsson.itsinterchange.eu", Collections.singleton(capability));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("ericsson.itsinterchange.eu", Collections.singleton(capability));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -128,12 +128,12 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
-		CapabilitySplitApi capability = new CapabilitySplitApi();
+		CapabilityApi capability = new CapabilityApi();
 		IvimApplicationApi dataType = new IvimApplicationApi("NO-123123", "pub-123", "NO", "P1", List.of("aaa"));
 		capability.setApplication(dataType);
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		capability.setMetadata(meta);
-		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("remote server", Collections.singleton(capability));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(capability));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
