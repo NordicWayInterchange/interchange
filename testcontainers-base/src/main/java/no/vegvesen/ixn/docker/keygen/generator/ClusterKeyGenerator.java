@@ -152,37 +152,69 @@ public class ClusterKeyGenerator {
     }
 
     /* Makes a truststore for the top CA, and keystores for each host and client in the chain */
-    public static void store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-        trustStoreForCa(response, basePath, passwordGenerator);
+    public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
+        CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
+        List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
+        List<ClientStore> clientStores = storeClientStores(basePath, passwordGenerator, response.clientResponses());
+        List<CaStores> subCaStores = new ArrayList<>();
         for (CaResponse subResponses : response.caResponses()) {
-            store(subResponses,basePath, passwordGenerator);
+            CaStores store = store(subResponses, basePath, passwordGenerator);
+            subCaStores.add(store);
         }
-        storeHostAndClientStores(response, basePath, passwordGenerator);
+        return new CaStores(response.name(), caStore, hostStores, clientStores, subCaStores);
     }
 
-    private static void trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         String password = passwordGenerator.generatePassword();
         Files.writeString(basePath.resolve(response.name() + ".txt"),password);
-        try (OutputStream outputStream = Files.newOutputStream(basePath.resolve(response.name() + ".jks"))) {
-            makeTrustStore(response, password,outputStream);
+        Path path = basePath.resolve(response.name() + ".jks");
+        try (OutputStream outputStream = Files.newOutputStream(path)) {
+            makeTrustStore(password,outputStream, response.details());
         }
+        return new CaStore(response.name(), path, password);
     }
 
-
-    private static void storeHostAndClientStores(CaResponse response, Path basePath, PasswordGenerator randomPasswordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-
-        for (HostResponse hostResponse : response.hostResponses()) {
+    private static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        List<HostStore> hostStores = new ArrayList<>();
+        for (HostResponse hostResponse : hostResponses) {
             String hostPassword = randomPasswordGenerator.generatePassword();
+            //TODO should we write the string password to file or not?
+            //TODO we could also create the store as a stream, and not use files at all...
             Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
-            makeKeystore(hostResponse,hostPassword,Files.newOutputStream(basePath.resolve(hostResponse.host() + ".p12")));
+            Path outputPath = basePath.resolve(hostResponse.host() + ".p12");
+            makeKeystore(hostResponse.host(), hostResponse.keyDetails(), hostPassword, Files.newOutputStream(outputPath));
+            hostStores.add(new HostStore(hostResponse.host(),outputPath,hostPassword));
         }
-        for (ClientResponse clientResponse : response.clientResponses()) {
+        return hostStores;
+    }
+    
+    private static List<ClientStore> storeClientStores(Path basePath, PasswordGenerator randomPasswordGenerator, List<ClientResponse> clientResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        List<ClientStore> clientStores = new ArrayList<>();
+        for (ClientResponse clientResponse : clientResponses) {
             String clientPassword = randomPasswordGenerator.generatePassword();
-            Files.writeString(basePath.resolve(clientResponse.name() + ".txt"),clientPassword);
-            makeKeystore(clientResponse,clientPassword,Files.newOutputStream(basePath.resolve(clientResponse.name() + ".p12")));
+            String name = clientResponse.name();
+            Files.writeString(basePath.resolve(name + ".txt"),clientPassword);
+            Path path = basePath.resolve(name + ".p12");
+            makeKeystore(name, clientResponse.clientDetails(), clientPassword,Files.newOutputStream(path));
+            clientStores.add(new ClientStore(name, path,clientPassword));
         }
+        return clientStores;
     }
 
+    public record CaStores(String name, CaStore trustStore, List<HostStore> hostStores, List<ClientStore> clientStores, List<CaStores> subCaStores) {}
+
+
+    //A CaResponse gives a truststore,
+    public record CaStore(String name, Path path, String password) {}
+
+    //a HostResponse or a ClientResponse gives a keystore
+    public record HostStore(String hostname, Path path, String password) {}
+
+    public record ClientStore(String clientName, Path path, String password) {}
+    
+    
+    
+    
     private static List<ClientResponse> getClientResponses(List<ClientRequest> clients, CertificateCertificateChainAndKeys issuer) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         ArrayList<ClientResponse> clientResponses = new ArrayList<>();
         for (ClientRequest clientRequest : clients) {
@@ -296,26 +328,18 @@ public class ClusterKeyGenerator {
 
     }
 
-    public static void makeKeystore(HostResponse hostResponse,String password, OutputStream outputStream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+    public static void makeKeystore(String name, CertificateCertificateChainAndKeys certificateCertificateChainAndKeys, String password, OutputStream outputStream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null,null);
-        X509Certificate[] certificates = hostResponse.keyDetails().certificateChain().toArray(new X509Certificate[0]);
-        keyStore.setKeyEntry(hostResponse.host(),hostResponse.keyDetails().keyPair().getPrivate(),password.toCharArray(),certificates);
+        X509Certificate[] certificates = certificateCertificateChainAndKeys.certificateChain().toArray(new X509Certificate[0]);
+        keyStore.setKeyEntry(name, certificateCertificateChainAndKeys.keyPair().getPrivate(),password.toCharArray(),certificates);
         keyStore.store(outputStream,password.toCharArray());
     }
 
-    public static void makeKeystore(ClientResponse clientResponse,String password, OutputStream outputStream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(null,null);
-        X509Certificate[] certificates = clientResponse.clientDetails().certificateChain().toArray(new X509Certificate[0]);
-        keyStore.setKeyEntry(clientResponse.name(),clientResponse.clientDetails().keyPair().getPrivate(),password.toCharArray(),certificates);
-        keyStore.store(outputStream,password.toCharArray());
-    }
-
-    public static void makeTrustStore(CaResponse caResponse, String truststorePassword, OutputStream outputStream) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+    public static void makeTrustStore(String truststorePassword, OutputStream outputStream, CertificateCertificateChainAndKeys details) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(null,null);
-        trustStore.setCertificateEntry("myKey",caResponse.details().certificate());
+        trustStore.setCertificateEntry("myKey", details.certificate());
         trustStore.store(outputStream,truststorePassword.toCharArray());
     }
 

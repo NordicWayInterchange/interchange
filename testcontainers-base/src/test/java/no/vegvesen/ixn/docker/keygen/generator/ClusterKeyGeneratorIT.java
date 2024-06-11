@@ -3,6 +3,7 @@ package no.vegvesen.ixn.docker.keygen.generator;
 import com.fasterxml.jackson.databind.*;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.keygen.Cluster;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.PasswordGenerator;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.RandomPasswordGenerator;
@@ -345,9 +346,13 @@ public class ClusterKeyGeneratorIT {
             responses.add(ClusterKeyGenerator.generate(request));
         }
         PasswordGenerator passwordGenerator = () -> "password";
+        List<CaStores> caStores = new ArrayList<>();
         for(CaResponse response : responses) {
-            ClusterKeyGenerator.store(response,basePath, passwordGenerator);
+            CaStores stores = ClusterKeyGenerator.store(response, basePath, passwordGenerator);
+            caStores.add(stores);
         }
+        assertThat(caStores).hasSize(3);
+        //TODO some functionality to traverse the tree and select the nodes we want
         try (Stream<Path> list = Files.list(basePath)) {
             assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(5);
         }
