@@ -52,13 +52,13 @@
       "authenticationProvider": "clientCerts",
       "port": "5673",
       "bindingAddress": "*",
-      "keyStore": "default",
       "needClientAuth": true,
       "transports": [
         "SSL",
         "TCP"
       ],
       "trustStores": ["internal_truststore"],
+      "keyStore": "internal-service",
       "wantClientAuth": false,
       "protocols": ["AMQP_1_0"],
       "virtualhostaliases": [
