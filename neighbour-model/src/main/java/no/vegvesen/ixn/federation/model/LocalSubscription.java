@@ -91,6 +91,7 @@ public class LocalSubscription {
         this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
     }
+
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
     }

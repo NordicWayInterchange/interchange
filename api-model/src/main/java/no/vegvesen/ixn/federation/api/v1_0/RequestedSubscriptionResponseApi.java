@@ -11,6 +11,7 @@ import java.util.UUID;
 public class RequestedSubscriptionResponseApi {
 
     private UUID id;
+
     private String selector;
 
     @JsonInclude(Include.NON_NULL)

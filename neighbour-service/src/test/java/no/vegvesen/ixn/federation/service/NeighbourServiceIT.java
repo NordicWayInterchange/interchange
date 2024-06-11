@@ -323,7 +323,6 @@ public class NeighbourServiceIT {
         assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
     }
 
-
     @Test
     public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
         Neighbour neighbour = new Neighbour();
@@ -430,7 +429,4 @@ public class NeighbourServiceIT {
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }
-
-
-
 }

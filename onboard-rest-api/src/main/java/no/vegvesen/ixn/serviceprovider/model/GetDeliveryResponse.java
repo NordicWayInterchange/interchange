@@ -6,10 +6,15 @@ import java.util.UUID;
 
 public class GetDeliveryResponse {
     private UUID id;
+
     private Set<DeliveryEndpoint> endpoints;
+
     private String path;
+
     private String selector;
+
     private long lastUpdatedTimestamp;
+
     private DeliveryStatus status;
 
     public GetDeliveryResponse() {

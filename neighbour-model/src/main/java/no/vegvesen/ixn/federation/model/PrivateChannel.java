@@ -37,18 +37,12 @@ public class PrivateChannel {
         this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
+
     public PrivateChannel(String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peerName = peerName;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
-    }
-    public PrivateChannel(UUID uuid, String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
-        this.peerName = peerName;
-        this.status = status;
-        this.endpoint = privateChannelEndpoint;
-        this.serviceProviderName = serviceProviderName;
-        this.uuid = uuid;
     }
 
     public PrivateChannelEndpoint getEndpoint() {
@@ -90,7 +84,6 @@ public class PrivateChannel {
     public void setStatus(PrivateChannelStatus status) {
         this.status = status;
     }
-
 
     public String getServiceProviderName() {
         return serviceProviderName;

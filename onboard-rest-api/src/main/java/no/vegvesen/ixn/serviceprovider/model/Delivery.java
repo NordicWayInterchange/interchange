@@ -7,10 +7,15 @@ import java.util.UUID;
 
 public class Delivery {
     private UUID id;
+
     private String path;
+
     private String selector;
+
     private long lastUpdatedTimestamp;
+
     private DeliveryStatus status;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String errorMessage;
 

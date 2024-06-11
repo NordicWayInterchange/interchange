@@ -7,10 +7,15 @@ import java.util.UUID;
 
 public class LocalActorSubscription {
     UUID id;
+
     String path;
+
     String selector;
+
     String consumerCommonName;
+
     long lastUpdatedTimeStamp;
+
     LocalActorSubscriptionStatusApi status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

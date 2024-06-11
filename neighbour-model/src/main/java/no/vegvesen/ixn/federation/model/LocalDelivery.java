@@ -9,6 +9,7 @@ import java.util.*;
 @Entity
 @Table(name = "local_deliveries")
 public class LocalDelivery {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
     @Column(name="id")

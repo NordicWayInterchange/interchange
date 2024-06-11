@@ -78,7 +78,6 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 	}
 
-
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> localSubscriptions,
@@ -219,17 +218,6 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-	public void removeLocalDelivery(Integer deliveryId) {
-		LocalDelivery localDeliveryToDelete = deliveries
-				.stream()
-				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))
-				.findFirst()
-				.orElseThrow(
-						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
-				);
-		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
-	}
-
 	public void removeLocalDelivery(UUID deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
@@ -241,14 +229,6 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public Capability getCapabilitySplit(Integer capabilityId){
-		return
-				getCapabilities().getCapabilities().stream()
-				.filter(c-> c.getId().equals(capabilityId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
-	}
-
 	public Capability getCapability(UUID capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
@@ -256,12 +236,14 @@ public class ServiceProvider {
 						.findFirst()
 						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
+
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
 				.filter(subscription -> allSubscriptions.contains(subscription))
 				.collect(Collectors.toSet());
 	}
+
 	public LocalSubscription getSubscription(UUID subscriptionId){
 		return getSubscriptions()
 				.stream()
@@ -276,13 +258,7 @@ public class ServiceProvider {
 				.filter(delivery -> allDeliveries.contains(delivery))
 				.collect(Collectors.toSet());
 	}
-	public LocalDelivery getDelivery(Integer deliveryId){
-		return getDeliveries()
-				.stream()
-				.filter(d -> d.getId().equals(deliveryId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
-	}
+
 	public LocalDelivery getDelivery(UUID deliveryId){
 		return getDeliveries()
 				.stream()
@@ -290,7 +266,6 @@ public class ServiceProvider {
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
 	}
-
 
 	@Override
 	public boolean equals(Object o) {
@@ -317,5 +292,4 @@ public class ServiceProvider {
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}
-
 }

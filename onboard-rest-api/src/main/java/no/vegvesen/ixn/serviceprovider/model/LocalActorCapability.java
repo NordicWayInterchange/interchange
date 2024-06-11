@@ -7,7 +7,10 @@ import java.util.UUID;
 
 public class LocalActorCapability {
     private UUID id;
+
+
     private String path;
+
     CapabilitySplitApi definition;
 
     public LocalActorCapability() {

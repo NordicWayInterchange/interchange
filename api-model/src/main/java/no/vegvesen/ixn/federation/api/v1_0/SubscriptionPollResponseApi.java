@@ -11,6 +11,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
     private UUID id;
+
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

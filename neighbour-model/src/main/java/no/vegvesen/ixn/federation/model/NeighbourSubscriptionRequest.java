@@ -60,6 +60,7 @@ public class NeighbourSubscriptionRequest {
         NeighbourSubscription subscriptionToTearDown = getSubscriptionByUuid(subscriptionId);
         subscriptionToTearDown.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
     }
+
     public void addNewSubscriptions (Set<NeighbourSubscription> newSubscriptions) {
         subscription.addAll(newSubscriptions);
     }
@@ -72,13 +73,6 @@ public class NeighbourSubscriptionRequest {
             }
         }
         throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
-    }
-    @Override
-    public String toString() {
-        return "SubscriptionRequest{" +
-                "subreq_id=" + subreq_id +
-                ", subscription=" + subscription +
-                '}';
     }
 
     public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus status) {
@@ -108,5 +102,13 @@ public class NeighbourSubscriptionRequest {
         return getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED).stream()
                 .filter(s -> !s.getConsumerCommonName().equals(ixnName))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String toString() {
+        return "SubscriptionRequest{" +
+                "subreq_id=" + subreq_id +
+                ", subscription=" + subscription +
+                '}';
     }
 }

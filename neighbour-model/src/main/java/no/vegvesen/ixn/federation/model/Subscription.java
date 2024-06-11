@@ -16,6 +16,7 @@ public class Subscription {
 	private Integer id;
 
 	private UUID uuid = UUID.randomUUID();
+
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
 

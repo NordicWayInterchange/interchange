@@ -8,8 +8,6 @@ import java.util.*;
 
 public class OnboardRestAPIDocumentationTest {
 
-
-
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();

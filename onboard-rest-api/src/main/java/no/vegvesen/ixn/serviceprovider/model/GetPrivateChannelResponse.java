@@ -18,6 +18,9 @@ public class GetPrivateChannelResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
+    public GetPrivateChannelResponse() {
+    }
+
     public GetPrivateChannelResponse(UUID id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
@@ -39,9 +42,6 @@ public class GetPrivateChannelResponse {
 
     public void setStatus(PrivateChannelStatusApi status) {
         this.status = status;
-    }
-
-    public GetPrivateChannelResponse() {
     }
 
     public PrivateChannelEndpointApi getEndpoint() {
