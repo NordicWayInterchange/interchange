@@ -154,7 +154,6 @@ public class OnboardRestControllerIT {
                         serviceProviderName,
                         Collections.singleton(datexNO)
                 )));
-        System.out.println(thrown.getMessage());
         assertThat(thrown.getMessage()).contains("invalid quadTree");
     }
 
@@ -208,8 +207,10 @@ public class OnboardRestControllerIT {
 
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO));
         restController.addCapabilities(serviceProviderName, request);
-        assertThat(restController.listCapabilities(serviceProviderName).getCapabilities().size()).isEqualTo(1);
+        ListCapabilitiesResponse response = restController.listCapabilities(serviceProviderName);
+        assertThat(response.getCapabilities().size()).isEqualTo(1);
 
+        response.getCapabilities().forEach(a->UUID.fromString(a.getId()));
     }
 
     @Test
@@ -517,6 +518,7 @@ public class OnboardRestControllerIT {
         LocalActorCapability capability = capabilities.stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
         GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId().toString());
+        UUID.fromString(response.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -547,7 +549,6 @@ public class OnboardRestControllerIT {
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
-
         LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
                 .findFirst()
                 .get();
@@ -792,7 +793,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGetSingleSubscription() {
+    public void testGettingSingleSubscription() {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
@@ -803,7 +804,7 @@ public class OnboardRestControllerIT {
 
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
         LocalActorSubscription subscription = anySubscription.get();
-        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId().toString());
+        GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
@@ -866,7 +867,6 @@ public class OnboardRestControllerIT {
 
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
 
-        System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName, response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.TEAR_DOWN, serviceProviderName).size()).isEqualTo(1);
     }
@@ -906,7 +906,6 @@ public class OnboardRestControllerIT {
         PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
 
         AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
-        System.out.println(privateChannels);
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
 
         assertThat(channelResponse).isNotNull();
@@ -941,7 +940,6 @@ public class OnboardRestControllerIT {
 
         ListPeerPrivateChannels response_1 = restController.listPeerPrivateChannels(serviceProviderName_1);
         ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
-        System.out.println(response_1);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
     }
