@@ -4,3 +4,4 @@ service-providers.users=
 remote-service-providers.users=
 clients-private-channels.users=
 bi-consumers.users=
+collector-users.users=a_message_collector
