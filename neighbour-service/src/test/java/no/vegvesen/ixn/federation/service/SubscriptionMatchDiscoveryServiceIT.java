@@ -72,6 +72,26 @@ public class SubscriptionMatchDiscoveryServiceIT {
     }
 
     @Test
+    public void matchesareCreatedWhenSubscriptionsComeFromTwoNeighbours(){
+        Neighbour neighbour1 = new Neighbour();
+        Neighbour neighbour2 = new Neighbour();
+        Subscription subscription = new Subscription("originatingCountry='NO'", SubscriptionStatus.CREATED, "serviceProvider");
+        Subscription subscription2 = new Subscription("originatingCountry='NO'", SubscriptionStatus.CREATED, "serviceProvider");
+
+        neighbour1.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription)));
+        neighbour2.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription2)));
+        neighbourRepository.saveAll(List.of(neighbour1,neighbour2));
+
+        ServiceProvider sp = new ServiceProvider("serviceProvider");
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO'", "serviceProvider");
+        sp.addLocalSubscription(localSubscription);
+        serviceProviderRepository.save(sp);
+
+        subscriptionMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(List.of(sp), neighbourRepository.findAll());
+        assertThat(subscriptionMatchRepository.findAll()).hasSize(2);
+    }
+
+    @Test
     public void matchIsNotDeletedIfOnlyOneIsResubscribe(){
         Neighbour nb = new Neighbour();
         Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED);
