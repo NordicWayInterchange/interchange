@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.message.*;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -12,7 +11,6 @@ import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
@@ -38,54 +36,54 @@ public class SendMessage implements Callable<Integer> {
             source.start();
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
-                if (message instanceof DenmMessage) {
+                if (message instanceof DenmMessage denmMessage) {
                     messageBuilder
-                            .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                            .bytesMessage(denmMessage.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(DENM)
-                            .causeCode(((DenmMessage) message).getCauseCode())
-                            .subCauseCode(((DenmMessage) message).getSubCauseCode());
-                } else if (message instanceof DatexMessage) {
+                            .causeCode(denmMessage.getCauseCode())
+                            .subCauseCode(denmMessage.getSubCauseCode());
+                } else if (message instanceof DatexMessage datexMessage) {
                     messageBuilder
                             .textMessage(message.getMessageText())
                             .messageType(DATEX_2)
-                            .publicationType(((DatexMessage) message).getPublicationType())
-                            .publicationSubType(((DatexMessage) message).getPublicationSubType())
-                            .publisherName(((DatexMessage) message).getPublisherName());
-                } else if (message instanceof IvimMessage) {
+                            .publicationType(datexMessage.getPublicationType())
+                            .publicationSubType(datexMessage.getPublicationSubType())
+                            .publisherName(datexMessage.getPublisherName());
+                } else if (message instanceof IvimMessage ivimMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(IVIM)
-                            .iviType(((IvimMessage) message).getIviType())
-                            .pictogramCategoryCode(((IvimMessage) message).getPictogramCategoryCode())
-                            .iviContainer(((IvimMessage) message).getIviContainer());
-                } else if (message instanceof SpatemMessage) {
+                            .iviType(ivimMessage.getIviType())
+                            .pictogramCategoryCode(ivimMessage.getPictogramCategoryCode())
+                            .iviContainer(ivimMessage.getIviContainer());
+                } else if (message instanceof SpatemMessage spatemMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(SPATEM)
-                            .id(((SpatemMessage) message).getId())
-                            .name(((SpatemMessage) message).getName());
-                } else if (message instanceof MapemMessage) {
+                            .id(spatemMessage.getId())
+                            .name(spatemMessage.getName());
+                } else if (message instanceof MapemMessage mapemMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(MAPEM)
-                            .id(((MapemMessage) message).getId())
-                            .name(((MapemMessage) message).getName());
-                } else if (message instanceof SsemMessage) {
+                            .id(mapemMessage.getId())
+                            .name(mapemMessage.getName());
+                } else if (message instanceof SsemMessage ssemMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(SSEM)
-                            .id(((SsemMessage) message).getId());
-                } else if (message instanceof SremMessage) {
+                            .id(ssemMessage.getId());
+                } else if (message instanceof SremMessage ssremMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(SREM)
-                            .id(((SremMessage) message).getId());
-                } else if (message instanceof CamMessage) {
+                            .id(ssremMessage.getId());
+                } else if (message instanceof CamMessage camMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
                             .messageType(CAM)
-                            .stationType(((CamMessage) message).getStationType())
-                            .vehicleRole(((CamMessage) message).getVehicleRole());
+                            .stationType(camMessage.getStationType())
+                            .vehicleRole(camMessage.getVehicleRole());
                 } else {
                     throw new Exception("Message is not of valid messagetype");
                 }
