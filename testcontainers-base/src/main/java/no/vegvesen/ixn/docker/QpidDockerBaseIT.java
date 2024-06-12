@@ -185,6 +185,22 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
+	public static SSLContext sslServerContext(CaStores stores, String hostName) {
+		HostStore hostStore = getHostStore(hostName, stores.hostStores().stream());
+		CaStore trustStore = stores.trustStore();
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(
+						hostStore.path().toString(),
+						hostStore.password(),
+						KeystoreType.PKCS12
+				),
+				new KeystoreDetails(
+						trustStore.path().toString(),
+						trustStore.password(),
+						KeystoreType.JKS
+				)
+		);
+	}
 
 	public static SSLContext sslServerContext(KeysStructure keysStructure) {
 		Path basePath = keysStructure.getKeysOutputPath();

@@ -1,2 +1,3 @@
 administrators.users=qpid-admin,localhost
 service-providers.users=sp_consumer
+collector-users.users=localhost

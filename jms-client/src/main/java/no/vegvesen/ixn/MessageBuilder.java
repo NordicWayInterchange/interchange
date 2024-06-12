@@ -1,6 +1,5 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
 import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -13,7 +12,7 @@ import jakarta.jms.Session;
 
 public class MessageBuilder {
     private JmsMessage message;
-    private Session session;
+    private final Session session;
 
     protected MessageBuilder(Session session) {
         this.session = session;

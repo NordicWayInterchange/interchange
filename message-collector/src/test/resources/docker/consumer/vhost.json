@@ -50,12 +50,31 @@
           }
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "collector-users",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "sp_consumer",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "sp_consumer"
+          }
+        },
+        {
+          "objectType": "EXCHANGE",
+          "identity": "collector-users",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "subscriptionExchange",
+            "NAME": ""
           }
         },
         {
