@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -20,6 +21,7 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -32,13 +34,16 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	private static final String SP_NAME = "king_harald";
 
-	static KeysStructure keysStructure = generateKeys(SourceSinkIT.class,"my_ca","localhost", SP_NAME);
+	static CaStores stores = generateStores(getTargetFolderPathForTestClass(SourceSinkIT.class),"my_ca","localhost", SP_NAME);
 
 	@Container
-	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-			keysStructure,
+	public final QpidContainer qpidContainer = getQpidTestContainer(
+			Paths.get("qpid"),
+			stores,
+		"localhost",
 			"localhost")
-			.withLogConsumer(new Slf4jLogConsumer(logger));
+		.withLogConsumer(new Slf4jLogConsumer(logger));
+
 
 	private String Url;
 	private SSLContext kingHaraldSSlContext;
@@ -46,7 +51,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@BeforeEach
 	public void setUp() {
 		Url = qpidContainer.getAmqpsUrl();
-		kingHaraldSSlContext = sslClientContext(keysStructure, SP_NAME);
+		kingHaraldSSlContext = sslClientContext(stores, SP_NAME);
 	}
 
 	@Test
