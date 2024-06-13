@@ -3,16 +3,12 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.SubscriptionCapabilityMatchRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,15 +17,12 @@ import java.util.stream.Collectors;
 public class SubscriptionCapabilityMatchDiscoveryService {
 
     private final SubscriptionCapabilityMatchRepository subscriptionCapabilityMatchRepository;
-
-    private final ServiceProviderRepository serviceProviderRepository;
     private Logger logger = LoggerFactory.getLogger(SubscriptionCapabilityMatchDiscoveryService.class);
 
 
     @Autowired
-    public SubscriptionCapabilityMatchDiscoveryService(SubscriptionCapabilityMatchRepository subscriptionCapabilityMatchRepository, ServiceProviderRepository serviceProviderRepository){
+    public SubscriptionCapabilityMatchDiscoveryService(SubscriptionCapabilityMatchRepository subscriptionCapabilityMatchRepository){
         this.subscriptionCapabilityMatchRepository = subscriptionCapabilityMatchRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
     }
 
     public void createMatches(NeighbourSubscription neighbourSubscription, Set<Capability> matchingCaps){

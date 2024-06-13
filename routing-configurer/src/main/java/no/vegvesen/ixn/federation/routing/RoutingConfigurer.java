@@ -72,7 +72,7 @@ public class RoutingConfigurer {
 		handleNewMatches();
 
 		logger.debug("Checking for neighbours to tear down routing");
-		Set<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
+		List<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
 	}
 
@@ -110,7 +110,7 @@ public class RoutingConfigurer {
 		neighbours.forEach(neighbourService::saveNeighbour);
 	}
 
-	void tearDownRouting(Set<Neighbour> readyToTearDownRouting) {
+	void tearDownRouting(List<Neighbour> readyToTearDownRouting) {
 		for (Neighbour subscriber : readyToTearDownRouting) {
 			tearDownNeighbourRouting(subscriber);
 		}
@@ -220,7 +220,7 @@ public class RoutingConfigurer {
 					}
 
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);
+					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);//TODO: Should be done inside loop going through caps with single capability
 				}
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
@@ -255,7 +255,7 @@ public class RoutingConfigurer {
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);
+					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps); //TODO: Should be done inside loop going through caps with single capability
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 			} else {

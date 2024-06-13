@@ -97,14 +97,6 @@ public class NeighbourSubscriptionRequest {
         return subscriptions;
     }
 
-    public boolean hasTearDownSubscriptions() {
-        return !getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN).isEmpty();
-    }
-
-    public boolean hasResubscribeSubscriptions(){
-        return !getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.RESUBSCRIBE).isEmpty();
-    }
-
     public Optional<LocalDateTime> getSuccessfulRequest() {
         return Optional.ofNullable(successfulRequest);
     }

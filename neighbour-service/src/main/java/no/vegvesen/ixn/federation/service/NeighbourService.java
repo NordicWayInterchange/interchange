@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
@@ -190,11 +189,8 @@ public class NeighbourService {
 		return neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
-	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
-		Set<Neighbour> tearDownSet = neighbourRepository.findAll().stream()
-				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions() || n.getNeighbourRequestedSubscriptions().hasResubscribeSubscriptions())
-				.collect(Collectors.toSet());
-		return tearDownSet;
+	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
+		return neighbourRepository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.TEAR_DOWN, NeighbourSubscriptionStatus.RESUBSCRIBE);
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
