@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.api.v1_0.exportmodel.ExportApi;
+import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -39,7 +39,6 @@ public class ExportApplication implements CommandLineRunner {
         ObjectMapper mapper = new ObjectMapper();
 
         ExportApi exportModel = new ExportApi(
-                neighbourRepository.findAll().stream().map(exportTransformer::transformNeighbourToNeighbourExportApi).collect(Collectors.toSet()),
                 serviceProviderRepository.findAll().stream().map(exportTransformer::transformServiceProviderToServiceProviderExportApi).collect(Collectors.toSet()),
                 privateChannelRepository.findAll().stream().map(exportTransformer::transformPrivateChannelToPrivateChannelExportApi).collect(Collectors.toSet())
         );

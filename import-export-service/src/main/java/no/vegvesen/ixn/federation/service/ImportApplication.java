@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.importmodel.ImportApi;
+import no.vegvesen.ixn.federation.service.importmodel.ImportApi;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -39,7 +39,6 @@ public class ImportApplication implements CommandLineRunner {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         ImportApi importModel = mapper.readValue(path.toFile(), ImportApi.class);
 
-        neighbourRepository.saveAll(importModel.getNeighbours().stream().map(importTransformer::transformNeighbourImportApiToNeighbour).collect(Collectors.toSet()));
         serviceProviderRepository.saveAll(importModel.getServiceProviders().stream().map(importTransformer::transformServiceProviderImportApiToServiceProvider).collect(Collectors.toSet()));
         privateChannelRepository.saveAll(importModel.getPrivateChannels().stream().map(importTransformer::transformPrivateChannelImportApiToPrivateChannel).collect(Collectors.toSet()));
     }

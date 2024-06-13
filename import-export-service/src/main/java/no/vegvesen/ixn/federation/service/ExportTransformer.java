@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.exportmodel.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
+import no.vegvesen.ixn.federation.service.exportmodel.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
