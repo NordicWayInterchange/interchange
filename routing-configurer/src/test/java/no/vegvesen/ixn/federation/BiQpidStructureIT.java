@@ -4,25 +4,22 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
+
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,37 +27,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class BiQpidStructureIT extends QpidDockerBaseIT {
 
-    private static Logger logger = LoggerFactory.getLogger(BiQpidStructureIT.class);
-
-    //@Container
-    //private static KeysContainer keyContainer = getKeyContainer(BiQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
-
-    private static KeysStructure keysStructure = generateKeys(BiQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+    public static final String HOST_NAME = "localhost";
+    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(BiQpidStructureIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
     SSLContext sslContext;
 
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("bi-qpid",
-            keysStructure,
-            "localhost");
+    public QpidContainer qpidContainer = getQpidTestContainer(
+            Path.of("bi-qpid"),
+            stores,
+            HOST_NAME,
+            HOST_NAME
+    );
 
 
     @BeforeEach
     public void setUp() {
-        KeystoreDetails trust = new KeystoreDetails(
-                keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(),
-                "password",
-                KeystoreType.JKS
-        );
-        KeystoreDetails keys = new KeystoreDetails(
-                keysStructure.getKeysOutputPath().resolve("routing_configurer.p12").toString(),
-                "password",
-                KeystoreType.PKCS12
-        );
-        sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keys,trust);
+        sslContext = sslClientContext(stores,"routing_configurer");
         QpidClientConfig config = new QpidClientConfig(sslContext);
+        //TODO messageCollectorUser should not be there...
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate(), "message_collector");
     }
 
@@ -73,13 +60,13 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 3000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
-        Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-        MessageConsumer testConsumer = sink.createConsumer();
-        Optional<Message> receive = Optional.ofNullable(testConsumer.receive(1000));
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            assertThat(receive).isPresent();
+        }
 
-        assertThat(receive).isPresent();
     }
 
     /*
@@ -94,15 +81,15 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 10000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 10000));
 
         Thread.sleep(6000);
 
-        Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-        MessageConsumer testConsumer = sink.createConsumer();
-        Optional<Message> receive = Optional.ofNullable(testConsumer.receive(1000));
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            assertThat(receive).isNotPresent();
+        }
 
-        assertThat(receive).isNotPresent();
     }
 
     /*
@@ -117,18 +104,18 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 5, 3000));
+        source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
         Thread.sleep(4000);
 
-        Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-        MessageConsumer testConsumer = sink.createConsumer();
-        Optional<Message> receive = Optional.ofNullable(testConsumer.receive(1000));
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            assertThat(receive).isNotPresent();
+        }
 
-        assertThat(receive).isNotPresent();
     }
 
-    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, Integer causeCode, long ttl) throws JMSException {
+    private JmsMessage createDenmMessage(Source source, byte[] bytemessage, long ttl) throws JMSException {
         return source.createMessageBuilder()
                 .bytesMessage(bytemessage)
                 .userId("anna")
@@ -140,7 +127,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
                 .quadTreeTiles(",12003,")
                 .shardId(1)
                 .shardCount(1)
-                .causeCode(causeCode)
+                .causeCode(5)
                 .subCauseCode(76)
                 .ttl(ttl)
                 .build();

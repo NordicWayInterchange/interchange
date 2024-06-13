@@ -34,7 +34,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	private static final String SP_NAME = "king_harald";
 
-	static CaStores stores = generateStores(getTargetFolderPathForTestClass(SourceSinkIT.class),"my_ca","localhost", SP_NAME);
+	final static CaStores stores = generateStores(getTargetFolderPathForTestClass(SourceSinkIT.class),"my_ca","localhost", SP_NAME);
 
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer(
