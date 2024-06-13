@@ -207,7 +207,7 @@ public class NeighbourService {
 
 	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
 		Set<Neighbour> tearDownSet = neighbourRepository.findAll().stream()
-				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions() && !n.isIgnore())
+				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions() || n.isIgnore())
 				.collect(Collectors.toSet());
 		return tearDownSet;
 	}
