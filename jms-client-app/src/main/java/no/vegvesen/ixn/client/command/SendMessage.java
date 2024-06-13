@@ -12,6 +12,7 @@ import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
@@ -48,7 +49,8 @@ public class SendMessage implements Callable<Integer> {
                             .textMessage(message.getMessageText())
                             .messageType(DATEX_2)
                             .publicationType(((DatexMessage) message).getPublicationType())
-                            .publicationSubType(((DatexMessage) message).getPublicationSubType());
+                            .publicationSubType(((DatexMessage) message).getPublicationSubType())
+                            .publisherName(((DatexMessage) message).getPublisherName());
                 } else if (message instanceof IvimMessage) {
                     messageBuilder
                             .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))

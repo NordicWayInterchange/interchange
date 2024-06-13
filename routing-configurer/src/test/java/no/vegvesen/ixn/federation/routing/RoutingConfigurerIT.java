@@ -1236,7 +1236,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						Arrays.asList("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+                        "publisherName"
 				),
 				new Metadata(redirect)
 		);
@@ -1258,7 +1259,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						Arrays.asList("01230122", "01230123"),
-						"RoadBlock"
+						"RoadBlock",
+                        "publisherName"
 				),
 				metadata
 		);

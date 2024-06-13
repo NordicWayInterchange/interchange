@@ -68,7 +68,7 @@ public class CapabilityToCapabilityApiTransformer {
 
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
 		if (applicationApi instanceof DatexApplicationApi) {
-			return new DatexApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DatexApplicationApi) applicationApi).getPublicationType());
+			return new DatexApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DatexApplicationApi) applicationApi).getPublicationType(), ((DatexApplicationApi) applicationApi).getPublisherName());
 		} else if (applicationApi instanceof DenmApplicationApi) {
 			return new DenmApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DenmApplicationApi) applicationApi).getCauseCode());
 		} else if (applicationApi instanceof IvimApplicationApi) {

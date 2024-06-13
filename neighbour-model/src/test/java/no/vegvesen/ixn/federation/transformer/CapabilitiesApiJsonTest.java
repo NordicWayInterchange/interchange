@@ -17,7 +17,7 @@ public class CapabilitiesApiJsonTest {
 	@Test
 	public void capabilitiesApiDatexTransformedToJsonAndBackToCapabilitiesApi() throws IOException {
 		HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
-		capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType"), new MetadataApi()));
+		capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType", "publisherName"), new MetadataApi()));
 		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();

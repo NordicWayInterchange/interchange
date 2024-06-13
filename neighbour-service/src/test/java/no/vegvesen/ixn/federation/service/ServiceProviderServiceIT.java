@@ -278,15 +278,15 @@ public class ServiceProviderServiceIT {
         capabilities.setCapabilities(
                 Set.of(
                         new Capability(
-                            new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12"),
+                            new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
                             new Metadata()
                 ),
                         new Capability(
-                                new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123"),
+                                new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
                                 new Metadata()
                         ),
                         new Capability(
-                                new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234"),
+                                new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
                                 new Metadata()
                         ))
         );

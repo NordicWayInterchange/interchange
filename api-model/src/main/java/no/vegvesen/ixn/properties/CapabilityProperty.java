@@ -23,11 +23,12 @@ public class CapabilityProperty {
             QUAD_TREE
     );
 
-    //publisherName
+    public static final CapabilityProperty PUBLISHER_NAME = new CapabilityProperty("publisherName");
     public static final CapabilityProperty PUBLICATION_TYPE = new CapabilityProperty("publicationType");
 
-    public static final List<CapabilityProperty> datex2CapabilityProperties = Collections.singletonList(
-            PUBLICATION_TYPE
+    public static final List<CapabilityProperty> datex2CapabilityProperties = List.of(
+            PUBLICATION_TYPE,
+            PUBLISHER_NAME
     );
 
     public static final CapabilityProperty CAUSE_CODE = new CapabilityProperty("causeCode");

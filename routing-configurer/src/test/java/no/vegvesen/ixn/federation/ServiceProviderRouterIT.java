@@ -362,7 +362,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"NO",
 						"1.0",
 						List.of("0122"),
-						"publicationType"
+						"publicationType",
+						"publisherName"
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
@@ -463,7 +464,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -481,7 +482,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication"),
+				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap.getMetadata().setShardCount(3);
@@ -506,7 +507,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication"),
+				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 
@@ -555,7 +556,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);

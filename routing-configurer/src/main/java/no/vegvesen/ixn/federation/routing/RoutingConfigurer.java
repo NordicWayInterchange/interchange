@@ -274,7 +274,7 @@ public class RoutingConfigurer {
 
 	@Scheduled(fixedRateString = "${tear-down-subscriptions-exchange.interval}")
 	public void tearDownSubscriptionExchanges() {
-		logger.debug("Looking for new subscriptions to set up exchanges for");
+		logger.debug("Looking for new subscriptions to tear down exchanges for");
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
@@ -291,8 +291,8 @@ public class RoutingConfigurer {
 									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
 								}
 								endpoint.removeShard();
-								endpointsToRemove.add(endpoint);
 							}
+							endpointsToRemove.add(endpoint);
 						}
 						subscription.getEndpoints().removeAll(endpointsToRemove);
 					}

@@ -49,7 +49,8 @@ public class ApiModelRestDocumentationTest {
                         "NO",
                         "DATEX:1.0",
                         List.of("1234"),
-                        "Roadworks"
+                        "Roadworks",
+                        "publisherName"
                 ),
                 new MetadataApi(
                         1,
