@@ -72,7 +72,12 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	}
 
 	public static CaStores generateStores(Path outputPath, String ca, String server, String ... serviceProviders) {
-		List<ClientRequest> clientRequests = new ArrayList<>();
+        try {
+            Files.createDirectories(outputPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        List<ClientRequest> clientRequests = new ArrayList<>();
 		for (String serviceProvider : serviceProviders) {
 			clientRequests.add(new ClientRequest(serviceProvider,"NO", serviceProvider + "@" + server));
 		}
