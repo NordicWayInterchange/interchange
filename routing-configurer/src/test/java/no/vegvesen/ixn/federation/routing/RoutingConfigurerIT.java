@@ -861,7 +861,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -880,7 +880,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -904,9 +904,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
+		System.out.println(neighbourService.findAllNeighboursByIgnoreIs(false));
 		routingConfigurer.setUpSubscriptionExchanges();
 
 		assertThat(end1.hasShard()).isTrue();

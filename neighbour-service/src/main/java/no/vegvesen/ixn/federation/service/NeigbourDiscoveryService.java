@@ -52,7 +52,6 @@ public class NeigbourDiscoveryService {
         logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
         List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
         logger.debug("Got neighbours from DNS {}.", neighbours);
-
         for (Neighbour neighbour : neighbours) {
             String neighbourName = neighbour.getName();
             NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbourName);
@@ -66,7 +65,7 @@ public class NeigbourDiscoveryService {
             NeighbourMDCUtil.removeLogVariables();
         }
     }
-
+    
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 CapabilitiesStatus.UNKNOWN,
@@ -351,7 +350,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void setGiveUpSubscriptionsToTearDownForRemoval(){
-        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP).stream().filter(a->!a.isIgnore()).toList();
+        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
         for (Neighbour neighbour : neighbours) {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
                 if (!subscription.getEndpoints().isEmpty()) {

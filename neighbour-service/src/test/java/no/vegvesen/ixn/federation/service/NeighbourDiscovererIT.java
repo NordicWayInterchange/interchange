@@ -69,7 +69,7 @@ public class NeighbourDiscovererIT {
 
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
-		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
+		assertThat(repository.findAllByIgnoreIs(false)).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", nodeProperties.getName()));
 
@@ -306,7 +306,7 @@ public class NeighbourDiscovererIT {
 				);
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour,localSubscriptions,mockNeighbourFacade);
 		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
-		List<Neighbour> neighbours = repository.findAll();
+		List<Neighbour> neighbours = repository.findAllByIgnoreIs(false);
 		assertThat(neighbours).hasSize(1);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(listenerEndpointRepository.findAll()).hasSize(0);
@@ -1078,7 +1078,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
-		assertThat(repository.findAll()).hasSize(2);
+		assertThat(repository.findAllByIgnoreIs(false)).hasSize(2);
 	}
 
 	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, NeighbourCapabilities c1, NeighbourCapabilities c2) {

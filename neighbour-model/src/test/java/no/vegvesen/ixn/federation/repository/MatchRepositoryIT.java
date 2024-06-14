@@ -44,7 +44,7 @@ public class MatchRepositoryIT {
     public void setUp() {
         assertThat(matchRepository.findAll()).isEmpty();
         assertThat(serviceProviderRepository.findAll()).isEmpty();
-        assertThat(neighbourRepository.findAll()).isEmpty();
+        assertThat(neighbourRepository.findAllByIgnoreIs(false)).isEmpty();
     }
 
     @Test

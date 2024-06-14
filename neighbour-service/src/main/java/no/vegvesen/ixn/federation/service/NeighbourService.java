@@ -47,8 +47,11 @@ public class NeighbourService {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
-	public List<Neighbour> findAllNeighbours() {
-		return neighbourRepository.findAllByIgnoreIs(false);
+	public List<Neighbour> findAllNeighboursByIgnoreIs(boolean ignore) {
+		return neighbourRepository.findAllByIgnoreIs(ignore);
+	}
+	public List<Neighbour> findAllNeighbours(){
+		return neighbourRepository.findAll();
 	}
 
 	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
@@ -164,7 +167,6 @@ public class NeighbourService {
 		logger.debug("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
-
 		if (neighbour != null) {
 			if(neighbour.isIgnore()){
 				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
@@ -226,7 +228,6 @@ public class NeighbourService {
 	public void saveNeighbour(Neighbour neighbour) {
 		neighbourRepository.save(neighbour);
 	}
-
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		logger.info("Looking up polling Neighbour in DB.");

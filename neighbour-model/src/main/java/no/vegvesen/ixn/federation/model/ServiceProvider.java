@@ -228,12 +228,14 @@ public class ServiceProvider {
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
+
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
 				.filter(subscription -> allSubscriptions.contains(subscription))
 				.collect(Collectors.toSet());
 	}
+
 	public LocalSubscription getSubscription(Integer subscriptionId){
 		return getSubscriptions()
 				.stream()
@@ -248,6 +250,7 @@ public class ServiceProvider {
 				.filter(delivery -> allDeliveries.contains(delivery))
 				.collect(Collectors.toSet());
 	}
+
 	public LocalDelivery getDelivery(Integer deliveryId){
 		return getDeliveries()
 				.stream()
