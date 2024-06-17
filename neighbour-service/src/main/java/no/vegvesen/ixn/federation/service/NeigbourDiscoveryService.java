@@ -364,6 +364,17 @@ public class NeigbourDiscoveryService {
         }
     }
 
+    public void tearDownListenerEndpointsFromIgnoredNeighbours(){
+        List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAll();
+        List<String> ignoredNeighbours = neighbourRepository.findAllByIgnoreIs(true).stream().map(Neighbour::getName).toList();
+        List<ListenerEndpoint> endpointsToDelete = listenerEndpoints.stream().filter(a->ignoredNeighbours.contains(a.getNeighbourName())).toList();
+
+        endpointsToDelete.forEach(a->{
+            listenerEndpointRepository.delete(a);
+            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", a.getNeighbourName(), a.getHost(), a.getSource());
+        });
+    }
+
     public void tearDownListenerEndpointsFromEndpointsList(String neighbourName, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
             SubscriptionShard shard = endpoint.getShard();

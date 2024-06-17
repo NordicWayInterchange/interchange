@@ -157,4 +157,6 @@ public class NeighbourDiscoverer {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
 
+	@Scheduled(fixedRateString = "10000", initialDelayString = "8000")
+	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();}
 }
