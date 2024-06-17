@@ -80,7 +80,16 @@ public class NeighbourRestControllerIT {
         assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getId()).toString().toLowerCase()).contains("lastupdatedtimestamp");
     }
 
+    @Test
+    public void listSubscriptionsDoesNotIncludeTimestamp(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour3");
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)));
+        neighbour.setNeighbourRequestedSubscriptions(request);
+        neighbour = neighbourRepository.save(neighbour);
 
+        assertThat(neighbourRestController.listSubscriptions(neighbour.getName()).toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
+    }
 
     @Autowired
     WebApplicationContext context;
