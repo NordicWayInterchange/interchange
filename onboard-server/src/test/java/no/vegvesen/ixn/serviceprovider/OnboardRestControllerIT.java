@@ -32,6 +32,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -1138,6 +1139,67 @@ public class OnboardRestControllerIT {
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "notAnId")
         );
+    }
+
+    @Test
+    public void CapabilityEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_1";
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                serviceProviderName,
+                Set.of(new CapabilitySplitApi(
+                        new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("123"), "String publicationType", "String publisherName"),
+                        new MetadataApi()
+                ))
+        );
+        assertTrue(checkUuid(restController.addCapabilities(serviceProviderName,request).getCapabilities().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listCapabilities(serviceProviderName).getCapabilities().stream().findFirst().get().getId()));
+    }
+
+
+    @Test
+    public void SubscriptionEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_2";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'")));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getSubscription(serviceProviderName, response.getSubscriptions().stream().findFirst().get().getId()).getId()));
+    }
+
+
+    @Test
+    public void privateChannelEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_3";
+        String serviceProvider2 = "sp";
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi("serviceProvider_uuid_3")));
+        AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProvider2, request);
+        assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getPrivateChannel(serviceProvider2, response.getPrivateChannels().stream().findFirst().get().getId()).getId()));
+
+        assertTrue(checkUuid(restController.listPeerPrivateChannels(serviceProviderName).getPrivateChannels().stream().findFirst().get().getId()));
+    }
+
+    @Test
+    public void deliveryEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_4";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+                new SelectorApi("originatingCountry='NO'")
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertTrue(checkUuid(response.getDeliveries().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listDeliveries(serviceProviderName).getDeliveries().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId()).getId()));
+    }
+
+    private boolean checkUuid(String uuid){
+        try{
+            UUID.fromString(uuid);
+            return true;
+        }
+        catch (IllegalArgumentException e){
+            return false;
+        }
     }
 
     @Autowired

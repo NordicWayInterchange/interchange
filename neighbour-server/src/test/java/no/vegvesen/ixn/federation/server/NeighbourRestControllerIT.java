@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.server;
 
 
 import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -30,8 +31,10 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -56,34 +59,55 @@ public class NeighbourRestControllerIT {
     @Autowired
     NeighbourRepository neighbourRepository;
 
-    @Test
-    public void requestSubscriptionsDoesNotIncludeTimeStamp(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour1");
-        neighbourRepository.save(neighbour);
-        SubscriptionRequestApi request = new SubscriptionRequestApi(neighbour.getName(), Set.of(new RequestedSubscriptionApi(
-                "originatingCountry='NO'",
-                "sp.bouvetinterchange.eu"
-        )));
-        SubscriptionResponseApi response = neighbourRestController.requestSubscriptions(request);
-        assertThat(response.toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
-    }
-
-    @Test
-    public void pollSubscriptionIncludesTimestamp(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour2");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED)));
-        neighbour.setNeighbourRequestedSubscriptions(request);
-        neighbour = neighbourRepository.save(neighbour);
-
-        assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getId()).toString().toLowerCase()).contains("lastupdatedtimestamp");
-    }
-
-
-
     @Autowired
     WebApplicationContext context;
+
+
+    @Test
+    public void requestSubscriptionsReturnsUUID(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour_uuid_1");
+        neighbourRepository.save(neighbour);
+        SubscriptionRequestApi request = new SubscriptionRequestApi(neighbour.getName(), Set.of(
+                new RequestedSubscriptionApi("originatingCountry='NO'")
+        ));
+        assertTrue(checkUuid(neighbourRestController.requestSubscriptions(request).getSubscriptions().stream().findAny().get().getId()));
+    }
+
+    @Test
+    public void listSubscriptionsReturnsUUID(){
+       Neighbour neighbour = new Neighbour();
+       neighbour.setName("neighbour_uuid_2");
+       neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(
+               Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED))
+       ));
+       neighbourRepository.save(neighbour);
+
+       assertTrue(checkUuid(neighbourRestController.listSubscriptions(neighbour.getName()).getSubscriptions().stream().findFirst().get().getId()));
+    }
+
+    @Test
+    public void pollSubscriptionReturnsUUID(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour_uuid_3");
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(
+                new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)
+        ));
+        neighbour.setNeighbourRequestedSubscriptions(request);
+        neighbourRepository.save(neighbour);
+        SubscriptionPollResponseApi responseApi = neighbourRestController.pollSubscription(neighbour.getName(), request.getSubscriptions().stream().findFirst().get().getUuid());
+        assertTrue(checkUuid(responseApi.getId()));
+    }
+
+    private boolean checkUuid(String id){
+        try{
+            UUID.fromString(id);
+            return true;
+        }
+        catch (IllegalArgumentException e){
+            return false;
+        }
+    }
 
     @Test
     public void genSwagger() throws Exception {
@@ -99,4 +123,5 @@ public class NeighbourRestControllerIT {
 
                 }));
     }
+
 }
