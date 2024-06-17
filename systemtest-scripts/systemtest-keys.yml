@@ -1,0 +1,71 @@
+[ {
+  "name" : "ca.bouvetinterchange.eu",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.bouvetinterchange.eu",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_olav.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "post@slottet.no"
+    } ]
+  }, {
+    "name" : "ca.b.bouvetinterchange.eu",
+    "country" : "SE",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "b.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_gustaf.bouvetinterchange.eu",
+      "country" : "SE",
+      "email" : "kungen@slottet.se"
+    } ]
+  } ],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+}, {
+  "name" : "internal_a",
+  "country" : "NO",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "a-qpid"
+  } ],
+  "clientRequests" : [ {
+    "name" : "a_routing_configurer",
+    "country" : "NO",
+    "email" : "routing-configurer@a.bouvetinterchange.eu"
+  }, {
+    "name" : "a.nap",
+    "country" : "NO",
+    "email" : "nap@a.bouvetinterchange.eu"
+  }, {
+    "name" : "a_message_collector",
+    "country" : "NO",
+    "email" : "message-collector@a.bouvetinterchange.eu"
+  } ]
+}, {
+  "name" : "internal_b",
+  "country" : "SE",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "b-qpid"
+  } ],
+  "clientRequests" : [ {
+    "name" : "b_routing_configurer",
+    "country" : "SE",
+    "email" : "routing-configurer@b.bouvetinterchange.eu"
+  }, {
+    "name" : "b.nap",
+    "country" : "SE",
+    "email" : "nap@b.bouvetinterchange.eu"
+  }, {
+    "name" : "b_message_collector",
+    "country" : "SE",
+    "email" : "message-collector@b.bouvetinterchange.eu"
+  } ]
+} ]

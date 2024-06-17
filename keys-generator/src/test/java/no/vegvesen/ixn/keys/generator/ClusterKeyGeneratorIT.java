@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.keys.generator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -316,9 +319,20 @@ public class ClusterKeyGeneratorIT {
 
 
     @Test
+    public void requests() throws IOException {
+        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("systemtest-scripts").resolve("systemtest-keys.yml");
+        ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
+        writer.writeValue(Files.newOutputStream(outPath),CA_REQUESTS);
+    }
+
+    @Test
     public void saveKeystores() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
-        Path basePath = Files.createTempDirectory("keystoreTest");
-        System.out.println(basePath);
+        Path absolutePath = Path.of("").toAbsolutePath();
+        Path parent = absolutePath.getParent();
+        Path additionalPath = Path.of("target","test-keys",ClusterKeyGeneratorIT.class.getSimpleName());
+        Path target = parent.resolve(additionalPath);
+        Files.createDirectories(target);
+
         List<CaResponse> responses = new ArrayList<>();
         for (CARequest request : CA_REQUESTS) {
             responses.add(ClusterKeyGenerator.generate(request));
@@ -326,12 +340,12 @@ public class ClusterKeyGeneratorIT {
         PasswordGenerator passwordGenerator = new ClusterKeyGenerator.RandomPasswordGenerator(new SecureRandom(),12);
         List<CaStores> caStores = new ArrayList<>();
         for(CaResponse response : responses) {
-            CaStores stores = ClusterKeyGenerator.store(response, basePath, passwordGenerator);
+            CaStores stores = ClusterKeyGenerator.store(response, target, passwordGenerator);
             caStores.add(stores);
         }
         assertThat(caStores).hasSize(3);
         //TODO some functionality to traverse the tree and select the nodes we want
-        try (Stream<Path> list = Files.list(basePath)) {
+        try (Stream<Path> list = Files.list(target)) {
             assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(5);
         }
     }

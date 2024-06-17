@@ -7,14 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class DockerBaseIT {
-	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
 	protected static Path getFolderPath(String relativePathFromProjectRoot) {
 		Path projectRoot = getProjectRootPath();
-		logger.debug("Resolving path to project folder [{}] from project root path: [{}]", relativePathFromProjectRoot, projectRoot.toString());
+		logger.debug("Resolving path to project folder [{}] from project root path: [{}]", relativePathFromProjectRoot, projectRoot);
 		Path dockerFilePath = projectRoot.resolve(relativePathFromProjectRoot);
-		logger.debug("Resolved path to project folder [{}] to path [{}]", relativePathFromProjectRoot, dockerFilePath.toAbsolutePath().toString());
+		logger.debug("Resolved path to project folder [{}] to path [{}]", relativePathFromProjectRoot, dockerFilePath.toAbsolutePath());
 		return dockerFilePath;
 	}
 
@@ -38,12 +38,12 @@ public class DockerBaseIT {
 			run = run.getParent();
 		}
 		if (projectRoot == null ) {
-			throw new RuntimeException("Could not resolve path to project root in parent folder of " + run.toString());
+			throw new RuntimeException("Could not resolve path to project root in parent folder of " + run);
 		}
 		return projectRoot;
 	}
 
-	public static Path getTargetFolderPathForTestClass(Class clazz) {
+	public static Path getTargetFolderPathForTestClass(Class<?> clazz) {
 		return getFolderPath("target/test-keys-" + clazz.getSimpleName());
 	}
 
