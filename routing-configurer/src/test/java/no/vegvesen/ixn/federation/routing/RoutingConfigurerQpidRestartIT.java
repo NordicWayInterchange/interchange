@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -36,6 +35,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

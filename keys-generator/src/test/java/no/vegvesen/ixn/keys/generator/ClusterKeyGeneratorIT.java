@@ -1,8 +1,8 @@
-package no.vegvesen.ixn.docker.keygen.generator;
+package no.vegvesen.ixn.keys.generator;
 
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.PasswordGenerator;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;

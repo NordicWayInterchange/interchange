@@ -260,5 +260,6 @@
         <module>napcore-server-app</module>
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
+        <module>keys-generator</module>
     </modules>
 </project>

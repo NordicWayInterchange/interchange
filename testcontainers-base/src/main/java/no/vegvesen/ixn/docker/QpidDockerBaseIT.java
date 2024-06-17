@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.docker;
 
-import no.vegvesen.ixn.docker.keygen.generator.*;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.*;
+import no.vegvesen.ixn.keys.generator.*;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStore;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.HostStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;

@@ -1,3 +1,3 @@
-package no.vegvesen.ixn.docker.keygen.generator;
+package no.vegvesen.ixn.keys.generator;
 
 public record ClientRequest(String name, String country, String email) { }

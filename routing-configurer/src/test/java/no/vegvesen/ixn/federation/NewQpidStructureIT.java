@@ -4,7 +4,6 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -12,6 +11,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     private static final Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
 
     public static final String HOSTNAME = "localhost";
-    private static final ClusterKeyGenerator.CaStores stores = generateStores(getTargetFolderPathForTestClass(NewQpidStructureIT.class),"my_ca", HOSTNAME, "routing_configurer", "king_gustaf");
+    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(NewQpidStructureIT.class),"my_ca", HOSTNAME, "routing_configurer", "king_gustaf");
 
     @Qualifier("getTestSslContext")
     @Autowired

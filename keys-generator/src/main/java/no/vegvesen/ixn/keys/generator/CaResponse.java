@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker.keygen.generator;
+package no.vegvesen.ixn.keys.generator;
 
 import java.util.List;
 
