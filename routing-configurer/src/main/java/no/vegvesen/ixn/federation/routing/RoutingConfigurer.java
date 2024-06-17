@@ -39,16 +39,14 @@ public class RoutingConfigurer {
 	private final InterchangeNodeProperties interchangeNodeProperties;
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
-	private final MatchRepository matchRepository;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchRepository matchRepository) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
-		this.matchRepository = matchRepository;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
