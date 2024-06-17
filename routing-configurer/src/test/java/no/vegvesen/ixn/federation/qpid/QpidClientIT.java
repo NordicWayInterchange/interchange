@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Disabled;
@@ -19,6 +20,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,25 +39,31 @@ import static org.assertj.core.api.Assertions.*;
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
-	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "localhost", "routing_configurer");
+	public static final String HOST_NAME = "localhost";
+	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidClientIT.class),"my_ca", HOST_NAME, "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			Path.of("qpid"),
+			stores,
+			HOST_NAME,
+			HOST_NAME
+	);
 
-	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			String httpsUrl = qpidContainer.getHttpsUrl();
-			logger.info("server url: " + qpidContainer.getHttpUrl());
+            logger.info("server url: {}", qpidContainer.getHttpUrl());
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + stores.trustStore().path().toString(),
+					"test.ssl.key-store=" +  getClientStore("routing_configurer",stores.clientStores().stream()).path().toString()
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -102,9 +110,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void createExchangeThatAlreadyExistsResultsInException() {
 		Exchange exchange = client.createHeadersExchange("test-create-exchange");
 
-		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
-			client.createHeadersExchange("test-create-exchange");
-		});
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> client.createHeadersExchange("test-create-exchange"));
 		client.removeExchange(exchange);
 
 	}
@@ -252,9 +258,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 	}
 
-	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
 	@Test
-	@Disabled
 	public void createValidAclWithBogusAttributes() {
 		Map<String,String> attributes = new HashMap<>();
 		attributes.put("ROUTING_KEY", "routing_key");
@@ -266,6 +270,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
 
 				() -> client.postQpidAcl(controller)
+		);
+		assertThatNoException().isThrownBy(
+				() -> client.getQpidAcl()
 		);
 	}
 
@@ -284,6 +291,12 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 				() -> client.postQpidAcl(controller)
 		);
+		assertThatNoException().isThrownBy(
+				() -> client.getQpidAcl()
+		);
+
+
+
 	}
 
 

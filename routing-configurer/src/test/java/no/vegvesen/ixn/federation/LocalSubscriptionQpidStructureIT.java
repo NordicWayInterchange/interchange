@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.routing.RoutingConfigurer;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
@@ -54,8 +53,7 @@ import static org.mockito.Mockito.when;
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     public static final String CONFIGURER_USER = "routing_configurer";
-    @Autowired
-    private RoutingConfigurer routingConfigurer;
+
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -67,8 +65,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + stores.trustStore().path(),
-                    "test.ssl.key-store=" +  getClientStore(CONFIGURER_USER,stores.clientStores().stream()).path(),
+                    "test.ssl.trust-store=" + stores.trustStore().path().toString(),
+                    "test.ssl.key-store=" +  getClientStore(CONFIGURER_USER,stores.clientStores().stream()).path().toString(),
                     "interchange.node-provider.name=" + qpidContainer.getHost(),
                     "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
             ).applyTo(configurableApplicationContext.getEnvironment());

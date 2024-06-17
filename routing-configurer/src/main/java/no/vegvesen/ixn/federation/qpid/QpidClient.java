@@ -72,8 +72,8 @@ public class QpidClient {
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
-		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
-		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
+		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl);
+		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl);
 		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN,baseUrl);
 		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
 		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
@@ -82,8 +82,8 @@ public class QpidClient {
 	/**
 	 * NOTE: This wiring means that the restTemplate from QpidClientConfig#qpidRestTemplate() is used.
 	 * At the time of writing, this switches off host name verification in TLS.
-	 * @param restTemplate
-	 * @param routingConfigurerProperties
+	 * @param restTemplate The rest template used
+	 * @param routingConfigurerProperties properties
 	 */
 	@Autowired
 	public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
@@ -93,7 +93,7 @@ public class QpidClient {
 	int ping() {
 		ResponseEntity<String> response = restTemplate.getForEntity(pingURL, String.class);
 		logger.debug(response.getBody());
-		return response.getStatusCodeValue();
+		return response.getStatusCode().value();
 	}
 
 	public boolean addBinding(String source, Binding binding) {
@@ -124,8 +124,7 @@ public class QpidClient {
 		logger.info("Create queue {}", request.getName());
 		String url = queuesURL + "/";
 		logger.debug("POSTin {} to {}", request,url);
-		Queue result = restTemplate.postForEntity(url, request, Queue.class).getBody();
-		return result;
+        return restTemplate.postForEntity(url, request, Queue.class).getBody();
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
@@ -274,7 +273,7 @@ public class QpidClient {
 
 	public VirtualHostAccessController getQpidAcl() {
 		ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
-		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
+		logger.debug("acl extractRules return code {}", response.getStatusCode().value());
 		return response.getBody();
 	}
 
@@ -345,4 +344,5 @@ public class QpidClient {
 			throw new RuntimeException(e);
 		}
 	}
+
 }

@@ -1,12 +1,8 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import com.fasterxml.jackson.databind.*;
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.PasswordGenerator;
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.RandomPasswordGenerator;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -19,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -127,24 +122,6 @@ public class ClusterKeyGeneratorIT {
             INTERNAL_A,
             INTERNAL_B
     );
-    Path targetPath = DockerBaseIT.getTargetFolderPathForTestClass(ClusterKeyGeneratorIT.class);
-
-    @Test
-    public void readClusterFromJson() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
-        Path jsonPath = Paths.get("src", "test", "resources", "cluster.json");
-        Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
-        assertThat(cluster.getTopDomain().getDomainName()).isEqualTo("top-domain.eu");
-        assertThat(cluster.getTopDomain().getIntermediateDomains()).hasSize(1);
-        assertThat(cluster.getTopDomain().getIntermediateDomains().get(0).getInterchange().getServiceProviders()).hasSize(2);
-        ClusterKeyGenerator.generateKeys(cluster,targetPath, new RandomPasswordGenerator(new SecureRandom(), 24));
-    }
-
-    @Test
-    public void readClusterFromAnotherJson() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, NoSuchProviderException, InvalidKeyException {
-        Path jsonPath = Paths.get("src", "test", "resources", "systemtest-cluster.json");
-        Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
-        ClusterKeyGenerator.generateKeys(cluster,targetPath, new RandomPasswordGenerator(new SecureRandom(), 24));
-    }
 
     @Test
     public void testGenerateTopCaCountryWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
@@ -270,7 +247,7 @@ public class ClusterKeyGeneratorIT {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         assertThat(host.certificateChain()).hasSize(2);
         host.certificate().verify(topCa.keyPair().getPublic());
-        ClusterKeyGenerator.generateKeystore("password","mydomain.com",host.keyPair().getPrivate(), host.certificateChain(), outputStream);
+        ClusterKeyGenerator.makeKeystore("mydomain.com","password",outputStream,host.certificateChain(),host.keyPair().getPrivate());
     }
 
     @Test
@@ -297,7 +274,8 @@ public class ClusterKeyGeneratorIT {
         assertThat(host.certificateChain()).hasSize(3);
         assertThat(host.certificateChain().get(0)).isEqualTo(host.certificate());
         assertThat(host.certificateChain().get(1)).isEqualTo(intermediate.certificate());
-        ClusterKeyGenerator.generateKeystore("password","host.com",host.keyPair().getPrivate(),host.certificateChain() ,new ByteArrayOutputStream());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ClusterKeyGenerator.makeKeystore("host.com","password",outputStream,host.certificateChain(),host.keyPair().getPrivate());
     }
 
 
@@ -345,7 +323,7 @@ public class ClusterKeyGeneratorIT {
         for (CARequest request : CA_REQUESTS) {
             responses.add(ClusterKeyGenerator.generate(request));
         }
-        PasswordGenerator passwordGenerator = () -> "password";
+        PasswordGenerator passwordGenerator = new ClusterKeyGenerator.RandomPasswordGenerator(new SecureRandom(),12);
         List<CaStores> caStores = new ArrayList<>();
         for(CaResponse response : responses) {
             CaStores stores = ClusterKeyGenerator.store(response, basePath, passwordGenerator);
@@ -356,8 +334,6 @@ public class ClusterKeyGeneratorIT {
         try (Stream<Path> list = Files.list(basePath)) {
             assertThat(list.filter(p -> p.toString().endsWith(".jks")).toList()).hasSize(5);
         }
-        //TODO check the actual names of the jks and p12's and see if we can load the key from them using the passwords
-        //assertThat(Files.list(basePath).filter(p -> !Files.isDirectory(p)).toList()).hasSize(2);
     }
 
     private static String getCountry(X500Name name) {

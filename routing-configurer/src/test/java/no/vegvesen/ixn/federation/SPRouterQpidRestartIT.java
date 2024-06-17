@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -27,6 +29,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -42,17 +45,22 @@ import static org.mockito.Mockito.when;
 @Testcontainers
 public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
-    public static KeysStructure keysStructure = generateKeys(SPRouterQpidRestartIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
+    public static final String HOST_NAME = "localhost";
+    public static final CaStores stores = generateStores(getTargetFolderPathForTestClass(SPRouterQpidRestartIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf", "nordea");
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+            Path.of("qpid"),
+            stores,
+            HOST_NAME,
+            HOST_NAME
+    );
 
+    @Qualifier("getTestSslContext")
     @Autowired
     SSLContext sslContext;
 
-    private static Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
-
-    private static String AMQPS_URL;
+    private static final Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
 
     static class Initializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -61,14 +69,13 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
             String httpsUrl = qpidContainer.getHttpsUrl();
             String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpsUrl);
-            logger.info("server url: " + httpUrl);
-            AMQPS_URL = qpidContainer.getAmqpsUrl();
+            logger.info("server url: {}", httpsUrl);
+            logger.info("server url: {}", httpUrl);
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+                    "test.ssl.trust-store=" + stores.trustStore().path().toString(),
+                    "test.ssl.key-store=" +  getClientStore("routing_configurer",stores.clientStores().stream()).path().toString()
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
 
@@ -100,8 +107,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testLocalSubscriptionQueueIsAutomaticallyAddedToQpidAfterRestart() {
-        String queueName = "loc-" + UUID.randomUUID().toString();
-        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+        String queueName = "loc-" + UUID.randomUUID();
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
@@ -110,7 +117,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -131,7 +138,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -166,8 +173,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testLocalSubscriptionQueueIsAddedAutomaticallyToQpidWhenInRequestedAfterRestart() {
-        String queueName = "loc-" + UUID.randomUUID().toString();
-        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+        String queueName = "loc-" + UUID.randomUUID();
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "");
@@ -176,7 +183,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -187,8 +194,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testLocalSubscriptionQueuesAreNotAutomaticallyAddedToQpidAfterRestartWhenInTearDown() {
-        String queueName = "loc-" + UUID.randomUUID().toString();
-        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+        String queueName = "loc-" + UUID.randomUUID();
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "");
@@ -197,7 +204,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -209,8 +216,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testLocalSubscriptionQueueIsNotAddedAutomaticallyToQpidWhenInIllegalAfterRestart() {
-        String queueName = "loc-" + UUID.randomUUID().toString();
-        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+        String queueName = "loc-" + UUID.randomUUID();
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, "");
@@ -219,7 +226,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -309,8 +316,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         assertThat(client.exchangeExists(capability.getMetadata().getShards().get(0).getExchangeName())).isTrue();
 
-        String queueName = "loc-" + UUID.randomUUID().toString();
-        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+        String queueName = "loc-" + UUID.randomUUID();
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
         LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
@@ -319,7 +326,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider2 = new ServiceProvider(
                 "my-service-provider-2",
                 new Capabilities(),
-                new HashSet(Collections.singleton(subscription)),
+                Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -351,8 +358,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'NO'";
-        String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
+        String deliveryExchangeName = "del-" + UUID.randomUUID();
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
@@ -392,8 +399,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'SE'";
-        String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
+        String deliveryExchangeName = "del-" + UUID.randomUUID();
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),

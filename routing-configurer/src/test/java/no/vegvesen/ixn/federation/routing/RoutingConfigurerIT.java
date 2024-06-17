@@ -4,6 +4,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -15,9 +16,6 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -34,10 +32,9 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
-import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,11 +50,17 @@ import static org.mockito.Mockito.*;
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
+	public static final String HOST_NAME = "localhost";
+	public static CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf","nordea");
 
-	public static KeysStructure keysStructure = generateKeys(RoutingConfigurerIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			Path.of("qpid"),
+			stores,
+			HOST_NAME,
+			HOST_NAME
+	);
 
     @Qualifier("getTestSslContext")
     @Autowired
@@ -68,9 +71,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(emptySet());
 	private final NeighbourCapabilities emptyNeighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet());
 
-	private static String AMQPS_URL;
-
-	static class Initializer
+    static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -79,12 +80,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
-			AMQPS_URL = qpidContainer.getAmqpsUrl();
-			TestPropertyValues.of(
+            TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + stores.trustStore().path().toString(),
+					"test.ssl.key-store=" +  getClientStore("routing_configurer",stores.clientStores().stream()).path().toString()
+
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 
@@ -775,8 +776,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(singleton(cap)));
 
-		MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-		String capabilitySelector = creator.makeSelector(cap);
+		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(cap);
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
@@ -834,12 +834,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671, new SubscriptionShard("target"));
-
-		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
-
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
+        when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(null);
 
 		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection(), "target");
@@ -863,7 +858,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -882,7 +877,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -911,7 +906,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -941,7 +936,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
@@ -977,7 +972,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
@@ -993,7 +988,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange(exchangeName);
 
 		Neighbour myNeighbour = new Neighbour();
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
@@ -1046,7 +1041,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(anyString(), anyString(), anyString())).thenReturn(null);
 
@@ -1070,7 +1065,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		myNeighbour.setName("my-neighbour");
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, "my-source", "my-neighbour"))
 				.thenReturn(new ListenerEndpoint("my-neighbour", "my-source", "my-host", 5672, new Connection(), exchangeName));
@@ -1370,17 +1365,5 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
 
-
-	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
-		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
-		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
-		neighbourSink.start();
-	}
-
-	public SSLContext setUpTestSslContext(String s) {
-		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
-	}
 
 }
