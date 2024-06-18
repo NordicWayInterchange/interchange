@@ -1,4 +1,4 @@
-{
+[ {
   "name" : "ca.lookupdomain.com",
   "country" : "NO",
   "subCaRequests" : [ {
@@ -16,4 +16,4 @@
   } ],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
-}
+} ]
