@@ -82,6 +82,15 @@
           }
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "collector-users",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "a.interchangedomain.com"
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "ALL",
           "operation": "CONSUME",
