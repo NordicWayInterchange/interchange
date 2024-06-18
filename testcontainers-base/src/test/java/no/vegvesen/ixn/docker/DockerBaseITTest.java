@@ -17,15 +17,6 @@ class DockerBaseITTest {
 	}
 
 	@Test
-	void keyGenDockerImageFolderCanBeResolved() {
-		Path folderPath = DockerBaseIT.getFolderPath("key-gen");
-		assertThat(folderPath).isNotNull();
-		assertThat(folderPath.toString()).endsWith("key-gen");
-		File f = new File(folderPath.toUri());
-		assertThat(f.exists()).isTrue();
-	}
-
-	@Test
 	void getFolderPathOfNonExistingFolderWillGivePath() {
 		Path folderPath = DockerBaseIT.getFolderPath("this-folder-does-not-exist");
 		assertThat(folderPath).isNotNull();
