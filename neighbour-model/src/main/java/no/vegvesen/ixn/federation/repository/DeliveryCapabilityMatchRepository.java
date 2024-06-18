@@ -11,17 +11,11 @@ public interface DeliveryCapabilityMatchRepository extends CrudRepository<Delive
 
     List<DeliveryCapabilityMatch> findAll();
 
-    List<DeliveryCapabilityMatch> findAllByServiceProviderName(String serviceProviderName);
-
     List<DeliveryCapabilityMatch> findAllByLocalDelivery_Id(Integer id);
 
     List<DeliveryCapabilityMatch> findAllByLocalDelivery_ExchangeName(String deliveryExchangeName);
 
-    DeliveryCapabilityMatch findByLocalDelivery_Id(Integer id);
-
     List<DeliveryCapabilityMatch> findAllByCapability_Id(Integer id);
-
-    DeliveryCapabilityMatch findByCapability_Id(Integer id);
 
     DeliveryCapabilityMatch findByCapability_IdAndLocalDelivery_Id(Integer capabilityId, Integer localDeliveryId);
 }

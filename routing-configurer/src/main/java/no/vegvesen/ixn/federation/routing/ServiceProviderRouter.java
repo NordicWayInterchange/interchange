@@ -60,7 +60,7 @@ public class ServiceProviderRouter {
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
             serviceProvider = syncSubscriptions(serviceProvider, delta);
-            serviceProvider = subscriptionsForResubscribe(serviceProvider);
+            serviceProvider = syncLocalSubscriptionsSetToResubscribe(serviceProvider);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
             GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
@@ -81,7 +81,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    public ServiceProvider subscriptionsForResubscribe(ServiceProvider serviceProvider){
+    public ServiceProvider syncLocalSubscriptionsSetToResubscribe(ServiceProvider serviceProvider){
         for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
             List<SubscriptionMatch> matches = subscriptionMatchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
             for(SubscriptionMatch match : matches){

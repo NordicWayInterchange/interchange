@@ -38,16 +38,22 @@ public class NeighbourServiceDiscoveryTest {
 
 	@MockBean
 	private NeighbourRepository neighbourRepository;
+
 	@MockBean
 	private ListenerEndpointRepository listenerEndpointRepository;
+
 	@MockBean
 	private DNSFacade dnsFacade;
+
 	@MockBean
 	private NeighbourFacade neighbourFacade;
+
 	@MockBean
 	private NeighbourDiscovererProperties discovererProperties;
+
 	@MockBean
 	private GracefulBackoffProperties backoffProperties;
+
 	@Autowired
 	InterchangeNodeProperties interchangeNodeProperties;
 
@@ -65,6 +71,7 @@ public class NeighbourServiceDiscoveryTest {
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication", "publisherName"),
 				new Metadata(RedirectStatus.OPTIONAL));
 	}
+
 	private Capability getDatexCapabilitySplit(String originatingCountry) {
 		return new Capability(
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication", "publisherName"),

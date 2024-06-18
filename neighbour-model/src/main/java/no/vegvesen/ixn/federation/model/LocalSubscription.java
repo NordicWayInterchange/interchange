@@ -11,6 +11,7 @@ import java.util.Set;
 @Entity
 @Table(name = "local_subscriptions")
 public class LocalSubscription {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="id")

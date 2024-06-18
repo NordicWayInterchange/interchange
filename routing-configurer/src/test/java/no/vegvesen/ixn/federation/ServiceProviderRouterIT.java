@@ -94,6 +94,30 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	DeliveryCapabilityMatchRepository deliveryCapabilityMatchRepository;
 
 	@Test
+	public void localSubscriptionsAreSetToResubscribeWhenSubscriptionIsResubscribe(){
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProviderName");
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry='NO'", "serviceProviderName");
+		serviceProvider.addLocalSubscription(localSubscription);
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, new Subscription("originatingCountry='NO'", SubscriptionStatus.RESUBSCRIBE));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(List.of(subscriptionMatch));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncLocalSubscriptionsSetToResubscribe(serviceProvider);
+		assertThat(serviceProvider.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalSubscriptionStatus.RESUBSCRIBE);
+	}
+
+	@Test
+	public void localSubscriptionsAreNotSetToResubscribeWhenSubscriptionIsNotResubscribe(){
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProviderName");
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry='NO'", "serviceProviderName");
+		serviceProvider.addLocalSubscription(localSubscription);
+		SubscriptionMatch subscriptionMatch = new SubscriptionMatch(localSubscription, new Subscription("originatingCountry='NO'", SubscriptionStatus.CREATED));
+		when(subscriptionMatchRepository.findAllByLocalSubscriptionId(any())).thenReturn(List.of(subscriptionMatch));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncLocalSubscriptionsSetToResubscribe(serviceProvider);
+		assertThat(serviceProvider.getSubscriptions().stream().findFirst().get().getStatus()).isNotEqualTo(LocalSubscriptionStatus.RESUBSCRIBE);
+	}
+
+	@Test
 	public void capabilitiesLastUpdated(){
 		ServiceProvider sp = new ServiceProvider("Test");
 		sp.setCapabilities(new Capabilities(Set.of(

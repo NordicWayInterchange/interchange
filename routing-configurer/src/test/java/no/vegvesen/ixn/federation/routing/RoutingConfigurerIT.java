@@ -37,6 +37,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.N;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -117,6 +118,60 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@MockBean
     SubscriptionCapabilityMatchDiscoveryService subscriptionCapabilityMatchDiscoveryService;
 
+
+	@Test
+	public void capabilityMatchingIsDoneIfNewCapabilitiesAreCreated(){
+		Neighbour neighbour = new Neighbour();
+		NeighbourSubscription subscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED);
+		neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(subscription)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		Capability capability = new Capability(new SsemApplication("String publisherId", "String publicationId", "NO", "String protocolVersion", List.of("123")), new Metadata());
+		serviceProvider.setCapabilities(new Capabilities(Set.of(capability)));
+		serviceProvider.getCapabilities().setLastUpdated(LocalDateTime.now().plusHours(1));
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(List.of(serviceProvider));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		routingConfigurer.handleNewMatches();
+		verify(subscriptionCapabilityMatchDiscoveryService, times(1)).newMatchExists(any(), anySet());
+	}
+
+	@Test
+	public void capabilityMatchingIsNotDoneIfNoNewCapabilitiesAreCreated(){
+		Neighbour neighbour = new Neighbour();
+		NeighbourSubscription subscription = new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED);
+		neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(subscription)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		Capability capability = new Capability(new SsemApplication("String publisherId", "String publicationId", "NO", "String protocolVersion", List.of("123")), new Metadata());
+		serviceProvider.setCapabilities(new Capabilities(Set.of(capability)));
+		serviceProvider.getCapabilities().setLastUpdated(LocalDateTime.now().minusHours(1));
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(List.of(serviceProvider));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		routingConfigurer.handleNewMatches();
+		verify(subscriptionCapabilityMatchDiscoveryService, times(0)).newMatchExists(any(), anySet());
+	}
+
+	@Test
+	public void subscriptionIsSetToTearDownWhenInResubscribeAndNoMatchExists(){
+		Neighbour neighbour = new Neighbour();
+		Subscription subscription = new Subscription("originatingCountry='NO'", SubscriptionStatus.RESUBSCRIBE);
+		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription)));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		when(subscriptionMatchRepository.findAllBySubscriptionId(any())).thenReturn(List.of());
+		routingConfigurer.setSubscriptionsToTearDown();
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+	}
+
+	@Test
+	public void subscriptionIsNotSetToTearDownWhenInResubscribeAndMatchExists(){
+		Neighbour neighbour = new Neighbour();
+		Subscription subscription = new Subscription("originatingCountry='NO'", SubscriptionStatus.RESUBSCRIBE);
+		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(subscription)));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		subscriptionMatchRepository.save(new SubscriptionMatch(new LocalSubscription("originatingCountry='NO'", "test"), subscription));
+		when(subscriptionMatchRepository.findAllBySubscriptionId(any())).thenReturn(List.of(new SubscriptionMatch(new LocalSubscription("originatingCountry='NO'", "test"), subscription)));
+		routingConfigurer.setSubscriptionsToTearDown();
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.RESUBSCRIBE);
+	}
+
 	@Test
 	public void subscriptionIsSetToResubscribeWhenNewMatchExists(){
 		ServiceProvider sp = new ServiceProvider();
@@ -131,6 +186,22 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.handleNewMatches();
 		assertThat(nb.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))).hasSize(1);
+	}
+
+	@Test
+	public void subscriptionIsNotSetToResubscribeWhenNoNewMatchExists(){
+		ServiceProvider sp = new ServiceProvider();
+		sp.getCapabilities().setLastUpdated(LocalDateTime.now());
+		sp.getCapabilities().addDataType(new Capability());
+		Neighbour nb = new Neighbour();
+		nb.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'",NeighbourSubscriptionStatus.CREATED))));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(nb));
+		when(subscriptionCapabilityMatchDiscoveryService.newMatchExists(any(), anySet())).thenReturn(false);
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(List.of(sp));
+		neighbourService.saveNeighbour(nb);
+
+		routingConfigurer.handleNewMatches();
+		assertThat(nb.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(a->a.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))).hasSize(0);
 	}
 
 	@Test

@@ -14,8 +14,6 @@ public interface SubscriptionMatchRepository extends CrudRepository<Subscription
 
     List<SubscriptionMatch> findAllBySubscriptionId(Integer subscriptionId);
 
-    SubscriptionMatch findBySubscriptionIdAndLocalSubscriptionId(Integer subscriptionId, Integer localSubscriptionId);
-
     List<SubscriptionMatch> findAllByLocalSubscriptionId(Integer subscriptionId);
 
     SubscriptionMatch findBySubscriptionIdAndAndLocalSubscriptionId(Integer subscriptionId, Integer localSubscriptionId);
