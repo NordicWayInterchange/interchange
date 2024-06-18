@@ -346,6 +346,52 @@ class NeighbourServiceTest {
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}
 
+	@Test
+	public void tearDownListenerEndpointsForIgnoredNeighbours(){
+		Neighbour neighbour = new Neighbour();
+		String neighbourName = "my-ignored-neighbour";
+		neighbour.setName(neighbourName);
+		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
+		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
+
+		Set<Endpoint> endpoints = Set.of(endpoint1, endpoint2);
+		Subscription subscription = new Subscription();
+		subscription.setEndpoints(endpoints);
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
+
+		when(neighbourRepository.findAllByIgnoreIs(true)).thenReturn(List.of(neighbour));
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint1, listenerEndpoint2));
+
+		neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();
+
+		verify(listenerEndpointRepository, times(2)).delete(any());
+	}
+
+	@Test
+	public void doNotTearDownListenerEndpointsForNonIgnoredNeighbours(){
+		Neighbour neighbour = new Neighbour();
+		String neighbourName = "my-ignored-neighbour";
+		neighbour.setName(neighbourName);
+		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
+		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
+
+		Set<Endpoint> endpoints = Set.of(endpoint1, endpoint2);
+		Subscription subscription = new Subscription();
+		subscription.setEndpoints(endpoints);
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
+
+		when(neighbourRepository.findAllByIgnoreIs(true)).thenReturn(List.of());
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint1, listenerEndpoint2));
+
+		neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();
+
+		verify(listenerEndpointRepository, times(0)).delete(any());
+	}
+
 
 	@Test
 	public void teardownListenerEndpointsWithNullShard() {

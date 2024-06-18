@@ -1049,6 +1049,7 @@ public class NeighbourDiscovererIT {
 		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
 	}
 
+
 	@Test
 	public void neighbourIsIgnoredWhenPostingSubscriptionRequest(){
 		String name = "ignoredNeighbour2";

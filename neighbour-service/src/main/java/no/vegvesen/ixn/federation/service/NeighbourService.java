@@ -50,6 +50,7 @@ public class NeighbourService {
 	public List<Neighbour> findAllNeighboursByIgnoreIs(boolean ignore) {
 		return neighbourRepository.findAllByIgnoreIs(ignore);
 	}
+
 	public List<Neighbour> findAllNeighbours(){
 		return neighbourRepository.findAll();
 	}

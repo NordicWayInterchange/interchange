@@ -172,7 +172,7 @@ public class OnboardRestController {
 
 	private Set<Capability> getAllNeighbourCapabilities() {
 		Set<Capability> capabilities = new HashSet<>();
-		List<Neighbour> neighbours = neighbourRepository.findAllByIgnoreIs(false);
+		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
 			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
 		}
