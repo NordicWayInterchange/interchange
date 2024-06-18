@@ -46,7 +46,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/keys/truststore.jks
+      - TRUST_STORE=/keys/ca.a.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -67,7 +67,7 @@ services:
       - "../../qpid/a/messages:/work/a/messages"
       - "../tmp/dump:/dump"
     environment:
-      - TRUST_STORE=/keys/truststore.jks
+      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -98,7 +98,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/truststore.jks
+      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -121,7 +121,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a.interchangedomain.com
       - SERVER_NAME=a.interchangedomain.com
-      - TRUST_STORE=/keys/truststore.jks
+      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -142,7 +142,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/truststore.jks
+      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -166,7 +166,7 @@ services:
     - KEY_STORE=/keys/a.interchangedomain.com.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/keys/truststore.jks
+    - TRUST_STORE=/keys/ca.lookupdomain.com.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.interchangedomain.com
