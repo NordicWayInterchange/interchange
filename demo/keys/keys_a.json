@@ -1,0 +1,19 @@
+{
+  "name" : "lookupdomain.com",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.interchangedomain.com",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.interchangedomain.com"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_olav.a.interchangedomain.com",
+      "country" : "NO",
+      "email" : "olav@royalpalace.no"
+    } ]
+  } ],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+}
