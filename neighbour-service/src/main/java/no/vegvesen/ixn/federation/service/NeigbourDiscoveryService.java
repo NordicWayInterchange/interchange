@@ -365,14 +365,12 @@ public class NeigbourDiscoveryService {
     }
 
     public void tearDownListenerEndpointsFromIgnoredNeighbours(){
-        List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAll();
         List<String> ignoredNeighbours = neighbourRepository.findAllByIgnoreIs(true).stream().map(Neighbour::getName).toList();
-        List<ListenerEndpoint> endpointsToDelete = listenerEndpoints.stream().filter(a->ignoredNeighbours.contains(a.getNeighbourName())).toList();
-
-        endpointsToDelete.forEach(a->{
-            listenerEndpointRepository.delete(a);
-            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", a.getNeighbourName(), a.getHost(), a.getSource());
-        });
+        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a->ignoredNeighbours.contains(a.getNeighbourName())).toList();
+        for(ListenerEndpoint listenerEndpoint : endpointsToDelete){
+            listenerEndpointRepository.delete(listenerEndpoint);
+            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getSource());
+        }
     }
 
     public void tearDownListenerEndpointsFromEndpointsList(String neighbourName, Set<Endpoint> endpoints) {
