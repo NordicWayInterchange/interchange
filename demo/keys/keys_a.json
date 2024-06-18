@@ -16,4 +16,20 @@
   } ],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
+}, {
+  "name" : "internal_a",
+  "country" : "NO",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "a-qpid"
+  } ],
+  "clientRequests" : [ {
+    "name" : "a_routing_configurer",
+    "country" : "NO",
+    "email" : "routing_configurer@a.interchangedomain.com"
+  }, {
+    "name" : "a_message_collector",
+    "country" : "NO",
+    "email" : "message_collector@a.interchangedomain.com"
+  } ]
 } ]
