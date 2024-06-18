@@ -216,11 +216,11 @@ public class RoutingConfigurer {
 							Shard shard = cap.getMetadata().getShards().get(0);
 								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 							}
+							subscriptionCapabilityMatchDiscoveryService.createMatch(subscription, cap);
 						}
 					}
 
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps);//TODO: Should be done inside loop going through caps with single capability
 				}
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
@@ -252,10 +252,10 @@ public class RoutingConfigurer {
 								addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
 								bindRemoteServiceProvider(shard.getExchangeName(), endpoint.getSource(), subscription);
 							}
+							subscriptionCapabilityMatchDiscoveryService.createMatch(subscription, cap);
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-					subscriptionCapabilityMatchDiscoveryService.createMatches(subscription, matchingCaps); //TODO: Should be done inside loop going through caps with single capability
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 			} else {

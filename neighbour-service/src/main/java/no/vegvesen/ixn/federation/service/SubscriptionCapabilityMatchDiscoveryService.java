@@ -25,10 +25,9 @@ public class SubscriptionCapabilityMatchDiscoveryService {
         this.subscriptionCapabilityMatchRepository = subscriptionCapabilityMatchRepository;
     }
 
-    public void createMatches(NeighbourSubscription neighbourSubscription, Set<Capability> matchingCaps){
-        if(!neighbourSubscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) return;
-
-        for(Capability capability : matchingCaps){
+    public void createMatch(NeighbourSubscription neighbourSubscription, Capability capability){
+        SubscriptionCapabilityMatch subscriptionMatch = subscriptionCapabilityMatchRepository.findSubscriptionCapabilityMatchByCapabilityAndNeighbourSubscription(capability, neighbourSubscription);
+        if(subscriptionMatch == null) {
             SubscriptionCapabilityMatch match = new SubscriptionCapabilityMatch(neighbourSubscription, capability);
             subscriptionCapabilityMatchRepository.save(match);
             logger.info("Saved new match {}", match);
