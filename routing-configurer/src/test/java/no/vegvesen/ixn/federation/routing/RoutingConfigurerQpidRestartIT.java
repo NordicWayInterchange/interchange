@@ -46,8 +46,14 @@ import static org.mockito.Mockito.when;
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
-    public static final String HOST_NAME = "localhost";
-    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf", "nordea");
+    public static final String HOST_NAME = getDockerHost();
+    private static final CaStores stores = generateStores(
+            getTargetFolderPathForTestClass(RoutingConfigurerIT.class),
+            "my_ca",
+            HOST_NAME,
+            "routing_configurer",
+            "king_gustaf"
+    );
 
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
@@ -70,7 +76,6 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
             String httpsUrl = qpidContainer.getHttpsUrl();
             String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: {}", httpsUrl);
             logger.info("server url: {}", httpUrl);
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,

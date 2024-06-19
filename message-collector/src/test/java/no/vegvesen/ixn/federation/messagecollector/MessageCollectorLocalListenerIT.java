@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 
-	public static final String HOST_NAME = "localhost";
+	public static final String HOST_NAME = getDockerHost();
 	static final CaStores stores = generateStores(getTargetFolderPathForTestClass(MessageCollectorLocalListenerIT.class),"my_ca", HOST_NAME);
 
 	@Container

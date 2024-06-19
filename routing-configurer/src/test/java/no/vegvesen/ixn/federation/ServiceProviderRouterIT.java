@@ -48,7 +48,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	public static final String HOST_NAME = "localhost";
+	public static final String HOST_NAME = getDockerHost();
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(ServiceProviderRouterIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
 	@Container

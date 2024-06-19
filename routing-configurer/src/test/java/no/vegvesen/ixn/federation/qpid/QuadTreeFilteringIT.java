@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
-    public static final String HOST_NAME = "localhost";
+    public static final String HOST_NAME = getDockerHost();
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QuadTreeFilteringIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf");
 
 

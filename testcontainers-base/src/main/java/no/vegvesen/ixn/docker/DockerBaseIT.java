@@ -2,6 +2,7 @@ package no.vegvesen.ixn.docker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.DockerClientFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +10,10 @@ import java.nio.file.Paths;
 public class DockerBaseIT {
 	private static final Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
+
+	public static String getDockerHost() {
+		return DockerClientFactory.instance().dockerHostIpAddress();
+	}
 
 	protected static Path getFolderPath(String relativePathFromProjectRoot) {
 		Path projectRoot = getProjectRootPath();

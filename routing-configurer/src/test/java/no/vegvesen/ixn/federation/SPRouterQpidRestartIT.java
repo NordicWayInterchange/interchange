@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 @Testcontainers
 public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
-    public static final String HOST_NAME = "localhost";
+    public static final String HOST_NAME = getDockerHost();
     public static final CaStores stores = generateStores(getTargetFolderPathForTestClass(SPRouterQpidRestartIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf", "nordea");
 
     @Container

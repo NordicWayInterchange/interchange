@@ -37,7 +37,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	private static final String PRODUCER_SP_NAME = "sp_producer";
 	public static final String CONSUMER_SP_NAME = "sp_consumer";
-	public static final String HOST_NAME = "localhost";
+	public static final String HOST_NAME = getDockerHost();
 	static CaStores stores = generateStores(getTargetFolderPathForTestClass(MessageCollectorIT.class),"my_ca", HOST_NAME,PRODUCER_SP_NAME,CONSUMER_SP_NAME);
 
 	@Container

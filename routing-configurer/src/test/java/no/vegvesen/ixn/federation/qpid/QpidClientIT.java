@@ -41,7 +41,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
-	public static final String HOST_NAME = "localhost";
+	public static final String HOST_NAME = getDockerHost();
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidClientIT.class),"my_ca", HOST_NAME, "routing_configurer");
 
 	@Container

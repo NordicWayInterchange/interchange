@@ -78,7 +78,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
 
     public static final String SP_NAME = "sp-1";
-    public static final String HOST_NAME = "localhost";
+    public static final String HOST_NAME = getDockerHost();
 
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(LocalSubscriptionQpidStructureIT.class),"my_ca", HOST_NAME, CONFIGURER_USER, SP_NAME);
 

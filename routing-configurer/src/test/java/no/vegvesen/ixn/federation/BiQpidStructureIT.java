@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class BiQpidStructureIT extends QpidDockerBaseIT {
 
-    public static final String HOST_NAME = "localhost";
+    public static final String HOST_NAME = getDockerHost();
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(BiQpidStructureIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
     SSLContext sslContext;

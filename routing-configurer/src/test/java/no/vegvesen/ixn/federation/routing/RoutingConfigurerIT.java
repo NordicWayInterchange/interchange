@@ -50,7 +50,7 @@ import static org.mockito.Mockito.*;
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
-	public static final String HOST_NAME = "localhost";
+	public static final String HOST_NAME = getDockerHost();
 	public static CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf","nordea");
 
 
