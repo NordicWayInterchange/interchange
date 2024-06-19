@@ -48,6 +48,8 @@ of the actual [endpoint](../../GLOSSARY.md#endpoint) to receive messages from.
 ## Use the jms client
 The script `./a_jms_client.sh` runs the JMS client, a test client we provide for Service Providers for sending and receiving messages.
 Try running `./a_jms_client.sh --help` to see the different options.
+We have also added two other scripts, `./a_jms_sink.sh` and `./a_jms_source.sh` to receive and send messages, respectively. This is 
+really just copies of the `./a_jms_client`-script, but with different container names so that they don't clash.
 
 ## Listening to messages
 
