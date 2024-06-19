@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash -eu
+
+IXN_VERSION=$(<version)
 
 docker run \
   -it \
@@ -9,4 +11,4 @@ docker run \
   -v ${PWD}/../keys/a:/keys \
   -v ${PWD}:/work \
   --link a_qpid:a.interchangedomain.com \
-   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/jms-client-source-app:3743e41 -k /keys/king_olav.a.interchangedomain.com.p12  -s password -t /keys/truststore.jks -w password amqps://a.interchangedomain.com "$@"
+   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/jms-client-source-app:${IXN_VERSION} -k /keys/king_olav.a.interchangedomain.com.p12  -s password -t /keys/ca.lookupdomain.com.jks -w password amqps://a.interchangedomain.com "$@"
