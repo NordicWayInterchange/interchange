@@ -1,4 +1,3 @@
-version: '3'
 services:
 
   #This DNS server mocks the SRV records for a_interchangedomain.com
@@ -55,7 +54,7 @@ services:
 
   a_qpid:
     image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:3743e41
-    container_name: a_qpid
+    hostname: a-qpid
     ports:
       - 8666:8080
       - 443
@@ -77,6 +76,11 @@ services:
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+        #internal trust store?
+      - INTERNAL_KEY_STORE=/keys/a-qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
+      - INTERNAL_TRUST_STORE=/keys/internal_a.jks
+      - INTERNAL_TRUST_STORE_PASSWORD=password
     depends_on:
     - mock-dns-server
     networks:
@@ -121,10 +125,11 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a.interchangedomain.com
       - SERVER_NAME=a.interchangedomain.com
-      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
+      - TRUST_STORE=/keys/internal_a.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE=/keys/a_routing_configurer.p12
       - KEY_STORE_PASSWORD=password
+      - COLLECTOR_USER=a_message_collector
     networks:
     - singletest
 
