@@ -7,7 +7,7 @@
       "publicationId" : "NO00000-pub-1",
       "originatingCountry" : "NO",
       "protocolVersion" : "DENM:1.2.2",
-      "quadTree" : [ "12004" ],
+      "quadTree" : [ "12003" ],
       "causeCode" : [ 6, 5 ]
     },
     "metadata" : {

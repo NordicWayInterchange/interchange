@@ -115,15 +115,13 @@ services:
     container_name: a_routing_configurer
     depends_on:
       - a_db
-    links:
-      - "a_qpid:a.interchangedomain.com"
     volumes:
       - "../keys/a:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a.interchangedomain.com
+      - BASE_URL=https://a-qpid
       - SERVER_NAME=a.interchangedomain.com
       - TRUST_STORE=/keys/internal_a.jks
       - TRUST_STORE_PASSWORD=password
