@@ -68,8 +68,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + stores.trustStore().path().toString(),
-					"test.ssl.key-store=" +  getClientStore("routing_configurer",stores.clientStores().stream()).path().toString(),
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores()),
 					"interchange.node-provider.name=" + HOST_NAME
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}

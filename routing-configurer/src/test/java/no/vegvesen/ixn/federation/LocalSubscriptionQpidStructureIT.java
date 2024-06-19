@@ -65,8 +65,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + stores.trustStore().path().toString(),
-                    "test.ssl.key-store=" +  getClientStore(CONFIGURER_USER,stores.clientStores().stream()).path().toString(),
+                    "test.ssl.trust-store=" + getTrustStorePath(stores),
+                    "test.ssl.key-store=" +  getClientStorePath(CONFIGURER_USER,stores.clientStores()),
                     "interchange.node-provider.name=" + qpidContainer.getHost(),
                     "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
             ).applyTo(configurableApplicationContext.getEnvironment());

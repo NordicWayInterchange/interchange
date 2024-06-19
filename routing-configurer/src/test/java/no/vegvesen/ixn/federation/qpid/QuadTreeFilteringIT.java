@@ -49,9 +49,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + stores.trustStore().path().toString(),
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
 					"test.ssl.keystore-password=" + stores.trustStore().password(),
-					"test.ssl.key-store=" +  getClientStore("routing_configurer",stores.clientStores().stream()).path().toString()
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
