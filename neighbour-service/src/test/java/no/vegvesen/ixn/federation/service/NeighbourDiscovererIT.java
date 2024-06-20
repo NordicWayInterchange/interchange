@@ -446,7 +446,7 @@ public class NeighbourDiscovererIT {
 
 		assertThat(repository.findByName("neighbourA").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
 		assertThat(repository.findByName("neighbourB").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(2);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.ACCEPTED)).hasSize(2);
 		assertThat(listenerEndpointRepository.findAll()).hasSize(0);
 		verify(mockNeighbourFacade, times(2)).postSubscriptionRequest(any(Neighbour.class), anySet(), anyString());
 	}
@@ -1077,7 +1077,7 @@ public class NeighbourDiscovererIT {
 
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
-		List<Neighbour> unknown = repository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> unknown = repository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.UNKNOWN, false);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAllByIgnoreIs(false)).hasSize(2);
 	}
@@ -1089,7 +1089,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
-		List<Neighbour> known = repository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
+		List<Neighbour> known = repository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.KNOWN, false);
 		assertThat(known).hasSize(2);
 	}
 

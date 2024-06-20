@@ -197,15 +197,15 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN).stream().filter(a -> !a.isIgnore()).toList();
+		return neighbourRepository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.KNOWN, false);
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED).stream().filter(a->!a.isIgnore()).toList();
+		return neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.FAILED);
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
-		return neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED).stream().filter(a->!a.isIgnore()).toList();
+		return neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.CREATED);
 	}
 
 	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
@@ -216,7 +216,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED).stream().filter(a->!a.isIgnore()).toList();
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
 	}

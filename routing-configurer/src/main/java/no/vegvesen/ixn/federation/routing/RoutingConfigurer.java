@@ -73,10 +73,13 @@ public class RoutingConfigurer {
 		if(neighbour.isIgnore()){
 			Set<NeighbourSubscription> neighbourSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			if(neighbourSubscriptions.isEmpty()){
+				neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+				neighbourService.saveNeighbour(neighbour);
 				return;
 			}
 			else{
 				neighbourSubscriptions.forEach(s->s.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN));
+				neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 				subscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 			}
 		}
