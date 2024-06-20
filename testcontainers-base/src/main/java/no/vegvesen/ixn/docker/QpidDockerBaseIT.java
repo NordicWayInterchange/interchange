@@ -40,16 +40,14 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String keystorePassword = hostStore.password();
 		String truststoreName = caStore.path().getFileName().toString();
 		String truststorePassword = caStore.password();
-		return new QpidContainer("qpid-it-memory",
-				imageLocation,
+		return new QpidContainer(
 				configPath,
 				caStore.path().getParent(),
 				keystoreName,
 				keystorePassword,
 				truststoreName,
 				truststorePassword,
-				vhostName
-		);
+				vhostName);
 	}
 
 	public static CaStores generateStores(Path outputPath, String ca, String server, String ... serviceProviders) {

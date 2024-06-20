@@ -9,7 +9,7 @@
     {
       "name": "passwordFile",
       "type": "PlainPasswordFile",
-      "path": "${PASSWD_FILE}"
+      "path": "/qpid-broker-j/work/passwd"
     }
   ],
   "brokerloggers" : [
@@ -128,12 +128,12 @@
       "name": "default",
       "type": "JSON",
       "defaultVirtualHostNode": "true",
-      "storePath":"${VHOST_FILE}"
+      "storePath":"/qpid-broker-j/work/vhost.json"
     }
   ],
   "groupproviders" : [ {
     "name" : "default",
     "type" : "GroupFile",
-    "path" : "${GROUPS_FILE}"
+    "path" : "/qpid-broker-j/work/groups"
   } ]
 }
