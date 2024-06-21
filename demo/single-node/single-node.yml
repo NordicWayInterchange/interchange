@@ -53,7 +53,7 @@ services:
       - singletest
 
   a_qpid:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid:${IXN_VERSION}
+    image: apache/qpid-broker-j:9.2.0-alpine
     hostname: a-qpid
     ports:
       - 8666:8080
@@ -61,22 +61,13 @@ services:
       - 63003:5671
       - 5672
     volumes:
-      - "../qpid/a/config:/config"
+      - "../qpid/a/config:/qpid-broker-j/work-override"
       - "../keys/a:/keys"
-      - "../../qpid/a/messages:/work/a/messages"
-      - "../tmp/dump:/dump"
     environment:
       - TRUST_STORE=/keys/ca.lookupdomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
-      - VHOST_FILE=/work/default/config/default.json
-      - STATIC_VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/work/default/config/groups
-      - STATIC_GROUPS_FILE=/config/groups
-      - PASSWD_FILE=/config/passwd
-      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
-        #internal trust store?
       - INTERNAL_KEY_STORE=/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
       - INTERNAL_TRUST_STORE=/keys/internal_a.jks
