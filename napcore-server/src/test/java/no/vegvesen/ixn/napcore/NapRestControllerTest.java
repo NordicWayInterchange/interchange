@@ -30,11 +30,13 @@ import java.util.Collections;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -203,23 +205,75 @@ public class NapRestControllerTest {
     }
 
     @Test
-    public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() {
-
+    public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() throws Exception {
+        String request = """
+                {
+                "selector": "originatingCountry='NO'",
+                "extraField": "extra"
+                }
+                """;
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/subscriptions", "actor"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void postingInvalidNapSubscriptionRequestReturnsStatusBadRequest() {
-
+    public void postingInvalidNapSubscriptionRequestReturnsStatusBadRequest() throws Exception {
+        String invalidRequest = "";
+        String serviceProviderName = "actor";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                1,
+                serviceProviderName,
+                new Capabilities(),
+                Collections.emptySet(),
+                null
+        );
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/subscriptions", "actor"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest)
+        ).andExpect(status().isBadRequest());
     }
 
+    /*
     @Test
-    public void deletingNapSubscriptionReturnsNoContent() {
+    public void deletingNapSubscriptionReturnsNoContent() throws Exception {
+        String serviceProviderName = "actor";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                1,
+                serviceProviderName,
+                new Capabilities(),
+                Collections.emptySet(),
+                null
+        );
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO'", "actor");
+        localSubscription.setId(1);
+        serviceProvider.addLocalSubscription(localSubscription);
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(serviceProviderRepository.findByName(anyString())).thenReturn(serviceProvider);
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 
+        mockMvc.perform(
+                delete(String.format("/nap/%s/subscriptions/%s", serviceProviderName, "1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+
+        ).andExpect(status().isNoContent());
     }
+    */
 
     @Test
-    public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() {
-
+    public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() throws Exception{
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                delete(String.format("/nap/%s/subscriptions/%s", "actor", "1"))
+        ).andExpect(status().isNotFound());
     }
 
     @Configuration
