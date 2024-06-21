@@ -210,6 +210,10 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
+	public void addDelivery(LocalDelivery newDelivery){
+		deliveries.add(newDelivery);
+	}
+
 	public void removeLocalDelivery(Integer deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()

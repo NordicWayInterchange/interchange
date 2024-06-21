@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.napcore;
 
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.napcore.model.*;
-import no.vegvesen.ixn.federation.model.LocalEndpoint;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.napcore.model.Subscription;
+import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -17,6 +19,46 @@ public class TypeTransformer {
         return new LocalSubscription(subscription.getSelector(), nodeName);
     }
 
+    public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
+        return new LocalDelivery(delivery.getSelector());
+    }
+
+    public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
+        LocalDateTime lastUpdated = localDelivery.getLastUpdatedTimestamp();
+        Long epochSecond = null;
+        if(lastUpdated != null){
+            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
+        }
+
+        Delivery delivery = new Delivery(
+                localDelivery.getId().toString(),
+                localDelivery.getSelector(),
+                transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
+                transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
+                epochSecond
+        );
+
+        return delivery;
+    }
+
+    public DeliveryStatus transformLocalDeliveryStatusToNapDeliveryStatus(LocalDeliveryStatus localDeliveryStatus){
+        return switch(localDeliveryStatus){
+            case REQUESTED -> DeliveryStatus.REQUESTED;
+            case CREATED -> DeliveryStatus.CREATED;
+            case ILLEGAL -> DeliveryStatus.ILLEGAL;
+            case TEAR_DOWN -> DeliveryStatus.NO_OVERLAP;
+            case NOT_VALID -> DeliveryStatus.NOT_VALID;
+            case NO_OVERLAP -> DeliveryStatus.NO_OVERLAP;
+            case ERROR -> DeliveryStatus.NOT_VALID;
+        };
+    }
+    public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
+        List<DeliveryEndpoint> endpoints = new ArrayList<>();
+        for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
+            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate()));
+        }
+        return endpoints;
+    }
     public Subscription transformLocalSubscriptionToNapSubscription(LocalSubscription localSubscription) {
         LocalDateTime lastUpdated = localSubscription.getLastUpdated();
         Long epochSecond = null;

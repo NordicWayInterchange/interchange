@@ -24,6 +24,13 @@ public class DeliveryEndpoint {
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
+    public DeliveryEndpoint(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+        this.host = host;
+        this.port = port;
+        this.target = target;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
+    }
 
     public String getHost() {
         return host;

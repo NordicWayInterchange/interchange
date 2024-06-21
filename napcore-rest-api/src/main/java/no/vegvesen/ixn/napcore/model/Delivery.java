@@ -12,11 +12,11 @@ public class Delivery {
 
     List<DeliveryEndpoint> endpoints;
 
-    long lastUpdatedTimeStamp;
+    Long lastUpdatedTimeStamp;
 
     public Delivery(){}
 
-    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, long lastUpdatedTimeStamp) {
+    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimeStamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
@@ -60,11 +60,11 @@ public class Delivery {
 
     }
 
-    public long getLastUpdatedTimeStamp() {
+    public Long getLastUpdatedTimeStamp() {
         return lastUpdatedTimeStamp;
     }
 
-    public void setLastUpdatedTimeStamp(long lastUpdatedTimeStamp) {
+    public void setLastUpdatedTimeStamp(Long lastUpdatedTimeStamp) {
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
     }
 

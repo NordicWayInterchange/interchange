@@ -3,13 +3,12 @@ package no.vegvesen.ixn.napcore;
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.matcher.ParseException;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.napcore.model.Subscription;
-import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
-import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
@@ -59,32 +58,43 @@ public class NapRestControllerIT {
 
     @Test
     public void testAddSubscriptionWithNullObjectThrowsException() {
-        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription("actor", null));
+        String actorCommonName = "actor";
+        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, null));
     }
 
     @Test
     public void testAddingSubscriptionWithInvalidSelectorSetsStatusToIllegal(){
         String actorCommonName = "actor";
-        Subscription subscription = napRestController.addSubscription("actor", new SubscriptionRequest("1=1"));
+        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("1=1"));
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
+    }
+
+    // Should probably be SubscriptionRequestException and not NullPointerException
+    @Test
+    public void testAddingSubscriptionWithNullSelectorThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NullPointerException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest()));
     }
 
     @Test
     public void testAddingSubscriptionWithValidSelectorReturnsValidSubscriptionAndCreatesServiceProvider(){
-        Subscription subscription = napRestController.addSubscription("actor", new SubscriptionRequest("originatingCountry='NO'"));
+        String actorCommonName = "actor";
+        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
+        System.out.println(subscription);
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
-        assertThat(napRestController.getSubscriptions("actor")).hasSize(1);
+        assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
     }
 
     @Test
     public void testGetSubscriptionsReturnsValidSubscriptions(){
+        String actorCommonName = "actor";
         SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
         SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
-        napRestController.addSubscription("actor", request1);
-        napRestController.addSubscription("actor", request2);
+        napRestController.addSubscription(actorCommonName, request1);
+        napRestController.addSubscription(actorCommonName, request2);
 
-        List<Subscription> subscriptionList = napRestController.getSubscriptions("actor");
+        List<Subscription> subscriptionList = napRestController.getSubscriptions(actorCommonName);
         assertThat(subscriptionList).hasSize(2);
         subscriptionList.forEach(a->{
             assertThat(a.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
@@ -93,9 +103,10 @@ public class NapRestControllerIT {
 
     @Test
     public void testGetSubscriptionReturnsValidSubscription(){
+        String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
-        Subscription subscription = napRestController.addSubscription("actor", request);
-        Subscription response = napRestController.getSubscription("actor", subscription.getId().toString());
+        Subscription subscription = napRestController.addSubscription(actorCommonName, request);
+        Subscription response = napRestController.getSubscription(actorCommonName, subscription.getId().toString());
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
@@ -103,30 +114,63 @@ public class NapRestControllerIT {
 
     @Test
     public void testGetSubscriptionThrowsErrorWhenItDoesNotExist(){
-        assertThrows(NotFoundException.class, () -> napRestController.getSubscription("actor", "25"));
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getSubscription(actorCommonName, "25"));
     }
 
     @Test
     public void testGetSubscriptionWithInvalidIdThrowsException(){
-        assertThrows(NotFoundException.class, () -> napRestController.getSubscription("actor", "notAnId"));
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getSubscription(actorCommonName, "notAnId"));
     }
 
     @Test
     public void testSubscriptionIsDeletedCorrectly(){
+        String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
         Subscription subscription = napRestController.addSubscription("actor", request);
-        napRestController.deleteSubscription("actor", subscription.getId().toString());
-        assertThat(napRestController.getSubscriptions("actor").stream().findFirst().get().getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
+        napRestController.deleteSubscription(actorCommonName, subscription.getId().toString());
+        assertThat(napRestController.getSubscriptions(actorCommonName).stream().findFirst().get().getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
     }
 
     @Test
     public void testDeleteNonExistentSubscriptionThrowsException(){
-        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription("actor", "1"));
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "1"));
     }
 
     // This throws NumberFormatException, should it not be NotFoundException?
     @Test
     public void testDeleteSubscriptionWithInvalidIdThrowsException(){
-        assertThrows(NumberFormatException.class, () -> napRestController.deleteSubscription("actor", "notAnId"));
+        String actorCommonName = "actor";
+        assertThrows(NumberFormatException.class, () -> napRestController.deleteSubscription(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testAddingDeliveryWithValidSelectorGivesRequestedDelivery(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+    }
+
+    @Test
+    public void testAddingDeliveryWithInvalidSelectorGivesInvalidDelivery(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("1=1");
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+    }
+
+    @Test
+    public void testAddingNullDeliveryThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, null));
+    }
+
+    @Test
+    public void testAddingNullSelectorInDeliveryThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
     }
 }

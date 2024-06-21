@@ -51,6 +51,10 @@ public class LocalDelivery {
         this.status = status;
     }
 
+    public LocalDelivery(String selector){
+        this.selector = selector;
+    }
+
     public LocalDelivery(Integer id, String path, String selector, LocalDeliveryStatus status) {
         this(id, Collections.emptySet(),path,selector,status);
     }

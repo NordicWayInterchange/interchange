@@ -269,6 +269,18 @@ public class NapRestControllerTest {
     */
 
     @Test
+    public void postDeliveryReturnsStatusOk(){}
+
+    @Test
+    public void postDeliveryWithExtraFieldsReturnsStatusBadRequest(){}
+
+    @Test
+    public void postDeliveryWithNullSelectorReturnsStatusBadrequest(){}
+
+    @Test
+    public void postingInvalidDeliveryRequestReturnsStatusBadRequest(){}
+
+    @Test
     public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() throws Exception{
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         mockMvc.perform(

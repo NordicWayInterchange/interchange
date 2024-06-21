@@ -4,17 +4,14 @@ import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
-import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
@@ -168,6 +165,39 @@ public class NapRestController {
         }
 
         return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries"})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Delivery addDelivery(String actorCommonName, DeliveryRequest deliveryRequest){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
+
+        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
+            throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
+        }
+        LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
+        if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
+            localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
+        }
+        else{
+            localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+        }
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        serviceProvider.addDelivery(localDelivery);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
+        logger.debug("Updated Service Provider: {}", savedServiceProvider);
+
+        LocalDelivery savedDelivery = savedServiceProvider
+                .getDeliveries()
+                .stream()
+                .filter(delivery -> delivery.equals(localDelivery))
+                .findFirst()
+                .get();
+
+        return typeTransformer.transformLocalDeliveryToNapDelivery(savedDelivery);
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
