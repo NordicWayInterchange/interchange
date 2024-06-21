@@ -84,8 +84,7 @@ services:
       - testing_net
 
   a-qpid:
-    build:
-      context: ../qpid
+    image: apache/qpid-broker-j:9.2.0-alpine
     hostname: a-qpid
     ports:
       - 8666:8080
@@ -93,10 +92,8 @@ services:
       - 63003:5671
       - 5672
     volumes:
-      - "../qpid/a:/config"
+      - "../qpid/a:/qpid-broker-j/work-override"
       - "../tmp:/jks"
-      - "../qpid/messages/a:/work/a/messages"
-      - "../tmp/dump:/dump"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
@@ -107,7 +104,6 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
-      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
         #internal trust store?
       - INTERNAL_KEY_STORE=/jks/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
@@ -322,8 +318,7 @@ services:
     dns: 172.28.1.1
 
   b-qpid:
-    build:
-      context: ../qpid
+    image: apache/qpid-broker-j:9.2.0-alpine
     hostname: b-qpid
     ports:
       - 8555:8080
@@ -331,9 +326,8 @@ services:
       - 63001:5671
       - 5672
     volumes:
-      - "../qpid/b:/config"
+      - "../qpid/b:/qpid-broker-j/work-override"
       - "../tmp:/jks"
-      - "../qpid/messages/b:/work/b/messages"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password

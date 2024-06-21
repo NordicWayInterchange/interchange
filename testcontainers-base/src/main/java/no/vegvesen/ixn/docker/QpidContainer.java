@@ -28,7 +28,6 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
     private final String vHostName;
 
 
-    //TODO better name for the configPathFromClasspath variable
     public QpidContainer(Path configPathFromClasspath,
                          Path keysBasePath,
                          String keyStore,
