@@ -400,7 +400,6 @@ services:
       - INTERNAL_TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b-qpid
       - LOCAL_IXN_PORT=5673
-      - LOG_LEVELS=-Djavax.net.debug=ssl:handshake:verbose
     networks:
     - testing_net
 

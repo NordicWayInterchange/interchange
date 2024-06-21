@@ -151,7 +151,7 @@
       "name": "default",
       "type": "JSON",
       "defaultVirtualHostNode": "true",
-      "virtualHostInitialConfiguration": "{}"
+      "virtualHostInitialConfiguration": "file:///qpid-broker-j/work/vhost.json"
     }
   ],
   "groupproviders" : [ {
