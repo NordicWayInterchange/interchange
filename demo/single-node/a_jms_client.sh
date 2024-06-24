@@ -5,7 +5,6 @@ IXN_VERSION=$(<version)
 docker run \
     -it \
     --rm \
-    --name jms_client_sink \
     --network=single-node_singletest \
     --dns=172.28.1.1 \
     -v ${PWD}/../keys/a:/keys \
