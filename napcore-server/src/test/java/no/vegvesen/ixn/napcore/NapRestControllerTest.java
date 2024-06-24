@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,6 +66,9 @@ public class NapRestControllerTest {
 
     @Autowired
     private NapRestController restController;
+
+    @MockBean
+    private CapabilityToCapabilityApiTransformer transformer;
 
     @BeforeEach
     void setUp() {
@@ -207,7 +211,8 @@ public class NapRestControllerTest {
     public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() throws Exception {
         String request = """
                 {
-                "selector": "originatingCountry='NO'"
+                "selector": "originatingCountry='NO'",
+                "extra": "extra"
                 }
                 """;
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
