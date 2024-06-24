@@ -30,7 +30,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
