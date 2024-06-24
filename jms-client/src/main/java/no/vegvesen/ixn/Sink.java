@@ -21,15 +21,16 @@ import java.util.Enumeration;
 
 public class Sink implements AutoCloseable {
 
-	private static Logger logger = LoggerFactory.getLogger(Sink.class);
+	private static final Logger logger = LoggerFactory.getLogger(Sink.class);
 
 
     protected final String url;
     private final String queueName;
     private final SSLContext sslContext;
-    protected Connection connection;
+	protected Connection connection;
 	private MessageConsumer consumer;
-	private MessageListener listener;
+	private final MessageListener listener;
+	private ExceptionListener exceptionListener;
 
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
@@ -45,6 +46,14 @@ public class Sink implements AutoCloseable {
 		this.listener = listener;
 	}
 
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+		this.exceptionListener = exceptionListener;
+	}
+
 	public void startWithMessageListener(MessageListener newListener) throws JMSException, NamingException {
     	if (this.consumer != null) {
 			try {
@@ -55,6 +64,9 @@ public class Sink implements AutoCloseable {
 		}
 		this.consumer = createConsumer();
 		this.consumer.setMessageListener(newListener);
+		if (this.exceptionListener != null) {
+			connection.setExceptionListener(this.exceptionListener);
+		}
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
 	}
 
@@ -62,22 +74,21 @@ public class Sink implements AutoCloseable {
     public void start() throws JMSException, NamingException {
 		this.consumer = createConsumer();
 		consumer.setMessageListener(listener);
+		if (exceptionListener != null) {
+			connection.setExceptionListener(exceptionListener);
+		}
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
     }
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
 		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
-		createConnection(ixnContext);
+		connection = ixnContext.createConnection(sslContext);
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		MessageConsumer consumer = session.createConsumer(destination);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
-	}
-
-	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
-		connection = ixnContext.createConnection(sslContext);
 	}
 
 	public static class DefaultMessageListener implements MessageListener {
@@ -142,6 +153,7 @@ public class Sink implements AutoCloseable {
 
 	public void setExceptionListener(ExceptionListener exceptionListener) {
 		try {
+			this.exceptionListener = exceptionListener;
 			this.connection.setExceptionListener(exceptionListener);
 		} catch (JMSException e) {
 			logger.error("Could not set exceptionListener {}", exceptionListener, e);
