@@ -4,12 +4,14 @@ public class DeliveryRequest {
 
     String selector;
 
+    public DeliveryRequest() {
+    }
+
+
     public DeliveryRequest(String selector) {
         this.selector = selector;
     }
 
-    public DeliveryRequest() {
-    }
 
     public String getSelector() {
         return selector;
@@ -22,7 +24,7 @@ public class DeliveryRequest {
     @Override
     public String toString(){
         return "DeliveryRequest{" +
-                "selector='" + selector + "'" +
-                "}";
+                "selector='" + selector + '\'' +
+                '}';
     }
 }

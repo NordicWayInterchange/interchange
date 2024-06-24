@@ -9,5 +9,9 @@ public enum DeliveryStatus {
 
     NOT_VALID,
 
-    NO_OVERLAP
+    NO_OVERLAP,
+
+    ERROR,
+
+    TEAR_DOWN
 }

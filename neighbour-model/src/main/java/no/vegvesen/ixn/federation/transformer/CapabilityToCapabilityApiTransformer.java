@@ -66,6 +66,20 @@ public class CapabilityToCapabilityApiTransformer {
 		);
 	}
 
+	public ApplicationApi applicationToApplicationApi(Application application){
+		return switch (application){
+			case DatexApplication datex -> new DatexApplicationApi(datex.getPublisherId(), datex.getPublicationId(), datex.getOriginatingCountry(), datex.getProtocolVersion(), datex.getQuadTree(), datex.getPublicationType(), datex.getPublisherName());
+			case DenmApplication denm -> new DenmApplicationApi(denm.getPublisherId(), denm.getPublicationId(), denm.getOriginatingCountry(), denm.getProtocolVersion(), denm.getQuadTree(), denm.getCauseCode());
+			case IvimApplication ivim -> new IvimApplicationApi(ivim.getPublisherId(), ivim.getPublicationId(), ivim.getOriginatingCountry(), ivim.getProtocolVersion(), ivim.getQuadTree());
+			case SpatemApplication spatem -> new SpatemApplicationApi(spatem.getPublisherId(), spatem.getPublicationId(), spatem.getOriginatingCountry(), spatem.getProtocolVersion(), spatem.getQuadTree());
+			case MapemApplication mapem -> new MapemApplicationApi(mapem.getPublisherId(), mapem.getPublicationId(), mapem.getOriginatingCountry(), mapem.getProtocolVersion(), mapem.getQuadTree());
+			case SremApplication srem -> new SremApplicationApi(srem.getPublisherId(), srem.getPublicationId(), srem.getOriginatingCountry(), srem.getProtocolVersion(), srem.getQuadTree());
+			case SsemApplication ssem -> new SsemApplicationApi(ssem.getPublisherId(), ssem.getPublicationId(), ssem.getOriginatingCountry(), ssem.getProtocolVersion(), ssem.getQuadTree());
+			case CamApplication cam -> new CamApplicationApi(cam.getPublisherId(), cam.getPublicationId(), cam.getOriginatingCountry(), cam.getProtocolVersion(), cam.getQuadTree());
+			default -> throw new RuntimeException("Subclass of Capability not possible to convert: " + application.getClass().getSimpleName());
+		};
+	}
+
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
 		if (applicationApi instanceof DatexApplicationApi) {
 			return new DatexApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DatexApplicationApi) applicationApi).getPublicationType(), ((DatexApplicationApi) applicationApi).getPublisherName());
@@ -87,6 +101,27 @@ public class CapabilityToCapabilityApiTransformer {
 		throw new RuntimeException("Subclass of Capability not possible to convert: " + applicationApi.getClass().getSimpleName());
 	}
 
+	public MetadataApi metadataToMetadataApi(Metadata metadata){
+		MetadataApi metadataApi = new MetadataApi();
+		if(metadata.getShardCount() != null){
+			metadataApi.setShardCount(metadata.getShardCount());
+		}
+		if(metadata.getInfoUrl() != null){
+			metadataApi.setInfoUrl(metadata.getInfoUrl());
+		}
+		if(metadata.getMaxBandwidth() != null){
+			metadataApi.setMaxBandwidth(metadata.getMaxBandwidth());
+		}
+		if(metadata.getMaxMessageRate() != null){
+			metadataApi.setMaxMessageRate(metadata.getMaxMessageRate());
+		}
+		if(metadata.getRepetitionInterval() != null){
+			metadataApi.setRepetitionInterval(metadata.getRepetitionInterval());
+		}
+		metadataApi.setRedirectPolicy(transformRedirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()));
+		return metadataApi;
+	}
+
 	public Metadata metadataApiToMetadata(MetadataApi metadataApi) {
 		Metadata metadata = new Metadata();
 		if (metadataApi.getShardCount() != null)
@@ -104,6 +139,16 @@ public class CapabilityToCapabilityApiTransformer {
 		return metadata;
 	}
 
+	private RedirectStatusApi transformRedirectStatusToRedirectStatusApi(RedirectStatus status){
+		if(status == null){
+			return RedirectStatusApi.OPTIONAL;
+		}
+		return switch (status){
+			case RedirectStatus.MANDATORY -> RedirectStatusApi.MANDATORY;
+			case RedirectStatus.NOT_AVAILABLE -> RedirectStatusApi.NOT_AVAILABLE;
+			default -> RedirectStatusApi.OPTIONAL;
+		};
+	}
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
 		if (status == null) {
 			return RedirectStatus.OPTIONAL;

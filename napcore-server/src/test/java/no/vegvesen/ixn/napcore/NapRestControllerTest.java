@@ -2,11 +2,7 @@ package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.LocalEndpoint;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -24,8 +20,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.print.attribute.standard.Media;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -208,8 +207,7 @@ public class NapRestControllerTest {
     public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() throws Exception {
         String request = """
                 {
-                "selector": "originatingCountry='NO'",
-                "extraField": "extra"
+                "selector": "originatingCountry='NO'"
                 }
                 """;
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
@@ -232,6 +230,7 @@ public class NapRestControllerTest {
                 Collections.emptySet(),
                 null
         );
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         mockMvc.perform(
                 post(String.format("/nap/%s/subscriptions", "actor"))
@@ -269,16 +268,62 @@ public class NapRestControllerTest {
     */
 
     @Test
-    public void postDeliveryReturnsStatusOk(){}
+    public void postDeliveryReturnsStatusOk() throws Exception{
+        String request = """
+                {
+                "selector": "originatingCountry='NO'"
+                }
+                """;
+        String serviceProviderName = "actor";
+        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), null, "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(),
+                Set.of(),
+                Set.of(localDelivery),
+                null
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+
+    }
 
     @Test
-    public void postDeliveryWithExtraFieldsReturnsStatusBadRequest(){}
+    public void postDeliveryWithExtraFieldsReturnsStatusBadRequest() throws Exception{
+        String request = """
+                {
+                "selector": "originatingCountry='NO'",
+                "extraField": "extraField"
+                """;
+        String serviceProviderName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
 
     @Test
-    public void postDeliveryWithNullSelectorReturnsStatusBadrequest(){}
-
-    @Test
-    public void postingInvalidDeliveryRequestReturnsStatusBadRequest(){}
+    public void postDeliveryWithNullSelectorReturnsStatusBadrequest() throws Exception{
+        String request = "{}";
+        String serviceProviderName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
 
     @Test
     public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() throws Exception{

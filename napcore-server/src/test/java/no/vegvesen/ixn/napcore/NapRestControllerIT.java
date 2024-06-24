@@ -2,10 +2,13 @@ package no.vegvesen.ixn.napcore;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.matcher.ParseException;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,11 +73,10 @@ public class NapRestControllerIT {
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
     }
 
-    // Should probably be SubscriptionRequestException and not NullPointerException
     @Test
     public void testAddingSubscriptionWithNullSelectorThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NullPointerException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest()));
+        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest()));
     }
 
     @Test
@@ -139,11 +142,10 @@ public class NapRestControllerIT {
         assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "1"));
     }
 
-    // This throws NumberFormatException, should it not be NotFoundException?
     @Test
     public void testDeleteSubscriptionWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NumberFormatException.class, () -> napRestController.deleteSubscription(actorCommonName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "notAnId"));
     }
 
     @Test
@@ -172,5 +174,116 @@ public class NapRestControllerIT {
     public void testAddingNullSelectorInDeliveryThrowsException(){
         String actorCommonName = "actor";
         assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
+    }
+
+    @Test
+    public void testGettingDeliveryWithInvalidIdThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getDelivery(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testGettingNonExistentDeliveryThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getDelivery(actorCommonName, "1"));
+    }
+
+    @Test
+    public void testGettingDeliveryReturnsCorrectObject(){
+        String actorCommonName = "actor";
+        String selector = "originatingCountry='NO'";
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector));
+        Delivery delivery = napRestController.getDelivery(actorCommonName, "1");
+        assertThat(delivery).isNotNull();
+        assertThat(delivery.getSelector()).isEqualTo(selector);
+    }
+
+    @Test
+    public void testGettingDeliveries(){
+        String actorCommonName = "actor";
+        String selector1 = "originatingCountry='NO'";
+        String selector2 = "originatingCountry='SE'";
+        String selector3 = "originatingCountry='FI'";
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        napRestController.addDelivery("other_actor", new DeliveryRequest(selector3));
+
+        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(2);
+        assertThat(napRestController.getDeliveries("other_actor")).hasSize(1);
+    }
+
+    @Test
+    public void testDeletingDeliveryWithInvalidIdThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testDeletingNonExistentDeliveryThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "1"));
+    }
+
+    @Test
+    public void testDeletingDelivery(){
+        String actorCommonName = "actor";
+        DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'");
+        Delivery delivery = napRestController.addDelivery(actorCommonName, request);
+
+        napRestController.deleteDelivery(actorCommonName, delivery.getId());
+        for(Delivery response : napRestController.getDeliveries(actorCommonName)){
+            assertThat(response.getStatus()).isEqualTo(DeliveryStatus.TEAR_DOWN);
+        }
+    }
+
+    @Test
+    public void testAddingCapability(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("1"), "test", "test"),
+                new MetadataApi()
+        );
+        OnboardingCapability response = napRestController.addCapability(actorCommonName, capabilitiesRequest);
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void testAddingCapabilityWithInvalidQuadTreeThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("124"), "test", "test"),
+                new MetadataApi()
+        );
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testAddingCapabilityWithMissingPropertiesThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", null, List.of("1"), "test", "test"),
+                new MetadataApi()
+        );
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testAddingCapabilityWithDuplicatePublicationIdThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "protocolversion", List.of("1"), "test", "test"),
+                new MetadataApi()
+        );
+        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
+
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testAddingNullCapabilityThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest request = null;
+
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request));
     }
 }

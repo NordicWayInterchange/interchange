@@ -3,8 +3,10 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.napcore.model.Delivery;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,11 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({DeliveryPostException.class})
+    public ResponseEntity<ErrorDetails> handleDeliveryPostException(DeliveryPostException e){
         return error(BAD_REQUEST, e);
     }
 

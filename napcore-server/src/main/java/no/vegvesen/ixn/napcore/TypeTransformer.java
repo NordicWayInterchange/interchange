@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.napcore;
 
+import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
@@ -15,6 +18,29 @@ import java.util.Set;
 
 public class TypeTransformer {
 
+    public no.vegvesen.ixn.federation.model.capability.Capability transformCapabilitiesRequestToCapability(CapabilitiesRequest request){
+        CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
+        return new no.vegvesen.ixn.federation.model.capability.Capability(
+                transformer.applicationApiToApplication(request.getApplication()),
+                transformer.metadataApiToMetadata(request.getMetadata())
+        );
+    }
+
+    public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
+        CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
+        return new OnboardingCapability(
+                capability.getId().toString(),
+                transformer.applicationToApplicationApi(capability.getApplication()),
+                transformer.metadataToMetadataApi(capability.getMetadata()));
+    }
+
+    public List<OnboardingCapability> transformCapabilitiesToOnboardingCapabilities(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
+        List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
+        for(no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities){
+            onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capability));
+        }
+        return onboardingCapabilities;
+    }
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
         return new LocalSubscription(subscription.getSelector(), nodeName);
     }
@@ -41,15 +67,23 @@ public class TypeTransformer {
         return delivery;
     }
 
+    public List<Delivery> transformLocalDeliveriesToNapDeliveries(Set<LocalDelivery> localDeliveries){
+        List<Delivery> deliveries = new ArrayList<>();
+        for(LocalDelivery localDelivery : localDeliveries){
+            deliveries.add(transformLocalDeliveryToNapDelivery(localDelivery));
+        }
+        return deliveries;
+    }
+
     public DeliveryStatus transformLocalDeliveryStatusToNapDeliveryStatus(LocalDeliveryStatus localDeliveryStatus){
         return switch(localDeliveryStatus){
             case REQUESTED -> DeliveryStatus.REQUESTED;
             case CREATED -> DeliveryStatus.CREATED;
             case ILLEGAL -> DeliveryStatus.ILLEGAL;
-            case TEAR_DOWN -> DeliveryStatus.NO_OVERLAP;
+            case TEAR_DOWN -> DeliveryStatus.TEAR_DOWN;
             case NOT_VALID -> DeliveryStatus.NOT_VALID;
             case NO_OVERLAP -> DeliveryStatus.NO_OVERLAP;
-            case ERROR -> DeliveryStatus.NOT_VALID;
+            case ERROR -> DeliveryStatus.ERROR;
         };
     }
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
