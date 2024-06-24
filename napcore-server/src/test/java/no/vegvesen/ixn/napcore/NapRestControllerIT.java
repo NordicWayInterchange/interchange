@@ -284,4 +284,10 @@ public class NapRestControllerIT {
 
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request));
     }
+
+    @Test
+    public void testGettingNonExistentCapabilityThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "1"));
+    }
 }
