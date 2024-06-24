@@ -3,7 +3,6 @@ package no.vegvesen.ixn.serviceprovider.model;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class LocalActorCapability {
     private String id;

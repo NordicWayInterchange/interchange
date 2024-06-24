@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import org.springframework.data.repository.CrudRepository;
 import java.util.List;
-import java.util.UUID;
 
 public interface PrivateChannelRepository extends CrudRepository<PrivateChannel, Integer> {
 

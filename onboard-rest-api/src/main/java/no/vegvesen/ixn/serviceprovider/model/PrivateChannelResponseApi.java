@@ -3,7 +3,6 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class PrivateChannelResponseApi {
 

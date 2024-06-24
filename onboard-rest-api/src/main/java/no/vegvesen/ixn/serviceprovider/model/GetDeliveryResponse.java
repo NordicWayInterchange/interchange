@@ -2,7 +2,6 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 public class GetDeliveryResponse {
     private String id;

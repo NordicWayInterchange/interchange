@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
-import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedSubscriptionResponseApi {
