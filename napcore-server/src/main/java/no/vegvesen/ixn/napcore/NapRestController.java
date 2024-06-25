@@ -183,6 +183,7 @@ public class NapRestController {
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
         }
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
+
         if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
             localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
         }

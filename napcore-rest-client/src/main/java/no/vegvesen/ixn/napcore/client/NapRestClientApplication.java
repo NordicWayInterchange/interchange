@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,16 @@ subcommands = {
         NapRestClientApplication.GetNapSubscription.class,
         NapRestClientApplication.DeleteNapSubscription.class,
         NapRestClientApplication.FetchMatchingCapabilities.class,
-        NapRestClientApplication.CreateKeys.class
+        NapRestClientApplication.CreateKeys.class,
+        NapRestClientApplication.AddNapDelivery.class,
+        NapRestClientApplication.GetNapDelivery.class,
+        NapRestClientApplication.GetNapDeliveries.class,
+        NapRestClientApplication.DeleteNapDelivery.class,
+        NapRestClientApplication.FetchMatchingDeliveryCapabilities.class,
+        NapRestClientApplication.AddNapCapability.class,
+        NapRestClientApplication.GetNapCapabilities.class,
+        NapRestClientApplication.DeleteNapCapability.class,
+        NapRestClientApplication.GetNapCapability.class
 })
 public class NapRestClientApplication implements Callable<Integer> {
 
@@ -170,6 +180,171 @@ public class NapRestClientApplication implements Callable<Integer> {
             System.out.println(keyAndCSR.getKey());
             List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
             System.out.println(String.join("",decodedChain));
+            return 0;
+        }
+    }
+
+    @Command(name="adddelivery", description = "Add a NAP delivery")
+    static class AddNapDelivery implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Option(names = {"-f", "--filename"}, description = "The Nap delivery json file")
+        File file;
+
+        @Override
+        public Integer call() throws IOException{
+            NapRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            DeliveryRequest request = mapper.readValue(file, DeliveryRequest.class);
+            Delivery response = client.addDelivery(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+            return 0;
+        }
+    }
+
+    @Command(name="getdelivery", description = "Get one NAP delivery for the service provider")
+    static class GetNapDelivery implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the NAP delivery")
+        String deliveryId;
+
+        @Override
+        public Integer call() throws Exception{
+            NapRESTClient client = parentCommand.createClient();
+            Delivery delivery = client.getDelivery(deliveryId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
+            return 0;
+        }
+    }
+
+    @Command(name="getdeliveries", description = "Get the NAP deliveries for the service provider")
+    static class GetNapDeliveries implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws Exception {
+            NapRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            List<Delivery> deliveries = client.getDeliveries();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deliveries));
+            return 0;
+        }
+    }
+
+    @Command(name="deletedelivery", description = "Delete a NAP delivery")
+    static class DeleteNapDelivery implements Callable<Integer> {
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "the ID of the NAP delivery")
+        String deliveryId;
+
+        @Override
+        public Integer call(){
+            NapRESTClient client = parentCommand.createClient();
+            client.deleteDelivery(deliveryId);
+            System.out.printf("Nap delivery with id %s deleted successfully", deliveryId);
+            return 0;
+        }
+    }
+
+    @Command(name="fetchmatchingdeliverycapabilities", description = "Get service providers capabilities matching selector")
+    static class FetchMatchingDeliveryCapabilities implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The selector to match with the capabilities")
+        String selector;
+
+        @Override
+        public Integer call() throws JsonProcessingException {
+            NapRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            List<Capability> capabilities = client.getMatchingDeliveryCapabilities(selector);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+            return 0;
+        }
+    }
+
+    @Command(name="addcapability", description = "Add a NAP capability")
+    static class AddNapCapability implements Callable<Integer> {
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Option(names = {"-f", "--filename"}, description = "The NAP capability json file")
+        File file;
+
+        @Override
+        public Integer call() throws IOException {
+            NapRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            CapabilitiesRequest request = mapper.readValue(file, CapabilitiesRequest.class);
+            OnboardingCapability response = client.addCapability(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+            return 0;
+        }
+    }
+
+    @Command(name="getcapability", description = "Get one NAP capability for the service provider")
+    static class GetNapCapability implements Callable<Integer> {
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the NAP capability")
+        String capabilityId;
+
+        @Override
+        public Integer call() throws JsonProcessingException {
+            NapRESTClient client = parentCommand.createClient();
+            OnboardingCapability capability = client.getCapability(capabilityId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));
+            return 0;
+        }
+    }
+
+    @Command(name = "getcapabilities", description = "Get the NAP capabilities for the service provider")
+    static class GetNapCapabilities implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws JsonProcessingException {
+            NapRESTClient client = parentCommand.createClient();
+            List<OnboardingCapability> capabilities = client.getCapabilities();
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+            return 0;
+        }
+    }
+
+    @Command(name="deletecapability", description = "Delete a NAP capability")
+    static class DeleteNapCapability implements Callable<Integer>{
+
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the NAP capability")
+        String capabilityId;
+
+        @Override
+        public Integer call(){
+            NapRESTClient client = parentCommand.createClient();
+            client.deleteCapability(capabilityId);
+            System.out.printf("Nap capability with id %s deleted successfully", capabilityId);
             return 0;
         }
     }

@@ -101,8 +101,61 @@ public class NapRESTClient {
         return Arrays.asList(response.getBody());
     }
 
+    public Delivery addDelivery(DeliveryRequest deliveryRequest){
+        String url = String.format("%s/nap/%s/deliveries", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DeliveryRequest> entity = new HttpEntity<>(deliveryRequest, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, Delivery.class).getBody();
+    }
 
+    public Delivery getDelivery(String deliveryId){
+        String url = String.format("%s/nap/%s/deliveries/%s", server, user, deliveryId);
+        return restTemplate.getForEntity(url, Delivery.class).getBody();
+    }
 
+    public List<Delivery> getDeliveries(){
+        String url = String.format("%s/nap/%s/deliveries", server, user);
+        ResponseEntity<Delivery[]> response = restTemplate.getForEntity(url, Delivery[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public void deleteDelivery(String deliveryId){
+        String url = String.format("%s/nap/%s/deliveries/%s", server, user, deliveryId);
+        restTemplate.delete(url);
+    }
+
+    public List<Capability> getMatchingDeliveryCapabilities(String selector){
+        String url = String.format("%s/nap/%s/deliveries/capabilities");
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("selector", selector);
+        ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
+        return Arrays.asList(response.getBody());
+    }
+
+    public OnboardingCapability addCapability(CapabilitiesRequest request){
+        String url = String.format("%s/nap/%s/capabilities", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<CapabilitiesRequest> entity = new HttpEntity<>(request, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, OnboardingCapability.class).getBody();
+    }
+
+    public OnboardingCapability getCapability(String capabilityId){
+        String url = String.format("%s/nap/%s/capabilities/%s", server, user, capabilityId);
+        return restTemplate.getForEntity(url, OnboardingCapability.class).getBody();
+    }
+
+    public List<OnboardingCapability> getCapabilities(){
+        String url = String.format("%s/nap/%s/capabilities", server, user);
+        ResponseEntity<OnboardingCapability[]> response = restTemplate.getForEntity(url, OnboardingCapability[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public void deleteCapability(String capabilityId){
+        String url = String.format("%s/nap/%s/capabilities/%s", server, user, capabilityId);
+        restTemplate.delete(url);
+    }
     public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");

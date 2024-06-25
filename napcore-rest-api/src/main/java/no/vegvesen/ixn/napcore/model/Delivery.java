@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Delivery {
@@ -10,7 +11,7 @@ public class Delivery {
 
     DeliveryStatus status;
 
-    List<DeliveryEndpoint> endpoints;
+    List<DeliveryEndpoint> endpoints = new ArrayList<>();
 
     Long lastUpdatedTimeStamp;
 
