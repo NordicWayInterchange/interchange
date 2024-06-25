@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
@@ -41,6 +39,7 @@ public class TypeTransformer {
         }
         return onboardingCapabilities;
     }
+
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
         return new LocalSubscription(subscription.getSelector(), nodeName);
     }
@@ -87,7 +86,7 @@ public class TypeTransformer {
         };
     }
 
-    // TODO change empty string to LocalDeliveryEndpoints selector when object is changed
+    // TODO change empty string to LocalDeliveryEndpoint's selector when object is changed
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
         List<DeliveryEndpoint> endpoints = new ArrayList<>();
         for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){

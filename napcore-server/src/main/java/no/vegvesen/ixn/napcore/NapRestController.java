@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -130,7 +127,7 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"})
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Subscription getSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
@@ -158,7 +155,7 @@ public class NapRestController {
         logger.debug("Updated Service Provider: {}", saved.toString());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" })
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" }, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
@@ -214,7 +211,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
-                .filter(d->d.getId().equals(Integer.parseInt(deliveryId)))
+                .filter(d->d.getId().equals(parseInteger(deliveryId, "delivery")))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with Id %s for service provider %s", deliveryId, actorCommonName)));
 
@@ -231,7 +228,8 @@ public class NapRestController {
         return typeTransformer.transformLocalDeliveriesToNapDeliveries(serviceProvider.getDeliveries());
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"})
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
@@ -259,7 +257,7 @@ public class NapRestController {
         return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/capabilities"})
+    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
@@ -292,7 +290,7 @@ public class NapRestController {
         return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"})
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
@@ -302,7 +300,7 @@ public class NapRestController {
         return typeTransformer.transformCapabilitiesToOnboardingCapabilities(serviceProvider.getCapabilities().getCapabilities());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"})
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
@@ -313,6 +311,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"})
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
@@ -331,6 +330,7 @@ public class NapRestController {
             throw new NotFoundException(String.format("Could not find %s with Id %s", className, unparsedInt));
         }
     }
+
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {

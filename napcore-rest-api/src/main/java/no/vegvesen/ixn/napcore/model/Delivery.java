@@ -58,7 +58,6 @@ public class Delivery {
         if(endpoints != null){
             this.endpoints.addAll(endpoints);
         }
-
     }
 
     public Long getLastUpdatedTimeStamp() {

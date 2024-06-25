@@ -126,7 +126,7 @@ public class NapRESTClient {
     }
 
     public List<Capability> getMatchingDeliveryCapabilities(String selector){
-        String url = String.format("%s/nap/%s/deliveries/capabilities");
+        String url = String.format("%s/nap/%s/deliveries/capabilities", server, user);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("selector", selector);
         ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
@@ -156,6 +156,7 @@ public class NapRESTClient {
         String url = String.format("%s/nap/%s/capabilities/%s", server, user, capabilityId);
         restTemplate.delete(url);
     }
+
     public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
