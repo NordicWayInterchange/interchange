@@ -75,7 +75,7 @@ public class NeighbourRestControllerIT {
         neighbour.setNeighbourRequestedSubscriptions(request);
         neighbour = neighbourRepository.save(neighbour);
 
-        assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getId()).toString().toLowerCase()).contains("lastupdatedtimestamp");
+        assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getUuid()).toString().toLowerCase()).contains("lastupdatedtimestamp");
     }
 
     @Test
