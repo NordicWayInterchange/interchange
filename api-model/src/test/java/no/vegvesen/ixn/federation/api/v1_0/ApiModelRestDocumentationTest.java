@@ -140,8 +140,7 @@ public class ApiModelRestDocumentationTest {
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
-                                "node-1",
-                                System.currentTimeMillis()
+                                "node-1"
                         )
                 )
         );
@@ -159,16 +158,14 @@ public class ApiModelRestDocumentationTest {
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
-                                "node-1",
-                                System.currentTimeMillis()
+                                "node-1"
                         ),
                         new RequestedSubscriptionResponseApi(
                                 UUID.randomUUID().toString(),
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/2",
                                 SubscriptionStatusApi.REQUESTED,
-                                "node-1",
-                                System.currentTimeMillis()
+                                "node-1"
                         )
                 ))
         );

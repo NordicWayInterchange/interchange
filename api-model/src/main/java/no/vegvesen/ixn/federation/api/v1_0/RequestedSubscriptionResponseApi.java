@@ -18,7 +18,6 @@ public class RequestedSubscriptionResponseApi {
 
     private String path;
     private SubscriptionStatusApi status;
-    private long lastUpdatedTimestamp;
 
     public RequestedSubscriptionResponseApi() {
     }
@@ -38,13 +37,11 @@ public class RequestedSubscriptionResponseApi {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
-        this.id = id;
+    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.consumerCommonName = consumerCommonName;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public String getId() {
@@ -87,14 +84,6 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
     }
 
-    public long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
-    }
-
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -120,7 +109,6 @@ public class RequestedSubscriptionResponseApi {
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
 }

@@ -2,8 +2,8 @@ package no.vegvesen.ixn.federation.server;
 
 
 import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.NeighbourSubscription;
@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,9 +29,7 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -55,55 +54,43 @@ public class NeighbourRestControllerIT {
     @Autowired
     NeighbourRepository neighbourRepository;
 
+    @Test
+    public void requestSubscriptionsDoesNotIncludeTimeStamp(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour1");
+        neighbourRepository.save(neighbour);
+        SubscriptionRequestApi request = new SubscriptionRequestApi(neighbour.getName(), Set.of(new RequestedSubscriptionApi(
+                "originatingCountry='NO'",
+                "sp.bouvetinterchange.eu"
+        )));
+        SubscriptionResponseApi response = neighbourRestController.requestSubscriptions(request);
+        assertThat(response.toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
+    }
+
+    @Test
+    public void pollSubscriptionIncludesTimestamp(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour2");
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED)));
+        neighbour.setNeighbourRequestedSubscriptions(request);
+        neighbour = neighbourRepository.save(neighbour);
+
+        assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getId()).toString().toLowerCase()).contains("lastupdatedtimestamp");
+    }
+
+    @Test
+    public void listSubscriptionsDoesNotIncludeTimestamp(){
+        Neighbour neighbour = new Neighbour();
+        neighbour.setName("neighbour3");
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)));
+        neighbour.setNeighbourRequestedSubscriptions(request);
+        neighbour = neighbourRepository.save(neighbour);
+
+        assertThat(neighbourRestController.listSubscriptions(neighbour.getName()).toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
+    }
+
     @Autowired
     WebApplicationContext context;
-
-
-    @Test
-    public void requestSubscriptionsReturnsUUID(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour_uuid_1");
-        neighbourRepository.save(neighbour);
-        SubscriptionRequestApi request = new SubscriptionRequestApi(neighbour.getName(), Set.of(
-                new RequestedSubscriptionApi("originatingCountry='NO'")
-        ));
-        assertTrue(checkUuid(neighbourRestController.requestSubscriptions(request).getSubscriptions().stream().findAny().get().getId()));
-    }
-
-    @Test
-    public void listSubscriptionsReturnsUUID(){
-       Neighbour neighbour = new Neighbour();
-       neighbour.setName("neighbour_uuid_2");
-       neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(
-               Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED))
-       ));
-       neighbourRepository.save(neighbour);
-
-       assertTrue(checkUuid(neighbourRestController.listSubscriptions(neighbour.getName()).getSubscriptions().stream().findFirst().get().getId()));
-    }
-
-    @Test
-    public void pollSubscriptionReturnsUUID(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour_uuid_3");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(
-                new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)
-        ));
-        neighbour.setNeighbourRequestedSubscriptions(request);
-        neighbourRepository.save(neighbour);
-        SubscriptionPollResponseApi responseApi = neighbourRestController.pollSubscription(neighbour.getName(), request.getSubscriptions().stream().findFirst().get().getUuid());
-        assertTrue(checkUuid(responseApi.getId()));
-    }
-
-    private boolean checkUuid(String id){
-        try{
-            UUID.fromString(id);
-            return true;
-        }
-        catch (IllegalArgumentException e){
-            return false;
-        }
-    }
 
     @Test
     public void genSwagger() throws Exception {
