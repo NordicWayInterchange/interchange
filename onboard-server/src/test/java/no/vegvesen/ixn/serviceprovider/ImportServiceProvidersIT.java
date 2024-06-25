@@ -42,7 +42,7 @@ public class ImportServiceProvidersIT {
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
-            Set<Capability> capabilities = transformer.capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
+            Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
             Capabilities capabilities1 = new Capabilities();
             capabilities1.setCapabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);

@@ -26,7 +26,7 @@ public class SwaggerConfig {
         return openApi -> {
             Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-            ComposedSchema application = (ComposedSchema) schemas.get("CapabilitySplitApi").getProperties().get("application");
+            ComposedSchema application = (ComposedSchema) schemas.get("CapabilityApi").getProperties().get("application");
             application.getOneOf().remove(0);
 
             openApi.getComponents().addSchemas("SubscriptionPollResponseApi", ModelConverters.getInstance().readAllAsResolvedSchema(SubscriptionPollResponseApi.class).schema);

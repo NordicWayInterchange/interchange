@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -80,7 +80,7 @@ public class OnboardRestController {
 		}
 
 		Set<String> allPublicationIds = allPublicationIds();
-		for (CapabilitySplitApi capability : capabilityApi.getCapabilities()) {
+		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
@@ -119,7 +119,7 @@ public class OnboardRestController {
 		Set<Capability> allCapabilities = getAllLocalCapabilities();
 		allCapabilities.addAll(getAllNeighbourCapabilities());
 		return allCapabilities.stream()
-				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
+				.map(capability -> capability.getApplication().getPublicationId())
 				.collect(Collectors.toSet());
 	}
 
@@ -174,7 +174,7 @@ public class OnboardRestController {
 		Set<Capability> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+			capabilities.addAll(Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
 		}
 		return capabilities;
 	}

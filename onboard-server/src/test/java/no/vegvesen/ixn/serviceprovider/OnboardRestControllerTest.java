@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
@@ -81,7 +81,7 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
 		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-		CapabilitySplitApi datexNo = new CapabilitySplitApi();
+		CapabilityApi datexNo = new CapabilityApi();
 		datexNo.setApplication(app);
 		datexNo.setMetadata(meta);
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
@@ -146,7 +146,7 @@ public class OnboardRestControllerTest {
 
 		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", List.of(), "SituationPublication", "publisherName");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-		CapabilitySplitApi datexFi = new CapabilitySplitApi();
+		CapabilityApi datexFi = new CapabilityApi();
 		datexFi.setApplication(app);
 		datexFi.setMetadata(meta);
 

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
@@ -101,7 +101,7 @@ public class ExportServiceProvidersIT {
         for (ServiceProvider serviceProvider : serviceProviderList) {
             ServiceProviderApi serviceProviderApi = new ServiceProviderApi();
             serviceProviderApi.setName(serviceProvider.getName());
-            Set<CapabilitySplitApi> capabilityApis = capabilityApiTransformer.capabilitiesSplitToCapabilitiesSplitApi(serviceProvider.getCapabilities().getCapabilities());
+            Set<CapabilityApi> capabilityApis = capabilityApiTransformer.capabilitiesToCapabilitiesApi(serviceProvider.getCapabilities().getCapabilities());
             serviceProviderApi.setCapabilities(capabilityApis);
 
             Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();

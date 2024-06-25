@@ -97,15 +97,15 @@ public class Capability {
         return metadata.hasShards();
     }
 
-    public static Set<Capability> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
-        Set<Capability> capabilitySplits = new HashSet<>();
-        for(NeighbourCapability i : capabilities){
-            capabilitySplits.add(
+    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
+        Set<Capability> capabilities = new HashSet<>();
+        for(NeighbourCapability i : neighbourCapabilities){
+            capabilities.add(
                     new Capability(i.getApplication(), i.getMetadata())
             );
 
         }
-        return capabilitySplits;
+        return capabilities;
     }
 
     @Override

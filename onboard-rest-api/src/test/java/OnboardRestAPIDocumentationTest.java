@@ -132,7 +132,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void createDENMCapability() throws JsonProcessingException {
-        CapabilitySplitApi api = new CapabilitySplitApi(
+        CapabilityApi api = new CapabilityApi(
                 new DenmApplicationApi(
                 "NPRA",
                 "pub-1",
@@ -153,7 +153,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "sp-1",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -174,7 +174,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "SVT",
                                         "pub-1",
@@ -198,7 +198,7 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 UUID.randomUUID().toString(),
                                 "/sp-1/capabilities/1",
-                                new CapabilitySplitApi(
+                                new CapabilityApi(
                                     new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -222,7 +222,7 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 UUID.randomUUID().toString(),
                                 "/spi-1/capabilities/1",
-                                new CapabilitySplitApi(
+                                new CapabilityApi(
                                         new DenmApplicationApi(
                                                 "NPRA",
                                                 "pub-1",
@@ -243,7 +243,7 @@ public class OnboardRestAPIDocumentationTest {
         GetCapabilityResponse response = new GetCapabilityResponse(
                 UUID.randomUUID().toString(),
                 "/sp-1/capabilities/1",
-                new CapabilitySplitApi(
+                new CapabilityApi(
                         new DenmApplicationApi(
                                 "NPRA",
                                 "pub-1",
@@ -330,7 +330,7 @@ public class OnboardRestAPIDocumentationTest {
         FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
                 "service-provider",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -352,7 +352,7 @@ public class OnboardRestAPIDocumentationTest {
                 "service-provider",
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -430,7 +430,7 @@ public class OnboardRestAPIDocumentationTest {
                 0
         );
 
-        CapabilitySplitApi denm = new CapabilitySplitApi(
+        CapabilityApi denm = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
                         "NO00000-DENM",
@@ -442,7 +442,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi datex = new CapabilitySplitApi(
+        CapabilityApi datex = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
                         "NO00000-DATEX",
@@ -455,7 +455,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi ivim = new CapabilitySplitApi(
+        CapabilityApi ivim = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-IVIM",
@@ -465,7 +465,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi spatem = new CapabilitySplitApi(
+        CapabilityApi spatem = new CapabilityApi(
                 new SpatemApplicationApi(
                         "NO00000",
                         "NO00000-SPATEM",
@@ -476,7 +476,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi mapem = new CapabilitySplitApi(
+        CapabilityApi mapem = new CapabilityApi(
                 new MapemApplicationApi(
                         "NO00000",
                         "NO00000-MAPEM",
@@ -487,7 +487,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi ssem = new CapabilitySplitApi(
+        CapabilityApi ssem = new CapabilityApi(
                 new SsemApplicationApi(
                         "NO00000",
                         "NO00000-SSEM",
@@ -498,7 +498,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi srem = new CapabilitySplitApi(
+        CapabilityApi srem = new CapabilityApi(
                 new SremApplicationApi(
                         "NO00000",
                         "NO00000-SREM",
@@ -509,7 +509,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi cam = new CapabilitySplitApi(
+        CapabilityApi cam = new CapabilityApi(
                 new CamApplicationApi(
                         "NO00000",
                         "NO00000-CAM",

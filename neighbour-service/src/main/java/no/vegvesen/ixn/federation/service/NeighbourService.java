@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -51,7 +51,7 @@ public class NeighbourService {
 		return neighbourRepository.findAll();
 	}
 
-	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		LocalDateTime now = LocalDateTime.now();
 

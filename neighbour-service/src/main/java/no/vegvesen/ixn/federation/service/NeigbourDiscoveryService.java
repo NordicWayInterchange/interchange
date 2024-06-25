@@ -170,7 +170,7 @@ public class NeigbourDiscoveryService {
         String neighbourName = neighbour.getName();
         Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, Capability.transformNeighbourCapabilityToSplitCapability(neighbourCapabilities), interchangeNodeProperties.getName());
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, Capability.transformNeighbourCapabilityToCapability(neighbourCapabilities), interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
