@@ -96,6 +96,8 @@ public class ServiceProviderRouter {
 
     public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort, QpidDelta delta) {
         switch (subscription.getStatus()) {
+            case IMPORTED_CREATED:
+                break;
             case REQUESTED:
                 if (subscription.getLocalEndpoints().isEmpty()) {
                     String queueName = "loc-" + UUID.randomUUID().toString();
@@ -179,8 +181,9 @@ public class ServiceProviderRouter {
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        }
-        else {
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.IMPORTED_CREATED)) {
+            //Skip, handled in ImportRouter
+        } else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
@@ -298,6 +301,14 @@ public class ServiceProviderRouter {
                     newShards.add(newShard);
                 }
                 capability.setShards(newShards);
+                capability.setStatus(CapabilityStatus.CREATED);
+            } else {
+                for (CapabilityShard shard : capability.getShards()) {
+                    if (!delta.exchangeExists(shard.getExchangeName())) {
+                        Exchange exchange = qpidClient.createHeadersExchange(shard.getExchangeName());
+                        delta.addExchange(exchange);
+                    }
+                }
                 capability.setStatus(CapabilityStatus.CREATED);
             }
         }

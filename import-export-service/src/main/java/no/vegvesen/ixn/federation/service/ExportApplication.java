@@ -39,6 +39,7 @@ public class ExportApplication implements CommandLineRunner {
         ObjectMapper mapper = new ObjectMapper();
 
         ExportApi exportModel = new ExportApi(
+                neighbourRepository.findAll().stream().map(exportTransformer::transformNeighbourToNeighbourExportApi).collect(Collectors.toSet()),
                 serviceProviderRepository.findAll().stream().map(exportTransformer::transformServiceProviderToServiceProviderExportApi).collect(Collectors.toSet()),
                 privateChannelRepository.findAll().stream().map(exportTransformer::transformPrivateChannelToPrivateChannelExportApi).collect(Collectors.toSet())
         );

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ImportTransformer {
 
-    public CapabilityToCapabilityApiTransformer capabilityTransformer;
+    public CapabilityToCapabilityApiTransformer capabilityTransformer = new CapabilityToCapabilityApiTransformer();
 
     public LocalDateTime convertLongToLocalDateTime(long importTimestamp) {
         Instant instant = Instant.ofEpochMilli(importTimestamp);
@@ -29,7 +29,8 @@ public class ImportTransformer {
     }
 
     public LocalSubscription transformLocalSubscriptionImportApiToLocalSubscription(LocalSubscriptionImportApi localSubscription) {
-        LocalSubscription newLocalSubscription = new LocalSubscription(transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+        LocalSubscription newLocalSubscription = new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+                LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName()
         );
@@ -78,7 +79,7 @@ public class ImportTransformer {
         Capability newCapability = new Capability(capabilityTransformer.applicationApiToApplication(capability.getApplication()),
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
-        newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
+        //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
         newCapability.setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
         return newCapability;
     }
@@ -129,7 +130,9 @@ public class ImportTransformer {
     public LocalDelivery transformDeliveryImportApiToLocalDelivery(DeliveryImportApi delivery) {
         return new LocalDelivery(delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus()));
+                //transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus())
+                LocalDeliveryStatus.REQUESTED
+        );
     }
 
     public LocalDeliveryEndpoint transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint(DeliveryEndpointImportApi endpoint) {
@@ -317,7 +320,8 @@ public class ImportTransformer {
 
     public PrivateChannel transformPrivateChannelImportApiToPrivateChannel(PrivateChannelImportApi privateChannel) {
         return new PrivateChannel(privateChannel.getPeerName(),
-                transformPrivateChannelStatusImportApiToPrivateChannelStatus(privateChannel.getStatus()),
+                //transformPrivateChannelStatusImportApiToPrivateChannelStatus(privateChannel.getStatus()),
+                PrivateChannelStatus.REQUESTED,
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
         );
