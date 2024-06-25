@@ -2,6 +2,8 @@ package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -25,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -262,13 +263,12 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
-        if(Objects.isNull(capabilitiesRequest)){
+        if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
             throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
         }
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
-
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
             throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
         }
@@ -318,8 +318,8 @@ public class NapRestController {
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         serviceProviderToUpdate.getCapabilities().removeDataType(parseInteger(capabilityId, "capability"));
-
-        logger.info("Updated service provider {}", actorCommonName);
+        serviceProviderRepository.save(serviceProviderToUpdate);
+        logger.info("Updated service provider {}", serviceProviderToUpdate);
     }
 
     private Integer parseInteger(String unparsedInt, String className){

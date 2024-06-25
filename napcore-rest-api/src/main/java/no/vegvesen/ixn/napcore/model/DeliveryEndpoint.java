@@ -1,5 +1,9 @@
 package no.vegvesen.ixn.napcore.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeliveryEndpoint {
 
     private String host;
@@ -8,6 +12,7 @@ public class DeliveryEndpoint {
 
     private String target;
 
+    @JsonIgnore
     private String selector;
 
     private Integer maxBandwidth;
@@ -21,14 +26,6 @@ public class DeliveryEndpoint {
         this.port = port;
         this.target = target;
         this.selector = selector;
-        this.maxBandwidth = maxBandwidth;
-        this.maxMessageRate = maxMessageRate;
-    }
-
-    public DeliveryEndpoint(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
-        this.host = host;
-        this.port = port;
-        this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }

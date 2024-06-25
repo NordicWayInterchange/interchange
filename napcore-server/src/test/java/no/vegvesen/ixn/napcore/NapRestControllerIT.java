@@ -2,12 +2,16 @@ package no.vegvesen.ixn.napcore;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MapemApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
@@ -19,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -187,11 +193,11 @@ public class NapRestControllerIT {
     }
 
     @Test
-    public void testGettingDeliveryReturnsCorrectObject(){
+    public void testGettingDelivery(){
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector));
-        Delivery delivery = napRestController.getDelivery(actorCommonName, "1");
+        Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector));
+        Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
         assertThat(delivery).isNotNull();
         assertThat(delivery.getSelector()).isEqualTo(selector);
     }
@@ -208,6 +214,39 @@ public class NapRestControllerIT {
 
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(2);
         assertThat(napRestController.getDeliveries("other_actor")).hasSize(1);
+    }
+
+    @Test
+    public void testGettingMatchingDeliveryCapabilities(){
+        String actor1 = "actor-1";
+        String actor2 = "actor-2";
+        String selector = "originatingCountry='NO'";
+        CapabilitiesRequest request1 = new CapabilitiesRequest(
+          new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+          new MetadataApi()
+        );
+
+        CapabilitiesRequest request2 = new CapabilitiesRequest(
+                new DatexApplicationApi("pub-id","publication-id-2","SE","1", List.of("1"), "type","name"),
+                new MetadataApi()
+        );
+
+        CapabilitiesRequest request3 = new CapabilitiesRequest(
+                new DatexApplicationApi("pub-id","publication-id-3","NO","1", List.of("1"), "type","name"),
+                new MetadataApi()
+        );
+        napRestController.addCapability(actor1, request1);
+        napRestController.addCapability(actor1, request2);
+        napRestController.addCapability(actor2, request3);
+
+        List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingDeliveryCapabilities(actor1, selector);
+        List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingDeliveryCapabilities(actor1, "originatingCountry='SE'");
+        List<no.vegvesen.ixn.napcore.model.Capability> response3 = napRestController.getMatchingDeliveryCapabilities(actor2, "originatingCountry='SE'");
+        List<no.vegvesen.ixn.napcore.model.Capability> response4 = napRestController.getMatchingDeliveryCapabilities(actor2, selector);
+        assertThat(response1).hasSize(1);
+        assertThat(response2).hasSize(1);
+        assertThat(response3).hasSize(0);
+        assertThat(response4).hasSize(1);
     }
 
     @Test
@@ -286,8 +325,71 @@ public class NapRestControllerIT {
     }
 
     @Test
+    public void testAddingCapabilityWithNullApplicationOrMetadataThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest request1 = new CapabilitiesRequest(new MapemApplicationApi(), null);
+        CapabilitiesRequest request2 = new CapabilitiesRequest(null, new MetadataApi());
+
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request1));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request2));
+    }
+
+    @Test
     public void testGettingNonExistentCapabilityThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "1"));
     }
+
+    @Test
+    public void testGettingCapabilityWithInvalidIdThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testGettingCapabilities(){
+        String actor1 = "actor";
+        String actor2 = "actor-2";
+        CapabilitiesRequest request = new CapabilitiesRequest(
+                new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
+                new MetadataApi()
+        );
+        napRestController.addCapability(actor1, request);
+        request.getApplication().setPublicationId("publi-Id-2");
+        napRestController.addCapability(actor1, request);
+        request.getApplication().setPublicationId("publi-Id-3");
+        napRestController.addCapability(actor2, request);
+
+        assertThat(napRestController.getCapabilities(actor1)).hasSize(2);
+        assertThat(napRestController.getCapabilities(actor2)).hasSize(1);
+    }
+
+    @Test
+    public void testDeletingCapability(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest request = new CapabilitiesRequest(
+                new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
+                new MetadataApi()
+        );
+        OnboardingCapability response = napRestController.addCapability(actorCommonName, request);
+        napRestController.deleteCapability(actorCommonName, response.getId());
+
+        // Ugly, should onboardingCapability have Status?
+        for(Capability capability : serviceProviderRepository.findAll().stream().flatMap(a->a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet())){
+            assertThat(capability.getStatus().equals(CapabilityStatus.TEAR_DOWN));
+        }
+    }
+
+    @Test
+    public void testDeletingNonExistentCapabilityThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "1"));
+    }
+
+    @Test
+    public void testDeletingCapabilityWithInvalidIdThrowsException(){
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId"));
+    }
+
 }

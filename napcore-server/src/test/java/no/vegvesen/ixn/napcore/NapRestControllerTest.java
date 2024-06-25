@@ -1,8 +1,14 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -25,6 +31,7 @@ import javax.print.attribute.standard.Media;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -32,10 +39,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -69,6 +73,8 @@ public class NapRestControllerTest {
 
     @MockBean
     private CapabilityToCapabilityApiTransformer transformer;
+    @Autowired
+    private CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
 
     @BeforeEach
     void setUp() {
@@ -338,6 +344,120 @@ public class NapRestControllerTest {
         ).andExpect(status().isNotFound());
     }
 
+    @Test
+    public void deletingNapSubscriptionWithInvalidIdReturnsStatusNotFound() throws Exception{
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                delete(String.format("/nap/%s/subscriptions/%s", "actor", "notAnId"))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addingCapabilityReturnsStatusOk() throws Exception{
+        String request = """
+                {
+                "application":
+                {
+                "messageType": "DATEX2",
+                "publisherId": "publisherId",
+                "publicationId": "publicationId",
+                "protocolVersion": "protocolVersion",
+                "quadTree": ["123"],
+                "publicationType": "Hello",
+                "publisherName": "hello",
+                "originatingCountry": "NO"
+                },
+                "metadata": {}
+                }
+                """;
+        String actorCommonName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        Capability capability = new Capability(
+                new DatexApplication("publisherId", "publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new Metadata()
+        );
+        capability.setId(1);
+        when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(
+                1,
+                actorCommonName,
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                null
+        ));
+        when(capabilityToCapabilityApiTransformer.capabilitySplitToCapabilitySplitApi(any())).thenReturn(new CapabilitySplitApi(
+                new DatexApplicationApi("publisherId", "publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new MetadataApi()
+        ));
+        mockMvc.perform(
+                post(String.format("/nap/%s/capabilities", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void addingCapabilityWithMissingFieldsReturnsStatusBadRequest() throws Exception{
+        String request = """
+                {
+                "application":
+                {
+                "messageType": "DATEX2",
+                "publisherId": "publisherId",
+                "publicationId": "publicationId",
+                "quadTree": ["123"],
+                "publicationType": "Hello",
+                "publisherName": "hello",
+                "originatingCountry": "NO"
+                },
+                "metadata": {}
+                }
+                """;
+        String actorCommonName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(capabilityToCapabilityApiTransformer.capabilitySplitToCapabilitySplitApi(any())).thenReturn(new CapabilitySplitApi(
+                new DatexApplicationApi("publisherId", "publicationId","NO", null, List.of("123"), "Hello", "hello"),
+                new MetadataApi()
+        ));
+        mockMvc.perform(
+                post(String.format("/nap/%s/capabilities", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    /*
+    Some strange error occurs 'content type not set'. Need to find cause
+    @Test
+    public void deleteCapabilityReturnsNoContent() throws Exception {
+        String actorCommonName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        Capability capability = new Capability(
+                new DatexApplication("pub", "pub", "NO", "1", List.of("1"), "type", "name"),
+                new Metadata());
+        capability.setId(1);
+        when(serviceProviderRepository.findByName(any())).thenReturn(
+          new ServiceProvider(
+                  1,
+                  actorCommonName,
+                  new Capabilities(Set.of(capability)),
+                  Set.of(),
+                  null
+          )
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(
+                new ServiceProvider()
+        );
+
+        mockMvc.perform(
+                delete(String.format("/nap/%s/capabilities/%s", actorCommonName, "1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+*/
     @Configuration
     public static class NapCorePropertiesCreator {
         @Bean

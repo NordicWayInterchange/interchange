@@ -3,9 +3,11 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.napcore.model.Capability;
 import no.vegvesen.ixn.napcore.model.Delivery;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
@@ -52,6 +54,11 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({DeliveryPostException.class})
     public ResponseEntity<ErrorDetails> handleDeliveryPostException(DeliveryPostException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({CapabilityPostException.class})
+    public ResponseEntity<ErrorDetails> handleCapabilityPostException(CapabilityPostException e){
         return error(BAD_REQUEST, e);
     }
 

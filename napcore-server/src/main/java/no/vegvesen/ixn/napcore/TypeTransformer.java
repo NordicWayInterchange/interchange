@@ -86,13 +86,16 @@ public class TypeTransformer {
             case ERROR -> DeliveryStatus.ERROR;
         };
     }
+
+    // TODO change empty string to LocalDeliveryEndpoints selector when object is changed
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
         List<DeliveryEndpoint> endpoints = new ArrayList<>();
         for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
-            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate()));
+            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate()));
         }
         return endpoints;
     }
+
     public Subscription transformLocalSubscriptionToNapSubscription(LocalSubscription localSubscription) {
         LocalDateTime lastUpdated = localSubscription.getLastUpdated();
         Long epochSecond = null;
