@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class NeigbourDiscoveryService {
 
-    private Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
+    private final Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
 
     private final DNSFacade dnsFacade;
     private final NeighbourRepository neighbourRepository;
@@ -213,7 +213,6 @@ public class NeigbourDiscoveryService {
     public void pollSubscriptions(NeighbourFacade neighbourFacade) {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 SubscriptionStatus.REQUESTED,
-                SubscriptionStatus.ACCEPTED,
                 SubscriptionStatus.FAILED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {

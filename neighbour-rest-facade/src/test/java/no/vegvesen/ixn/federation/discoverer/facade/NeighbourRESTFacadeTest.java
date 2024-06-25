@@ -25,10 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -36,14 +33,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class NeighbourRESTFacadeTest {
 
 
-	private RestTemplate restTemplate = new RestTemplate();
-	private ObjectMapper mapper = new ObjectMapper();
-	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
-	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
+	private final RestTemplate restTemplate = new RestTemplate();
+	private final ObjectMapper mapper = new ObjectMapper();
+	private final CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
+	private final SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private final SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private final CapabilityToCapabilityApiTransformer capabilityTransformer = new CapabilityToCapabilityApiTransformer();
-	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
+	private final NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
 			capabilitiesTransformer,
 			capabilityTransformer,
 			subscriptionTransformer,
@@ -155,14 +152,22 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
-
+		String uuid = UUID.randomUUID().toString();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setId(1);
-		subscription.setPath("/bouvet/subscriptions/1");
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
-		String remoteServerJson = new ObjectMapper().writeValueAsString(responseApi);
+		subscription.setPath("/bouvet/subscriptions/" + uuid);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
+		SubscriptionPollResponseApi subscriptionPollResponseApi = new SubscriptionPollResponseApi(
+				uuid,
+				"originatingCountry = 'NO'",
+				"/bouvet/subscriptions/" + uuid,
+				SubscriptionStatusApi.REQUESTED,
+				""
+		);
+
+		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionPollResponseApi);
+
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/" + uuid))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
@@ -203,9 +208,9 @@ public class NeighbourRESTFacadeTest {
 
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 
-		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver");
-		});
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
+				() -> neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver")
+		);
 	}
 
 	@Test
@@ -275,9 +280,9 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond((request) -> mock);
 
-		assertThatExceptionOfType(SubscriptionPollException.class).isThrownBy(() -> {
-			Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
-		});
+		assertThatExceptionOfType(SubscriptionPollException.class).isThrownBy(
+				() -> neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson)
+		);
 
 	}
 
@@ -294,8 +299,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.DELETE))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		assertThatExceptionOfType(SubscriptionNotFoundException.class).isThrownBy(() -> {
-			neighbourRESTFacade.deleteSubscription(ericsson, subscription);
-		});
+		assertThatExceptionOfType(SubscriptionNotFoundException.class).isThrownBy(
+				() -> neighbourRESTFacade.deleteSubscription(ericsson, subscription)
+		);
 	}
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 public class SubscriptionRequestTransformer {
 
 
-	private SubscriptionTransformer subscriptionTransformer;
+	private final SubscriptionTransformer subscriptionTransformer;
 
 	@Autowired
 	public SubscriptionRequestTransformer(SubscriptionTransformer subscriptionTransformer){
@@ -22,10 +22,9 @@ public class SubscriptionRequestTransformer {
 
 
 	public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(String selfName, Set<Subscription> subscriptions) {
-	    SubscriptionRequestApi requestApi = new SubscriptionRequestApi(selfName,
+        return new SubscriptionRequestApi(selfName,
 				subscriptionTransformer.subscriptionsToRequestedSubscriptionApi(subscriptions)
 		);
-	    return requestApi;
 	}
 
 	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<NeighbourSubscription> subscriptions) {
@@ -35,8 +34,7 @@ public class SubscriptionRequestTransformer {
 
 
 	public  NeighbourSubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
-		return subscriptionRequest;
+        return new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 	}
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
@@ -78,30 +76,6 @@ public class SubscriptionRequestTransformer {
 						endpoint.getPort(),
 						endpoint.getMaxBandwidth(),
 						endpoint.getMaxMessageRate()
-				);
-				newEndpoints.add(endpointApi);
-			}
-			response.setEndpoints(newEndpoints);
-			//TODO: Return redirectQueueName
-		}
-		return response;
-	}
-
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription) {
-		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setSelector(subscription.getSelector());
-		response.setPath(subscription.getPath());
-		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
-		response.setStatus(status);
-		response.setConsumerCommonName(subscription.getConsumerCommonName());
-		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
-		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			Set<EndpointApi> newEndpoints = new HashSet<>();
-			for(Endpoint endpoint : subscription.getEndpoints()) {
-				EndpointApi endpointApi = new EndpointApi(
-						endpoint.getSource(),
-						endpoint.getHost(),
-						endpoint.getPort()
 				);
 				newEndpoints.add(endpointApi);
 			}
