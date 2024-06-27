@@ -232,6 +232,13 @@ public class ServiceProvider {
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
+	public Capability getCreatedCapability(Integer capabilityId){
+		return getCapabilities().getCreatedCapabilities().stream()
+				.filter(c->c.getId().equals(capabilityId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
+	}
+
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
