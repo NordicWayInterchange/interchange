@@ -297,7 +297,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
-        return typeTransformer.transformCapabilitiesToOnboardingCapabilities(serviceProvider.getCapabilities().getCapabilities());
+        return typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilities());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)

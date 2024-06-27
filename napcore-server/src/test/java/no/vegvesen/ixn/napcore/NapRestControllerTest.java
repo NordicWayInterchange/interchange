@@ -248,33 +248,6 @@ public class NapRestControllerTest {
         ).andExpect(status().isBadRequest());
     }
 
-    /*
-    @Test
-    public void deletingNapSubscriptionReturnsNoContent() throws Exception {
-        String serviceProviderName = "actor";
-        ServiceProvider serviceProvider = new ServiceProvider(
-                1,
-                serviceProviderName,
-                new Capabilities(),
-                Collections.emptySet(),
-                null
-        );
-        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO'", "actor");
-        localSubscription.setId(1);
-        serviceProvider.addLocalSubscription(localSubscription);
-        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
-        when(serviceProviderRepository.findByName(anyString())).thenReturn(serviceProvider);
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-
-        mockMvc.perform(
-                delete(String.format("/nap/%s/subscriptions/%s", serviceProviderName, "1"))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-
-        ).andExpect(status().isNoContent());
-    }
-    */
-
     @Test
     public void postDeliveryReturnsStatusOk() throws Exception{
         String request = """
@@ -424,37 +397,6 @@ public class NapRestControllerTest {
         ).andExpect(status().isBadRequest());
     }
 
-    /*
-    Some strange error occurs 'content type not set'. Need to find cause
-    @Test
-    public void deleteCapabilityReturnsNoContent() throws Exception {
-        String actorCommonName = "actor";
-        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
-        Capability capability = new Capability(
-                new DatexApplication("pub", "pub", "NO", "1", List.of("1"), "type", "name"),
-                new Metadata());
-        capability.setId(1);
-        when(serviceProviderRepository.findByName(any())).thenReturn(
-          new ServiceProvider(
-                  1,
-                  actorCommonName,
-                  new Capabilities(Set.of(capability)),
-                  Set.of(),
-                  null
-          )
-        );
-        when(serviceProviderRepository.save(any())).thenReturn(
-                new ServiceProvider()
-        );
-
-        mockMvc.perform(
-                delete(String.format("/nap/%s/capabilities/%s", actorCommonName, "1"))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-    }
-
-*/
     @Configuration
     public static class NapCorePropertiesCreator {
         @Bean

@@ -32,7 +32,7 @@ public class TypeTransformer {
                 transformer.metadataToMetadataApi(capability.getMetadata()));
     }
 
-    public List<OnboardingCapability> transformCapabilitiesToOnboardingCapabilities(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
+    public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
         List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
         for(no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities){
             onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capability));
