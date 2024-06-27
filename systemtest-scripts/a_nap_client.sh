@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
+
 docker run \
   -it \
   --rm \
@@ -7,12 +9,6 @@ docker run \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
-  -e KEY_STORE=/keys/nap.bouvetinterchange.eu.p12 \
-  -e KEY_STORE_PASSWORD=password \
-  -e TRUST_STORE_PATH=/keys/truststore.jks \
-  -e TRUST_STORE_PASSWORD=password \
-  -e NAP_SERVER=https://a.bouvetinterchange.eu:8898/ \
-  -e USER=king_olav.bouvetinterchange.eu \
-  -e NAP=nap.bouvetinterchange.eu \
+  -v $PWD:/work \
   --link a_napcore_server:a.bouvetinterchange.eu \
-  --entrypoint bash napcore_rest_client
+  napcore_rest_client -k /keys/nap.bouvetinterchange.eu.p12 -s password -t /keys/truststore.jks -w password https://a.bouvetinterchange.eu:8898/ ${SERVICE_PROVIDER} nap.bouvetinterchange.eu "$@"
