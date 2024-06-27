@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.napcore.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -12,7 +11,6 @@ public class DeliveryEndpoint {
 
     private String target;
 
-    @JsonIgnore
     private String selector;
 
     private Integer maxBandwidth;
