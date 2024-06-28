@@ -79,10 +79,10 @@ public class TypeTransformer {
             case REQUESTED -> DeliveryStatus.REQUESTED;
             case CREATED -> DeliveryStatus.CREATED;
             case ILLEGAL -> DeliveryStatus.ILLEGAL;
-            case TEAR_DOWN -> DeliveryStatus.TEAR_DOWN;
+            case TEAR_DOWN -> DeliveryStatus.ILLEGAL;
             case NOT_VALID -> DeliveryStatus.NOT_VALID;
             case NO_OVERLAP -> DeliveryStatus.NO_OVERLAP;
-            case ERROR -> DeliveryStatus.ERROR;
+            case ERROR -> DeliveryStatus.ILLEGAL;
         };
     }
 

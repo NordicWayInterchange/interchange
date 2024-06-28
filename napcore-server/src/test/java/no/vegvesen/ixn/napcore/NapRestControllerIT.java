@@ -266,7 +266,7 @@ public class NapRestControllerIT {
 
         napRestController.deleteDelivery(actorCommonName, delivery.getId());
         for(Delivery response : napRestController.getDeliveries(actorCommonName)){
-            assertThat(response.getStatus()).isEqualTo(DeliveryStatus.TEAR_DOWN);
+            assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
         }
     }
 
