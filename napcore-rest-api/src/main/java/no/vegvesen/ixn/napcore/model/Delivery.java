@@ -7,9 +7,9 @@ public class Delivery {
 
     String id;
 
-    String selector;
-
     DeliveryStatus status;
+
+    String selector;
 
     List<DeliveryEndpoint> endpoints = new ArrayList<>();
 
@@ -72,8 +72,8 @@ public class Delivery {
     public String toString(){
         return "Delivery{" +
                 "id=" + id +
-                ", selector='" + selector + '\'' +
                 ", status=" + status +
+                ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints  +
                 ", lastUpdatedTimestamp: " + lastUpdatedTimeStamp +
                 "}";
