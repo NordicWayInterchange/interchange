@@ -15,17 +15,11 @@ import picocli.CommandLine;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
 
 
 import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 @Command(name = "napcoreclient",
 description = "NAPCore REST Client",

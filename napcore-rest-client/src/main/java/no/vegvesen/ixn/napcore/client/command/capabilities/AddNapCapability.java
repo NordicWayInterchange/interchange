@@ -4,24 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.CapabilitiesRequest;
 import no.vegvesen.ixn.napcore.model.OnboardingCapability;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "add",
         description = "Add NAP capability from file",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class AddNapCapability implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     CapabilitiesCommand parentCommand;
 
-    @CommandLine.Option(names = {"-f", "--filename"}, description = "The capability json file")
+    @Option(names = {"-f", "--filename"}, description = "The capability json file")
     File file;
 
     @Override

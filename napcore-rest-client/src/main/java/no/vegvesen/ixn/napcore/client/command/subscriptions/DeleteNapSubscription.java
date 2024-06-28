@@ -1,22 +1,21 @@
 package no.vegvesen.ixn.napcore.client.command.subscriptions;
 
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
-import picocli.CommandLine;
-
+import static picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "delete",
         description = "Delete nap capability",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class DeleteNapSubscription implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @CommandLine.Parameters(index = "0", description = "The ID of the NAP capability")
+    @Parameters(index = "0", description = "The ID of the NAP capability")
     String subscriptionId;
 
     @Override

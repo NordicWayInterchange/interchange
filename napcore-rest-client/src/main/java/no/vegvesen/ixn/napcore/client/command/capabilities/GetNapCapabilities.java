@@ -3,21 +3,21 @@ package no.vegvesen.ixn.napcore.client.command.capabilities;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.OnboardingCapability;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "list",
         description = "List all NAP capabilities",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class GetNapCapabilities implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     CapabilitiesCommand parentCommand;
 
     @Override

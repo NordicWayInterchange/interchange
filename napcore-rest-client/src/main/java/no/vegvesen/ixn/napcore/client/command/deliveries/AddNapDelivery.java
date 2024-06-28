@@ -5,25 +5,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
 import no.vegvesen.ixn.napcore.model.DeliveryRequest;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "add",
         description = "Add NAP delivery from file",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 
 public class AddNapDelivery implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     DeliveriesCommand parentCommand;
 
-    @CommandLine.Option(names = {"-f", "--filename"}, description = "The Nap delivery json file")
+    @Option(names = {"-f", "--filename"}, description = "The Nap delivery json file")
     File file;
 
     @Override

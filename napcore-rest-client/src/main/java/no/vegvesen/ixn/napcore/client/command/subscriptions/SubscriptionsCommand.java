@@ -2,9 +2,9 @@ package no.vegvesen.ixn.napcore.client.command.subscriptions;
 
 
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
-@CommandLine.Command(name="subscriptions",
+@Command(name="subscriptions",
                     description = "List, add or delete NAP subscriptions",
                     subcommands = {
                             AddNapSubscription.class,
@@ -13,12 +13,12 @@ import picocli.CommandLine;
                             FetchMatchingCapabilities.class,
                             DeleteNapSubscription.class
                     },
-                    defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+                    defaultValueProvider = PropertiesDefaultProvider.class,
                     mixinStandardHelpOptions = true
 )
 public class SubscriptionsCommand {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     NapRestClientApplication parentCommand;
 
     public NapRestClientApplication getParentCommand() {

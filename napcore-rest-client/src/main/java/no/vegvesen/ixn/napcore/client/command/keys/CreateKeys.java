@@ -3,28 +3,28 @@ package no.vegvesen.ixn.napcore.client.command.keys;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
 import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(
+@Command(
         name = "create",
         description = "create keys",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class CreateKeys implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     KeysCommand  parentCommand;
 
-    @CommandLine.Parameters(index = "0", paramLabel = "SERVICE_PROVIDER_NAME",description = "Service Provider name")
+    @Parameters(index = "0", paramLabel = "SERVICE_PROVIDER_NAME",description = "Service Provider name")
     String spName;
 
-    @CommandLine.Parameters(index = "1", paramLabel = "SERVICE_PROVIDER_COUNTRY",description = "Service Provider country code")
+    @Parameters(index = "1", paramLabel = "SERVICE_PROVIDER_COUNTRY",description = "Service Provider country code")
     String countryCode;
 
     @Override

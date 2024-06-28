@@ -4,22 +4,21 @@ package no.vegvesen.ixn.napcore.client.command.subscriptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Subscription;
-import picocli.CommandLine;
-
+import static picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "get",
         description = "Get one NAP subscription",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class GetNapSubscription implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @CommandLine.Parameters(index = "0", description = "The ID of the NAP capability")
+    @Parameters(index = "0", description = "The ID of the NAP capability")
     String subscriptionId;
 
     @Override

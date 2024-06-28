@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.napcore.client.command.capabilities;
 
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
-@CommandLine.Command(name = "capabilities",
+@Command(name = "capabilities",
         description="List, get, add or delete capabilities for the current Service Provider",
         subcommands = {
                 AddNapCapability.class,
@@ -11,12 +11,12 @@ import picocli.CommandLine;
                 GetNapCapabilities.class,
                 DeleteNapCapability.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class CapabilitiesCommand {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     NapRestClientApplication parentCommand;
 
     public NapRestClientApplication getParentCommand(){

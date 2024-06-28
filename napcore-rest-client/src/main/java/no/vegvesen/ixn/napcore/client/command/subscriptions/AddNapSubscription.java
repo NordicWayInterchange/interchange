@@ -4,24 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
-import picocli.CommandLine;
-
+import static picocli.CommandLine.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "add",
         description = "Add NAP subscription from file",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class AddNapSubscription implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @CommandLine.Option(names = {"-f", "--filename"}, description = "The subscription json file")
+    @Option(names = {"-f", "--filename"}, description = "The subscription json file")
     File file;
 
 

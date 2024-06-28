@@ -3,22 +3,21 @@ package no.vegvesen.ixn.napcore.client.command.deliveries;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
-import picocli.CommandLine;
-
+import static picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "get",
         description = "Get one NAP delivery",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class GetNapDelivery implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     DeliveriesCommand parentCommand;
 
-    @CommandLine.Parameters(index = "0", description = "The ID of the NAP delivery")
+    @Parameters(index = "0", description = "The ID of the NAP delivery")
     String deliveryId;
 
     @Override

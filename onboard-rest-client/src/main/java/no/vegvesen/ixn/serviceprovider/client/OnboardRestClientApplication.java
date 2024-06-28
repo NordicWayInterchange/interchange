@@ -4,7 +4,6 @@ package no.vegvesen.ixn.serviceprovider.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.client.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.serviceprovider.client.command.deliveries.DeliveriesCommand;
-import no.vegvesen.ixn.serviceprovider.client.command.privatechannel.GetPeerPrivateChannels;
 import no.vegvesen.ixn.serviceprovider.client.command.privatechannel.PrivateChannelCommand;
 import no.vegvesen.ixn.serviceprovider.client.command.subscriptions.*;
 import no.vegvesen.ixn.serviceprovider.model.*;

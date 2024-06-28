@@ -1,19 +1,19 @@
 package no.vegvesen.ixn.napcore.client.command.keys;
 
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
-@CommandLine.Command(
+@Command(
         name = "keys",
         subcommands = {
                 CreateKeys.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class KeysCommand {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     NapRestClientApplication parentCommand;
 
     public NapRestClientApplication getParentCommand(){

@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.napcore.client.command.deliveries;
 
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
-@CommandLine.Command(
+@Command(
         name="deliveries",
         description = "Get, add, list or delete NAP deliveries",
         subcommands = {
@@ -13,11 +13,11 @@ import picocli.CommandLine;
                 DeleteNapDelivery.class,
                 FetchMatchingDeliveryCapabilities.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true)
 public class DeliveriesCommand {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     NapRestClientApplication parentCommand;
 
     public NapRestClientApplication getParentCommand(){

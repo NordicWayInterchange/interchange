@@ -2,24 +2,24 @@ package no.vegvesen.ixn.napcore.client.command.capabilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
+@Command(
         name = "delete",
         description = "Delete nap capability",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class DeleteNapCapability implements Callable<Integer> {
 
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     CapabilitiesCommand parentCommand;
 
-    @CommandLine.Parameters(index = "0", description = "The ID of the NAP capability")
+    @Parameters(index = "0", description = "The ID of the NAP capability")
     String capabilityId;
 
     @Override
