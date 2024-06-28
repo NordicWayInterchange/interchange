@@ -18,32 +18,17 @@ public class CapabilityValidator {
     public static Set<String> capabilityIsValid(CapabilitySplitApi capability) {
         ApplicationApi application = capability.getApplication();
 
-        if (application instanceof DatexApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatoryDatex2PropertyNames);
-        }
-        else if (application instanceof DenmApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatoryDenmPropertyNames);
-        }
-        else if (application instanceof IvimApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatoryIvimPropertyNames);
-        }
-        else if (application instanceof SpatemApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
-        }
-        else if (application instanceof MapemApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatorySpatemMapemPropertyNames);
-        }
-        else if (application instanceof SremApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
-        }
-        else if (application instanceof SsemApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatorySremSsemPropertyNames);
-        }
-        else if (application instanceof CamApplicationApi) {
-            return checkProperties(application, CapabilityProperty.mandatoryCamPropertyNames);
-        } else {
-            throw new IllegalStateException("Error occurred while validating capability");
-        }
+        return switch (application){
+            case DatexApplicationApi datex -> checkProperties(datex, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case DenmApplicationApi denm -> checkProperties(denm, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case IvimApplicationApi ivim -> checkProperties(ivim, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case SpatemApplicationApi spatem -> checkProperties(spatem, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case MapemApplicationApi mapem -> checkProperties(mapem, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case SremApplicationApi srem -> checkProperties(srem, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case SsemApplicationApi ssem -> checkProperties(ssem, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case CamApplicationApi cam -> checkProperties(cam, CapabilityProperty.mandatoryDatex2PropertyNames);
+            default -> throw new IllegalStateException("Error occurred while validating capability");
+        };
     }
 
     public static Set<String> checkProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
