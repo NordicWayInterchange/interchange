@@ -136,7 +136,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = serviceProvider.getSubscriptions()
                 .stream()
-                .filter(s -> s.getId().equals(Integer.parseInt(subscriptionId)))
+                .filter(s -> s.getUuid().equals(subscriptionId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,actorCommonName)));
 
@@ -150,7 +150,7 @@ public class NapRestController {
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.removeLocalSubscription(parseInteger(subscriptionId, "subscription"));
+        serviceProviderToUpdate.removeLocalSubscription(subscriptionId);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
         logger.debug("Updated Service Provider: {}", saved.toString());
@@ -212,7 +212,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
-                .filter(d->d.getId().equals(parseInteger(deliveryId, "delivery")))
+                .filter(d->d.getUuid().equals(deliveryId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with Id %s for service provider %s", deliveryId, actorCommonName)));
 
@@ -236,7 +236,7 @@ public class NapRestController {
         logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.removeLocalDelivery(parseInteger(deliveryId, "delivery"));
+        serviceProviderToUpdate.removeLocalDelivery(deliveryId);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
         logger.debug("Updated service provider: {}", saved);
@@ -307,7 +307,7 @@ public class NapRestController {
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        Capability capability = serviceProvider.getCreatedCapability(parseInteger(capabilityId, "capability"));
+        Capability capability = serviceProvider.getCreatedCapability(parseInteger(capabilityId));
         return typeTransformer.transformCapabilityToOnboardingCapability(capability);
     }
 
@@ -318,17 +318,17 @@ public class NapRestController {
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.getCapabilities().removeDataType(parseInteger(capabilityId, "capability"));
+        serviceProviderToUpdate.getCapabilities().removeDataType(parseInteger(capabilityId));
         serviceProviderRepository.save(serviceProviderToUpdate);
         logger.info("Updated service provider {}", serviceProviderToUpdate);
     }
 
-    private Integer parseInteger(String unparsedInt, String className){
+    private Integer parseInteger(String unparsedInt){
         try {
             return Integer.parseInt(unparsedInt);
         }
         catch (Exception e){
-            throw new NotFoundException(String.format("Could not find %s with Id %s", className, unparsedInt));
+            throw new NotFoundException(String.format("Could not find capability with Id %s", unparsedInt));
         }
     }
 

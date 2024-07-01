@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class Subscription {
 
-    Integer id;
+    String id;
 
     SubscriptionStatus status;
 
@@ -18,7 +18,7 @@ public class Subscription {
 
     }
 
-    public Subscription(Integer id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp) {
+    public Subscription(String id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.status = status;
         this.selector = selector;
@@ -26,11 +26,11 @@ public class Subscription {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

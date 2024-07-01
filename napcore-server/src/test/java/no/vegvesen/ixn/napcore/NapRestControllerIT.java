@@ -122,11 +122,6 @@ public class NapRestControllerIT {
         assertThrows(NotFoundException.class, () -> napRestController.getSubscription(actorCommonName, "25"));
     }
 
-    @Test
-    public void testGetSubscriptionWithInvalidIdThrowsException(){
-        String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getSubscription(actorCommonName, "notAnId"));
-    }
 
     @Test
     public void testSubscriptionIsDeletedCorrectly(){
@@ -141,12 +136,6 @@ public class NapRestControllerIT {
     public void testDeleteNonExistentSubscriptionThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "1"));
-    }
-
-    @Test
-    public void testDeleteSubscriptionWithInvalidIdThrowsException(){
-        String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "notAnId"));
     }
 
     @Test
@@ -177,11 +166,6 @@ public class NapRestControllerIT {
         assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
     }
 
-    @Test
-    public void testGettingDeliveryWithInvalidIdThrowsException(){
-        String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getDelivery(actorCommonName, "notAnId"));
-    }
 
     @Test
     public void testGettingNonExistentDeliveryThrowsException(){
@@ -244,12 +228,6 @@ public class NapRestControllerIT {
         assertThat(response2).hasSize(1);
         assertThat(response3).hasSize(0);
         assertThat(response4).hasSize(1);
-    }
-
-    @Test
-    public void testDeletingDeliveryWithInvalidIdThrowsException(){
-        String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "notAnId"));
     }
 
     @Test

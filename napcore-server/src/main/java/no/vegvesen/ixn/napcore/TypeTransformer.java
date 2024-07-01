@@ -56,7 +56,7 @@ public class TypeTransformer {
         }
 
         Delivery delivery = new Delivery(
-                localDelivery.getId().toString(),
+                localDelivery.getUuid(),
                 localDelivery.getSelector(),
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
@@ -102,7 +102,7 @@ public class TypeTransformer {
             epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
         }
         Subscription subscription = new Subscription(
-                localSubscription.getId(),
+                localSubscription.getUuid(),
                 transformLocalSubscriptionStatusToNapSubscriptionStatus(localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()),

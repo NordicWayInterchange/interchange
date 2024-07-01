@@ -27,10 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -150,39 +147,42 @@ public class NapRestControllerTest {
     @DisplayName("Get the details of a local subscription")
     public void getSingleLocalSubscription() throws Exception {
         String serviceProviderName = "sp-1";
+        LocalSubscription localSubscription = new LocalSubscription(
+                1,
+                LocalSubscriptionStatus.REQUESTED,
+                "originatingCountry = 'NO'",
+                serviceProviderName,
+                Collections.emptySet(),
+                Collections.singleton(
+                        new LocalEndpoint(
+                                "my-source",
+                                "my-host",
+                                5671,
+                                0,
+                                0
+                        )
+                )
+        );
+        localSubscription.setUuid(UUID.randomUUID().toString());
+
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
                 serviceProviderName,
                 new Capabilities(),
                 Collections.singleton(
-                        new LocalSubscription(
-                                1,
-                                LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'",
-                                serviceProviderName,
-                                Collections.emptySet(),
-                                Collections.singleton(
-                                        new LocalEndpoint(
-                                                "my-source",
-                                                "my-host",
-                                                5671,
-                                                0,
-                                                0
-                                        )
-                                )
-                        )
+                    localSubscription
                 ),
                 null
         );
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         when(serviceProviderRepository.findByName(serviceProviderName)).thenReturn(serviceProvider);
         mockMvc.perform(
-                        get(String.format("/nap/%s/subscriptions/%d",serviceProviderName,serviceProvider.getId()))
+                        get(String.format("/nap/%s/subscriptions/%s",serviceProviderName, localSubscription.getUuid()))
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id",is(1)));
+                .andExpect(jsonPath("$.id",is(localSubscription.getUuid())));
         verify(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         verify(serviceProviderRepository).findByName(serviceProviderName);
     }
