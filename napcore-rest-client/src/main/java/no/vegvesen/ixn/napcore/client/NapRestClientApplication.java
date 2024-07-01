@@ -1,13 +1,10 @@
 package no.vegvesen.ixn.napcore.client;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.napcore.client.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.napcore.client.command.keys.KeysCommand;
 import no.vegvesen.ixn.napcore.client.command.subscriptions.SubscriptionsCommand;
-import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;

@@ -26,7 +26,7 @@ public class FetchMatchingDeliveryCapabilities implements Callable<Integer> {
     public Integer call() throws JsonProcessingException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        List<Capability> capabilities = client.getMatchingCapabilities(selector);
+        List<Capability> capabilities = client.getMatchingDeliveryCapabilities(selector);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
         return 0;
     }
