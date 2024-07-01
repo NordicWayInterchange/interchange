@@ -16,13 +16,13 @@ public class DeletePrivateChannel implements Callable<Integer> {
     PrivateChannelCommand parentCommand;
 
     @Parameters(index = "0", description = "The ID of the subscription to delete")
-    Integer privateChannelId;
+    String privateChannelId;
 
     @Override
     public Integer call() {
         OnboardRESTClient client = parentCommand.getParent().createClient();
         client.deletePrivateChannel(privateChannelId);
-        System.out.printf("Private channel with id %d deleted successfully%n", privateChannelId);
+        System.out.printf("Private channel with id %s deleted successfully%n", privateChannelId);
         return 0;
     }
 }

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class PrivateChannelResponseApi {
 
-    private Integer id;
+    private String id;
 
     private String peerName;
 
@@ -23,13 +23,13 @@ public class PrivateChannelResponseApi {
         this.peerName = peerName;
     }
 
-    public PrivateChannelResponseApi(String peerName, PrivateChannelStatusApi status, Integer id) {
+    public PrivateChannelResponseApi(String peerName, PrivateChannelStatusApi status, String id) {
         this.id = id;
         this.peerName = peerName;
         this.status = status;
     }
 
-    public PrivateChannelResponseApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, Integer id) {
+    public PrivateChannelResponseApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, String id) {
         this.id = id;
         this.peerName = peerName;
         this.status = status;
@@ -55,11 +55,11 @@ public class PrivateChannelResponseApi {
         this.status = status;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -94,5 +94,4 @@ public class PrivateChannelResponseApi {
                 '}';
 
     }
-
 }

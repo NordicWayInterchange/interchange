@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "neighbour_subscriptions")
@@ -12,6 +13,8 @@ public class NeighbourSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_sub_seq")
     private Integer id;
+
+    private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
     private NeighbourSubscriptionStatus subscriptionStatus;
@@ -46,7 +49,6 @@ public class NeighbourSubscription {
     }
 
     public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -62,12 +64,29 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
+    public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+        this.subscriptionStatus = subscriptionStatus;
+        this.selector = selector;
+        this.path = path;
+        this.consumerCommonName = consumerCommonName;
+        this.endpoints.addAll(endpoints);
+        this.uuid = uuid;
+    }
+
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public NeighbourSubscriptionStatus getSubscriptionStatus() {
@@ -138,7 +157,7 @@ public class NeighbourSubscription {
     @Override
     public String toString() {
         return "NeighbourSubscription{" +
-                "id=" + id +
+                "id=" + uuid +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +
                 ", path='" + path + '\'' +

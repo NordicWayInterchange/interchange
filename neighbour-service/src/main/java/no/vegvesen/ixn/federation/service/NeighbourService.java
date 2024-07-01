@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -51,7 +51,7 @@ public class NeighbourService {
 		return neighbourRepository.findAll();
 	}
 
-	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		LocalDateTime now = LocalDateTime.now();
 
@@ -140,7 +140,7 @@ public class NeighbourService {
 		logger.info("Paths for requested subscriptions created.");
 		// Create a path for each subscription
 		for (NeighbourSubscription subscription : persistentRequest.getSubscriptions()) {
-			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
+			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getUuid();
 			subscription.setPath(path);
 			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 		}
@@ -152,13 +152,12 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, String subscriptionId) {
 		logger.debug("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-
-			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
+			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(subscriptionId);
 			//TODO logging. What do we log on poll?
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
@@ -172,7 +171,7 @@ public class NeighbourService {
 	}
 
 
-	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
+	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);

@@ -170,7 +170,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
+    public void incomingSubscriptionRequestReturnsPathForSubscription() {
         Neighbour neighbour = new Neighbour("myNeighbour",
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
@@ -186,7 +186,6 @@ public class NeighbourServiceIT {
         assertThat(subscriptions).hasSize(1);
         RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
         assertThat(subscriptionApi.getPath()).isNotNull();
-        assertThat(subscriptionApi.getLastUpdatedTimestamp()).isGreaterThan(0);
     }
 
     @Test
@@ -238,7 +237,7 @@ public class NeighbourServiceIT {
         service.saveSetupRouting(neighbour);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
-        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour = repository.findByName(neighbour.getName());
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
@@ -265,7 +264,7 @@ public class NeighbourServiceIT {
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
         neighbour = repository.findByName(neighbour.getName());
-        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
         service.saveNeighbour(neighbour);
@@ -323,17 +322,16 @@ public class NeighbourServiceIT {
         assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
     }
 
-
     @Test
     public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
         Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
         repository.save(neighbour);
-        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
                 name,
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                             new DenmApplicationApi(
                                 "NO-123",
                                 "pub-1",
@@ -400,7 +398,7 @@ public class NeighbourServiceIT {
         );
         Neighbour saved = repository.save(neighbour);
         NeighbourSubscription subscription = saved.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getId());
+        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getUuid().toString());
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
 
     }
@@ -417,20 +415,17 @@ public class NeighbourServiceIT {
         );
         repository.save(neighbour);
         ObjectMapper mapper = new ObjectMapper();
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class), Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
         //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
         List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
 
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }
-
-
-
 }

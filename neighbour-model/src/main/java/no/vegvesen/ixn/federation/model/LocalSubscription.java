@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "local_subscriptions")
@@ -15,6 +16,8 @@ public class LocalSubscription {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="id")
     private Integer id;
+
+    private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
@@ -80,6 +83,15 @@ public class LocalSubscription {
         this.localEndpoints.addAll(localEndpoints);
     }
 
+    public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+        this.uuid = uuid;
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+        this.connections.addAll(connections);
+        this.localEndpoints.addAll(localEndpoints);
+    }
+
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
     }
@@ -91,6 +103,14 @@ public class LocalSubscription {
     public boolean isSubscriptionWanted() {
         return status.equals(LocalSubscriptionStatus.REQUESTED)
                 || status.equals(LocalSubscriptionStatus.CREATED);
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getSelector() {
@@ -159,6 +179,7 @@ public class LocalSubscription {
     public String toString() {
         return "LocalSubscription{" +
                 "id=" + id +
+                "uuid=" + uuid +
                 ", status=" + status +
                 ", selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +

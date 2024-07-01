@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -28,19 +28,19 @@ public class TypeTransformer {
     }
 
     private static LocalActorCapability capabilityToLocalCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
-        String id = capability.getId().toString();
+        String id = capability.getUuid();
         return new LocalActorCapability(
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
-                capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability));
+                capabilityApiTransformer.capabilityToCapabilityApi(capability));
 
     }
 
 
     public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<Capability> capabilities) {
-        Set<CapabilitySplitApi> fetchCapabilities = new HashSet<>();
+        Set<CapabilityApi> fetchCapabilities = new HashSet<>();
         for (Capability capability : capabilities) {
-            fetchCapabilities.add(capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability));
+            fetchCapabilities.add(capabilityApiTransformer.capabilityToCapabilityApi(capability));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
@@ -57,7 +57,7 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
-            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
+            String sub_id = subscription.getUuid() == null ? null : subscription.getUuid();
             result.add(new LocalActorSubscription(
                     sub_id,
                     createSubscriptionPath(name,sub_id, subscription.getStatus()),
@@ -102,8 +102,8 @@ public class TypeTransformer {
         Set<Delivery> result = new HashSet<>();
         for (LocalDelivery delivery : localDeliveries){
             result.add(new Delivery(
-                    delivery.getId().toString(),
-                    createDeliveryPath(serviceProviderName, delivery.getId().toString(), delivery.getStatus()),
+                    delivery.getUuid(),
+                    createDeliveryPath(serviceProviderName, delivery.getUuid(), delivery.getStatus()),
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                     transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus()),
@@ -134,7 +134,7 @@ public class TypeTransformer {
     public Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            String subscriptionId = subscription.getId().toString();
+            String subscriptionId = subscription.getUuid();
             result.add(new LocalActorSubscription(
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId, subscription.getStatus()),
@@ -175,8 +175,8 @@ public class TypeTransformer {
 
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
-                localSubscription.getId().toString(),
-                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString(), localSubscription.getStatus()),
+                localSubscription.getUuid(),
+                createSubscriptionPath(serviceProviderName,localSubscription.getUuid(), localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
@@ -186,11 +186,11 @@ public class TypeTransformer {
     }
 
     public GetDeliveryResponse transformLocalDeliveryToGetDeliveryResponse(String serviceProviderName, LocalDelivery localDelivery) {
-        String id = localDelivery.getId().toString();
+        String uuid = localDelivery.getUuid();
         return new GetDeliveryResponse(
-                id,
+                uuid,
                 transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
-                createDeliveryPath(serviceProviderName, id, localDelivery.getStatus()),
+                createDeliveryPath(serviceProviderName, uuid, localDelivery.getStatus()),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
                 transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())
@@ -258,8 +258,8 @@ public class TypeTransformer {
 
     public List<Capability> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
         List<Capability> capabilities = new ArrayList<>();
-        for (CapabilitySplitApi capabilityApi : capabilitiesRequest.getCapabilities()) {
-            Capability capability = capabilityApiTransformer.capabilitySplitApiToCapabilitySplit(capabilityApi);
+        for (CapabilityApi capabilityApi : capabilitiesRequest.getCapabilities()) {
+            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
             capabilities.add(capability);
 
         }
@@ -274,28 +274,28 @@ public class TypeTransformer {
     }
 
     public GetCapabilityResponse getCapabilityResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
-        String capabilityId = capability.getId().toString();
+        String capabilityId = capability.getUuid();
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
+                capabilityApiTransformer.capabilityToCapabilityApi(capability)
         );
     }
 
     public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
         if(privateChannel.getEndpoint() != null) {
             PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-            return new GetPrivateChannelResponse(privateChannel.getId(), privateChannel.getPeerName(), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeerName(), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
         }
         else{
-            return new GetPrivateChannelResponse(privateChannel.getId(),privateChannel.getPeerName(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+            return new GetPrivateChannelResponse(privateChannel.getUuid(),privateChannel.getPeerName(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
         }
         }
 
     public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList){
         AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelList){
-                response.getPrivateChannels().add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+                response.getPrivateChannels().add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getUuid()));
         }
         return response;
     }
@@ -303,7 +303,7 @@ public class TypeTransformer {
     public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList){
         ArrayList<PrivateChannelResponseApi> returnList = new ArrayList<>();
         for(PrivateChannel privateChannel : privateChannelList){
-            returnList.add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getId()));
+            returnList.add(new PrivateChannelResponseApi(privateChannel.getPeerName(),PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getUuid()));
         }
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);
     }
@@ -314,10 +314,10 @@ public class TypeTransformer {
         for (PrivateChannel privateChannel : privateChannelList) {
             if(privateChannel.getEndpoint() != null) {
                 PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
             }
             else{
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getId(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
             }
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);

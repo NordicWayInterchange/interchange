@@ -3,17 +3,17 @@ package no.vegvesen.ixn.federation.api.v1_0.capability;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CapabilitySplitApi {
+public class CapabilityApi {
 
     private ApplicationApi application;
 
     private MetadataApi metadata;
 
-    public CapabilitySplitApi() {
+    public CapabilityApi() {
 
     }
 
-    public CapabilitySplitApi(ApplicationApi application, MetadataApi metadata) {
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata) {
         this.application = application;
         this.metadata = metadata;
     }
@@ -36,7 +36,7 @@ public class CapabilitySplitApi {
 
     @Override
     public String toString() {
-        return "CapabilitySplitApi{" +
+        return "CapabilityApi{" +
                 "application=" + application +
                 ", metadata=" + metadata +
                 '}';
