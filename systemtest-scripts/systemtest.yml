@@ -72,16 +72,17 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.nap
-      - NAP_NAME=nap.bouvetinterchange.eu #a.nap.bouvetinterchange.eu?
+      - SERVER_NAME=a-napcore-server
+      - NAP_NAME=a.nap
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
       - TRUST_STORE=/jks/keys/internal_a.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.nap.p12
+      - KEY_STORE=/jks/keys/a-napcore-server.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
+
 
   a-qpid:
     image: apache/qpid-broker-j:9.2.0-alpine
@@ -398,5 +399,4 @@ networks:
       driver: default
       config:
       - subnet: 172.28.0.0/16
-
 

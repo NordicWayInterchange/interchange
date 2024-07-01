@@ -3,6 +3,7 @@
 #Set environment variable to choose what docker image tag to use in the test
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
+export MY_TOKEN=Yoohoo
 
 echo Running system test on branch $BRANCH with tag $BRANCH_TAG
 

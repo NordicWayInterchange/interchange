@@ -34,6 +34,8 @@
   "subCaRequests" : [ ],
   "hostRequests" : [ {
     "name" : "a-qpid"
+  }, {
+    "name" : "a-napcore-server"
   } ],
   "clientRequests" : [ {
     "name" : "a_routing_configurer",
