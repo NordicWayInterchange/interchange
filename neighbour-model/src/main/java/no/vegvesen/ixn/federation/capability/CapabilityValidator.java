@@ -20,13 +20,13 @@ public class CapabilityValidator {
 
         return switch (application){
             case DatexApplicationApi datex -> checkProperties(datex, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case DenmApplicationApi denm -> checkProperties(denm, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case IvimApplicationApi ivim -> checkProperties(ivim, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case SpatemApplicationApi spatem -> checkProperties(spatem, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case MapemApplicationApi mapem -> checkProperties(mapem, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case SremApplicationApi srem -> checkProperties(srem, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case SsemApplicationApi ssem -> checkProperties(ssem, CapabilityProperty.mandatoryDatex2PropertyNames);
-            case CamApplicationApi cam -> checkProperties(cam, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case DenmApplicationApi denm -> checkProperties(denm, CapabilityProperty.mandatoryDenmPropertyNames);
+            case IvimApplicationApi ivim -> checkProperties(ivim, CapabilityProperty.mandatoryIvimPropertyNames);
+            case SpatemApplicationApi spatem -> checkProperties(spatem, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            case MapemApplicationApi mapem -> checkProperties(mapem, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            case SremApplicationApi srem -> checkProperties(srem, CapabilityProperty.mandatorySremSsemPropertyNames);
+            case SsemApplicationApi ssem -> checkProperties(ssem, CapabilityProperty.mandatorySremSsemPropertyNames);
+            case CamApplicationApi cam -> checkProperties(cam, CapabilityProperty.mandatoryCamPropertyNames);
             default -> throw new IllegalStateException("Error occurred while validating capability");
         };
     }
