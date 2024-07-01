@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(
-        name = "fetchdeliverycapabilities",
+        name = "match",
         description = "Fetch NAP capabilities matching selector",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
