@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -354,7 +354,7 @@ public class NapRestControllerTest {
                 Set.of(),
                 null
         ));
-        when(capabilityToCapabilityApiTransformer.capabilitySplitToCapabilitySplitApi(any())).thenReturn(new CapabilitySplitApi(
+        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
                 new DatexApplicationApi("publisherId", "publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
                 new MetadataApi()
         ));
@@ -385,7 +385,7 @@ public class NapRestControllerTest {
                 """;
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
-        when(capabilityToCapabilityApiTransformer.capabilitySplitToCapabilitySplitApi(any())).thenReturn(new CapabilitySplitApi(
+        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
                 new DatexApplicationApi("publisherId", "publicationId","NO", null, List.of("123"), "Hello", "hello"),
                 new MetadataApi()
         ));

@@ -275,7 +275,7 @@ public class NapRestController {
         if(!CapabilityValidator.quadTreeIsValid(capabilityToAdd)){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
         }
-        Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capabilityToAdd));
+        Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }

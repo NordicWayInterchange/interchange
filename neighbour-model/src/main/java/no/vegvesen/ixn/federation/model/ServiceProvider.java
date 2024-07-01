@@ -216,13 +216,27 @@ public class ServiceProvider {
 	public void addDeliveries(Set<LocalDelivery> newDeliveries) {
 		deliveries.addAll(newDeliveries);
 	}
+
+
     public void addDelivery(LocalDelivery newDelivery){
         deliveries.add(newDelivery);
     }
+
 	public void removeLocalDelivery(String deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
 				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
+				);
+		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+	}
+
+	public void removeLocalDelivery(Integer deliveryId){
+		LocalDelivery localDeliveryToDelete = deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))
 				.findFirst()
 				.orElseThrow(
 						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")

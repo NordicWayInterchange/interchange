@@ -58,6 +58,16 @@ public class Capabilities {
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
+	public void removeDataType(Integer capabilityId) {
+		Set<Capability> currentServiceProviderCapabilities = getCapabilities();
+		Optional<Capability> subscriptionToDelete = currentServiceProviderCapabilities
+				.stream()
+				.filter(dataType -> dataType.getId().equals(capabilityId))
+				.findFirst();
+		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
+	}
+
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<Capability> capabilities = new HashSet<>();
