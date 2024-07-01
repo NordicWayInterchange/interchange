@@ -2,25 +2,24 @@ package no.vegvesen.ixn.federation.api.v1_0.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.vegvesen.ixn.federation.api.v1_0.ApiVersion;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CapabilitiesSplitApi {
+public class CapabilitiesApi {
 
     private String version = ApiVersion.version;
 
     private String name;
 
-    private Set<CapabilitySplitApi> capabilities = new HashSet<>();
+    private Set<CapabilityApi> capabilities = new HashSet<>();
 
-    public CapabilitiesSplitApi() {
+    public CapabilitiesApi() {
 
     }
 
-    public CapabilitiesSplitApi(String name, Set<CapabilitySplitApi> capabilities) {
+    public CapabilitiesApi(String name, Set<CapabilityApi> capabilities) {
         this.name = name;
         this.capabilities = capabilities;
     }
@@ -41,11 +40,11 @@ public class CapabilitiesSplitApi {
         this.name = name;
     }
 
-    public Set<CapabilitySplitApi> getCapabilities() {
+    public Set<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilitySplitApi> capabilities) {
+    public void setCapabilities(Set<CapabilityApi> capabilities) {
         if (this.capabilities == null) {
             this.capabilities = new HashSet<>();
         }
@@ -55,7 +54,7 @@ public class CapabilitiesSplitApi {
 
     @Override
     public String toString() {
-        return "CapabilitiesSplitApi{" +
+        return "CapabilitiesApi{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", capabilities=" + capabilities +

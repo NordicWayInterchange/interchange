@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
@@ -81,7 +81,7 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
 		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-		CapabilitySplitApi datexNo = new CapabilitySplitApi();
+		CapabilityApi datexNo = new CapabilityApi();
 		datexNo.setApplication(app);
 		datexNo.setMetadata(meta);
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
@@ -116,13 +116,13 @@ public class OnboardRestControllerTest {
 	void deletingExistingCapabilitiesReturnsNoContent() throws Exception {
 		String serviceProviderName = "Second Service Provider";
 		mockCertificate(serviceProviderName);
-
+		UUID uuid = UUID.randomUUID();
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
 		// Mock existing service provider with three capabilities in database
 		Capability capability42 = mock(Capability.class);
-		when(capability42.getId()).thenReturn(42);
-		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42, mock(Capability.class), mock(Capability.class));
+		when(capability42.getUuid()).thenReturn(uuid.toString());
+		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
@@ -130,9 +130,8 @@ public class OnboardRestControllerTest {
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
-		Integer dataTypeId = 42;
 		mockMvc.perform(
-				delete(String.format("/%s/capabilities/%s", serviceProviderName, dataTypeId))
+				delete(String.format("/%s/capabilities/%s", serviceProviderName, uuid))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -147,7 +146,7 @@ public class OnboardRestControllerTest {
 
 		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", List.of(), "SituationPublication", "publisherName");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-		CapabilitySplitApi datexFi = new CapabilitySplitApi();
+		CapabilityApi datexFi = new CapabilityApi();
 		datexFi.setApplication(app);
 		datexFi.setMetadata(meta);
 
@@ -265,7 +264,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, fiSubs.getUuid());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -285,7 +284,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "3");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, UUID.randomUUID());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -304,7 +303,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, UUID.randomUUID());
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -447,7 +446,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
-		String deliveryId = "1";
+		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
@@ -458,7 +457,7 @@ public class OnboardRestControllerTest {
 		);
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
-						1,
+						uuid.toString(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
 						LocalDeliveryStatus.REQUESTED
@@ -468,7 +467,7 @@ public class OnboardRestControllerTest {
 				.thenReturn(serviceProvider);
 
 		mockMvc.perform(
-				get(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				get(String.format("/%s/deliveries/%s",firstServiceProvider,uuid))
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
@@ -478,7 +477,7 @@ public class OnboardRestControllerTest {
 	public void deleteDeliveryReturnsNoContent() throws Exception {
 
 		String firstServiceProvider = "First Service Provider";
-		String deliveryId = "1";
+		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
@@ -489,7 +488,7 @@ public class OnboardRestControllerTest {
 		);
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
-						1,
+						uuid.toString(),
 						Collections.emptySet(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
@@ -503,7 +502,7 @@ public class OnboardRestControllerTest {
 		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
 
 		mockMvc.perform(
-				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				delete(String.format("/%s/deliveries/%s",firstServiceProvider,uuid))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 
@@ -577,17 +576,17 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setId(2);
+		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
-		when(privateChannelRepository.findByServiceProviderNameAndId(any(),any())).thenReturn(savedPrivateChannel);
+		when(privateChannelRepository.findByServiceProviderNameAndUuid(any(),any())).thenReturn(savedPrivateChannel);
 
 		mockMvc.perform(
-						delete(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getId()))
+						delete(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getUuid()))
 								.contentType(MediaType.APPLICATION_JSON)
 								.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 
-		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndId(any(),any());
+		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndUuid(any(),any());
 		verify(privateChannelRepository, times(1)).save(any());
 	}
 
@@ -597,32 +596,17 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setId(2);
 
-		when(privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, savedPrivateChannel.getId())).thenReturn(savedPrivateChannel);
+		when(privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, savedPrivateChannel.getUuid())).thenReturn(savedPrivateChannel);
 
 
 		mockMvc.perform(
-				delete(String.format("/%s/privatechannels/%s", serviceProviderName, "99"))
+				delete(String.format("/%s/privatechannels/%s", serviceProviderName, UUID.randomUUID()))
 		).andExpect(status().isNotFound());
 
 
 		verify(privateChannelRepository, times(0)).save(any());
-		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndId(any(), any());
-	}
-
-	@Test
-	public void testDeletingChannelWithInvalidId()throws Exception{
-		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		mockCertificate(serviceProviderName);
-
-		mockMvc.perform(
-				delete(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isNotFound());
-
-		verify(privateChannelRepository, times(0)).save(any());
-		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndId(any(),any());
-
+		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndUuid(any(), any());
 	}
 
 	@Test
@@ -644,45 +628,32 @@ public class OnboardRestControllerTest {
 		mockCertificate(serviceProviderName);
 
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setId(2);
+		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
-		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any())).thenReturn(savedPrivateChannel);
+		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any())).thenReturn(savedPrivateChannel);
 
 		mockMvc.perform(
-				get(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getId().toString()))
+				get(String.format("/%s/privatechannels/%s", serviceProviderName, savedPrivateChannel.getUuid().toString()))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk());
 
-		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
+		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any());
 	}
 
 	@Test
 	public void testGettingNonExistentChannel() throws Exception {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
-		savedPrivateChannel.setId(1);
 
 		mockCertificate(serviceProviderName);
-		when(privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, savedPrivateChannel.getId(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
+		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, savedPrivateChannel.getUuid(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
 
 		mockMvc.perform(
-				get(String.format("/%s/privatechannels/%s", serviceProviderName, "88"))
+				get(String.format("/%s/privatechannels/%s", serviceProviderName, UUID.randomUUID()))
 		).andExpect(status().isNotFound());
 
-		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndIdAndStatusIsNot(any(), any(), any());
-	}
-
-	@Test
-	public void testGettingChannelWithInvalidId() throws Exception{
-		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		mockCertificate(serviceProviderName);
-
-		mockMvc.perform(
-				get(String.format("/%s/privatechannels/%s", serviceProviderName, "notAnId"))
-		).andExpect(status().isNotFound());
-
-		verify(privateChannelRepository, times(0)).findByServiceProviderNameAndIdAndStatusIsNot(any(),any(),any());
+		verify(privateChannelRepository, times(1)).findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any());
 	}
 
 	@Test

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +31,18 @@ public class NeighbourRESTClient {
         this.mapper = mapper;
     }
 
-    CapabilitiesSplitApi doPostCapabilities(String controlChannelUrl, String name, CapabilitiesSplitApi selfCapability) {
-        CapabilitiesSplitApi result;
+    CapabilitiesApi doPostCapabilities(String controlChannelUrl, String name, CapabilitiesApi selfCapability) {
+        CapabilitiesApi result;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Convert discovering Neighbour to CapabilityApi object and post to neighbour
-        HttpEntity<CapabilitiesSplitApi> entity = new HttpEntity<>(selfCapability, headers);
+        HttpEntity<CapabilitiesApi> entity = new HttpEntity<>(selfCapability, headers);
 		logHttpEntity(entity, "Posting");
 
 		try {
-            ResponseEntity<CapabilitiesSplitApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilitiesSplitApi.class);
+            ResponseEntity<CapabilitiesApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilitiesApi.class);
 			logHttpEntity(response, "Received");
 
             if (response.getBody() != null) {
