@@ -16,7 +16,7 @@ public class CapabilityValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
 
-    public static Set<String> capabilityIsValid(CapabilitySplitApi capability) {
+    public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
 
         if (application instanceof DatexApplicationApi) {
@@ -59,7 +59,7 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static boolean quadtreeIsValid(CapabilitySplitApi capability){
+    public static boolean quadtreeIsValid(CapabilityApi capability){
         List<String> quadTree = capability.getApplication().getQuadTree();
         for(String quadTile : quadTree){
             for(char nextNumber : quadTile.toCharArray()){

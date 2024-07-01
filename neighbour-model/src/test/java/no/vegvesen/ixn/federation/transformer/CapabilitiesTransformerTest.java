@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
@@ -19,9 +19,9 @@ public class CapabilitiesTransformerTest {
 
     @Test
     public void addMetadataWithoutShardCount() {
-        HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
-        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType", "publisherName"), new MetadataApi()));
-        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
+        HashSet<CapabilityApi> capabilities = new HashSet<>();
+        capabilities.add(new CapabilityApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType", "publisherName"), new MetadataApi()));
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi("norway", capabilities);
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);
 
@@ -32,11 +32,11 @@ public class CapabilitiesTransformerTest {
 
     @Test
     public void addMetadataWithShardCount() {
-        HashSet<CapabilitySplitApi> capabilities = new HashSet<>();
+        HashSet<CapabilityApi> capabilities = new HashSet<>();
         MetadataApi metadataApi = new MetadataApi();
         metadataApi.setShardCount(3);
-        capabilities.add(new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType","publisherName"), metadataApi));
-        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("norway", capabilities);
+        capabilities.add(new CapabilityApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", "pv1", List.of(), "myPublicationType","publisherName"), metadataApi));
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi("norway", capabilities);
 
         Capabilities caps = transformer.capabilitiesApiToCapabilities(capabilitiesApi);
 

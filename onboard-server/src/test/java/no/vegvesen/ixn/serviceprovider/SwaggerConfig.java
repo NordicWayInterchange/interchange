@@ -28,8 +28,8 @@ public class SwaggerConfig {
 
             Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-            // To remove 'ApplicationApi' from 'oneOf' in CapabilitySplitApi
-            ComposedSchema application = (ComposedSchema) schemas.get("CapabilitySplitApi").getProperties().get("application");
+            // To remove 'ApplicationApi' from 'oneOf' in CapabilityApi
+            ComposedSchema application = (ComposedSchema) schemas.get("CapabilityApi").getProperties().get("application");
             application.getOneOf().remove(0);
 
 

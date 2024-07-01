@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Objects;
 
 public class GetPrivateChannelResponse {
-    private Integer id;
+    private String id;
 
     private String peerName;
 
@@ -17,7 +17,10 @@ public class GetPrivateChannelResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
-    public GetPrivateChannelResponse(Integer id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse() {
+    }
+
+    public GetPrivateChannelResponse(String id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
@@ -25,7 +28,7 @@ public class GetPrivateChannelResponse {
         this.status = status;
     }
 
-    public GetPrivateChannelResponse(Integer id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
         this.peerName = peerName;
         this.serviceProviderName = serviceProviderName;
@@ -40,9 +43,6 @@ public class GetPrivateChannelResponse {
         this.status = status;
     }
 
-    public GetPrivateChannelResponse() {
-    }
-
     public PrivateChannelEndpointApi getEndpoint() {
         return endpoint;
     }
@@ -51,7 +51,7 @@ public class GetPrivateChannelResponse {
         this.endpoint = endpoint;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 

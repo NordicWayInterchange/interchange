@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelResponseApi;
 
 import java.util.Set;
@@ -8,7 +8,7 @@ import java.util.Set;
 public class OldServiceProviderApi {
     private String name;
     private Set<OldLocalActorSubscription> subscriptions;
-    private Set<CapabilitySplitApi> capabilities;
+    private Set<CapabilityApi> capabilities;
     private Set<DeliveryApi> deliveries;
     private Set<PrivateChannelResponseApi> privateChannels;
 
@@ -28,11 +28,11 @@ public class OldServiceProviderApi {
         this.subscriptions = subscriptions;
     }
 
-    public Set<CapabilitySplitApi> getCapabilities() {
+    public Set<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilitySplitApi> capabilities) {
+    public void setCapabilities(Set<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 

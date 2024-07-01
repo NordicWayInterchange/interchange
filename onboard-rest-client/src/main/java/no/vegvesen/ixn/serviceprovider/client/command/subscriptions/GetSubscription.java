@@ -24,13 +24,13 @@ public class GetSubscription implements Callable<Integer> {
     SubscriptionsCommand parentCommand;
 
     @Parameters(index = "0", description = "The ID of the subscription with the brokerUrl")
-    Integer subscriptionId;
+    String subscriptionId;
 
     @Override
     public Integer call() throws JsonProcessingException {
         OnboardRESTClient client = parentCommand.getParent().createClient();
         GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
-        System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
+        System.out.printf("Subscription %s successfully polled with %n", subscriptionId);
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
         return 0;
