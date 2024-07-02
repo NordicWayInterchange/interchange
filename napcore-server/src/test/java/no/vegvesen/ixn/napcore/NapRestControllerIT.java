@@ -71,13 +71,13 @@ public class NapRestControllerIT {
     public void testAddingSubscriptionWithInvalidSelectorSetsStatusToIllegal(){
         String actorCommonName = "actor";
         Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("1=1"));
-        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
+        assertThat(subscription.status()).isEqualTo(SubscriptionStatus.ILLEGAL);
     }
 
     @Test
     public void testAddingSubscriptionWithNullSelectorThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest()));
+        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest(null)));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
         System.out.println(subscription);
-        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
+        assertThat(subscription.status()).isEqualTo(SubscriptionStatus.REQUESTED);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
     }
@@ -101,7 +101,7 @@ public class NapRestControllerIT {
         List<Subscription> subscriptionList = napRestController.getSubscriptions(actorCommonName);
         assertThat(subscriptionList).hasSize(2);
         subscriptionList.forEach(a->{
-            assertThat(a.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
+            assertThat(a.status()).isEqualTo(SubscriptionStatus.REQUESTED);
         });
     }
 
@@ -110,10 +110,10 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
         Subscription subscription = napRestController.addSubscription(actorCommonName, request);
-        Subscription response = napRestController.getSubscription(actorCommonName, subscription.getId().toString());
+        Subscription response = napRestController.getSubscription(actorCommonName, subscription.id().toString());
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
+        assertThat(response.status()).isEqualTo(SubscriptionStatus.REQUESTED);
     }
 
     @Test
@@ -128,8 +128,8 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
         Subscription subscription = napRestController.addSubscription("actor", request);
-        napRestController.deleteSubscription(actorCommonName, subscription.getId().toString());
-        assertThat(napRestController.getSubscriptions(actorCommonName).stream().findFirst().get().getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
+        napRestController.deleteSubscription(actorCommonName, subscription.id().toString());
+        assertThat(napRestController.getSubscriptions(actorCommonName).stream().findFirst().get().status()).isEqualTo(SubscriptionStatus.NOT_VALID);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
-        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+        assertThat(response.status()).isEqualTo(DeliveryStatus.REQUESTED);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("1=1");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
-        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+        assertThat(response.status()).isEqualTo(DeliveryStatus.ILLEGAL);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class NapRestControllerIT {
     @Test
     public void testAddingNullSelectorInDeliveryThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest(null)));
     }
 
 
@@ -178,9 +178,9 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
         Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector));
-        Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
+        Delivery delivery = napRestController.getDelivery(actorCommonName, response.id());
         assertThat(delivery).isNotNull();
-        assertThat(delivery.getSelector()).isEqualTo(selector);
+        assertThat(delivery.selector()).isEqualTo(selector);
     }
 
     @Test
@@ -242,9 +242,9 @@ public class NapRestControllerIT {
         DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'");
         Delivery delivery = napRestController.addDelivery(actorCommonName, request);
 
-        napRestController.deleteDelivery(actorCommonName, delivery.getId());
+        napRestController.deleteDelivery(actorCommonName, delivery.id());
         for(Delivery response : napRestController.getDeliveries(actorCommonName)){
-            assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+            assertThat(response.status()).isEqualTo(DeliveryStatus.ILLEGAL);
         }
     }
 
@@ -330,9 +330,9 @@ public class NapRestControllerIT {
                 new MetadataApi()
         );
         napRestController.addCapability(actor1, request);
-        request.getApplication().setPublicationId("publi-Id-2");
+        request.application().setPublicationId("publi-Id-2");
         napRestController.addCapability(actor1, request);
-        request.getApplication().setPublicationId("publi-Id-3");
+        request.application().setPublicationId("publi-Id-3");
         napRestController.addCapability(actor2, request);
 
         assertThat(napRestController.getCapabilities(actor1)).hasSize(2);
@@ -347,7 +347,7 @@ public class NapRestControllerIT {
                 new MetadataApi()
         );
         OnboardingCapability response = napRestController.addCapability(actorCommonName, request);
-        napRestController.deleteCapability(actorCommonName, response.getId());
+        napRestController.deleteCapability(actorCommonName, response.id());
 
         // Ugly, should onboardingCapability have Status?
         for(Capability capability : serviceProviderRepository.findAll().stream().flatMap(a->a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet())){

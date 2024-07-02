@@ -74,7 +74,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("CSR - signing new cert for actor {}", actorCommonName);
         List<String> certs;
-        String csr = new String(Base64.getDecoder().decode(signRequest.getCsr()));
+        String csr = new String(Base64.getDecoder().decode(signRequest.csr()));
         try {
             certs = certSigner.sign(csr,actorCommonName);
         } catch (IOException | OperatorCreationException | CertificateException | NoSuchAlgorithmException |
@@ -91,7 +91,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
 
-        if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector())) {
+        if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.selector())) {
             throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
         }
 
@@ -177,7 +177,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
-        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
+        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.selector())){
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
         }
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
@@ -263,7 +263,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
-        if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
+        if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.application()) || Objects.isNull(capabilitiesRequest.metadata())){
             throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
         }
 
@@ -273,7 +273,7 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
         }
         if(!CapabilityValidator.quadTreeIsValid(capabilityToAdd)){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.application().getQuadTree()));
         }
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){

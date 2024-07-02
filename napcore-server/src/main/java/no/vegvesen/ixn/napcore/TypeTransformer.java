@@ -19,8 +19,8 @@ public class TypeTransformer {
     public no.vegvesen.ixn.federation.model.capability.Capability transformCapabilitiesRequestToCapability(CapabilitiesRequest request){
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         return new no.vegvesen.ixn.federation.model.capability.Capability(
-                transformer.applicationApiToApplication(request.getApplication()),
-                transformer.metadataApiToMetadata(request.getMetadata())
+                transformer.applicationApiToApplication(request.application()),
+                transformer.metadataApiToMetadata(request.metadata())
         );
     }
 
@@ -41,11 +41,11 @@ public class TypeTransformer {
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
-        return new LocalSubscription(subscription.getSelector(), nodeName);
+        return new LocalSubscription(subscription.selector(), nodeName);
     }
 
     public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector());
+        return new LocalDelivery(delivery.selector());
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){

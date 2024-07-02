@@ -33,7 +33,7 @@ public class CreateKeys implements Callable<Integer> {
         NapRESTClient.KeyAndCSR keyAndCSR = client.generateKeyAndCSR(spName, countryCode);
         CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(keyAndCSR.getCsr().getBytes())));
         System.out.println(keyAndCSR.getKey());
-        List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
+        List<String> decodedChain = certificateSignResponse.chain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
         System.out.println(String.join("",decodedChain));
         return 0;
     }

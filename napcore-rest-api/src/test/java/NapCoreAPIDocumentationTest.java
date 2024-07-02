@@ -67,9 +67,9 @@ public class NapCoreAPIDocumentationTest {
     @Test
     public void testCertificateResponse() throws IOException {
         CertificateSignResponse response = new ObjectMapper().readValue(Paths.get("src","test","resources","certChainResponse.json").toFile(), CertificateSignResponse.class);
-        assertThat(response.getChain()).hasSize(3);
+        assertThat(response.chain()).hasSize(3);
 
-        List<String> decoded = response.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s))).collect(Collectors.toList());
+        List<String> decoded = response.chain().stream().map(s -> new String(Base64.getDecoder().decode(s))).collect(Collectors.toList());
         assertThat(decoded).allMatch(s -> s.startsWith("-----BEGIN CERTIFICATE-----\n")).allMatch(s -> s.endsWith("-----END CERTIFICATE-----\n"));
 
     }
