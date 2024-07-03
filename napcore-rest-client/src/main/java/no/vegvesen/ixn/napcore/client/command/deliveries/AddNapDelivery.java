@@ -23,17 +23,32 @@ public class AddNapDelivery implements Callable<Integer> {
     @ParentCommand
     DeliveriesCommand parentCommand;
 
-    @Option(names = {"-f", "--filename"}, description = "The Nap delivery json file")
-    File file;
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    AddNapDeliveryOption option;
 
     @Override
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        DeliveryRequest request = mapper.readValue(file, DeliveryRequest.class);
-        Delivery response = client.addDelivery(request);
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+        if(option.file != null) {
+            DeliveryRequest request = mapper.readValue(option.file, DeliveryRequest.class);
+            Delivery response = client.addDelivery(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+        }
+        else {
+            DeliveryRequest request = new DeliveryRequest(option.selector);
+            Delivery response = client.addDelivery(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+        }
         return 0;
     }
 
+}
+
+class AddNapDeliveryOption{
+    @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
+    File file;
+
+    @Option(names = {"-s", "--selector"}, required = true, description = "The subscription selector")
+    String selector;
 }
