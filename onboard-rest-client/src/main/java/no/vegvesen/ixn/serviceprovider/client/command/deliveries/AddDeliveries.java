@@ -42,12 +42,13 @@ public class AddDeliveries implements Callable<Integer> {
         }
         return 0;
     }
+
+    static class AddDeliveriesOption{
+        @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
+        File file;
+
+        @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
+        String selector;
+    }
 }
 
-class AddDeliveriesOption{
-    @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
-    File file;
-
-    @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
-    String selector;
-}

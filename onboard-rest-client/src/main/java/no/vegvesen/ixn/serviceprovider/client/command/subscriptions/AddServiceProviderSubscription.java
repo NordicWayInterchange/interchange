@@ -42,12 +42,13 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
         }
         return 0;
     }
+    static class AddServiceProviderSubscriptionOption {
+        @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
+        File file;
+
+        @Option(names = {"-s", "--selector"}, required = true, description = "The subscription selector")
+        String selector;
+    }
 }
 
-class AddServiceProviderSubscriptionOption {
-    @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
-    File file;
 
-    @Option(names = {"-s", "--selector"}, required = true, description = "The subscription selector")
-    String selector;
-}
