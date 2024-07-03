@@ -41,12 +41,12 @@ public class AddNapSubscription implements Callable<Integer> {
         }
         return 0;
     }
+    static class AddNapSubscriptionOption{
+        @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
+        File file;
+
+        @Option(names = {"-s", "--selector"}, required = true, description = "The subscription selector")
+        String selector;
+    }
 }
 
-class AddNapSubscriptionOption{
-    @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
-    File file;
-
-    @Option(names = {"-s", "--selector"}, required = true, description = "The subscription selector")
-    String selector;
-}
