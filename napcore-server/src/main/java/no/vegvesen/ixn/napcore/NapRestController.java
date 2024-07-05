@@ -221,6 +221,7 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName){
+        System.out.println(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing deliveries for service provider {}", actorCommonName);
 
