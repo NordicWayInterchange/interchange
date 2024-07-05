@@ -11,9 +11,6 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +28,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,13 +46,18 @@ import static org.mockito.Mockito.*;
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
-	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	private static KeysStructure keysStructure = generateKeys(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+	public static final String HOST_NAME = getDockerHost();
+	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(ServiceProviderRouterIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
 	@Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
-	private static final String nodeName = "localhost";
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+			HOST_NAME,
+			HOST_NAME,
+			Path.of("qpid")
+			);
 
 
 	static class Initializer
@@ -64,9 +68,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12"),
-					"interchange.node-provider.name=" + nodeName
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores()),
+					"interchange.node-provider.name=" + HOST_NAME
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -98,7 +102,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription localSubscription1 = new LocalSubscription(
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2' and originatingCountry = 'NO'",
-				nodeName
+				HOST_NAME
 		);
 		nordea.addLocalSubscription(localSubscription1);
 
@@ -110,7 +114,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription localSubscription2 = new LocalSubscription(
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2' and originatingCountry = 'FI'",
-				nodeName
+				HOST_NAME
 		);
 
 		nordea.addLocalSubscription(localSubscription2);
@@ -237,7 +241,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				LocalSubscriptionStatus.ERROR,
 				"1=1",
-				nodeName,
+				HOST_NAME,
 				Collections.emptySet(),
 				Set.of()
 		));
@@ -246,7 +250,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				2,
 				LocalSubscriptionStatus.ERROR,
 				"messageType = 'DATEX2'",
-				nodeName,
+				HOST_NAME,
 				Collections.emptySet(),
 				Set.of()
 		));
@@ -255,7 +259,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				3,
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX23'",
-				nodeName,
+				HOST_NAME,
 				Collections.emptySet(),
 				Set.of()
 		));
@@ -345,7 +349,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
-				nodeName,
+				HOST_NAME,
 				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
 								source,
@@ -397,7 +401,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(king_gustaf);
 		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
 
-		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
+		SSLContext kingGustafSslContext = sslClientContext(stores,"king_gustaf");
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
 
 		Set<LocalEndpoint> sinkEndpoints = king_gustaf.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
@@ -437,7 +441,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-		assertThat(localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
+		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
 				.flatMap(s -> s.getLocalEndpoints().stream())
@@ -1281,11 +1285,4 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 
-	//TODO the queue might not be created, either
-
-	public SSLContext setUpTestSslContext(String s) {
-		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
-	}
 }

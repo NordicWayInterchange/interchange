@@ -11,11 +11,13 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -28,20 +30,25 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+//TODO this class does things differently from all the other Qpid test classes. Should we change this to be like the rest?
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
 @ContextConfiguration(initializers = {NewQpidStructureIT.Initializer.class})
 @Testcontainers
 public class NewQpidStructureIT extends QpidDockerBaseIT {
 
-    private static Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
 
-    private static KeysStructure keysStructure = generateKeys(NewQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+    public static final String HOSTNAME = "localhost";
+    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(NewQpidStructureIT.class),"my_ca", HOSTNAME, "routing_configurer", "king_gustaf");
 
+    @Qualifier("getTestSslContext")
     @Autowired
     SSLContext sslContext;
 
@@ -49,9 +56,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     QpidClient qpidClient;
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-            keysStructure,
-            "localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+            stores,
+            HOSTNAME,
+            HOSTNAME,
+            Path.of("qpid")
+            );
 
 
     static class Initializer
@@ -60,12 +70,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             //need to set the logg follower somewhere, this seems like a "good" place to do it for now
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            logger.info("Server admin url: " + qpidContainer.getHttpUrl());
+            logger.info("Server admin url: {}", qpidContainer.getHttpUrl());
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+                    "test.ssl.trust-store=" + getTrustStorePath(stores),
+                    "test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
@@ -90,8 +100,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 new Metadata()
         );
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(capability);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability);
         System.out.println(selector);
         //3. Create a binding on exchange using the validating selector, pointing at queue
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
@@ -137,7 +146,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     private JmsMessage getJmsMessage(Source source, String originatingCountry, String quadTreeTiles) throws JMSException {
         return source.createMessageBuilder()
                 .textMessage("Yo")
-                .userId("localhost")
+                .userId(HOSTNAME)
                 .messageType(Constants.DATEX_2)
                 .publisherId("NO-123")
                 .publicationId("pub-1")
@@ -194,8 +203,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createHeadersExchange(exchangeName);
 
         //3. Making Capability selector and joining with delivery selector.
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector = creator.makeSelector(capability);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
         System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
@@ -362,9 +370,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         String subscriptionSelector = subscription.getSelector();
 
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector1 = creator.makeSelector(capability1);
-        String capabilitySelector2 = creator.makeSelector(capability2);
+        String capabilitySelector1 = MessageValidatingSelectorCreator.makeSelector(capability1);
+        String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(capability2);
 
         String joinedSelector1 = String.format("(%s) AND (%s)", capabilitySelector1, deliverySelector);
         System.out.println(joinedSelector1);
@@ -443,8 +450,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.createHeadersExchange(capabilityExchange);
 
         //3. Making Capability selector and joining with delivery selector.
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String capabilitySelector = creator.makeSelector(capability);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
 
         String deliverySelector = delivery.getSelector();
 

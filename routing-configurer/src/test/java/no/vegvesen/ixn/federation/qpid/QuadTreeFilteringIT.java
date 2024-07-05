@@ -10,8 +10,6 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.federation.SelectorBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -24,8 +22,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
-import java.util.List;
+import java.nio.file.Path;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
@@ -33,22 +32,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
-	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
-
-	private static KeysStructure keysStructure = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+    public static final String HOST_NAME = getDockerHost();
+	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QuadTreeFilteringIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf");
 
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+			HOST_NAME,
+			HOST_NAME,
+			Path.of("qpid")
+			);
 
 	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve(keysStructure.getTruststoreName()),
-					"test.ssl.keystore-password=password",
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve(keysStructure.getSpKeystoreName("routing_configurer").toString())
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
+					"test.ssl.keystore-password=" + stores.trustStore().password(),
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -79,8 +82,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')";
 		String kingGustaf = "king_gustaf";
-		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue2","exchange2");
-		Message message = receivedMessage;
+        Message message = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue2","exchange2");
 		assertThat(message).isNull();
 	}
 
@@ -143,7 +145,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
-		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf");
+		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
@@ -152,7 +154,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		source.start();
 		source.sendNonPersistentMessage(source.createMessageBuilder()
 				.textMessage("fisk")
-				.userId("localhost")
+				.userId(HOST_NAME)
 				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.publisherName("publishername")
@@ -179,7 +181,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
 
-		SSLContext sslContext = sslClientContext(keysStructure, "king_gustaf");
+		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
@@ -191,7 +193,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		}
 		source.sendNonPersistentMessage(source.createMessageBuilder()
 				.textMessage("fisk")
-				.userId("localhost")
+				.userId(HOST_NAME)
 				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.publisherName("publishername")

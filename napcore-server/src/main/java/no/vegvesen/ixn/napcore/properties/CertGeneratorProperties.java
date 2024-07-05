@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Component
 public class CertGeneratorProperties {
@@ -53,11 +54,10 @@ public class CertGeneratorProperties {
     public CertSigner createBean() {
         try {
             KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keyStorePassword,"PKCS12");
-            KeyStore trustStore = CertSigner.loadKeyStore(truststoreLocation,truststorePassword,"JKS");
-            PrivateKey privateKey = CertSigner.getKey(keyStore, keyAlias, keyStorePassword);
-            X509Certificate intermediateCertificate = CertSigner.getCertificate(keyStore, keyAlias);
-            X509Certificate caCertificate = CertSigner.getCertificate(trustStore, "myKey");
-            return new CertSigner(privateKey,intermediateCertificate,caCertificate);
+            PrivateKey issuerPrivateKey = CertSigner.getKey(keyStore, keyAlias, keyStorePassword);
+            X509Certificate issuerCertificate = CertSigner.getCertificate(keyStore, keyAlias);
+            List<X509Certificate> certificateChain = CertSigner.getCertificateChain(keyStore, keyAlias);
+            return new CertSigner(issuerPrivateKey,issuerCertificate,certificateChain);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
                  UnrecoverableKeyException e) {
             throw new RuntimeException(e);

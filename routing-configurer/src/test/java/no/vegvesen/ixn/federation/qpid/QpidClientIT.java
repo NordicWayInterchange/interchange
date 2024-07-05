@@ -4,6 +4,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,25 +39,31 @@ import static org.assertj.core.api.Assertions.*;
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
-	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+	public static final String HOST_NAME = getDockerHost();
+	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidClientIT.class),"my_ca", HOST_NAME, "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+			HOST_NAME,
+			HOST_NAME,
+			Path.of("qpid")
+			);
 
-	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			String httpsUrl = qpidContainer.getHttpsUrl();
-			logger.info("server url: " + qpidContainer.getHttpUrl());
+            logger.info("server url: {}", qpidContainer.getHttpUrl());
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -102,9 +110,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void createExchangeThatAlreadyExistsResultsInException() {
 		Exchange exchange = client.createHeadersExchange("test-create-exchange");
 
-		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> {
-			client.createHeadersExchange("test-create-exchange");
-		});
+		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> client.createHeadersExchange("test-create-exchange"));
 		client.removeExchange(exchange);
 
 	}

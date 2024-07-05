@@ -8,53 +8,44 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
-    private static Logger logger = LoggerFactory.getLogger(QueueDepthQpidStructureIT.class);
 
-    private static KeysStructure keysStructure = generateKeys(QueueDepthQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+    public static final String HOST_NAME = getDockerHost();
+    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QueueDepthQpidStructureIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf");
+
     SSLContext sslContext;
 
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", keysStructure, "localhost");
-
-
+    public QpidContainer qpidContainer = getQpidTestContainer(
+            stores,
+            HOST_NAME,
+            HOST_NAME,
+            Path.of("queue-qpid")
+            );
 
     @BeforeEach
     public void setUp() {
-        KeystoreDetails trust = new KeystoreDetails(
-                keysStructure.getKeysOutputPath().resolve("truststore.jks").toString(),
-                "password",
-                KeystoreType.JKS
-        );
-        KeystoreDetails keys = new KeystoreDetails(
-                keysStructure.getKeysOutputPath().resolve("routing_configurer.p12").toString(),
-                "password",
-                KeystoreType.PKCS12
-        );
-        sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keys,trust);
+        sslContext = sslClientContext(stores,"routing_configurer");
         QpidClientConfig config = new QpidClientConfig(sslContext);
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
     }
@@ -77,8 +68,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 new Metadata()
         );
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(capability);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
@@ -123,8 +113,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 new Metadata()
         );
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(capability);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueOne, new Filter(selector)));
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueTwo, new Filter(selector)));
@@ -170,8 +159,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 new Metadata()
         );
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(capability);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
