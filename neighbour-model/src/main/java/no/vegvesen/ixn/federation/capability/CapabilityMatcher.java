@@ -57,6 +57,31 @@ public class CapabilityMatcher {
 		return matches;
 	}
 
+	public static Set<Capability> matchCapabilitiesToSelectorWithShards(Set<Capability> capabilities, String selector) {
+		Set<Capability> matches = new HashSet<>();
+		for (Capability capability : capabilities) {
+			if (capability.isSharded()) {
+				for (int i = 0; i <= capability.getMetadata().getShardCount(); i++) {
+					boolean match = matchCapabilityShardToSelector(capability, i+1, selector);
+					if (match) {
+						logger.debug("Selector [{}] matches capability {}", selector, capability);
+						matches.add(capability);
+						break;
+					}
+				}
+			} else {
+				if (!selectorIsSharded(selector)) {
+					boolean match = matchCapabilityToSelector(capability, selector);
+					if (match) {
+						logger.debug("Selector [{}] matches capability {}", selector, capability);
+						matches.add(capability);
+					}
+				}
+			}
+		}
+		return matches;
+	}
+
 	public static boolean matchCapabilityToSelector(Capability capability, String selector) {
 		ObjectMapper mapper = new ObjectMapper();
 		String capabilityJson = null;
@@ -76,7 +101,10 @@ public class CapabilityMatcher {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println(capabilityJson);
 		return matcher.match(selector, capabilityJson);
+	}
+
+	public static boolean selectorIsSharded(String selector) {
+		return selector.contains("shardId");
 	}
 }

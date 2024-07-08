@@ -462,4 +462,24 @@ class CapabilityMatcherTest {
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
 	}
+
+	@Test
+	public void matchUnshardedSubscriptionToShardedCapability() {
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		metadata.setShardCount(3);
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO00000",
+						"NO00000-quad-tree-testing",
+						"NO",
+						"DENM:2.3.2",
+						Collections.singletonList("12003"),
+						Collections.singletonList(6)
+				),
+				metadata
+		);
+
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
+		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 2, selector)).isTrue();
+	}
 }

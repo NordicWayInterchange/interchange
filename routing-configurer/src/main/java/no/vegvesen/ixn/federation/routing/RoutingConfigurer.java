@@ -140,37 +140,33 @@ public class RoutingConfigurer {
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			logger.debug("Checking subscription {}", subscription);
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
+
+				String queueName = "sub-" + UUID.randomUUID();
+				logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+				subscription.setEndpoints(Collections.singleton(endpoint));
+
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
+				createQueue(endpoint.getSource(), neighbourName, delta);
 
 				for (Capability capability : matchingCaps) {
-					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
-					if (subscription.isSharded()) {
-						if (capability.isSharded()) {
-							for (CapabilityShard shard : capability.getShards()) {
-								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
-									createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
-								}
+					for (CapabilityShard shard : capability.getShards()) {
+						if (subscription.isSharded()) {
+							if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 							}
 						} else {
-							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
-						}
-					} else {
-						for (CapabilityShard shard : capability.getShards()) {
-							createEndpointForSubscription(newEndpoints, subscription, neighbourName, delta, shard);
+							if (!subscription.isSharded()) {
+								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+							}
 						}
 					}
-					subscription.getEndpoints().addAll(newEndpoints);
-					subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 				}
-				if (!subscription.getEndpoints().isEmpty()) {
-					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-				} else {
-					logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
-				}
+
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
@@ -180,60 +176,38 @@ public class RoutingConfigurer {
 		logger.debug("Set up routing for neighbour {}", neighbourName);
 	}
 
-	public void createEndpointForSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, String neighbourName, QpidDelta delta, CapabilityShard shard) {
-		String queueName = "sub-" + UUID.randomUUID();
-		logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
-		NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
-		createQueue(endpoint.getSource(), neighbourName, delta);
-		qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-		newEndpoints.add(endpoint);
-	}
-
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
+				logger.debug("Subscription matches {} caps", matchingCaps.size());
+
+				String redirectQueue = "re-" + UUID.randomUUID();
+				logger.debug("Creating endpoint {} for subscription with id {}", redirectQueue, subscription.getId());
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+				subscription.setEndpoints(Collections.singleton(endpoint));
+
+				createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);
+				addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+
 				for (Capability capability : matchingCaps) {
-					Set<NeighbourEndpoint> newEndpoints = new HashSet<>();
-					if (subscription.isSharded()) {
-						if (capability.isSharded()) {
-							for (CapabilityShard shard : capability.getShards()) {
-								if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
-									createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
-								}
+					for (CapabilityShard shard : capability.getShards()) {
+						if (subscription.isSharded()) {
+							if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 							}
 						} else {
-							logger.debug("Capability is not sharded, no match for subscription with id {}",subscription.getId());
-						}
-					} else {
-						for (CapabilityShard shard : capability.getShards()) {
-							createEndpointForRedirectSubscription(newEndpoints, subscription, delta, shard);
+							qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 						}
 					}
-					subscription.getEndpoints().addAll(newEndpoints);
-					subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 				}
-				if (!subscription.getEndpoints().isEmpty()) {
-					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
-					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
-				} else {
-					logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
-				}
+				subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 		}
-	}
-
-	public void createEndpointForRedirectSubscription(Set<NeighbourEndpoint> newEndpoints, NeighbourSubscription subscription, QpidDelta delta, CapabilityShard shard) {
-		String redirectQueue = "re-" + UUID.randomUUID();
-		logger.debug("Creating endpoint {} for subscription with id {}", redirectQueue, subscription.getId());
-		NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
-		createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);
-		qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-		newEndpoints.add(endpoint);
 	}
 
 	@Scheduled(fixedRateString = "${create-subscriptions-exchange.interval}")

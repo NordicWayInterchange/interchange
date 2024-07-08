@@ -243,11 +243,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn("my-name");
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(tigershark, client.getQpidDelta());
-		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
-		assertThat(sub.getEndpoints()).hasSize(2);
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
 	}
@@ -427,13 +425,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
 		assertThat(sub1.getEndpoints()).hasSize(1);
-		assertThat(sub2.getEndpoints()).hasSize(2);
+		assertThat(sub2.getEndpoints()).hasSize(1);
 		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
@@ -458,12 +454,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub.getEndpoints()).hasSize(3);
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
 	}
 
 	@Test
@@ -509,16 +503,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub1.getEndpoints()).hasSize(2);
-		assertThat(sub2.getEndpoints()).hasSize(3);
-		for (NeighbourEndpoint endpoint : sub1.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
-		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(sub1.getEndpoints()).hasSize(1);
+		assertThat(sub2.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
@@ -549,11 +539,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub.getEndpoints()).hasSize(4);
-		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(4);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
 
@@ -1091,13 +1079,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
 		assertThat(sub1.getEndpoints()).hasSize(1);
-		assertThat(sub2.getEndpoints()).hasSize(2);
+		assertThat(sub2.getEndpoints()).hasSize(1);
 		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(client.getGroupMember("redirect-sp-2", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
@@ -1124,12 +1110,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub.getEndpoints()).hasSize(3);
+		assertThat(sub.getEndpoints()).hasSize(1);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(client.getGroupMember("redirect-sp-4", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 	}
 
@@ -1177,16 +1161,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub1.getEndpoints()).hasSize(2);
-		assertThat(sub2.getEndpoints()).hasSize(3);
-		for (NeighbourEndpoint endpoint : sub1.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
-		for (NeighbourEndpoint endpoint : sub2.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(sub1.getEndpoints()).hasSize(1);
+		assertThat(sub2.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub1.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub1.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(client.queueExists(sub2.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(client.getGroupMember("redirect-sp-6", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
@@ -1219,11 +1199,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		assertThat(sub.getEndpoints()).hasSize(4);
-		for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-			assertThat(client.queueExists(endpoint.getSource())).isTrue();
-			assertThat(client.getQueuePublishingLinks(endpoint.getSource())).hasSize(1);
-		}
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(4);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(client.getGroupMember("redirect-sp-8", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
 	}
