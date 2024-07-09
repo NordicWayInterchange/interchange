@@ -23,9 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**

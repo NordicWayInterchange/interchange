@@ -1,13 +1,15 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.SelectorBuilder;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.federation.SelectorBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -21,10 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
