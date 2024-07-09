@@ -51,7 +51,7 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -76,7 +76,7 @@ services:
       - NAP_NAME=nap.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -98,7 +98,7 @@ services:
       - "../qpid/messages/a:/work/a/messages"
       - "../tmp/dump:/dump"
     environment:
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -131,7 +131,7 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -156,7 +156,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a.bouvetinterchange.eu
       - SERVER_NAME=a.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -181,7 +181,7 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -208,7 +208,7 @@ services:
     - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/jks/keys/truststore.jks
+    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
@@ -247,7 +247,7 @@ services:
     - SERVER_NAME=b.bouvetinterchange.eu
     - DOMAIN_NAME=bouvetinterchange.eu
     - SP_CHNL_PORT=8696
-    - TRUST_STORE=/jks/keys/truststore.jks
+    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=password
     - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
@@ -272,7 +272,7 @@ services:
       - SERVER_NAME=b.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -299,7 +299,7 @@ services:
       #- NODE_PROVIDER_NAME=b.bouvetinterchange.eu # "my name"
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -321,7 +321,7 @@ services:
       - "../tmp:/jks"
       - "../qpid/messages/b:/work/b/messages"
     environment:
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -352,7 +352,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://b.bouvetinterchange.eu
       - SERVER_NAME=b.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
@@ -378,7 +378,7 @@ services:
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
