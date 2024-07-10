@@ -245,7 +245,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("List network capabilities for service provider {}", actorCommonName);
+        logger.info("List local capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
@@ -337,7 +337,7 @@ public class NapRestController {
         if (serviceProvider == null) {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
-        return serviceProvider;
+        return serviceProviderRepository.save(serviceProvider);
     }
 
     private Set<String> allPublicationIds(){
