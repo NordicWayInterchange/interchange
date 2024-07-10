@@ -11,7 +11,7 @@
         <version>1.0.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>routing-configurer</artifactId>
+    <artifactId>qpid-client</artifactId>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,7 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
             <version>${project.version}</version>
@@ -77,15 +77,19 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>qpid-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

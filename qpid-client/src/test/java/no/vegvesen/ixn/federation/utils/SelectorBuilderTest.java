@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.utils;
 
-import no.vegvesen.ixn.federation.SelectorBuilder;
 import org.junit.Test;
-
+import no.vegvesen.ixn.federation.SelectorBuilder;
 import java.util.Arrays;
 import java.util.HashSet;
 

@@ -255,6 +255,7 @@
         <module>jms-client-app</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>qpid-client</module>
         <module>napcore-rest-api</module>
         <module>napcore-server</module>
         <module>napcore-server-app</module>
