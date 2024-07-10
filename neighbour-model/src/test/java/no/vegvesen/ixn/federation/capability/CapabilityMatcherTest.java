@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -406,6 +407,7 @@ class CapabilityMatcherTest {
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
 	}
+
 	@Test
 	public void publisherNameInCapability(){
 		Capability capability = new Capability(
@@ -418,4 +420,181 @@ class CapabilityMatcherTest {
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isTrue();
 	}
+
+	@Test
+	public void quadTreeOnCapabilityIsLongerThanSelector() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of(6)
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void quadTreeOnSelectorIsLongerThanOnCapability() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void selectorWithOnlyQuadTree() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "quadTree like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void selectorWithOnlyQuadTreeNotLike() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "quadTree not like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
+
+
+	@Test
+	public void selectorWithNegatedQuadTreeOtherThanTheOneFromCapability() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void selectorWithOutsideAnd() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
+
+	@Test
+	public void selectorWithOutsideAndNotMatching() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void selectorWithNegatedQuadTreeSameAsCapabilityShouldNotMatch() {
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
+
+	@Test
+	@Disabled("This test does not work. Seems to be a problem with the selectorMatcher")
+	public void matchingQuadTreeeWithFalseThenTrue() {
+		Capability capability2 = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123.123",
+						"NO",
+						"1.0",
+						List.of("122"),
+						List.of()
+				),
+				new Metadata()
+		);
+        assertThat(
+				CapabilityMatcher.matchCapabilityToSelector(
+						capability2,
+						"messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')"
+				)).isFalse();
+	}
+
+	@Test
+	public void mathcAgainstSubTile() {
+		Capability capability1 = new Capability(
+				new DenmApplication(
+						"NO-123",
+						"NO-123:123",
+						"NO",
+						"1.0",
+						List.of("123"),
+						List.of()
+				),
+				new Metadata()
+		);
+
+		String selector = "messageType = 'DENM' and not (quadTree like '%,1233%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector)).isTrue();
+	}
+
 }
