@@ -132,6 +132,10 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
+
+    public String getUser() {
+        return user;
+    }
 }
 
 

@@ -106,7 +106,7 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>9.0.0</version>
+                <version>9.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -145,15 +145,9 @@
                 <version>42.7.2</version>
             </dependency>
             <dependency>
-                <groupId>com.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>5.7.1</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>pl.pragmatists</groupId>
-                <artifactId>JUnitParams</artifactId>
-                <version>1.1.1</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>5.10.1</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -255,10 +249,12 @@
         <module>jms-client-app</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>qpid-client</module>
         <module>napcore-rest-api</module>
         <module>napcore-server</module>
         <module>napcore-server-app</module>
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
+        <module>keys-generator</module>
     </modules>
 </project>
