@@ -1,0 +1,26 @@
+services:
+  a-napcore-client:
+    #image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend:1.0
+    build:
+      context: ../../napcore-frontend/
+    depends_on:
+      - a_napcore_server
+    ports:
+      - 3000:3000
+    links:
+      - "a_napcore_server:a.bouvetinterchange.eu"
+    volumes:
+      - "../tmp/keys/nap.bouvetinterchange.eu.p12:/app/nap.bouvetinterchange.eu.p12"
+    environment:
+      - PFX_KEY_FILENAME=nap.bouvetinterchange.eu.p12
+      - PFX_PASSPHRASE=password
+      - INTERCHANGE_URI=https://a.bouvetinterchange.eu:8898/nap/
+      - INTERCHANGE_PREFIX=a.bouvetinterchange.eu.nap.
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
+      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
+      - AUTH0_ISSUER=${AUTH0_ISSUER}
+      - NEXTAUTH_URL=http://localhost:3000/
+    networks:
+      - testing_net
+
