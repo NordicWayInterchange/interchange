@@ -10,9 +10,10 @@ To run the project make sure you have built the Java project (`mvn clean package
 directory), then use the `systemtest.sh`.
 
 If you encounter any problems starting the project, try doing either a hard prune of Docker,
-(`docker container prune -f; docker network prune -f; docker volume prune -f` if you don't have)
-any containers, network or volumes you want to keep on the Docker host, or remove any conflicting
-items using `docker container/volume/network rm`.
+(`docker container prune -f; docker network prune -f; docker volume prune -f` WARNING: the 
+command will remove all containers, networks and volumes in Docker) if you don't have
+any containers, network or volumes you want to keep on the Docker host, or remove any 
+conflicting items using `docker container/volume/network rm`.
 
 There are scripts to run the onboard client for a and b (`a_onboard_client.sh` and `b_onboard_client`,
 respectively), as well as demo jms clients for a and b (`jms_client_a.sh` and `jms_client_b`, 
