@@ -1056,6 +1056,7 @@ public class NeighbourDiscovererIT {
 				new DatexApplication(),
 				new Metadata()
 		));
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
                 List.of(neighbour),
 				Optional.of(LocalDateTime.now()),

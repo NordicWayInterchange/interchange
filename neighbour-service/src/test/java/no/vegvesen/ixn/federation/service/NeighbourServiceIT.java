@@ -438,18 +438,18 @@ public class NeighbourServiceIT {
         String name = "ignoredNeighbour";
 
         Neighbour neighbour = ignoredNeighbour(name);
-        CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
+        CapabilityApi capabilitySplitApi = new CapabilityApi(
                 new DatexApplicationApi(),
                 new MetadataApi()
         );
-        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesSplitApi(name, Set.of(capabilitySplitApi)), Set.of()));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilitySplitApi)), Set.of()));
     }
     @Test
     public void neighbourIgnoredWhenPollingSubscription(){
         String name = "ignoredNeighbour2";
         Neighbour neighbour = ignoredNeighbour(name);
 
-        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionPoll(name, 1));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionPoll(name, "1"));
     }
 
     @Test
@@ -467,7 +467,7 @@ public class NeighbourServiceIT {
         String name = "ignoredNeighbour4";
         Neighbour neighbour = ignoredNeighbour(name);
 
-        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionDelete(name, 1));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionDelete(name, "1"));
     }
     public Neighbour ignoredNeighbour(String name){
         Neighbour neighbour = new Neighbour(

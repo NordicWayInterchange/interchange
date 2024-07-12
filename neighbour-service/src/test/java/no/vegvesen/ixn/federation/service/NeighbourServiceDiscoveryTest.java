@@ -467,13 +467,13 @@ public class NeighbourServiceDiscoveryTest {
 		spyNeighbour.setName("neighbour-name");
 		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(anyBoolean(), any())).thenReturn(Collections.singletonList(spyNeighbour));
 
-		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REJECTED, "");
+		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED, "");
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
 
-		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.ACCEPTED)).isEmpty();
+		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).isEmpty();
 	}
 
 	@Test
@@ -485,7 +485,7 @@ public class NeighbourServiceDiscoveryTest {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 		spyNeighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
-		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
+		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED)).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
