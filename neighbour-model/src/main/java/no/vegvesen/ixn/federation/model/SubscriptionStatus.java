@@ -2,13 +2,11 @@ package no.vegvesen.ixn.federation.model;
 
 public enum SubscriptionStatus {
     REQUESTED,
-    ACCEPTED,
     CREATED,
     ILLEGAL,
     NO_OVERLAP,
     GIVE_UP,
     FAILED,
-    REJECTED,
     TEAR_DOWN,
     RESUBSCRIBE;
 

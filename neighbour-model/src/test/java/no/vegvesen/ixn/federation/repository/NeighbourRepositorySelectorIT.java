@@ -108,14 +108,14 @@ public class NeighbourRepositorySelectorIT {
 
 		Subscription subscriptionA = new Subscription();
 		subscriptionA.setSelector("originatingCountry = 'OM'");
-		subscriptionA.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+		subscriptionA.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequest fedin = new SubscriptionRequest(Sets.newSet(subscriptionA));
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 
 		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false,
-				SubscriptionStatus.ACCEPTED, SubscriptionStatus.REQUESTED);
+				 SubscriptionStatus.REQUESTED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn)).isTrue();
 		assertThat(interchangeInList(ericssonA.getName(), getInterchangeWithRequestedSubscriptionsInFedIn)).isTrue();

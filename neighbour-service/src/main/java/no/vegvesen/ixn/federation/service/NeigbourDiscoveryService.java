@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class NeigbourDiscoveryService {
 
-    private Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
+    private final Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
 
     private final DNSFacade dnsFacade;
     private final NeighbourRepository neighbourRepository;
@@ -174,7 +174,7 @@ public class NeigbourDiscoveryService {
         String neighbourName = neighbour.getName();
         Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, Capability.transformNeighbourCapabilityToSplitCapability(neighbourCapabilities), interchangeNodeProperties.getName());
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, Capability.transformNeighbourCapabilityToCapability(neighbourCapabilities), interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
@@ -218,7 +218,6 @@ public class NeigbourDiscoveryService {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 false,
                 SubscriptionStatus.REQUESTED,
-                SubscriptionStatus.ACCEPTED,
                 SubscriptionStatus.FAILED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {

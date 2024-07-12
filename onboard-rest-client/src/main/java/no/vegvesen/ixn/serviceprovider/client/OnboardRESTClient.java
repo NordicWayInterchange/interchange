@@ -79,8 +79,8 @@ public class OnboardRESTClient {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
-        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
+    public GetSubscriptionResponse getSubscription(String localSubscriptionId) {
+        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId);
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 
@@ -116,7 +116,7 @@ public class OnboardRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelResponse.class).getBody();
     }
 
-    public void deletePrivateChannel(Integer privateChannelId) {
+    public void deletePrivateChannel(String privateChannelId) {
         restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
     }
 
@@ -124,13 +124,17 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/privatechannels", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
-    public GetPrivateChannelResponse getPrivateChannel(Integer privateChannelId){
+    public GetPrivateChannelResponse getPrivateChannel(String privateChannelId){
        String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
     public ListPeerPrivateChannels getPeerPrivateChannels(){
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
+    }
+
+    public String getUser() {
+        return user;
     }
 }
 

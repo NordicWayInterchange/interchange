@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
@@ -59,7 +59,6 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
-
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.debug("Common name of certificate matched name in API object.");
@@ -93,14 +92,13 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	@Operation(summary="Poll subscription")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE)))})
-	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
-
 		NeighbourMDCUtil.removeLogVariables();
 		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
 	}
@@ -125,7 +123,7 @@ public class NeighbourRestController {
 		@ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE),
 	}
 	))})
-	public CapabilitiesSplitApi updateCapabilities(@RequestBody CapabilitiesSplitApi neighbourCapabilities) {
+	public CapabilitiesApi updateCapabilities(@RequestBody CapabilitiesApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
@@ -136,7 +134,7 @@ public class NeighbourRestController {
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
-		CapabilitiesSplitApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
+		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilitiesApiResponse;
@@ -146,14 +144,13 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{ixnName}/subscriptions/{subscriptionId}")
 	@Secured("ROLE_USER")
 	@Operation(summary="Delete subscription")
-	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received request to delete subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
-
 		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
 		NeighbourMDCUtil.removeLogVariables();
 	}

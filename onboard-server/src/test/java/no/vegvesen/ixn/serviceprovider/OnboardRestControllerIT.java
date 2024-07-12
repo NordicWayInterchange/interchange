@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -33,6 +32,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -89,7 +89,7 @@ public class OnboardRestControllerIT {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "serviceProvider",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "Publisher1",
                                         "Publisher1:Publication1",
@@ -111,7 +111,7 @@ public class OnboardRestControllerIT {
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -146,7 +146,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
         DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(application);
 
         String serviceProviderName = "my-service-provider";
@@ -155,7 +155,6 @@ public class OnboardRestControllerIT {
                         serviceProviderName,
                         Collections.singleton(datexNO)
                 )));
-        System.out.println(thrown.getMessage());
         assertThat(thrown.getMessage()).contains("invalid quadTree");
     }
 
@@ -163,7 +162,7 @@ public class OnboardRestControllerIT {
     public void testAddingCapabilityWithMissingProperties() {
         DatexApplicationApi app = new DatexApplicationApi("", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -181,14 +180,14 @@ public class OnboardRestControllerIT {
     public void testAddingMultipleCapabilitiesWithOneInvalidCapabilityReturnsWithoutSavingAny(){
         String serviceProviderName = "serviceProviderMissingProperties";
         ServiceProvider sp = new ServiceProvider(serviceProviderName);
-        Set<CapabilitySplitApi> capabilities = new HashSet<>();
+        Set<CapabilityApi> capabilities = new HashSet<>();
         serviceProviderRepository.save(sp);
         for(int i = 0; i<10; i++){
-            capabilities.add(new CapabilitySplitApi(
+            capabilities.add(new CapabilityApi(
                     new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2",List.of("1230123"), "SituationPublication", "pubname"),
                     new MetadataApi()));
         }
-        capabilities.add(new CapabilitySplitApi(
+        capabilities.add(new CapabilityApi(
                 new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", List.of("1230123"), "SituationPublication", ""),
                 new MetadataApi()
         ));
@@ -203,21 +202,23 @@ public class OnboardRestControllerIT {
 
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO));
         restController.addCapabilities(serviceProviderName, request);
-        assertThat(restController.listCapabilities(serviceProviderName).getCapabilities().size()).isEqualTo(1);
+        ListCapabilitiesResponse response = restController.listCapabilities(serviceProviderName);
+        assertThat(response.getCapabilities().size()).isEqualTo(1);
 
+        response.getCapabilities().forEach(a->UUID.fromString(a.getId()));
     }
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingANeighbourCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
@@ -455,7 +456,7 @@ public class OnboardRestControllerIT {
     public void testDeletingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
@@ -474,7 +475,7 @@ public class OnboardRestControllerIT {
 
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, saved.getId());
+        restController.deleteCapability(serviceProviderName, saved.getId().toString());
 
         //We did four calls to the controller, thus we should have checked the cert 4 times
         verify(certService, times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -502,7 +503,7 @@ public class OnboardRestControllerIT {
     public void testGettingCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
-        CapabilitySplitApi datexNO = new CapabilitySplitApi(
+        CapabilityApi datexNO = new CapabilityApi(
                 app,
                 meta
         );
@@ -517,7 +518,8 @@ public class OnboardRestControllerIT {
         assertThat(capabilities).hasSize(1);
         LocalActorCapability capability = capabilities.stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId());
+        GetCapabilityResponse response = restController.getCapability(serviceProviderName, capability.getId().toString());
+        UUID.fromString(response.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -548,7 +550,6 @@ public class OnboardRestControllerIT {
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
-
         LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
                 .findFirst()
                 .get();
@@ -727,7 +728,7 @@ public class OnboardRestControllerIT {
         assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
         LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
-        restController.deleteSubscription(serviceProviderName, subscriptionApi.getId());
+        restController.deleteSubscription(serviceProviderName, subscriptionApi.getId().toString());
 
         ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
@@ -747,7 +748,7 @@ public class OnboardRestControllerIT {
     public void testDeletingNonExistentSubscription() {
         String serviceprovidername = "serviceprovider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
-                () -> restController.deleteSubscription(serviceprovidername, "1")
+                () -> restController.deleteSubscription(serviceprovidername, UUID.randomUUID().toString())
         );
     }
 
@@ -767,7 +768,7 @@ public class OnboardRestControllerIT {
         assertThat(subscriptionUpdated).isPresent();
 
         try {
-            restController.deleteSubscription(serviceProviderName, "-1");
+            restController.deleteSubscription(serviceProviderName, UUID.randomUUID().toString());
         } catch (NotFoundException ignore) {
         }
         ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
@@ -793,7 +794,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGetSingleSubscription() {
+    public void testGettingSingleSubscription() {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
@@ -867,7 +868,6 @@ public class OnboardRestControllerIT {
 
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
 
-        System.out.println(response.getPrivateChannels().get(0));
         restController.deletePrivateChannel(serviceProviderName, response.getPrivateChannels().get(0).getId().toString());
         assertThat(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.TEAR_DOWN, serviceProviderName).size()).isEqualTo(1);
     }
@@ -1088,7 +1088,7 @@ public class OnboardRestControllerIT {
         );
         AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
 
-        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId();
+        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId().toString();
         GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
 
         assertThat(getDeliveryResponse).isNotNull();
@@ -1118,7 +1118,7 @@ public class OnboardRestControllerIT {
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
 
-        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId());
+        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId().toString());
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()
                 .stream()
                 .filter(i -> i.getStatus().equals(DeliveryStatus.ILLEGAL)))
@@ -1139,6 +1139,67 @@ public class OnboardRestControllerIT {
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteDelivery(serviceProviderName, "notAnId")
         );
+    }
+
+    @Test
+    public void CapabilityEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_1";
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                serviceProviderName,
+                Set.of(new CapabilityApi(
+                        new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("123"), "String publicationType", "String publisherName"),
+                        new MetadataApi()
+                ))
+        );
+        assertTrue(checkUuid(restController.addCapabilities(serviceProviderName,request).getCapabilities().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listCapabilities(serviceProviderName).getCapabilities().stream().findFirst().get().getId()));
+    }
+
+
+    @Test
+    public void SubscriptionEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_2";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'")));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getSubscription(serviceProviderName, response.getSubscriptions().stream().findFirst().get().getId()).getId()));
+    }
+
+
+    @Test
+    public void privateChannelEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_3";
+        String serviceProvider2 = "sp";
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi("serviceProvider_uuid_3")));
+        AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProvider2, request);
+        assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getPrivateChannel(serviceProvider2, response.getPrivateChannels().stream().findFirst().get().getId()).getId()));
+
+        assertTrue(checkUuid(restController.listPeerPrivateChannels(serviceProviderName).getPrivateChannels().stream().findFirst().get().getId()));
+    }
+
+    @Test
+    public void deliveryEndpointsReturnsUUID(){
+        String serviceProviderName = "serviceProvider_uuid_4";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+                new SelectorApi("originatingCountry='NO'")
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertTrue(checkUuid(response.getDeliveries().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.listDeliveries(serviceProviderName).getDeliveries().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.getDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId()).getId()));
+    }
+
+    private boolean checkUuid(String uuid){
+        try{
+            UUID.fromString(uuid);
+            return true;
+        }
+        catch (IllegalArgumentException e){
+            return false;
+        }
     }
 
     @Autowired
