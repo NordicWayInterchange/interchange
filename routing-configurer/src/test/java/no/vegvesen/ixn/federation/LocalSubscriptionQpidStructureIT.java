@@ -30,9 +30,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,18 +52,21 @@ import static org.mockito.Mockito.when;
 @Testcontainers
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
+    public static final String CONFIGURER_USER = "routing_configurer";
+
+
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             qpidContainer.followOutput(new Slf4jLogConsumer(logger));
             String httpsUrl = qpidContainer.getHttpsUrl();
             String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpUrl);
+            logger.info("server url: {}", httpUrl);
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12"),
+                    "test.ssl.trust-store=" + getTrustStorePath(stores),
+                    "test.ssl.key-store=" +  getClientStorePath(CONFIGURER_USER,stores.clientStores()),
                     "interchange.node-provider.name=" + qpidContainer.getHost(),
                     "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -69,17 +74,21 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     }
 
 
-    private static Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
 
     public static final String SP_NAME = "sp-1";
+    public static final String HOST_NAME = getDockerHost();
 
-    private static KeysStructure keysStructure = generateKeys(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
+    private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(LocalSubscriptionQpidStructureIT.class),"my_ca", HOST_NAME, CONFIGURER_USER, SP_NAME);
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-            keysStructure,
-            "localhost");
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+            stores,
+            HOST_NAME,
+            HOST_NAME,
+            Path.of("qpid")
+            );
 
 
     //TODO would be nic to be able to do without it :-)
@@ -132,17 +141,17 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             }
         }
         assertThat(actualEndpoint).isNotNull();
-        SSLContext sslContext = sslClientContext(keysStructure,SP_NAME);
+        SSLContext sslContext = sslClientContext(stores,SP_NAME);
         try (Sink sink = new Sink(
                 String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
                 actualEndpoint.getSource(),
                 sslContext,
-                message -> System.out.println(message)
+                System.out::println
         ))  {
             sink.start();
 
         } catch (Exception e) {
-            e.printStackTrace();
+           throw new RuntimeException(e);
         }
 
     }

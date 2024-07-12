@@ -1,182 +1,140 @@
 package no.vegvesen.ixn.docker;
 
-import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
+import no.vegvesen.ixn.keys.generator.*;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStore;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 
 public class QpidDockerBaseIT extends DockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
-	public static QpidContainer getQpidTestContainer(String configPathFromClasspath, KeysStructure keysStructure, String vhostName) {
+	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
 		Path imageLocation = getFolderPath("qpid-test");
-		Path configPath = Paths.get(configPathFromClasspath); //TODO parameter
 		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
-				imageLocation,configPath);
+				imageLocation, configPath);
+		Stream<HostStore> stream = stores.hostStores().stream();
+		HostStore hostStore = getHostStore(hostname, stream);
+		CaStore caStore = stores.trustStore();
+		String keystoreName = hostStore.path().getFileName().toString();
+		String keystorePassword = hostStore.password();
+		String truststoreName = caStore.path().getFileName().toString();
+		String truststorePassword = caStore.password();
 		return new QpidContainer("qpid-it-memory",
 				imageLocation,
 				configPath,
-				keysStructure.getKeysOutputPath(),
-				keysStructure.getServerKeystoreName(),
-				keysStructure.getKeystorePassword(),
-				keysStructure.getTruststoreName(),
-				keysStructure.getTruststorePassword(),
-				vhostName
-		);
+				caStore.path().getParent(),
+				keystoreName,
+				keystorePassword,
+				truststoreName,
+				truststorePassword,
+				vhostName);
 	}
-	public static KeysStructure generateKeys(Class<?> clazz,String ca, String server, String ... serviceProviders) {
-		Path keysOutputPath = getTargetFolderPathForTestClass(clazz);
-		try {
-			Files.createDirectories(keysOutputPath);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		String truststoreName = "truststore.jks";
-		Path truststorePath = keysOutputPath.resolve(truststoreName);
-		HashMap<String,String> spKeystoreNames = new HashMap<>();
-		HashMap<String,String> spKeystorePasswords = new HashMap<>();
-		String serverKeystoreName = server + ".p12";
-		String keystorePassword = "password";
-		String truststorePassword = "password";
-		try {
-			ClusterKeyGenerator.KeyPairAndCertificate topCa = ClusterKeyGenerator.generateTopCa(ca, "NO");
-			ClusterKeyGenerator.makeTrustStore(truststorePassword,"myKey",topCa.getCertificate(),new FileOutputStream(truststorePath.toFile()));
-			ClusterKeyGenerator.KeyPairAndCsr intermediate = ClusterKeyGenerator.generateIntermediateKeypairAndCsr(server, "NO");
-			ClusterKeyGenerator.CertificateAndCertificateChain intermediateCertDetails = ClusterKeyGenerator.signIntermediateCsr(topCa.getCertificate(),topCa.getKeyPair() , intermediate.getCsr());
-			Path serverKeystorePath = keysOutputPath.resolve(serverKeystoreName);
-			ClusterKeyGenerator.generateKeystoreBC(keystorePassword,server,intermediate.getKeyPair().getPrivate(),intermediateCertDetails.getChain().toArray(new X509Certificate[0]), new FileOutputStream(serverKeystorePath.toFile()));
-			for (String serviceProvider : serviceProviders) {
-				ClusterKeyGenerator.KeyPairAndCsr spKeys = ClusterKeyGenerator.generateCsrForServiceProviderBC(serviceProvider, "NO");
-				List<X509Certificate> certificates = ClusterKeyGenerator.generateServiceProviderCertBC(spKeys.getCsr(), topCa.getCertificate(), intermediateCertDetails.getCertificate(), intermediate.getKeyPair().getPrivate(), serviceProvider);
-				String spKeystoreName = serviceProvider + ".p12";
-				Path spKeystorePath = keysOutputPath.resolve(spKeystoreName);
-				String spKeystorePassword = "password";
-				ClusterKeyGenerator.generateKeystoreBC(spKeystorePassword,serviceProvider,spKeys.getKeyPair().getPrivate(),certificates.toArray(new X509Certificate[0]), new FileOutputStream(spKeystorePath.toFile()));
-				spKeystoreNames.put(serviceProvider,spKeystoreName);
-				spKeystorePasswords.put(serviceProvider,spKeystorePassword);
-			}
 
-		} catch (NoSuchAlgorithmException | OperatorCreationException | CertificateException | KeyStoreException |
-				 IOException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
-			throw new RuntimeException(e);
+	public static CaStores generateStores(Path outputPath, String ca, String server, String ... serviceProviders) {
+        try {
+            Files.createDirectories(outputPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        List<ClientRequest> clientRequests = new ArrayList<>();
+		for (String serviceProvider : serviceProviders) {
+			clientRequests.add(new ClientRequest(serviceProvider,"NO", serviceProvider + "@" + server));
 		}
-		return new KeysStructure(keysOutputPath, serverKeystoreName, truststoreName, spKeystoreNames, spKeystorePasswords, truststorePassword,keystorePassword);
-	}
-	
-	
-	public static SSLContext sslClientContext(KeysStructure keysStructure, String spName) {
-		Path keysOutputPath = keysStructure.getKeysOutputPath();
-		Path trustStorePath = keysOutputPath.resolve(keysStructure.getTruststoreName());
+		CARequest request = new CARequest(
+				ca,
+				"NO",
+				List.of(),
+				List.of(new HostRequest(
+						server
+				)),
+				clientRequests
+		);
+		CaResponse response;
+		try {
+            response = generate(request);
+        } catch (CertificateException | NoSuchAlgorithmException | SignatureException | OperatorCreationException |
+				 InvalidKeyException | NoSuchProviderException | CertIOException e) {
+            throw new RuntimeException(e);
+        }
+        CaStores stores;
+		try {
+            stores = store(response,outputPath, () -> "password");
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+		return stores;
+    }
+
+
+	public static SSLContext sslClientContext(CaStores stores, String serviceProviderName) {
+        ClientStore clientStore = getClientStore(serviceProviderName, stores.clientStores().stream());
+		CaStore caStore = stores.trustStore();
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(
-						keysStructure.getKeysOutputPath().resolve(keysStructure.getSpKeystoreName(spName)).toString(),
-						keysStructure.getSpKeystorePassword(spName),
+						clientStore.path().toString(),
+						clientStore.password(),
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(
-						trustStorePath.toString(),
-						keysStructure.getTruststorePassword(),
+						caStore.path().toString(),
+						caStore.password(),
 						KeystoreType.JKS
 				)
 		);
 	}
 
+	public static String getTrustStorePath(CaStores stores) {
+		return stores.trustStore().path().toString();
+	}
 
-	public static SSLContext sslServerContext(KeysStructure keysStructure) {
-		Path basePath = keysStructure.getKeysOutputPath();
-		KeystoreDetails keystoreDetails = new KeystoreDetails(
-				basePath.resolve(keysStructure.getServerKeystoreName()).toString(),
-				keysStructure.getKeystorePassword(),
-				KeystoreType.PKCS12
-		);
-		KeystoreDetails truststoreDetails = new KeystoreDetails(
-				basePath.resolve(keysStructure.getTruststoreName()).toString(),
-				keysStructure.getTruststorePassword(),
-				KeystoreType.JKS
-		);
-		return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails,truststoreDetails);
+	public static String getClientStorePath(String clientName, List<ClientStore> clientStores) {
+		return getClientStore(clientName,clientStores.stream()).path().toString();
 
 	}
 
-	public static class KeysStructure {
-
-		private final Path keysOutputPath;
-		private final String truststoreName;
-		private final String serverKeystoreName;
-		private final HashMap<String, String> spKeystoreNames;
-
-		private final HashMap<String, String> spKeystorePasswords;
-
-		private final String truststorePassword;
-		private final String keystorePassword;
-
-		public KeysStructure(Path keysOutputPath,
-							 String serverKeystoreName,
-							 String truststoreName,
-							 HashMap<String, String> spKeystoreNames,
-							 HashMap<String, String> spKeystorePasswords, 
-							 String truststorePassword,
-							 String keystorePassword) {
-
-			this.keysOutputPath = keysOutputPath;
-			this.truststoreName = truststoreName;
-			this.serverKeystoreName = serverKeystoreName;
-			this.spKeystoreNames = spKeystoreNames;
-			this.spKeystorePasswords = spKeystorePasswords;
-			this.truststorePassword = truststorePassword;
-			this.keystorePassword = keystorePassword;
-		}
-
-		public Path getKeysOutputPath() {
-			return keysOutputPath;
-		}
-
-		public String getTruststoreName() {
-			return truststoreName;
-		}
-
-		public String getServerKeystoreName() {
-			return serverKeystoreName;
-		}
-
-		public HashMap<String, String> getSpKeystoreNames() {
-			return spKeystoreNames;
-		}
-
-		public String getSpKeystoreName(String spName) {
-			return spKeystoreNames.get(spName);
-		}
-
-		public HashMap<String, String> getSpKeystorePasswords() {
-			return spKeystorePasswords;
-		}
-
-		public String getSpKeystorePassword(String spName) {
-			return spKeystorePasswords.get(spName);
-		}
-
-		public String getTruststorePassword() {
-			return truststorePassword;
-		}
-
-		public String getKeystorePassword() {
-			return keystorePassword;
-		}
+	public static SSLContext sslServerContext(CaStores stores, String hostName) {
+		HostStore hostStore = getHostStore(hostName, stores.hostStores().stream());
+		CaStore trustStore = stores.trustStore();
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(
+						hostStore.path().toString(),
+						hostStore.password(),
+						KeystoreType.PKCS12
+				),
+				new KeystoreDetails(
+						trustStore.path().toString(),
+						trustStore.password(),
+						KeystoreType.JKS
+				)
+		);
 	}
+
+	private static HostStore getHostStore(String hostname, Stream<HostStore> stream) {
+		return stream.filter(h -> h.hostname().equals(hostname)).findAny().orElseThrow(() -> new RuntimeException("No store found for hostname: " + hostname));
+	}
+
+	private static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
+		return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
+	}
+
 }
