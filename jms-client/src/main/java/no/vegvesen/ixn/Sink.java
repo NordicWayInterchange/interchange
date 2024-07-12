@@ -21,15 +21,16 @@ import java.util.Enumeration;
 
 public class Sink implements AutoCloseable {
 
-	private static Logger logger = LoggerFactory.getLogger(Sink.class);
+	private static final Logger logger = LoggerFactory.getLogger(Sink.class);
 
 
     protected final String url;
     private final String queueName;
     private final SSLContext sslContext;
-    protected Connection connection;
+	protected Connection connection;
 	private MessageConsumer consumer;
-	private MessageListener listener;
+	private final MessageListener listener;
+	private ExceptionListener exceptionListener;
 
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
@@ -45,6 +46,14 @@ public class Sink implements AutoCloseable {
 		this.listener = listener;
 	}
 
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+		this.exceptionListener = exceptionListener;
+	}
+
 	public void startWithMessageListener(MessageListener newListener) throws JMSException, NamingException {
     	if (this.consumer != null) {
 			try {
@@ -55,6 +64,9 @@ public class Sink implements AutoCloseable {
 		}
 		this.consumer = createConsumer();
 		this.consumer.setMessageListener(newListener);
+		if (this.exceptionListener != null) {
+			connection.setExceptionListener(this.exceptionListener);
+		}
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
 	}
 
@@ -62,22 +74,21 @@ public class Sink implements AutoCloseable {
     public void start() throws JMSException, NamingException {
 		this.consumer = createConsumer();
 		consumer.setMessageListener(listener);
+		if (exceptionListener != null) {
+			connection.setExceptionListener(exceptionListener);
+		}
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
     }
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
 		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
-		createConnection(ixnContext);
+		connection = ixnContext.createConnection(sslContext);
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		MessageConsumer consumer = session.createConsumer(destination);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
-	}
-
-	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
-		connection = ixnContext.createConnection(sslContext);
 	}
 
 	public static class DefaultMessageListener implements MessageListener {
@@ -100,17 +111,16 @@ public class Sink implements AutoCloseable {
 					String propertyName = propertyNames.nextElement();
 					Object value = message.getObjectProperty(propertyName);
 					if (value instanceof String) {
-						System.out.println(String.format("%s:'%s'",propertyName,value));
+						System.out.printf("%s:'%s'%n",propertyName,value);
 					} else {
-						System.out.println(String.format("%s:%s:%s", propertyName, value.getClass().getSimpleName(), value));
+						System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
 					}
 				}
 
 				String messageBody;
-				if (message instanceof JmsBytesMessage){
+				if (message instanceof JmsBytesMessage bytesMessage){
 					System.out.println(" BYTES message");
-					JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
-					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+                    byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 					bytesMessage.readBytes(messageBytes);
 					messageBody = Base64.getEncoder().encodeToString(messageBytes);
 				}
@@ -127,7 +137,7 @@ public class Sink implements AutoCloseable {
 				System.out.println("/Body -----------");
 				System.out.println("Delay " + delay + " ms \n");
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 		}
@@ -142,6 +152,7 @@ public class Sink implements AutoCloseable {
 
 	public void setExceptionListener(ExceptionListener exceptionListener) {
 		try {
+			this.exceptionListener = exceptionListener;
 			this.connection.setExceptionListener(exceptionListener);
 		} catch (JMSException e) {
 			logger.error("Could not set exceptionListener {}", exceptionListener, e);
