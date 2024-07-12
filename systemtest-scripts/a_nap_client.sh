@@ -11,4 +11,4 @@ docker run \
   -v $PWD/../tmp/keys:/keys \
   -v $PWD:/work \
   --link a_napcore_server:a.bouvetinterchange.eu \
-  napcore_rest_client -k /keys/nap.bouvetinterchange.eu.p12 -s password -t /keys/truststore.jks -w password https://a.bouvetinterchange.eu:8898/ ${SERVICE_PROVIDER} nap.bouvetinterchange.eu "$@"
+  napcore_rest_client -k /keys/nap.bouvetinterchange.eu.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks -w password https://a.bouvetinterchange.eu:8898/ ${SERVICE_PROVIDER} nap.bouvetinterchange.eu "$@"
