@@ -337,7 +337,7 @@ public class NapRestController {
         if (serviceProvider == null) {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
-        return serviceProviderRepository.save(serviceProvider);
+        return serviceProvider;
     }
 
     private Set<String> allPublicationIds(){
