@@ -50,17 +50,20 @@ public class LocalDelivery {
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
         this.uuid = uuid;
         this.endpoints.addAll(endpoints);
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.status = status;
     }
 
     public LocalDelivery(Integer id, String selector, LocalDeliveryStatus status) {
         this(id, Collections.emptySet(),selector,status);
+        this.selector = new Selector(selector);
+        this.status = status;
     }
+
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
         this.endpoints = Collections.emptySet();
-        this.selector = selector;
+        this.selector = new Selector(selector);
         this.status = status;
     }
 
