@@ -16,3 +16,4 @@ docker run \
     -e TRUST_STORE_PASS=password \
     --link a_qpid:a.interchangedomain.com \
     europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/jms-client-app:3743e41 -k /keys/king_olav.a.interchangedomain.com.p12 -s password -t /keys/truststore.jks -w password amqps://a.interchangedomain.com "$@"
+
