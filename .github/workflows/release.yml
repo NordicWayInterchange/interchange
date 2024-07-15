@@ -149,6 +149,7 @@ jobs:
         run: |
           cd ./${{ matrix.Images }}
           docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=${{ env.CURRENT_VERSION }}
+          
 
       - name: Push docker image to Google artifact registry
         run: |
