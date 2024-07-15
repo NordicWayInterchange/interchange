@@ -71,7 +71,14 @@
         <java.version>21</java.version>
         <spring-boot-dependencies.version>3.2.0</spring-boot-dependencies.version>
         <picocli-version>4.7.5</picocli-version>
+        <qpid-jms-client.version>2.5.0</qpid-jms-client.version>
         <testcontainers.version>1.19.3</testcontainers.version>
+        <dnsjava.version>3.5.3</dnsjava.version>
+        <qpid-broker.version>9.2.0</qpid-broker.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
+        <postgresql.version>42.7.2</postgresql.version>
+        <junit-jupiter.version>5.10.1</junit-jupiter.version>
+        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
@@ -95,18 +102,17 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-jms-client</artifactId>
-                <!-- The 1.7.* version line uses javax.jms, and 2.1.* uses jakarta.jms-->
-                <version>2.5.0</version>
+                <version>${qpid-jms-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>dnsjava</groupId>
                 <artifactId>dnsjava</artifactId>
-                <version>3.5.3</version>
+                <version>${dnsjava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>9.2.0</version>
+                <version>${qpid-broker.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -132,22 +138,22 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.78</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
-                <version>1.78</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.2</version>
+                <version>${postgresql.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
-                <version>5.10.1</version>
+                <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -165,7 +171,7 @@
                         <!-- Integration tests are named *IT.java, Run with 'mvn verify' -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*IT</include>
@@ -198,6 +204,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*ST</include>
