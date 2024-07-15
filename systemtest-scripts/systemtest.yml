@@ -96,7 +96,6 @@ services:
       - "../qpid/a:/config"
       - "../tmp:/jks"
       - "../qpid/messages/a:/work/a/messages"
-      - "../tmp/dump:/dump"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password

@@ -94,7 +94,7 @@ public class NapRESTClient {
     }
 
     public List<Capability> getMatchingCapabilities(String selector) throws JsonProcessingException {
-        String url = String.format("%s/nap/%s/subscriptions/capabilities", server, user);
+        String url = String.format("%s/nap/%s/subscriptions/capabilities?selector={selector}", server, user);
         Map<String,String> parameters = new HashMap<>();
         parameters.put("selector",selector);
         ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
@@ -126,7 +126,7 @@ public class NapRESTClient {
     }
 
     public List<Capability> getMatchingDeliveryCapabilities(String selector){
-        String url = String.format("%s/nap/%s/deliveries/capabilities", server, user);
+        String url = String.format("%s/nap/%s/deliveries/capabilities?selector={selector}", server, user);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("selector", selector);
         ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
