@@ -197,9 +197,8 @@ public class ServiceProviderServiceIT {
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.REQUESTED);
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+        LocalDelivery delivery = new LocalDelivery("a = b",LocalDeliveryStatus.REQUESTED);
+        serviceProvider.addDeliveries(Set.of(delivery));
 
         repository.save(serviceProvider);
         service.updateDeliveryStatus(serviceProvider.getName());
