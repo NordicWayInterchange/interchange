@@ -5,7 +5,6 @@ permissions:
   id-token: write
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       git-ref:
@@ -79,8 +78,8 @@ jobs:
 
       - name: Save version for release
         run: |
-          echo "CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_ENV"
-          echo "$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)" >> CURRENT_VERSION.txt
+          echo "CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/[^0-9.]//g')" >> "$GITHUB_ENV"
+          echo "$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/[^0-9.]//g')" >> CURRENT_VERSION.txt
 
       - name: Git config for maven-release-plugin
         run: |
