@@ -7,7 +7,7 @@ import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +58,8 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPostCapabilitiesOk() {
         when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
-                .thenReturn(new ResponseEntity<>(new CapabilitiesSplitApi(), HttpStatus.OK));
-        client.doPostCapabilities("https://test.server/","test",new CapabilitiesSplitApi());
+                .thenReturn(new ResponseEntity<>(new CapabilitiesApi(), HttpStatus.OK));
+        client.doPostCapabilities("https://test.server/","test",new CapabilitiesApi());
         //We don't want the client to emit INFO messages, as we do this in the RESTFacade
         verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
@@ -72,7 +72,7 @@ public class NeighbourRESTClientTest {
         when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
                 .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
         String neighbourName = "test";
-        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesApi()));
         assertThat(thrown.getMessage()).contains(neighbourName);
         //We don't want the client to emit INFO messages, as we do this in the RESTFacade
         verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
@@ -88,7 +88,7 @@ public class NeighbourRESTClientTest {
                 .thenThrow(exception);
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
-                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
+                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesApi()));
         assertThat(thrown.getMessage()).contains(neighbourName);
         verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
@@ -105,7 +105,7 @@ public class NeighbourRESTClientTest {
 
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
-                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
+                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesApi()));
         assertThat(thrown).hasMessageContaining(neighbourName);
         verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
@@ -120,7 +120,7 @@ public class NeighbourRESTClientTest {
 
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class,
-                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesSplitApi()));
+                () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesApi()));
         assertThat(thrown).hasMessageContaining(neighbourName);
         verify(template).exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();

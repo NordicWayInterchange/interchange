@@ -44,6 +44,11 @@
             <artifactId>ssl-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>keys-generator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 

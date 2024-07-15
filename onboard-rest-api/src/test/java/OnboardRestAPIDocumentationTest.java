@@ -8,8 +8,6 @@ import java.util.*;
 
 public class OnboardRestAPIDocumentationTest {
 
-
-
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
@@ -52,14 +50,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription("1",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED,
                 null));
-        subscriptions.add(new LocalActorSubscription("2",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
@@ -81,14 +79,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
-        subscriptions.add(new LocalActorSubscription("1",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
                 null));
-        subscriptions.add(new LocalActorSubscription("2",
+        subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
                 "serviceprovider1",
@@ -134,7 +132,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void createDENMCapability() throws JsonProcessingException {
-        CapabilitySplitApi api = new CapabilitySplitApi(
+        CapabilityApi api = new CapabilityApi(
                 new DenmApplicationApi(
                 "NPRA",
                 "pub-1",
@@ -155,7 +153,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "sp-1",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -176,7 +174,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "SVT",
                                         "pub-1",
@@ -198,9 +196,9 @@ public class OnboardRestAPIDocumentationTest {
                 "sp-1",
                 Collections.singleton(
                         new LocalActorCapability(
-                                "1",
+                                UUID.randomUUID().toString(),
                                 "/sp-1/capabilities/1",
-                                new CapabilitySplitApi(
+                                new CapabilityApi(
                                     new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -222,9 +220,9 @@ public class OnboardRestAPIDocumentationTest {
                 "sp-1",
                 Collections.singleton(
                         new LocalActorCapability(
-                                "1",
+                                UUID.randomUUID().toString(),
                                 "/spi-1/capabilities/1",
-                                new CapabilitySplitApi(
+                                new CapabilityApi(
                                         new DenmApplicationApi(
                                                 "NPRA",
                                                 "pub-1",
@@ -243,9 +241,9 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getCapabilityResponse() throws JsonProcessingException {
         GetCapabilityResponse response = new GetCapabilityResponse(
-                "1",
+                UUID.randomUUID().toString(),
                 "/sp-1/capabilities/1",
-                new CapabilitySplitApi(
+                new CapabilityApi(
                         new DenmApplicationApi(
                                 "NPRA",
                                 "pub-1",
@@ -277,7 +275,7 @@ public class OnboardRestAPIDocumentationTest {
         AddDeliveriesResponse response = new AddDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
-                        "1",
+                        UUID.randomUUID().toString(),
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
@@ -294,7 +292,7 @@ public class OnboardRestAPIDocumentationTest {
         ListDeliveriesResponse response = new ListDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
-                        "1",
+                        UUID.randomUUID().toString(),
                         "/sp-1/deliveries/1",
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
@@ -311,7 +309,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getDeliveryResponse() throws JsonProcessingException {
         GetDeliveryResponse response = new GetDeliveryResponse(
-                "1",
+                UUID.randomUUID().toString(),
                 Collections.singleton(new DeliveryEndpoint(
                         "amqps://sp-1",
                         5671,
@@ -332,7 +330,7 @@ public class OnboardRestAPIDocumentationTest {
         FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
                 "service-provider",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -354,7 +352,7 @@ public class OnboardRestAPIDocumentationTest {
                 "service-provider",
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                                 new DenmApplicationApi(
                                         "NPRA",
                                         "pub-1",
@@ -393,7 +391,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addPrivateChannelResponse() throws JsonProcessingException {
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, 1);
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.REQUESTED, UUID.randomUUID().toString());
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
         response.getPrivateChannels().add(privateChannel);
@@ -402,20 +400,20 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getPrivateChannelResponse() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        GetPrivateChannelResponse response = new GetPrivateChannelResponse(1, "king_olaf.bouvetinterchange.eu",endpoint,"king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
+        GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID().toString(), "king_olaf.bouvetinterchange.eu",endpoint,"king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
     @Test
     public void ListPrivateChannelsResponse()throws JsonProcessingException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,1);
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi("king_olaf.bouvetinterchange.eu",PrivateChannelStatusApi.CREATED,endpoint,UUID.randomUUID().toString());
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
     @Test
     public void ListPeerPrivateChannels() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(1,"king_olaf.bouvetinterchange.eu" ,PrivateChannelStatusApi.CREATED, endpoint);
+        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID().toString(),"king_olaf.bouvetinterchange.eu" ,PrivateChannelStatusApi.CREATED, endpoint);
         ListPeerPrivateChannels response = new ListPeerPrivateChannels("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
@@ -432,7 +430,7 @@ public class OnboardRestAPIDocumentationTest {
                 0
         );
 
-        CapabilitySplitApi denm = new CapabilitySplitApi(
+        CapabilityApi denm = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
                         "NO00000-DENM",
@@ -444,7 +442,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi datex = new CapabilitySplitApi(
+        CapabilityApi datex = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
                         "NO00000-DATEX",
@@ -457,7 +455,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi ivim = new CapabilitySplitApi(
+        CapabilityApi ivim = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-IVIM",
@@ -467,7 +465,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi spatem = new CapabilitySplitApi(
+        CapabilityApi spatem = new CapabilityApi(
                 new SpatemApplicationApi(
                         "NO00000",
                         "NO00000-SPATEM",
@@ -478,7 +476,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi mapem = new CapabilitySplitApi(
+        CapabilityApi mapem = new CapabilityApi(
                 new MapemApplicationApi(
                         "NO00000",
                         "NO00000-MAPEM",
@@ -489,7 +487,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi ssem = new CapabilitySplitApi(
+        CapabilityApi ssem = new CapabilityApi(
                 new SsemApplicationApi(
                         "NO00000",
                         "NO00000-SSEM",
@@ -500,7 +498,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi srem = new CapabilitySplitApi(
+        CapabilityApi srem = new CapabilityApi(
                 new SremApplicationApi(
                         "NO00000",
                         "NO00000-SREM",
@@ -511,7 +509,7 @@ public class OnboardRestAPIDocumentationTest {
                 metadataApi
         );
 
-        CapabilitySplitApi cam = new CapabilitySplitApi(
+        CapabilityApi cam = new CapabilityApi(
                 new CamApplicationApi(
                         "NO00000",
                         "NO00000-CAM",

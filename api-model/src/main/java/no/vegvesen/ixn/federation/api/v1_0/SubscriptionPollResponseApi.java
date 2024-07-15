@@ -10,6 +10,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
     private String id;
+
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -4,18 +4,19 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "local_deliveries")
 public class LocalDelivery {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
     @Column(name="id")
     private Integer id;
+
+    @Column
+    private String uuid = UUID.randomUUID().toString();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
@@ -51,16 +52,34 @@ public class LocalDelivery {
         this.status = status;
     }
 
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
+        this.uuid = uuid;
+        this.endpoints.addAll(endpoints);
+        this.path = path;
+        this.selector = selector;
+        this.status = status;
+    }
+
     public LocalDelivery(Integer id, String path, String selector, LocalDeliveryStatus status) {
         this(id, Collections.emptySet(),path,selector,status);
     }
 
+    public LocalDelivery(String id, String path, String selector, LocalDeliveryStatus status) {
+        this(id, Collections.emptySet(),path,selector,status);
+    }
+
     public LocalDelivery(String path, String selector, LocalDeliveryStatus status) {
-        this(null,Collections.emptySet(),path,selector,status);
+        this.endpoints = Collections.emptySet();
+        this.path = path;
+        this.selector = selector;
+        this.status = status;
     }
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
-        this(null,Collections.emptySet(),null,selector,status);
+        this.endpoints = Collections.emptySet();
+        this.path = null;
+        this.selector = selector;
+        this.status = status;
     }
 
     public Integer getId() {
@@ -69,6 +88,14 @@ public class LocalDelivery {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<LocalDeliveryEndpoint> getEndpoints() {
@@ -164,6 +191,7 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
+                "uuid=" + uuid +
                 ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +

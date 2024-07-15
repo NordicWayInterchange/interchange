@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -80,7 +80,7 @@ public class OnboardRestController {
 		}
 
 		Set<String> allPublicationIds = allPublicationIds();
-		for (CapabilitySplitApi capability : capabilityApi.getCapabilities()) {
+		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
@@ -119,7 +119,7 @@ public class OnboardRestController {
 		Set<Capability> allCapabilities = getAllLocalCapabilities();
 		allCapabilities.addAll(getAllNeighbourCapabilities());
 		return allCapabilities.stream()
-				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
+				.map(capability -> capability.getApplication().getPublicationId())
 				.collect(Collectors.toSet());
 	}
 
@@ -174,7 +174,7 @@ public class OnboardRestController {
 		Set<Capability> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+			capabilities.addAll(Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
 		}
 		return capabilities;
 	}
@@ -189,8 +189,7 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		serviceProviderToUpdate.getCapabilities().removeDataType(parsedCapabilityId);
+		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
@@ -207,8 +206,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedCapabilityId = parseInt(capabilityId, "capability");
-		Capability capability = serviceProvider.getCapabilitySplit(parsedCapabilityId);
+		Capability capability = serviceProvider.getCapability(capabilityId);
 
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
@@ -286,9 +284,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		Integer parsedDataTypeId =  parseInt(dataTypeId, "subscription");
-
-		serviceProviderToUpdate.removeLocalSubscription(parsedDataTypeId);
+		serviceProviderToUpdate.removeLocalSubscription(dataTypeId);
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
@@ -325,9 +321,9 @@ public class OnboardRestController {
 		logger.info("Getting subscription {} for service provider {}", subscriptionId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedSubscriptionId = parseInt(subscriptionId, "subscription");
+
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscription(parsedSubscriptionId);
+		LocalSubscription localSubscription = serviceProvider.getSubscription(subscriptionId);
 
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
@@ -382,9 +378,7 @@ public class OnboardRestController {
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId, "private channel");
-
-		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndId(serviceProviderName, parsedId);
+		PrivateChannel privateChannelToUpdate = privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, privateChannelId);
 		if (privateChannelToUpdate == null) {
 			throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
 		}
@@ -414,16 +408,13 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
 	@Tag(name = "Private Channel")
 	@Operation(summary = "Get private channel")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE)))})
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.GETPRIVATECHANNELRESPONSE)))})
 	public GetPrivateChannelResponse getPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channel {} for service provider {}", privateChannelId, serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		Integer parsedId = parseInt(privateChannelId, "private channel");
-
-		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndIdAndStatusIsNot(serviceProviderName, parsedId, PrivateChannelStatus.TEAR_DOWN);
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, privateChannelId, PrivateChannelStatus.TEAR_DOWN);
 		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with Id %s", privateChannelId));
 		}
@@ -515,9 +506,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
-		Integer parsedDeliveryId = parseInt(deliveryId, "delivery");
-
-		LocalDelivery localDelivery = serviceProvider.getDelivery(parsedDeliveryId);
+		LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
@@ -537,22 +526,10 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		Integer parsedId = parseInt(deliveryId, "delivery");
-		serviceProvider.removeLocalDelivery(parsedId);
+		serviceProvider.removeLocalDelivery(deliveryId);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
-	}
-
-	private Integer parseInt(String unParsedInt, String objectName){
-		Integer parsedInt;
-		try {
-			 parsedInt = Integer.parseInt(unParsedInt);
-		}
-		catch (Exception e){
-			throw new NotFoundException(String.format("Could not find %s with Id %s",objectName, unParsedInt));
-		}
-		return parsedInt;
 	}
 }
