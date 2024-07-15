@@ -141,7 +141,7 @@ jobs:
       - name: Build the Docker image
         run: |
           cd ./${{ matrix.Images }}          
-          docker build . -t ${{ matrix.Images }} --build-args JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
+          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
 
       - name: Push docker image to Google artifact registry
         run: |
