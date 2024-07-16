@@ -1,8 +1,11 @@
 FROM eclipse-temurin:21-alpine
-RUN apk add --no-cache bash alpine-conf
-RUN setup-timezone -z Europe/Oslo
 
+RUN apk add --no-cache bash openssl jq
+
+VOLUME /tmp
+RUN mkdir /tmp/keys
 COPY target/keys-generator-1.0.3-SNAPSHOT.jar keys-generator.jar
-RUN mkdir /work
-WORKDIR /work
-ENTRYPOINT ["java", "-jar", "/keys-generator.jar"]
+COPY systemtest-keys.json systemtest-keys.json
+
+ENTRYPOINT ["java", "-jar", "/keys-generator.jar", "generate", "-f systemtest-keys.json", "-o", "tmp/keys"]
+
