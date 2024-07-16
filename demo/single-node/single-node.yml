@@ -17,7 +17,7 @@ services:
           - dns.lookupdomain.com
 
   key_gen:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/key-generator:${IMAGE_TAG}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/keys-generator:${IMAGE_TAG}
     container_name: key-gen
     volumes:
       - "../keys/a:/keys"
@@ -120,6 +120,7 @@ services:
     container_name: a_routing_configurer
     depends_on:
       - a_db
+      - key_gen
     links:
       - "a_qpid:a.interchangedomain.com"
     volumes:
