@@ -455,13 +455,14 @@ public class OnboardRestControllerTest {
 				Collections.emptySet(),
 				LocalDateTime.now()
 		);
+		LocalDelivery localDelivery = new LocalDelivery(
+		"originatingCountry='NO'",
+		LocalDeliveryStatus.REQUESTED
+		);
+		localDelivery.setUuid(uuid.toString());
+
 		serviceProvider.addDeliveries(Collections.singleton(
-				new LocalDelivery(
-						uuid.toString(),
-						"/mydelivery",
-						"originatingCountry = 'NO'",
-						LocalDeliveryStatus.REQUESTED
-				)
+		localDelivery
 		));
 		when(serviceProviderRepository.findByName(firstServiceProvider))
 				.thenReturn(serviceProvider);
@@ -490,7 +491,6 @@ public class OnboardRestControllerTest {
 				new LocalDelivery(
 						uuid.toString(),
 						Collections.emptySet(),
-						"/mydelivery",
 						"originatingCountry = 'NO'",
 						LocalDeliveryStatus.REQUESTED
 				)
