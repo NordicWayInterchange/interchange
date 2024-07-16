@@ -1,7 +1,9 @@
 #!/bin/bash -eu
 
-cd ../../keys-generator/Dockerfile
-docker build -f ../../keys-generator/Dockerfile
+mkdir -p ../keys
+cd ../../keys-generator
+docker build . -t keys
 cd -
-docker-compose -f single-node.yml up --build
+docker run --rm -v $PWD/../keys:/keys keys
+IMAGE_TAG=3743e41 docker-compose -f single-node.yml up --build
 
