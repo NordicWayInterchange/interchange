@@ -9,7 +9,8 @@ import static picocli.CommandLine.*;
                 AddNapCapability.class,
                 GetNapCapability.class,
                 GetNapCapabilities.class,
-                DeleteNapCapability.class
+                DeleteNapCapability.class,
+                GetPublicationIds.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true

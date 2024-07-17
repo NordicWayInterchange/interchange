@@ -311,6 +311,14 @@ public class NapRestController {
         return typeTransformer.transformCapabilityToOnboardingCapability(capability);
     }
 
+    @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"})
+    public Set<String> getPublicationIds(String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
+
+        return allPublicationIds();
+    }
+
     @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){

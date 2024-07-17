@@ -25,10 +25,8 @@ import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NapRESTClient {
 
@@ -150,6 +148,12 @@ public class NapRESTClient {
         String url = String.format("%s/nap/%s/capabilities", server, user);
         ResponseEntity<OnboardingCapability[]> response = restTemplate.getForEntity(url, OnboardingCapability[].class);
         return Arrays.asList(response.getBody());
+    }
+
+    public Set<String> getPublicationIds(){
+        String url = String.format("%s/nap/%s/capabilities/publicationids", server, user);
+        ResponseEntity<String[]> response = restTemplate.getForEntity(url, String[].class);
+        return Arrays.stream(response.getBody()).collect(Collectors.toSet());
     }
 
     public void deleteCapability(String capabilityId){
