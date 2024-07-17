@@ -1,0 +1,16 @@
+[
+  {
+    "name" : "a.interchangedomain.com",
+    "country" : "NO",
+    "subCaRequests" : [],
+    "hostRequests" : [{
+      "name": "a.interchangedomain.com"
+    }],
+    "clientRequests" : [{
+      "name": "king_gustaf.interchangedomain.com",
+      "country" : "NO",
+      "email" : "kungen@slottet.se"
+    }
+    ]
+  }
+]
