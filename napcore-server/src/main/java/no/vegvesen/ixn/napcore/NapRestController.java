@@ -311,8 +311,8 @@ public class NapRestController {
         return typeTransformer.transformCapabilityToOnboardingCapability(capability);
     }
 
-    @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"})
-    public Set<String> getPublicationIds(String actorCommonName){
+    @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
 
