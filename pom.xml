@@ -49,7 +49,7 @@
                     <!-- unit tests are named *Test.java, Run with 'mvn test' -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-		    <version>${maven-surefire-plugin.version}</version> 
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
                     </configuration>
@@ -70,7 +70,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-		    <version>${maven-compiler-plugin.version}</version> 
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <parameters>true</parameters>
                     </configuration>
@@ -95,12 +95,12 @@
         <postgresql.version>42.7.3</postgresql.version>
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
         <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
-	<maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version> 
+        <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
-	<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
-	<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version> 
-	<maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version> 
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <javacc.version>7.0.10</javacc.version>
         <springdoc-openapi-starter-webmvc-api.version>2.2.0</springdoc-openapi-starter-webmvc-api.version>
@@ -201,7 +201,7 @@
                         <!-- Integration tests are named *IT.java, Run with 'mvn verify' -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-			<version>${maven-failsafe-plugin.version}</version> 
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*IT</include>
@@ -227,7 +227,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
-			<version>${maven-surefire-plugin.version}</version> 
+                        <version>${maven-surefire-plugin.version}</version>
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
@@ -235,7 +235,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-			<version>${maven-failsafe-plugin.version}</version> 
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*ST</include>
