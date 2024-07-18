@@ -9,4 +9,4 @@ docker run \
   -v ${PWD}/../keys/a:/keys \
   -v ${PWD}:/work \
   --link a_qpid:a.interchangedomain.com \
-   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/jms-client-source-app:65dd491 -k /keys/king_olav.a.interchangedomain.com.p12  -s password -t /keys/truststore.jks -w password amqps://a.interchangedomain.com "$@"
+   europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/jms-client-source-app:65dd491 -k /keys/king_gustaf.interchangedomain.com.p12  -s password -t /keys/a.interchangedomain.com.jks -w password amqps://a.interchangedomain.com "$@"
