@@ -234,6 +234,7 @@ public class ClusterKeyGeneratorTest {
     }
 
 
+    //TODO Load the keystore and assert on the contents
     @Test
     public void makeHostKeystore() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, IOException, SignatureException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
         CaResponse response = ClusterKeyGenerator.generate(
@@ -253,6 +254,7 @@ public class ClusterKeyGeneratorTest {
         ClusterKeyGenerator.makeKeystore("mydomain.com","password",outputStream,host.certificateChain(),host.keyPair().getPrivate());
     }
 
+    //TODO Load the keystore and assert on the contents
     @Test
     public void makeHostKeystoreWithTwoLayersOfCa() throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, IOException, KeyStoreException {
         CaResponse response = ClusterKeyGenerator.generate(
@@ -320,7 +322,8 @@ public class ClusterKeyGeneratorTest {
 
     @Test
     public void requests() throws IOException {
-        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("systemtest-scripts").resolve("systemtest-keys.yml");
+        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("test-keys").resolve(ClusterKeyGeneratorTest.class.getSimpleName()).resolve("systemtest-keys.json");
+        Files.createDirectories(outPath);
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         writer.writeValue(Files.newOutputStream(outPath),CA_REQUESTS);
     }
