@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClusterKeyGeneratorIT {
+public class ClusterKeyGeneratorTest {
 
 
     public static final CARequest INTERNAL_A = new CARequest(
@@ -329,7 +329,7 @@ public class ClusterKeyGeneratorIT {
     public void saveKeystores() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
         Path absolutePath = Path.of("").toAbsolutePath();
         Path parent = absolutePath.getParent();
-        Path additionalPath = Path.of("target","test-keys",ClusterKeyGeneratorIT.class.getSimpleName());
+        Path additionalPath = Path.of("target","test-keys",ClusterKeyGeneratorTest.class.getSimpleName());
         Path target = parent.resolve(additionalPath);
         Files.createDirectories(target);
 
