@@ -16,12 +16,17 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 	@NonNull
 	List<Neighbour> findAll();
 
-	List<Neighbour> findByCapabilities_Status(CapabilitiesStatus capabilitiesStatus);
-	List<Neighbour> findByCapabilities_StatusIn(CapabilitiesStatus... capabilitiesStatuses);
+	List<Neighbour> findAllByIgnoreIs(boolean ignore);
 
-	List<Neighbour> findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus... subscriptionStatus);
+	List<Neighbour> findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus capabilitiesStatus, boolean ignore);
 
-	List<Neighbour> findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus... neighbourSubscriptionStatus);
+	List<Neighbour> findByIgnoreIsAndCapabilities_StatusIn(boolean ignore, CapabilitiesStatus... capabilitiesStatuses);
 
-	List<Neighbour> findByControlConnection_ConnectionStatus(ConnectionStatus connectionStatus);
+	List<Neighbour> findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(boolean ignore, SubscriptionStatus... subscriptionStatus);
+
+	List<Neighbour> findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(boolean ignore, NeighbourSubscriptionStatus... neighbourSubscriptionStatus);
+
+
+	List<Neighbour> findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus connectionStatus, boolean ignore);
+
 }

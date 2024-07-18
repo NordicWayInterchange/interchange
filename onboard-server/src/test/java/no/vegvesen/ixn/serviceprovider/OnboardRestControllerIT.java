@@ -297,7 +297,7 @@ public class OnboardRestControllerIT {
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        assertThat(neighbourRepository.findAll()).hasSize(1);
+        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
@@ -351,7 +351,7 @@ public class OnboardRestControllerIT {
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        assertThat(neighbourRepository.findAll()).hasSize(1);
+        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
@@ -392,7 +392,7 @@ public class OnboardRestControllerIT {
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
-        assertThat(neighbourRepository.findAll()).hasSize(1);
+        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
@@ -444,7 +444,7 @@ public class OnboardRestControllerIT {
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        assertThat(neighbourRepository.findAll()).hasSize(1);
+        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
