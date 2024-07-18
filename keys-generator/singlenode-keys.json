@@ -10,7 +10,17 @@
       "name": "king_gustaf.interchangedomain.com",
       "country" : "NO",
       "email" : "kungen@slottet.se"
-    }
+    },
+      {
+        "name" : "king_olav.interchangedomain.com",
+        "country" : "SE",
+        "email" : "kongen@slottet.no"
+      },
+      {
+        "name" : "king_fredrik.interchangedomain.com",
+        "country" : "DK",
+        "email" : "kongen@slottet.dk"
+      }
     ]
   }
 ]
