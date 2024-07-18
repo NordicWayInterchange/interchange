@@ -322,7 +322,7 @@ public class ClusterKeyGeneratorTest {
 
     @Test
     public void requests() throws IOException {
-        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("test-keys").resolve(ClusterKeyGeneratorTest.class.getSimpleName());
+        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("target").resolve("test-keys").resolve(ClusterKeyGeneratorTest.class.getSimpleName());
         Files.createDirectories(outPath);
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         writer.writeValue(Files.newOutputStream(outPath.resolve("systemtest-keys.json")), CA_REQUESTS);
