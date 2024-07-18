@@ -1,0 +1,61 @@
+[ {
+  "id" : "95412857-9b14-4ebe-95a7-0d60bac2c823",
+  "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.client1",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368670,
+  "createdTime" : 1687847368669
+}, {
+  "id" : "b996792e-5c7f-4228-812d-ca04d84316a5",
+  "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.fourc1",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368671,
+  "createdTime" : 1687847368670
+}, {
+  "id" : "d4691c07-1d87-4a19-8184-347675c8887a",
+  "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368669,
+  "createdTime" : 1687847368668
+}, {
+  "id" : "63910197-f7ce-406b-b09b-79cf93f975dc",
+  "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.alex1",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368668,
+  "createdTime" : 1687847368667
+}, {
+  "id" : "693fefff-d450-48f9-a4ad-b44d09a55d30",
+  "name" : "anna",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368666,
+  "createdTime" : 1687847368665
+}, {
+  "id" : "5d2258cb-819b-44dc-a8cb-da8784162868",
+  "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.drd.dk.client1",
+  "type" : "ManagedGroupMember",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "lastOpenedTime" : 1687847368667,
+  "createdTime" : 1687847368666
+} ]

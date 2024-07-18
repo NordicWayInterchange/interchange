@@ -1,0 +1,330 @@
+{
+  "id" : "41664015-ab35-4341-bc35-18a63470cf03",
+  "name" : "default",
+  "type" : "RuleBased",
+  "desiredState" : "ACTIVE",
+  "state" : "ACTIVE",
+  "durable" : true,
+  "lifetimePolicy" : "PERMANENT",
+  "defaultResult" : "DENIED",
+  "lastOpenedTime" : 1683639599887,
+  "priority" : 10,
+  "rules" : [ {
+    "identity" : "administrators",
+    "operation" : "ALL",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "ALL",
+    "attributes" : { }
+  }, {
+    "identity" : "service-providers",
+    "operation" : "ACCESS",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "VIRTUALHOST",
+    "attributes" : {
+      "NAME" : "bouvet.pilotinterchange.eu"
+    }
+  }, {
+    "identity" : "bi-consumers",
+    "operation" : "ACCESS",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "VIRTUALHOST",
+    "attributes" : {
+      "NAME" : "bouvet.pilotinterchange.eu"
+    }
+  }, {
+    "identity" : "federated-interchanges",
+    "operation" : "ACCESS",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "VIRTUALHOST",
+    "attributes" : {
+      "NAME" : "bouvet.pilotinterchange.eu"
+    }
+  }, {
+    "identity" : "remote-service-providers",
+    "operation" : "ACCESS",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "VIRTUALHOST",
+    "attributes" : {
+      "NAME" : "bouvet.pilotinterchange.eu"
+    }
+  }, {
+    "identity" : "clients-private-channels",
+    "operation" : "ACCESS",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "VIRTUALHOST",
+    "attributes" : {
+      "NAME" : "bouvet.pilotinterchange.eu"
+    }
+  }, {
+    "identity" : "ALL",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "bi-queue"
+    }
+  }, {
+    "identity" : "anna",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "7c971dc4-3bcd-4f99-8275-b35e9cfe8592"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.fourc1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "f0f20575-e4cf-4706-9506-4027ffbbc838"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.fourc1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "44fe6891-ce1d-4de2-b53d-0ccf5a7036f6"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.fourc1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-d9032905-c5a2-4119-863c-1899b12fbced",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "33ca31fc-5e61-4d06-849b-b5fdb8760721"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "18a0b0b8-509b-4309-9f95-54e556cf6204"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "8e481806-d1a2-404d-94c8-d7478bf427c5"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-8aef2e92-5134-416c-a75f-63dd237b22c4",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-b0006a4e-c9cc-40bb-894d-4b41c5906383",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-a7d9841f-0fd1-4bba-84a4-6e39fde6de6c",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-0cda40fe-6386-4866-8862-3531c9eefd57",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.alex1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "abb813c6-5e0e-4dc0-9b33-4290863b3d22"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.alex1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "28cd931b-0636-4bdd-8150-b9b806f778ec"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.alex1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "55d9128d-6f9a-4317-aa41-1a6d87609116"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.client1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "0af01af7-04f3-43d5-b19a-83c4294f9b77"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.client1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "c8488ac2-f571-4c6f-aa7b-27b7c17aede4"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.client1",
+    "operation" : "PUBLISH",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "EXCHANGE",
+    "attributes" : {
+      "ROUTING_KEY" : "del-39238940-97c5-4a6a-a849-0d8096effea2",
+      "NAME" : ""
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-0bce6c1d-7867-456e-9b2b-4cc91b13f0e7"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-02f1c4f1-3e9b-4b0f-8cd5-962f971b4980"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-1ea2119b-d3b3-4564-98cd-423f26e17edd"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-3ead6162-c125-4ed8-9a70-0c47a18155d2"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-4d6f31d9-c4c5-43be-9d60-9512c54bcc6c"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-7e6b33ac-668f-4e8f-a5a6-fbea5ece6ba5"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-e96961bd-854c-475f-8172-3f7cba9843ef"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-645c6239-edbb-46b8-99a9-cb30348af580"
+    }
+  }, {
+    "identity" : "anna",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "760d853e-65f1-429e-9bc6-2ad767f603ee"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "66afa815-e347-4a4a-9689-b33e21ca23e9"
+    }
+  }, {
+    "identity" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.npra.io.aventi1",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "289fb708-d54d-46f2-b450-d65268d9dc81"
+    }
+  }, {
+    "identity" : "anna",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "4f4989af-fcd1-4f9e-9d11-46b2001c83aa"
+    }
+  }, {
+    "identity" : "nw3-interchange-b.tlex.se",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "sub-f530fd3a-ecc2-4cb7-9100-bbe4309915fe"
+    }
+  }, {
+    "identity" : "kyrre",
+    "operation" : "CONSUME",
+    "outcome" : "ALLOW_LOG",
+    "objectType" : "QUEUE",
+    "attributes" : {
+      "NAME" : "dl-del-b0006a4e"
+    }
+  }, {
+    "identity" : "ALL",
+    "operation" : "ALL",
+    "outcome" : "DENY_LOG",
+    "objectType" : "ALL",
+    "attributes" : { }
+  } ],
+  "lastUpdatedBy" : "kyrre",
+  "lastUpdatedTime" : 1683643747250,
+  "createdTime" : 1683026597827
+}

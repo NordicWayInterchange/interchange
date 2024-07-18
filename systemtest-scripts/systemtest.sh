@@ -8,7 +8,6 @@ echo Running system test on branch $BRANCH with tag $BRANCH_TAG
 
 docker build ../onboard-rest-client -t onboard_rest_client
 docker build ../napcore-rest-client -t napcore_rest_client
-docker build ../jms-client-source-app -t jms_client_source_app
-docker build ../jms-client-sink-app -t jms_client_sink_app
+docker build ../jms-client-app -t jms_client
 [ -f ../tmp/keys/a.bouvetinterchange.eu.p12 ] || ./systemtest-keys.sh
 docker-compose -f systemtest.yml build && docker-compose -f systemtest.yml up

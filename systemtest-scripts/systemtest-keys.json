@@ -1,0 +1,23 @@
+[ {
+  "name" : "ca.bouvetinterchange.eu",
+  "country" : "NO",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "a.bouvetinterchange.eu"
+  }, {
+    "name" : "b.bouvetinterchange.eu"
+  } ],
+  "clientRequests" : [ {
+    "name" : "king_gustaf.bouvetinterchange.eu",
+    "country" : "SE",
+    "email" : "kungen@slottet.se"
+  }, {
+    "name" : "king_olav.bouvetinterchange.eu",
+    "country" : "NO",
+    "email" : "kongen@slottet.no"
+  }, {
+    "name" : "nap.bouvetinterchange.eu",
+    "country" : "NO",
+    "email" : "nap@bouvetinterchange.eu"
+  } ]
+} ]

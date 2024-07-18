@@ -1,0 +1,22 @@
+{	"name" : "king_olav",
+  "version" : "1.0",
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "DENM",
+      "publisherId" : "NO00000",
+      "publicationId" : "NO00000-pub-1",
+      "originatingCountry" : "NO",
+      "protocolVersion" : "DENM:1.2.2",
+      "quadTree" : [ "12003" ],
+      "causeCode" : [ 6, 5 ]
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "https://king_olav.info.no",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }]
+}
