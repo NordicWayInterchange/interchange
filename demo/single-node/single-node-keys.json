@@ -1,0 +1,31 @@
+[ {
+  "name" : "ca.bouvetinterchange.eu",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.bouvetinterchange.eu",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_olav.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "post@slottet.no"
+    } ]
+  }, {
+    "name" : "ca.b.bouvetinterchange.eu",
+    "country" : "SE",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "b.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_gustaf.bouvetinterchange.eu",
+      "country" : "SE",
+      "email" : "kungen@slottet.se"
+    } ]
+  } ],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+} ]
