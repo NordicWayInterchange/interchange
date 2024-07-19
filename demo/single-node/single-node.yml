@@ -21,7 +21,6 @@ services:
     container_name: a_db
     depends_on:
       - mock-dns-server
-      - key_gen
     ports:
       - 15432:5432
     environment:
@@ -36,7 +35,6 @@ services:
     container_name: a_onboard_server
     depends_on:
       - a_db
-      - key_gen
     ports:
       - 32666:8797
     volumes:
@@ -48,7 +46,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/keys/a.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.a.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -69,7 +67,7 @@ services:
       - "../../qpid/a/messages:/work/a/messages"
       - "../tmp/dump:/dump"
     environment:
-      - TRUST_STORE=/keys/a.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -81,7 +79,6 @@ services:
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
     depends_on:
     - mock-dns-server
-    - key_gen
     networks:
     - singletest
 
@@ -90,7 +87,6 @@ services:
     container_name: a_neighbour_server
     depends_on:
       - a_db
-      - key_gen
     ports:
       - 8090
     volumes:
@@ -102,7 +98,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/a.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -115,7 +111,6 @@ services:
     container_name: a_routing_configurer
     depends_on:
       - a_db
-      - key_gen
     links:
       - "a_qpid:a.interchangedomain.com"
     volumes:
@@ -126,7 +121,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a.interchangedomain.com
       - SERVER_NAME=a.interchangedomain.com
-      - TRUST_STORE=/keys/a.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -138,7 +133,6 @@ services:
     container_name: a_neighbour_discoverer
     depends_on:
       - a_db
-      - key_gen
     volumes:
       - "../keys/a:/keys"
     environment:
@@ -148,7 +142,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/a.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -161,7 +155,6 @@ services:
     container_name: a_message_collector_app
     depends_on:
     - a_db
-    - key_gen
     links:
     - "a_qpid:a.interchangedomain.com"
     volumes:
@@ -173,7 +166,7 @@ services:
     - KEY_STORE=/keys/a.interchangedomain.com.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/keys/a.interchangedomain.com.jks
+    - TRUST_STORE=/keys/ca.interchangedomain.com.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.interchangedomain.com
