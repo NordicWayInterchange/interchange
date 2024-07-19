@@ -1,4 +1,4 @@
 #!/bin/bash -eu
 
-IMAGE_TAG=5484e5e docker-compose -f single-node.yml up --build
+IMAGE_TAG=c0dbadb docker-compose -f single-node.yml up --build
 
