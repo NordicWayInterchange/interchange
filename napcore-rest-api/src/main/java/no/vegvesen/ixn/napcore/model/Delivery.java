@@ -13,16 +13,16 @@ public class Delivery {
 
     List<DeliveryEndpoint> endpoints = new ArrayList<>();
 
-    Long lastUpdatedTimeStamp;
+    Long lastUpdatedTimestamp;
 
     public Delivery(){}
 
-    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimeStamp) {
+    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
         this.endpoints = endpoints;
-        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public String getId() {
@@ -60,12 +60,12 @@ public class Delivery {
         }
     }
 
-    public Long getLastUpdatedTimeStamp() {
-        return lastUpdatedTimeStamp;
+    public Long getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
     }
 
-    public void setLastUpdatedTimeStamp(Long lastUpdatedTimeStamp) {
-        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
+    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Delivery {
                 ", status=" + status +
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints  +
-                ", lastUpdatedTimestamp: " + lastUpdatedTimeStamp +
+                ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
                 "}";
     }
 }
