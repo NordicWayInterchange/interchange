@@ -16,11 +16,6 @@ services:
         aliases:
           - dns.lookupdomain.com
 
-  key_gen:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/keys-generator:${IMAGE_TAG}
-    container_name: key-gen
-    volumes:
-      - "../keys/a:/keys"
   a_db:
     image: postgres:9.6
     container_name: a_db
