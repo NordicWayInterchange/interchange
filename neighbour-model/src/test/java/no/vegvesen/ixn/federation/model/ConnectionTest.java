@@ -88,4 +88,11 @@ class ConnectionTest {
         Assert.assertFalse(connection.canBeContacted(backoffProperties));
         Assert.assertEquals(connection.getConnectionStatus(), ConnectionStatus.UNREACHABLE);
     }
+
+    @Test
+    public void canBeContactedWhenLastFailedConnectionAttemptIsNull() {
+        Connection connection = new Connection();
+        connection.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+        Assert.assertTrue(connection.canBeContacted(backoffProperties));
+    }
 }
