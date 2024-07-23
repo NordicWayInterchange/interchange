@@ -74,7 +74,7 @@
         <picocli-version>4.7.6</picocli-version>
         <qpid-jms-client.version>2.5.0</qpid-jms-client.version>
         <testcontainers.version>1.20.0</testcontainers.version>
-        <dnsjava.version>3.5.3</dnsjava.version>
+        <dnsjava.version>3.6.0</dnsjava.version>
         <qpid-broker.version>9.2.0</qpid-broker.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <postgresql.version>42.7.3</postgresql.version>
