@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClusterKeyGeneratorIT {
+public class ClusterKeyGeneratorTest {
 
 
     public static final CARequest INTERNAL_A = new CARequest(
@@ -234,6 +234,7 @@ public class ClusterKeyGeneratorIT {
     }
 
 
+    //TODO Load the keystore and assert on the contents
     @Test
     public void makeHostKeystore() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, IOException, SignatureException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
         CaResponse response = ClusterKeyGenerator.generate(
@@ -253,6 +254,7 @@ public class ClusterKeyGeneratorIT {
         ClusterKeyGenerator.makeKeystore("mydomain.com","password",outputStream,host.certificateChain(),host.keyPair().getPrivate());
     }
 
+    //TODO Load the keystore and assert on the contents
     @Test
     public void makeHostKeystoreWithTwoLayersOfCa() throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, IOException, KeyStoreException {
         CaResponse response = ClusterKeyGenerator.generate(
@@ -320,16 +322,17 @@ public class ClusterKeyGeneratorIT {
 
     @Test
     public void requests() throws IOException {
-        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("systemtest-scripts").resolve("systemtest-keys.yml");
+        Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("target").resolve("test-keys").resolve(ClusterKeyGeneratorTest.class.getSimpleName());
+        Files.createDirectories(outPath);
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
-        writer.writeValue(Files.newOutputStream(outPath),CA_REQUESTS);
+        writer.writeValue(Files.newOutputStream(outPath.resolve("systemtest-keys.json")), CA_REQUESTS);
     }
 
     @Test
     public void saveKeystores() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, KeyStoreException {
         Path absolutePath = Path.of("").toAbsolutePath();
         Path parent = absolutePath.getParent();
-        Path additionalPath = Path.of("target","test-keys",ClusterKeyGeneratorIT.class.getSimpleName());
+        Path additionalPath = Path.of("target","test-keys",ClusterKeyGeneratorTest.class.getSimpleName());
         Path target = parent.resolve(additionalPath);
         Files.createDirectories(target);
 

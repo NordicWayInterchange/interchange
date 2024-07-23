@@ -363,7 +363,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
-                "/delivery/1",
                 deliverySelector,
                 LocalDeliveryStatus.CREATED);
 
@@ -404,7 +403,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
-                "/delivery/1",
                 deliverySelector,
                 LocalDeliveryStatus.NO_OVERLAP);
 

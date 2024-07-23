@@ -51,12 +51,12 @@ Try running `./a_jms_client.sh --help` to see the different options.
 
 ## Listening to messages
 
-To listen for messages, use the `./a_jms_sink.sh receivemessages <endpoint>` command with the endpoint from the registered subscription. The command will 
+To listen for messages, use the `./a_jms_client.sh receivemessages <endpoint>` command with the endpoint from the registered subscription. The command will 
 block, waiting for messages to arrive. Keep it running, and switch to a new console to publish messages.
 
 ## Publish your first message
 
-Publishing messages is done using the command `./a_jms_source.sh sendmessage -f message_king_olav.json`. This will send a single message, defined in the json file used
+Publishing messages is done using the command `./a_jms_client.sh sendmessage -f message_king_olav.json`. This will send a single message, defined in the json file used
 as an argument. 
 
 You should now see a message logged on the console of the sink command. 

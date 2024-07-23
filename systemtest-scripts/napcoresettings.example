@@ -1,0 +1,7 @@
+#This is an example file for Auth0 settings that must be set to be able to use
+#napcore in the systemtest Dcoker Compose project. See https://auth0.com/docs/quickstart/webapp/nextjs/interactive
+
+export NEXTAUTH_SECRET=<your nextAuth secret>
+export AUTH0_CLIENT_ID=<your client id>
+export AUTH0_CLIENT_SECRET=<your nextauth client secret>
+export AUTH0_ISSUER=<the Auth0 issuer URL>
