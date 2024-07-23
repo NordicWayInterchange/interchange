@@ -82,6 +82,10 @@ public class LocalDeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public boolean targetExists() {
+        return !target.isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

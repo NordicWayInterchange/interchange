@@ -362,7 +362,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 deliverySelector,
                 LocalDeliveryStatus.CREATED);
 
-        delivery.setExchangeName(deliveryExchangeName);
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
@@ -402,8 +401,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 "/delivery/1",
                 deliverySelector,
                 LocalDeliveryStatus.NO_OVERLAP);
-
-        delivery.setExchangeName(deliveryExchangeName);
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 

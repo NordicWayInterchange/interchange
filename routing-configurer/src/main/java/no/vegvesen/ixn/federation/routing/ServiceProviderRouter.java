@@ -355,24 +355,35 @@ public class ServiceProviderRouter {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
                     List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
-                    if (!delta.exchangeExists(delivery.getExchangeName())) {
-                        String exchangeName = delivery.getExchangeName();
-                        Exchange exchange = qpidClient.createDirectExchange(exchangeName);
-                        qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
-                        delta.addExchange(exchange);
+                    for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                        if (!delta.exchangeExists(endpoint.getTarget())) {
+                            String exchangeName = endpoint.getTarget();
+                            Exchange exchange = qpidClient.createDirectExchange(exchangeName);
+                            qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
+                            delta.addExchange(exchange);
+                        }
                     }
 
                     for (OutgoingMatch match : matches) {
                         Capability capability = match.getCapability();
-                        if (capability.hasShards()) {
-                            if (capability.isSharded()) {
-                                //TODO: Sharding, check if selector is sharded as well.
+                        for (CapabilityShard shard : capability.getShards()) {
+                            if (delivery.isSharded()) {
+                                if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), delivery.getSelector())) {
+                                    for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                                        if (!delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
+                                            String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                            qpidClient.addBinding(endpoint.getTarget(), new Binding(endpoint.getTarget(), shard.getExchangeName(), new Filter(joinedSelector)));
+                                            delta.addBindingToExchange(endpoint.getTarget(), joinedSelector, shard.getExchangeName());
+                                        }
+                                    }
+                                }
                             } else {
-                                CapabilityShard shard = capability.getShards().get(0);
-                                if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), shard.getExchangeName())) {
-                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
-                                    qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), shard.getExchangeName(), new Filter(joinedSelector)));
-                                    delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, shard.getExchangeName());
+                                for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                                    if (!delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
+                                        String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                        qpidClient.addBinding(endpoint.getTarget(), new Binding(endpoint.getTarget(), shard.getExchangeName(), new Filter(joinedSelector)));
+                                        delta.addBindingToExchange(endpoint.getTarget(), joinedSelector, shard.getExchangeName());
+                                    }
                                 }
                             }
                         }
@@ -391,17 +402,21 @@ public class ServiceProviderRouter {
                         && !delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
                     List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
                     if (matches.isEmpty()) {
-                        if (delivery.exchangeExists()) {
-                            String target = delivery.getExchangeName();
-                            Exchange exchange = delta.findByExchangeName(target);
-                            if (exchange != null) {
-                                logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-                                qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                                qpidClient.removeExchange(exchange);
-                                delta.removeExchange(exchange);
+                        HashSet<LocalDeliveryEndpoint> endpointsToRemove = new HashSet<>();
+                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                            if (endpoint.targetExists()) {
+                                String target = endpoint.getTarget();
+                                Exchange exchange = delta.findByExchangeName(target);
+                                if (exchange != null) {
+                                    logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                                    qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                                    qpidClient.removeExchange(exchange);
+                                    delta.removeExchange(exchange);
+                                }
+                                endpointsToRemove.add(endpoint);
                             }
-                            delivery.setExchangeName("");
                         }
+                        delivery.removeAllEndpoints(endpointsToRemove);
                         if (!(delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN) || delivery.getStatus().equals(LocalDeliveryStatus.ERROR))) {
                             delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                         }

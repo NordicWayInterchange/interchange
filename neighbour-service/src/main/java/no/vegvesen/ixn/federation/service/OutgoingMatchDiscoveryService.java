@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class OutgoingMatchDiscoveryService {
@@ -34,7 +35,7 @@ public class OutgoingMatchDiscoveryService {
                         if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
-                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
                             for (Capability capability : matchingCapabilities) {
                                 if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) == null) {
                                     if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
@@ -53,16 +54,15 @@ public class OutgoingMatchDiscoveryService {
 
     public void syncOutgoingMatchesToDelete() {
         List<OutgoingMatch> existingMatches = repository.findAll();
-        Set<OutgoingMatch> matchesToDelete = new HashSet<>();
-        for (OutgoingMatch match : existingMatches) {
-            if (match.capabilityIsTearDown()) {
-                logger.info("Removing OutgoingMatch {}", match);
-                matchesToDelete.add(match);
-            } else if (match.deliveryIsTearDown()) {
-                logger.info("Removing OutgoingMatch {}", match);
-                matchesToDelete.add(match);
-            }
-        }
+        Set<OutgoingMatch> matchesToDelete = existingMatches.stream().filter(this::capabilityOrDeliveryIsTearDown).collect(Collectors.toSet());
         repository.deleteAll(matchesToDelete);
+    }
+
+    public boolean capabilityOrDeliveryIsTearDown(OutgoingMatch match) {
+        if (match.capabilityIsTearDown()) {
+            return true;
+        } else {
+            return match.deliveryIsTearDown();
+        }
     }
 }

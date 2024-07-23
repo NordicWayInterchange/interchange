@@ -61,7 +61,7 @@ public class CapabilityMatcher {
 		Set<Capability> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
 			if (capability.isSharded()) {
-				for (int i = 0; i <= capability.getMetadata().getShardCount(); i++) {
+				for (int i = 0; i < capability.getMetadata().getShardCount(); i++) {
 					boolean match = matchCapabilityShardToSelector(capability, i+1, selector);
 					if (match) {
 						logger.debug("Selector [{}] matches capability {}", selector, capability);

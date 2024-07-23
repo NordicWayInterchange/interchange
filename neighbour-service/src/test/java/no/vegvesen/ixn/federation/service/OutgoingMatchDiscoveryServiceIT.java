@@ -54,7 +54,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -67,7 +67,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -100,7 +100,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -113,7 +113,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -146,7 +146,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -159,7 +159,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -206,7 +206,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -219,7 +219,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.REQUESTED);
 

@@ -381,7 +381,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalDeliveryStatus.CREATED
 		);
 		String exchangeName = "myexchange";
-		localDelivery.setExchangeName(exchangeName);
 		localDelivery.addEndpoint(new LocalDeliveryEndpoint(
 				qpidContainer.getHost(),
 				qpidContainer.getAmqpsPort(),
@@ -615,9 +614,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createHeadersExchange("cap-ex1");
 
+		String deliveryExchangeName = "my-exchange5";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
-		delivery.setExchangeName("my-exchange5");
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
 
@@ -628,8 +628,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
-		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
-		assertThat(delivery.getExchangeName()).isNotNull();
+		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
+		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(1);
 	}
 
 	@Test
@@ -667,20 +667,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex3");
 
+		String deliveryExchangeName = "my-exchange6";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
-		delivery.setExchangeName("my-exchange6");
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
-
 		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match, match2));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
-		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
-		assertThat(delivery.getExchangeName()).isNotNull();
+		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
+		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(2);
 	}
 
 	@Test
@@ -705,9 +705,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, exchangeName));
 		delivery.setId(1);
 		serviceProvider.addDeliveries(Set.of(delivery));
-		delivery.setExchangeName(exchangeName);
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
 
@@ -722,7 +722,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
-		assertThat(delivery.exchangeExists()).isFalse();
+		assertThat(delivery.getEndpoints()).isEmpty();
 	}
 
 	@Test
@@ -745,9 +745,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex5");
 
+		String deliveryExchangeName = "my-exchange9";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
-		delivery.setExchangeName("my-exchange9");
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -757,14 +758,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
-		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(client.exchangeExists(delivery.getEndpoints().stream().findFirst().get().getTarget())).isTrue();
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
-		assertThat(delivery.exchangeExists()).isFalse();
+		assertThat(delivery.getEndpoints()).isEmpty();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
 	}
 
@@ -803,26 +804,26 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex7");
 
+		String deliveryExchangeName = "my-exchange10";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
-		delivery.setExchangeName("my-exchange10");
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
 		OutgoingMatch match1 = new OutgoingMatch(delivery, denmCapability1, serviceProviderName);
-
 		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match1, match2));
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
-		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(client.exchangeExists(delivery.getEndpoints().stream().findFirst().get().getTarget())).isTrue();
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match2));
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
-		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(client.exchangeExists(delivery.getEndpoints().stream().findFirst().get().getTarget())).isTrue();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
 	}
 

@@ -15,10 +15,6 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
 
     List<OutgoingMatch> findAllByLocalDelivery_Id(Integer id);
 
-    List<OutgoingMatch> findAllByLocalDelivery_ExchangeName(String deliveryExchangeName);
-
-    OutgoingMatch findByLocalDelivery_Id(Integer id);
-
     List<OutgoingMatch> findAllByCapability_Id(Integer id);
 
     OutgoingMatch findByCapability_Id(Integer id);
