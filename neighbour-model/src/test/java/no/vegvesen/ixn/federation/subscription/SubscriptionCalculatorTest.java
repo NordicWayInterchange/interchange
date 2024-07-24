@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.DenmApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -151,7 +148,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
                 capabilities, ""
@@ -170,7 +167,7 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 Collections.singleton(
-                        new Capability(
+                        new NeighbourCapability(
                             new DatexApplication(
                                     "NO0001",
                                     "",
@@ -199,7 +196,7 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 new HashSet<>(Arrays.asList(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
@@ -210,7 +207,7 @@ public class SubscriptionCalculatorTest {
                                         "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new Capability(
+                        new NeighbourCapability(
                             new DenmApplication(
                                 "NO0001",
                                 "pub-123",
@@ -242,7 +239,7 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 Collections.singleton(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
@@ -275,7 +272,7 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 new HashSet<>(Arrays.asList(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "pub-1",
@@ -286,7 +283,7 @@ public class SubscriptionCalculatorTest {
                                         "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new Capability(
+                        new NeighbourCapability(
                                 new DenmApplication(
                                         "NO0001",
                                         "pub-123",
@@ -307,7 +304,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
@@ -319,7 +316,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
                 capabilities, "");
@@ -331,8 +328,8 @@ public class SubscriptionCalculatorTest {
                 .contains("messageType = 'DATEX2'");
     }
 
-    private Capability getDatexCapability(String country) {
-        return new Capability(
+    private NeighbourCapability getDatexCapability(String country) {
+        return new NeighbourCapability(
                 new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }

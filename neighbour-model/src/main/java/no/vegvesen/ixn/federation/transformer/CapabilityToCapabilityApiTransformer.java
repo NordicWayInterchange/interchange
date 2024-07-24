@@ -66,6 +66,13 @@ public class CapabilityToCapabilityApiTransformer {
 		);
 	}
 
+	public CapabilitySplitApi neighbourCapabilityToCapabilitySplitApi(NeighbourCapability capability) {
+		return new CapabilitySplitApi(
+				capability.getApplication().toApi(),
+				capability.getMetadata().toApi()
+		);
+	}
+
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
 		if (applicationApi instanceof DatexApplicationApi) {
 			return new DatexApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DatexApplicationApi) applicationApi).getPublicationType(), ((DatexApplicationApi) applicationApi).getPublisherName());

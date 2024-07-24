@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -116,11 +117,14 @@ public class OnboardRestController {
 	}
 
 	private Set<String> allPublicationIds() {
-		Set<Capability> allCapabilities = getAllLocalCapabilities();
-		allCapabilities.addAll(getAllNeighbourCapabilities());
-		return allCapabilities.stream()
-				.map(capabilitySplit -> capabilitySplit.getApplication().getPublicationId())
-				.collect(Collectors.toSet());
+		Set<String> allPublicationIds = getAllLocalCapabilities().stream()
+						.map(c -> c.getApplication().getPublicationId())
+						.collect(Collectors.toSet());
+		Set<String> neighbourPublicationIds = getAllNeighbourCapabilities().stream()
+						.map(c -> c.getApplication().getPublicationId())
+						.collect(Collectors.toSet());
+		allPublicationIds.addAll(neighbourPublicationIds);
+		return allPublicationIds;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -145,20 +149,25 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
-		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
-		allCapabilities.addAll(getAllLocalCapabilities());
+		Set<Capability> localCapabilities = getAllLocalCapabilities();
+		Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
 		if (selector != null) {
 			if (!selector.isEmpty()) {
-				allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+				localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+				neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
 			}
 		}
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, allCapabilities);
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, localCapabilities, neighbourCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
 
-	private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
-		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+	private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
+		return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+	}
+
+	private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
+		return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
 	}
 
 	private Set<Capability> getAllLocalCapabilities() {
@@ -170,11 +179,11 @@ public class OnboardRestController {
 		return capabilities;
 	}
 
-	private Set<Capability> getAllNeighbourCapabilities() {
-		Set<Capability> capabilities = new HashSet<>();
+	private Set<NeighbourCapability> getAllNeighbourCapabilities() {
+		Set<NeighbourCapability> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
-			capabilities.addAll(Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
 		}
 		return capabilities;
 	}

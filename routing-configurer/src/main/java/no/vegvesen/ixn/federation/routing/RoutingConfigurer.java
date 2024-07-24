@@ -155,7 +155,7 @@ public class RoutingConfigurer {
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {
 						if (subscription.isSharded()) {
-							if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+							if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
 								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 							}
 						} else {
@@ -191,7 +191,7 @@ public class RoutingConfigurer {
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {
 						if (subscription.isSharded()) {
-							if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+							if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
 								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
 							}
 						} else {

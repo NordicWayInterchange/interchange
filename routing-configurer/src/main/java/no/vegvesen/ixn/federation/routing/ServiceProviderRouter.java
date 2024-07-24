@@ -368,7 +368,7 @@ public class ServiceProviderRouter {
                         Capability capability = match.getCapability();
                         for (CapabilityShard shard : capability.getShards()) {
                             if (delivery.isSharded()) {
-                                if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), delivery.getSelector())) {
+                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), delivery.getSelector())) {
                                     for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                                         if (!delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
                                             String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
@@ -477,7 +477,7 @@ public class ServiceProviderRouter {
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
                 removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
+                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         Set<String> existingConnections = subscription.getConnections().stream()
                                 .map(LocalConnection::getSource)
@@ -487,7 +487,7 @@ public class ServiceProviderRouter {
                             if (capability.isSharded()) {
                                 for (CapabilityShard shard : capability.getShards()) {
                                     if (!existingConnections.contains(shard.getExchangeName())) {
-                                        if (CapabilityMatcher.matchCapabilityShardToSelector(capability, shard.getShardId(), subscription.getSelector())) {
+                                        if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
                                             createLocalEndpointForLocalSubscription(subscription, serviceProvider.getName(), delta, shard);
                                         }
                                     }

@@ -30,7 +30,7 @@ class CapabilityMatcherTest {
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, List.of(6));
-		Capability capability = new Capability();
+		NeighbourCapability capability = new NeighbourCapability();
 		capability.setApplication(denm_a_b_causeCode_1_2);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -43,7 +43,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -56,7 +56,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -69,7 +69,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -82,7 +82,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -95,7 +95,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -108,7 +108,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -121,7 +121,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122,"Obstruction", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -134,7 +134,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction", "publisherName");
-		Capability datexCapability = new Capability();
+		NeighbourCapability datexCapability = new NeighbourCapability();
 		datexCapability.setApplication(datexApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		datexCapability.setMetadata(meta);
@@ -155,7 +155,7 @@ class CapabilityMatcherTest {
 				   quadTreeTiles,
 				    List.of(6));
 
-		Capability capability = new Capability();
+		NeighbourCapability capability = new NeighbourCapability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -177,7 +177,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void denmNonMatching() {
         Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-				Collections.singleton(new Capability(
+				Collections.singleton(new NeighbourCapability(
                         new DenmApplication("NO-123",
                                 "pub-123",
                                 "NO",
@@ -200,7 +200,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void denmMatchesOneOfSeveral() {
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-                Set.of(new Capability(
+                Set.of(new NeighbourCapability(
                                 new DenmApplication("NO-123",
                                         "pub-123",
                                         "NO",
@@ -223,7 +223,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void matchIviSelectorWithQuadTree() {
 		IvimApplication application = new IvimApplication("NO-12345", "pub-2131", "NO", "IVI:1.0", List.of("12004"));
-		Capability capability = new Capability();
+		NeighbourCapability capability = new NeighbourCapability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -242,7 +242,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		Capability capability = new Capability();
+		NeighbourCapability capability = new NeighbourCapability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -256,7 +256,7 @@ class CapabilityMatcherTest {
 	@Test
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		CamApplication camApplication = new CamApplication("publ-id-1", "pub-1", "NO", "1.0", QUAD_TREE_0121_0122);
-		Capability camCapability = new Capability();
+		NeighbourCapability camCapability = new NeighbourCapability();
 		camCapability.setApplication(camApplication);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		camCapability.setMetadata(meta);
@@ -267,7 +267,7 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	void mathcCapabilityWithSelectorOfOnlyOptionalField() {
+	void matchCapabilityWithSelectorOfOnlyOptionalField() {
 		SpatemApplication application = new SpatemApplication(
 				"NO-12345",
 				"pub-1",
@@ -275,7 +275,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		Capability capability = new Capability();
+		NeighbourCapability capability = new NeighbourCapability();
 		capability.setApplication(application);
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
@@ -296,7 +296,7 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5";
 
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
@@ -309,7 +309,7 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5 AND shardId = 2";
 
-		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 2, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), 2, selector)).isTrue();
 	}
 
 	@Test
@@ -322,7 +322,7 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND shardId = 2 AND (causeCode = 6 OR causeCode = 5)";
 
-		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 1, selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), 1, selector)).isFalse();
 	}
 
 	@Test
@@ -336,67 +336,67 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 5";
 
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findSubTile() {
 		String selector = "quadTree LIKE '%,12002010%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findTinySubTile() {
 		String selector = "quadTree LIKE '%,120020100000000000%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void finSuperTile() {
 		String selector = "quadTree LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void FindTilesOutsideSubTile() {
 		String selector = "quadTree NOT LIKE '%,12002010%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTile() {
 		String selector = "quadTree NOT LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileAlternateNegation() {
 		String selector = "NOT (quadTree LIKE '%,12%')";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileAlternateNegationWithoutParentheses() {
 		String selector = "NOT quadTree LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileNoMatch() {
 		String selector = "quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isFalse();
 	}
 
 	@Test
 	public void unknownAndSuperTile() {
 		String selector = "fish = 'shark' AND quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isFalse();
 	}
 
 	@Test
 	public void unknownOrSuperTile() {
 		String selector = "fish = 'shark' OR quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(quadTreeCoverageCapability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
@@ -415,10 +415,10 @@ class CapabilityMatcherTest {
 		);
 
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector1)).isTrue();
 
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,1200401%' and causeCode = 6";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector2)).isFalse();
 	}
 
 	@Test
@@ -429,8 +429,8 @@ class CapabilityMatcherTest {
 		);
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
 		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector2)).isFalse();
 	}
 	@Test
 	public void publisherNameInCapability(){
@@ -441,8 +441,8 @@ class CapabilityMatcherTest {
 		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
 
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector1)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector2)).isTrue();
 	}
 
 	@Test
@@ -460,7 +460,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(), selector)).isTrue();
 	}
 
 	@Test
@@ -480,7 +480,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
-		assertThat(CapabilityMatcher.matchCapabilityShardToSelector(capability, 2, selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), 2, selector)).isTrue();
 	}
 
 	@Test

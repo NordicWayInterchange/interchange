@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import java.time.LocalDateTime;
@@ -37,10 +38,13 @@ public class TypeTransformer {
     }
 
 
-    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<Capability> capabilities) {
+    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities) {
         Set<CapabilitySplitApi> fetchCapabilities = new HashSet<>();
         for (Capability capability : capabilities) {
             fetchCapabilities.add(capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability));
+        }
+        for (NeighbourCapability capability : neighbourCapabilities) {
+            fetchCapabilities.add(capabilityApiTransformer.neighbourCapabilityToCapabilitySplitApi(capability));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);

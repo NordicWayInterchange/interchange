@@ -178,6 +178,7 @@ public class NapRestController {
         return serviceProvider;
     }
 
+    //TODO: Transform here instead of in method where this is used
     private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
         return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
     }

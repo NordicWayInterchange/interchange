@@ -94,6 +94,7 @@ public class Capability {
         this.lastUpdated = lastUpdated;
     }
 
+    //TODO: Should be removed after fix in NapRestController
     public static Set<Capability> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> capabilities){
         Set<Capability> capabilitySplits = new HashSet<>();
         for(NeighbourCapability i : capabilities){

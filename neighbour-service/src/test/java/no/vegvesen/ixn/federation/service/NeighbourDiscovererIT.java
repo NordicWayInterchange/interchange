@@ -638,7 +638,7 @@ public class NeighbourDiscovererIT {
 
 		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Capability.transformNeighbourCapabilityToSplitCapability(neighbour.getCapabilities().getCapabilities()));
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, serviceProvider.getCapabilities().getCapabilities());
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
