@@ -60,6 +60,10 @@ public class NeighbourCapability {
         this.metadata = metadata;
     }
 
+    public boolean isSharded() {
+        return metadata.getShardCount() > 1;
+    }
+
     @Override
     public boolean equals(Object o){
         if (this == o) return true;

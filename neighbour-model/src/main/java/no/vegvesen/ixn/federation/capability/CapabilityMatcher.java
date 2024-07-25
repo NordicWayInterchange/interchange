@@ -22,13 +22,26 @@ public class CapabilityMatcher {
 	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<NeighbourCapability> capabilities, Set<LocalSubscription> subscriptionSelectors, String ixnName) {
 		Set<LocalSubscription> matches = new HashSet<>();
 		for (NeighbourCapability capability : capabilities) {
-			for (LocalSubscription selector : subscriptionSelectors) {
-				if (!selector.getSelector().isEmpty()) {
-					if (matchConsumerCommonNameToRedirectPolicy(selector.getConsumerCommonName(), capability.getMetadata().getRedirectPolicy(), ixnName)) {
-						boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), selector.getSelector());
-						if (match) {
-							logger.debug("Selector [{}] matches capability {}", selector, capability);
-							matches.add(selector);
+			for (LocalSubscription subscription : subscriptionSelectors) {
+				if (!subscription.getSelector().isEmpty()) {
+					if (matchConsumerCommonNameToRedirectPolicy(subscription.getConsumerCommonName(), capability.getMetadata().getRedirectPolicy(), ixnName)) {
+						if (capability.isSharded()) {
+							for (int i = 0; i < capability.getMetadata().getShardCount(); i++) {
+								boolean match = matchCapabilityApplicationWithShardToSelector(capability.getApplication(), i + 1, subscription.getSelector());
+								if (match) {
+									logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
+									matches.add(subscription);
+									break;
+								}
+							}
+						} else {
+							if (!selectorIsSharded(subscription.getSelector())) {
+								boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), subscription.getSelector());
+								if (match) {
+									logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
+									matches.add(subscription);
+								}
+							}
 						}
 					}
 				}
