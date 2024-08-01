@@ -283,6 +283,7 @@ public class NapRestControllerTest {
                 "selector": "originatingCountry='NO'",
                 "extraField": "extraField"
                 """;
+
         String serviceProviderName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         mockMvc.perform(
