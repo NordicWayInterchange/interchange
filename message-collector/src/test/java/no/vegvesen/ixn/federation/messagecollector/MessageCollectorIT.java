@@ -43,20 +43,20 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer consumerContainer = getQpidTestContainer(
-			Paths.get("docker","consumer"),
 			stores,
 			HOST_NAME,
-			HOST_NAME
-	);
+			HOST_NAME,
+			Paths.get("docker","consumer")
+			);
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer(
-			Paths.get("docker","producer"),
 			stores,
 			HOST_NAME,
-			HOST_NAME
-	).withLogConsumer(new Slf4jLogConsumer(logger));
+			HOST_NAME,
+			Paths.get("docker","producer")
+			).withLogConsumer(new Slf4jLogConsumer(logger));
 
 
 

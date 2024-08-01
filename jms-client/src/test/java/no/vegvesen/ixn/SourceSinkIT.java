@@ -39,10 +39,9 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer(
-			Paths.get("qpid"),
 			stores,
 		"localhost",
-			"localhost")
+			"localhost", Paths.get("qpid"))
 		.withLogConsumer(new Slf4jLogConsumer(logger));
 
 

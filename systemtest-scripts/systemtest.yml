@@ -95,6 +95,7 @@ services:
     volumes:
       - "../qpid/a:/qpid-broker-j/work-override"
       - "../tmp:/jks"
+      - "../qpid/messages/a:/work/a/messages"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password

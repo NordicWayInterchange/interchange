@@ -220,7 +220,7 @@ public class ExampleAPIObjects {
             {
               "name" : "sp-1",
               "capabilities" : [ {
-                "id" : "1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/sp-1/capabilities/1",
                 "definition" : {
                   "application" : {
@@ -242,13 +242,13 @@ public class ExampleAPIObjects {
               "version" : "1.0",
               "name" : "serviceprovider1",
               "subscriptions" : [ {
-                "id" : "2",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/serviceprovider1/subscriptions/2",
                 "selector" : "originatingCountry = 'SE' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
                 "status" : "REQUESTED"
               }, {
-                "id" : "1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/serviceprovider1/subscriptions/1",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
@@ -275,13 +275,13 @@ public class ExampleAPIObjects {
               "name" : "serviceprovider1",
               "version" : "1.0",
               "subscriptions" : [ {
-                "id" : "1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/serviceprovider1/subscriptions/1",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
                 "status" : "CREATED"
               }, {
-                "id" : "2",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/serviceprovider1/subscriptions/2",
                 "selector" : "originatingCountry = 'SE' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
@@ -293,7 +293,7 @@ public class ExampleAPIObjects {
 
     public static final String GETSUBSCRIPTIONRESPONSE = """
             {
-              "id" : "1",
+              "id" : "550e8400-e29b-41d4-a716-446655440000",
               "path" : "/serviceprovider1/subscriptions/1",
               "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
               "consumerCommonName" : "serviceprovider1",
@@ -315,7 +315,7 @@ public class ExampleAPIObjects {
               "version" : "1.0",
               "name" : "serviceprovider-1",
               "privateChannels" : [ {
-                "id" : 2,
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "peerName" : "serviceprovider-2",
                 "status" : "CREATED"
               } ]
@@ -327,7 +327,7 @@ public class ExampleAPIObjects {
               "version" : "1.0",
               "name" : "serviceprovider-1",
               "privateChannels" : [ {
-                "id" : 52,
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "peerName" : "serviceprovider-2",
                 "status" : "REQUESTED"
               }]
@@ -336,7 +336,7 @@ public class ExampleAPIObjects {
 
     public static final String GETPRIVATECHANNELRESPONSE = """
             {
-              "id" : 52,
+              "id" : "550e8400-e29b-41d4-a716-446655440000",
               "peerName" : "serviceprovider-2",
               "serviceProviderName" : "serviceprovider-1",
               "status" : "CREATED",
@@ -348,16 +348,12 @@ public class ExampleAPIObjects {
             }
             """;
 
-    public static final String GETPEERPRIVATECHANNELSRESPONSE = """
-
-            """;
     public static final String LISTDELIVERIESRESPONSE = """
             {
               "version" : "1.0",
               "name" : "sp-1",
               "deliveries" : [ {
-                "id" : "1",
-                "path" : "/sp-1/deliveries/1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "lastUpdatedTimestamp" : 1684846428079,
                 "status" : "CREATED"
@@ -370,8 +366,7 @@ public class ExampleAPIObjects {
               "version" : "1.0",
               "name" : "sp-1",
               "deliveries" : [ {
-                "id" : "1",
-                "path" : "/sp-1/deliveries/1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "lastUpdatedTimestamp" : 1684934126952,
                 "status" : "REQUESTED"
@@ -381,7 +376,7 @@ public class ExampleAPIObjects {
 
     public static final String GETDELIVERYRESPONSE = """
             {
-              "id" : "1",
+              "id" : "550e8400-e29b-41d4-a716-446655440000",
               "endpoints" : [ {
                 "host" : "amqps://sp-1",
                 "port" : 5671,
@@ -389,7 +384,6 @@ public class ExampleAPIObjects {
                 "maxBandwidth" : 0,
                 "maxMessageRate" : 0
               } ],
-              "path" : "/sp-1/deliveries/1",
               "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
               "lastUpdatedTimestamp" : 1684934230041,
               "status" : "CREATED"
@@ -399,7 +393,7 @@ public class ExampleAPIObjects {
             {
               "name" : "sp-1",
               "capabilities" : [ {
-                "id" : "1",
+                "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/spi-1/capabilities/1",
                 "definition" : {
                   "application" : {
@@ -418,7 +412,7 @@ public class ExampleAPIObjects {
             """;
     public static final String GETCAPABILITYRESPONSE = """
             {
-              "id" : "1",
+              "id" : "550e8400-e29b-41d4-a716-446655440000",
               "path" : "/sp-1/capabilities/1",
               "definition" : {
                 "application" : {

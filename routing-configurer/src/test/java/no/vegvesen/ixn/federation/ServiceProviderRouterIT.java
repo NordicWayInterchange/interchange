@@ -53,11 +53,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
-			Path.of("qpid"),
 			stores,
 			HOST_NAME,
-			HOST_NAME
-	);
+			HOST_NAME,
+			Path.of("qpid")
+			);
 
 
 	static class Initializer
@@ -379,7 +379,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String deliverySelector = "messageType = 'DATEX2'";
 		LocalDelivery localDelivery = new LocalDelivery(
 				1,
-				"/deliveries/1",
 				deliverySelector,
 				LocalDeliveryStatus.CREATED
 		);
@@ -821,7 +820,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void tearDownDeliveryQueueShouldNotChangeRequestedDeliveries() {
 		LocalDelivery localDelivery = new LocalDelivery(
 				1,
-				"/this/is/my/path",
 				"a = b",
 				LocalDeliveryStatus.REQUESTED
 		);

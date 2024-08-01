@@ -30,7 +30,7 @@ services:
     - singletest
 
   a_onboard_server:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:${IXN_VERSION}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:${IMAGE_TAG}
     container_name: a_onboard_server
     depends_on:
       - a_db
@@ -64,7 +64,7 @@ services:
       - "../qpid/a/config:/qpid-broker-j/work-override"
       - "../keys/a:/keys"
     environment:
-      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -78,7 +78,7 @@ services:
     - singletest
 
   a_neighbour_server:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app:${IXN_VERSION}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app:${IMAGE_TAG}
     container_name: a_neighbour_server
     depends_on:
       - a_db
@@ -93,7 +93,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -102,7 +102,7 @@ services:
     dns: 172.28.1.1
 
   a_routing_configurer:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app:${IXN_VERSION}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app:${IMAGE_TAG}
     container_name: a_routing_configurer
     depends_on:
       - a_db
@@ -123,7 +123,7 @@ services:
     - singletest
 
   a_neighbour_discoverer:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app:${IXN_VERSION}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app:${IMAGE_TAG}
     container_name: a_neighbour_discoverer
     depends_on:
       - a_db
@@ -136,7 +136,7 @@ services:
       - SERVER_NAME=a.interchangedomain.com
       - DOMAIN_NAME=lookupdomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.lookupdomain.com.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
@@ -145,7 +145,7 @@ services:
     - singletest
 
   a_message_collector_app:
-    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app:${IXN_VERSION}
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app:${IMAGE_TAG}
     container_name: a_message_collector_app
     depends_on:
     - a_db
@@ -160,7 +160,7 @@ services:
     - KEY_STORE=/keys/a.interchangedomain.com.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/keys/ca.lookupdomain.com.jks
+    - TRUST_STORE=/keys/ca.interchangedomain.com.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.interchangedomain.com

@@ -9,11 +9,13 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +70,19 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
+		if(neighbour.isIgnore()){
+			Set<NeighbourSubscription> neighbourSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
+			if(neighbourSubscriptions.isEmpty()){
+				neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+				neighbourService.saveNeighbour(neighbour);
+				return;
+			}
+			else{
+				neighbourSubscriptions.forEach(s->s.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN));
+				neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+				subscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
+			}
+		}
 		Set<String> redirectedServiceProviders = new HashSet<>();
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
@@ -215,7 +230,7 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${create-subscriptions-exchange.interval}")
 	public void setUpSubscriptionExchanges() {
 		logger.debug("Looking for new subscriptions to set up exchanges for");
-		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		List<Neighbour> neighbours = neighbourService.findAllNeighboursByIgnoreIs(false);
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
@@ -256,6 +271,10 @@ public class RoutingConfigurer {
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
+				if(neighbour.isIgnore()){
+					neighbour.getOurRequestedSubscriptions().getSubscriptions().forEach(s->s.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN));
+					ourSubscriptions.addAll(neighbour.getOurRequestedSubscriptions().getSubscriptions());
+				}
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						Set<Endpoint> endpointsToRemove = new HashSet<>();

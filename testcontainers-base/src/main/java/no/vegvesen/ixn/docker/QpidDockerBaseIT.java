@@ -4,7 +4,6 @@ import no.vegvesen.ixn.keys.generator.*;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStore;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.HostStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -23,12 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
+
 public class QpidDockerBaseIT extends DockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
-
-	public static QpidContainer getQpidTestContainer(Path configPath, CaStores stores, String vhostName, String hostname) {
+	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
 		Path imageLocation = getFolderPath("qpid-test");
 		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
 				imageLocation, configPath);
@@ -71,14 +71,14 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 		CaResponse response;
 		try {
-            response = ClusterKeyGenerator.generate(request);
+            response = generate(request);
         } catch (CertificateException | NoSuchAlgorithmException | SignatureException | OperatorCreationException |
-                 InvalidKeyException | NoSuchProviderException | CertIOException e) {
+				 InvalidKeyException | NoSuchProviderException | CertIOException e) {
             throw new RuntimeException(e);
         }
         CaStores stores;
 		try {
-            stores = ClusterKeyGenerator.store(response,outputPath, () -> "password");
+            stores = store(response,outputPath, () -> "password");
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

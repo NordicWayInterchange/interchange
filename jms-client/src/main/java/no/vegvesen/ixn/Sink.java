@@ -111,17 +111,16 @@ public class Sink implements AutoCloseable {
 					String propertyName = propertyNames.nextElement();
 					Object value = message.getObjectProperty(propertyName);
 					if (value instanceof String) {
-						System.out.println(String.format("%s:'%s'",propertyName,value));
+						System.out.printf("%s:'%s'%n",propertyName,value);
 					} else {
-						System.out.println(String.format("%s:%s:%s", propertyName, value.getClass().getSimpleName(), value));
+						System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
 					}
 				}
 
 				String messageBody;
-				if (message instanceof JmsBytesMessage){
+				if (message instanceof JmsBytesMessage bytesMessage){
 					System.out.println(" BYTES message");
-					JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
-					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+                    byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 					bytesMessage.readBytes(messageBytes);
 					messageBody = Base64.getEncoder().encodeToString(messageBytes);
 				}
@@ -138,7 +137,7 @@ public class Sink implements AutoCloseable {
 				System.out.println("/Body -----------");
 				System.out.println("Delay " + delay + " ms \n");
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 		}

@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -57,11 +58,11 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
-            Path.of("qpid"),
             stores,
             HOST_NAME,
-            HOST_NAME
-    );
+            HOST_NAME,
+            Path.of("qpid")
+            );
 
     @Qualifier("getTestSslContext")
     @Autowired

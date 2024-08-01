@@ -22,9 +22,6 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    @Column
-    private String path;
-
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
     @Column(columnDefinition="TEXT")
     private String selector = "";
@@ -44,40 +41,26 @@ public class LocalDelivery {
     public LocalDelivery() {
     }
 
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status) {
         this.id = id;
         this.endpoints.addAll(endpoints);
-        this.path = path;
         this.selector = selector;
         this.status = status;
     }
 
-    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDeliveryStatus status) {
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
         this.uuid = uuid;
         this.endpoints.addAll(endpoints);
-        this.path = path;
         this.selector = selector;
         this.status = status;
     }
 
-    public LocalDelivery(Integer id, String path, String selector, LocalDeliveryStatus status) {
-        this(id, Collections.emptySet(),path,selector,status);
-    }
-
-    public LocalDelivery(String id, String path, String selector, LocalDeliveryStatus status) {
-        this(id, Collections.emptySet(),path,selector,status);
-    }
-
-    public LocalDelivery(String path, String selector, LocalDeliveryStatus status) {
-        this.endpoints = Collections.emptySet();
-        this.path = path;
-        this.selector = selector;
-        this.status = status;
+    public LocalDelivery(Integer id, String selector, LocalDeliveryStatus status) {
+        this(id, Collections.emptySet(),selector,status);
     }
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
         this.endpoints = Collections.emptySet();
-        this.path = null;
         this.selector = selector;
         this.status = status;
     }
@@ -112,14 +95,6 @@ public class LocalDelivery {
 
     public void addEndpoint(LocalDeliveryEndpoint endpoint) {
         this.endpoints.add(endpoint);
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getSelector() {
@@ -193,7 +168,6 @@ public class LocalDelivery {
                 "id=" + id +
                 "uuid=" + uuid +
                 ", endpoints=" + endpoints +
-                ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", exchangeName='" + exchangeName + '\'' +

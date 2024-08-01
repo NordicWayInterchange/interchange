@@ -25,20 +25,22 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	@Container
 	public QpidContainer localContainer = getQpidTestContainer(
-			Path.of("docker","consumer"),
 			stores,
 			HOST_NAME,
-			HOST_NAME);
+			HOST_NAME,
+			Path.of("docker","consumer")
+			);
 
 
 
 
 	@Container
 	public QpidContainer remoteContainer = getQpidTestContainer(
-			Path.of("docker","producer"),
 			stores,
 			HOST_NAME,
-			HOST_NAME);
+			HOST_NAME,
+			Path.of("docker","producer")
+			);
 
 
 	@Test

@@ -84,11 +84,11 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
-            Path.of("qpid"),
             stores,
             HOST_NAME,
-            HOST_NAME
-    );
+            HOST_NAME,
+            Path.of("qpid")
+            );
 
 
     //TODO would be nic to be able to do without it :-)

@@ -128,7 +128,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.CREATED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -177,8 +177,8 @@ public class NeighbourRepositoryIT {
 		neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
-		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(repository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.UNREACHABLE, false)).contains(neighbour);
+		assertThat(repository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.CONNECTED, false)).doesNotContain(neighbour);
 	}
 
 	@Test
@@ -279,7 +279,7 @@ public class NeighbourRepositoryIT {
 
 		repository.save(neighbour);
 
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED)).hasSize(1);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED)).hasSize(1);
 		assertThat(repository.findByName("my-multi-neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
@@ -298,7 +298,7 @@ public class NeighbourRepositoryIT {
 		repository.save(neighbour1);
 		repository.save(neighbour2);
 
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED)).hasSize(2);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED)).hasSize(2);
 		assertThat(repository.findByName("my-multi-neighbour1").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(repository.findByName("my-multi-neighbour2").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
