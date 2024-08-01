@@ -59,6 +59,10 @@ public class LocalDelivery {
         this(id, Collections.emptySet(),selector,status);
     }
 
+    public LocalDelivery(String selector){
+        this.selector = selector;
+    }
+
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
         this.endpoints = Collections.emptySet();
         this.selector = selector;

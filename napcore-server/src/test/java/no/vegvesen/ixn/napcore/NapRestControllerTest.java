@@ -256,7 +256,7 @@ public class NapRestControllerTest {
                 }
                 """;
         String serviceProviderName = "actor";
-        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), null, "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED);
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(),
