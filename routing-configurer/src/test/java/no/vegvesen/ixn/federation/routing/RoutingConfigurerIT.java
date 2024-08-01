@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
@@ -863,7 +864,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -882,7 +883,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -906,9 +907,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
+		System.out.println(neighbourService.findAllNeighboursByIgnoreIs(false));
 		routingConfigurer.setUpSubscriptionExchanges();
 
 		assertThat(end1.hasShard()).isTrue();

@@ -6,7 +6,7 @@
     "originatingCountry" : "NO",
     "protocolVersion" : "DENM:1.2.2",
     "messageType" : "DENM",
-    "quadTree" : ",12004,",
+    "quadTree" : ",12003,",
     "causeCode" : 6,
     "subCauseCode" : 61
   } ]

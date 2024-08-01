@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +58,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);
 
-        when(neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
+        when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
@@ -74,7 +76,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);
 
-        when(neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
+        when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
@@ -92,7 +94,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
         neighbour.setOurRequestedSubscriptions(existingSubscriptions);
 
-        when(neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
+        when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         doThrow(SubscriptionNotFoundException.class).when(neighbourFacade).deleteSubscription(neighbour,subscription1);
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);

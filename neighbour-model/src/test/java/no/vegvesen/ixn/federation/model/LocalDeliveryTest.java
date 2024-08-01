@@ -9,12 +9,10 @@ public class LocalDeliveryTest {
     public void hashCodeAndEquals() {
         LocalDelivery localDelivery1 = new LocalDelivery(
                 1,
-                "/path-to-my-delivery",
                 "messageType = 'DENM'",
                 LocalDeliveryStatus.REQUESTED
         );
         LocalDelivery localDelivery2 = new LocalDelivery(
-                "/path-to-my-delivery",
                 "messageType = 'DENM'",
                 LocalDeliveryStatus.REQUESTED
         );
