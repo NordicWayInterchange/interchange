@@ -448,7 +448,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String selector = "originatingCountry = 'NO'";
 
 		client.createHeadersExchange(capabilityExchange);
-		client.createDirectExchange(deliveryExchange);
+		client.createHeadersExchange(deliveryExchange);
 
 		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 

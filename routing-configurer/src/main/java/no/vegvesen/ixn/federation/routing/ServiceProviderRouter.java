@@ -351,7 +351,7 @@ public class ServiceProviderRouter {
                     List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
                     if (!delta.exchangeExists(delivery.getExchangeName())) {
                         String exchangeName = delivery.getExchangeName();
-                        Exchange exchange = qpidClient.createDirectExchange(exchangeName);
+                        Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
                         qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
                         delta.addExchange(exchange);
                     }

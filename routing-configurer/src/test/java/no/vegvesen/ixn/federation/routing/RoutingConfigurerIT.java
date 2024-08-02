@@ -782,7 +782,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
 
-		client.createDirectExchange(deliveryExchangeName);
+		client.createHeadersExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getMetadata().getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 

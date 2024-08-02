@@ -192,7 +192,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         //1. Creating delivery queue and adding write access.
-        qpidClient.createDirectExchange(inQueueName);
+        qpidClient.createHeadersExchange(inQueueName);
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         //2. Creating read queue and adding read access.
@@ -356,7 +356,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createQueue(subscriptionQueue);
@@ -443,7 +443,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         //1. Creating delivery queue and adding write access.
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         //Create intermediate exchange. No ACL needed for this.
