@@ -257,6 +257,7 @@
 
 
     <modules>
+        <module>admin-server</module>
         <module>ssl-utils</module>
         <module>testcontainers-base</module>
         <module>testcontainers-init-postgres</module>

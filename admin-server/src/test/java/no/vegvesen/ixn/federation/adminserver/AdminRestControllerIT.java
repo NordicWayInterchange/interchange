@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminapi;
+package no.vegvesen.ixn.federation.adminserver;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
