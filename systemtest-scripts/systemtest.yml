@@ -253,7 +253,6 @@ services:
     networks:
     - testing_net
 
-
   b_admin:
     build:
       context: ../admin-server
