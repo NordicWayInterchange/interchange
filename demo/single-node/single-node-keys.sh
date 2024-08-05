@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-IMAGE_TAG=9c1c1e9
+IMAGE_TAG=$(<version)
 RELATIVE_KEYS_FOLDER=../keys/a
 mkdir -p $RELATIVE_KEYS_FOLDER
 KEYS_FOLDER=$(realpath ${RELATIVE_KEYS_FOLDER})
