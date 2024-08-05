@@ -42,6 +42,9 @@ qpid:
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
 
+admin_server:
+  replicas: 1
+
 message_collector:
   replicas: 1
 

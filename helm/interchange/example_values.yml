@@ -80,6 +80,14 @@ onboard_server:                                                     # Java appli
   logging:
   - logger_name: .root
     level: info
+admin_server:
+  replicas: 1
+  image:
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app
+    tag: "c6b1cf8"
+  logging:
+    - logger_name: .root
+      lever: info
 napcore_server:
   replicas: 1
   image:
