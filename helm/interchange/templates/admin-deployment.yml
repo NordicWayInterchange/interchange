@@ -34,7 +34,7 @@ spec:
             - name: SERVER_NAME
               value: {{ .Values.external_name | quote }}
             - name: SP_CHNL_PORT
-              value: {{ .Values.self.service_provider_port | quote }}
+              value: {{ .Values.self.admin_port | quote }}
             - name: TRUST_STORE
               value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
             - name: TRUST_STORE_PASSWORD
@@ -52,7 +52,7 @@ spec:
               mountPath: {{ .Values.self.secret_mount_path | quote }}
           ports:
             - name: admin
-              containerPort: {{ .Values.self.service_provider_port }}
+              containerPort: {{ .Values.self.admin_port }}
       volumes:
         - name: secure
           secret:
