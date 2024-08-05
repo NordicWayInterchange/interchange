@@ -29,6 +29,29 @@ services:
     networks:
     - singletest
 
+  a_admin:
+    image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/admin-server:${IMAGE_TAG}
+    container_name: a_admin
+    depends_on:
+      - a_db
+    ports:
+      - 32667:8899
+    volumes:
+      - "../keys/a:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=lookupdomain.com
+      - SP_CHNL_PORT=8899
+      - TRUST_STORE=/keys/ca.a.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - singletest
+
   a_onboard_server:
     image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app:${IMAGE_TAG}
     container_name: a_onboard_server
