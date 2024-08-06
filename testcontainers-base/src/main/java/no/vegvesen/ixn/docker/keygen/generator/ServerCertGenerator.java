@@ -63,9 +63,8 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
     }
 
 
-        @Override
+    @Override
     public void configure() {
-
         this.withFileSystemBind(caCertOnHost,caCertInContainer, BindMode.READ_ONLY);
         this.withFileSystemBind(caKeyOnHost,caKeyInContainer,BindMode.READ_ONLY);
         this.withFileSystemBind(chainOnHost,chainInContainer,BindMode.READ_ONLY);
