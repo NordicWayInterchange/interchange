@@ -6,7 +6,6 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {

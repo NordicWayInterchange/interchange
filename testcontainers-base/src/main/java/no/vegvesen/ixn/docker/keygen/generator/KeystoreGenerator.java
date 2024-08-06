@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import com.github.dockerjava.api.model.Mount;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;

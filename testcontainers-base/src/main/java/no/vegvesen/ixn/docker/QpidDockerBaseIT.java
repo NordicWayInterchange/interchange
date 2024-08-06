@@ -26,7 +26,7 @@ import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 
 public class QpidDockerBaseIT extends DockerBaseIT {
 
-	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
 	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
 		Path imageLocation = getFolderPath("qpid-test");
