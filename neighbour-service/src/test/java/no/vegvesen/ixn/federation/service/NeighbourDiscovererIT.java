@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.net.ssl.SSLContext;
 import jakarta.transaction.Transactional;
@@ -45,7 +43,7 @@ import static org.mockito.Mockito.*;
 public class NeighbourDiscovererIT {
 
 	@Container
-	static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+	static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {

@@ -11,7 +11,7 @@ public class PostgresTestcontainerInitializer {
 	private static final String FEDERATION = "federation";
 
 	@ClassRule
-	public static PostgreSQLContainer postgresContainer = new PostgreSQLContainer<>("postgres:15")
+	public static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:15")
 			.withDatabaseName(FEDERATION)
 			.withUsername(FEDERATION)
 			.withPassword(FEDERATION);

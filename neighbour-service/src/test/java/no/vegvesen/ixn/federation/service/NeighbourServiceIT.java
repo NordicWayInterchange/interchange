@@ -10,13 +10,11 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -36,7 +34,7 @@ import org.testcontainers.junit.jupiter.Container;
 public class NeighbourServiceIT {
 
     @Container
-    static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

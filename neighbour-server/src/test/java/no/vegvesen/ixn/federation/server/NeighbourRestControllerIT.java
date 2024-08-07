@@ -14,15 +14,12 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,7 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class NeighbourRestControllerIT {
 
     @Container
-    static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

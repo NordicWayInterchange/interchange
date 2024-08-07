@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -42,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ExportServiceProvidersIT {
 
     @Container
-    static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

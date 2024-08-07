@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ImportServiceProvidersIT {
 
     @Container
-    static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

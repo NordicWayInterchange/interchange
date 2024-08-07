@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OutgoingMatchRepositoryIT {
 
     @Container
-    static PostgreSQLContainer postgreSQLContainer = ContainerConfig.postgreSQLContainer();
+    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
