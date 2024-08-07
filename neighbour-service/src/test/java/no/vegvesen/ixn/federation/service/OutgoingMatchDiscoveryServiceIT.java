@@ -31,9 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(ContainerConfig.class)
 public class OutgoingMatchDiscoveryServiceIT {
 
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");

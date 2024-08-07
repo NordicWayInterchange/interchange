@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 @SpringBootTest
 @Testcontainers
-@Import(ContainerConfig.class)
 public class ImportServiceProvidersIT {
 
     @Container

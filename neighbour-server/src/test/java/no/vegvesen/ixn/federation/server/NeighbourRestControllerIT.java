@@ -41,9 +41,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 public class NeighbourRestControllerIT {
 
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");

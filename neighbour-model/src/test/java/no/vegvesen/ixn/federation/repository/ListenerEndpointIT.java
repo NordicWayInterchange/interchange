@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest
 @Testcontainers
-@Import(ContainerConfig.class)
 public class ListenerEndpointIT {
 
     @Container

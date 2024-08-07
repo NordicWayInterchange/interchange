@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-@Import(ContainerConfig.class)
 public class OutgoingMatchRepositoryIT {
 
     @Container

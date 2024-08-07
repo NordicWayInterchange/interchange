@@ -42,9 +42,6 @@ import static org.mockito.Mockito.*;
 @Transactional
 public class NeighbourDiscovererIT {
 
-	@Container
-	static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");

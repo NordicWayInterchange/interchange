@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-@Import(ContainerConfig.class)
 @Transactional
 public class MatchDiscoveryServiceIT {
 
@@ -36,7 +35,7 @@ public class MatchDiscoveryServiceIT {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+        registry.add("spring.jpa.hibernate.d>dl-auto", ()-> "create-drop");
     }
 
     @Autowired

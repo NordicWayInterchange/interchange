@@ -47,9 +47,6 @@ import static org.mockito.Mockito.*;
 @Import(ContainerConfig.class)
 public class OnboardRestControllerIT {
 
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
