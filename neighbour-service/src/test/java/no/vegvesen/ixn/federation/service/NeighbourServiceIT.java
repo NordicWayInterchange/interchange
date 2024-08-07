@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +28,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@Testcontainers
-@Import(ContainerConfig.class)
-public class NeighbourServiceIT {
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class NeighbourServiceIT extends PostgresContainerBase {
 
     String jsonInput = """
             {

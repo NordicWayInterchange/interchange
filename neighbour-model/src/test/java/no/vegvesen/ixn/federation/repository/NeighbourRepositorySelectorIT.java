@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +23,8 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Testcontainers
 @Transactional
-public class NeighbourRepositorySelectorIT {
-
-	@Container
-	static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
-	@DynamicPropertySource
-	static void datasourceProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-		registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-		registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-		registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-	}
+public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 
 	@Autowired
 	private NeighbourRepository neighbourRepository;

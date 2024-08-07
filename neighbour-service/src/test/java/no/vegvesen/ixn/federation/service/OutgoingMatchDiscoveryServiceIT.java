@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +28,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Testcontainers
-@Import(ContainerConfig.class)
-public class OutgoingMatchDiscoveryServiceIT {
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Autowired
     private OutgoingMatchRepository repository;

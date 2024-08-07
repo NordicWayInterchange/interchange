@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,15 +37,8 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@Testcontainers
-@Import(ContainerConfig.class)
 @SpringBootTest
-public class NeighbourRestControllerIT {
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     NeighbourRestController neighbourRestController;

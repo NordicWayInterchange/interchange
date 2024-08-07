@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,15 +31,8 @@ import static org.mockito.Mockito.doThrow;
 
 
 @SpringBootTest
-@Testcontainers
-@Import(ContainerConfig.class)
 @Transactional
-public class NeighbourSubscriptionDeleteServiceIT {
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase {
 
     @Autowired
     NeighbourRepository neighbourRepository;

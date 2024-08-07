@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +44,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Transactional
-@Testcontainers
-@Import(ContainerConfig.class)
-public class OnboardRestControllerIT {
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-       registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;

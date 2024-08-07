@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -37,15 +38,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@Testcontainers
-@Import(ContainerConfig.class)
 @Transactional
-public class NeighbourDiscovererIT {
-
-	@DynamicPropertySource
-	static void datasourceProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-	}
+public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 	private final LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 	@MockBean

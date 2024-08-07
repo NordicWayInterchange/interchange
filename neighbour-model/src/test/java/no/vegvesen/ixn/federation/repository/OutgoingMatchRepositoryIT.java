@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.ContainerConfig;
+import no.vegvesen.ixn.postgresinit.PostgresContainerBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -28,19 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
-@Testcontainers
-public class OutgoingMatchRepositoryIT {
-
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = ContainerConfig.postgreSQLContainer();
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
-    }
+public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
 
     @Autowired
     OutgoingMatchRepository outgoingMatchRepository;
