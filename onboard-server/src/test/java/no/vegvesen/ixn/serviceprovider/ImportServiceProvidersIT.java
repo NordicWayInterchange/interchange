@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
-public class ImportServiceProvidersIT extends PostgresContainerBase {
+public class ImportServiceProvidersIT extends ServiceProviderImport.LocalContainerSetup {
 
     @Autowired
     ServiceProviderRepository repository;

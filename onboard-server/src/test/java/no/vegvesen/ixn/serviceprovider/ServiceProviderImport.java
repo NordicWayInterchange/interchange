@@ -6,9 +6,10 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelResponseApi;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -108,67 +109,66 @@ public class ServiceProviderImport {
         return importedPrivateChannels;
     }
 
+    public static abstract class PostgreSQLContainerSetup{
+        static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15").withDatabaseName("federation");
+
+        @BeforeAll
+        public static void setUp(){
+            postgreSQLContainer.start();
+        }
+    }
     /*
         Used to import data to systemtest, this one for the local instance
          */
-    public static class LocalInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static abstract class LocalContainerSetup extends PostgreSQLContainerSetup {
 
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:15432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
+        @DynamicPropertySource
+        static void datasourceProperties(DynamicPropertyRegistry registry) {
+            registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:15432/federation");
+            registry.add("spring.datasource.username", () -> "federation");
+            registry.add("spring.datasource.password", () -> "federation");
+            registry.add("spring.datasource.driver-class-name", ()-> "org.postgresql.Driver");
+        }
     }
 
     /*
         Used to import data to systemtest, this one for the remote instance
          */
-    public static class RemoteInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static abstract class RemoteContainerSetup extends PostgreSQLContainerSetup{
 
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:25432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
+        @DynamicPropertySource
+        static void datasourceProperties(DynamicPropertyRegistry registry) {
+            registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:25432/federation");
+            registry.add("spring.datasource.username", () -> "federation");
+            registry.add("spring.datasource.password", () -> "federation");
+            registry.add("spring.datasource.driver-class-name", ()-> "org.postgresql.Driver");
+        }
     }
         /*
         Used to import to a locally runnning database
          */
-    public static class LocalhostImportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver",
-                    "spring.jpa.hibernate.ddl-auto = update"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    public static abstract class LocalhostImport extends PostgreSQLContainerSetup{
+            @DynamicPropertySource
+            static void datasourceProperties(DynamicPropertyRegistry registry) {
+                registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5432/federation");
+                registry.add("spring.datasource.username", () -> "federation");
+                registry.add("spring.datasource.password", () -> "federation");
+                registry.add("spring.datasource.driver-class-name", ()-> "org.postgresql.Driver");
+                registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
+            }
     }
     /*
     Used to export a locally runnning database
      */
-    public static class LocalhostExportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static abstract class LocalhostExport extends PostgreSQLContainerSetup{
 
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
+        @DynamicPropertySource
+        static void datasourceProperties(DynamicPropertyRegistry registry) {
+            registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5432/federation");
+            registry.add("spring.datasource.username", () -> "federation");
+            registry.add("spring.datasource.password", () -> "federation");
+            registry.add("spring.datasource.driver-class-name", ()-> "org.postgresql.Driver");
+        }
     }
 
 }
