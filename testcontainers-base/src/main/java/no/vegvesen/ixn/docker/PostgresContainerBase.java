@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.postgresinit;
+package no.vegvesen.ixn.docker;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;

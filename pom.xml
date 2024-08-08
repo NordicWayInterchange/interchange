@@ -259,7 +259,6 @@
     <modules>
         <module>ssl-utils</module>
         <module>testcontainers-base</module>
-        <module>testcontainers-init-postgres</module>
         <module>jms-client</module>
         <module>api-model</module>
         <module>interchange-spring-security</module>
