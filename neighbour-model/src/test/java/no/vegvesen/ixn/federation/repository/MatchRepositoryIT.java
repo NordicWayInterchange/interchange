@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.repository;
 
-
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 @SpringBootTest
 public class MatchRepositoryIT extends PostgresContainerBase {
