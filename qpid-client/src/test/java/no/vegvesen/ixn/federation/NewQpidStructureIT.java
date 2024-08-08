@@ -13,19 +13,17 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
@@ -39,8 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 //TODO this class does things differently from all the other Qpid test classes. Should we change this to be like the rest?
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
-@ContextConfiguration(initializers = {NewQpidStructureIT.Initializer.class})
-@Testcontainers
 public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
@@ -63,22 +59,20 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
-
-    static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            //need to set the logg follower somewhere, this seems like a "good" place to do it for now
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            logger.info("Server admin url: {}", qpidContainer.getHttpUrl());
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + getTrustStorePath(stores),
-                    "test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+        registry.add("routing-configurer.vhost", () -> "localhost");
+        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
     }
+
+    @BeforeAll
+    static void setup(){
+        qpidContainer.start();
+    }
+
 
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
