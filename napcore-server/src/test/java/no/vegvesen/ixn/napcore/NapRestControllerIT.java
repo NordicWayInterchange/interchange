@@ -27,7 +27,10 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -116,14 +119,12 @@ public class NapRestControllerIT {
         SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
         SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
         SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
+
         napRestController.addSubscription(actorCommonName, request1);
         TimeUnit.SECONDS.sleep(1);
-
         napRestController.addSubscription(actorCommonName, request2);
         TimeUnit.SECONDS.sleep(1);
-
         napRestController.addSubscription(actorCommonName, request3);
-        TimeUnit.SECONDS.sleep(1);
 
         List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
         subscriptions.forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
@@ -227,24 +228,20 @@ public class NapRestControllerIT {
     public void testGettingDeliveriesReturnsOrderedByLastUpdatedTimestamp() throws InterruptedException {
         String actorCommonName = "actor";
         String selector1 = "originatingCountry='NO'";
-        String selector2 = "originatingCountry='SE'";
+        String selector2 = "originatingCountry='DK'";
         String selector3 = "originatingCountry='FI'";
-
-        Delivery delivery1 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
         TimeUnit.SECONDS.sleep(1);
-        Delivery delivery2 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
         TimeUnit.SECONDS.sleep(1);
-        Delivery delivery3 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        TimeUnit.SECONDS.sleep(1);
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
 
-        System.out.println("Timestamps after add delivery");
-        System.out.println(delivery1.getLastUpdatedTimestamp() + " " + delivery2.getLastUpdatedTimestamp() + " " + delivery3.getLastUpdatedTimestamp());
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
-        System.out.println("Timestamps after get deliveries");
-        deliveries.forEach(a -> System.out.print(a.getLastUpdatedTimestamp() + " "));
 
-        assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
-        assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
-        assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
+       assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
+       assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
+       assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
     }
 
     @Test
