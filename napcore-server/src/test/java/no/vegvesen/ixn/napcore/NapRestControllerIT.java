@@ -2,9 +2,7 @@ package no.vegvesen.ixn.napcore;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MapemApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
@@ -27,10 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -120,11 +115,11 @@ public class NapRestControllerIT {
         SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
         SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
 
-        napRestController.addSubscription(actorCommonName, request1);
+        System.out.println(napRestController.addSubscription(actorCommonName, request1).getLastUpdatedTimestamp());
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addSubscription(actorCommonName, request2);
+        System.out.println(napRestController.addSubscription(actorCommonName, request2).getLastUpdatedTimestamp());
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addSubscription(actorCommonName, request3);
+        System.out.println(napRestController.addSubscription(actorCommonName, request3).getLastUpdatedTimestamp());
 
         List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
         subscriptions.forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
@@ -386,7 +381,6 @@ public class NapRestControllerIT {
         assertThat(napRestController.getCapabilities(actor2)).hasSize(1);
     }
 
-
     @Test
     public void testDeletingCapability(){
         String actorCommonName = "actor";
@@ -413,6 +407,22 @@ public class NapRestControllerIT {
     public void testDeletingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void useRepos() throws InterruptedException {
+        ServiceProvider sp = new ServiceProvider("sp");
+        sp = serviceProviderRepository.save(sp);
+        sp.addDelivery(new LocalDelivery("originatingCountry='NO'"));
+        sp = serviceProviderRepository.save(sp);
+        TimeUnit.SECONDS.sleep(1);
+
+        sp.addDelivery(new LocalDelivery("originatingCountry='SE'"));
+        sp = serviceProviderRepository.save(sp);
+        TimeUnit.SECONDS.sleep(1);
+
+        sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
+        serviceProviderRepository.findByName(sp.getName()).getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
     }
 
 }
