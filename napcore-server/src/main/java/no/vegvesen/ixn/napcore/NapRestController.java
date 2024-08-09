@@ -33,11 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -124,8 +120,9 @@ public class NapRestController {
         logger.info("Listing subscription for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-
-        return typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
+        List<Subscription> subscriptions= typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
+        Collections.sort(subscriptions);
+        return subscriptions;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -225,8 +222,9 @@ public class NapRestController {
         logger.info("Listing deliveries for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-
-        return typeTransformer.transformLocalDeliveriesToNapDeliveries(serviceProvider.getDeliveries());
+        List<Delivery> deliveries = typeTransformer.transformLocalDeliveriesToNapDeliveries(serviceProvider.getDeliveries());
+        Collections.sort(deliveries);
+        return deliveries;
     }
 
     @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"})

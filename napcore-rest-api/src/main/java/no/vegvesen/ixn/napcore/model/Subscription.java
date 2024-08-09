@@ -2,7 +2,8 @@ package no.vegvesen.ixn.napcore.model;
 
 import java.util.Set;
 
-public class Subscription {
+public class Subscription implements Comparable<Subscription> {
+
 
     String id;
 
@@ -76,5 +77,11 @@ public class Subscription {
                 ", endpoints=" + endpoints +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
+    }
+    @Override
+    public int compareTo(Subscription o) {
+        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null) return 0;
+
+        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
 }

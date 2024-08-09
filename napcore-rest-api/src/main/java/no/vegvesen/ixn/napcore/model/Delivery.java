@@ -3,7 +3,7 @@ package no.vegvesen.ixn.napcore.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Delivery {
+public class Delivery implements Comparable<Delivery>{
 
     String id;
 
@@ -77,5 +77,12 @@ public class Delivery {
                 ", endpoints=" + endpoints  +
                 ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
                 "}";
+    }
+
+    @Override
+    public int compareTo(Delivery o) {
+        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null)return 0;
+
+        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
 }

@@ -9,6 +9,8 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -23,7 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,6 +110,27 @@ public class NapRestControllerIT {
         });
     }
 
+    @Test
+    public void getSubscriptionsGivesCorrectOrder() throws InterruptedException {
+        String actorCommonName = "actor";
+        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
+        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
+        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
+        napRestController.addSubscription(actorCommonName, request1);
+        TimeUnit.SECONDS.sleep(1);
+
+        napRestController.addSubscription(actorCommonName, request2);
+        TimeUnit.SECONDS.sleep(1);
+
+        napRestController.addSubscription(actorCommonName, request3);
+        TimeUnit.SECONDS.sleep(1);
+
+        List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
+        subscriptions.forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
+        assertThat(subscriptions.get(0).getSelector()).isEqualTo(request3.getSelector());
+        assertThat(subscriptions.get(1).getSelector()).isEqualTo(request2.getSelector());
+        assertThat(subscriptions.get(2).getSelector()).isEqualTo(request1.getSelector());
+    }
     @Test
     public void testGetSubscriptionReturnsValidSubscription(){
         String actorCommonName = "actor";
@@ -195,6 +221,30 @@ public class NapRestControllerIT {
 
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(2);
         assertThat(napRestController.getDeliveries("other_actor")).hasSize(1);
+    }
+
+    @Test
+    public void testGettingDeliveriesReturnsOrderedByLastUpdatedTimestamp() throws InterruptedException {
+        String actorCommonName = "actor";
+        String selector1 = "originatingCountry='NO'";
+        String selector2 = "originatingCountry='SE'";
+        String selector3 = "originatingCountry='FI'";
+
+        Delivery delivery1 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
+        TimeUnit.SECONDS.sleep(1);
+        Delivery delivery2 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        TimeUnit.SECONDS.sleep(1);
+        Delivery delivery3 = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
+
+        System.out.println("Timestamps after add delivery");
+        System.out.println(delivery1.getLastUpdatedTimestamp() + " " + delivery2.getLastUpdatedTimestamp() + " " + delivery3.getLastUpdatedTimestamp());
+        List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
+        System.out.println("Timestamps after get deliveries");
+        deliveries.forEach(a -> System.out.print(a.getLastUpdatedTimestamp() + " "));
+
+        assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
+        assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
+        assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
     }
 
     @Test
@@ -338,6 +388,7 @@ public class NapRestControllerIT {
         assertThat(napRestController.getCapabilities(actor1)).hasSize(2);
         assertThat(napRestController.getCapabilities(actor2)).hasSize(1);
     }
+
 
     @Test
     public void testDeletingCapability(){

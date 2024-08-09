@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class LocalDelivery {
 
     @Column
     @UpdateTimestamp
-    private LocalDateTime lastUpdatedTimestamp;
+    private LocalDateTime lastUpdatedTimestamp = LocalDateTime.now();
 
     private String exchangeName = "";
 
