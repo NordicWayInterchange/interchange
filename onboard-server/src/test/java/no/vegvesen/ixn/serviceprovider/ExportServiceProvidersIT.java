@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,13 +29,14 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ExportServiceProvidersIT extends PostgresContainerBase {
+public class ExportServiceProvidersIT extends ServiceProviderImport.LocalhostImportInitializer {
 
     @TempDir
     Path tempDir;
 
     @Autowired
     ServiceProviderRepository repository;
+
     @Autowired
     PrivateChannelRepository privateChannelRepository;
 
@@ -128,5 +129,9 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
         writer.writeValue(path.toFile(),serviceProviders);
     }
 
-
+    @Test
+    public void export() throws Exception{
+        Path out = Paths.get("C://exports/aug/export.json");
+        writeToFile(out, repository.findAll(), privateChannelRepository.findAll());
+    }
 }

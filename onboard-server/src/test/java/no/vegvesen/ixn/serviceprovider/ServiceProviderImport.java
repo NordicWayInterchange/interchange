@@ -120,7 +120,7 @@ public class ServiceProviderImport {
     /*
         Used to import data to systemtest, this one for the local instance
          */
-    public static abstract class LocalContainerSetup extends PostgreSQLContainerSetup {
+    public static abstract class LocalInitializer extends PostgreSQLContainerSetup {
 
         @DynamicPropertySource
         static void datasourceProperties(DynamicPropertyRegistry registry) {
@@ -134,7 +134,7 @@ public class ServiceProviderImport {
     /*
         Used to import data to systemtest, this one for the remote instance
          */
-    public static abstract class RemoteContainerSetup extends PostgreSQLContainerSetup{
+    public static abstract class RemoteInitializer extends PostgreSQLContainerSetup{
 
         @DynamicPropertySource
         static void datasourceProperties(DynamicPropertyRegistry registry) {
@@ -147,7 +147,7 @@ public class ServiceProviderImport {
         /*
         Used to import to a locally runnning database
          */
-    public static abstract class LocalhostImport extends PostgreSQLContainerSetup{
+    public static abstract class LocalhostImportInitializer extends PostgreSQLContainerSetup{
             @DynamicPropertySource
             static void datasourceProperties(DynamicPropertyRegistry registry) {
                 registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5432/federation");
@@ -160,7 +160,7 @@ public class ServiceProviderImport {
     /*
     Used to export a locally runnning database
      */
-    public static abstract class LocalhostExport extends PostgreSQLContainerSetup{
+    public static abstract class LocalhostExportInitializer extends PostgreSQLContainerSetup{
 
         @DynamicPropertySource
         static void datasourceProperties(DynamicPropertyRegistry registry) {

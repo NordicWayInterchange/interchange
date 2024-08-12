@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
-public class ImportServiceProvidersIT extends ServiceProviderImport.LocalContainerSetup {
+public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitializer {
 
     @Autowired
     ServiceProviderRepository repository;
