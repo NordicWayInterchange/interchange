@@ -128,10 +128,4 @@ public class ExportServiceProvidersIT extends ServiceProviderImport.LocalhostImp
         System.out.println(writer.writeValueAsString(serviceProviders));
         writer.writeValue(path.toFile(),serviceProviders);
     }
-
-    @Test
-    public void export() throws Exception{
-        Path out = Paths.get("C://exports/aug/export.json");
-        writeToFile(out, repository.findAll(), privateChannelRepository.findAll());
-    }
 }
