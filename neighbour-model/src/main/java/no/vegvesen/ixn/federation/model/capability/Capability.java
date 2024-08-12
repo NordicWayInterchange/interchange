@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.federation.model.capability;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -9,6 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
+@JsonIgnoreProperties(value = "lastUpdatedTimestamp")
 public class Capability {
 
     @Id
@@ -27,6 +31,9 @@ public class Capability {
 
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.CREATED;
+
+    @UpdateTimestamp
+    private LocalDateTime lastUpdatedTimestamp = LocalDateTime.now();
 
     public Capability() {
 
@@ -87,6 +94,14 @@ public class Capability {
 
     public void setStatus(CapabilityStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(LocalDateTime lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public boolean isSharded() {

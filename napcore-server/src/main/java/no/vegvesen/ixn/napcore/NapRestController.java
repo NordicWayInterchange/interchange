@@ -165,8 +165,9 @@ public class NapRestController {
                 allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
             }
         }
-
-        return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        Collections.sort(capabilities);
+        return capabilities;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -252,8 +253,9 @@ public class NapRestController {
                 allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
             }
         }
-
-        return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        Collections.sort(capabilities);
+        return capabilities;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -295,8 +297,9 @@ public class NapRestController {
         logger.info("List capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-
-        return typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCreatedCapabilities());
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCreatedCapabilities());
+        Collections.sort(capabilities);
+        return capabilities;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)

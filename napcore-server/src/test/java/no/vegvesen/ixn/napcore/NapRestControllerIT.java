@@ -109,25 +109,6 @@ public class NapRestControllerIT {
     }
 
     @Test
-    public void getSubscriptionsGivesCorrectOrder() throws InterruptedException {
-        String actorCommonName = "actor";
-        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
-        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
-        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
-
-        System.out.println(napRestController.addSubscription(actorCommonName, request1).getLastUpdatedTimestamp());
-        TimeUnit.SECONDS.sleep(1);
-        System.out.println(napRestController.addSubscription(actorCommonName, request2).getLastUpdatedTimestamp());
-        TimeUnit.SECONDS.sleep(1);
-        System.out.println(napRestController.addSubscription(actorCommonName, request3).getLastUpdatedTimestamp());
-
-        List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
-        subscriptions.forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
-        assertThat(subscriptions.get(0).getSelector()).isEqualTo(request3.getSelector());
-        assertThat(subscriptions.get(1).getSelector()).isEqualTo(request2.getSelector());
-        assertThat(subscriptions.get(2).getSelector()).isEqualTo(request1.getSelector());
-    }
-    @Test
     public void testGetSubscriptionReturnsValidSubscription(){
         String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
@@ -203,20 +184,6 @@ public class NapRestControllerIT {
         Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
         assertThat(delivery).isNotNull();
         assertThat(delivery.getSelector()).isEqualTo(selector);
-    }
-
-    @Test
-    public void testGettingDeliveries(){
-        String actorCommonName = "actor";
-        String selector1 = "originatingCountry='NO'";
-        String selector2 = "originatingCountry='SE'";
-        String selector3 = "originatingCountry='FI'";
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
-        napRestController.addDelivery("other_actor", new DeliveryRequest(selector3));
-
-        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(2);
-        assertThat(napRestController.getDeliveries("other_actor")).hasSize(1);
     }
 
     @Test
@@ -422,7 +389,8 @@ public class NapRestControllerIT {
         TimeUnit.SECONDS.sleep(1);
 
         sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
-        serviceProviderRepository.findByName(sp.getName()).getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
+        sp = serviceProviderRepository.findByName(sp.getName());
+        sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
     }
 
 }

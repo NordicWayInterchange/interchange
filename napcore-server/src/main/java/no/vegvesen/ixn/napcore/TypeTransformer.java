@@ -26,10 +26,16 @@ public class TypeTransformer {
 
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
+        LocalDateTime lastUpdated = capability.getLastUpdatedTimestamp();
+        Long epochSecond = null;
+        if (lastUpdated != null) {
+            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
+        }
         return new OnboardingCapability(
                 capability.getId().toString(),
                 transformer.applicationToApplicationApi(capability.getApplication()),
-                transformer.metadataToMetadataApi(capability.getMetadata()));
+                transformer.metadataToMetadataApi(capability.getMetadata()),
+                epochSecond);
     }
 
     public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
@@ -150,9 +156,15 @@ public class TypeTransformer {
     public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities) {
         List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
+            LocalDateTime lastUpdated = capability.getLastUpdatedTimestamp();
+            Long epochSecond = null;
+            if (lastUpdated != null) {
+                epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
+            }
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi()
+                    capability.getMetadata().toApi(),
+                    epochSecond
             ));
         }
         return matchingCapabilities;

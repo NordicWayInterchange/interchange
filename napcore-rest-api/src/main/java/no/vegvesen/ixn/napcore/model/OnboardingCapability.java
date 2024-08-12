@@ -1,15 +1,20 @@
 package no.vegvesen.ixn.napcore.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 
-public class OnboardingCapability {
+@JsonIgnoreProperties(value = {"lastUpdatedTimestamp"})
+public class OnboardingCapability implements Comparable<OnboardingCapability> {
+
 
     String id;
 
     ApplicationApi application;
 
     MetadataApi metadata;
+
+    Long lastUpdatedTimestamp;
 
     public OnboardingCapability() {
     }
@@ -18,6 +23,13 @@ public class OnboardingCapability {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+    }
+
+    public OnboardingCapability(String id, ApplicationApi application, MetadataApi metadata, Long lastUpdatedTimestamp) {
+        this.id = id;
+        this.application = application;
+        this.metadata = metadata;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public String getId() {
@@ -44,6 +56,14 @@ public class OnboardingCapability {
         this.metadata = metadata;
     }
 
+    public Long getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
     @Override
     public String toString(){
         return "Capability{" +
@@ -51,5 +71,12 @@ public class OnboardingCapability {
                 "application=" + application +
                 ", metadata=" + metadata +
                 '}';
+    }
+
+    @Override
+    public int compareTo(OnboardingCapability o) {
+        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null) return 0;
+
+        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
 }
