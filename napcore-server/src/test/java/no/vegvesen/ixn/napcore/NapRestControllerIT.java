@@ -7,8 +7,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.LocalDelivery;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -23,8 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -113,7 +109,7 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
         Subscription subscription = napRestController.addSubscription(actorCommonName, request);
-        Subscription response = napRestController.getSubscription(actorCommonName, subscription.getId().toString());
+        Subscription response = napRestController.getSubscription(actorCommonName, subscription.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
@@ -135,6 +131,33 @@ public class NapRestControllerIT {
         assertThat(napRestController.getSubscriptions(actorCommonName).stream().findFirst().get().getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
     }
 
+    @Test
+    public void testGettingSubscriptionsReturnsCorrectOrder() throws InterruptedException {
+        String actorCommonName = "actor";
+        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
+        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
+        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
+
+        napRestController.addSubscription(actorCommonName, request1);
+
+        // This is weird. However, timeunit.sleep alone somehow messes up code execution order. Compiler issue?
+        while(!serviceProviderRepository.findByName(actorCommonName).getSubscriptions().isEmpty()){
+            TimeUnit.SECONDS.sleep(1);
+            break;
+        }
+        napRestController.addSubscription(actorCommonName, request2);
+
+        while(!serviceProviderRepository.findByName(actorCommonName).getSubscriptions().isEmpty()){
+            TimeUnit.SECONDS.sleep(1);
+            break;
+        }
+        napRestController.addSubscription(actorCommonName, request3);
+
+        List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
+        assertThat(subscriptions.get(0).getSelector()).isEqualTo(request3.getSelector());
+        assertThat(subscriptions.get(1).getSelector()).isEqualTo(request2.getSelector());
+        assertThat(subscriptions.get(2).getSelector()).isEqualTo(request1.getSelector());
+    }
     @Test
     public void testDeleteNonExistentSubscriptionThrowsException(){
         String actorCommonName = "actor";
@@ -190,20 +213,28 @@ public class NapRestControllerIT {
     public void testGettingDeliveriesReturnsOrderedByLastUpdatedTimestamp() throws InterruptedException {
         String actorCommonName = "actor";
         String selector1 = "originatingCountry='NO'";
-        String selector2 = "originatingCountry='DK'";
+        String selector2 = "originatingCountry='SE'";
         String selector3 = "originatingCountry='FI'";
-        TimeUnit.SECONDS.sleep(1);
+
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
-        TimeUnit.SECONDS.sleep(1);
+
+        // This is weird. However, timeunit.sleep alone somehow messes up code execution order. Compiler issue?
+        while(!serviceProviderRepository.findByName(actorCommonName).getDeliveries().isEmpty()){
+            TimeUnit.SECONDS.sleep(1);
+            break;
+        }
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
-        TimeUnit.SECONDS.sleep(1);
+
+        while(!serviceProviderRepository.findByName(actorCommonName).getDeliveries().isEmpty()){
+            TimeUnit.SECONDS.sleep(1);
+            break;
+        }
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
-
-       assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
-       assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
-       assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
+        assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
+        assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
+        assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
     }
 
     @Test
@@ -374,26 +405,6 @@ public class NapRestControllerIT {
     public void testDeletingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId"));
-    }
-
-    @Test
-    public void useRepos() throws InterruptedException {
-        ServiceProvider sp = new ServiceProvider("sp");
-        sp = serviceProviderRepository.save(sp);
-        sp.addDelivery(new LocalDelivery("originatingCountry='NO'"));
-        sp = serviceProviderRepository.save(sp);
-
-        System.out.println("WAITING");
-        TimeUnit.SECONDS.sleep(3);
-        sp.addDelivery(new LocalDelivery("originatingCountry='SE'"));
-        sp = serviceProviderRepository.save(sp);
-
-        sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
-
-        sp = serviceProviderRepository.findByName(sp.getName());
-        sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
-
-        sp.getDeliveries().forEach(a-> System.out.println(a));
     }
 
 }
