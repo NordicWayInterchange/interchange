@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.capability;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
@@ -264,12 +264,12 @@ public class ApplicationEqualsAndHashCodeTest {
     @Test
     public void testFromJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        CapabilitiesSplitApi capabilitySplitApi = mapper.readValue(inputJson, CapabilitiesSplitApi.class);
+        CapabilitiesApi capabilityApi = mapper.readValue(inputJson, CapabilitiesApi.class);
         CapabilitiesTransformer transformer = new CapabilitiesTransformer();
-        Capabilities capabilities = transformer.capabilitiesApiToCapabilities(capabilitySplitApi);
+        Capabilities capabilities = transformer.capabilitiesApiToCapabilities(capabilityApi);
         AtomicInteger i = new AtomicInteger(0);
         capabilities.getCapabilities().forEach(capability -> capability.setId(i.incrementAndGet()));
-        Capabilities capabilities2 = transformer.capabilitiesApiToCapabilities(capabilitySplitApi);
+        Capabilities capabilities2 = transformer.capabilitiesApiToCapabilities(capabilityApi);
         assertThat(capabilities.getCapabilities()).isEqualTo(capabilities2.getCapabilities());
         int size = capabilities.getCapabilities().size();
         capabilities.replaceCapabilities(capabilities2.getCapabilities());

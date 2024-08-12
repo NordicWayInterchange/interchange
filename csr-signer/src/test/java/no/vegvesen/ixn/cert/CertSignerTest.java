@@ -17,8 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,13 +37,14 @@ public class CertSignerTest {
         String keystoreLocation = path.resolve("keystore.p12").toString();
         String keystorePassword = "password";
         KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keystorePassword, "PKCS12");
-        String truststoreLocation = path.resolve("truststore.jks").toString();
-        KeyStore trustStore = CertSigner.loadKeyStore(truststoreLocation, "trustpassword", "JKS");
         String keyAlias = "interchangetestdomain.no";
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keystorePassword.toCharArray());
         X509Certificate intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
-        X509Certificate caCertificate = (X509Certificate) trustStore.getCertificate("myKey");
-        CertSigner signer = new CertSigner(privateKey,intermediateCertificate,caCertificate);
+        List<X509Certificate> certChain = new ArrayList<>();
+        for (Certificate cert :  keyStore.getCertificateChain(keyAlias)) {
+            certChain.add((X509Certificate) cert);
+        }
+        CertSigner signer = new CertSigner(privateKey,intermediateCertificate,certChain);
         List<String> certificatesAsString = signer.sign(csrAsString,"testSP");
         assertThat(certificatesAsString).isNotNull();
         assertThat(certificatesAsString).isNotEmpty();
@@ -49,19 +52,20 @@ public class CertSignerTest {
     }
 
     @Test
-    public void testWrongSubject() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException {
+    public void testWrongSubject() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         String csrAsString = Files.readString(path.resolve("testSP.csr.pem"));
 
         String keystoreLocation = path.resolve("keystore.p12").toString();
         String keystorePassword = "password";
         KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keystorePassword, "PKCS12");
-        String truststoreLocation = path.resolve("truststore.jks").toString();
-        KeyStore trustStore = CertSigner.loadKeyStore(truststoreLocation, "trustpassword", "JKS");
         String keyAlias = "interchangetestdomain.no";
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keystorePassword.toCharArray());
         X509Certificate intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
-        X509Certificate caCertificate = (X509Certificate) trustStore.getCertificate("myKey");
-        CertSigner signer = new CertSigner(privateKey,intermediateCertificate,caCertificate);
+        List<X509Certificate> certChain = new ArrayList<>();
+        for (Certificate cert : keyStore.getCertificateChain(keyAlias)) {
+            certChain.add((X509Certificate) cert);
+        }
+        CertSigner signer = new CertSigner(privateKey,intermediateCertificate,certChain);
         assertThatThrownBy(() -> signer.sign(csrAsString,"anotherSP")).isInstanceOf(IllegalSubjectException.class);
     }
 

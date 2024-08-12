@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class NeigbourDiscoveryService {
 
-    private Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
+    private final Logger logger = LoggerFactory.getLogger(NeigbourDiscoveryService.class);
 
     private final DNSFacade dnsFacade;
     private final NeighbourRepository neighbourRepository;
@@ -68,7 +68,8 @@ public class NeigbourDiscoveryService {
     }
 
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
-        List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
+        List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByIgnoreIsAndCapabilities_StatusIn(
+                false,
                 CapabilitiesStatus.UNKNOWN,
                 CapabilitiesStatus.KNOWN,
                 CapabilitiesStatus.FAILED);
@@ -98,7 +99,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
-        List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
+        List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.UNREACHABLE, false);
         if (!unreachableNeighbours.isEmpty()) {
             logger.debug("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
             for (Neighbour neighbour : unreachableNeighbours) {
@@ -137,6 +138,10 @@ public class NeigbourDiscoveryService {
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
+            if(neighbour.isIgnore()){
+                logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
+                continue;
+            }
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasCapabilities()) {
@@ -211,9 +216,9 @@ public class NeigbourDiscoveryService {
     }
 
     public void pollSubscriptions(NeighbourFacade neighbourFacade) {
-        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+                false,
                 SubscriptionStatus.REQUESTED,
-                SubscriptionStatus.ACCEPTED,
                 SubscriptionStatus.FAILED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {
@@ -232,7 +237,8 @@ public class NeigbourDiscoveryService {
     }
 
     public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
-        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+        List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+                false,
                 SubscriptionStatus.CREATED);
         for (Neighbour neighbour : neighboursToPoll) {
             try {
@@ -347,7 +353,7 @@ public class NeigbourDiscoveryService {
     }
 
     public void setGiveUpSubscriptionsToTearDownForRemoval(){
-        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
+        List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.GIVE_UP);
         for (Neighbour neighbour : neighbours) {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
                 if (!subscription.getEndpoints().isEmpty()) {
@@ -358,6 +364,15 @@ public class NeigbourDiscoveryService {
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
             neighbourRepository.save(neighbour);
+        }
+    }
+
+    public void tearDownListenerEndpointsFromIgnoredNeighbours(){
+        List<String> ignoredNeighbours = neighbourRepository.findAllByIgnoreIs(true).stream().map(Neighbour::getName).toList();
+        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a->ignoredNeighbours.contains(a.getNeighbourName())).toList();
+        for(ListenerEndpoint listenerEndpoint : endpointsToDelete){
+            listenerEndpointRepository.delete(listenerEndpoint);
+            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getSource());
         }
     }
 

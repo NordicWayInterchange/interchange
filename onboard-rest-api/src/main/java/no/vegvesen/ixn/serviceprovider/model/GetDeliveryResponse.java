@@ -5,10 +5,15 @@ import java.util.Set;
 
 public class GetDeliveryResponse {
     private String id;
+
     private Set<DeliveryEndpoint> endpoints;
+
     private String path;
+
     private String selector;
+
     private long lastUpdatedTimestamp;
+
     private DeliveryStatus status;
 
     public GetDeliveryResponse() {

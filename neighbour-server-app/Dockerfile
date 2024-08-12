@@ -2,7 +2,8 @@ FROM eclipse-temurin:21-alpine
 RUN apk add --no-cache bash alpine-conf
 RUN setup-timezone -z Europe/Oslo
 
-COPY target/neighbour-server-app-1.0.3-SNAPSHOT.jar neighbour-server.jar
+ARG JAR_VERSION
+COPY target/neighbour-server-app-$JAR_VERSION.jar neighbour-server.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh

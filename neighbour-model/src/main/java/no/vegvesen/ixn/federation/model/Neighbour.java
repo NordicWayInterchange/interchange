@@ -22,7 +22,7 @@ public class Neighbour {
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
 
-	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
+	private static final Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_seq")
@@ -49,6 +49,10 @@ public class Neighbour {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
+
+	@Column
+	private Boolean ignore = false;
+
 	private String controlChannelPort;
 
 	public Neighbour() {
@@ -88,6 +92,14 @@ public class Neighbour {
 		this.name = name;
 	}
 
+	public boolean isIgnore() {
+		return ignore;
+	}
+
+	public void setIgnore(boolean ignore) {
+		this.ignore = ignore;
+	}
+
 	public NeighbourCapabilities getCapabilities() {
 		return capabilities;
 	}
@@ -123,7 +135,6 @@ public class Neighbour {
 	public Set<Subscription> getSubscriptionsForPolling() {
 		return getOurRequestedSubscriptions().getSubscriptions().stream()
 				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
-						SubscriptionStatus.ACCEPTED.equals(s.getSubscriptionStatus()) ||
 						SubscriptionStatus.FAILED.equals(s.getSubscriptionStatus()))
 				.collect(Collectors.toSet());
 	}
@@ -161,14 +172,6 @@ public class Neighbour {
 		return getCapabilities() != null && getCapabilities().getStatus() == CapabilitiesStatus.KNOWN;
 	}
 
-	public void setDnsProperties(Neighbour dnsNeighbour) {
-		assert dnsNeighbour.getName().equals(this.getName());
-		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}",
-				this.getName(),
-				dnsNeighbour.getControlChannelPort());
-		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
-	}
-
 	/**
 	 * The basis of the subscription calculations are Self.local subscriptions and capabilities of the neighbour.
 	 * Should calculate new subscriptions if the localSubscriptionsUpdated time or the lastCapabilityExchange for
@@ -181,7 +184,7 @@ public class Neighbour {
 	 * calculated and sent subscription request to the neighbour
 	 */
 	public boolean shouldCheckSubscriptionRequestsForUpdates(Optional<LocalDateTime> localSubscriptionsUpdated) {
-		if (!localSubscriptionsUpdated.isPresent()) {
+		if (localSubscriptionsUpdated.isEmpty()) {
 			logger.debug("Local subscriptions never established for any service provider, should not check for subscription requests for any neighbour");
 			return false;
 		}
@@ -193,7 +196,7 @@ public class Neighbour {
 		}
 		LocalDateTime capabilityPostDate = this.getCapabilities().getLastCapabilityExchange();
 
-		if (this.getOurRequestedSubscriptions() == null || !this.getOurRequestedSubscriptions().getSuccessfulRequest().isPresent()) {
+		if (this.getOurRequestedSubscriptions() == null || this.getOurRequestedSubscriptions().getSuccessfulRequest().isEmpty()) {
 			logger.debug("Should check subscription for neighbour with no previous subscription request");
 			return true;
 		}

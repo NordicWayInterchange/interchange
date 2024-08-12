@@ -11,3 +11,6 @@ jms-client-sink-app/jmsclientsink_completion
 onboard-rest-client/onboardclient_completion
 jms-client-source-app/jmsclientsource_completion
 napcore-rest-client/napcoreclient_completion
+systemtest-scripts/napcoresettings
+jms-client-app/jmsclient_completion
+demo/keys

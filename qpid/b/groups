@@ -2,3 +2,5 @@ federated-interchanges.users=
 administrators.users=qpid-admin,b.bouvetinterchange.eu
 service-providers.users=
 remote-service-providers.users=
+clients-private-channels.users=
+bi-consumers.users=

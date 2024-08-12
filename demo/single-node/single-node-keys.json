@@ -1,0 +1,19 @@
+[ {
+  "name" : "ca.interchangedomain.com",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.interchangedomain.com",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.interchangedomain.com"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_olav.interchangedomain.com",
+      "country" : "NO",
+      "email" : "post@slottet.no"
+    } ]
+  }],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+} ]

@@ -57,6 +57,11 @@ public class NeighbourServiceErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
+	@ExceptionHandler({NeighbourIgnoredException.class})
+	public ResponseEntity<ErrorDetails> neighbourIgnoredException(NeighbourIgnoredException e){
+		return error(FORBIDDEN, e);
+	}
+
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());

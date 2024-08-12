@@ -7,6 +7,9 @@ import no.vegvesen.ixn.model.IllegalMessageException;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -17,7 +20,9 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,14 +30,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(SourceSinkIT.class);
 
 	private static final String SP_NAME = "king_harald";
-	static KeysStructure keysStructure = generateKeys(SourceSinkIT.class,"my_ca","localhost", SP_NAME);
+
+	final static CaStores stores = generateStores(getTargetFolderPathForTestClass(SourceSinkIT.class),"my_ca","localhost", SP_NAME);
 
 	@Container
-	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-			keysStructure,
-			"localhost");
+	public final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+		"localhost",
+			"localhost", Paths.get("qpid"))
+		.withLogConsumer(new Slf4jLogConsumer(logger));
+
 
 	private String Url;
 	private SSLContext kingHaraldSSlContext;
@@ -40,7 +50,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@BeforeEach
 	public void setUp() {
 		Url = qpidContainer.getAmqpsUrl();
-		kingHaraldSSlContext = sslClientContext(keysStructure, SP_NAME);
+		kingHaraldSSlContext = sslClientContext(stores, SP_NAME);
 	}
 
 	@Test

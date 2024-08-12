@@ -60,17 +60,15 @@ public class NeighbourDiscovererIT {
 	@Autowired
 	ListenerEndpointRepository listenerEndpointRepository;
 
-	private Set<LocalSubscription> localSubscriptions;
-
-	@Test
+    @Test
 	public void discovererIsAutowired() {
 		assertThat(neighbourService).isNotNull();
 	}
 
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
-		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		localSubscriptions = new HashSet<>();
+		assertThat(repository.findAllByIgnoreIs(false)).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
+        Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", nodeProperties.getName()));
 
 		Neighbour neighbour1 = new Neighbour();
@@ -108,12 +106,12 @@ public class NeighbourDiscovererIT {
 		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
 		String selector = String.format("messageType = %s and originatingCountry = 'NO'", Constants.DATEX_2);
 		HashSet<Subscription> subscriptions = new HashSet<>(Arrays.asList(
-				new Subscription(selector, SubscriptionStatus.ACCEPTED, "self"),
-				new Subscription(selector, SubscriptionStatus.ACCEPTED, "self")
+				new Subscription(selector, SubscriptionStatus.REQUESTED, "self"),
+				new Subscription(selector, SubscriptionStatus.REQUESTED, "self")
 		));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptions);
 
-		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour1, neighbour2), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour1, neighbour2), Optional.of(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -146,7 +144,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", List.of("0122"), "SituationPublication", "publisherName"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new CapabilityApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", List.of("0122"), "SituationPublication", "publisherName"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -252,13 +250,13 @@ public class NeighbourDiscovererIT {
 
 	@Test
 	public void oneLocalSubscriptionsBothMatchingTwoCapabilities() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>(Arrays.asList(
+		Set<LocalSubscription> localSubscriptions = Set.of(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
 						"originatingCountry = 'NO'",
 						""
 				)
-		));
+		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
 				new NeighbourCapabilities(
@@ -295,18 +293,18 @@ public class NeighbourDiscovererIT {
 		repository.save(neighbour);
 		//NOTE this will only return one subscription as per SubscriptionCalculator.calculateCustomSubscriptionForNeighbour
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
-				.thenReturn(new HashSet<>(Arrays.asList(
+				.thenReturn(Set.of(
 								new Subscription(
 										"originatingCountry = 'NO'",
 										SubscriptionStatus.REQUESTED,
 										"bouvet.itsinterchange.eu"
 
 								)
-						))
+						)
 				);
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour,localSubscriptions,mockNeighbourFacade);
 		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
-		List<Neighbour> neighbours = repository.findAll();
+		List<Neighbour> neighbours = repository.findAllByIgnoreIs(false);
 		assertThat(neighbours).hasSize(1);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(listenerEndpointRepository.findAll()).hasSize(0);
@@ -420,13 +418,13 @@ public class NeighbourDiscovererIT {
 		);
 		Subscription responseSubscription1 = new Subscription(
 				"originatingCountry = 'NO'",
-				SubscriptionStatus.ACCEPTED,
+				SubscriptionStatus.REQUESTED,
 				nodeProperties.getName()
 		);
 
 		Subscription responseSubscription2 = new Subscription(
 				"originatingCountry = 'NO'",
-				SubscriptionStatus.ACCEPTED,
+				SubscriptionStatus.REQUESTED,
 				nodeProperties.getName()
 		);
 
@@ -446,7 +444,7 @@ public class NeighbourDiscovererIT {
 
 		assertThat(repository.findByName("neighbourA").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
 		assertThat(repository.findByName("neighbourB").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(2);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED)).hasSize(2);
 		assertThat(listenerEndpointRepository.findAll()).hasSize(0);
 		verify(mockNeighbourFacade, times(2)).postSubscriptionRequest(any(Neighbour.class), anySet(), anyString());
 	}
@@ -604,13 +602,13 @@ public class NeighbourDiscovererIT {
 		serviceProvider.addLocalSubscription(subscription);
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
-				.thenReturn(new HashSet<>( Arrays.asList(
+				.thenReturn(Set.of(
 						new Subscription(
 								selector,
 								SubscriptionStatus.REQUESTED,
 								nodeProperties.getName()
 						)
-				)));
+				));
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
@@ -1041,11 +1039,46 @@ public class NeighbourDiscovererIT {
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 	}
 
+	@Test
+	public void neighbourIsIgnoredDuringCapabilityExchange(){
+		String name = "ignoredNeighbour1";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
+	}
+
+
+	@Test
+	public void neighbourIsIgnoredWhenPostingSubscriptionRequest(){
+		String name = "ignoredNeighbour2";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbour.getCapabilities().getCapabilities().add(new NeighbourCapability(
+				new DatexApplication(),
+				new Metadata()
+		));
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
+                List.of(neighbour),
+				Optional.of(LocalDateTime.now()),
+				localSubscriptions,
+				mockNeighbourFacade);
+		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(any(),any(),any());
+	}
+
+	@Test
+	public void neighbourIsIgnoredWhenPollingSubscription(){
+		String name = "ignoredNeighbour3";
+		Neighbour neighbour = ignoredNeighbour(name);
+		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED))));
+		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		verify(mockNeighbourFacade, times(0)).pollSubscriptionStatus(any(),any());
+	}
+
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
-		List<Neighbour> unknown = repository.findByCapabilities_Status(CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> unknown = repository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.UNKNOWN, false);
 		assertThat(unknown).hasSize(2);
-		assertThat(repository.findAll()).hasSize(2);
+		assertThat(repository.findAllByIgnoreIs(false)).hasSize(2);
 	}
 
 	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, NeighbourCapabilities c1, NeighbourCapabilities c2) {
@@ -1055,7 +1088,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
-		List<Neighbour> known = repository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
+		List<Neighbour> known = repository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.KNOWN, false);
 		assertThat(known).hasSize(2);
 	}
 
@@ -1069,5 +1102,20 @@ public class NeighbourDiscovererIT {
 		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
-
+	public Neighbour ignoredNeighbour(String name){
+		Neighbour neighbour = new Neighbour(
+				name,
+				new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Set.of(
+						new NeighbourCapability(
+								new DatexApplication(),
+								new Metadata()
+						)
+				)),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		neighbour.setIgnore(true);
+		repository.save(neighbour);
+		return neighbour;
+	}
 }

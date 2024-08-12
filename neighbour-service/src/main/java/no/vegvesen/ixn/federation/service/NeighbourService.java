@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -47,20 +47,28 @@ public class NeighbourService {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
-	public List<Neighbour> findAllNeighbours() {
+	public List<Neighbour> findAllNeighboursByIgnoreIs(boolean ignore) {
+		return neighbourRepository.findAllByIgnoreIs(ignore);
+	}
+
+	public List<Neighbour> findAllNeighbours(){
 		return neighbourRepository.findAll();
 	}
 
-	public CapabilitiesSplitApi incomingCapabilities(CapabilitiesSplitApi neighbourCapabilities, Set<Capability> localCapabilities) {
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		LocalDateTime now = LocalDateTime.now();
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
 
+
 		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
+		}
+		if(neighbourToUpdate.isIgnore()){
+			throw new NeighbourIgnoredException(String.format("Ignore flag is set on neighbour %s, will not process request.", neighbourToUpdate.getName()));
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		NeighbourCapabilities capabilities = neighbourToUpdate.getCapabilities();
@@ -117,11 +125,15 @@ public class NeighbourService {
 		logger.debug("Looking up neighbour in database.");
 		Neighbour neighbour = neighbourRepository.findByName(neighbourSubscriptionRequest.getName());
 
+
 		if (neighbour == null) {
 			throw new SubscriptionRequestException("Neighbours can not request subscriptions before capabilities are exchanged.");
 		}
 		if (incomingRequest.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
+		}
+		if(neighbour.isIgnore()){
+			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 		}
 
 		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
@@ -140,7 +152,7 @@ public class NeighbourService {
 		logger.info("Paths for requested subscriptions created.");
 		// Create a path for each subscription
 		for (NeighbourSubscription subscription : persistentRequest.getSubscriptions()) {
-			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
+			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getUuid();
 			subscription.setPath(path);
 			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 		}
@@ -152,13 +164,15 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, String subscriptionId) {
 		logger.debug("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-
-			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
+			if(neighbour.isIgnore()){
+				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
+			}
+			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(subscriptionId);
 			//TODO logging. What do we log on poll?
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
@@ -166,39 +180,43 @@ public class NeighbourService {
 			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
-		} else {
+		}
+		else {
 			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
 		}
 	}
 
 
-	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
+	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		if(neighbour.isIgnore()){
+			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
+		}
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(CapabilitiesStatus.KNOWN);
+		return neighbourRepository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.KNOWN, false);
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
+		return neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.FAILED);
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
-		return neighbourRepository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+		return neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.CREATED);
 	}
 
 	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
 		Set<Neighbour> tearDownSet = neighbourRepository.findAll().stream()
-				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions())
+				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions() || n.isIgnore())
 				.collect(Collectors.toSet());
 		return tearDownSet;
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.ACCEPTED);
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
 	}
@@ -212,12 +230,14 @@ public class NeighbourService {
 		neighbourRepository.save(neighbour);
 	}
 
-
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
+			if(neighbour.isIgnore()){
+				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
+			}
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
 		} else {

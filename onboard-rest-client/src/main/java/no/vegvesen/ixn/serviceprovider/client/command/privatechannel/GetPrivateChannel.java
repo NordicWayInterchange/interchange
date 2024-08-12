@@ -16,7 +16,7 @@ public class GetPrivateChannel implements Callable<Integer> {
     PrivateChannelCommand parentCommand;
 
     @CommandLine.Parameters(index = "0", description = "The ID of the private channel to get")
-    Integer privateChannelId;
+    String privateChannelId;
 
     @Override
     public Integer call() throws Exception {

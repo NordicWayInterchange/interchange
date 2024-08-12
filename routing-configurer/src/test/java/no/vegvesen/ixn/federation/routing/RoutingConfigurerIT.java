@@ -13,14 +13,17 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -33,6 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,23 +52,28 @@ import static org.mockito.Mockito.*;
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
+	public static final String HOST_NAME = getDockerHost();
+	public static CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf","nordea");
 
-	public static KeysStructure keysStructure = generateKeys(RoutingConfigurerIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure,"localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+			HOST_NAME,
+			HOST_NAME,
+			Path.of("qpid")
+			);
 
-	@Autowired
+    @Qualifier("getTestSslContext")
+    @Autowired
 	SSLContext sslContext;
 
-	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(emptySet());
 	private final NeighbourCapabilities emptyNeighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet());
 
-	private static String AMQPS_URL;
-
-	static class Initializer
+    static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -73,12 +82,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
-			AMQPS_URL = qpidContainer.getAmqpsUrl();
-			TestPropertyValues.of(
+            TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + getTrustStorePath(stores),
+					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
+
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 
@@ -323,8 +332,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		ServiceProvider sp = new ServiceProvider("sp");
 		sp.setCapabilities(new Capabilities(singleton(cap)));
 
-		MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-		String capabilitySelector = creator.makeSelector(cap, null);
+		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(cap, null);
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
@@ -579,7 +587,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -593,12 +601,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
 		subscription.setConsumerCommonName("my-node");
-		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671)));
+		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671)));
 
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
 		routingConfigurer.setUpSubscriptionExchanges();
@@ -622,9 +630,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint());
+		System.out.println(neighbourService.findAllNeighboursByIgnoreIs(false));
 		routingConfigurer.setUpSubscriptionExchanges();
 
 		assertThat(end1.hasShard()).isTrue();
@@ -639,7 +648,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String exchangeName = "subscription-exchange";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
-		subscription.setEndpoints(Collections.singleton(new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName))));
+		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName))));
 		subscription.setConsumerCommonName("my-node");
 
 		client.createHeadersExchange(exchangeName);
@@ -647,7 +656,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
@@ -683,7 +692,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 
 		routingConfigurer.tearDownSubscriptionExchanges();
@@ -697,7 +706,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String exchangeName = "failed-exchange";
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
 		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		subscription.setConsumerCommonName("my-node");
 
 		client.createHeadersExchange(exchangeName);
@@ -705,7 +714,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour myNeighbour = new Neighbour();
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(anyString(), anyString(), anyString())).thenReturn(null);
 
@@ -720,7 +729,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String exchangeName = "failed-exchange-with-listener-endpoint";
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
 		Endpoint endpoint = new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		subscription.setConsumerCommonName("my-node");
 
 		client.createHeadersExchange(exchangeName);
@@ -729,7 +738,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		myNeighbour.setName("my-neighbour");
 		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
-		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, "my-source", "my-neighbour"))
 				.thenReturn(new ListenerEndpoint("my-neighbour", "my-source", "my-host", 5672, new Connection(), exchangeName));
@@ -762,8 +771,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getHost());
 		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
 		routingConfigurer.setUpRegularRouting(
-				Collections.singleton(neighbourSubscription),
-				Collections.singleton(denmCapability),
+				singleton(neighbourSubscription),
+				singleton(denmCapability),
 				"my_Neighbour",
 				client.getQpidDelta()
 		);
@@ -785,12 +794,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourName
 		);
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
-						Collections.singleton(subscription)
+						singleton(subscription)
 				),
 				new SubscriptionRequest()
 		);
@@ -821,7 +830,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourName);
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-queue";
 		NeighbourEndpoint nonTearDownEndpoint = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -832,7 +841,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
 				neighbourName);
-		nonTearDownSubscription.setEndpoints(Collections.singleton(nonTearDownEndpoint));
+		nonTearDownSubscription.setEndpoints(singleton(nonTearDownEndpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
@@ -879,13 +888,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourSPName);
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
-						Collections.singleton(subscription)
+						singleton(subscription)
 				),
 				new SubscriptionRequest()
 		);
@@ -918,7 +927,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourSPName);
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-redirected-queue";
 		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -929,7 +938,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
 				neighbourSPName);
-		nonTearDownSubscription.setEndpoints(Collections.singleton(endpointNonTearDown));
+		nonTearDownSubscription.setEndpoints(singleton(endpointNonTearDown));
 		String neighbourName = "redirect-neighbour";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
@@ -980,7 +989,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourSPName);
-		subscription.setEndpoints(Collections.singleton(endpoint));
+		subscription.setEndpoints(singleton(endpoint));
 		String nonTeardownQueueName = "non-teardown-redirected-queue-x";
 		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -991,7 +1000,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
 				otherNeighbourSPName);
-		nonTearDownSubscription.setEndpoints(Collections.singleton(endpointNonTearDown));
+		nonTearDownSubscription.setEndpoints(singleton(endpointNonTearDown));
 		String neighbourName = "redirect-neighbour-xx";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,

@@ -38,7 +38,7 @@ For any questions please contact
 ## Getting Started
 
 ### Prerequisites
-* Maven 3.6.x or later
+* Maven 3.9.x or later
 * Java 21
 * Docker 
 

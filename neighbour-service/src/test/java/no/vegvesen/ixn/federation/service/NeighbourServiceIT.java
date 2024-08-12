@@ -2,10 +2,12 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
@@ -15,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.io.IOException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -171,7 +175,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
+    public void incomingSubscriptionRequestReturnsPathForSubscription() {
         Neighbour neighbour = new Neighbour("myNeighbour",
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.emptySet()),
@@ -187,7 +191,6 @@ public class NeighbourServiceIT {
         assertThat(subscriptions).hasSize(1);
         RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
         assertThat(subscriptionApi.getPath()).isNotNull();
-        assertThat(subscriptionApi.getLastUpdatedTimestamp()).isGreaterThan(0);
     }
 
     @Test
@@ -239,7 +242,7 @@ public class NeighbourServiceIT {
         service.saveSetupRouting(neighbour);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
-        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour = repository.findByName(neighbour.getName());
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
@@ -266,7 +269,7 @@ public class NeighbourServiceIT {
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
         neighbour = repository.findByName(neighbour.getName());
-        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+        NeighbourSubscription sub = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(no.getId());
 
         neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(Collections.singleton(sub));
         service.saveNeighbour(neighbour);
@@ -324,17 +327,16 @@ public class NeighbourServiceIT {
         assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
     }
 
-
     @Test
     public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
         Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
         repository.save(neighbour);
-        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
                 name,
                 Collections.singleton(
-                        new CapabilitySplitApi(
+                        new CapabilityApi(
                             new DenmApplicationApi(
                                 "NO-123",
                                 "pub-1",
@@ -402,7 +404,7 @@ public class NeighbourServiceIT {
         );
         Neighbour saved = repository.save(neighbour);
         NeighbourSubscription subscription = saved.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getId());
+        SubscriptionPollResponseApi response = service.incomingSubscriptionPoll(name, subscription.getUuid().toString());
         assertThat(response.getStatus()).isEqualTo(SubscriptionStatusApi.ERROR);
 
     }
@@ -419,20 +421,70 @@ public class NeighbourServiceIT {
         );
         repository.save(neighbour);
         ObjectMapper mapper = new ObjectMapper();
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class), Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class), Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
         //Test that the ID's of the capabilities are unchanged between saves, ensures that none of the objects are being replaced
         List<Integer> ids = neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList();
 
-        service.incomingCapabilities(mapper.readValue(jsonInput,CapabilitiesSplitApi.class),Collections.emptySet());
+        service.incomingCapabilities(mapper.readValue(jsonInput, CapabilitiesApi.class),Collections.emptySet());
         neighbour = repository.findByName(name);
         assertThat(neighbour.getCapabilities().getCapabilities().stream().map(NeighbourCapability::getId).sorted().toList()).isEqualTo(ids);
         assertThat(neighbour.getCapabilities().getCapabilities()).hasSize(6);
 
     }
 
+    @Test
+    public void neighbourIgnoredWhenPostingCapabilities(){
+        String name = "ignoredNeighbour";
 
+        Neighbour neighbour = ignoredNeighbour(name);
+        CapabilityApi capabilitySplitApi = new CapabilityApi(
+                new DatexApplicationApi(),
+                new MetadataApi()
+        );
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilitySplitApi)), Set.of()));
+    }
+    @Test
+    public void neighbourIgnoredWhenPollingSubscription(){
+        String name = "ignoredNeighbour2";
+        Neighbour neighbour = ignoredNeighbour(name);
 
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionPoll(name, "1"));
+    }
+
+    @Test
+    public void neighbourIgnoredWhenRequestingSubscriptions(){
+        String name = "ignoredNeighbour3";
+        Neighbour neighbour = ignoredNeighbour(name);
+
+        SubscriptionRequestApi subscriptionRequest = new SubscriptionRequestApi(name, Set.of(
+                new RequestedSubscriptionApi("originatingCountry = 'NO'", name)
+        ));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionRequest(subscriptionRequest));
+    }
+    @Test
+    public void neighbourIgnoredWhenDeletingSubscription(){
+        String name = "ignoredNeighbour4";
+        Neighbour neighbour = ignoredNeighbour(name);
+
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingSubscriptionDelete(name, "1"));
+    }
+    public Neighbour ignoredNeighbour(String name){
+        Neighbour neighbour = new Neighbour(
+                name,
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Set.of(
+                        new NeighbourCapability(
+                                new DatexApplication(),
+                                new Metadata()
+                        )
+                )),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest()
+        );
+        neighbour.setIgnore(true);
+        repository.save(neighbour);
+        return neighbour;
+    }
 }

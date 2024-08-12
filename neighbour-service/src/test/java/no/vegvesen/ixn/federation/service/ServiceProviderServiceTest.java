@@ -48,7 +48,6 @@ public class ServiceProviderServiceTest {
 
         LocalDelivery localDelivery = new LocalDelivery(
                 1,
-                "",
                 selector,
                 LocalDeliveryStatus.CREATED
         );
@@ -82,7 +81,6 @@ public class ServiceProviderServiceTest {
 
         LocalDelivery localDelivery = new LocalDelivery(
                 1,
-                "",
                 selector,
                 LocalDeliveryStatus.CREATED
         );
@@ -130,7 +128,6 @@ public class ServiceProviderServiceTest {
 
         LocalDelivery localDelivery = new LocalDelivery(
                 1,
-                "",
                 selector,
                 LocalDeliveryStatus.CREATED
         );
@@ -147,7 +144,6 @@ public class ServiceProviderServiceTest {
     public void updateDeliveryStatusShouldNotChangeTheStatusOfADeliveryThatDoesNotHaveAnExchangeYet() {
         LocalDelivery localDelivery = new LocalDelivery(
                 1,
-                "/deliveries/1",
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );
@@ -193,7 +189,6 @@ public class ServiceProviderServiceTest {
     public void updateDeliveryStatusShouldMakeDeliveryNoOverlapIfNoCapabilitiesMatch() {
         LocalDelivery localDelivery = new LocalDelivery(
                 1,
-                "/deliveries/1",
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );

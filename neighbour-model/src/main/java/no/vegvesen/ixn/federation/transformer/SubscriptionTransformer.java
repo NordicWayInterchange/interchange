@@ -7,10 +7,7 @@ import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class SubscriptionTransformer {
@@ -47,24 +44,15 @@ public class SubscriptionTransformer {
 		List<RequestedSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (NeighbourSubscription s : subscriptions) {
 			RequestedSubscriptionResponseApi responseApi = new RequestedSubscriptionResponseApi(
-					s.getId().toString(),
+					s.getUuid(),
 					s.getSelector(),
 					s.getPath(),
 					neighbourSubscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
-					s.getConsumerCommonName(),
-					s.getLastUpdatedTimestamp());
+					s.getConsumerCommonName());
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);
 
-	}
-
-	//TODO what about statuses that are not valid in the api?
-	public SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
-		if (subscriptionStatus.equals(SubscriptionStatus.ACCEPTED)) {
-			return SubscriptionStatusApi.REQUESTED;
-		}
-		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}
 
 	public SubscriptionStatusApi neighbourSubscriptionStatusToSubscriptionStatusApi(NeighbourSubscriptionStatus subscriptionStatus) {
@@ -84,14 +72,17 @@ public class SubscriptionTransformer {
 					s.getSelector(),
 					s.getPath(),
 					s.getConsumerCommonName());
-			subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
 	}
 
 	public SubscriptionStatus subscriptionStatusApiToSubscriptionStatus(SubscriptionStatusApi status) {
-	    return SubscriptionStatus.valueOf(status.name());
+		if (status.equals(SubscriptionStatusApi.NOT_VALID) || status.equals(SubscriptionStatusApi.ERROR)) {
+			return SubscriptionStatus.TEAR_DOWN;
+		} else {
+			return SubscriptionStatus.valueOf(status.name());
+		}
 	}
 
 

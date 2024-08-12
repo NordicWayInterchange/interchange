@@ -178,10 +178,6 @@ public class Subscription {
 				'}';
 	}
 
-	public String bindKey() {
-		return "" + selector.hashCode();
-	}
-
 	public void incrementNumberOfPolls() {
 		numberOfPolls++;
 	}

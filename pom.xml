@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.13-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -16,14 +14,31 @@
             <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
         </repository>
     </distributionManagement>
-
+    <scm>
+        <developerConnection>scm:git:https://github.com/NordicwayInterchange/interchange.git</developerConnection>
+        <tag>interchange-parent-..0</tag>
+    </scm>
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+                    </configuration>
+                    <version>3.0.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>2.0.0</version>
+                    <version>${license-maven-plugin.version}</version>
                     <configuration>
                         <inceptionYear>2019</inceptionYear>
                         <organizationName>Nordic Way 3</organizationName>
@@ -34,7 +49,7 @@
                     <!-- unit tests are named *Test.java, Run with 'mvn test' -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
                     </configuration>
@@ -48,13 +63,14 @@
 
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8</version>
+                    <version>${maven-deploy-plugin.version}</version>
                     <configuration>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <parameters>true</parameters>
                     </configuration>
@@ -69,12 +85,28 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
-        <spring-boot-dependencies.version>3.2.0</spring-boot-dependencies.version>
-        <picocli-version>4.7.5</picocli-version>
-        <testcontainers.version>1.19.3</testcontainers.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.release>17</maven.compiler.release>
+        <spring-boot-dependencies.version>3.3.1</spring-boot-dependencies.version>
+        <picocli-version>4.7.6</picocli-version>
+        <qpid-jms-client.version>2.5.0</qpid-jms-client.version>
+        <testcontainers.version>1.20.0</testcontainers.version>
+        <dnsjava.version>3.6.0</dnsjava.version>
+        <qpid-broker.version>9.2.0</qpid-broker.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <postgresql.version>42.7.3</postgresql.version>
+        <junit-jupiter.version>5.10.3</junit-jupiter.version>
+        <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
+        <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
+        <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
+        <javacc.version>7.0.10</javacc.version>
+        <springdoc-openapi-starter-webmvc-api.version>2.2.0</springdoc-openapi-starter-webmvc-api.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
     <dependencyManagement>
@@ -95,18 +127,17 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-jms-client</artifactId>
-                <!-- The 1.7.* version line uses javax.jms, and 2.1.* uses jakarta.jms-->
-                <version>2.5.0</version>
+                <version>${qpid-jms-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>dnsjava</groupId>
                 <artifactId>dnsjava</artifactId>
-                <version>3.5.3</version>
+                <version>${dnsjava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>9.0.0</version>
+                <version>${qpid-broker.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -132,29 +163,28 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.78</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
-                <version>1.78</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.2</version>
+                <version>${postgresql.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>5.7.1</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>pl.pragmatists</groupId>
-                <artifactId>JUnitParams</artifactId>
-                <version>1.1.1</version>
-                <scope>test</scope>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger-annotations-jakarta.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -171,7 +201,7 @@
                         <!-- Integration tests are named *IT.java, Run with 'mvn verify' -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*IT</include>
@@ -197,6 +227,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
@@ -204,6 +235,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <configuration>
                             <includes>
                                 <include>*ST</include>
@@ -255,11 +287,13 @@
         <module>jms-client-app</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>qpid-client</module>
         <module>napcore-rest-api</module>
         <module>napcore-server</module>
         <module>napcore-server-app</module>
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
+        <module>keys-generator</module>
         <module>import-export-service</module>
     </modules>
 </project>

@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 
 import java.util.Set;
 
@@ -12,7 +11,7 @@ public class FetchMatchingCapabilitiesResponse {
 
     private String selector = "";
 
-    private Set<CapabilitySplitApi> capabilities;
+    private Set<CapabilityApi> capabilities;
 
     private String version = "1.0";
 
@@ -20,12 +19,12 @@ public class FetchMatchingCapabilitiesResponse {
 
     }
 
-    public FetchMatchingCapabilitiesResponse(String name, Set<CapabilitySplitApi> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(String name, Set<CapabilityApi> fetchCapabilities){
         this.name = name;
         this.capabilities = fetchCapabilities;
     }
 
-    public FetchMatchingCapabilitiesResponse(String name, String selector, Set<CapabilitySplitApi> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(String name, String selector, Set<CapabilityApi> fetchCapabilities){
         this.name = name;
         this.selector = selector;
         this.capabilities = fetchCapabilities;
@@ -47,11 +46,11 @@ public class FetchMatchingCapabilitiesResponse {
         this.selector = selector;
     }
 
-    public Set<CapabilitySplitApi> getCapabilities() {
+    public Set<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilitySplitApi> capabilities) {
+    public void setCapabilities(Set<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 

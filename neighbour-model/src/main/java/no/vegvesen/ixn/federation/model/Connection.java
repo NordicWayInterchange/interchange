@@ -35,6 +35,9 @@ public class Connection {
         switch (connectionStatus){
             case UNREACHABLE:
                 //Calculate if allowed to connect to UNREACHABLE
+                if (lastFailedConnectionAttempt == null) {
+                    return true;
+                }
                 this.unreachableTime = LocalDateTime.now();
                 LocalDateTime interval = lastFailedConnectionAttempt.plus(backoffProperties.getBackoffInterval(), ChronoUnit.MILLIS);
                 return unreachableTime.isAfter(interval);

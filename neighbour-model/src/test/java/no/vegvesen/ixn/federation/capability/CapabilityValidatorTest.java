@@ -11,7 +11,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testDatexCapabilityWithMissingPublisherName(){
-        CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(
                         "N000000",
                         "N000000-pub-1",
@@ -23,11 +23,11 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityIsValid(capabilitySplitApi)).isNotEmpty();
+        assertThat(CapabilityValidator.capabilityIsValid(capabilityApi)).isNotEmpty();
     }
     @Test
     public void testDatexCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -45,7 +45,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testDatexCapabilityWithoutPublicationTypeIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -58,7 +58,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -77,7 +77,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testDenmCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -94,7 +94,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testDenmCapabilityWithoutCauseCodeIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -106,7 +106,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -124,7 +124,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testIvimCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -140,7 +140,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testSpatemCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new SpatemApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -156,7 +156,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testMapemCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new MapemApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -172,7 +172,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testSsemCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new SsemApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -188,7 +188,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testSremCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new SremApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -204,7 +204,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCamCapabilityIsValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new CamApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -220,7 +220,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCapabilityWithoutPublisherIdIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "",
                         "NO00000-pub-1",
@@ -231,7 +231,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         null,
                         "NO00000-pub-1",
@@ -248,7 +248,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCapabilityWithoutPublicationIdIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "",
@@ -259,7 +259,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         null,
@@ -276,7 +276,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCapabilityWithoutOriginatingCountryIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -287,7 +287,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -304,7 +304,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCapabilityWithoutProtocolVersionIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -315,7 +315,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -332,7 +332,7 @@ public class CapabilityValidatorTest {
 
     @Test
     public void testCapabilityWithoutQuadTreeTilesIsNotValid() {
-        CapabilitySplitApi capability = new CapabilitySplitApi(
+        CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",
@@ -343,7 +343,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilitySplitApi capabilityNull = new CapabilitySplitApi(
+        CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
                         "NO00000-pub-1",

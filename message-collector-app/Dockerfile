@@ -2,7 +2,8 @@ FROM eclipse-temurin:21-alpine
 RUN apk add --no-cache bash alpine-conf
 RUN setup-timezone -z Europe/Oslo
 
-COPY target/message-collector-app-1.0.3-SNAPSHOT.jar message-collector.jar
+ARG JAR_VERSION
+COPY target/message-collector-app-$JAR_VERSION.jar message-collector.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh

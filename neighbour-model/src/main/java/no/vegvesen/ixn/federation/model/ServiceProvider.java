@@ -7,10 +7,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -82,7 +79,6 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 	}
 
-
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
 						   Set<LocalSubscription> localSubscriptions,
@@ -153,6 +149,18 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void removeLocalSubscription(String uuid){
+		LocalSubscription subscriptionToDelete = subscriptions
+				.stream()
+				.filter(subscription -> subscription.getUuid().equals(uuid))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
+				);
+		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
 		this.setSubscriptions(newSubscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
@@ -211,10 +219,10 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-	public void removeLocalDelivery(Integer deliveryId) {
+	public void removeLocalDelivery(String deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
-				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))
+				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryId))
 				.findFirst()
 				.orElseThrow(
 						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
@@ -222,23 +230,25 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
-	public Capability getCapabilitySplit(Integer capabilityId){
+	public Capability getCapability(String capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
-				.filter(c-> c.getId().equals(capabilityId))
-				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
+						.filter(c-> c.getUuid().equals(capabilityId))
+						.findFirst()
+						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
+
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
 				.filter(subscription -> allSubscriptions.contains(subscription))
 				.collect(Collectors.toSet());
 	}
-	public LocalSubscription getSubscription(Integer subscriptionId){
+
+	public LocalSubscription getSubscription(String subscriptionId){
 		return getSubscriptions()
 				.stream()
-				.filter(s -> s.getId().equals(subscriptionId))
+				.filter(s -> s.getUuid().equals(subscriptionId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
 	}
@@ -249,10 +259,11 @@ public class ServiceProvider {
 				.filter(delivery -> allDeliveries.contains(delivery))
 				.collect(Collectors.toSet());
 	}
-	public LocalDelivery getDelivery(Integer deliveryId){
+
+	public LocalDelivery getDelivery(String deliveryId){
 		return getDeliveries()
 				.stream()
-				.filter(d -> d.getId().equals(deliveryId))
+				.filter(d -> d.getUuid().equals(deliveryId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
 	}
@@ -290,5 +301,4 @@ public class ServiceProvider {
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}
-
 }

@@ -6,10 +6,15 @@ import java.util.Objects;
 
 public class LocalActorSubscription {
     String id;
+
     String path;
+
     String selector;
+
     String consumerCommonName;
+
     long lastUpdatedTimeStamp;
+
     LocalActorSubscriptionStatusApi status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

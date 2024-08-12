@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "private_channels")
@@ -11,6 +12,9 @@ public class PrivateChannel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "privchannel_seq")
     @Column(name="id")
     private Integer id;
+
+    @Column
+    private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
@@ -33,13 +37,13 @@ public class PrivateChannel {
         this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
+
     public PrivateChannel(String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peerName = peerName;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
     }
-
 
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
@@ -57,6 +61,14 @@ public class PrivateChannel {
         this.id = id;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getPeerName() {
         return peerName;
     }
@@ -72,7 +84,6 @@ public class PrivateChannel {
     public void setStatus(PrivateChannelStatus status) {
         this.status = status;
     }
-
 
     public String getServiceProviderName() {
         return serviceProviderName;
@@ -100,6 +111,7 @@ public class PrivateChannel {
     public String toString() {
         return "PrivateChannel{" +
                 "id=" + id +
+                "uuid=" + uuid +
                 ", status=" + status +
                 ", peerName='" + peerName + '\'' +
                 ", serviceProviderName='"+serviceProviderName + '\'' +

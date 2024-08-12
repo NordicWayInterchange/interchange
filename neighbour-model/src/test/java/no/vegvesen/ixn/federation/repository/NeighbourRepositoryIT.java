@@ -1,16 +1,13 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
@@ -131,7 +128,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(NeighbourSubscriptionStatus.CREATED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.CREATED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -150,23 +147,6 @@ public class NeighbourRepositoryIT {
 		Neighbour foundNeighbour = repository.findByName("any");
 		assertThat(foundNeighbour.getName()).isEqualTo("any");
 		assertThat(foundNeighbour.getCapabilities().getCapabilities()).hasSize(2);
-	}
-
-	@NonNull
-	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType, String publisherName) {
-		HashMap<String, String> datexHeaders = new HashMap<>();
-		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
-		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		if (publicationType != null) {
-			datexHeaders.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
-		}
-		if (publicationSubType != null) {
-			datexHeaders.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
-		}
-		if(publisherName != null){
-			datexHeaders.put(MessageProperty.PUBLISHER_NAME.getName(), publisherName);
-		}
-		return datexHeaders;
 	}
 
 	@Test
@@ -197,8 +177,8 @@ public class NeighbourRepositoryIT {
 		neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
-		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(repository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.UNREACHABLE, false)).contains(neighbour);
+		assertThat(repository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.CONNECTED, false)).doesNotContain(neighbour);
 	}
 
 	@Test
@@ -267,9 +247,8 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void addSubscriptionWithEndpointsList() {
-		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-neighbour-1");
 		Endpoint endpoint = new Endpoint("my-queue","my-host", 5671);
-		sub.setEndpoints(Collections.singleton(endpoint));
+		Subscription sub = new Subscription(SubscriptionStatus.REQUESTED,"originatingCountry = 'NO'","", "my-neighbour-1",Set.of(endpoint));
 
 		Set<Subscription> subs = Collections.singleton(sub);
 		SubscriptionRequest subscriptions = new SubscriptionRequest(subs);
@@ -286,11 +265,11 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void getBySubscriptionStatusOnSubscriptionsReturnsOneNeighbour(){
-		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-multi-neighbour");
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "my-multi-neighbour");
 		Endpoint endpoint1 = new Endpoint("my-queue-1","my-host", 5671);
 		sub1.setEndpoints(Collections.singleton(endpoint1));
 
-		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "my-multi-neighbour");
+		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED, "my-multi-neighbour");
 		Endpoint endpoint2 = new Endpoint("my-queue-2","my-host", 5671);
 		sub2.setEndpoints(Collections.singleton(endpoint2));
 
@@ -300,15 +279,15 @@ public class NeighbourRepositoryIT {
 
 		repository.save(neighbour);
 
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(1);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED)).hasSize(1);
 		assertThat(repository.findByName("my-multi-neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
 	@Test
 	public void findDistinctNeighboursBySubscriptionStatus() {
-		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-node");
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "my-node");
 
-		Subscription sub2 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-node");
+		Subscription sub2 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "my-node");
 
 		SubscriptionRequest subscriptions1 = new SubscriptionRequest(Collections.singleton(sub1));
 		Neighbour neighbour1 = new Neighbour("my-multi-neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptions1);
@@ -319,7 +298,7 @@ public class NeighbourRepositoryIT {
 		repository.save(neighbour1);
 		repository.save(neighbour2);
 
-		assertThat(repository.findDistinctNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.ACCEPTED)).hasSize(2);
+		assertThat(repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.REQUESTED)).hasSize(2);
 		assertThat(repository.findByName("my-multi-neighbour1").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(repository.findByName("my-multi-neighbour2").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
