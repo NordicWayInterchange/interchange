@@ -382,15 +382,18 @@ public class NapRestControllerIT {
         sp = serviceProviderRepository.save(sp);
         sp.addDelivery(new LocalDelivery("originatingCountry='NO'"));
         sp = serviceProviderRepository.save(sp);
-        TimeUnit.SECONDS.sleep(1);
 
+        System.out.println("WAITING");
+        TimeUnit.SECONDS.sleep(3);
         sp.addDelivery(new LocalDelivery("originatingCountry='SE'"));
         sp = serviceProviderRepository.save(sp);
-        TimeUnit.SECONDS.sleep(1);
 
         sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
+
         sp = serviceProviderRepository.findByName(sp.getName());
         sp.getDeliveries().forEach(a-> System.out.println(a.getLastUpdatedTimestamp()));
+
+        sp.getDeliveries().forEach(a-> System.out.println(a));
     }
 
 }

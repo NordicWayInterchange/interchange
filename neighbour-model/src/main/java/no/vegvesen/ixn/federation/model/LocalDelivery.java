@@ -29,7 +29,7 @@ public class LocalDelivery {
 
     @Column
     @UpdateTimestamp
-    private LocalDateTime lastUpdatedTimestamp = LocalDateTime.now();
+    private LocalDateTime lastUpdatedTimestamp;
 
     private String exchangeName = "";
 
@@ -171,7 +171,7 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
-                "uuid=" + uuid +
+                ", uuid=" + uuid +
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
