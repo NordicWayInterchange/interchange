@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
-@JsonIgnoreProperties(value = "lastUpdatedTimestamp")
+@JsonIgnoreProperties(value = "createdTimestamp")
 public class Capability {
 
     @Id
