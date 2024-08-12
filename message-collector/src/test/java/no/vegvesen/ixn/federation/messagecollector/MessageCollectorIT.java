@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -79,7 +78,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(1)
+	//@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -134,7 +133,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(2)
+	//@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -194,7 +193,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(3)
+	//@Order(3)
 	public void testDatexMessagesWithMessageCollector() throws NamingException, JMSException {
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
@@ -247,8 +246,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(4)
-	@Disabled
+	//@Order(4)
 	public void testDenmMessagesWithMessageCollector() throws NamingException, JMSException {
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
