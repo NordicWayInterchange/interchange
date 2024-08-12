@@ -519,7 +519,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isTrue();
 	}
 
 	@Test
@@ -536,7 +536,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isTrue();
 	}
 
 	@Test
@@ -553,7 +553,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "quadTree like '%,123%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isTrue();
 	}
 
 	@Test
@@ -570,7 +570,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "quadTree not like '%,123%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isFalse();
 	}
 
 
@@ -588,7 +588,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isTrue();
 	}
 
 	@Test
@@ -605,7 +605,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isFalse();
 	}
 
 	@Test
@@ -622,7 +622,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isTrue();
 	}
 
 	@Test
@@ -639,7 +639,7 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
 		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability.getApplication(),selector)).isFalse();
 	}
 
 	@Test
@@ -657,8 +657,8 @@ class CapabilityMatcherTest {
 				new Metadata()
 		);
         assertThat(
-				CapabilityMatcher.matchCapabilityToSelector(
-						capability2,
+				CapabilityMatcher.matchCapabilityApplicationToSelector(
+						capability2.getApplication(),
 						"messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')"
 				)).isFalse();
 	}
@@ -678,7 +678,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,1233%')";
-		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector)).isTrue();
+		assertThat(CapabilityMatcher.matchCapabilityApplicationToSelector(capability1.getApplication(),selector)).isTrue();
 	}
 
 }

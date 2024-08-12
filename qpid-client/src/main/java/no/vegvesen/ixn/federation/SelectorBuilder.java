@@ -169,6 +169,11 @@ public class SelectorBuilder {
 		values.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
 		return this;
 	}
+
+	public SelectorBuilder shardId(String shardId) {
+		values.put(MessageProperty.SHARD_ID.getName(), shardId);
+		return this;
+	}
 }
 
 

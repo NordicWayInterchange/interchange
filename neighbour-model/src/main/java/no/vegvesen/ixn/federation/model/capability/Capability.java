@@ -111,7 +111,7 @@ public class Capability {
     }
 
     //TODO: Should be removed after fix in NapRestController
-    public static Set<Capability> transformNeighbourCapabilityToSplitCapability(Set<NeighbourCapability> neighbourCapabilities){
+    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
         Set<Capability> capabilities = new HashSet<>();
         for(NeighbourCapability i : neighbourCapabilities){
             capabilities.add(
