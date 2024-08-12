@@ -26,16 +26,11 @@ public class TypeTransformer {
 
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
-        LocalDateTime lastUpdated = capability.getLastUpdatedTimestamp();
-        Long epochSecond = null;
-        if (lastUpdated != null) {
-            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
-        }
         return new OnboardingCapability(
                 capability.getId().toString(),
                 transformer.applicationToApplicationApi(capability.getApplication()),
                 transformer.metadataToMetadataApi(capability.getMetadata()),
-                epochSecond);
+                transformLocalDateTimeToTimestamp(capability.getLastUpdatedTimestamp()));
     }
 
     public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
@@ -55,18 +50,12 @@ public class TypeTransformer {
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
-        LocalDateTime lastUpdated = localDelivery.getLastUpdatedTimestamp();
-        Long epochSecond = null;
-        if(lastUpdated != null){
-            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
-        }
-
         Delivery delivery = new Delivery(
                 localDelivery.getUuid(),
                 localDelivery.getSelector(),
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
-                epochSecond
+                transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp())
         );
 
         return delivery;
@@ -102,17 +91,12 @@ public class TypeTransformer {
     }
 
     public Subscription transformLocalSubscriptionToNapSubscription(LocalSubscription localSubscription) {
-        LocalDateTime lastUpdated = localSubscription.getLastUpdated();
-        Long epochSecond = null;
-        if (lastUpdated != null) {
-            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
-        }
         Subscription subscription = new Subscription(
                 localSubscription.getUuid(),
                 transformLocalSubscriptionStatusToNapSubscriptionStatus(localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()),
-                epochSecond
+                transformLocalDateTimeToTimestamp(localSubscription.getLastUpdated())
 
         );
         return subscription;
@@ -156,17 +140,20 @@ public class TypeTransformer {
     public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities) {
         List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
-            LocalDateTime lastUpdated = capability.getLastUpdatedTimestamp();
-            Long epochSecond = null;
-            if (lastUpdated != null) {
-                epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
-            }
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
-                    epochSecond
+                    transformLocalDateTimeToTimestamp(capability.getLastUpdatedTimestamp())
             ));
         }
         return matchingCapabilities;
+    }
+
+    public Long transformLocalDateTimeToTimestamp(LocalDateTime localDateTime) {
+        Long epochSecond = null;
+        if (localDateTime != null) {
+            epochSecond = localDateTime.atZone(ZoneId.systemDefault()).toEpochSecond();
+        }
+        return epochSecond;
     }
 }
