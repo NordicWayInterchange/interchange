@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 
-@JsonIgnoreProperties(value={"lastUpdatedTimestamp"})
+@JsonIgnoreProperties(value={"createdTimestamp"})
 public class Capability implements Comparable<Capability> {
 
     ApplicationApi application;
 
     MetadataApi metadata;
 
-    Long lastUpdatedTimestamp;
+    Long createdTimestamp;
 
     public Capability() {
 
@@ -21,10 +21,10 @@ public class Capability implements Comparable<Capability> {
         this.application = application;
         this.metadata = metadata;
     }
-    public Capability(ApplicationApi application, MetadataApi metadata, Long lastUpdatedTimestamp) {
+    public Capability(ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
         this.application = application;
         this.metadata = metadata;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.createdTimestamp = createdTimestamp;
     }
 
     public ApplicationApi getApplication() {
@@ -43,12 +43,12 @@ public class Capability implements Comparable<Capability> {
         this.metadata = metadata;
     }
 
-    public Long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
+    public Long getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
-    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    public void setCreatedTimestamp(Long createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 
     @Override
@@ -61,8 +61,8 @@ public class Capability implements Comparable<Capability> {
 
     @Override
     public int compareTo(Capability o) {
-        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null) return  0;
+        if(o.createdTimestamp == null || createdTimestamp == null) return  0;
 
-        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
+        return Long.compare(o.createdTimestamp, createdTimestamp);
     }
 }

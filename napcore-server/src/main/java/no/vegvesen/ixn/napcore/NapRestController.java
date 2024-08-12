@@ -102,7 +102,7 @@ public class NapRestController {
         serviceProvider.addLocalSubscription(localSubscription);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
-        logger.debug("Updated Service Provider: {}", savedServiceProvider.toString());
+        logger.debug("Updated Service Provider: {}", savedServiceProvider);
 
         LocalSubscription savedSubscription = savedServiceProvider
                 .getSubscriptions()
@@ -150,7 +150,7 @@ public class NapRestController {
         serviceProviderToUpdate.removeLocalSubscription(subscriptionId);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-        logger.debug("Updated Service Provider: {}", saved.toString());
+        logger.debug("Updated Service Provider: {}", saved);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" }, produces = MediaType.APPLICATION_JSON_VALUE)

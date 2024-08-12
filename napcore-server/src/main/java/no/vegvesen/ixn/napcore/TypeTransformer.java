@@ -30,7 +30,7 @@ public class TypeTransformer {
                 capability.getId().toString(),
                 transformer.applicationToApplicationApi(capability.getApplication()),
                 transformer.metadataToMetadataApi(capability.getMetadata()),
-                transformLocalDateTimeToTimestamp(capability.getLastUpdatedTimestamp()));
+                transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
     }
 
     public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
@@ -143,7 +143,7 @@ public class TypeTransformer {
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
-                    transformLocalDateTimeToTimestamp(capability.getLastUpdatedTimestamp())
+                    transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         return matchingCapabilities;
