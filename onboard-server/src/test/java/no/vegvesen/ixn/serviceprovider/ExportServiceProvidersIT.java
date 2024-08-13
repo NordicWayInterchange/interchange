@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ExportServiceProvidersIT extends ServiceProviderImport.LocalhostImportInitializer {
+public class ExportServiceProvidersIT extends PostgresContainerBase {
 
     @TempDir
     Path tempDir;
