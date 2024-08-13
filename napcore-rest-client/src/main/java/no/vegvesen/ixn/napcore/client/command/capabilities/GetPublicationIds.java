@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 

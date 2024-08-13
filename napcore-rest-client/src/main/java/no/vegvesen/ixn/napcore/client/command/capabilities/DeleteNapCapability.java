@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.napcore.client.command.capabilities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import static picocli.CommandLine.*;
 
