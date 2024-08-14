@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -137,20 +138,11 @@ public class NapRestControllerIT {
         SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
         SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
         SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
-
+        serviceProviderRepository.save(new ServiceProvider(actorCommonName));
         napRestController.addSubscription(actorCommonName, request1);
-
-        // This is weird. However, timeunit.sleep alone somehow messes up code execution order. Compiler issue?
-        while(!serviceProviderRepository.findByName(actorCommonName).getSubscriptions().isEmpty()){
-            TimeUnit.SECONDS.sleep(1);
-            break;
-        }
+        TimeUnit.SECONDS.sleep(1);
         napRestController.addSubscription(actorCommonName, request2);
-
-        while(!serviceProviderRepository.findByName(actorCommonName).getSubscriptions().isEmpty()){
-            TimeUnit.SECONDS.sleep(1);
-            break;
-        }
+        TimeUnit.SECONDS.sleep(1);
         napRestController.addSubscription(actorCommonName, request3);
 
         List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
@@ -215,20 +207,12 @@ public class NapRestControllerIT {
         String selector1 = "originatingCountry='NO'";
         String selector2 = "originatingCountry='SE'";
         String selector3 = "originatingCountry='FI'";
-
+        ServiceProvider sp = new ServiceProvider(actorCommonName);
+        serviceProviderRepository.save(sp);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
-
-        // This is weird. However, timeunit.sleep alone somehow messes up code execution order. Compiler issue?
-        while(!serviceProviderRepository.findByName(actorCommonName).getDeliveries().isEmpty()){
-            TimeUnit.SECONDS.sleep(1);
-            break;
-        }
+        TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
-
-        while(!serviceProviderRepository.findByName(actorCommonName).getDeliveries().isEmpty()){
-            TimeUnit.SECONDS.sleep(1);
-            break;
-        }
+        TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
