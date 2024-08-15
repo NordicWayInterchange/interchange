@@ -125,8 +125,7 @@ public class Sink implements AutoCloseable {
 				System.out.println("** Message received **");
 				Enumeration<String> propertyNames =  message.getPropertyNames();
 
-				String filename = "file-"+messages;
-				String metadataFile = filename+"-metadata";
+
 				Map<String, Object> metadataContent = new HashMap<>();
 
 				while (propertyNames.hasMoreElements()) {
@@ -149,31 +148,40 @@ public class Sink implements AutoCloseable {
 					System.out.println(" BYTES message");
                     byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 					bytesMessage.readBytes(messageBytes);
-					messages += 1;
-					try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())){
-						fos.write(messageBytes);
+					if(directory != null) {
+						messages += 1;
+						String filename = "file-"+messages;
+						String metadataFile = filename+"-metadata";
+						messageBody = null;
+						try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())) {
+							fos.write(messageBytes);
+						}
+						try (PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())) {
+							printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
+						}
+						System.out.println(String.format("Message written to file %s, metadata written to file %s", filename, metadataFile));
+
 					}
-					try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())){
-						printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
+					else{
+						messageBody = Base64.getEncoder().encodeToString(messageBytes);
 					}
-					System.out.println(String.format("Message written to file {}, metadata written to file {}", filename, metadataFile));
 				}
 				else if (message instanceof JmsTextMessage) {
 					System.out.println(" TEXT message");
 					messageBody = message.getBody(String.class);
-					System.out.println("Body ------------");
-					System.out.println(messageBody);
-					System.out.println("/Body -----------");
+
 				}
 				else {
 					System.err.println("Message type unknown: " + message.getClass().getName());
 					messageBody = null;
+				}
+				if(directory == null) {
 					System.out.println("Body ------------");
 					System.out.println(messageBody);
 					System.out.println("/Body -----------");
 				}
-
 				System.out.println("Delay " + delay + " ms \n");
+
 			} catch (Exception e) {
 				//e.printStackTrace();
 				throw new RuntimeException(e);
