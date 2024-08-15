@@ -125,7 +125,6 @@ public class Sink implements AutoCloseable {
 				System.out.println("** Message received **");
 				Enumeration<String> propertyNames =  message.getPropertyNames();
 
-
 				Map<String, Object> metadataContent = new HashMap<>();
 
 				while (propertyNames.hasMoreElements()) {
@@ -143,43 +142,52 @@ public class Sink implements AutoCloseable {
 					}
 				}
 
-				String messageBody;
-				if (message instanceof JmsBytesMessage bytesMessage){
-					System.out.println(" BYTES message");
-                    byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
-					bytesMessage.readBytes(messageBytes);
-					if(directory != null) {
-						messages += 1;
-						String filename = "file-"+messages;
-						String metadataFile = filename+"-metadata";
-						messageBody = null;
-						try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())) {
-							fos.write(messageBytes);
-						}
-						try (PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())) {
-							printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
-						}
-						System.out.println(String.format("Message written to file %s, metadata written to file %s", filename, metadataFile));
+				String messageBody = null;
+				messages += 1;
+				String filename = "file-"+messages;
+				String metadataFile = filename+"-metadata";
 
+				switch (message){
+					case JmsBytesMessage bytesMessage -> {
+						System.out.println(" BYTES message");
+						byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+						bytesMessage.readBytes(messageBytes);
+						if(directory != null) {
+							try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())) {
+								fos.write(messageBytes);
+							}
+							try (PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())) {
+								printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
+							}
+						}
+						else{
+							messageBody = Base64.getEncoder().encodeToString(messageBytes);
+						}
 					}
-					else{
-						messageBody = Base64.getEncoder().encodeToString(messageBytes);
+					case JmsTextMessage jmsTextMessage -> {
+						System.out.println(" TEXT message");
+						messageBody = jmsTextMessage.getBody(String.class);
+						if(directory != null){
+							try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), filename).toFile())){
+								printWriter.write(messageBody);
+							}
+							try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())){
+								printWriter.write(new ObjectMapper().writeValueAsString(messageBody));
+							}
+						}
 					}
+					default -> System.err.println("Message type unknown: " + message.getClass().getName());
 				}
-				else if (message instanceof JmsTextMessage) {
-					System.out.println(" TEXT message");
-					messageBody = message.getBody(String.class);
 
-				}
-				else {
-					System.err.println("Message type unknown: " + message.getClass().getName());
-					messageBody = null;
-				}
 				if(directory == null) {
 					System.out.println("Body ------------");
 					System.out.println(messageBody);
 					System.out.println("/Body -----------");
 				}
+				else {
+					System.out.println(String.format("Message written to file %s, metadata written to file %s", filename, metadataFile));
+				}
+
 				System.out.println("Delay " + delay + " ms \n");
 
 			} catch (Exception e) {
