@@ -16,6 +16,9 @@ import jakarta.jms.MessageListener;
 import jakarta.jms.Session;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Enumeration;
 
@@ -142,7 +145,65 @@ public class Sink implements AutoCloseable {
 			}
 		}
 	}
+	public static class BinaryMessageListener implements MessageListener {
 
+		Long messages = 0L;
+
+		File directory;
+
+		public BinaryMessageListener(String directoryName){
+			this.directory = new File(directoryName);
+			if(!directory.exists()){
+				directory.mkdir();
+			}
+		}
+		@Override
+		public void onMessage(Message message) {
+			try {
+				message.acknowledge();
+				long delay = -1;
+				try {
+					long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
+					delay = System.currentTimeMillis() - timestamp;
+				} catch (Exception e) {
+					System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
+				}
+				messages += 1;
+				System.out.println("** Message received **");
+				Enumeration<String> propertyNames =  message.getPropertyNames();
+
+				while (propertyNames.hasMoreElements()) {
+					String propertyName = propertyNames.nextElement();
+					Object value = message.getObjectProperty(propertyName);
+					if (value instanceof String) {
+						System.out.printf("%s:'%s'%n",propertyName,value);
+					} else {
+						System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
+					}
+				}
+				String filename = "file-"+messages;
+				if (message instanceof JmsBytesMessage bytesMessage){
+					System.out.println("BYTES message");
+					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+					bytesMessage.readBytes(messageBytes);
+					try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())){
+						fos.write(messageBytes);
+					}
+				}
+				else if (message instanceof JmsTextMessage) {
+					throw new Exception("Can not receive text message in binary mode");
+				}
+				else {
+					System.err.println("Message type unknown: " + message.getClass().getName());
+				}
+				System.out.println(String.format("Message received. Saved to file %s", filename));
+				System.out.println("Delay " + delay + " ms \n");
+			} catch (Exception e) {
+				//e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+		}
+	}
 	@Override
 	public void close() throws Exception {
 		if (connection != null)  {
