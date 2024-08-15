@@ -123,12 +123,17 @@ public class SendMessage implements Callable<Integer> {
         return 0;
     }
     private void validateInput() throws Exception {
-        if(binary){
-            ObjectMapper mapper = new ObjectMapper();
-            Messages messages = mapper.readValue(messageFile, Messages.class);
-            for(Message message : messages.getMessages()){
-                if(message.getFile() == null){
+        ObjectMapper mapper = new ObjectMapper();
+        Messages messages = mapper.readValue(messageFile, Messages.class);
+        for(Message message : messages.getMessages()){
+            if(binary) {
+                if (message.getFile() == null) {
                     throw new Exception("Message does not contain file");
+                }
+            }
+            else{
+                if(message.getMessageText() == null){
+                    throw new Exception("Message does not contain messageText");
                 }
             }
         }
