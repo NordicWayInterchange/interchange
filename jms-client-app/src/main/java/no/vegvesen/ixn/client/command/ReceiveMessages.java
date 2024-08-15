@@ -21,9 +21,6 @@ public class ReceiveMessages implements Callable<Integer> {
     @ParentCommand
     JmsTopCommand parentCommand;
 
-    @CommandLine.Option(names = {"-b", "--binary"}, description = "", required = false)
-    boolean binary;
-
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
     String directory;
 
@@ -31,7 +28,6 @@ public class ReceiveMessages implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        validateInput();
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", queueName, parentCommand.getUrl());
         AtomicInteger returnCode = new AtomicInteger(0);
         ExceptionListener exceptionListener = e -> {
@@ -43,18 +39,12 @@ public class ReceiveMessages implements Callable<Integer> {
                 parentCommand.getUrl(),
                 queueName,
                 parentCommand.createContext(),
-                binary ? new Sink.BinaryMessageListener(directory) : new Sink.DefaultMessageListener(),
+                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
             counter.await();
         }
         return 0;
-    }
-
-    public void validateInput() throws Exception {
-        if(binary && directory == null){
-            throw new Exception("No directory specified");
-        }
     }
 }

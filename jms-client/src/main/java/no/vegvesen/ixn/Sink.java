@@ -18,9 +18,11 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.Enumeration;
+import java.util.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Sink implements AutoCloseable {
 
@@ -96,62 +98,14 @@ public class Sink implements AutoCloseable {
 
 	public static class DefaultMessageListener implements MessageListener {
 
-		@Override
-		public void onMessage(Message message) {
-			try {
-				message.acknowledge();
-				long delay = -1;
-				try {
-					long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
-					delay = System.currentTimeMillis() - timestamp;
-				} catch (Exception e) {
-					System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
-				}
-				System.out.println("** Message received **");
-				Enumeration<String> propertyNames =  message.getPropertyNames();
-
-				while (propertyNames.hasMoreElements()) {
-					String propertyName = propertyNames.nextElement();
-					Object value = message.getObjectProperty(propertyName);
-					if (value instanceof String) {
-						System.out.printf("%s:'%s'%n",propertyName,value);
-					} else {
-						System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
-					}
-				}
-
-				String messageBody;
-				if (message instanceof JmsBytesMessage bytesMessage){
-					System.out.println(" BYTES message");
-                    byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
-					bytesMessage.readBytes(messageBytes);
-					messageBody = Base64.getEncoder().encodeToString(messageBytes);
-				}
-				else if (message instanceof JmsTextMessage) {
-					System.out.println(" TEXT message");
-					messageBody = message.getBody(String.class);
-				}
-				else {
-					System.err.println("Message type unknown: " + message.getClass().getName());
-					messageBody = null;
-				}
-				System.out.println("Body ------------");
-				System.out.println(messageBody);
-				System.out.println("/Body -----------");
-				System.out.println("Delay " + delay + " ms \n");
-			} catch (Exception e) {
-				//e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
-	}
-	public static class BinaryMessageListener implements MessageListener {
-
 		Long messages = 0L;
-
 		File directory;
 
-		public BinaryMessageListener(String directoryName){
+		public DefaultMessageListener(){
+
+		}
+
+		public DefaultMessageListener(String directoryName){
 			this.directory = new File(directoryName);
 			if(!directory.exists()){
 				directory.mkdir();
@@ -168,35 +122,57 @@ public class Sink implements AutoCloseable {
 				} catch (Exception e) {
 					System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 				}
-				messages += 1;
 				System.out.println("** Message received **");
 				Enumeration<String> propertyNames =  message.getPropertyNames();
+
+				String filename = "file-"+messages;
+				String metadataFile = filename+"-metadata";
+				Map<String, Object> metadataContent = new HashMap<>();
 
 				while (propertyNames.hasMoreElements()) {
 					String propertyName = propertyNames.nextElement();
 					Object value = message.getObjectProperty(propertyName);
-					if (value instanceof String) {
-						System.out.printf("%s:'%s'%n",propertyName,value);
-					} else {
-						System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
+					if(directory != null){
+						metadataContent.put(propertyName, value);
+					}
+					else {
+						if (value instanceof String) {
+							System.out.printf("%s:'%s'%n", propertyName, value);
+						} else {
+							System.out.printf("%s:%s:%s%n", propertyName, value.getClass().getSimpleName(), value);
+						}
 					}
 				}
-				String filename = "file-"+messages;
+
+				String messageBody;
 				if (message instanceof JmsBytesMessage bytesMessage){
-					System.out.println("BYTES message");
-					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+					System.out.println(" BYTES message");
+                    byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 					bytesMessage.readBytes(messageBytes);
+					messages += 1;
 					try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())){
 						fos.write(messageBytes);
 					}
+					try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())){
+						printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
+					}
+					System.out.println(String.format("Message written to file {}, metadata written to file {}", filename, metadataFile));
 				}
 				else if (message instanceof JmsTextMessage) {
-					throw new Exception("Can not receive text message in binary mode");
+					System.out.println(" TEXT message");
+					messageBody = message.getBody(String.class);
+					System.out.println("Body ------------");
+					System.out.println(messageBody);
+					System.out.println("/Body -----------");
 				}
 				else {
 					System.err.println("Message type unknown: " + message.getClass().getName());
+					messageBody = null;
+					System.out.println("Body ------------");
+					System.out.println(messageBody);
+					System.out.println("/Body -----------");
 				}
-				System.out.println(String.format("Message received. Saved to file %s", filename));
+
 				System.out.println("Delay " + delay + " ms \n");
 			} catch (Exception e) {
 				//e.printStackTrace();
@@ -204,6 +180,7 @@ public class Sink implements AutoCloseable {
 			}
 		}
 	}
+
 	@Override
 	public void close() throws Exception {
 		if (connection != null)  {
