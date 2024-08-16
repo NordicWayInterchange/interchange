@@ -28,7 +28,7 @@ public class LocalSubscription {
 
     @Column
     @UpdateTimestamp
-    private LocalDateTime lastUpdated = LocalDateTime.now();
+    private LocalDateTime lastUpdated;
 
     @Column(columnDefinition="TEXT", nullable = false)
     private String consumerCommonName;

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore.model;
 
 public enum DeliveryStatus {
+
     REQUESTED,
 
     CREATED,

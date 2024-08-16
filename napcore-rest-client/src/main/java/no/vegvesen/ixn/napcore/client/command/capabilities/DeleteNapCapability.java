@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 )
 public class DeleteNapCapability implements Callable<Integer> {
 
-
     @ParentCommand
     CapabilitiesCommand parentCommand;
 

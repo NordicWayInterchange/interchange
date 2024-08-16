@@ -17,7 +17,6 @@ import java.util.concurrent.Callable;
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
-
 public class AddNapDelivery implements Callable<Integer> {
 
     @ParentCommand
@@ -42,6 +41,7 @@ public class AddNapDelivery implements Callable<Integer> {
         }
         return 0;
     }
+
     static class AddNapDeliveryOption{
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;

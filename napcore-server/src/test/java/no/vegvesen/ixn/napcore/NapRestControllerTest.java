@@ -67,6 +67,7 @@ public class NapRestControllerTest {
 
     @MockBean
     private CapabilityToCapabilityApiTransformer transformer;
+
     @Autowired
     private CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
 

@@ -21,6 +21,7 @@ public class Capability implements Comparable<Capability> {
         this.application = application;
         this.metadata = metadata;
     }
+
     public Capability(ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
         this.application = application;
         this.metadata = metadata;

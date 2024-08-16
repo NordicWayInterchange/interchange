@@ -78,6 +78,7 @@ public class Subscription implements Comparable<Subscription> {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
+
     @Override
     public int compareTo(Subscription o) {
         if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null) return 0;

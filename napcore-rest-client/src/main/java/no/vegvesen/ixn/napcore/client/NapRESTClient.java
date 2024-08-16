@@ -194,7 +194,6 @@ public class NapRESTClient {
         }
     }
 
-
     public static class KeyAndCSR {
         private String key;
 
@@ -204,7 +203,6 @@ public class NapRESTClient {
             this.key = key;
             this.csr = csr;
         }
-
 
         public String getKey() {
             return key;

@@ -28,7 +28,7 @@ public class LocalDelivery {
 
     @Column
     @UpdateTimestamp
-    private LocalDateTime lastUpdatedTimestamp = LocalDateTime.now();
+    private LocalDateTime lastUpdatedTimestamp;
 
     private String exchangeName = "";
 

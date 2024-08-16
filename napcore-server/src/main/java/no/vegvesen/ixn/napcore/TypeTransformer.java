@@ -50,15 +50,13 @@ public class TypeTransformer {
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
-        Delivery delivery = new Delivery(
+        return new Delivery(
                 localDelivery.getUuid(),
                 localDelivery.getSelector(),
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
                 transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp())
         );
-
-        return delivery;
     }
 
     public List<Delivery> transformLocalDeliveriesToNapDeliveries(Set<LocalDelivery> localDeliveries){
@@ -125,16 +123,12 @@ public class TypeTransformer {
     }
 
     public SubscriptionStatus transformLocalSubscriptionStatusToNapSubscriptionStatus(LocalSubscriptionStatus status) {
-        switch(status) {
-            case REQUESTED:
-                return SubscriptionStatus.REQUESTED;
-            case CREATED:
-                return SubscriptionStatus.CREATED;
-            case TEAR_DOWN:
-                return SubscriptionStatus.NOT_VALID;
-            default:
-                return SubscriptionStatus.ILLEGAL;
-        }
+        return switch (status) {
+            case REQUESTED -> SubscriptionStatus.REQUESTED;
+            case CREATED -> SubscriptionStatus.CREATED;
+            case TEAR_DOWN -> SubscriptionStatus.NOT_VALID;
+            default -> SubscriptionStatus.ILLEGAL;
+        };
     }
 
     public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities) {

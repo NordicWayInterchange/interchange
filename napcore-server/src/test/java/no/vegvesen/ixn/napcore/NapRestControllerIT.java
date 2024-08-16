@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -208,12 +209,15 @@ public class NapRestControllerIT {
         String selector2 = "originatingCountry='SE'";
         String selector3 = "originatingCountry='FI'";
         ServiceProvider sp = new ServiceProvider(actorCommonName);
-        serviceProviderRepository.save(sp);
+        sp = serviceProviderRepository.save(sp);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
+        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector1)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector2)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
+        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector3)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
         assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
