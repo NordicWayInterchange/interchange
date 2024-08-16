@@ -490,6 +490,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 System.out.println();
             }
             System.out.println();
+
             sink.close();
             sink.start();
             Thread.sleep(200);
