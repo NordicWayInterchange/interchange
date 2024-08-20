@@ -245,8 +245,8 @@ public class NeighbourService {
 		}
 	}
 
-	public String getNodeName() {
-		return interchangeNodeProperties.getName();
+	public String getBrokerExternalName() {
+		return interchangeNodeProperties.getBrokerExternalName();
 	}
 
 	public String getMessagePort() {

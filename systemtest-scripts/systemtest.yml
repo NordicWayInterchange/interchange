@@ -158,6 +158,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.bouvetinterchange.eu
     networks:
     - testing_net
 
@@ -354,6 +355,8 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.bouvetinterchange.eu
+
     networks:
     - testing_net
 

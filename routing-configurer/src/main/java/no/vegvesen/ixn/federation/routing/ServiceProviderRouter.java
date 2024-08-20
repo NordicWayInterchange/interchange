@@ -84,7 +84,7 @@ public class ServiceProviderRouter {
         if (!serviceProvider.getSubscriptions().isEmpty()) {
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    processSubscription(serviceProvider, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort(), delta);
+                    processSubscription(serviceProvider, subscription, nodeProperties.getBrokerExternalName(), nodeProperties.getMessageChannelPort(), delta);
                 } else {
                     processRedirectSubscription(subscription);
                 }
