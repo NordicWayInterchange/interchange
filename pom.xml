@@ -294,5 +294,6 @@
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
         <module>keys-generator</module>
+        <module>service-provider-client</module>
     </modules>
 </project>
