@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.FetchMatchingCapabilities;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.JmsTopCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
@@ -28,7 +29,7 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                ServiceProviderClientApplication.FetchMatchingCapabilities.class,
+                FetchMatchingCapabilities.class,
                 MessagesCommand.class
         },
         mixinStandardHelpOptions = true)
@@ -52,30 +53,11 @@ public class ServiceProviderClientApplication{
     @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
-
-    @Command(name = "fetchmatchingcapabilities", description = "Fetch all capabilities in the network matching a selector")
-    static class FetchMatchingCapabilities implements Callable<Integer> {
-
-        @ParentCommand
-        ServiceProviderClientApplication parentCommand;
-
-        @Parameters(index = "0", description = "The selector to match with the capabilities")
-        String selector;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            System.out.println(String.format("using selector: %s", selector));
-            ObjectMapper mapper = new ObjectMapper();
-            FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
-            return 0;
-        }
-    }
     public static void main(String[] args) {
         int exitCode = new CommandLine(new ServiceProviderClientApplication()).execute(args);
         System.exit(exitCode);
     }
+
     public String getUrl() {
         return server;
     }

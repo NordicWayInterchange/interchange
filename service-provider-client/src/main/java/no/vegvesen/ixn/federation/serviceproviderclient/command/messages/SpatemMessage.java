@@ -1,17 +1,18 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.message;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.messages;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 
-public class SsemMessage extends Message {
+public class SpatemMessage extends Message {
 
     private String id;
 
+    private String name;
 
-    public SsemMessage() {
+    public SpatemMessage() {
 
     }
 
-    public SsemMessage(String messageText,
+    public SpatemMessage(String messageText,
                          String userId,
                          String publisherId,
                          String publicationId,
@@ -24,7 +25,8 @@ public class SsemMessage extends Message {
                          String quadTree,
                          Integer shardId,
                          Integer shardCount,
-                         String id) {
+                         String id,
+                         String name) {
         super(messageText,
                 userId,
                 publisherId,
@@ -33,13 +35,14 @@ public class SsemMessage extends Message {
                 protocolVersion,
                 serviceType,
                 baselineVersion,
-                Constants.SSEM,
+                Constants.SPATEM,
                 longitude,
                 latitude,
                 quadTree,
                 shardId,
                 shardCount);
         this.id = id;
+        this.name = name;
     }
 
     public String getId() {
@@ -48,5 +51,13 @@ public class SsemMessage extends Message {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

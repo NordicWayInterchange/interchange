@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.message;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

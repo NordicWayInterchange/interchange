@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.message;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.messages;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 

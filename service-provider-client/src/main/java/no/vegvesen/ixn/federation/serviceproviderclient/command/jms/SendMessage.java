@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.message.*;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.messages.*;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
