@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 
+
 import no.vegvesen.ixn.client.command.JmsTopCommand;
 import no.vegvesen.ixn.client.command.SendMessage;
 import no.vegvesen.ixn.client.command.SendPredefinedMessage;

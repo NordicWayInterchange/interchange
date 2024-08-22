@@ -279,7 +279,6 @@
         <module>onboard-rest-api</module>
         <module>onboard-server</module>
         <module>onboard-server-app</module>
-        <module>onboard-rest-client</module>
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
