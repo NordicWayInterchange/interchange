@@ -9,6 +9,5 @@ export JAR_VERSION=$(mvn -f .. org.apache.maven.plugins:maven-help-plugin:evalua
 
 docker build ../service-provider-client -t service_provider_client --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../napcore-rest-client -t napcore_rest_client --build-arg JAR_VERSION=$JAR_VERSION
-docker build ../jms-client-app -t jms_client --build-arg JAR_VERSION=$JAR_VERSION
 [ -f ../tmp/keys/a.bouvetinterchange.eu.p12 ] || ./systemtest-keys.sh
 docker-compose -f systemtest.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker-compose -f systemtest.yml up
