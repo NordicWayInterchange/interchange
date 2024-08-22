@@ -1,10 +1,8 @@
 package no.vegvesen.ixn;
 
-
-
-import no.vegvesen.ixn.client.command.JmsTopCommand;
-import no.vegvesen.ixn.client.command.SendMessage;
-import no.vegvesen.ixn.client.command.SendPredefinedMessage;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.JmsTopCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.SendMessage;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.SendPredefinedMessage;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;

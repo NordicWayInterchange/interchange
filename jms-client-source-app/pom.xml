@@ -10,9 +10,14 @@
     <artifactId>jms-client-source-app</artifactId>
     <dependencies>
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>jms-client-app</artifactId>
-            <version>${project.version}</version>
+            <artifactId>service-provider-client</artifactId>
+            <version>1.0.13-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

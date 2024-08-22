@@ -3,10 +3,10 @@ package no.vegvesen.ixn;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import no.vegvesen.ixn.client.command.CountMessages;
-import no.vegvesen.ixn.client.command.DrainMessages;
-import no.vegvesen.ixn.client.command.JmsTopCommand;
-import no.vegvesen.ixn.client.command.ReceiveMessages;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.CountMessages;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.DrainMessages;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.JmsTopCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.ReceiveMessages;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
