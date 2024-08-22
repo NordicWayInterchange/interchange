@@ -20,4 +20,4 @@ docker run \
   -e ONBOARD_SERVER=https://c.bouvetinterchange.eu:8595/ \
   -e USER=${SERVICE_PROVIDER} \
   --link c_onboard_server:c.bouvetinterchange.eu \
-  --entrypoint bash onboard_rest_client
+  --entrypoint bash service_provider_client
