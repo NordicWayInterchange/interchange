@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>jms-client-app</artifactId>
+            <artifactId>service-provider-client</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
