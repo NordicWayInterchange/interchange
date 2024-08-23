@@ -225,20 +225,8 @@ public class ExportTransformer {
             case NO_OVERLAP -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.NO_OVERLAP;
             }
-            case GIVE_UP -> {
-                return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.GIVE_UP;
-            }
-            case FAILED -> {
-                return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.FAILED;
-            }
-            case UNREACHABLE -> {
-                return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.UNREACHABLE;
-            }
             case TEAR_DOWN -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.TEAR_DOWN;
-            }
-            case RESUBSCRIBE -> {
-                return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.RESUBSCRIBE;
             }
             default -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.REQUESTED;
@@ -265,9 +253,6 @@ public class ExportTransformer {
 
     public SubscriptionExportApi.SubscriptionStatusExportApi transformSubscriptionStatusToSubscriptionStatusExportApi(SubscriptionStatus status) {
         switch (status) {
-            case ACCEPTED -> {
-                return SubscriptionExportApi.SubscriptionStatusExportApi.ACCEPTED;
-            }
             case CREATED -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.CREATED;
             }
@@ -282,9 +267,6 @@ public class ExportTransformer {
             }
             case FAILED -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.FAILED;
-            }
-            case REJECTED -> {
-                return SubscriptionExportApi.SubscriptionStatusExportApi.REJECTED;
             }
             case TEAR_DOWN -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.TEAR_DOWN;

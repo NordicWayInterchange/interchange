@@ -51,6 +51,14 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
+    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+        this.subscriptionStatus = subscriptionStatus;
+        this.selector = selector;
+        this.path = path;
+        this.consumerCommonName = consumerCommonName;
+        this.endpoints = endpoints;
+    }
+
     public Integer getId() {
         return id;
     }

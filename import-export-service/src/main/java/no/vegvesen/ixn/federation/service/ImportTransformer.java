@@ -234,20 +234,8 @@ public class ImportTransformer {
             case NO_OVERLAP -> {
                 return NeighbourSubscriptionStatus.NO_OVERLAP;
             }
-            case GIVE_UP -> {
-                return NeighbourSubscriptionStatus.GIVE_UP;
-            }
-            case FAILED -> {
-                return NeighbourSubscriptionStatus.FAILED;
-            }
-            case UNREACHABLE -> {
-                return NeighbourSubscriptionStatus.UNREACHABLE;
-            }
             case TEAR_DOWN -> {
                 return NeighbourSubscriptionStatus.TEAR_DOWN;
-            }
-            case RESUBSCRIBE -> {
-                return NeighbourSubscriptionStatus.RESUBSCRIBE;
             }
             default -> {
                 return NeighbourSubscriptionStatus.REQUESTED;
@@ -275,9 +263,6 @@ public class ImportTransformer {
 
     public SubscriptionStatus transformSubscriptionStatusImportApiToSubscriptionStatus(SubscriptionImportApi.SubscriptionStatusImportApi status) {
         switch (status) {
-            case ACCEPTED -> {
-                return SubscriptionStatus.ACCEPTED;
-            }
             case CREATED -> {
                 return SubscriptionStatus.CREATED;
             }
@@ -292,9 +277,6 @@ public class ImportTransformer {
             }
             case FAILED -> {
                 return SubscriptionStatus.FAILED;
-            }
-            case REJECTED -> {
-                return SubscriptionStatus.REJECTED;
             }
             case TEAR_DOWN -> {
                 return SubscriptionStatus.TEAR_DOWN;
