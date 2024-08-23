@@ -76,10 +76,6 @@ public class LocalEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        return source.equals(listenerEndpoint.getSource()) && host.equals(listenerEndpoint.getHost()) && port.equals(listenerEndpoint.getPort());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

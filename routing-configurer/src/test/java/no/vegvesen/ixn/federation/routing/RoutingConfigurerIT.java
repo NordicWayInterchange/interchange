@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
@@ -232,7 +231,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void addingOneSubscriptionAndTwoCapabilitiesResultsInTwoEndpoints() {
+	public void addingOneSubscriptionAndTwoCapabilitiesResultsInOneEndpointAndTwoBindings() {
 		Capability cap1 = getDatexCapability("pub-1", RedirectStatus.NOT_AVAILABLE, "cap-ex6");
 		cap1.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange("cap-ex6");
@@ -554,28 +553,33 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void listenerEndpointsAreSavedFromEndpointsList() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("my-neighbour");
+	public void twoCapabilitiesOneShardedAndOneNotAndOneShardedSubscription() {
+		Capability cap1 = getDatexCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex49");
+		cap1.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex49");
 
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671, new SubscriptionShard("target"));
+		Capability cap2 = getShardedCapability("pub-2", RedirectStatus.OPTIONAL, "cap-ex50", "cap-ex51", "cap-ex52");
+		cap2.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange("cap-ex50");
+		client.createHeadersExchange("cap-ex51");
+		client.createHeadersExchange("cap-ex52");
 
-		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(cap1, cap2))));
 
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(null);
+		NeighbourSubscription sub = new NeighbourSubscription("(publicationId = 'pub-1' OR publicationId = 'pub-2') AND shardId >= 2", NeighbourSubscriptionStatus.ACCEPTED, "neighbour");
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection(), "target");
+		Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(Collections.singleton(sub)), new SubscriptionRequest());
 
-		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
+		when(neighbourService.getNodeName()).thenReturn("my-name");
+		when(neighbourService.getMessagePort()).thenReturn(qpidContainer.getAmqpsPort().toString());
+		routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
-		routingConfigurer.createListenerEndpoint("host-1", 5671, "my-source-1", "target", "my-neighbour");
-		routingConfigurer.createListenerEndpoint("host-2", 5671, "my-source-2", "target", "my-neighbour");
-
-		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
+		assertThat(sub.getEndpoints()).hasSize(1);
+		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
+		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 	}
 
 	@Test
@@ -765,7 +769,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		NeighbourSubscription neighbourSubscription = new NeighbourSubscription(
 				"publisherId = 'NO0000'",
-				NeighbourSubscriptionStatus.ACCEPTED
+				NeighbourSubscriptionStatus.ACCEPTED,
+				"my_Neighbour"
 		);
 
 		when(neighbourService.getNodeName()).thenReturn(qpidContainer.getHost());

@@ -37,23 +37,10 @@ public class NeighbourSubscription {
 
     }
 
-    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus) {
-        this.selector = selector;
-        this.subscriptionStatus = subscriptionStatus;
-    }
-
     public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus, String consumerCommonName) {
         this.selector = selector;
         this.subscriptionStatus = subscriptionStatus;
         this.consumerCommonName = consumerCommonName;
-    }
-
-    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-        this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
     }
 
     public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -62,24 +49,6 @@ public class NeighbourSubscription {
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
-    }
-
-    public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-        this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
-        this.uuid = uuid;
-    }
-
-    public NeighbourSubscription(Integer id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-        this.id = id;
-        this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
     }
 
     public Integer getId() {

@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -266,14 +265,6 @@ public class ServiceProvider {
 				.filter(d -> d.getUuid().equals(deliveryId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
-	}
-
-	public boolean hasImportedCapabilities() {
-		return !capabilities.getCapabilitiesByStatus(CapabilityStatus.IMPORTED_CREATED).isEmpty();
-	}
-
-	public boolean hasImportedLocalSubscriptions() {
-		return !subscriptions.stream().filter(l -> l.getStatus().equals(LocalSubscriptionStatus.IMPORTED_CREATED)).collect(Collectors.toSet()).isEmpty();
 	}
 
 	@Override

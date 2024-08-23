@@ -134,10 +134,6 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
-    public boolean isSharded() {
-        return selector.contains("shardId");
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

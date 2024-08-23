@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +70,7 @@ public class NeighbourRestControllerIT {
     public void pollSubscriptionIncludesTimestamp(){
         Neighbour neighbour = new Neighbour();
         neighbour.setName("neighbour2");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED)));
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED, "neighbour2")));
         neighbour.setNeighbourRequestedSubscriptions(request);
         neighbour = neighbourRepository.save(neighbour);
 
@@ -82,7 +81,7 @@ public class NeighbourRestControllerIT {
     public void listSubscriptionsDoesNotIncludeTimestamp(){
         Neighbour neighbour = new Neighbour();
         neighbour.setName("neighbour3");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)));
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "neighbour3")));
         neighbour.setNeighbourRequestedSubscriptions(request);
         neighbour = neighbourRepository.save(neighbour);
 

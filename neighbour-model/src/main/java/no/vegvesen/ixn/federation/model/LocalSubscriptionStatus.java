@@ -6,8 +6,7 @@ public enum LocalSubscriptionStatus {
     TEAR_DOWN,
     RESUBSCRIBE,
     ILLEGAL,
-    ERROR,
-    IMPORTED_CREATED;
+    ERROR;
 
     public static boolean isAlive(LocalSubscriptionStatus status) {
         return CREATED.equals(status) || REQUESTED.equals(status);

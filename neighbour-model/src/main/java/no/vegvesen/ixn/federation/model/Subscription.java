@@ -139,10 +139,6 @@ public class Subscription {
 		return endpoints;
 	}
 
-	public boolean isSharded() {
-		return selector.contains("shardId");
-	}
-
 	public void setEndpoints(Set<Endpoint> newEndpoints) {
 		if (newEndpoints != null) {
 			endpoints.retainAll(newEndpoints);

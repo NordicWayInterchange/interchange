@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -503,6 +502,26 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 4";
 		assertThat(CapabilityMatcher.matchCapabilitiesToSelectorWithShards(Collections.singleton(capability), selector)).hasSize(0);
+	}
+
+	@Test
+	public void capabilityIsNotAddedMultipleTimesWhenMatchingMultipleShardsInSelector() {
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		metadata.setShardCount(3);
+		Capability capability = new Capability(
+				new DenmApplication(
+						"NO00000",
+						"NO00000-quad-tree-testing",
+						"NO",
+						"DENM:2.3.2",
+						Collections.singletonList("12003"),
+						Collections.singletonList(6)
+				),
+				metadata
+		);
+
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and (shardId = 2 OR shardId = 3)";
+		assertThat(CapabilityMatcher.matchCapabilitiesToSelectorWithShards(Collections.singleton(capability), selector)).hasSize(1);
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Disabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -831,6 +832,53 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void deliveryMatchingShardedCapabilityGetsMultipleBindings() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		metadata.setShardCount(3);
+
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				metadata
+		);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex12");
+
+		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex13", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex13");
+
+		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex14", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex14");
+
+		denmCapability.setShards(Arrays.asList(shard1, shard2, shard3));
+
+		String deliveryExchangeName = "my-exchange11";
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
+		delivery.setStatus(LocalDeliveryStatus.CREATED);
+
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
+		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(3);
+	}
+
+	@Test
 	public void tearDownDeliveryQueueShouldNotChangeRequestedDeliveries() {
 		LocalDelivery localDelivery = new LocalDelivery(
 				1,
@@ -859,6 +907,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
+		LocalEndpoint endpoint = new LocalEndpoint("endpoint-1", "my-interchange", 5671);
+		subscription.addLocalEndpoint(endpoint);
+		client.createQueue("endpoint-1");
 
 		Capability denmCapability = new Capability(
 				new DenmApplication(
@@ -885,6 +936,166 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(1);
+	}
+
+	@Test
+	public void localSubscriptionConnectsToCapabilityWithMultipleShards() {
+		ServiceProvider mySP = new ServiceProvider("my-sp");
+		ServiceProvider otherSP = new ServiceProvider("other-sp");
+
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
+		LocalEndpoint endpoint = new LocalEndpoint("endpoint-2", "my-interchange", 5671);
+		subscription.addLocalEndpoint(endpoint);
+		client.createQueue("endpoint-2");
+
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		metadata.setShardCount(3);
+
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				metadata
+		);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex9");
+
+		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex10", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex10");
+
+		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex11", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex11");
+
+		denmCapability.setShards(Arrays.asList(shard1, shard2, shard3));
+		denmCapability.setStatus(CapabilityStatus.CREATED);
+
+		mySP.addLocalSubscription(subscription);
+		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+
+		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
+
+		verify(serviceProviderRepository, times(1)).save(any());
+
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(3);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(3);
+	}
+
+	@Test
+	public void connectionGetsRemovedWhenCapabilityIsRemoved(){
+		ServiceProvider mySP = new ServiceProvider("my-sp");
+		ServiceProvider otherSP = new ServiceProvider("other-sp");
+
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
+		LocalEndpoint endpoint = new LocalEndpoint("endpoint-3", "my-interchange", 5671);
+		subscription.addLocalEndpoint(endpoint);
+		client.createQueue("endpoint-3");
+
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex15", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex15");
+
+		denmCapability.setShards(Collections.singletonList(shard));
+		denmCapability.setStatus(CapabilityStatus.CREATED);
+
+		mySP.addLocalSubscription(subscription);
+		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+
+		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(1);
+
+		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
+
+		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(0);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(0);
+	}
+
+	@Test
+	public void localSubscriptionKeepsConnectionToOneCapabilityAndTearsDownAnother() {
+		ServiceProvider mySP = new ServiceProvider("my-sp");
+		ServiceProvider otherSP = new ServiceProvider("other-sp");
+
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
+		LocalEndpoint endpoint = new LocalEndpoint("endpoint-4", "my-interchange", 5671);
+		subscription.addLocalEndpoint(endpoint);
+		client.createQueue("endpoint-4");
+
+		Capability denmCapability1 = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex16", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex16");
+
+		denmCapability1.setShards(Collections.singletonList(shard1));
+		denmCapability1.setStatus(CapabilityStatus.CREATED);
+
+		Capability denmCapability2 = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-2",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex17", "publicationId = 'pub-2'");
+		client.createHeadersExchange("cap-ex17");
+
+		denmCapability2.setShards(Collections.singletonList(shard2));
+		denmCapability2.setStatus(CapabilityStatus.CREATED);
+
+		mySP.addLocalSubscription(subscription);
+		otherSP.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(denmCapability1, denmCapability2))));
+
+		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(2);
+
+		denmCapability1.setStatus(CapabilityStatus.TEAR_DOWN);
+
+		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
@@ -1239,7 +1450,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
 		router.createBindingsWithMatches();
-		//TODO asserts, verify that the methods are called
+
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(client.getQueuePublishingLinks(source)).doesNotContain(new Binding(source, name, new Filter("a = b")));
 
@@ -1287,9 +1498,43 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
 		router.createBindingsWithMatches();
-		//TODO asserts, verify that the methods are called
+
 		assertThat(client.queueExists(source)).isFalse();
 	}
 
+	@Test
+	public void localSubscriptionWillBindToMultipleEndpointsFromNeighbour() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
 
+		String queueName = "loc-sub-queue-6";
+		String exchangeName = "sub-exchange-6";
+		String exchangeName2 = "sub-exchange-7";
+
+		client.createQueue(queueName);
+		client.createHeadersExchange(exchangeName);
+		client.createHeadersExchange(exchangeName2);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+
+		Endpoint endpoint1 = new Endpoint("source1", "host", 5671, new SubscriptionShard(exchangeName));
+		Endpoint endpoint2 = new Endpoint("source2", "host", 5671, new SubscriptionShard(exchangeName2));
+		subscription.setEndpoints(new HashSet<>(Arrays.asList(endpoint1, endpoint2)));
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
+		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
+	}
 }

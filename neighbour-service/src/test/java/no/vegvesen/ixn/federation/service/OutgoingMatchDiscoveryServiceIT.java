@@ -237,4 +237,72 @@ public class OutgoingMatchDiscoveryServiceIT {
         serviceProviderRepository.deleteAll();
     }
 
+    @Test
+    public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED);
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        serviceProvider.setCapabilities(new Capabilities(
+                Sets.newHashSet(Collections.singletonList(cap))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(0);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        metadata.setShardCount(2);
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                metadata
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        serviceProvider.setCapabilities(new Capabilities(
+                Sets.newHashSet(Collections.singletonList(cap))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(1);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
 }

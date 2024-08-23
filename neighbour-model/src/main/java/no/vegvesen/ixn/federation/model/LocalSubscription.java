@@ -60,12 +60,6 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
-        this.id = id;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-    }
-
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.id = id;
         this.status = status;
