@@ -62,6 +62,9 @@ public class Capability implements Comparable<Capability> {
 
     @Override
     public int compareTo(Capability o) {
+        if(o.createdTimestamp == null && createdTimestamp == null){
+            return 0;
+        }
         if(o.createdTimestamp == null){
             return 1;
         }
