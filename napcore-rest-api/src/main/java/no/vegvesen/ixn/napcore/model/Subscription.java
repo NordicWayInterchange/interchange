@@ -81,8 +81,12 @@ public class Subscription implements Comparable<Subscription> {
 
     @Override
     public int compareTo(Subscription o) {
-        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null) return 0;
-
+        if(o.lastUpdatedTimestamp == null){
+            return 1;
+        }
+        if(lastUpdatedTimestamp == null){
+            return -1;
+        }
         return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
 }

@@ -81,7 +81,12 @@ public class Delivery implements Comparable<Delivery>{
 
     @Override
     public int compareTo(Delivery o) {
-        if(o.lastUpdatedTimestamp == null || lastUpdatedTimestamp == null)return 0;
+        if(o.lastUpdatedTimestamp == null){
+            return 1;
+        }
+        else if (lastUpdatedTimestamp == null){
+            return -1;
+        }
 
         return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
