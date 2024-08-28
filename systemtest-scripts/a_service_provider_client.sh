@@ -7,7 +7,7 @@ URL=""
 
 if [ $1 == 'messages' ] && [ $2 != 'listen' ]; then
 CONTAINER="a_qpid"
-URL="amqps://a.bouvetinterchange.eu"
+URL="amqps://a.qpid.bouvetinterchange.eu"
 
 else
 CONTAINER="a_onboard_server"
@@ -17,7 +17,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name a_onboard_client \
+  --name a_onboard_client$RANDOM \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \

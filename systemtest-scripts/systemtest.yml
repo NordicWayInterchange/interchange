@@ -11,6 +11,7 @@ services:
       dockerfile: dns-dockerfile
     cap_add:
     - NET_ADMIN
+    -
     container_name: mock-dns-server
     hostname: mock-dns-server
     networks:
@@ -196,8 +197,8 @@ services:
     depends_on:
     - a_db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
+    - "a_qpid:a.qpid.bouvetinterchange.eu"
+    - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
     - "../tmp:/jks"
     environment:
@@ -369,8 +370,8 @@ services:
     depends_on:
       - b_db
     links:
-      - "a_qpid:a.bouvetinterchange.eu"
-      - "b_qpid:b.bouvetinterchange.eu"
+      - "a_qpid:a.qpid.bouvetinterchange.eu"
+      - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
