@@ -56,6 +56,12 @@ public class Capability {
         this.createdTimestamp = LocalDateTime.now();
     }
 
+    public Capability(Application application, Metadata metadata, LocalDateTime createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = createdTimestamp;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
