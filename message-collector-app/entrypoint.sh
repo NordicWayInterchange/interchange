@@ -9,6 +9,7 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Dspring.datasource.username=${POSTGRES_USER} \
      -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
+     -Dinterchange.node-provider.brokerExternalName=${BROKER_EXTERNAL_NAME} \
      -Dcollector.localIxnFederationPort=5671 \
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \
      -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \

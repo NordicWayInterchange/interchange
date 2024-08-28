@@ -23,4 +23,5 @@ docker run \
   -v $PWD/../tmp/keys:/keys \
   -v $PWD:/work \
   --link ${CONTAINER}:a.bouvetinterchange.eu \
+  --link a_qpid:a.qpid.bouvetinterchange.eu \
   service_provider_client -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks  -w password $URL -u ${SERVICE_PROVIDER} "$@"

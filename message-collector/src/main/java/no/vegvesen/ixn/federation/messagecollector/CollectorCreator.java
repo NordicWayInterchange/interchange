@@ -38,7 +38,7 @@ public class CollectorCreator {
     @Autowired
     public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
         this.sslContext = sslContext;
-        this.localIxnDomainName = interchangeNodeProperties.getName();
+        this.localIxnDomainName = interchangeNodeProperties.getBrokerExternalName();
         this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
         this.writeQueue = collectorProperties.getWritequeue();
     }

@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "a.bouvetinterchange.eu",
+  "name": "a.qpid.bouvetinterchange.eu",
   "modelVersion": "9.0",
   "exchanges": [
 
@@ -42,7 +42,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "a.qpid.bouvetinterchange.eu"
           }
         },
         {
@@ -51,7 +51,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "a.qpid.bouvetinterchange.eu"
           }
         },
         {
@@ -60,7 +60,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "a.qpid.bouvetinterchange.eu"
           }
         },
         {
@@ -69,7 +69,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "a.qpid.bouvetinterchange.eu"
           }
         },
         {
@@ -78,7 +78,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "a.qpid.bouvetinterchange.eu"
           }
         },
         {
