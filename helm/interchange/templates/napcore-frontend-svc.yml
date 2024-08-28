@@ -2,22 +2,19 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-napcore-frontend
-  annotations:
-    cloud.google.com/l4-rbs: "enabled"
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: napcore-frontend
     release: {{ .Release.Name }}
 spec:
-  type: LoadBalancer
-  loadBalancerIP: {{ .Values.static_external_ip }}
-  externalTrafficPolicy: Cluster
+  type: NodePort
   selector:
     app: {{ .Chart.Name }}
     component: napcore-frontend
     release: {{ .Release.Name }}
   ports:
   - name: nap-frontend
-    port: 80
-    targetPort: 3000
+    port: 3000 # TODO externalize
+    targetPort: 3000  # TODO externalize
+    protocol: TCP
