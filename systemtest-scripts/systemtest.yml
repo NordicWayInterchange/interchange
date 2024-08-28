@@ -11,7 +11,6 @@ services:
       dockerfile: dns-dockerfile
     cap_add:
     - NET_ADMIN
-    -
     container_name: mock-dns-server
     hostname: mock-dns-server
     networks:
