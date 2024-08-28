@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
 
@@ -27,7 +27,7 @@ public class AddServiceProviderCapability implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        OnboardRESTClient client = parentCommand.getParentCommand().createClient();
+        ServiceProviderClient client = parentCommand.getParentCommand().createClient();
 
         ObjectMapper mapper = new ObjectMapper();
         AddCapabilitiesRequest capability = mapper.readValue(file, AddCapabilitiesRequest.class);

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -27,7 +27,7 @@ public class GetSubscription implements Callable<Integer> {
 
     @Override
     public Integer call() throws JsonProcessingException {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
         System.out.printf("Subscription %s successfully polled with %n", subscriptionId);
         ObjectMapper mapper = new ObjectMapper();

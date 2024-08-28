@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelRequestApi;
@@ -23,7 +23,7 @@ public class AddPrivateChannel implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
         if(option.file != null) {
             AddPrivateChannelRequest privateChannel = mapper.readValue(option.file, AddPrivateChannelRequest.class);

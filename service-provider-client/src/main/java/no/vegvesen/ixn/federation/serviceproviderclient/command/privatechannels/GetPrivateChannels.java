@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListPrivateChannelsResponse;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
@@ -17,7 +17,7 @@ public class GetPrivateChannels implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
         ListPrivateChannelsResponse result = client.getPrivateChannels();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));

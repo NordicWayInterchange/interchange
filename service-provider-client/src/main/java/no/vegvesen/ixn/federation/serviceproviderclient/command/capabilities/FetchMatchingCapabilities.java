@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import no.vegvesen.ixn.serviceprovider.model.FetchMatchingCapabilitiesResponse;
 import picocli.CommandLine;
@@ -19,7 +19,7 @@ public class FetchMatchingCapabilities implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        OnboardRESTClient client = parentCommand.createClient();
+        ServiceProviderClient client = parentCommand.createClient();
         System.out.println(String.format("using selector: %s", selector));
         ObjectMapper mapper = new ObjectMapper();
         FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -24,7 +24,7 @@ public class DeleteServiceProviderSubscription implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         client.deleteSubscriptions(subscriptionId);
         System.out.printf("Subscription %s deleted successfully%n", subscriptionId);
         return 0;

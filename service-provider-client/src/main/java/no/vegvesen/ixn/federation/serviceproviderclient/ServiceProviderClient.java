@@ -14,14 +14,14 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 
-public class OnboardRESTClient {
+public class ServiceProviderClient {
 
 
     private RestTemplate restTemplate;
     private final String server;
     private final String user;
 
-    public OnboardRESTClient(SSLContext sslContext, String server, String user) {
+    public ServiceProviderClient(SSLContext sslContext, String server, String user) {
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
                 .create()

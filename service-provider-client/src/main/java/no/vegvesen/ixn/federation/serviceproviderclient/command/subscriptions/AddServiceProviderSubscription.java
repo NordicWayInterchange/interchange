@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
@@ -27,7 +27,7 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
 
         if(option.file != null) {

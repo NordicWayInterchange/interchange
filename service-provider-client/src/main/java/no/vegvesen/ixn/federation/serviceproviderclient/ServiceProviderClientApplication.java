@@ -1,14 +1,11 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.FetchMatchingCapabilities;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.JmsTopCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
-import no.vegvesen.ixn.serviceprovider.model.FetchMatchingCapabilitiesResponse;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -16,7 +13,6 @@ import picocli.CommandLine;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 
 import static picocli.CommandLine.*;
 
@@ -86,7 +82,7 @@ public class ServiceProviderClientApplication{
                 trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
-    public OnboardRESTClient createClient() {
-        return new OnboardRESTClient(createSSLContext(),server,user);
+    public ServiceProviderClient createClient() {
+        return new ServiceProviderClient(createSSLContext(),server,user);
     }
 }

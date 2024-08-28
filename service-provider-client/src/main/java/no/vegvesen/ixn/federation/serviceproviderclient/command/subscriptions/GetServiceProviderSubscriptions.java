@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -22,7 +22,7 @@ public class GetServiceProviderSubscriptions implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));

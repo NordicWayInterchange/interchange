@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -25,7 +25,7 @@ public class DeleteDelivery implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         client.deleteDelivery(deliveryId);
         System.out.printf("Delivery %s has been deleted%n", deliveryId);
         return 0;

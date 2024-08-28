@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
-import no.vegvesen.ixn.federation.serviceproviderclient.OnboardRESTClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
@@ -18,7 +18,7 @@ public class DeletePrivateChannel implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        OnboardRESTClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         client.deletePrivateChannel(privateChannelId);
         System.out.printf("Private channel with id %s deleted successfully%n", privateChannelId);
         return 0;
