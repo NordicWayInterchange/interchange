@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -29,16 +30,16 @@ public class SetUpListener implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        AddCapabilitiesRequest capabilitiesRequest = new AddCapabilitiesRequest("test", Set.of(new CapabilityApi(
-                new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("1"), "String publicationType", "String publisherName"),
+        AddCapabilitiesRequest capabilitiesRequest = new AddCapabilitiesRequest("king_olav.bouvetinterchange.eu", Set.of(new CapabilityApi(
+                new DenmApplicationApi("NO00002", "NO002-pub-1222", "NO", "DENM:2.3", List.of("12"), List.of(6)),
                 new MetadataApi()
         )));
         client.addCapability(capabilitiesRequest);
 
-        AddDeliveriesRequest deliveriesRequest = new AddDeliveriesRequest("test", Set.of(new SelectorApi("originatingCountry='NO'")));
+        AddDeliveriesRequest deliveriesRequest = new AddDeliveriesRequest("king_olav.bouvetinterchange.eu", Set.of(new SelectorApi("originatingCountry='NO'")));
         client.addServiceProviderDeliveries(deliveriesRequest);
 
-        AddSubscriptionsRequest subscriptionsRequest = new AddSubscriptionsRequest("test", Set.of(new AddSubscription("originatingCountry='NO'")));
+        AddSubscriptionsRequest subscriptionsRequest = new AddSubscriptionsRequest("king_olav.bouvetinterchange.eu", Set.of(new AddSubscription("originatingCountry='NO'")));
         client.addSubscription(subscriptionsRequest);
         ListSubscriptionsResponse listSubscriptionsResponse = client.getServiceProviderSubscriptions();
         LocalActorSubscription subscription = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get();
