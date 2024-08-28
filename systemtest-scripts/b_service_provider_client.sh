@@ -4,20 +4,15 @@ SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
 CONTAINER=""
 URL=""
 
-for i in $@
-do
-if [ $i == 'messages' ]
-then
+if [ $1 == 'messages' ]; then
 CONTAINER="b_qpid"
 URL="amqps://b.bouvetinterchange.eu"
-fi
 
-if [ $i == 'capabilities' ] || [ $i == 'subscriptions' ] || [ $i == 'deliveries' ] || [ $i == 'privatechannels' ]
-then
+elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
 CONTAINER="b_onboard_server"
 URL="https://b.bouvetinterchange.eu:8696/"
 fi
-done
+
 
 docker run \
   -it \
@@ -27,5 +22,5 @@ docker run \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
   -v $PWD:/work \
-  --link $CONTAINER:b.bouvetinterchange.eu \
+  --link ${CONTAINER}:b.bouvetinterchange.eu \
   service_provider_client -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks  -w password $URL -u ${SERVICE_PROVIDER} "$@"
