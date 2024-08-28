@@ -27,7 +27,7 @@ public class TypeTransformer {
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         return new OnboardingCapability(
-                capability.getId().toString(),
+                capability.getUuid(),
                 transformer.applicationToApplicationApi(capability.getApplication()),
                 transformer.metadataToMetadataApi(capability.getMetadata()),
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));

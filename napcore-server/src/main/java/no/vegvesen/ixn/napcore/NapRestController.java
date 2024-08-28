@@ -307,7 +307,7 @@ public class NapRestController {
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        Capability capability = serviceProvider.getCreatedCapability(parseInteger(capabilityId));
+        Capability capability = serviceProvider.getCreatedCapability(capabilityId);
         return typeTransformer.transformCapabilityToOnboardingCapability(capability);
     }
 
@@ -326,18 +326,9 @@ public class NapRestController {
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.getCapabilities().removeDataType(parseInteger(capabilityId));
+        serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
         serviceProviderRepository.save(serviceProviderToUpdate);
         logger.info("Updated service provider {}", serviceProviderToUpdate);
-    }
-
-    private Integer parseInteger(String unparsedInt){
-        try {
-            return Integer.parseInt(unparsedInt);
-        }
-        catch (Exception e){
-            throw new NotFoundException(String.format("Could not find capability with Id %s", unparsedInt));
-        }
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {

@@ -242,9 +242,9 @@ public class ServiceProvider {
 	}
 
 
-	public Capability getCreatedCapability(Integer capabilityId){
+	public Capability getCreatedCapability(String capabilityId){
 		return getCapabilities().getCreatedCapabilities().stream()
-				.filter(c->c.getId().equals(capabilityId))
+				.filter(c->c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
