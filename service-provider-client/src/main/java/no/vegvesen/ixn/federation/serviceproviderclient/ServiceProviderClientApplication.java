@@ -74,7 +74,7 @@ public class ServiceProviderClientApplication{
         return trustStorePassword;
     }
 
-    private SSLContext createSSLContext() {
+    public SSLContext createSSLContext() {
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
                 keystorePassword,
                 KeystoreType.PKCS12);

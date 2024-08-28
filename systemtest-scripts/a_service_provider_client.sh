@@ -5,15 +5,14 @@ CONTAINER=""
 URL=""
 
 
-if [ $1 == 'messages' ]; then
+if [ $1 == 'messages' ] && [ $2 != 'listen' ]; then
 CONTAINER="a_qpid"
 URL="amqps://a.bouvetinterchange.eu"
 
-elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
+else
 CONTAINER="a_onboard_server"
 URL="https://a.bouvetinterchange.eu:8797/"
 fi
-
 
 docker run \
   -it \

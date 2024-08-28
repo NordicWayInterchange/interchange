@@ -15,7 +15,8 @@ import static picocli.CommandLine.*;
                 DrainMessages.class,
                 ReceiveMessages.class,
                 SendMessage.class,
-                SendPredefinedMessage.class
+                SendPredefinedMessage.class,
+                SetUpListener.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
