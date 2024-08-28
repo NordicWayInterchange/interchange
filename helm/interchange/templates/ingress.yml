@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: interchange-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "belle-external-ip" # TODO externalize
+    kubernetes.io/ingress.global-static-ip-name: belle-external-ip # TODO externalize
 spec:
   rules:
     - host: portal.belle.stminterchange.com
