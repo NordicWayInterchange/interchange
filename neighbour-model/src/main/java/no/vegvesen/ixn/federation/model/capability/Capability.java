@@ -30,28 +30,30 @@ public class Capability {
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.CREATED;
 
-    @CreationTimestamp
     private LocalDateTime createdTimestamp;
 
     public Capability() {
-
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public void setId(Integer id) {

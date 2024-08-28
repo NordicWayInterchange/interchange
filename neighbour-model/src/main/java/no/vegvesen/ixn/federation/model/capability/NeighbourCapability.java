@@ -22,21 +22,23 @@ public class NeighbourCapability {
     @JoinColumn(name = "meta", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neigh_cap_meta"))
     private Metadata metadata;
 
-    @CreationTimestamp
     private LocalDateTime createdTimestamp;
 
     public NeighbourCapability() {
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public NeighbourCapability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public NeighbourCapability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Integer getId() {
