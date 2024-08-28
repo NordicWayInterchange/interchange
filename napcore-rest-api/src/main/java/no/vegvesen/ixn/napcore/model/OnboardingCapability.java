@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 @JsonIgnoreProperties(value = {"createdTimestamp"})
 public class OnboardingCapability implements Comparable<OnboardingCapability> {
 
-
     String id;
 
     ApplicationApi application;

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
@@ -25,11 +26,10 @@ public class TypeTransformer {
     }
 
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
-        CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         return new OnboardingCapability(
                 capability.getUuid(),
-                transformer.applicationToApplicationApi(capability.getApplication()),
-                transformer.metadataToMetadataApi(capability.getMetadata()),
+                capability.getApplication().toApi(),
+                capability.getMetadata().toApi(),
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
     }
 
@@ -131,13 +131,20 @@ public class TypeTransformer {
         };
     }
 
-    public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities) {
+    public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities) {
         List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
                     transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp())
+            ));
+        }
+        for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
+            matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
+                    neighbourCapability.getApplication().toApi(),
+                    neighbourCapability.getMetadata().toApi(),
+                    transformLocalDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
             ));
         }
         return matchingCapabilities;

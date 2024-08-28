@@ -5,9 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -110,17 +108,6 @@ public class Capability {
 
     public boolean hasShards() {
         return metadata.hasShards();
-    }
-
-    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
-        Set<Capability> capabilities = new HashSet<>();
-        for(NeighbourCapability i : neighbourCapabilities){
-            capabilities.add(
-                    new Capability(i.getApplication(), i.getMetadata())
-            );
-
-        }
-        return capabilities;
     }
 
     @Override

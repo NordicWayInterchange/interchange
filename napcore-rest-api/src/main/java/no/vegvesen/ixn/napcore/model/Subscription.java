@@ -4,7 +4,6 @@ import java.util.Set;
 
 public class Subscription implements Comparable<Subscription> {
 
-
     String id;
 
     SubscriptionStatus status;
@@ -16,7 +15,6 @@ public class Subscription implements Comparable<Subscription> {
     Long lastUpdatedTimestamp;
 
     public Subscription() {
-
     }
 
     public Subscription(String id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp) {
@@ -66,7 +64,6 @@ public class Subscription implements Comparable<Subscription> {
     public void setSelector(String selector) {
         this.selector = selector;
     }
-
 
     @Override
     public String toString() {

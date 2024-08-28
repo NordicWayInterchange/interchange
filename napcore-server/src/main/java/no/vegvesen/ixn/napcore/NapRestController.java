@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -157,14 +158,15 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 
-        Set<Capability> allCapabilities = getAllNeighbourCapabilities();
-        allCapabilities.addAll(getAllLocalCapabilities());
+        Set<Capability> localCapabilities = getAllLocalCapabilities();
+        Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
         if (selector != null) {
             if (!selector.isEmpty()) {
-                allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+                localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+                neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
             }
         }
-        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(localCapabilities, neighbourCapabilities);
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -249,10 +251,10 @@ public class NapRestController {
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){
             if(!selector.isEmpty()){
-                allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+                allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
-        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities, Collections.emptySet());
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -271,7 +273,7 @@ public class NapRestController {
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
             throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
         }
-        if(!CapabilityValidator.quadTreeIsValid(capabilityToAdd)){
+        if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
         }
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
@@ -339,14 +341,23 @@ public class NapRestController {
         return serviceProvider;
     }
 
-    private Set<String> allPublicationIds(){
-        Set<Capability> allCapabilities = getAllLocalCapabilities();
-        allCapabilities.addAll(getAllNeighbourCapabilities());
-        return allCapabilities.stream().map(a->a.getApplication().getPublicationId()).collect(Collectors.toSet());
+    private Set<String> allPublicationIds() {
+        Set<String> allPublicationIds = getAllLocalCapabilities().stream()
+                .map(c -> c.getApplication().getPublicationId())
+                .collect(Collectors.toSet());
+        Set<String> neighbourPublicationIds = getAllNeighbourCapabilities().stream()
+                .map(c -> c.getApplication().getPublicationId())
+                .collect(Collectors.toSet());
+        allPublicationIds.addAll(neighbourPublicationIds);
+        return allPublicationIds;
     }
 
-    private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+    private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
+        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+    }
+
+    private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
+        return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
     }
 
     private Set<Capability> getAllLocalCapabilities() {
@@ -358,11 +369,11 @@ public class NapRestController {
         return capabilities;
     }
 
-    private Set<Capability> getAllNeighbourCapabilities() {
-        Set<Capability> capabilities = new HashSet<>();
+    private Set<NeighbourCapability> getAllNeighbourCapabilities() {
+        Set<NeighbourCapability> capabilities = new HashSet<>();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
+            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
         }
         return capabilities;
     }

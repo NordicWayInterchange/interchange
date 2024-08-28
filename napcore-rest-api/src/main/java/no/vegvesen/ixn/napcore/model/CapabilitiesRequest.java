@@ -10,7 +10,6 @@ public class CapabilitiesRequest {
     MetadataApi metadata;
 
     public CapabilitiesRequest() {
-
     }
 
     public CapabilitiesRequest(ApplicationApi application, MetadataApi metadata) {
