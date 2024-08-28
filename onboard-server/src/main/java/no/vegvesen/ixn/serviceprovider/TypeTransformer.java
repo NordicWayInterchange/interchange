@@ -44,7 +44,7 @@ public class TypeTransformer {
             fetchCapabilities.add(capabilityApiTransformer.capabilityToCapabilityApi(capability));
         }
         for (NeighbourCapability capability : neighbourCapabilities) {
-            fetchCapabilities.add(capabilityApiTransformer.neighbourCapabilityToCapabilitySplitApi(capability));
+            fetchCapabilities.add(capabilityApiTransformer.neighbourCapabilityToCapabilityApi(capability));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);

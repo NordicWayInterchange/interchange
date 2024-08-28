@@ -66,7 +66,7 @@ public class CapabilityToCapabilityApiTransformer {
 		);
 	}
 
-	public CapabilityApi neighbourCapabilityToCapabilitySplitApi(NeighbourCapability capability) {
+	public CapabilityApi neighbourCapabilityToCapabilityApi(NeighbourCapability capability) {
 		return new CapabilityApi(
 				capability.getApplication().toApi(),
 				capability.getMetadata().toApi()
