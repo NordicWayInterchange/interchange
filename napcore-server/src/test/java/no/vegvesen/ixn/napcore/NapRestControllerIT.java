@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Transactional
 public class NapRestControllerIT {
 
-
     @Autowired
     private  ServiceProviderRepository serviceProviderRepository;
 
@@ -122,7 +121,6 @@ public class NapRestControllerIT {
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.getSubscription(actorCommonName, "25"));
     }
-
 
     @Test
     public void testSubscriptionIsDeletedCorrectly(){
@@ -377,7 +375,6 @@ public class NapRestControllerIT {
         OnboardingCapability response = napRestController.addCapability(actorCommonName, request);
         napRestController.deleteCapability(actorCommonName, response.getId());
 
-        // Ugly, should onboardingCapability have Status?
         for(Capability capability : serviceProviderRepository.findAll().stream().flatMap(a->a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet())){
             assertThat(capability.getStatus().equals(CapabilityStatus.TEAR_DOWN));
         }

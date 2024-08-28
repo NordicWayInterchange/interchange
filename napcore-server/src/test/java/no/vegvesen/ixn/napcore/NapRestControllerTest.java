@@ -45,7 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NapRestControllerTest {
 
     public static final String NODE_NAME = "interchangenode";
+
     public static final String NAP_USER_NAME = "napcn";
+
     private MockMvc mockMvc;
 
     @MockBean
@@ -80,7 +82,6 @@ public class NapRestControllerTest {
                 .alwaysExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .build();
     }
-
 
     @Test
     @DisplayName("Get existing local subscription")
@@ -274,7 +275,6 @@ public class NapRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request)
         ).andExpect(status().isOk());
-
     }
 
     @Test

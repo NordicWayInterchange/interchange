@@ -14,7 +14,6 @@ public class Capability implements Comparable<Capability> {
     Long createdTimestamp;
 
     public Capability() {
-
     }
 
     public Capability(ApplicationApi application, MetadataApi metadata) {
@@ -73,6 +72,5 @@ public class Capability implements Comparable<Capability> {
         }
 
         return Long.compare(o.createdTimestamp, createdTimestamp);
-
     }
 }

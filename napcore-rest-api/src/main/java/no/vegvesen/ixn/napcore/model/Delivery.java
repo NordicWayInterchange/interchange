@@ -15,7 +15,8 @@ public class Delivery implements Comparable<Delivery>{
 
     Long lastUpdatedTimestamp;
 
-    public Delivery(){}
+    public Delivery(){
+    }
 
     public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;

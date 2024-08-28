@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +43,8 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static boolean quadtreeIsValid(CapabilityApi capability){
-        List<String> quadTree = capability.getApplication().getQuadTree();
-        for(String quadTile : quadTree){
-            for(char nextNumber : quadTile.toCharArray()){
-                if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public static boolean quadTreeIsValid(Capability capability){
-        List<String> quadTree = capability.getApplication().getQuadTree();
-        for(String quadTile : quadTree){
+    public static boolean isQuadTreeValid(List<String> quadTreeTiles){
+        for(String quadTile : quadTreeTiles){
             for(char nextNumber : quadTile.toCharArray()){
                 if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
                     return false;

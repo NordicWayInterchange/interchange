@@ -217,7 +217,6 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-
     public void addDelivery(LocalDelivery newDelivery){
         deliveries.add(newDelivery);
     }
@@ -241,7 +240,6 @@ public class ServiceProvider {
 						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
-
 	public Capability getCreatedCapability(Integer capabilityId){
 		return getCapabilities().getCreatedCapabilities().stream()
 				.filter(c->c.getId().equals(capabilityId))
@@ -252,7 +250,7 @@ public class ServiceProvider {
 	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
-				.filter(subscription -> allSubscriptions.contains(subscription))
+				.filter(allSubscriptions::contains)
 				.collect(Collectors.toSet());
 	}
 
@@ -267,7 +265,7 @@ public class ServiceProvider {
 	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries){
 		return this.getDeliveries()
 				.stream()
-				.filter(delivery -> allDeliveries.contains(delivery))
+				.filter(allDeliveries::contains)
 				.collect(Collectors.toSet());
 	}
 
