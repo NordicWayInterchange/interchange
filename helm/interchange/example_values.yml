@@ -5,8 +5,13 @@ interchange_password: not-a-secure-password                       # Password for
 admin_password: not-a-secure-password                             # Password for a Qpid administrative user
 postgres_user: federation                                         # Database user
 postgres_password: federation                                     # Database password
-key_store: "test"                                                 # Name of key store file
-trust_store: truststore.jks                                       # Name of trust store file
+key_store: "base64 endcoded keystore file"
+trust_store: "base64 encoded truststore file"
+napcore_keystore: "base64 encoded napcore keystore file"
+napcore_keystore_password: password
+napcore_nextauth_secret: ABC
+napcore_auth0_client_id: my_client
+napcore_auth0_client_secret: my_secret
 
 # Values:
 external_name: example-node.itsinterchange.eu
@@ -88,5 +93,11 @@ napcore_server:
   logging:
   - logger_name: .root
     level: info
-secret_dev_no:
-  key_store: "test"
+napcore_frontend:
+  replicas: 1
+  image:
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend
+    tag: "1.0"
+  keystore_file_name: napcore_frontend.p12
+  generated_username_prefix: nap.example-node.itsinterchange.eu.
+  home_url: "https://portal.example-node.itsinterchange.eu/"

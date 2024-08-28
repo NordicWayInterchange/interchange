@@ -59,3 +59,6 @@ routing_configurer:
 
 napcore_server:
   replicas: 1
+
+napcore_frontend:
+  replicas: 1
