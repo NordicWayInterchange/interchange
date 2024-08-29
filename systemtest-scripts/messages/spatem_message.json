@@ -1,0 +1,19 @@
+{
+  "messages": [
+    {
+      "messageText": "this is my message",
+      "userId": "king_olav.bouvetinterchange.eu",
+      "publisherId": "bouvet",
+      "publicationId": "bouvet:7",
+      "originatingCountry": "NO",
+      "protocolVersion": "SPATEM:1",
+      "serviceType": "service",
+      "baselineVersion": "1.8.0",
+      "messageType": "SPATEM",
+      "longitude": 124,
+      "latitude": 213,
+      "quadTree": ",12,",
+      "shardCount": 1
+    }
+  ]
+}

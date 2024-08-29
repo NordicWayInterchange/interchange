@@ -1,0 +1,23 @@
+{
+  "messages": [
+    {
+      
+            "messageText": "this is my message",
+            "userId": "king_olav.bouvetinterchange.eu",
+            "publisherId": "bouvet",
+            "publicationId": "bouvet:1",
+            "originatingCountry": "NO",
+            "protocolVersion": "DENM:1",
+            "serviceType": "service",
+            "baselineVersion": "1.8.0",
+            "messageType": "DENM",
+            "longitude": 124,
+            "latitude": 213,
+            "quadTree": ",12,",
+            "stationType": 1,
+            "shardCount": 1,
+            "causeCode": 6
+        
+    }
+  ]
+}
