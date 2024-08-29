@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "a.interchangedomain.com",
+  "name": "a.qpid.interchangedomain.com",
   "modelVersion": "9.0",
   "exchanges": [
 
@@ -42,7 +42,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.interchangedomain.com"
+            "NAME": "a.qpid.interchangedomain.com"
           }
         },
         {
@@ -51,7 +51,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.interchangedomain.com"
+            "NAME": "a.qpid.interchangedomain.com"
           }
         },
         {
@@ -60,7 +60,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.interchangedomain.com"
+            "NAME": "a.qpid.interchangedomain.com"
           }
         },
         {
@@ -69,7 +69,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.interchangedomain.com"
+            "NAME": "a.qpid.interchangedomain.com"
           }
         },
         {
@@ -78,7 +78,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.interchangedomain.com"
+            "NAME": "a.qpid.interchangedomain.com"
           }
         },
         {
