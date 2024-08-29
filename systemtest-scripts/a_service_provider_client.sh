@@ -17,7 +17,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name a_onboard_client$RANDOM \
+  --name a_onboard_client${RANDOM} \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
