@@ -3,16 +3,10 @@ kind: Ingress
 metadata:
   name: interchange-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: belle-external-ip # TODO externalize
+    kubernetes.io/ingress.regional-static-ip-name: belle-external-ip # TODO externalize
 spec:
-  rules:
-    - host: portal.belle.stminterchange.com
-      http:
-        paths:
-          - path: /*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Release.Name }}-napcore-frontend
-                port:
-                  number: 3000 # TODO externalize
+  defaultBackend:
+    service:
+      name: ixn-belle-napcore-frontend
+      port:
+        number: 3000 # TODO externalize
