@@ -13,7 +13,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name a_onboard_client$RANDOM \
+  --name a_service_provider_client${RANDOM} \
   --network=single-node_singletest \
   --dns=172.28.1.1 \
   -v $PWD/../keys/a:/keys \

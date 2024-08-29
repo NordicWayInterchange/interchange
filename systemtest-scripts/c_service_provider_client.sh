@@ -15,7 +15,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name b_onboard_client \
+  --name b_service_provider_client \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
