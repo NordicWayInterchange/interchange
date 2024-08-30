@@ -8,7 +8,7 @@ if [ $1 == 'messages' ]; then
 CONTAINER="a_qpid"
 URL="amqps://a.interchangedomain.com"
 
-elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
+else
 CONTAINER="a_onboard_server"
 URL="https://a.interchangedomain.com:8797/"
 fi
@@ -16,7 +16,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name a_onboard_client$RANDOM \
+  --name a_service_provider_client \
   --network=single-node_singletest \
   --dns=172.28.1.1 \
   -v $PWD/../keys/a:/keys \

@@ -8,7 +8,7 @@ if [ $1 == 'messages' ]; then
 CONTAINER="b_qpid"
 URL="amqps://b.bouvetinterchange.eu"
 
-elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
+else
 CONTAINER="b_onboard_server"
 URL="https://b.bouvetinterchange.eu:8696/"
 fi
@@ -17,7 +17,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name b_onboard_client \
+  --name b_service_provider_client \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \

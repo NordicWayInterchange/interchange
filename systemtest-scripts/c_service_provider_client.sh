@@ -9,7 +9,7 @@ CONTAINER="c_qpid"
 URL="amqps://c.bouvetinterchange.eu"
 fi
 
-elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
+else
 CONTAINER="c_onboard_server"
 URL="https://c.bouvetinterchange.eu:8595/"
 fi
@@ -18,7 +18,7 @@ fi
 docker run \
   -it \
   --rm \
-  --name b_onboard_client \
+  --name c_service_provider_client \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
