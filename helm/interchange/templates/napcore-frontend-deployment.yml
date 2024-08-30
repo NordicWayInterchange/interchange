@@ -53,10 +53,16 @@ spec:
             httpGet:
               port: 3000
               path: /login
+            initialDelaySeconds: 300
+            periodSeconds: 20
+            timeoutSeconds: 10
           readinessProbe:
             httpGet:
               port: 3000
               path: /login
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 10
       volumes:
         - name: napcore-frontend-secret
           secret:
