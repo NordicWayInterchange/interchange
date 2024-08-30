@@ -49,6 +49,14 @@ spec:
           ports:
             - name: nap-frontend
               containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /login
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /login
       volumes:
         - name: napcore-frontend-secret
           secret:
