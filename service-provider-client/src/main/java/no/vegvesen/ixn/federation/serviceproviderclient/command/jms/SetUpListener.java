@@ -62,7 +62,7 @@ public class SetUpListener implements Callable<Integer> {
         LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().get();
         String url = "amqps://"+endpointApi.getHost();
 
-        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), parentCommand.getUrl());
+        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
         AtomicInteger returnCode = new AtomicInteger(0);
         ExceptionListener exceptionListener = e -> {
             returnCode.compareAndSet(0, 1);
