@@ -10,9 +10,7 @@ metadata:
     component: neighbour-server
     release: {{ .Release.Name }}
 spec:
-  type: LoadBalancer
-  loadBalancerIP: {{ .Values.static_external_ip }}
-  externalTrafficPolicy: Cluster
+  type: ClusterIP
   selector:
     app: {{ .Chart.Name }}
     component: neighbour-server

@@ -25,17 +25,15 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-qpid-secure
-  annotations:
-    cloud.google.com/l4-rbs: "enabled"
+#  annotations:
+#    cloud.google.com/l4-rbs: "enabled"
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: qpid
     release: {{ .Release.Name }}
 spec:
-  type: LoadBalancer
-  loadBalancerIP: {{ .Values.static_external_ip }}
-  externalTrafficPolicy: Cluster
+  type: ClusterIP
   selector:
     app: {{ .Chart.Name }}
     component: qpid
