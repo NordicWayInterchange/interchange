@@ -80,20 +80,17 @@ public class ImportTransformer {
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
         //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
-        newCapability.setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
+        newCapability.getMetadata().setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
         return newCapability;
     }
 
     public CapabilityStatus transformCapabilityStatusImportApiToCapabilityStatus(CapabilityImportApi.CapabilityStatusImportApi status) {
         switch (status) {
-            case CREATED -> {
-                return CapabilityStatus.CREATED;
-            }
             case TEAR_DOWN -> {
                 return CapabilityStatus.TEAR_DOWN;
             }
             default -> {
-                return CapabilityStatus.REQUESTED;
+                return CapabilityStatus.CREATED;
             }
         }
     }
@@ -121,8 +118,8 @@ public class ImportTransformer {
         }
     }
 
-    public CapabilityShard transformCapabilityShardImportApiToCapabilityShard(CapabilityShardImportApi shard) {
-        return new CapabilityShard(shard.getShardId(),
+    public Shard transformCapabilityShardImportApiToCapabilityShard(CapabilityShardImportApi shard) {
+        return new Shard(shard.getShardId(),
                 shard.getExchangeName(),
                 shard.getSelector());
     }
@@ -171,8 +168,8 @@ public class ImportTransformer {
         return new Neighbour(neighbour.getName(),
                 transformNeighbourCapabilitiesImportApiToNeighbourCapabilities(neighbour.getCapabilities()),
                 new NeighbourSubscriptionRequest(neighbour.getNeighbourSubscriptions().stream().map(this::transformNeighbourSubscriptionImportApiToNeighbourSubscription).collect(Collectors.toSet())),
-                new SubscriptionRequest(neighbour.getOurSubscriptions().stream().map(this::transformSubscriptionImportApiToSubscription).collect(Collectors.toSet())),
-                neighbour.getControlChannelPort()
+                new SubscriptionRequest(neighbour.getOurSubscriptions().stream().map(this::transformSubscriptionImportApiToSubscription).collect(Collectors.toSet()))
+                //neighbour.getControlChannelPort()
         );
     }
 

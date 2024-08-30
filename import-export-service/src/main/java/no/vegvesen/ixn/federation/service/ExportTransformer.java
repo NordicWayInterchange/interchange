@@ -76,7 +76,7 @@ public class ExportTransformer {
         return new CapabilityExportApi(capability.getApplication().toApi(),
                 transformMetadataToMetadataExportApi(capability.getMetadata()),
                 transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
-                capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
+                capability.getMetadata().getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
     }
 
     public CapabilityExportApi.CapabilityStatusExportApi transformCapabilityStatusToCapabilityStatusExportApi(CapabilityStatus status) {
@@ -117,7 +117,7 @@ public class ExportTransformer {
         }
     }
 
-    public CapabilityShardExportApi transformCapabilityShardToCapabilityShardExportApi(CapabilityShard shard) {
+    public CapabilityShardExportApi transformCapabilityShardToCapabilityShardExportApi(Shard shard) {
         return new CapabilityShardExportApi(shard.getShardId(),
                 shard.getExchangeName(),
                 shard.getSelector());
