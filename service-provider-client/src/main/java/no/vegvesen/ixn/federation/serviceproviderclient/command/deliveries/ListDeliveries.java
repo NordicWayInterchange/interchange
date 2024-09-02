@@ -16,9 +16,9 @@ import java.util.concurrent.Callable;
         mixinStandardHelpOptions = true
 )
 public class ListDeliveries implements Callable<Integer> {
+
     @ParentCommand
     DeliveriesCommand parentCommand;
-
 
     @Override
     public Integer call() throws Exception {

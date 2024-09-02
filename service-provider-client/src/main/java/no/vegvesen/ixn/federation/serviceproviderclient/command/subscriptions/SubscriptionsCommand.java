@@ -12,7 +12,8 @@ import picocli.CommandLine.ParentCommand;
                 GetServiceProviderSubscriptions.class,
                 GetSubscription.class,
                 AddServiceProviderSubscription.class,
-                DeleteServiceProviderSubscription.class
+                DeleteServiceProviderSubscription.class,
+                Listen.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true

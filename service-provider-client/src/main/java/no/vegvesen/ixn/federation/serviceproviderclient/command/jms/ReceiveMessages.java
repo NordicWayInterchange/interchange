@@ -15,6 +15,7 @@ public class ReceiveMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
+
     @ParentCommand
     MessagesCommand parentCommand;
 

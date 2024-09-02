@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import no.vegvesen.ixn.serviceprovider.model.FetchMatchingCapabilitiesResponse;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "match", description = "Fetch all capabilities in the network matching a selector")
+@Command(name = "match", description = "Fetch all capabilities in the network matching a selector")
 public class FetchMatchingCapabilities implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     ServiceProviderClientApplication parentCommand;
 
-    @CommandLine.Parameters(index = "0", description = "The selector to match with the capabilities")
+    @Parameters(index = "0", description = "The selector to match with the capabilities")
     String selector;
 
     @Override

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
@@ -6,7 +6,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import picocli.CommandLine;
+import static picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Iterator;
@@ -17,13 +17,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@CommandLine.Command(name = "listen", description = "")
-public class SetUpListener implements Callable<Integer> {
+@Command(name = "listen", description = "")
+public class Listen implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
-    MessagesCommand parentCommand;
+    @ParentCommand
+    SubscriptionsCommand parentCommand;
 
-    @CommandLine.Option(names = {"-f", "--file"}, description = "")
+    @Option(names = {"-f", "--file"}, description = "")
     File file;
 
     private final CountDownLatch counter = new CountDownLatch(1);
@@ -72,7 +72,7 @@ public class SetUpListener implements Callable<Integer> {
         try (Sink sink = new Sink(
                 url,
                 endpointApi.getSource(),
-                parentCommand.createContext(),
+                parentCommand.getParent().createSSLContext(),
                 new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
