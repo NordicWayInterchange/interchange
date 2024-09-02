@@ -184,6 +184,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -303,6 +304,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
     - testing_net
     dns: 172.28.1.1

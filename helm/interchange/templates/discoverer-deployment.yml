@@ -25,6 +25,8 @@ spec:
       - name: neighbour-discoverer
         image: "{{ .Values.neighbour_discoverer.image.repository }}:{{ .Values.neighbour_discoverer.image.tag }}"
         env:
+        - name: BROKER_EXTERNAL_NAME
+          value: .Values.broker_external_name
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
         - name: POSTGRES_PASSWORD

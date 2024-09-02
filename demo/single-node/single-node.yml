@@ -146,6 +146,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     dns: 172.28.1.1
     networks:
     - singletest

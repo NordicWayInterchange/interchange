@@ -3,13 +3,17 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
+import no.vegvesen.ixn.serviceprovider.model.*;
+
 import static picocli.CommandLine.*;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.CAM;
@@ -18,19 +22,34 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.CAM;
 public class Send implements Callable<Integer> {
 
     @ParentCommand
-    SubscriptionsCommand parentCommand;
+    DeliveriesCommand parentCommand;
 
     @Option(names = {"-f", "--filename"}, description = "The message json file", required = true)
     File messageFile;
 
+    @Option(names = {"-s", "--selector"}, description = "selector", required = true)
+    String selector;
+
     @Override
     public Integer call() throws Exception {
 
+        ServiceProviderClient client = parentCommand.getParent().createClient();
+        client.addServiceProviderDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(selector))));
+
+        String deliveryId = client.listServiceProviderDeliveries().getDeliveries().stream().filter(delivery -> delivery.getSelector().equals(selector)).findFirst().get().getId();
+        GetDeliveryResponse delivery = client.getDelivery(deliveryId);
+
+        while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
+            delivery = client.getDelivery(deliveryId);
+            TimeUnit.SECONDS.sleep(2);
+        }
+
+        String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
+        String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
         System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
-        String queueName = "";
-        try (Source source = new Source(parentCommand.getParent().getUrl(), queueName, parentCommand.getParent().createSSLContext())) {
+        try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
             source.start();
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
