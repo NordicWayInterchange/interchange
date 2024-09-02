@@ -5,7 +5,6 @@ import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.AddDeliveries;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
@@ -42,10 +41,10 @@ public class SendMessage implements Callable<Integer> {
         System.out.printf("Sending message from file %s%n",messageFile);
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        client.addServiceProviderDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(selector))));
+        client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(selector))));
         client.addCapability(getCapabilitiesRequest());
 
-        String deliveryId = client.listServiceProviderDeliveries().getDeliveries().stream().filter(d -> d.getSelector().equals(selector)).findFirst().get().getId();
+        String deliveryId = client.listDeliveries().getDeliveries().stream().filter(d -> d.getSelector().equals(selector)).findFirst().get().getId();
 
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
         while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){

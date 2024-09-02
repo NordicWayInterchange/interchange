@@ -3,9 +3,8 @@
 SERVICE_PROVIDER="king_olav.interchangedomain.com"
 URL=""
 
-if [ $1 == 'messages' ] && [ $2 != 'listen' ]; then
+if [ $1 == 'messages' ]; then
 URL="amqps://a.qpid.interchangedomain.com"
-
 else
 URL="https://a.interchangedomain.com:8797/"
 fi

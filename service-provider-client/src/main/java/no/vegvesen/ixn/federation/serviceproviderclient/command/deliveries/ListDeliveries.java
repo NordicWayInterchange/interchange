@@ -24,7 +24,7 @@ public class ListDeliveries implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        ListDeliveriesResponse response = client.listServiceProviderDeliveries();
+        ListDeliveriesResponse response = client.listDeliveries();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return 0;
     }

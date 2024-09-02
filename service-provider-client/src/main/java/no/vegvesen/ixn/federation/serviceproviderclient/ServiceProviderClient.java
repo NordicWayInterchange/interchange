@@ -57,7 +57,7 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,selector).getBody();
     }
 
-    public ListSubscriptionsResponse getServiceProviderSubscriptions() {
+    public ListSubscriptionsResponse getSubscriptions() {
         String url = String.format("%s/%s/subscriptions", server, user);
         return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
@@ -83,7 +83,7 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 
-    public AddDeliveriesResponse addServiceProviderDeliveries(AddDeliveriesRequest request) {
+    public AddDeliveriesResponse addDeliveries(AddDeliveriesRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request,headers);
@@ -91,7 +91,7 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddDeliveriesResponse.class).getBody();
     }
 
-    public ListDeliveriesResponse listServiceProviderDeliveries() {
+    public ListDeliveriesResponse listDeliveries() {
         String url = String.format("%s/%s/deliveries",server,user);
         return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
     }

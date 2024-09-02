@@ -1,11 +1,13 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import static picocli.CommandLine.*;
 
+import java.io.File;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -18,8 +20,8 @@ public class Listen implements Callable<Integer> {
     @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @Option(names = {"-s", "--selector"}, description = "")
-    String selector;
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    SubscriptionsOption option;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 
@@ -27,8 +29,16 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(selector))));
-        ListSubscriptionsResponse listSubscriptionsResponse = client.getServiceProviderSubscriptions();
+        if(option.file != null){
+            ObjectMapper mapper = new ObjectMapper();
+            AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
+            client.addSubscription(request);
+        }
+        else{
+            client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector))));
+        }
+
+        ListSubscriptionsResponse listSubscriptionsResponse = client.getSubscriptions();
         String subscriptionId = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get().getId();
 
         GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
@@ -57,6 +67,14 @@ public class Listen implements Callable<Integer> {
             counter.await();
         }
         return 0;
+    }
+
+    private static class SubscriptionsOption {
+        @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
+        File file;
+
+        @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
+        String selector;
     }
 }
 

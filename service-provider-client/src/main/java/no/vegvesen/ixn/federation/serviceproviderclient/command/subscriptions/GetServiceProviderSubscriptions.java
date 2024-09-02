@@ -23,7 +23,7 @@ public class GetServiceProviderSubscriptions implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
+        ListSubscriptionsResponse subscriptions = client.getSubscriptions();
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));
         return 0;

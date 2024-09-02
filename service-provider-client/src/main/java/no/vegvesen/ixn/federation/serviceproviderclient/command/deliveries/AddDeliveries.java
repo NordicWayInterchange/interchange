@@ -34,18 +34,18 @@ public class AddDeliveries implements Callable<Integer> {
 
         if (option.file != null) {
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
-            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+            AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         else{
             AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector)));
-            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+            AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         return 0;
     }
 
-    static class AddDeliveriesOption{
+    private static class AddDeliveriesOption{
         @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
         File file;
 

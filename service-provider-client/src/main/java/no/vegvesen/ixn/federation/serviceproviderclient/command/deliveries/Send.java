@@ -16,7 +16,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
-import static no.vegvesen.ixn.federation.api.v1_0.Constants.CAM;
 
 @Command(name="send", description = "")
 public class Send implements Callable<Integer> {
@@ -24,28 +23,41 @@ public class Send implements Callable<Integer> {
     @ParentCommand
     DeliveriesCommand parentCommand;
 
-    @Option(names = {"-f", "--filename"}, description = "The message json file", required = true)
+    @Option(names = {"-m", "--message"}, description = "The message json file", required = true)
     File messageFile;
 
-    @Option(names = {"-s", "--selector"}, description = "selector", required = true)
-    String selector;
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    DeliveriesOption option;
 
     @Override
     public Integer call() throws Exception {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        client.addServiceProviderDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(selector))));
+        String deliveryId;
+        if(option.file != null){
+            ObjectMapper mapper = new ObjectMapper();
+            AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
+            AddDeliveriesResponse response = client.addDeliveries(request);
+            deliveryId = response.getDeliveries().stream().findFirst().get().getId();
+        }
+        else{
+            AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector))));
+            deliveryId = response.getDeliveries().stream().findFirst().get().getId();
 
-        String deliveryId = client.listServiceProviderDeliveries().getDeliveries().stream().filter(delivery -> delivery.getSelector().equals(selector)).findFirst().get().getId();
+        }
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
 
         while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
+            if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)){
+                throw new Exception("delivery status is not valid");
+            }
             delivery = client.getDelivery(deliveryId);
             TimeUnit.SECONDS.sleep(2);
         }
 
         String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
         String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
+
         System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
@@ -132,5 +144,13 @@ public class Send implements Callable<Integer> {
             }
         }
         return 0;
+    }
+
+    private static class DeliveriesOption{
+        @Option(names = {"-f", "--file"}, required = true, description = "The deliveries json file")
+        File file;
+
+        @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
+        String selector;
     }
 }
