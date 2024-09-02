@@ -43,7 +43,6 @@ public class Send implements Callable<Integer> {
         else{
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector))));
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
-
         }
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
 
@@ -54,7 +53,8 @@ public class Send implements Callable<Integer> {
             delivery = client.getDelivery(deliveryId);
             TimeUnit.SECONDS.sleep(2);
         }
-
+        System.out.println("Delivery created successfully, waiting for qpid to set up queue");
+        TimeUnit.SECONDS.sleep(3);
         String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
         String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
 
