@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
@@ -8,7 +7,6 @@ import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import static picocli.CommandLine.*;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -23,8 +21,8 @@ public class Listen implements Callable<Integer> {
     @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @Option(names = {"-f", "--file"}, description = "")
-    File file;
+    @Option(names = {"-s", "--selector"}, description = "")
+    String selector;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 
@@ -32,27 +30,7 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        AddCapabilitiesRequest capability;
-        String consumerCommonName;
-        if(file != null){
-            ObjectMapper mapper = new ObjectMapper();
-            capability = mapper.readValue(file, AddCapabilitiesRequest.class);
-            consumerCommonName = capability.getName();
-        }
-        else{
-            capability = getCapabilitiesRequest();
-            consumerCommonName = "king_olav.bouvetinterchange.eu";
-        }
-
-        client.addCapability(capability);
-        String selector = generateSelector(capability);
-
-        AddDeliveriesRequest deliveriesRequest = new AddDeliveriesRequest(consumerCommonName, Set.of(new SelectorApi(selector)));
-        client.addServiceProviderDeliveries(deliveriesRequest);
-
-        AddSubscriptionsRequest subscriptionsRequest = new AddSubscriptionsRequest(consumerCommonName, Set.of(new AddSubscription(selector)));
-        client.addSubscription(subscriptionsRequest);
-
+        client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(selector))));
         ListSubscriptionsResponse listSubscriptionsResponse = client.getServiceProviderSubscriptions();
         LocalActorSubscription subscription = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get();
 

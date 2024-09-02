@@ -5,9 +5,8 @@ URL=""
 
 if [ $1 == 'messages' ]; then
 URL="amqps://c.qpid.bouvetinterchange.eu"
-fi
 
-elif [ $1 == 'capabilities' ] || [ $1 == 'subscriptions' ] || [ $1 == 'deliveries' ] || [ $1 == 'privatechannels' ]; then
+else 
 URL="https://c.bouvetinterchange.eu:8595/"
 fi
 

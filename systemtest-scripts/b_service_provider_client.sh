@@ -3,7 +3,7 @@
 SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
 URL=""
 
-if [ $1 == 'messages' ] && [ $2 != 'listen' ]; then
+if [ $1 == 'messages' ]; then
 URL="amqps://b.qpid.bouvetinterchange.eu"
 
 else
