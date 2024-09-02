@@ -48,7 +48,7 @@ public class Send implements Callable<Integer> {
 
         while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
             if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)){
-                throw new Exception("delivery status is not valid");
+                throw new Exception("Delivery status is not valid");
             }
             delivery = client.getDelivery(deliveryId);
             TimeUnit.SECONDS.sleep(2);
