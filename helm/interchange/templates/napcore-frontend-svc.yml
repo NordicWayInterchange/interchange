@@ -8,7 +8,7 @@ metadata:
     component: napcore-frontend
     release: {{ .Release.Name }}
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: {{ .Chart.Name }}
     component: napcore-frontend
