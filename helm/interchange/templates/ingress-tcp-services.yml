@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  {{ .Values.qpid.amqps.port }}: "belle/{{ .Release.Name }}-qpid-secure:{{ .Values.qpid.amqps.port }}"
+  {{ .Values.self.service_provider_port}}: "belle/{{ .Release.Name }}-onboard-server:{{ .Values.self.service_provider_port }}"
