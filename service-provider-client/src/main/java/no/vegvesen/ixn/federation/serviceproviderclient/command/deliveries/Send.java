@@ -10,7 +10,9 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import static picocli.CommandLine.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -26,12 +28,14 @@ public class Send implements Callable<Integer> {
     @Option(names = {"-m", "--message"}, description = "The message json file", required = true)
     File messageFile;
 
+    @Option(names = {"-b", "--binary"}, description = "")
+    boolean binary;
+
     @ArgGroup(exclusive = true, multiplicity = "1")
     DeliveriesOption option;
 
     @Override
     public Integer call() throws Exception {
-
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String deliveryId;
         if(option.file != null){
@@ -53,6 +57,7 @@ public class Send implements Callable<Integer> {
             delivery = client.getDelivery(deliveryId);
             TimeUnit.SECONDS.sleep(2);
         }
+
         System.out.println("Delivery created successfully, waiting for qpid to set up queue");
         TimeUnit.SECONDS.sleep(3);
         String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
@@ -61,6 +66,7 @@ public class Send implements Callable<Integer> {
         System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
+        validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
             source.start();
             for (Message message : messages.getMessages()) {
@@ -68,7 +74,7 @@ public class Send implements Callable<Integer> {
                 switch (message){
                     case DenmMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(DENM)
                                 .causeCode(((DenmMessage) message).getCauseCode())
                                 .subCauseCode(((DenmMessage) message).getSubCauseCode());
@@ -83,7 +89,7 @@ public class Send implements Callable<Integer> {
                     }
                     case IvimMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(IVIM)
                                 .iviType(((IvimMessage) message).getIviType())
                                 .pictogramCategoryCode(((IvimMessage) message).getPictogramCategoryCode())
@@ -91,39 +97,39 @@ public class Send implements Callable<Integer> {
                     }
                     case SpatemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SPATEM)
                                 .id(((SpatemMessage) message).getId())
                                 .name(((SpatemMessage) message).getName());
                     }
                     case MapemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(MAPEM)
                                 .id(((MapemMessage) message).getId())
                                 .name(((MapemMessage) message).getName());
                     }
                     case SsemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SSEM)
                                 .id(((SsemMessage) message).getId());
                     }
                     case SremMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SREM)
                                 .id(((SremMessage) message).getId());
                     }
                     case CamMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(CAM)
                                 .stationType(((CamMessage) message).getStationType())
                                 .vehicleRole(((CamMessage) message).getVehicleRole());
                     }
 
-                    default ->  throw new Exception("Message is not of valid messagetype");
+                    default -> throw new Exception("Message is not of valid messagetype");
                 }
 
                 messageBuilder
@@ -144,6 +150,30 @@ public class Send implements Callable<Integer> {
             }
         }
         return 0;
+    }
+
+    private static byte[] convertFileToByteArray(String fileName) throws IOException {
+        File file = new File(fileName);
+        byte [] bytes = Files.readAllBytes(file.toPath());
+        return bytes;
+    }
+
+    private void validateInput(Messages messages) throws Exception {
+        for(Message message : messages.getMessages()){
+            if(binary) {
+                if(message.getMessageType().equals(DATEX_2)){
+                    throw new Exception("DATEX messages can not be sent binary.");
+                }
+                if (message.getFile() == null) {
+                    throw new Exception("Message does not contain file");
+                }
+            }
+            else{
+                if(message.getMessageText() == null){
+                    throw new Exception("Message does not contain messageText");
+                }
+            }
+        }
     }
 
     private static class DeliveriesOption{

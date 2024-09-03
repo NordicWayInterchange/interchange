@@ -144,19 +144,18 @@ public class Sink implements AutoCloseable {
 
 				String messageBody = null;
 				messages += 1;
-				String filename = "file-"+messages;
-				String metadataFile = filename+"-metadata";
-
+				File messageFile = new File(directory, "file-"+messages+".txt");
+				File metadataFile = new File(directory, "file-"+messages+"-metadata.txt");
 				switch (message){
 					case JmsBytesMessage bytesMessage -> {
 						System.out.println(" BYTES message");
 						byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 						bytesMessage.readBytes(messageBytes);
 						if(directory != null) {
-							try (FileOutputStream fos = new FileOutputStream(Paths.get(directory.getAbsolutePath(), filename).toFile())) {
+							try (FileOutputStream fos = new FileOutputStream(messageFile)) {
 								fos.write(messageBytes);
 							}
-							try (PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())) {
+							try (PrintWriter printWriter = new PrintWriter(metadataFile)) {
 								printWriter.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(metadataContent));
 							}
 						}
@@ -168,10 +167,10 @@ public class Sink implements AutoCloseable {
 						System.out.println(" TEXT message");
 						messageBody = jmsTextMessage.getBody(String.class);
 						if(directory != null){
-							try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), filename).toFile())){
+							try(PrintWriter printWriter = new PrintWriter(messageFile)){
 								printWriter.write(messageBody);
 							}
-							try(PrintWriter printWriter = new PrintWriter(Paths.get(directory.getAbsolutePath(), metadataFile).toFile())){
+							try(PrintWriter printWriter = new PrintWriter(metadataFile)){
 								printWriter.write(new ObjectMapper().writeValueAsString(messageBody));
 							}
 						}
@@ -185,7 +184,7 @@ public class Sink implements AutoCloseable {
 					System.out.println("/Body -----------");
 				}
 				else {
-					System.out.println(String.format("Message written to file %s, metadata written to file %s", filename, metadataFile));
+					System.out.println(String.format("Message written to %s, metadata written to %s", messageFile.getPath(), metadataFile.getPath()));
 				}
 
 				System.out.println("Delay " + delay + " ms \n");

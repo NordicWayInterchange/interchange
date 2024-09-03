@@ -35,101 +35,97 @@ public class SendMessage implements Callable<Integer> {
     public Integer call() throws Exception {
         System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
-        validateInput();
-            Messages messages = mapper.readValue(messageFile, Messages.class);
-            try (Source source = new Source(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
-                source.start();
-                for (Message message : messages.getMessages()) {
-                    MessageBuilder messageBuilder = source.createMessageBuilder();
-                    try {
-                        switch (message){
-                            case DenmMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(DENM)
-                                        .causeCode(((DenmMessage) message).getCauseCode())
-                                        .subCauseCode(((DenmMessage) message).getSubCauseCode());
-                            }
-                            case DatexMessage ignored -> {
-                                messageBuilder
-                                        .textMessage(message.getMessageText())
-                                        .messageType(DATEX_2)
-                                        .publicationType(((DatexMessage) message).getPublicationType())
-                                        .publicationSubType(((DatexMessage) message).getPublicationSubType())
-                                        .publisherName(((DatexMessage) message).getPublisherName());
-                            }
-                            case IvimMessage ignored -> {
+        Messages messages = mapper.readValue(messageFile, Messages.class);
+        validateInput(messages);
+        try (Source source = new Source(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
+            source.start();
+            for (Message message : messages.getMessages()) {
+                MessageBuilder messageBuilder = source.createMessageBuilder();
+                try {
+                    switch (message){
+                        case DenmMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(DENM)
+                                    .causeCode(((DenmMessage) message).getCauseCode())
+                                    .subCauseCode(((DenmMessage) message).getSubCauseCode());
+                        }
+                        case DatexMessage ignored -> {
+                            messageBuilder
+                                    .textMessage(message.getMessageText())
+                                    .messageType(DATEX_2)
+                                    .publicationType(((DatexMessage) message).getPublicationType())
+                                    .publicationSubType(((DatexMessage) message).getPublicationSubType())
+                                    .publisherName(((DatexMessage) message).getPublisherName());
+                        }
+                        case IvimMessage ignored -> {
                                 messageBuilder
                                         .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                         .messageType(IVIM)
                                         .iviType(((IvimMessage) message).getIviType())
                                         .pictogramCategoryCode(((IvimMessage) message).getPictogramCategoryCode())
                                         .iviContainer(((IvimMessage) message).getIviContainer());
-                            }
-                            case SpatemMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(SPATEM)
-                                        .id(((SpatemMessage) message).getId())
-                                        .name(((SpatemMessage) message).getName());
-                            }
-                            case MapemMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(MAPEM)
-                                        .id(((MapemMessage) message).getId())
-                                        .name(((MapemMessage) message).getName());
-                            }
-                            case SsemMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(SSEM)
-                                        .id(((SsemMessage) message).getId());
-                            }
-                            case SremMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(SREM)
-                                        .id(((SremMessage) message).getId());
-                            }
-                            case CamMessage ignored -> {
-                                messageBuilder
-                                        .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
-                                        .messageType(CAM)
-                                        .stationType(((CamMessage) message).getStationType())
-                                        .vehicleRole(((CamMessage) message).getVehicleRole());
-                            }
-
-                            default -> throw new Exception("Message is not of valid messagetype");
                         }
+                        case SpatemMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(SPATEM)
+                                    .id(((SpatemMessage) message).getId())
+                                    .name(((SpatemMessage) message).getName());
+                        }
+                        case MapemMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(MAPEM)
+                                    .id(((MapemMessage) message).getId())
+                                    .name(((MapemMessage) message).getName());
+                        }
+                        case SsemMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(SSEM)
+                                    .id(((SsemMessage) message).getId());
+                        }
+                        case SremMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(SREM)
+                                    .id(((SremMessage) message).getId());
+                        }
+                        case CamMessage ignored -> {
+                            messageBuilder
+                                    .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                    .messageType(CAM)
+                                    .stationType(((CamMessage) message).getStationType())
+                                    .vehicleRole(((CamMessage) message).getVehicleRole());
+                        }
+                            default -> throw new Exception("Message is not of valid messagetype");
+                    }
 
-                        messageBuilder
-                                .userId(message.getUserId())
-                                .publisherId(message.getPublisherId())
-                                .publicationId(message.getPublicationId())
-                                .originatingCountry(message.getOriginatingCountry())
-                                .protocolVersion(message.getProtocolVersion())
-                                .longitude(message.getLongitude())
-                                .latitude(message.getLatitude())
-                                .quadTreeTiles(message.getQuadTree())
-                                .shardId(message.getShardId())
-                                .shardCount(message.getShardCount())
-                                .baselineVersion(message.getBaselineVersion())
-                                .serviceType(message.getServiceType());
-                        source.send(messageBuilder.build());
-                    }
-                    catch(NoSuchFileException e){
-                        throw new Exception(String.format("File %s not found", message.getFileName()));
-                    }
+                    messageBuilder
+                            .userId(message.getUserId())
+                            .publisherId(message.getPublisherId())
+                            .publicationId(message.getPublicationId())
+                            .originatingCountry(message.getOriginatingCountry())
+                            .protocolVersion(message.getProtocolVersion())
+                            .longitude(message.getLongitude())
+                            .latitude(message.getLatitude())
+                            .quadTreeTiles(message.getQuadTree())
+                            .shardId(message.getShardId())
+                            .shardCount(message.getShardCount())
+                            .baselineVersion(message.getBaselineVersion())
+                            .serviceType(message.getServiceType());
+                    source.send(messageBuilder.build());
+                }
+                catch(NoSuchFileException e){
+                    throw new Exception(String.format("File %s not found", message.getFileName()));
                 }
             }
-
+        }
         return 0;
     }
 
-    private void validateInput() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        Messages messages = mapper.readValue(messageFile, Messages.class);
+    private void validateInput(Messages messages) throws Exception {
         for(Message message : messages.getMessages()){
             if(binary) {
                 if(message.getMessageType().equals(DATEX_2)){

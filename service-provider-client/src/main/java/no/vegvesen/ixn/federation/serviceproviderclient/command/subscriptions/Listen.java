@@ -23,6 +23,9 @@ public class Listen implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     SubscriptionsOption option;
 
+    @Option(names = {"-d", "--directory"}, description = "directory to save messages")
+    String directory;
+
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -60,7 +63,7 @@ public class Listen implements Callable<Integer> {
                 url,
                 endpointApi.getSource(),
                 parentCommand.getParent().createSSLContext(),
-                new Sink.DefaultMessageListener(),
+                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
