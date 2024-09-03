@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: interchange-ingress
+  #namespace?
+  annotations:
+    cert-manager.io/issuer: letsencrypt-staging
 spec:
   ingressClassName: nginx
   rules:
@@ -15,3 +18,7 @@ spec:
                 name: ixn-belle-napcore-frontend
                 port:
                   number: 3000
+  tls:
+    - hosts:
+      - portal.belle.stminterchange.com
+      secretName: belle-portal-cert
