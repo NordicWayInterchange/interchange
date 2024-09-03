@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -28,9 +27,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Autowired
     NeighbourRepository neighbourRepository;
 
-    @Mock
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
-
     @Autowired
     MatchRepository matchRepository;
 
@@ -39,7 +35,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Autowired
     OutgoingMatchRepository outgoingMatchRepository;
-
 
     @Test
     public void repositoryIsAutowired() {

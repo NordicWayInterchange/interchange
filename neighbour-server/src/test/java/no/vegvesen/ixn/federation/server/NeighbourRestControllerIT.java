@@ -51,6 +51,9 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
     @Autowired
     NeighbourRepository neighbourRepository;
 
+    @Autowired
+    WebApplicationContext context;
+
     @Test
     public void requestSubscriptionsDoesNotIncludeTimeStamp(){
         Neighbour neighbour = new Neighbour();
@@ -85,9 +88,6 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
 
         assertThat(neighbourRestController.listSubscriptions(neighbour.getName()).toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
     }
-
-    @Autowired
-    WebApplicationContext context;
 
     @Test
     public void genSwagger() throws Exception {
