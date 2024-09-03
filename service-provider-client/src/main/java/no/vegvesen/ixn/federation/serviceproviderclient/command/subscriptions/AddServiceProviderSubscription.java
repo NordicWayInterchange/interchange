@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Set;
@@ -42,6 +42,7 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
         }
         return 0;
     }
+
     static class AddServiceProviderSubscriptionOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;

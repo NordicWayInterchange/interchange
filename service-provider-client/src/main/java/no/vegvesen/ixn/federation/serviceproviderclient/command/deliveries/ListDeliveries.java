@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListDeliveriesResponse;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
@@ -16,9 +15,9 @@ import java.util.concurrent.Callable;
         mixinStandardHelpOptions = true
 )
 public class ListDeliveries implements Callable<Integer> {
+
     @ParentCommand
     DeliveriesCommand parentCommand;
-
 
     @Override
     public Integer call() throws Exception {

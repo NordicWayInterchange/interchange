@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import no.vegvesen.ixn.Sink;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;

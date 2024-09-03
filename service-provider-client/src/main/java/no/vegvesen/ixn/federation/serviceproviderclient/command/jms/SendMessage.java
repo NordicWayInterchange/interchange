@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +26,6 @@ public class SendMessage implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
         try (Source source = new Source(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
@@ -101,7 +97,6 @@ public class SendMessage implements Callable<Integer> {
                         .baselineVersion(message.getBaselineVersion())
                         .serviceType(message.getServiceType());
                 source.send(messageBuilder.build());
-
             }
         }
         return 0;

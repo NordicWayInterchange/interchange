@@ -4,20 +4,20 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import picocli.CommandLine;
+import picocli.CommandLine.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.DENM;
 
-@CommandLine.Command(name = "sendpredefined", description = "Sending a message that i predefined")
+@Command(name = "sendpredefined", description = "Sending a message that i predefined")
 public class SendPredefinedMessage implements Callable<Integer> {
 
-    @CommandLine.ParentCommand
+    @ParentCommand
     MessagesCommand parentCommand;
 
-    @CommandLine.Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")
+    @Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
 
     @Override

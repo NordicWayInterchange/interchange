@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelRequestApi;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +38,7 @@ public class AddPrivateChannel implements Callable<Integer> {
         return 0;
 
     }
+
     static class AddPrivateChannelOption{
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;

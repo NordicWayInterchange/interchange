@@ -6,7 +6,7 @@ import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
 
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Set;
@@ -25,7 +25,6 @@ public class AddDeliveries implements Callable<Integer> {
 
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddDeliveriesOption option;
-
 
     @Override
     public Integer call() throws Exception {

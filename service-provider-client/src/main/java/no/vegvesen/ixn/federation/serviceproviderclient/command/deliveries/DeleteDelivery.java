@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
@@ -21,7 +19,6 @@ public class DeleteDelivery implements Callable<Integer> {
 
     @Parameters(index = "0", description = "The ID of the delivery to delete")
     String deliveryId;
-
 
     @Override
     public Integer call() throws Exception {

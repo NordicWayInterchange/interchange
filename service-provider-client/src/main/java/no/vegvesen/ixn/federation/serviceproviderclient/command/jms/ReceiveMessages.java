@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -15,6 +13,7 @@ public class ReceiveMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
+
     @ParentCommand
     MessagesCommand parentCommand;
 
@@ -41,5 +40,4 @@ public class ReceiveMessages implements Callable<Integer> {
         }
         return 0;
     }
-
 }

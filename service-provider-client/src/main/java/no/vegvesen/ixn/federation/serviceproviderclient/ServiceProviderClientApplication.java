@@ -82,6 +82,7 @@ public class ServiceProviderClientApplication{
                 trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
+
     public ServiceProviderClient createClient() {
         return new ServiceProviderClient(createSSLContext(),server,user);
     }

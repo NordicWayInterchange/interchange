@@ -2,8 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 @Command(
         name = "subscriptions",
