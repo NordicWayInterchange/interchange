@@ -62,3 +62,9 @@ napcore_server:
 
 napcore_frontend:
   replicas: 1
+letsencrypt:
+  server: https://letsencrypt-server
+  email: my-email@mycompany.com
+  key_secret_ref: my-key-secret
+ingress:
+  name: my-ingress
