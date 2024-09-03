@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
@@ -13,11 +14,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Command(name = "receive", description = "Receive messages and print them to stdout")
 public class ReceiveMessages implements Callable<Integer> {
 
+
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
 
     @ParentCommand
     MessagesCommand parentCommand;
+
+    @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
+    String directory;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 
@@ -34,7 +39,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 parentCommand.getUrl(),
                 queueName,
                 parentCommand.createContext(),
-                new Sink.DefaultMessageListener(),
+                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
@@ -42,5 +47,4 @@ public class ReceiveMessages implements Callable<Integer> {
         }
         return 0;
     }
-
 }
