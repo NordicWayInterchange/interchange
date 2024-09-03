@@ -5,6 +5,9 @@ metadata:
   #namespace?
   annotations:
     cert-manager.io/issuer: letsencrypt-prod
+    kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   ingressClassName: nginx
   rules:
@@ -18,6 +21,16 @@ spec:
                 name: ixn-belle-napcore-frontend
                 port:
                   number: 3000
+    - host: belle.stminterchange
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ixn-belle-neighbour-server
+                port:
+                  number: {{ .Values.self.control_channel_port }}
   tls:
     - hosts:
       - portal.belle.stminterchange.com
