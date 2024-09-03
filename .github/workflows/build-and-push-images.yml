@@ -75,7 +75,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Save image tag
+      - name: Save tags to files
         run: |
           echo "$(git rev-parse --short HEAD)" >> IMAGE_TAG.txt
           echo "$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
@@ -137,7 +137,7 @@ jobs:
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
 
-      - name: Save tags to variable
+      - name: Save tags to variables
         run: |
           echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
