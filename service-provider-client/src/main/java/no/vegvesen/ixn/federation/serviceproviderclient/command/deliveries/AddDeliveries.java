@@ -6,7 +6,7 @@ import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
 
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Set;

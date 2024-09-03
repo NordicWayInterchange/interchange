@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -21,7 +18,7 @@ public class ReceiveMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
-    @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
+    @Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
     String directory;
 
     private final CountDownLatch counter = new CountDownLatch(1);

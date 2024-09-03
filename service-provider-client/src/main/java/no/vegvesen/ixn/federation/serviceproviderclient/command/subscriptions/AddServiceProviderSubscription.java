@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Set;

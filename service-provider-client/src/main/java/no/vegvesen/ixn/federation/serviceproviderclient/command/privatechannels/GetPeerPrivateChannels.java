@@ -3,8 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListPeerPrivateChannels;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 

@@ -4,17 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
 @Command(
         name = "get",
         description = "Get details on a specific subscription for a Service Provider",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class GetSubscription implements Callable<Integer> {

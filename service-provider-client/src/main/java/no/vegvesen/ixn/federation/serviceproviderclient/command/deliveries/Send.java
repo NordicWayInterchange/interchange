@@ -1,13 +1,14 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,9 +58,8 @@ public class Send implements Callable<Integer> {
             delivery = client.getDelivery(deliveryId);
             TimeUnit.SECONDS.sleep(2);
         }
-
-        System.out.println("Delivery created successfully, waiting for qpid to set up queue");
         TimeUnit.SECONDS.sleep(3);
+
         String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
         String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
 
@@ -68,7 +68,15 @@ public class Send implements Callable<Integer> {
         Messages messages = mapper.readValue(messageFile, Messages.class);
         validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
-            source.start();
+            while(true) {
+             try {
+                 source.start();
+                 break;
+             }catch (InvalidDestinationException e){
+                 System.out.println("\nRetrying\n");
+                 TimeUnit.SECONDS.sleep(2);
+             }
+            }
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
                 switch (message){

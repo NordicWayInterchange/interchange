@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 

@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 @Command(
         name = "subscriptions",
@@ -15,7 +13,7 @@ import picocli.CommandLine.ParentCommand;
                 DeleteServiceProviderSubscription.class,
                 Listen.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class SubscriptionsCommand {

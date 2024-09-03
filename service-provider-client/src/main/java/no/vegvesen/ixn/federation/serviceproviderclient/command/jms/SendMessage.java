@@ -5,7 +5,7 @@ import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
 
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;

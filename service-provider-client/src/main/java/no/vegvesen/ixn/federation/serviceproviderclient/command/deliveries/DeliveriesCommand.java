@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 @Command(
         name = "deliveries",

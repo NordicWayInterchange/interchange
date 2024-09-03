@@ -5,7 +5,7 @@ import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.io.File;
 import java.util.Set;

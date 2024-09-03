@@ -146,9 +146,9 @@ public class Sink implements AutoCloseable {
 				messages += 1;
 				File messageFile = new File(directory, "file-"+messages+".txt");
 				File metadataFile = new File(directory, "file-"+messages+"-metadata.txt");
+
 				switch (message){
 					case JmsBytesMessage bytesMessage -> {
-						System.out.println(" BYTES message");
 						byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 						bytesMessage.readBytes(messageBytes);
 						if(directory != null) {
@@ -160,11 +160,11 @@ public class Sink implements AutoCloseable {
 							}
 						}
 						else{
+							System.out.println(" BYTES message");
 							messageBody = Base64.getEncoder().encodeToString(messageBytes);
 						}
 					}
 					case JmsTextMessage jmsTextMessage -> {
-						System.out.println(" TEXT message");
 						messageBody = jmsTextMessage.getBody(String.class);
 						if(directory != null){
 							try(PrintWriter printWriter = new PrintWriter(messageFile)){
@@ -173,6 +173,9 @@ public class Sink implements AutoCloseable {
 							try(PrintWriter printWriter = new PrintWriter(metadataFile)){
 								printWriter.write(new ObjectMapper().writeValueAsString(messageBody));
 							}
+						}
+						else{
+							System.out.println(" TEXT message");
 						}
 					}
 					default -> System.err.println("Message type unknown: " + message.getClass().getName());

@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.Listen;
 import picocli.CommandLine;
 
 import java.nio.file.Path;

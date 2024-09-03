@@ -4,7 +4,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
