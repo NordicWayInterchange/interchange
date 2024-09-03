@@ -30,7 +30,7 @@ spec:
             - name: PFX_PASSPHRASE
               value: {{ .Values.napcore_keystore_password }}
             - name: INTERCHANGE_URI
-              value: "https://{{ .Values.external_name }}:{{ .Values.self.nap_provider_port}}/nap/"
+              value: "https://{{ .Release.Name }}-napcore-server:{{ .Values.self.nap_provider_port}}/nap/"
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.napcore_frontend.generated_username_prefix }}
             - name: NEXTAUTH_SECRET
