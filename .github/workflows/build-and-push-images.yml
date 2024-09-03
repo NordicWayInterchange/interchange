@@ -77,8 +77,8 @@ jobs:
 
       - name: Save image tag
         run: |
-          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> IMAGE_TAG.txt
-          echo "BRANCH_TAG=$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
+          echo "$(git rev-parse --short HEAD)" >> IMAGE_TAG.txt
+          echo "$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
 
       - name: Checkout to interchange-swagger-docs
         if: github.ref == 'refs/heads/federation-master'
