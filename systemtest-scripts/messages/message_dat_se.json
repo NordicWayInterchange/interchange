@@ -1,0 +1,19 @@
+{
+  "messages" : [ {
+    "messageText" : "This is my message",
+    "userId" : "king_olav.bouvetinterchange.eu",
+    "publisherId" : "SE12345",
+    "publicationId" : "SE12345-pub-1",
+    "originatingCountry" : "SE",
+    "protocolVersion" : "DATEX2:1.2.2",
+    "serviceType" : "service",
+    "baselineVersion" : "1.8.0",
+    "messageType" : "DATEX2",
+    "longitude" : 124.0,
+    "latitude" : 213.0,
+    "quadTree" : ",01230122,01230123",
+    "shardCount" : 1,
+    "publicationType": "SituationPublication",
+    "publisherName": "SE_publisher"
+  }]
+}

@@ -2,16 +2,17 @@
   "version" : "1.0",
   "capabilities" : [ {
     "application" : {
-      "messageType" : "DATEX",
+      "messageType" : "DATEX2",
       "publisherId" : "SE12345",
       "publicationId" : "SE12345-pub-1",
       "originatingCountry" : "SE",
-      "protocolVersion" : "DENM:1.2.2",
+      "protocolVersion" : "DATEX2:1.2.2",
       "quadTree" : [
         "01230122",
         "01230123"
       ],
-      "publicationType": "SituationPublication"
+      "publicationType": "SituationPublication",
+      "publisherName": "SE_publisher"
     },
     "metadata" : {
       "shardCount" : 1,
