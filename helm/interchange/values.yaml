@@ -65,7 +65,6 @@ napcore_server:
 
 napcore_frontend:
   enabled: false
-  replicas: 1
 #letsencrypt:
 #  server: https://letsencrypt-server
 #  email: my-email@mycompany.com

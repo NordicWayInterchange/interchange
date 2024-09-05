@@ -93,5 +93,3 @@ napcore_server:
   logging:
   - logger_name: .root
     level: info
-napcore_frontend:
-  enabled: false
