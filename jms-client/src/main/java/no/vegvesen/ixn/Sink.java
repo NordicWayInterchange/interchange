@@ -144,7 +144,7 @@ public class Sink implements AutoCloseable {
 
 				String messageBody = null;
 				messages += 1;
-				File messageFile = new File(directory, "file-"+messages+".txt");
+				File messageFile = new File(directory, "file-"+messages);
 				File metadataFile = new File(directory, "file-"+messages+"-metadata.txt");
 
 				switch (message){

@@ -29,7 +29,7 @@ public class Send implements Callable<Integer> {
     @Option(names = {"-m", "--message"}, description = "The message json file", required = true)
     File messageFile;
 
-    @Option(names = {"-b", "--binary"}, description = "")
+    @Option(names = {"-b", "--binary"}, description = "Send file")
     boolean binary;
 
     @ArgGroup(exclusive = true, multiplicity = "1")
@@ -37,6 +37,7 @@ public class Send implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String deliveryId;
         if(option.file != null){
@@ -49,6 +50,7 @@ public class Send implements Callable<Integer> {
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector))));
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
         }
+
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
 
         while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
@@ -68,15 +70,18 @@ public class Send implements Callable<Integer> {
         Messages messages = mapper.readValue(messageFile, Messages.class);
         validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
+
             while(true) {
              try {
                  source.start();
                  break;
-             }catch (InvalidDestinationException e){
+             }
+             catch (InvalidDestinationException e){
                  System.out.println("\nRetrying\n");
-                 TimeUnit.SECONDS.sleep(2);
+                 TimeUnit.SECONDS.sleep(3);
              }
             }
+
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
                 switch (message){

@@ -1,0 +1,19 @@
+{
+    "application" : {
+      "messageType" : "DENM",
+      "publisherId" : "NO00002",
+      "publicationId" : "NO0012-pubg",
+      "causeCode": [6],
+      "originatingCountry" : "NO",
+      "protocolVersion" : "DENM:2.3",
+      "quadTree" : [ "1111111111111111111111111111111111111111" ]
+    },
+      "metadata" : {
+        "shardCount" : 1,
+        "infoUrl" : "https://king_charles.info.no",
+        "redirectPolicy" : "OPTIONAL",
+        "maxBandwidth" : 0,
+        "maxMessageRate" : 0,
+        "repetitionInterval" : 0
+      }
+}
