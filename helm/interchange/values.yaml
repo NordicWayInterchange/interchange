@@ -1,3 +1,4 @@
+static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
   control_channel_port: 443                                         # Specify the control channel port  for the Node
   message_channel_port: 5671                                        # Specify the message channel port  for the Node
@@ -44,6 +45,8 @@ qpid:
 
 message_collector:
   replicas: 1
+  key_store_type: P12
+  trust_store_type: JKS
 
 neighbour_discoverer:
   replicas: 1
@@ -61,10 +64,11 @@ napcore_server:
   replicas: 1
 
 napcore_frontend:
+  enabled: false
   replicas: 1
-letsencrypt:
-  server: https://letsencrypt-server
-  email: my-email@mycompany.com
-  key_secret_ref: my-key-secret
-ingress:
-  name: my-ingress
+#letsencrypt:
+#  server: https://letsencrypt-server
+#  email: my-email@mycompany.com
+#  key_secret_ref: my-key-secret
+#ingress:
+#  name: my-ingress

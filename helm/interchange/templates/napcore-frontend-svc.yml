@@ -1,3 +1,4 @@
+{{ if .Values.napcore_frontend.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -18,3 +19,4 @@ spec:
     port: 3000 # TODO externalize
     targetPort: 3000  # TODO externalize
     protocol: TCP
+{{- end }}

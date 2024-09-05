@@ -1,3 +1,4 @@
+{{ if .Values.napcore_frontend.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -18,3 +19,4 @@ spec:
   ports:
   - name: napcore
     port: {{ .Values.self.nap_provider_port }}
+{{- end }}

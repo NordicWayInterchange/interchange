@@ -15,7 +15,7 @@ napcore_auth0_client_secret: my_secret
 
 # Values:
 external_name: example-node.itsinterchange.eu
-static_external_ip: ""
+static_external_ip: "1.2.3.4"
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
@@ -94,4 +94,19 @@ napcore_server:
   - logger_name: .root
     level: info
 napcore_frontend:
-  enabled: false
+  enabled: true
+#  replicas: 1
+  image:
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend
+    tag: "1.0"
+  keystore_file_name: napcore_frontend.p12
+  generated_username_prefix: nap.example-node.itsinterchange.eu.
+  napcore_auth0_issuer: my_auth0_issuer
+  #TODO share with ingress config
+  home_url: https://portal.belle.stminterchange.com
+letsencrypt:
+  server: https://letsencrypt-server
+##  email: my-email@mycompany.com
+##  key_secret_ref: my-key-secret
+ingress:
+  name: my-ingress
