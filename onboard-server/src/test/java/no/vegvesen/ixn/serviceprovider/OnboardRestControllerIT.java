@@ -1200,6 +1200,22 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         }
     }
 
+    @Test
+    public void testAddingCapabilityWithAlreadyDefinedCreatedTimestamp(){
+        ServiceProvider sp = new ServiceProvider("sp-1");
+        Capability capability = new Capability(
+                new DatexApplication("bouvet","bouvet-1", "NO","test", List.of("1"), "test", "test"),
+                new Metadata());
+        LocalDateTime time = LocalDateTime.of(1999, 12, 12, 11, 11, 11);
+        capability.setCreatedTimestamp(time);
+        sp.setCapabilities(new Capabilities(Set.of(capability)));
+        serviceProviderRepository.save(sp);
+
+        assertThat(serviceProviderRepository.findByName("sp-1")
+                .getCapabilities().getCapabilities().stream().findFirst().get().getCreatedTimestamp())
+                .isEqualTo(time);
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

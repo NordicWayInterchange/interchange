@@ -636,7 +636,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Collections.emptySet());
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);

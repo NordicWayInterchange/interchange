@@ -435,11 +435,11 @@ public class NeighbourServiceIT extends PostgresContainerBase {
         String name = "ignoredNeighbour";
 
         Neighbour neighbour = ignoredNeighbour(name);
-        CapabilityApi capabilitySplitApi = new CapabilityApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(),
                 new MetadataApi()
         );
-        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilitySplitApi)), Set.of()));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilityApi)), Set.of()));
     }
     @Test
     public void neighbourIgnoredWhenPollingSubscription(){

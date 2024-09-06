@@ -1,14 +1,16 @@
 package no.vegvesen.ixn.federation.model.capability;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
+@JsonIgnoreProperties(value = "createdTimestamp")
 public class Capability {
 
     @Id
@@ -28,25 +30,36 @@ public class Capability {
     @Enumerated(EnumType.STRING)
     private CapabilityStatus status = CapabilityStatus.CREATED;
 
-    public Capability() {
+    private LocalDateTime createdTimestamp;
 
+    public Capability() {
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+    }
+
+    public Capability(Application application, Metadata metadata, LocalDateTime createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = createdTimestamp;
     }
 
     public void setId(Integer id) {
@@ -89,23 +102,20 @@ public class Capability {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(LocalDateTime lastUpdatedTimestamp) {
+        this.createdTimestamp = lastUpdatedTimestamp;
+    }
+
     public boolean isSharded() {
         return metadata.getShardCount() > 1;
     }
 
     public boolean hasShards() {
         return metadata.hasShards();
-    }
-
-    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
-        Set<Capability> capabilities = new HashSet<>();
-        for(NeighbourCapability i : neighbourCapabilities){
-            capabilities.add(
-                    new Capability(i.getApplication(), i.getMetadata())
-            );
-
-        }
-        return capabilities;
     }
 
     @Override
