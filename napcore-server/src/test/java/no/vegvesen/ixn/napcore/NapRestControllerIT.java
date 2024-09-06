@@ -2,6 +2,7 @@ package no.vegvesen.ixn.napcore;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -14,13 +15,11 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,9 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@ContextConfiguration(initializers={PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class NapRestControllerIT {
+public class NapRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private  ServiceProviderRepository serviceProviderRepository;
