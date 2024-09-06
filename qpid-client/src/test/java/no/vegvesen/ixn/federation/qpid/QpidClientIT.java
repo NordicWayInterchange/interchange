@@ -40,6 +40,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
 	public static final String HOST_NAME = getDockerHost();
+
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidClientIT.class),"my_ca", HOST_NAME, "routing_configurer");
 
 	@Container
@@ -49,7 +50,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			HOST_NAME,
 			Path.of("qpid")
 			);
-
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -69,7 +69,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Autowired
 	QpidClient client;
 
-
 	@Test
 	public void pingQpid() {
 		assertThat(client.ping()).isEqualTo(200);
@@ -84,6 +83,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		});
 		client.removeQueue(queue);
 	}
+
 	@Test
 	public void testGetQueue() {
 		String name = "test-get-queue-queue";
@@ -91,11 +91,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		Queue result = client.getQueue(name);
 		assertThat(result.getName()).isEqualTo(name);
 	}
+
 	@Test
 	public void testGetNonExistingQueue() {
 		String name = "this-queue-does-not-exist";
 		assertThat(client.getQueue(name)).isNull();
 	}
+
 	@Test
 	public void testQueueExists() {
 		String name = "test-queue-exist-queue";
@@ -134,7 +136,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists("this-exchange-does-not-exist")).isFalse();
 	}
 
-
 	@Test
 	public void testGetGroupMember() {
 		String groupMember = "test-get-group-member-member";
@@ -144,7 +145,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(member).isNotNull();
 		assertThat(member.getName()).isEqualTo(groupMember);
 	}
-
 
 	@Test
 	public void testGetGroupMemberNonExistingMember() {
@@ -163,7 +163,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String myUser = "my-service-provider";
 		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
 		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
-
 
 		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
 		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
@@ -196,7 +195,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
 				() -> client.addMemberToGroup("member-of-non-existing-group", "this-group-does-not-exist")
 		);
-
 	}
 
 	@Test
@@ -206,7 +204,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
 				() -> client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME)
 		);
-
 	}
 
 	@Test
@@ -240,11 +237,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThatNoException().isThrownBy(
 				() -> client.postQpidAcl(qpidAcl)
 		);
-
 	}
 
 	@Test
-	//@Disabled
 	public void createAclWithMissingAttributes() {
 		Map<String,String> attributes = new HashMap<>();
 		AclRule rule = new AclRule("missing-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
@@ -290,7 +285,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 	}
 
-
 	@Test
 	public void readAccessIsAdded() {
 		String subscriberName = "king_harald";
@@ -309,13 +303,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
 
-
 	@Test
 	public void removeReadAccessThatDoesNotExist() {
 		assertThatNoException().isThrownBy(
 				() -> client.removeReadAccess("htis-subscriber-does-not-exist","this-queue-does-not-exist")
 		);
-
 	}
 
 	@Test
@@ -336,7 +328,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		Exchange directExchange = client.createDirectExchange("my-exchange");
+		Exchange directExchange = client.createHeadersExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
 		client.removeExchange(directExchange);
@@ -368,7 +360,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
 
-
 	@Test
 	public void readExchangesFromQpid() throws IOException {
 		client.createHeadersExchange("test-exchange1");
@@ -379,7 +370,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		assertThat(client.getAllExchanges()).isNotEmpty();
 	}
-
 
 	@Test
 	public void readQueuesFromQpid() throws IOException {
@@ -448,7 +438,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String selector = "originatingCountry = 'NO'";
 
 		client.createHeadersExchange(capabilityExchange);
-		client.createDirectExchange(deliveryExchange);
+		client.createHeadersExchange(deliveryExchange);
 
 		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 
@@ -480,7 +470,5 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void testCreateExchangeCheckIfItsDurable() {
 		Exchange exchange = client.createHeadersExchange("test-create-exchange-is-durable-header");
 		assertThat(exchange.isDurable()).isTrue();
-
 	}
-
 }
