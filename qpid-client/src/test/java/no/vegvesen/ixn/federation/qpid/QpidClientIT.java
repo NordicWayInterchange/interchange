@@ -5,19 +5,17 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,8 +31,6 @@ import static org.assertj.core.api.Assertions.*;
  * the actual hostname would normally end up as something like "localhost".
  */
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
-@ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
-@Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
@@ -51,19 +47,18 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			Path.of("qpid")
 			);
 
-	static class Initializer
-			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+	@DynamicPropertySource
+	static void datasourceProperties(DynamicPropertyRegistry registry) {
+		logger.info("server url: {}", qpidContainer.getHttpUrl());
+		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+		registry.add("routing-configurer.vhost", () -> "localhost");
+		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+	}
 
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = qpidContainer.getHttpsUrl();
-            logger.info("server url: {}", qpidContainer.getHttpUrl());
-			TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + getTrustStorePath(stores),
-					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
+	@BeforeAll
+	static void setup(){
+		qpidContainer.start();
 	}
 
 	@Autowired

@@ -12,17 +12,16 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.net.ssl.SSLContext;
 import jakarta.transaction.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -30,10 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import no.vegvesen.ixn.docker.PostgresContainerBase;
+
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class NeighbourDiscovererIT {
+public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 	private final LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 	@MockBean
