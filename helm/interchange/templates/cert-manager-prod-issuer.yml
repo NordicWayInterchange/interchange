@@ -13,5 +13,5 @@ spec:
       - http01:
           ingress:
             ingressClassName: nginx
-            name: {{ .Values.ingress.name }}
+            name: {{ .Release.Name }}-interchange-ingress
 {{- end }}
