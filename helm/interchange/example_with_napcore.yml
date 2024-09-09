@@ -103,7 +103,7 @@ napcore_frontend:
   generated_username_prefix: nap.example-node.itsinterchange.eu.
   napcore_auth0_issuer: my_auth0_issuer
   #TODO share with ingress config
-  home_url: https://portal.belle.stminterchange.com
+  home_url: https://portal.example-node.itsinterchange.eu
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
