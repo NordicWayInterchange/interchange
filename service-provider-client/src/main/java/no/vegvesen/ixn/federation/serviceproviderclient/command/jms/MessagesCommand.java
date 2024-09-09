@@ -3,10 +3,9 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import picocli.CommandLine;
+import picocli.CommandLine.*;
 
 import java.nio.file.Path;
-
-import static picocli.CommandLine.*;
 
 @Command(name="messages",
         description = "",
@@ -53,5 +52,4 @@ public class MessagesCommand implements JmsTopCommand {
     public String getTrustStorePassword() {
         return parent.getTrustStorePassword();
     }
-
 }

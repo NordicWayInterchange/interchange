@@ -38,6 +38,7 @@ public class AddPrivateChannel implements Callable<Integer> {
         return 0;
 
     }
+
     static class AddPrivateChannelOption{
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;

@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParentCommand;
-import static picocli.CommandLine.*;
-
+import picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
 @Command(name = "delete", description = "Delete a service provider capability")

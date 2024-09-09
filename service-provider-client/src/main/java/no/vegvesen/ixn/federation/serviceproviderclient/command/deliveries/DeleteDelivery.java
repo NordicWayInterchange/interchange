@@ -19,7 +19,6 @@ public class DeleteDelivery implements Callable<Integer> {
     @Parameters(index = "0", description = "The ID of the delivery to delete")
     String deliveryId;
 
-
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();

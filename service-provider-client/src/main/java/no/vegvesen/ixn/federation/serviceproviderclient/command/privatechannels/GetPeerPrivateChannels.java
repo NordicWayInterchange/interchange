@@ -13,7 +13,6 @@ public class GetPeerPrivateChannels implements Callable<Integer> {
     @ParentCommand
     PrivateChannelsCommand parentCommand;
 
-
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();

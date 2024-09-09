@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -48,31 +51,9 @@ import static org.mockito.Mockito.when;
         InterchangeNodeProperties.class,
         ServiceProviderRouter.class
         })
-@ContextConfiguration(initializers = {LocalSubscriptionQpidStructureIT.Initializer.class})
-@Testcontainers
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     public static final String CONFIGURER_USER = "routing_configurer";
-
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            String httpsUrl = qpidContainer.getHttpsUrl();
-            String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: {}", httpUrl);
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + httpsUrl,
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + getTrustStorePath(stores),
-                    "test.ssl.key-store=" +  getClientStorePath(CONFIGURER_USER,stores.clientStores()),
-                    "interchange.node-provider.brokerExternalName=" + qpidContainer.getHost(),
-                    "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
-
 
     private static final Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
@@ -90,6 +71,21 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+        registry.add("routing-configurer.vhost", () -> "localhost");
+        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        registry.add("interchange.node-provider.name", qpidContainer::getHost);
+        registry.add("interchange.node-provider.messageChannelPort", qpidContainer::getAmqpsPort);
+    }
+
+    @BeforeAll
+    static void setUp(){
+        qpidContainer.start();
+    }
 
     //TODO would be nic to be able to do without it :-)
     @MockBean

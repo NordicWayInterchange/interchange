@@ -16,7 +16,6 @@ import javax.net.ssl.SSLContext;
 
 public class ServiceProviderClient {
 
-
     private RestTemplate restTemplate;
     private final String server;
     private final String user;
@@ -38,6 +37,7 @@ public class ServiceProviderClient {
         this.server = server;
         this.user = user;
     }
+
     public AddCapabilitiesResponse addCapability(AddCapabilitiesRequest capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -123,10 +123,12 @@ public class ServiceProviderClient {
         String url = String.format("%s/%s/privatechannels", server, user);
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
+
     public GetPrivateChannelResponse getPrivateChannel(String privateChannelId){
         String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
+
     public ListPeerPrivateChannels getPeerPrivateChannels(){
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();

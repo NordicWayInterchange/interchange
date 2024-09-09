@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import no.vegvesen.ixn.serviceprovider.model.FetchMatchingCapabilitiesResponse;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 

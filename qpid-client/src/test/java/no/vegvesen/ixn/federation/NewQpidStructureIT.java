@@ -13,19 +13,17 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import javax.net.ssl.SSLContext;
@@ -39,13 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 //TODO this class does things differently from all the other Qpid test classes. Should we change this to be like the rest?
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
-@ContextConfiguration(initializers = {NewQpidStructureIT.Initializer.class})
-@Testcontainers
 public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
 
     public static final String HOSTNAME = "localhost";
+
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(NewQpidStructureIT.class),"my_ca", HOSTNAME, "routing_configurer", "king_gustaf");
 
     @Qualifier("getTestSslContext")
@@ -63,32 +60,29 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
-
-    static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            //need to set the logg follower somewhere, this seems like a "good" place to do it for now
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            logger.info("Server admin url: {}", qpidContainer.getHttpUrl());
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + getTrustStorePath(stores),
-                    "test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+        registry.add("routing-configurer.vhost", () -> "localhost");
+        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
     }
+
+    @BeforeAll
+    static void setup(){
+        qpidContainer.start();
+    }
+
 
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
-        //1. Create an exchange
         String exchangeName = "inputExchange";
-        qpidClient.createDirectExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
+
         String queueName = "outputQueue";
-        //2. Create a queue
         qpidClient.createQueue(queueName);
-        //2.1 Create a Capability to base a Validating selector on
+
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO-123",
@@ -101,11 +95,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 new Metadata()
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability);
-        System.out.println(selector);
-        //3. Create a binding on exchange using the validating selector, pointing at queue
+
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
-        //4. Create a Source, sending one good message, and one bad
+
         AtomicInteger numMessages = new AtomicInteger();
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
                 queueName,
@@ -113,7 +106,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 message -> numMessages.incrementAndGet())) {
             sink.start();
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),exchangeName,sslContext)) {
-                //5. Create a Sink, listens to queue. Check that sink get 1 message.
                 source.start();
                 source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
                 String messageText = "{}";
@@ -191,18 +183,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED
         );
 
-        //1. Creating delivery queue and adding write access.
-        qpidClient.createDirectExchange(inQueueName);
+        qpidClient.createHeadersExchange(inQueueName);
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
-        //2. Creating read queue and adding read access.
         qpidClient.createQueue(outQueueName);
         qpidClient.addReadAccess("king_gustaf", outQueueName);
 
-        //Create intermediate exchange. No ACL needed for this.
         qpidClient.createHeadersExchange(exchangeName);
 
-        //3. Making Capability selector and joining with delivery selector.
         String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
         System.out.println(capabilitySelector);
 
@@ -213,27 +201,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
         System.out.println(joinedSelector);
 
-        //4. Adding binding on deliveryQueue to out-queue
         qpidClient.addBinding(inQueueName, new Binding(inQueueName, exchangeName, new Filter(joinedSelector)));
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, outQueueName, new Filter(subscriptionSelector)));
 
-        //5. Adding binding on out queue to outgoingExchange
-        //TODO this is not being done. We need a lot of selectors here:
-            //1. The capability selector, used for validating incoming messages from SP.
-            //2. The delivery selector, further limiting what the SP can produce on the in-queue.
-            //3. The subscription selector, event further limiting what ends up on the out-queue for the Subscription.
-        //TODO the question becomes: Do we just AND the different selectors together?
-
-        //String subscriptionSelector = subscription.getSelector();
-        //System.out.println(subscriptionSelector);
-
-        //qpidClient.addBinding(subscriptionSelector, outQueueName, "" + subscriptionSelector.hashCode(), exchangeName);
-
-        //6. Allowing inQueue To publish on exchange
-        //qpidClient.createPublishAccessOnExchangeForQueue("routing_configurer", inQueueName);
-        //qpidClient.createConsumeAccessOnQueueForExchange(inQueueName);
-
-        //7. Creating a Source and Sink to send message
         AtomicInteger numMessages = new AtomicInteger();
 
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
@@ -312,7 +282,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             System.out.println();
             Thread.sleep(200);
         }
-        //assertThat(numMessages.get()).isEqualTo(1);
     }
 
     @Test
@@ -356,7 +325,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createQueue(subscriptionQueue);
@@ -442,14 +411,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED
         );
 
-        //1. Creating delivery queue and adding write access.
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
-        //Create intermediate exchange. No ACL needed for this.
         qpidClient.createHeadersExchange(capabilityExchange);
 
-        //3. Making Capability selector and joining with delivery selector.
         String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
 
         String deliverySelector = delivery.getSelector();
@@ -457,7 +423,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
         System.out.println(joinedSelector);
 
-        //4. Adding binding on deliveryQueue to out-queue
         qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(joinedSelector)));
         qpidClient.addBinding(capabilityExchange, new Binding(capabilityExchange, consumeQueue, new Filter(capabilitySelector)));
 
@@ -496,7 +461,5 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             Thread.sleep(200);
         }
         assertThat(numMessages.get()).isEqualTo(2);
-
     }
-
 }

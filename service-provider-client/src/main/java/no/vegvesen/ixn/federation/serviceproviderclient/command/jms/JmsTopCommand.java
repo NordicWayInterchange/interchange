@@ -8,7 +8,9 @@ import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 
 public interface JmsTopCommand {
+
     String getUrl();
+
     Path getKeystorePath();
 
     String getKeystorePassword();
@@ -16,7 +18,6 @@ public interface JmsTopCommand {
     Path getTrustStorePath();
 
     String getTrustStorePassword();
-
 
     default SSLContext createContext() {
         KeystoreDetails keystoreDetails = new KeystoreDetails(getKeystorePath().toString(),

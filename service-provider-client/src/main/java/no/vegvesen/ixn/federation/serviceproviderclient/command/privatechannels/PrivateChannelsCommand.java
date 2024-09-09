@@ -21,7 +21,6 @@ public class PrivateChannelsCommand {
     @ParentCommand
     ServiceProviderClientApplication parent;
 
-
     public ServiceProviderClientApplication getParent() {
         return parent;
     }

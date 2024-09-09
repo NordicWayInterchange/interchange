@@ -17,6 +17,7 @@ import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,22 +48,10 @@ import static org.mockito.Mockito.*;
 
 
 @SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
-@ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
-@Testcontainers
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
-
 
 	public static final String HOST_NAME = getDockerHost();
 	public static CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf","nordea");
-
-
-	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer(
-			stores,
-			HOST_NAME,
-			HOST_NAME,
-			Path.of("qpid")
-			);
 
     @Qualifier("getTestSslContext")
     @Autowired
@@ -71,24 +62,29 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(emptySet());
 	private final NeighbourCapabilities emptyNeighbourCapabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, emptySet());
 
-    static class Initializer
-			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+	@Container
+	public static final QpidContainer qpidContainer = getQpidTestContainer(
+			stores,
+			HOST_NAME,
+			HOST_NAME,
+			Path.of("qpid")
+	);
+	@DynamicPropertySource
+	static void datasourceProperties(DynamicPropertyRegistry registry) {
+		qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+		String httpsUrl = qpidContainer.getHttpsUrl();
+		String httpUrl = qpidContainer.getHttpUrl();
+		logger.info("server url: {}", httpsUrl);
+		logger.info("server url: {}", httpUrl);
+		registry.add("routing-configurer.baseUrl", () -> httpsUrl);
+		registry.add("routing-configurer.vhost", () -> "localhost");
+		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+	}
 
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-			String httpsUrl = qpidContainer.getHttpsUrl();
-			String httpUrl = qpidContainer.getHttpUrl();
-			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
-            TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + getTrustStorePath(stores),
-					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
-
+	@BeforeAll
+	static void setUp(){
+		qpidContainer.start();
 	}
 
 	@MockBean
@@ -781,7 +777,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
 
-		client.createDirectExchange(deliveryExchangeName);
+		client.createHeadersExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getMetadata().getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 

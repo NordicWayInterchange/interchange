@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 
 import picocli.CommandLine.*;
@@ -22,7 +21,6 @@ public class DeliveriesCommand {
 
     @ParentCommand
     ServiceProviderClientApplication parent;
-
 
     public ServiceProviderClientApplication getParent() {
         return parent;
