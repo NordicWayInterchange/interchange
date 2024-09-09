@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
-@Command(name="send", description = "")
+@Command(name="send", description = "Add delivery and send message")
 public class Send implements Callable<Integer> {
 
     @ParentCommand

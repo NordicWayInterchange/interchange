@@ -57,6 +57,14 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,selector).getBody();
     }
 
+    public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilitiesResponse(String selector){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = String.format("%s/%s/deliveries/match?selector={selector}", server, user);
+        return restTemplate.getForEntity(url, FetchMatchingCapabilitiesResponse.class, selector).getBody();
+    }
+
     public ListSubscriptionsResponse getSubscriptions() {
         String url = String.format("%s/%s/subscriptions", server, user);
         return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();

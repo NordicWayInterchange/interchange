@@ -27,7 +27,7 @@ public class AddServiceProviderCapability implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        ServiceProviderClient client = parentCommand.getParentCommand().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
 
         ObjectMapper mapper = new ObjectMapper();
         AddCapabilitiesRequest capability = mapper.readValue(file, AddCapabilitiesRequest.class);

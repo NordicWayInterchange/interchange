@@ -306,6 +306,59 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingMatchingLocalCapabilities(){
+       ServiceProvider serviceProvider1 = new ServiceProvider("sp-1");
+       ServiceProvider serviceProvider2 = new ServiceProvider("sp-2");
+       serviceProvider1.setCapabilities(new Capabilities(
+               Set.of(
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-1",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)
+                                       ),
+                               new Metadata(RedirectStatus.OPTIONAL)
+                       ),
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-2",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)),
+                               new Metadata(RedirectStatus.OPTIONAL))
+               )
+       ));
+       serviceProvider2.setCapabilities(new Capabilities(
+               Set.of(new Capability(
+                       new DenmApplication(  "NPRA_2",
+                               "pub-3",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ), new Capability(
+                       new DenmApplication(
+                               "NPRA_2",
+                               "pub-4",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)
+                       ),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ))
+       ));
+       serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+       assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
+       assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
+    }
+    @Test
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
@@ -315,7 +368,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                List.of("1234"),
+                                List.of("123"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));

@@ -14,7 +14,7 @@ public class DeleteServiceProviderCapability implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        parentCommand.getParentCommand().createClient().deleteCapability(capabilityId);
+        parentCommand.getParent().createClient().deleteCapability(capabilityId);
         System.out.printf("Capability %s deleted successfully%n", capabilityId);
         return 0;
     }

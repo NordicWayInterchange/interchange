@@ -80,6 +80,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
         registry.add("interchange.node-provider.name", qpidContainer::getHost);
         registry.add("interchange.node-provider.messageChannelPort", qpidContainer::getAmqpsPort);
+        registry.add("interchange.node-provider.brokerExternalName", qpidContainer::getHost);
     }
 
     @BeforeAll

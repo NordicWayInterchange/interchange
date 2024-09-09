@@ -25,7 +25,6 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                FetchMatchingCapabilities.class,
                 MessagesCommand.class
         },
         mixinStandardHelpOptions = true)

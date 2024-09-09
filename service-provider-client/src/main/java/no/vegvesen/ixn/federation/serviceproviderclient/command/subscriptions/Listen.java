@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Command(name = "listen", description = "")
+@Command(name = "listen", description = "Add subscription and receive messages")
 public class Listen implements Callable<Integer> {
 
     @ParentCommand
