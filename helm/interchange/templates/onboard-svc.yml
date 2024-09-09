@@ -10,7 +10,8 @@ metadata:
     component: onboard-server
     release: {{ .Release.Name }}
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.static_external_ip }}
   selector:
     app: {{ .Chart.Name }}
     component: onboard-server

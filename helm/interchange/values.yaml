@@ -6,6 +6,8 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
+  trust_store: truststore.jks
+  key_store: keystore.p12
 
 qpid:
   replicas: 1

@@ -10,7 +10,7 @@ metadata:
 spec:
   externalTrafficPolicy: Local
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.static_external_ip }}
+  loadBalancerIP: {{ .Values.ingress.external_portal_ip }}
   ports:
     - port: 80
       name: http
@@ -18,14 +18,6 @@ spec:
     - port: 443
       name: https
       targetPort: 443
-    - port: 5671
-      name: amqps
-      targetPort: 5671
-      protocol: TCP
-    - port: 4141
-      name: onboard
-      targetPort: 4141
-      protocol: TCP
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx

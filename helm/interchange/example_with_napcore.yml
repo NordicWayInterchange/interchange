@@ -95,7 +95,7 @@ napcore_server:
     level: info
 napcore_frontend:
   enabled: true
-#  replicas: 1
+  replicas: 1
   image:
     repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend
     tag: "1.0"
@@ -106,7 +106,8 @@ napcore_frontend:
   home_url: https://portal.belle.stminterchange.com
 letsencrypt:
   server: https://letsencrypt-server
-##  email: my-email@mycompany.com
-##  key_secret_ref: my-key-secret
+  email: my-email@mycompany.com
+  key_secret_ref: my-key-secret
 ingress:
   name: my-ingress
+  external_portal_ip: 2.3.4.5

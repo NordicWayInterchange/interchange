@@ -3,8 +3,6 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-napcore-server
-  annotations:
-    cloud.google.com/l4-rbs: "enabled"
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
