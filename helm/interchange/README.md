@@ -3,9 +3,8 @@
 The helm charts in this folder is uploaded to the registry at oci://europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/helm/interchange
 The current version can be located by looking at the version listed in the chart file [here](https://raw.githubusercontent.com/NordicWayInterchange/interchange/federation-master/helm/interchange/Chart.yaml)
 
-## Some important values
 
-### Portal
+## Portal
 The Interchange includes a simple portal implementation that uses Auth0 for authentication and letsencrypt for 
 certificate management, as well as nginx-ingress as ingress. These components require the ability to install
 components in separate namespaces. Additional requirements are a separate static IP for the portal, and an DNS A-record
