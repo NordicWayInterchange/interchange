@@ -9,20 +9,20 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -37,10 +37,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class OnboardRestControllerIT {
-
+public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
@@ -1200,6 +1198,22 @@ public class OnboardRestControllerIT {
         catch (IllegalArgumentException e){
             return false;
         }
+    }
+
+    @Test
+    public void testAddingCapabilityWithAlreadyDefinedCreatedTimestamp(){
+        ServiceProvider sp = new ServiceProvider("sp-1");
+        Capability capability = new Capability(
+                new DatexApplication("bouvet","bouvet-1", "NO","test", List.of("1"), "test", "test"),
+                new Metadata());
+        LocalDateTime time = LocalDateTime.of(1999, 12, 12, 11, 11, 11);
+        capability.setCreatedTimestamp(time);
+        sp.setCapabilities(new Capabilities(Set.of(capability)));
+        serviceProviderRepository.save(sp);
+
+        assertThat(serviceProviderRepository.findByName("sp-1")
+                .getCapabilities().getCapabilities().stream().findFirst().get().getCreatedTimestamp())
+                .isEqualTo(time);
     }
 
     @Autowired
