@@ -15,6 +15,8 @@ public class CountMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
+    @Option(names = {"-p", "--prefetch"}, description = "set prefetch value")
+    Integer prefetch;
     //TODO will this wait for messages?
     @Override
     public Integer call() throws Exception {
@@ -25,7 +27,7 @@ public class CountMessages implements Callable<Integer> {
                 }
         ));
         try (Sink sink = new Sink(parentCommand.getUrl(), queueName, parentCommand.createContext(), message -> counter.incrementAndGet())) {
-            sink.start(1000);
+            sink.start(prefetch == null ? 1000 : prefetch);
         }
         return 0;
     }
