@@ -13,7 +13,7 @@ for the domain name the portal is to be served from.
 To enable the portal, first install [Niginx ingress](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io/)
 into their separate namespaces. 
 The nginx ingress might need a separate LoadBalancer in front, in that case, the setting `controller.extraArgs` need to contain the setting 
-`publish-service: ingress-nginx/ingress-lb` (TODO: this should have the namespace in the lb service name)
+`publish-service: ingress-nginx/<interchange release-name>-ingress-lb` 
 Then, in order to install the portal, review the example values in the [example file](example_with_napcore.yml), and set the 
 value of `napcore_frontend.enabled` to true.
 It is advised to set the `letsencrypt.server` variable to the letsencrypt staging server until you are completely convinced

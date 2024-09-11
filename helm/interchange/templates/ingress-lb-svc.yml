@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ingress-lb
+  name: {{ .Release.Name }}-ingress-lb
   namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
