@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.junit.jupiter.api.Test;
@@ -41,8 +44,6 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, InterchangeNodeProperties.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
-@ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
-@Testcontainers
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
@@ -51,7 +52,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public static final String HOST_NAME = getDockerHost();
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(ServiceProviderRouterIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
-	@Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
 			stores,
 			HOST_NAME,
@@ -59,20 +59,19 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			Path.of("qpid")
 			);
 
+	@DynamicPropertySource
+	static void datasourceProperties(DynamicPropertyRegistry registry) {
+		qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+		registry.add("routing-configurer.vhost", () -> "localhost");
+		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("interchange.node-provider.name", () -> HOST_NAME);
+	}
 
-	static class Initializer
-			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-			TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
-					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + getTrustStorePath(stores),
-					"test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores()),
-					"interchange.node-provider.name=" + HOST_NAME
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
+	@BeforeAll
+	static void setup(){
+		qpidContainer.start();
 	}
 
 	@MockBean

@@ -9,11 +9,13 @@
     "status" : "CREATED"
   } ],
   "capabilities" : [ {
-    "messageType" : "DATEX2",
+  "application" : {
+    "messageType" : "IVIM",
     "publisherId" : "NO-0001",
     "originatingCountry" : "NO",
     "protocolVersion" : "1.0",
-    "quadTree" : [ "123" ],
-    "publicationType" : [ "6" ]
+    "quadTree" : [ "123" ]
+    },
+    "metadata" : {}
   } ]
 } ]

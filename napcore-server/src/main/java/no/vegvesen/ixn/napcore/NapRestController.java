@@ -3,18 +3,18 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
-import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
@@ -33,11 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,6 +43,7 @@ public class NapRestController {
     private final NeighbourRepository neighbourRepository;
     private final CertService certService;
     private final NapCoreProperties napCoreProperties;
+    private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
     private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
@@ -59,12 +56,13 @@ public class NapRestController {
             NeighbourRepository neighbourRepository,
             CertService certService,
             NapCoreProperties napCoreProperties,
-            CertSigner certSigner) {
+            CertSigner certSigner, CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.certService = certService;
         this.napCoreProperties = napCoreProperties;
         this.certSigner = certSigner;
+        this.capabilityToCapabilityApiTransformer = capabilityToCapabilityApiTransformer;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/x509/csr"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,7 +87,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
 
-        if (Objects.isNull(subscriptionRequest)) {
+        if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector())) {
             throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
         }
 
@@ -104,7 +102,7 @@ public class NapRestController {
         serviceProvider.addLocalSubscription(localSubscription);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
-        logger.debug("Updated Service Provider: {}", savedServiceProvider.toString());
+        logger.debug("Updated Service Provider: {}", savedServiceProvider);
 
         LocalSubscription savedSubscription = savedServiceProvider
                 .getSubscriptions()
@@ -122,11 +120,12 @@ public class NapRestController {
         logger.info("Listing subscription for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-
-        return typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
+        List<Subscription> subscriptions= typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
+        Collections.sort(subscriptions);
+        return subscriptions;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"})
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Subscription getSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
@@ -134,7 +133,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = serviceProvider.getSubscriptions()
                 .stream()
-                .filter(s -> s.getId().equals(Integer.parseInt(subscriptionId)))
+                .filter(s -> s.getUuid().equals(subscriptionId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,actorCommonName)));
 
@@ -148,26 +147,190 @@ public class NapRestController {
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(subscriptionId));
+        serviceProviderToUpdate.removeLocalSubscription(subscriptionId);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-        logger.debug("Updated Service Provider: {}", saved.toString());
+        logger.debug("Updated Service Provider: {}", saved);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" })
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" }, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 
-        Set<Capability> allCapabilities = getAllNeighbourCapabilities();
-        allCapabilities.addAll(getAllLocalCapabilities());
+        Set<Capability> localCapabilities = getAllLocalCapabilities();
+        Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
         if (selector != null) {
             if (!selector.isEmpty()) {
-                allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+                localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+                neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
             }
         }
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(localCapabilities, neighbourCapabilities);
+        Collections.sort(capabilities);
+        return capabilities;
+    }
 
-        return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
+    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
+
+        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
+            throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
+        }
+        LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
+
+        if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
+            localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
+        }
+        else{
+            localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+        }
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        serviceProvider.addDelivery(localDelivery);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
+        logger.debug("Updated Service Provider: {}", savedServiceProvider);
+
+        LocalDelivery savedDelivery = savedServiceProvider
+                .getDeliveries()
+                .stream()
+                .filter(delivery -> delivery.equals(localDelivery))
+                .findFirst()
+                .get();
+
+        return typeTransformer.transformLocalDeliveryToNapDelivery(savedDelivery);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Getting subscription {} for service provider {}", deliveryId, actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
+                .filter(d->d.getUuid().equals(deliveryId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with Id %s for service provider %s", deliveryId, actorCommonName)));
+
+        return typeTransformer.transformLocalDeliveryToNapDelivery(localDelivery);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Listing deliveries for service provider {}", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        List<Delivery> deliveries = typeTransformer.transformLocalDeliveriesToNapDeliveries(serviceProvider.getDeliveries());
+        Collections.sort(deliveries);
+        return deliveries;
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"})
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
+
+        ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
+        serviceProviderToUpdate.removeLocalDelivery(deliveryId);
+
+        ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+        logger.debug("Updated service provider: {}", saved);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("List local capabilities for service provider {}", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
+        if(selector != null){
+            if(!selector.isEmpty()){
+                allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
+            }
+        }
+        List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities, Collections.emptySet());
+        Collections.sort(capabilities);
+        return capabilities;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
+
+        if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
+            throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
+        }
+
+        ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
+        Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
+        if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
+            throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
+        }
+        if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
+        }
+        Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
+        if(!capabilityProperties.isEmpty()){
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
+        }
+
+        serviceProviderToUpdate.getCapabilities().addDataType(capabilityToAdd);
+        ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
+        Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
+                .stream()
+                .filter(a->a.equals(capabilityToAdd))
+                .findFirst().get();
+
+        logger.info("Returning updated Service Provider: {}", savedServiceProvider);
+        return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("List capabilities for service provider {}", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCreatedCapabilities());
+        Collections.sort(capabilities);
+        return capabilities;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        Capability capability = serviceProvider.getCreatedCapability(capabilityId);
+        return typeTransformer.transformCapabilityToOnboardingCapability(capability);
+    }
+
+    @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
+
+        return allPublicationIds();
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"})
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
+
+        ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
+        serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+        serviceProviderRepository.save(serviceProviderToUpdate);
+        logger.info("Updated service provider {}", serviceProviderToUpdate);
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
@@ -178,8 +341,23 @@ public class NapRestController {
         return serviceProvider;
     }
 
-    private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+    private Set<String> allPublicationIds() {
+        Set<String> allPublicationIds = getAllLocalCapabilities().stream()
+                .map(c -> c.getApplication().getPublicationId())
+                .collect(Collectors.toSet());
+        Set<String> neighbourPublicationIds = getAllNeighbourCapabilities().stream()
+                .map(c -> c.getApplication().getPublicationId())
+                .collect(Collectors.toSet());
+        allPublicationIds.addAll(neighbourPublicationIds);
+        return allPublicationIds;
+    }
+
+    private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
+        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+    }
+
+    private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
+        return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
     }
 
     private Set<Capability> getAllLocalCapabilities() {
@@ -191,11 +369,11 @@ public class NapRestController {
         return capabilities;
     }
 
-    private Set<Capability> getAllNeighbourCapabilities() {
-        Set<Capability> capabilities = new HashSet<>();
+    private Set<NeighbourCapability> getAllNeighbourCapabilities() {
+        Set<NeighbourCapability> capabilities = new HashSet<>();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for (Neighbour neighbour : neighbours) {
-            capabilities.addAll(Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
+            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
         }
         return capabilities;
     }

@@ -3,6 +3,7 @@ package no.vegvesen.ixn.docker.keygen.generator;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -52,12 +53,12 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
                 outputFile);
     }
 
-        @Override
+    @Override
     protected void configure() {
-        this.withFileSystemBind(keyOnHost.toString(), IN_KEY_PATH);
-        this.withFileSystemBind(chainCertOnHost.toString(), IN_CERT_PATH);
-        this.withFileSystemBind(caCertOnHost.toString(), CA_CERT_PATH);
-        this.withFileSystemBind(outputFile.getParent().toString(), OUT_FOLDER);
+        this.copyFileToContainer(MountableFile.forHostPath(keyOnHost), IN_KEY_PATH);
+        this.copyFileToContainer(MountableFile.forHostPath(chainCertOnHost), IN_CERT_PATH);
+        this.copyFileToContainer(MountableFile.forHostPath(caCertOnHost), CA_CERT_PATH);
+        this.copyFileToContainer(MountableFile.forHostPath(outputFile), OUT_FOLDER);
         String outputFileInContainer = OUT_FOLDER + outputFile.getFileName();
         this.withCommand(IN_KEY_PATH, IN_CERT_PATH, domainName, CA_CERT_PATH, password, outputFileInContainer);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
