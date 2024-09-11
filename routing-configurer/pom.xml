@@ -70,12 +70,6 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>testcontainers-init-postgres</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>qpid-client</artifactId>
             <version>${project.version}</version>
         </dependency>
