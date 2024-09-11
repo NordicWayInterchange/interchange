@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>testcontainers-init-postgres</artifactId>
+            <artifactId>testcontainers-base</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
