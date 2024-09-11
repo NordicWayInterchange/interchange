@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
@@ -26,15 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
@@ -70,6 +64,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			HOST_NAME,
 			Path.of("qpid")
 	);
+
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
 		qpidContainer.followOutput(new Slf4jLogConsumer(logger));
@@ -348,7 +343,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNull();
 	}
-
 
 	@Test
 	public void addingOneSubscriptionResultsInOneBindKey() {
@@ -778,7 +772,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
 
-		client.createHeadersExchange(deliveryExchangeName);
+		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getMetadata().getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 
@@ -1357,6 +1351,4 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
-
-
 }
