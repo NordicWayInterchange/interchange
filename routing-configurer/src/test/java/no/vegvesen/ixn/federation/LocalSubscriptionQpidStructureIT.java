@@ -148,7 +148,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 sslContext,
                 System.out::println
         ))  {
-            sink.start();
+            sink.start(1000);
 
         } catch (Exception e) {
            throw new RuntimeException(e);

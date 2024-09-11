@@ -804,7 +804,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				sub.getEndpoints().stream().findFirst().get().getSource(),
 				sslContext,
 				message -> numMessages.incrementAndGet())) {
-			sink.start();
+			sink.start(1000);
 			try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchangeName,sslContext)) {
 				source.start();
 				String messageText = "This is my DENM message :) ";

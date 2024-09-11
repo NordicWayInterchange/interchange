@@ -111,7 +111,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 queueName,
                 sslContext,
                 message -> numMessages.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),exchangeName,sslContext)) {
                 //5. Create a Sink, listens to queue. Check that sink get 1 message.
                 source.start();
@@ -240,7 +240,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 outQueueName,
                 sslContext,
                 message -> numMessages.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
                 source.start();
                 String messageText = "This is my DENM message :) ";
@@ -288,7 +288,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 output,
                 sslContext,
                 message -> numMessages.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),input,sslContext)) {
                 source.start();
                 String messageText = "This is my DENM message :) ";
@@ -390,7 +390,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 subscriptionQueue,
                 sslContext,
                 message -> numMessages.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
                 source.start();
                 String messageText = "This is my DENM message :) ";
@@ -467,7 +467,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 consumeQueue,
                 sslContext,
                 message -> numMessages.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
                 source.start();
                 String messageText = "This is my DENM message :) ";
@@ -491,7 +491,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             }
             System.out.println();
             sink.close();
-            sink.start();
+            sink.start(1000);
             Thread.sleep(200);
         }
         assertThat(numMessages.get()).isEqualTo(2);

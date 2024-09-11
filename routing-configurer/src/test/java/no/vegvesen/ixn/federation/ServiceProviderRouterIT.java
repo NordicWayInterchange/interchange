@@ -408,7 +408,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalEndpoint endpoint = sinkEndpoints.stream().findFirst().get();
 		Sink readKingGustafQueue = new Sink(amqpsUrl, endpoint.getSource(), kingGustafSslContext);
-		readKingGustafQueue.start();
+		readKingGustafQueue.start(1000);
 
 		Set<LocalDeliveryEndpoint> deliveryEndpoints = king_gustaf.getDeliveries().stream().flatMap(d -> d.getEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(deliveryEndpoints).hasSize(1);
@@ -418,7 +418,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		writeOnrampQueue.start();
 		try {
 			Sink readDlqueue = new Sink(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
-			readDlqueue.start();
+			readDlqueue.start(1000);
 			fail("Should not allow king_gustaf to read from queue not granted access on local endpoint");
 		} catch (Exception ignore) {
 		}

@@ -51,6 +51,8 @@ spec:
           value: "{{- range .Values.message_collector.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
+        - name: PREFETCH
+          value: {{ .Values.prefetch }}
         volumeMounts:
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}

@@ -10,6 +10,7 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      -Dcollector.localIxnFederationPort=5671 \
+     -Dcollector.prefetch=${PREFETCH} \
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \
      -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
      -Djavax.net.ssl.trustStoreType=${TRUST_STORE_TYPE} \

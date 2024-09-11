@@ -210,6 +210,7 @@ services:
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
+    - PREFETCH=1000
     networks:
     - testing_net
 
@@ -380,6 +381,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
+      - PREFETCH=1000
     networks:
     - testing_net
 

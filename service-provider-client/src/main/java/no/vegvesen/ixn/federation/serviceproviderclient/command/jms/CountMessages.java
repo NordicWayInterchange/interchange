@@ -25,7 +25,7 @@ public class CountMessages implements Callable<Integer> {
                 }
         ));
         try (Sink sink = new Sink(parentCommand.getUrl(), queueName, parentCommand.createContext(), message -> counter.incrementAndGet())) {
-            sink.start();
+            sink.start(1000);
         }
         return 0;
     }

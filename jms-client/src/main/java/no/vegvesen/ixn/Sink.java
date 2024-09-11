@@ -54,15 +54,15 @@ public class Sink implements AutoCloseable {
 		this.exceptionListener = exceptionListener;
 	}
 
-	public void startWithMessageListener(MessageListener newListener) throws JMSException, NamingException {
-    	if (this.consumer != null) {
+	public void startWithMessageListener(MessageListener newListener, Integer prefetch) throws JMSException, NamingException {
+		if (this.consumer != null) {
 			try {
 				this.consumer.close();
 				logger.debug("Closed message consumer before creating new consumer");
 			} catch (JMSException ignore) {
 			}
 		}
-		this.consumer = createConsumer();
+		this.consumer = createConsumer(prefetch);
 		this.consumer.setMessageListener(newListener);
 		if (this.exceptionListener != null) {
 			connection.setExceptionListener(this.exceptionListener);
@@ -70,15 +70,14 @@ public class Sink implements AutoCloseable {
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
 	}
 
-
-    public void start() throws JMSException, NamingException {
-		this.consumer = createConsumer();
+	public void start(Integer prefetch) throws JMSException, NamingException {
+		this.consumer = createConsumer(prefetch);
 		consumer.setMessageListener(listener);
 		if (exceptionListener != null) {
 			connection.setExceptionListener(exceptionListener);
 		}
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
-    }
+	}
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
 		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
@@ -90,6 +89,18 @@ public class Sink implements AutoCloseable {
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
+
+	public MessageConsumer createConsumer(Integer prefetch) throws NamingException, JMSException {
+		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName, prefetch);
+		connection = ixnContext.createConnection(sslContext);
+		Destination destination = ixnContext.getReceiveQueue();
+		connection.start();
+		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageConsumer consumer = session.createConsumer(destination);
+		logger.debug("Created message consumer for {}", this.queueName);
+		return consumer;
+	}
+
 
 	public static class DefaultMessageListener implements MessageListener {
 

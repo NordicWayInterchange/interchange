@@ -22,6 +22,11 @@ public class CollectorProperties {
 	 */
 	private String fixeddelay;
 
+	/**
+	 * Set a limit to how many messages the message collector will prefetch
+	 */
+	private Integer prefetch;
+
 	public CollectorProperties() {
 	}
 
@@ -47,6 +52,14 @@ public class CollectorProperties {
 
 	public void setFixeddelay(String fixeddelay) {
 		this.fixeddelay = fixeddelay;
+	}
+
+	public Integer getPrefetch() {
+		return prefetch;
+	}
+
+	public void setPrefetch(Integer prefetch) {
+		this.prefetch = prefetch;
 	}
 
 	@Override
