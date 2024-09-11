@@ -5,6 +5,7 @@ import static picocli.CommandLine.*;
 
 @Command(
         name = "keys",
+        description = "create keys",
         subcommands = {
                 CreateKeys.class
         },

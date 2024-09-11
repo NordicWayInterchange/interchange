@@ -30,7 +30,7 @@ import static picocli.CommandLine.*;
         mixinStandardHelpOptions = true)
 public class ServiceProviderClientApplication{
 
-    @Parameters(index = "0", paramLabel = "SERVER", description = "The onboard server address")
+    @Parameters(index = "0", paramLabel = "SERVER", description = "URL to connect to")
     private String server;
 
     @Option(names = {"-u", "--user"}, required = false, description = "The service provider user")

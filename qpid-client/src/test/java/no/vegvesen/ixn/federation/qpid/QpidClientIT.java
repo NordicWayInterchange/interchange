@@ -107,7 +107,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		assertThatExceptionOfType(HttpClientErrorException.Conflict.class).isThrownBy(() -> client.createHeadersExchange("test-create-exchange"));
 		client.removeExchange(exchange);
-
 	}
 
 	@Test
@@ -323,7 +322,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		Exchange directExchange = client.createHeadersExchange("my-exchange");
+		Exchange directExchange = client.createDirectExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
 		client.removeExchange(directExchange);
@@ -433,7 +432,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String selector = "originatingCountry = 'NO'";
 
 		client.createHeadersExchange(capabilityExchange);
-		client.createHeadersExchange(deliveryExchange);
+		client.createDirectExchange(deliveryExchange);
 
 		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 

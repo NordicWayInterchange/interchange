@@ -114,6 +114,10 @@ public class QpidClient {
 		return createExchange(new CreateExchangeRequest(name,"headers"));
 	}
 
+	public Exchange createDirectExchange(String exchangeName) {
+		return createExchange(new CreateExchangeRequest(exchangeName,"direct"));
+	}
+
 	private Queue createQueue(CreateQueueRequest request) {
 		logger.info("Create queue {}", request.getName());
 		String url = queuesURL + "/";

@@ -8,7 +8,7 @@ import picocli.CommandLine.*;
 import java.nio.file.Path;
 
 @Command(name="messages",
-        description = "",
+        description = "Send and receive messages",
         subcommands = {
                 CountMessages.class,
                 DrainMessages.class,
