@@ -26,7 +26,7 @@ spec:
         image: "{{ .Values.routing_configurer.image.repository }}:{{ .Values.routing_configurer.image.tag }}"
         env:
         - name: BROKER_EXTERNAL_NAME
-          value: .Values.broker_external_name
+          value: {{ .Values.broker_external_name }}
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
         - name: POSTGRES_USER
