@@ -25,6 +25,8 @@ spec:
       - name: message-collector
         image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
         env:
+        - name: PREFETCH
+          value: {{ .Values.message_collector.prefetch }}
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
         - name: POSTGRES_PASSWORD
@@ -51,8 +53,6 @@ spec:
           value: "{{- range .Values.message_collector.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
-        - name: PREFETCH
-          value: {{ .Values.message_collector.prefetch | int }}
         volumeMounts:
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}
