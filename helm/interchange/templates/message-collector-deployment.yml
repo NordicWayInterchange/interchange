@@ -26,7 +26,7 @@ spec:
         image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
         env:
         - name: PREFETCH
-          value: {{ .Values.message_collector.prefetch }}
+          value: {{ .Values.message_collector.prefetch | quote }}
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
         - name: POSTGRES_PASSWORD
