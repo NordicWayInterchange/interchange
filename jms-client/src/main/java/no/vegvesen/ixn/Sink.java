@@ -79,17 +79,6 @@ public class Sink implements AutoCloseable {
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
 	}
 
-	public MessageConsumer createConsumer() throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
-		connection = ixnContext.createConnection(sslContext);
-		Destination destination = ixnContext.getReceiveQueue();
-		connection.start();
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = session.createConsumer(destination);
-		logger.debug("Created message consumer for {}", this.queueName);
-		return consumer;
-	}
-
 	public MessageConsumer createConsumer(Integer prefetch) throws NamingException, JMSException {
 		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName, prefetch);
 		connection = ixnContext.createConnection(sslContext);
@@ -100,7 +89,6 @@ public class Sink implements AutoCloseable {
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
-
 
 	public static class DefaultMessageListener implements MessageListener {
 

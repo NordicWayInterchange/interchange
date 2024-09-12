@@ -30,7 +30,7 @@ public class FederationSystemST {
 		KeystoreDetails spTwoKeystore = new KeystoreDetails(Thread.currentThread().getContextClassLoader().getResource("jks/sp-two.p12").getFile(), "password",KeystoreType.PKCS12);
 		SSLContext spTwoSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(spTwoKeystore,truststoreDetails);
 		Sink sinkSpTwo = new Sink("amqps://bouvet-two.bouvetinterchange.no", "sp-two.bouvetinterchange.no", spTwoSslContext);
-		MessageConsumer consumer = sinkSpTwo.createConsumer();
+		MessageConsumer consumer = sinkSpTwo.createConsumer(1000);
 		//noinspection StatementWithEmptyBody
 		while (consumer.receive(200) != null) ; //drain out queue
 		KeystoreDetails spOneKeystore = new KeystoreDetails(Thread.currentThread().getContextClassLoader().getResource("jks/sp-one.p12").getFile(),"password", KeystoreType.PKCS12);
@@ -96,7 +96,7 @@ public class FederationSystemST {
 			try {
 				Thread.sleep(30000);
 				System.out.printf("Reconnect attempt %d %n", y);
-				consumer = sinkSpTwo.createConsumer();
+				consumer = sinkSpTwo.createConsumer(1000);
 			} catch (InterruptedException | NamingException | JMSException ex) {
 				System.out.printf("Reconnect consumer attempt %d failed %s %n", y, ex.getMessage());
 			}

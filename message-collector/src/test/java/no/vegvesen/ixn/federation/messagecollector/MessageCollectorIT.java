@@ -121,7 +121,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						.timestamp(System.currentTimeMillis())
 						.build(), 8000L);
 
-				Message message = sink.createConsumer().receive(2000);
+				Message message = sink.createConsumer(1000).receive(2000);
 				assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
 				assertThat(message.getJMSExpiration()).withFailMessage("Routed message has no expiry specified").isNotEqualTo(0L);
             } catch (Exception e) {
@@ -183,7 +183,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			Thread.sleep(2000L); // wait for the message to expire with extra margin
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, stores, CONSUMER_SP_NAME)) {
-                Message message = sink.createConsumer().receive(1000L);
+                Message message = sink.createConsumer(1000).receive(1000L);
 				assertThat(message).withFailMessage("Received message we expected to be expired").isNull();
 			} catch (Exception e) {
                 throw new RuntimeException(e);
@@ -234,7 +234,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(senderMessage);
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer();
+                MessageConsumer consumer = sink.createConsumer(1000);
 				Message message = consumer.receive(1000);
 
 				assertThat(message).isNotNull();
@@ -290,7 +290,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(senderMessage);
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer();
+                MessageConsumer consumer = sink.createConsumer(1000);
 				Message receiveMessage = consumer.receive(1000);
 
 				assertThat(receiveMessage).isNotNull();
