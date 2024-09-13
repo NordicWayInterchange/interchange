@@ -66,7 +66,7 @@ public class ServiceProviderServiceTest {
                 new Metadata()
         );
         capability.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addDataType(capability);
+        sp.getCapabilities().addCapability(capability);
 
         when(serviceProviderRepository.findByName(any())).thenReturn(sp);
         service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
@@ -99,7 +99,7 @@ public class ServiceProviderServiceTest {
                 new Metadata()
         );
         capability.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addDataType(capability);
+        sp.getCapabilities().addCapability(capability);
 
         Capability capability1 = new Capability(
                 new DenmApplication(
@@ -113,7 +113,7 @@ public class ServiceProviderServiceTest {
                 new Metadata()
         );
         capability1.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addDataType(capability1);
+        sp.getCapabilities().addCapability(capability1);
 
         when(serviceProviderRepository.findByName(any())).thenReturn(sp);
         service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);

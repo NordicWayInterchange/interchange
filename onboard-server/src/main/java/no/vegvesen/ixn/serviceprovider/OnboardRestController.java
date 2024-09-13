@@ -99,7 +99,7 @@ public class OnboardRestController {
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
 		for (Capability newLocalCapability : newLocalCapabilities) {
-			capabilities.addDataType(newLocalCapability);
+			capabilities.addCapability(newLocalCapability);
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
@@ -198,7 +198,7 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+		serviceProviderToUpdate.getCapabilities().removeCapability(capabilityId);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());

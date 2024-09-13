@@ -1,15 +1,12 @@
 package no.vegvesen.ixn.federation.model;
 
-
 import jakarta.persistence.*;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name="neighbour_capabilities")
@@ -18,36 +15,6 @@ public class NeighbourCapabilities {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_cap_seq")
     private Integer id;
-
-    private LocalDateTime lastCapabilityExchange;
-
-    public LocalDateTime getLastCapabilityExchange() {
-        return lastCapabilityExchange;
-    }
-
-    public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
-        this.lastCapabilityExchange = lastCapabilityExchange;
-    }
-
-    public Optional<LocalDateTime> getLastUpdated() {
-        return Optional.ofNullable(lastUpdated);
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-
-
-    public void replaceCapabilities(Set<NeighbourCapability> newCapabilities) {
-        capabilities.retainAll(newCapabilities);
-        capabilities.addAll(newCapabilities);
-        if (hasDataTypes()) {
-            setStatus(CapabilitiesStatus.KNOWN);
-        }
-        setLastUpdated(LocalDateTime.now());
-
-    }
 
     @Enumerated(EnumType.STRING)
     private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
@@ -60,7 +27,10 @@ public class NeighbourCapabilities {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
+    private LocalDateTime lastCapabilityExchange;
+
     public NeighbourCapabilities(){
+
     }
 
     public NeighbourCapabilities(CapabilitiesStatus status, Set<NeighbourCapability> capabilities) {
@@ -86,7 +56,6 @@ public class NeighbourCapabilities {
         return capabilities;
     }
 
-
     public void setCapabilities(Set<NeighbourCapability> capabilities) {
         this.capabilities.clear();
         if ( capabilities != null ) {
@@ -94,9 +63,33 @@ public class NeighbourCapabilities {
         }
     }
 
-    public boolean hasDataTypes() {
+    public void replaceCapabilities(Set<NeighbourCapability> newCapabilities) {
+        capabilities.retainAll(newCapabilities);
+        capabilities.addAll(newCapabilities);
+        if (hasCapabilities()) {
+            setStatus(CapabilitiesStatus.KNOWN);
+        }
+        setLastUpdated(LocalDateTime.now());
+    }
 
+    public Optional<LocalDateTime> getLastUpdated() {
+        return Optional.ofNullable(lastUpdated);
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public boolean hasCapabilities() {
         return !capabilities.isEmpty();
+    }
+
+    public LocalDateTime getLastCapabilityExchange() {
+        return lastCapabilityExchange;
+    }
+
+    public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
+        this.lastCapabilityExchange = lastCapabilityExchange;
     }
 
     @Override
