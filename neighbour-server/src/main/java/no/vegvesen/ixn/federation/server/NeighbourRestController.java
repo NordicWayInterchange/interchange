@@ -22,11 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Set;
-
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @RestController("/")
 public class NeighbourRestController {
@@ -59,7 +56,6 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.debug("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.debug("Common name of certificate matched name in API object.");
 
@@ -79,13 +75,10 @@ public class NeighbourRestController {
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
 
-		//fetch the list of neighbours
 		SubscriptionResponseApi reponse = neighbourService.findSubscriptions(ixnName);
 		NeighbourMDCUtil.removeLogVariables();
-
 		return reponse;
 	}
-
 
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,16 +89,14 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
 
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
 		NeighbourMDCUtil.removeLogVariables();
 		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
 	}
 
-
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	@Operation(summary="Update capabilities")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
@@ -128,7 +119,6 @@ public class NeighbourRestController {
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
@@ -148,7 +138,6 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received request to delete subscription {} from neighbour {}.",subscriptionId, ixnName);
 
-		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
 		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
