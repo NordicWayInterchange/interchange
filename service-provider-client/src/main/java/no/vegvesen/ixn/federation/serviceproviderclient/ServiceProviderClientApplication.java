@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.FetchMatchingCapabilities;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;

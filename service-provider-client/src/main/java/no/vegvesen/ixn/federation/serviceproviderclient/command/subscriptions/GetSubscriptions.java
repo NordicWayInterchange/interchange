@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
-public class GetServiceProviderSubscriptions implements Callable<Integer> {
+public class GetSubscriptions implements Callable<Integer> {
 
     @ParentCommand
     SubscriptionsCommand parentCommand;

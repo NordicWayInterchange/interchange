@@ -5,6 +5,7 @@ URL=""
 
 if [ $1 == 'messages' ]; then
 URL="amqps://a.qpid.interchangedomain.com"
+
 else
 URL="https://a.interchangedomain.com:8797/"
 fi

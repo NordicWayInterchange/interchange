@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
-public class DeleteServiceProviderSubscription implements Callable<Integer> {
+public class DeleteSubscription implements Callable<Integer> {
 
     @ParentCommand
     SubscriptionsCommand parentCommand;

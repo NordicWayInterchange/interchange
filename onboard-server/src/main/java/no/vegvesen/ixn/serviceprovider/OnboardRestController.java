@@ -62,7 +62,7 @@ public class OnboardRestController {
 			content = @Content(
 					examples = {
 							@ExampleObject(name = "messageType DENM", value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST),
-							@ExampleObject(name = "messageType DATEX", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType DATEX2", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType IVIM", value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType SPATEM", value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType MAPEM", value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST),
@@ -504,7 +504,6 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 		 return typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
 	}
-
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries/match"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Delivery")

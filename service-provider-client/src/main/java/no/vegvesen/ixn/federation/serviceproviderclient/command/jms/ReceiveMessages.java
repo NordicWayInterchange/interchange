@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Command(name = "receive", description = "Receive messages and print them to stdout")
 public class ReceiveMessages implements Callable<Integer> {
 
-
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")
     private String queueName;
 

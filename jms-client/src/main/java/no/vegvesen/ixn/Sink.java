@@ -1,28 +1,22 @@
 package no.vegvesen.ixn;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.jms.Connection;
-import jakarta.jms.Destination;
-import jakarta.jms.ExceptionListener;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
-import jakarta.jms.MessageListener;
-import jakarta.jms.Session;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
-import java.util.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Base64;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Sink implements AutoCloseable {
 
@@ -75,7 +69,6 @@ public class Sink implements AutoCloseable {
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
 	}
 
-
     public void start() throws JMSException, NamingException {
 		this.consumer = createConsumer();
 		consumer.setMessageListener(listener);
@@ -111,6 +104,7 @@ public class Sink implements AutoCloseable {
 				directory.mkdir();
 			}
 		}
+
 		@Override
 		public void onMessage(Message message) {
 			try {

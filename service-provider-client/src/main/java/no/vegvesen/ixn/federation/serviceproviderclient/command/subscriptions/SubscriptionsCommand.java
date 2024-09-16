@@ -7,10 +7,10 @@ import picocli.CommandLine.*;
         name = "subscriptions",
         description = "list, get, add or delete subscriptions for Service Provider",
         subcommands = {
-                GetServiceProviderSubscriptions.class,
+                GetSubscriptions.class,
                 GetSubscription.class,
-                AddServiceProviderSubscription.class,
-                DeleteServiceProviderSubscription.class,
+                AddSubscriptions.class,
+                DeleteSubscription.class,
                 Listen.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,

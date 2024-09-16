@@ -5,7 +5,10 @@ import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import picocli.CommandLine.*;
+import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
 import java.util.Set;
@@ -37,18 +40,26 @@ public class Listen implements Callable<Integer> {
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             client.addSubscription(request);
         }
-        else{
+        else if(option.selector != null){
             client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector))));
         }
 
-        ListSubscriptionsResponse listSubscriptionsResponse = client.getSubscriptions();
-        String subscriptionId = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get().getId();
+        GetSubscriptionResponse subscription;
 
-        GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
-        while(!subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)){
+        if(option.id == null) {
+            ListSubscriptionsResponse listSubscriptionsResponse = client.getSubscriptions();
+            String subscriptionId = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get().getId();
             subscription = client.getSubscription(subscriptionId);
+        }
+        else{
+            subscription = client.getSubscription(option.id);
+        }
+
+        while (!subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+            subscription = client.getSubscription(subscription.getId());
             TimeUnit.SECONDS.sleep(2);
         }
+
         LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().get();
         String url = "amqps://"+endpointApi.getHost();
 
@@ -73,11 +84,14 @@ public class Listen implements Callable<Integer> {
     }
 
     private static class SubscriptionsOption {
-        @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
+        @Option(names = {"-f", "--filename"}, description = "The subscription json file")
         File file;
 
-        @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
+        @Option(names = {"-s", "--selector"}, description = "The subscriptions selector")
         String selector;
+
+        @Option(names = {"-i", "--id"}, description = "The subscription Id")
+        String id;
     }
 }
 
