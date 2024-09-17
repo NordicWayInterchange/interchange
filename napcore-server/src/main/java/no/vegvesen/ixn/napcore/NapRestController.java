@@ -1,5 +1,11 @@
 package no.vegvesen.ixn.napcore;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
@@ -14,9 +20,9 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -66,6 +72,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/x509/csr"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "certificates")
+    @Operation(summary = "Generate certificate")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public CertificateSignResponse addCsrRequest(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("CSR - signing new cert for actor {}", actorCommonName);
@@ -83,6 +92,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/subscriptions"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "subscriptions")
+    @Operation(summary = "Add subscription")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public Subscription addSubscription(@PathVariable("actorCommonName") String actorCommonName, @RequestBody SubscriptionRequest subscriptionRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
@@ -115,6 +127,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions", "/nap/{actorCommonName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "subscriptions")
+    @Operation(summary = "Get subscriptions")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public List<Subscription> getSubscriptions(@PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing subscription for service provider {}", actorCommonName);
@@ -126,6 +141,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "subscriptions")
+    @Operation(summary = "Get subscription")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public Subscription getSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
@@ -142,6 +160,9 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Tag(name = "subscriptions")
+    @Operation(summary = "Delete subscription")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public void deleteSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
@@ -154,6 +175,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" }, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "subscriptions")
+    @Operation(summary = "Get capabilities matching subscription")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
@@ -172,6 +196,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "deliveries")
+    @Operation(summary = "Add delivery")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
@@ -205,6 +232,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "deliveries")
+    @Operation(summary = "Get delivery")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", deliveryId, actorCommonName);
@@ -219,6 +249,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "deliveries")
+    @Operation(summary = "Get deliveries")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing deliveries for service provider {}", actorCommonName);
@@ -231,6 +264,9 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Tag(name = "deliveries")
+    @Operation(summary = "Delete delivery")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
@@ -243,6 +279,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "deliveries")
+    @Operation(summary = "Get capabilities matching delivery")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List local capabilities for service provider {}", actorCommonName);
@@ -260,6 +299,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "capabilities")
+    @Operation(summary = "Add capability")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
@@ -293,6 +335,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "capabilities")
+    @Operation(summary = "Get capabilities")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
@@ -304,6 +349,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "capabilities")
+    @Operation(summary = "Get capability")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
@@ -314,6 +362,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "capabilities")
+    @Operation(summary = "Get publicationIds")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
@@ -323,6 +374,9 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/capabilities/{capabilityId}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Tag(name = "capabilities")
+    @Operation(summary = "Delete capability")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
