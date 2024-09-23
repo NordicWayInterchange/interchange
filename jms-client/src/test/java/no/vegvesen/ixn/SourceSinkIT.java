@@ -14,9 +14,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
