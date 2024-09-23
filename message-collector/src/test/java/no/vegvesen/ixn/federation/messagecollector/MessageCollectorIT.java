@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -18,12 +17,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
 import javax.naming.NamingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,16 +60,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			).withLogConsumer(new Slf4jLogConsumer(logger));
 
 
-
-	public Sink createSink(String containerUrl, String queueName, CaStores stores, String spName) {
-		return new Sink(
-				containerUrl,
-				queueName,
-				sslClientContext(stores,spName)
-		);
-
-	}
-
 	public Source createSource(String containerUrl, String queue, CaStores stores, String spName) {
 		return new Source(
 				containerUrl,
@@ -79,7 +69,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -102,29 +91,47 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
         try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
             source.start();
 
-            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, stores, CONSUMER_SP_NAME)) {
-                source.sendNonPersistentMessage(source.createMessageBuilder()
-						.textMessage("fishy fishy")
-						.userId(HOST_NAME)
-						.messageType(Constants.DATEX_2)
-						.publicationType("Obstruction")
-						.publisherName("publishername")
-						.protocolVersion("DATEX2;2.3")
-						.publisherId("SE-123")
-						.publicationId("pub-1")
-						.quadTreeTiles(",232,")
-						.latitude(60.352374)
-						.longitude(13.334253)
-						.originatingCountry("SE")
-						.shardId(1)
-						.shardCount(1)
-						.timestamp(System.currentTimeMillis())
-						.build(), 8000L);
+			CountDownLatch latch = new CountDownLatch(1);
+			AtomicBoolean jmsExpiration = new AtomicBoolean(true);
+			try {
+				try (Sink sink = new Sink(
+                        consumerContainer.getAmqpsUrl(),
+						CONSUMER_SP_NAME,
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message -> {
+							latch.countDown();
+                            try {
+                                if (message.getJMSExpiration() == 0) {
+                                    jmsExpiration.set(false);
+                                }
+                            } catch (JMSException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+				)) {
+					sink.start();
+					source.sendNonPersistentMessage(source.createMessageBuilder()
+							.textMessage("fishy fishy")
+							.userId(HOST_NAME)
+							.messageType(Constants.DATEX_2)
+							.publicationType("Obstruction")
+							.publisherName("publishername")
+							.protocolVersion("DATEX2;2.3")
+							.publisherId("SE-123")
+							.publicationId("pub-1")
+							.quadTreeTiles(",232,")
+							.latitude(60.352374)
+							.longitude(13.334253)
+							.originatingCountry("SE")
+							.shardId(1)
+							.shardCount(1)
+							.timestamp(System.currentTimeMillis())
+							.build(), 8000L);
 
-				Message message = sink.createConsumer().receive(2000);
-				assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
-				assertThat(message.getJMSExpiration()).withFailMessage("Routed message has no expiry specified").isNotEqualTo(0L);
-            } catch (Exception e) {
+                    assertThat(latch.await(2, TimeUnit.SECONDS)).withFailMessage("Message did not arrive within threshold").isTrue();
+					assertThat(jmsExpiration).withFailMessage("Routed message has no expiry specified").isTrue();
+				}
+			} catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
@@ -134,7 +141,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -182,9 +188,19 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(message1,1000L);
 			Thread.sleep(2000L); // wait for the message to expire with extra margin
 
-            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, stores, CONSUMER_SP_NAME)) {
-                Message message = sink.createConsumer().receive(1000L);
-				assertThat(message).withFailMessage("Received message we expected to be expired").isNull();
+			CountDownLatch latch = new CountDownLatch(1);
+            try {
+				String containerUrl = consumerContainer.getAmqpsUrl();
+
+				try (Sink sink = new Sink(
+						containerUrl,
+						CONSUMER_SP_NAME,
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message -> latch.countDown()
+				)) {
+					sink.start();
+					assertThat(latch.await(1,TimeUnit.SECONDS)).withFailMessage("Received message we expected to be expired").isFalse();
+				}
 			} catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -194,7 +210,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(3)
 	public void testDatexMessagesWithMessageCollector() throws NamingException, JMSException {
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
@@ -233,12 +248,20 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
                     .build();
             source.sendNonPersistentMessage(senderMessage);
 
-            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer();
-				Message message = consumer.receive(1000);
+            try {
+				CountDownLatch latch = new CountDownLatch(1);
+				String containerUrl = consumerContainer.getAmqpsUrl();
 
-				assertThat(message).isNotNull();
-            } catch (Exception e) {
+				try (Sink sink = new Sink(
+						containerUrl,
+						"sp_consumer",
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message -> latch.countDown()
+				)) {
+					sink.start();
+					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
+				}
+			} catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
@@ -247,8 +270,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(4)
-	@Disabled
 	public void testDenmMessagesWithMessageCollector() throws NamingException, JMSException {
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
@@ -265,12 +286,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
-
-        try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
-            source.start();
-            String message = "Should work!";
-            byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
-            JmsMessage senderMessage = source.createMessageBuilder()
+		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
+		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
+		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+			source.start();
+			String message = "Should work!";
+			byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
+			JmsMessage senderMessage = source.createMessageBuilder()
                     .bytesMessage(bytemessage)
                     .userId(HOST_NAME)
                     .messageType(Constants.DENM)
@@ -287,14 +309,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
                     .shardCount(1)
                     .timestamp(System.currentTimeMillis())
                     .build();
-            source.sendNonPersistentMessage(senderMessage);
+			try {
 
-            try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer();
-				Message receiveMessage = consumer.receive(1000);
+				CountDownLatch latch = new CountDownLatch(1);
+				try (Sink sink = new Sink(
+                        consumerContainer.getAmqpsUrl(),
+						"sp_consumer",
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message1 -> latch.countDown()
 
-				assertThat(receiveMessage).isNotNull();
-            } catch (Exception e) {
+				)) {
+					sink.start();
+					source.sendNonPersistentMessage(senderMessage);
+					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
+				}
+			} catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
