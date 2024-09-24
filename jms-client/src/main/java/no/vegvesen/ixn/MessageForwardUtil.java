@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageForwardUtil {
-	private static Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);
 	public final static long DEFAULT_TTL_1_DAY = 86_400_000L;
 	public final static long MAX_TTL_8_DAYS = 691_200_000L;
 

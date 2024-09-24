@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
@@ -230,7 +229,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException, InterruptedException {
+	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException {
         try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
             source.start();
 
@@ -266,7 +265,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 
 	@Test
-	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException, InterruptedException {
+	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
         try (ImageSource source = new ImageSource(Url, "test-queue", kingHaraldSSlContext)) {
             source.start();
             source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
