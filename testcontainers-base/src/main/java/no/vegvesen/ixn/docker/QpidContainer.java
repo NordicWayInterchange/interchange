@@ -70,8 +70,6 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
 
     @Override
     protected void configure() {
-        //Path configJsonPath = Path.of("").toAbsolutePath().getParent().resolve("qpid-test").resolve("config.json");
-        //this.withCopyToContainer(MountableFile.forHostPath(configJsonPath), "/qpid-broker-j/work-override/config.json");
         try (Stream<Path> filesStream = Files.list(configPathFromClasspath)){
             List<Path> configFiles = filesStream.toList();
             String targetPath = "/qpid-broker-j/work-override/";

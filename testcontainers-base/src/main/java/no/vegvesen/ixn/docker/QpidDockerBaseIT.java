@@ -9,9 +9,6 @@ import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -27,12 +24,8 @@ import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 
 public class QpidDockerBaseIT extends DockerBaseIT {
 
-	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
 	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
-		Path imageLocation = getFolderPath("qpid-test");
-		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
-				imageLocation, configPath);
 		Stream<HostStore> stream = stores.hostStores().stream();
 		HostStore hostStore = getHostStore(hostname, stream);
 		CaStore caStore = stores.trustStore();
@@ -40,9 +33,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String keystorePassword = hostStore.password();
 		String truststoreName = caStore.path().getFileName().toString();
 		String truststorePassword = caStore.password();
-		final ImageFromDockerfile imageFromDockerfile = new ImageFromDockerfile("qpid-it-memory", false);
 		return new QpidContainer(
-				//imageFromDockerfile.withFileFromPath(".", imageLocation),
 				configPath,
 				caStore.path().getParent(),
 				keystoreName,
