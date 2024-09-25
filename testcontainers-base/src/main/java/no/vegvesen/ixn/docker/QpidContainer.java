@@ -4,10 +4,15 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class QpidContainer extends GenericContainer<QpidContainer> {
 
@@ -24,8 +29,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
     private final String vHostName;
 
 
-    public QpidContainer(String imageName,
-                         Path dockerFilePath,
+    public QpidContainer(ImageFromDockerfile image,
                          Path configPathFromClasspath,
                          Path keysBasePath,
                          String keyStore,
@@ -33,8 +37,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
                          String trustStore,
                          String trustStorePassword,
                          String vHostName) {
-        super(new ImageFromDockerfile(imageName,false)
-                .withFileFromPath(".",dockerFilePath));
+        super(image);
         this.configPathFromClasspath = configPathFromClasspath;
         this.keysBasePath = keysBasePath;
         this.keyStore = keyStore;
@@ -46,10 +49,39 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         this.withExposedPorts(AMQP_PORT,AMQPS_PORT,HTTP_PORT,HTTPS_PORT);
     }
 
+    public QpidContainer(Path configPathFromClasspath,
+                         Path keysBasePath,
+                         String keyStore,
+                         String keyStorePassword,
+                         String trustStore,
+                         String trustStorePassword,
+                         String vHostName) {
+        super("apache/qpid-broker-j:9.2.0-alpine");
+        this.configPathFromClasspath = Path.of("src","test","resources").toAbsolutePath().resolve(configPathFromClasspath);
+        this.keysBasePath = keysBasePath;
+        this.keyStore = keyStore;
+        this.keyStorePassword = keyStorePassword;
+        this.trustStore = trustStore;
+        this.trustStorePassword = trustStorePassword;
+        this.vHostName = vHostName;
+        this.waitingFor(Wait.forLogMessage(".*BRK-1004.*\\n",1));
+        this.withExposedPorts(AMQP_PORT,AMQPS_PORT,HTTP_PORT,HTTPS_PORT);
+    }
 
     @Override
     protected void configure() {
-        this.withClasspathResourceMapping(configPathFromClasspath.toString(),"/config", BindMode.READ_ONLY);
+        //Path configJsonPath = Path.of("").toAbsolutePath().getParent().resolve("qpid-test").resolve("config.json");
+        //this.withCopyToContainer(MountableFile.forHostPath(configJsonPath), "/qpid-broker-j/work-override/config.json");
+        try (Stream<Path> filesStream = Files.list(configPathFromClasspath)){
+            List<Path> configFiles = filesStream.toList();
+            String targetPath = "/qpid-broker-j/work-override/";
+            for (Path configFile : configFiles) {
+                String targetFileName = targetPath + configFile.getFileName().toString();
+                this.withCopyToContainer(MountableFile.forHostPath(configFile), targetFileName);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
         this.withEnv("KEY_STORE", "/jks/" + keyStore);
         this.withEnv("KEY_STORE_PASSWORD", keyStorePassword);

@@ -1,5 +1,7 @@
 package no.vegvesen.ixn;
 
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -14,18 +16,19 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.MessageConsumer;
+
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
@@ -55,55 +58,64 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void invalidDatexMessageThrowsError() throws JMSException, NamingException{
-		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
-		kingHaraldTestQueueSource.start();
-		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publisherId("king_harald")
-				.publicationId("NO00001")
-				.publicationType("Obstruction")
-				.publisherName("publishername")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("SE")
-				.quadTreeTiles(",120002,")
-				.shardId(1)
-				.shardCount(1)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
+        try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+            kingHaraldTestQueueSource.start();
+            JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
+                    .textMessage("fisk")
+                    .userId("localhost")
+                    .messageType(Constants.DATEX_2)
+                    .publisherId("king_harald")
+                    .publicationId("NO00001")
+                    .publicationType("Obstruction")
+                    .publisherName("publishername")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("SE")
+                    .quadTreeTiles(",120002,")
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
+        }
 
-		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
-		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
-		Message receive = testQueueConsumer.receive(1000);
+		CountDownLatch latch = new CountDownLatch(1);
+		boolean success;
+        try (Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext,message -> latch.countDown())) {
+			kingHaraldTestQueueSink.start();
+			success = latch.await(1,TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        assertThat(success).isTrue();
 
 	}
 
 	@Test
 	public void explicitExpiryIsReceived() throws JMSException, NamingException {
-		Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext);
-		kingHaraldTestQueueSource.start();
-		assertThrows(IllegalMessageException.class, () -> kingHaraldTestQueueSource.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publisherId("king_harald")
-				.publicationId("NO00001")
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("SE")
-				.quadTreeTiles(",120002,")
-				.shardId(1)
-				.shardCount(1)
-				.timestamp(System.currentTimeMillis())
-				.build());
+        try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+			kingHaraldTestQueueSource.start();
+			assertThrows(IllegalMessageException.class, () -> kingHaraldTestQueueSource.createMessageBuilder()
+                    .textMessage("fisk")
+                    .userId("localhost")
+                    .messageType(Constants.DATEX_2)
+                    .publisherId("king_harald")
+                    .publicationId("NO00001")
+                    .publicationType("Obstruction")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("SE")
+                    .quadTreeTiles(",120002,")
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build());
 
-	}
+		}
+
+    }
 
 	@Test
 	public void expiredMessageIsNotDelivered() throws JMSException, NamingException, InterruptedException {

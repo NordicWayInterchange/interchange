@@ -9,7 +9,7 @@
     {
       "name": "passwordFile",
       "type": "PlainPasswordFile",
-      "path": "${PASSWD_FILE}"
+      "path": "/qpid-broker-j/work/passwd"
     }
   ],
   "brokerloggers" : [
@@ -31,6 +31,12 @@
     "type" : "FileKeyStore",
     "storeUrl" : "${KEY_STORE}",
     "password" : "${KEY_STORE_PASSWORD}"
+    },
+    {
+      "name" : "internal-service",
+      "type" : "FileKeyStore",
+      "storeUrl" : "${INTERNAL_KEY_STORE}",
+      "password" : "${INTERNAL_KEY_STORE_PASSWORD}"
     }
   ],
   "plugins": [
@@ -41,10 +47,19 @@
   ],
   "ports": [
     {
-      "name": "AMQP",
+      "name": "INTERNAL_AMQPS",
       "type": "AMQP",
-      "authenticationProvider": "passwordFile",
-      "port": "5672",
+      "authenticationProvider": "clientCerts",
+      "port": "5673",
+      "bindingAddress": "*",
+      "needClientAuth": true,
+      "transports": [
+        "SSL",
+        "TCP"
+      ],
+      "trustStores": ["internal_truststore"],
+      "keyStore": "internal-service",
+      "wantClientAuth": false,
       "protocols": ["AMQP_1_0"],
       "virtualhostaliases": [
         {
@@ -103,8 +118,8 @@
       "authenticationProvider" : "clientCerts",
       "bindingAddress" : "*",
       "port" : "443",
-      "trustStores": ["default"],
-      "keyStore": "default",
+      "trustStores": ["internal_truststore"],
+      "keyStore": "internal-service",
       "needClientAuth": true,
       "wantClientAuth": false,
       "transports": [
@@ -121,6 +136,14 @@
       "trustAnchorValidityEnforced": false,
       "storeUrl": "${TRUST_STORE}",
       "password": "${TRUST_STORE_PASSWORD}"
+    },
+    {
+      "name": "internal_truststore",
+      "type": "FileTrustStore",
+      "exposedAsMessageSource": false,
+      "trustAnchorValidityEnforced": false,
+      "storeUrl": "${INTERNAL_TRUST_STORE}",
+      "password": "${INTERNAL_TRUST_STORE_PASSWORD}"
     }
   ],
   "virtualhostnodes": [
@@ -128,12 +151,12 @@
       "name": "default",
       "type": "JSON",
       "defaultVirtualHostNode": "true",
-      "virtualHostInitialConfiguration": "{}"
+      "storePath":"/qpid-broker-j/work/vhost.json"
     }
   ],
   "groupproviders" : [ {
     "name" : "default",
     "type" : "GroupFile",
-    "path" : "${GROUPS_FILE}"
+    "path" : "/qpid-broker-j/work/groups"
   } ]
 }
