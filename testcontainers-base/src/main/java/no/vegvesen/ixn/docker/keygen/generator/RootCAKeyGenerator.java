@@ -3,9 +3,9 @@ package no.vegvesen.ixn.docker.keygen.generator;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
@@ -31,7 +31,7 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
     @Override
     protected void configure() {
-        this.withFileSystemBind(keysFolder.toString(),"/ca_keys");
+        this.copyFileToContainer(MountableFile.forHostPath(keysFolder), "/ca_keys");
         this.withCommand(caDomain,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }

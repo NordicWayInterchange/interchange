@@ -6,12 +6,10 @@ import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 import jakarta.transaction.Transactional;
@@ -20,18 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class ServiceProviderServiceIT {
+public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Autowired
     ServiceProviderRepository repository;
 
     @Autowired
     NeighbourRepository neighbourRepository;
-
-    @Mock
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Autowired
     MatchRepository matchRepository;
@@ -41,7 +35,6 @@ public class ServiceProviderServiceIT {
 
     @Autowired
     OutgoingMatchRepository outgoingMatchRepository;
-
 
     @Test
     public void repositoryIsAutowired() {

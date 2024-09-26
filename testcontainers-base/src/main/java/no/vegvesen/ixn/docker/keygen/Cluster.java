@@ -2,8 +2,6 @@ package no.vegvesen.ixn.docker.keygen;
 
 import no.vegvesen.ixn.docker.keygen.builder.ClusterBuilder;
 
-import java.util.List;
-
 public class Cluster {
     private TopDomain topDomain;
 

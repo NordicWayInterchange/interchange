@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -42,8 +45,6 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurer.class})
-@ContextConfiguration(initializers = {RoutingConfigurerQpidRestartIT.Initializer.class})
-@Testcontainers
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
@@ -56,13 +57,6 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
             "king_gustaf"
     );
 
-    @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer(
-            stores,
-            HOST_NAME,
-            HOST_NAME,
-            Path.of("qpid")
-            );
 
     @Qualifier("getTestSslContext")
     @Autowired
@@ -70,22 +64,29 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingConfigurerQpidRestartIT.class);
 
-    static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    @Container
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+            stores,
+            HOST_NAME,
+            HOST_NAME,
+            Path.of("qpid")
+    );
 
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            String httpsUrl = qpidContainer.getHttpsUrl();
-            String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: {}", httpUrl);
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + httpsUrl,
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + getTrustStorePath(stores),
-                    "test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        String httpsUrl = qpidContainer.getHttpsUrl();
+        String httpUrl = qpidContainer.getHttpUrl();
+        logger.info("server url: {}", httpUrl);
+        registry.add("routing-configurer.baseUrl", () -> httpsUrl);
+        registry.add("routing-configurer.vhost", () -> "localhost");
+        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+    }
 
+    @BeforeAll
+    static void setUp(){
+        qpidContainer.start();
     }
 
     @MockBean
