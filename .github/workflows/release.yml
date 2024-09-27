@@ -115,7 +115,7 @@ jobs:
     needs: release
     strategy:
       matrix:
-        Images: [ qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app, service-provider-client, keys-generator ]
+        Images: [ message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app, service-provider-client, keys-generator ]
     defaults:
       run:
         shell: bash
