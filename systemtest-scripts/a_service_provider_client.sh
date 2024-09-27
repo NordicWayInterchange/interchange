@@ -5,20 +5,18 @@ CONTAINER=""
 URL=""
 
 
-if [ $1 == 'messages' ]; then
-CONTAINER="a_qpid"
-URL="amqps://a.bouvetinterchange.eu"
-
+if [[ "$#" -ge 1  && $1 == 'messages' ]]; then
+	CONTAINER="a-qpid"
+	URL="amqps://a.bouvetinterchange.eu"
 else
-CONTAINER="a_onboard_server"
-URL="https://a.bouvetinterchange.eu:8797/"
+	CONTAINER="a-onboard-server"
+	URL="https://a.bouvetinterchange.eu:8797/"
 fi
 
 
 docker run \
   -it \
   --rm \
-  --name a_service_provider_client \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \

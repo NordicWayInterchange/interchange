@@ -39,8 +39,8 @@ services:
     container_name: a-onboard-server
     depends_on:
       - a-db
-    ports:
-      - 32666:8797
+    #ports:
+    #  - 32666:8899
     volumes:
     - "../tmp:/jks"
     environment:
@@ -95,7 +95,6 @@ services:
     volumes:
       - "../qpid/a:/qpid-broker-j/work-override"
       - "../tmp:/jks"
-      - "../qpid/messages/a:/work/a/messages"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
@@ -143,8 +142,6 @@ services:
     container_name: a-routing-configurer
     depends_on:
       - a-db
-        #links:
-        #- "a_qpid:a.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:

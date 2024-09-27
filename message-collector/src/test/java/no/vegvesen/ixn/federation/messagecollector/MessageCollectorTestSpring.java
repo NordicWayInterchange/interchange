@@ -35,7 +35,6 @@ class MessageCollectorTestSpring {
 
 	@Test
 	void collectorCreatorPropertiesIsReadFromPropertiesFile() {
-		assertThat(collectorProperties.getWritequeue()).isEqualTo("thisQueueIsForPropertyScanTestingOnly");
 		assertThat(collectorProperties.getFixeddelay()).isEqualTo("3000");
 	}
 

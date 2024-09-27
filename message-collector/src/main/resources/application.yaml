@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:7070/federation"
+    username: "federation"
+    password: "federation"
+  jpa:
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.PostgreSQL10Dialect"
+    hibernate:
+        ddl-auto: update
+    open-in-view: false
+  output:
+    ansi:
+      enabled: always
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%-13.13thread] %-5level %logger{36}  - %msg%n"
+  level:
+    org:
+      hibernate:
+        SQL: warn
+    root: info
+collector:
+  fixeddelay: 30000
+
+

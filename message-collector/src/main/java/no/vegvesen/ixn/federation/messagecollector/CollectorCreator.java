@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.stereotype.Component;
 
 import jakarta.jms.JMSException;
@@ -19,39 +20,40 @@ import javax.net.ssl.SSLContext;
 public class CollectorCreator {
 
 
-    private final SSLContext sslContext;
-    private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
-    private String localIxnDomainName;
-    private String localIxnFederationPort;
-    private String writeQueue;
+    private final SSLContext externalSslContext;
+    private final SSLContext internalSslContext;
+    private final Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
+    private final String localIxnDomainName;
+    private final String localIxnFederationPort;
 
-    CollectorCreator(SSLContext sslContext,
+    CollectorCreator(SSLContext externalSslContext,
                      String localIxnDomainName,
-                     String localIxnFederationPort,
-                     String writequeue) {
-        this.sslContext = sslContext;
+                     String localIxnFederationPort) {
+        //TODO for testing, for now
+        this.internalSslContext = externalSslContext;
+        this.externalSslContext = externalSslContext;
+
         this.localIxnDomainName = localIxnDomainName;
         this.localIxnFederationPort = localIxnFederationPort;
-        this.writeQueue = writequeue;
     }
 
     @Autowired
-    public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
-        this.sslContext = sslContext;
+    public CollectorCreator(SslBundles sslBundles, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
+        this.externalSslContext = sslBundles.getBundle("external-service").createSslContext();
+        this.internalSslContext = sslBundles.getBundle("internal-service").createSslContext();
         this.localIxnDomainName = interchangeNodeProperties.getName();
         this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
-        this.writeQueue = collectorProperties.getWritequeue();
     }
 
     MessageCollectorListener setupCollection(ListenerEndpoint listenerEndpoint) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         String localExchange = listenerEndpoint.getTarget();
         logger.debug("Write URL: {}, exchange {}", writeUrl, localExchange);
-        Source writeSource = new Source(writeUrl, localExchange, sslContext);
+        Source writeSource = new Source(writeUrl, localExchange, internalSslContext);
 
         String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
         String readQueue = listenerEndpoint.getSource();
-        Sink readSink = new Sink(readUrl, readQueue, sslContext);
+        Sink readSink = new Sink(readUrl, readQueue, externalSslContext);
         logger.info("Fetching messages from URL {}, queue {} ; write to URL {} target {}", readUrl, readQueue, writeUrl, localExchange);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);

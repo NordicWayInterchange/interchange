@@ -1,15 +1,15 @@
 #!/bin/bash
 
-SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
+SERVICE_PROVIDER="king_gustaf.bouvetinterchange.eu"
 CONTAINER=""
 URL=""
 
-if [ $1 == 'messages' ]; then
-CONTAINER="b_qpid"
+if [[ "$#" -ge 1  && $1 == 'messages' ]]; then
+CONTAINER="b-qpid"
 URL="amqps://b.bouvetinterchange.eu"
 
 else
-CONTAINER="b_onboard_server"
+CONTAINER="b-onboard-server"
 URL="https://b.bouvetinterchange.eu:8696/"
 fi
 

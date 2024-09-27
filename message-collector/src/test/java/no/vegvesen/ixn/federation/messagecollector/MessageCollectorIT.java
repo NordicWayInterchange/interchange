@@ -92,8 +92,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		CollectorCreator collectorCreator = new CollectorCreator(
 				sslServerContext(stores,HOST_NAME),
 				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
+				localIxnFederationPort
+		);
 
 		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		collector.runSchedule();
@@ -146,10 +146,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		//TODO this should use different contexts for each side of the collector, see comment in CollectorCreator constructor
 		CollectorCreator collectorCreator = new CollectorCreator(
-				sslServerContext(stores,HOST_NAME),
+				sslServerContext(stores, HOST_NAME),
 				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
+				localIxnFederationPort
+		);
 
 		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		collector.runSchedule();
@@ -206,8 +206,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		CollectorCreator collectorCreator = new CollectorCreator(
 				sslServerContext(stores,HOST_NAME),
 				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
+				localIxnFederationPort
+		);
 
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
@@ -256,12 +256,11 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
 
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
-		CollectorCreator collectorCreator = new CollectorCreator(
+        CollectorCreator collectorCreator = new CollectorCreator(
 				sslServerContext(stores,HOST_NAME),
 				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
+                consumerContainer.getAmqpsPort().toString()
+		);
 
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
