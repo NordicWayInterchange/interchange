@@ -9,13 +9,12 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -42,13 +41,17 @@ public class RoutingConfigurer {
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
+
+	private final String messageCollectorUser;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, RoutingConfigurerProperties routingConfigurerProperties) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
+		this.messageCollectorUser = routingConfigurerProperties.getCollectorUser();
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -242,6 +245,8 @@ public class RoutingConfigurer {
 											new SubscriptionShard(exchangeName)
 									);
 									qpidClient.createHeadersExchange(exchangeName);
+									//TODO set the message collector user as writer on exchange
+									qpidClient.addWriteAccess(messageCollectorUser,exchangeName);
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
 								}
