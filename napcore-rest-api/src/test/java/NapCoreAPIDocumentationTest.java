@@ -42,7 +42,8 @@ public class NapCoreAPIDocumentationTest {
                 SubscriptionStatus.CREATED,
                 "messageType = 'DENM'",
                 new HashSet<>(Collections.singleton(endpoint)),
-                LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()
+                LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond(),
+                ""
         );
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));

@@ -15,15 +15,18 @@ public class Delivery implements Comparable<Delivery>{
 
     Long lastUpdatedTimestamp;
 
+    String comment;
+
     public Delivery(){
     }
 
-    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp) {
+    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp, String comment) {
         this.id = id;
         this.selector = selector;
         this.status = status;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.comment = comment;
     }
 
     public String getId() {
@@ -69,6 +72,14 @@ public class Delivery implements Comparable<Delivery>{
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     @Override
     public String toString(){
         return "Delivery{" +
@@ -77,6 +88,7 @@ public class Delivery implements Comparable<Delivery>{
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints  +
                 ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
+                ", comment=" + comment+
                 "}";
     }
 
