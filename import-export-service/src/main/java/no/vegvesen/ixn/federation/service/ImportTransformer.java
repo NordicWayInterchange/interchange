@@ -30,6 +30,7 @@ public class ImportTransformer {
 
     public LocalSubscription transformLocalSubscriptionImportApiToLocalSubscription(LocalSubscriptionImportApi localSubscription) {
         LocalSubscription newLocalSubscription = new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+                localSubscription.getUuid(),
                 LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName()
@@ -76,10 +77,10 @@ public class ImportTransformer {
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {
-        Capability newCapability = new Capability(capabilityTransformer.applicationApiToApplication(capability.getApplication()),
+        Capability newCapability = new Capability(capability.getUuid(),
+                capabilityTransformer.applicationApiToApplication(capability.getApplication()),
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
-        //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
         newCapability.getMetadata().setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
         return newCapability;
     }
@@ -125,9 +126,9 @@ public class ImportTransformer {
     }
 
     public LocalDelivery transformDeliveryImportApiToLocalDelivery(DeliveryImportApi delivery) {
-        return new LocalDelivery(delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
+        return new LocalDelivery(delivery.getUuid(),
+                delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                //transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus())
                 LocalDeliveryStatus.REQUESTED
         );
     }
@@ -169,7 +170,6 @@ public class ImportTransformer {
                 transformNeighbourCapabilitiesImportApiToNeighbourCapabilities(neighbour.getCapabilities()),
                 new NeighbourSubscriptionRequest(neighbour.getNeighbourSubscriptions().stream().map(this::transformNeighbourSubscriptionImportApiToNeighbourSubscription).collect(Collectors.toSet())),
                 new SubscriptionRequest(neighbour.getOurSubscriptions().stream().map(this::transformSubscriptionImportApiToSubscription).collect(Collectors.toSet()))
-                //neighbour.getControlChannelPort()
         );
     }
 
@@ -206,6 +206,7 @@ public class ImportTransformer {
 
     public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription) {
         return new NeighbourSubscription(
+                neighbourSubscription.getUuid(),
                 transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
                 neighbourSubscription.getSelector(),
                 neighbourSubscription.getPath(),
@@ -298,8 +299,8 @@ public class ImportTransformer {
     }
 
     public PrivateChannel transformPrivateChannelImportApiToPrivateChannel(PrivateChannelImportApi privateChannel) {
-        return new PrivateChannel(privateChannel.getPeerName(),
-                //transformPrivateChannelStatusImportApiToPrivateChannelStatus(privateChannel.getStatus()),
+        return new PrivateChannel(privateChannel.getUuid(),
+                privateChannel.getPeerName(),
                 PrivateChannelStatus.REQUESTED,
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()

@@ -45,6 +45,14 @@ public class PrivateChannel {
         this.serviceProviderName = serviceProviderName;
     }
 
+    public PrivateChannel(String uuid, String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+        this.uuid = uuid;
+        this.peerName = peerName;
+        this.status = status;
+        this.endpoint = privateChannelEndpoint;
+        this.serviceProviderName = serviceProviderName;
+    }
+
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
     }

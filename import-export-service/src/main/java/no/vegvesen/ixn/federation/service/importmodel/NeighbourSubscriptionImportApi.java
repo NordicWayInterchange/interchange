@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class NeighbourSubscriptionImportApi {
 
+    private String uuid;
+
     private NeighbourSubscriptionStatusImportApi status;
 
     private String selector;
@@ -23,16 +25,26 @@ public class NeighbourSubscriptionImportApi {
 
     }
 
-    public NeighbourSubscriptionImportApi(NeighbourSubscriptionStatusImportApi status,
+    public NeighbourSubscriptionImportApi(String uuid,
+                                          NeighbourSubscriptionStatusImportApi status,
                                           String selector,
                                           String path,
                                           String consumerCommonName,
                                           Set<NeighbourEndpointImportApi> endpoints) {
+        this.uuid = uuid;
         this.status = status;
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public NeighbourSubscriptionStatusImportApi getStatus() {
@@ -80,18 +92,19 @@ public class NeighbourSubscriptionImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NeighbourSubscriptionImportApi that = (NeighbourSubscriptionImportApi) o;
-        return status == that.status && Objects.equals(selector, that.selector) && Objects.equals(path, that.path) && Objects.equals(consumerCommonName, that.consumerCommonName) && Objects.equals(endpoints, that.endpoints);
+        return Objects.equals(uuid, that.uuid) && status == that.status && Objects.equals(selector, that.selector) && Objects.equals(path, that.path) && Objects.equals(consumerCommonName, that.consumerCommonName) && Objects.equals(endpoints, that.endpoints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector, path, consumerCommonName, endpoints);
+        return Objects.hash(uuid, status, selector, path, consumerCommonName, endpoints);
     }
 
     @Override
     public String toString() {
         return "NeighbourSubscriptionImportApi{" +
-                "status=" + status +
+                "uuid='" + uuid + '\'' +
+                ", status=" + status +
                 ", selector='" + selector + '\'' +
                 ", path='" + path + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +

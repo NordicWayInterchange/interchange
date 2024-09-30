@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class DeliveryExportApi {
 
+    private String uuid;
+
     private Set<DeliveryEndpointExportApi> endpoints;
 
     private String selector;
@@ -19,12 +21,22 @@ public class DeliveryExportApi {
 
     }
 
-    public DeliveryExportApi(Set<DeliveryEndpointExportApi> endpoints,
+    public DeliveryExportApi(String uuid,
+                             Set<DeliveryEndpointExportApi> endpoints,
                              String selector,
                              DeliveryStatusExportApi status) {
+        this.uuid = uuid;
         this.endpoints = endpoints;
         this.selector = selector;
         this.status = status;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<DeliveryEndpointExportApi> getEndpoints() {
@@ -56,18 +68,19 @@ public class DeliveryExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryExportApi that = (DeliveryExportApi) o;
-        return Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, selector, status);
+        return Objects.hash(uuid, endpoints, selector, status);
     }
 
     @Override
     public String toString() {
         return "DeliveryExportApi{" +
-                "endpoints=" + endpoints +
+                "uuid='" + uuid + '\'' +
+                ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
                 '}';

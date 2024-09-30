@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class LocalSubscriptionExportApi {
 
+    private String uuid;
+
     private String selector;
 
     private String consumerCommonName;
@@ -23,16 +25,26 @@ public class LocalSubscriptionExportApi {
 
     }
 
-    public LocalSubscriptionExportApi(String selector,
+    public LocalSubscriptionExportApi(String uuid,
+                                      String selector,
                                       String consumerCommonName,
                                       LocalSubscriptionStatusExportApi status,
                                       Set<LocalEndpointExportApi> localEndpoints,
                                       Set<LocalConnectionExportApi> localConnections) {
+        this.uuid = uuid;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.status = status;
         this.localEndpoints = localEndpoints;
         this.localConnections = localConnections;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getSelector() {
@@ -80,18 +92,19 @@ public class LocalSubscriptionExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscriptionExportApi that = (LocalSubscriptionExportApi) o;
-        return Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints) && Objects.equals(localConnections, that.localConnections);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints) && Objects.equals(localConnections, that.localConnections);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, consumerCommonName, status, localEndpoints, localConnections);
+        return Objects.hash(uuid, selector, consumerCommonName, status, localEndpoints, localConnections);
     }
 
     @Override
     public String toString() {
         return "LocalSubscriptionExportApi{" +
-                "selector='" + selector + '\'' +
+                "uuid='" + uuid + '\'' +
+                ", selector='" + selector + '\'' +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", status=" + status +
                 ", localEndpoints=" + localEndpoints +

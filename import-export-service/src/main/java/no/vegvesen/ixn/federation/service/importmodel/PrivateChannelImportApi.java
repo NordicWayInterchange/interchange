@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class PrivateChannelImportApi {
 
+    private String uuid;
+
     private String serviceProviderName;
 
     private String peerName;
@@ -20,14 +22,24 @@ public class PrivateChannelImportApi {
 
     }
 
-    public PrivateChannelImportApi(String serviceProviderName,
+    public PrivateChannelImportApi(String uuid,
+                                   String serviceProviderName,
                                    String peerName,
                                    PrivateChannelStatusImportApi status,
                                    PrivateChannelEndpointImportApi endpoint) {
+        this.uuid = uuid;
         this.serviceProviderName = serviceProviderName;
         this.peerName = peerName;
         this.status = status;
         this.endpoint = endpoint;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getServiceProviderName() {
@@ -67,18 +79,19 @@ public class PrivateChannelImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelImportApi that = (PrivateChannelImportApi) o;
-        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceProviderName, peerName, status, endpoint);
+        return Objects.hash(uuid, serviceProviderName, peerName, status, endpoint);
     }
 
     @Override
     public String toString() {
         return "PrivateChannelImportApi{" +
-                "serviceProviderName='" + serviceProviderName + '\'' +
+                "uuid='" + uuid + '\'' +
+                ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", peerName='" + peerName + '\'' +
                 ", status=" + status +
                 ", endpoint=" + endpoint +

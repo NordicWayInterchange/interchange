@@ -28,7 +28,6 @@ public class ExportApplication implements CommandLineRunner {
     @Autowired
     private PrivateChannelRepository privateChannelRepository;
 
-
     public static void main(String[] args) {
         SpringApplication.run(ExportApplication.class);
     }

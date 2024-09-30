@@ -48,14 +48,6 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-        this.subscriptionStatus = subscriptionStatus;
-        this.selector = selector;
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
-    }
-
     public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
@@ -65,12 +57,12 @@ public class NeighbourSubscription {
     }
 
     public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+        this.uuid = uuid;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints.addAll(endpoints);
-        this.uuid = uuid;
     }
 
     public Integer getId() {

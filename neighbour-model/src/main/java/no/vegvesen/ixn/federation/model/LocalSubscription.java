@@ -60,8 +60,9 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
-        this.id = id;
+    public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.uuid = uuid;
+        this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
     }
@@ -150,11 +151,6 @@ public class LocalSubscription {
 
     public String getConsumerCommonName() {
         return consumerCommonName;
-    }
-
-    //TODO lag et objekt av selector??
-    public String bindKey() {
-        return "" + selector.hashCode();
     }
 
     @Override

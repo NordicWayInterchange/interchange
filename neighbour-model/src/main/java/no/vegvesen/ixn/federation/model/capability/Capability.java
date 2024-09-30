@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -43,9 +42,9 @@ public class Capability {
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
+        this.uuid = uuid;
         this.application = application;
         this.metadata = metadata;
-        this.uuid = uuid;
         this.createdTimestamp = LocalDateTime.now();
     }
 

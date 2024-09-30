@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class CapabilityImportApi {
 
+    private String uuid;
+
     private ApplicationApi application;
 
     private MetadataImportApi metadata;
@@ -23,10 +25,20 @@ public class CapabilityImportApi {
 
     }
 
-    public CapabilityImportApi(ApplicationApi application,
+    public CapabilityImportApi(String uuid,
+                               ApplicationApi application,
                                MetadataImportApi metadata) {
+        this.uuid = uuid;
         this.application = application;
         this.metadata = metadata;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public ApplicationApi getApplication() {
@@ -66,19 +78,22 @@ public class CapabilityImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CapabilityImportApi that = (CapabilityImportApi) o;
-        return Objects.equals(application, that.application) && Objects.equals(metadata, that.metadata);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(application, that.application) && Objects.equals(metadata, that.metadata) && status == that.status && Objects.equals(shards, that.shards);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(application, metadata);
+        return Objects.hash(uuid, application, metadata, status, shards);
     }
 
     @Override
     public String toString() {
         return "CapabilityImportApi{" +
-                "application=" + application +
+                "uuid='" + uuid + '\'' +
+                ", application=" + application +
                 ", metadata=" + metadata +
+                ", status=" + status +
+                ", shards=" + shards +
                 '}';
     }
 }

@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class DeliveryImportApi {
 
+    private String uuid;
+
     private Set<DeliveryEndpointImportApi> endpoints;
 
     private String path;
@@ -21,14 +23,24 @@ public class DeliveryImportApi {
 
     }
 
-    public DeliveryImportApi(Set<DeliveryEndpointImportApi> endpoints,
+    public DeliveryImportApi(String uuid,
+                             Set<DeliveryEndpointImportApi> endpoints,
                              String path,
                              String selector,
                              DeliveryStatusImportApi status) {
+        this.uuid = uuid;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.status = status;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<DeliveryEndpointImportApi> getEndpoints() {
@@ -68,18 +80,19 @@ public class DeliveryImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, path, selector, status);
+        return Objects.hash(uuid, endpoints, path, selector, status);
     }
 
     @Override
     public String toString() {
         return "DeliveryImportApi{" +
-                "endpoints=" + endpoints +
+                "uuid='" + uuid + '\'' +
+                ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +

@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class CapabilityExportApi {
 
+    private String uuid;
+
     private ApplicationApi application;
 
     private MetadataExportApi metadata;
@@ -23,14 +25,24 @@ public class CapabilityExportApi {
 
     }
 
-    public CapabilityExportApi(ApplicationApi application,
+    public CapabilityExportApi(String uuid,
+                               ApplicationApi application,
                                MetadataExportApi metadata,
                                CapabilityStatusExportApi status,
                                Set<CapabilityShardExportApi> shards) {
+        this.uuid = uuid;
         this.application = application;
         this.metadata = metadata;
         this.status = status;
         this.shards = shards;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public ApplicationApi getApplication() {
@@ -70,18 +82,19 @@ public class CapabilityExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CapabilityExportApi that = (CapabilityExportApi) o;
-        return Objects.equals(application, that.application) && Objects.equals(metadata, that.metadata) && status == that.status && Objects.equals(shards, that.shards);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(application, that.application) && Objects.equals(metadata, that.metadata) && status == that.status && Objects.equals(shards, that.shards);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(application, metadata, status, shards);
+        return Objects.hash(uuid, application, metadata, status, shards);
     }
 
     @Override
     public String toString() {
         return "CapabilityExportApi{" +
-                "application=" + application +
+                "uuid='" + uuid + '\'' +
+                ", application=" + application +
                 ", metadata=" + metadata +
                 ", status=" + status +
                 ", shards=" + shards +
