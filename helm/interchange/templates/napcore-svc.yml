@@ -1,4 +1,4 @@
-{{ if .Values.napcore_frontend.enabled }}
+{{ if or .Values.napcore_frontend.enabled .Values.napcore_server.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -9,7 +9,13 @@ metadata:
     component: napcore-server
     release: {{ .Release.Name }}
 spec:
+{{ if .Values.napcore_frontend.enabled }}
   type: ClusterIP
+{{ else }}
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.static_external_ip }}
+  externalTrafficPolicy: Cluster
+{{ end }}
   selector:
     app: {{ .Chart.Name }}
     component: napcore-server

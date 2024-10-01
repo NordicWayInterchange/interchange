@@ -64,6 +64,7 @@ routing_configurer:
 
 napcore_server:
   replicas: 1
+  enabled: false
 
 napcore_frontend:
   enabled: false

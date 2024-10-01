@@ -1,4 +1,4 @@
-{{ if .Values.napcore_frontend.enabled }}
+{{ if or .Values.napcore_frontend.enabled  .Values.napcore_server.enabled }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
