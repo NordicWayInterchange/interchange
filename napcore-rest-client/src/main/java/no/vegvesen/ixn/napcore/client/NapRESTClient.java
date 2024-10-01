@@ -17,7 +17,6 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-
 import javax.net.ssl.SSLContext;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -76,6 +75,14 @@ public class NapRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, Subscription.class).getBody();
     }
 
+    public Subscription addSubscriptionComment(AddCommentRequest addCommentRequest){
+        String url = String.format("%s/nap/%s/subscriptions/comment", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddCommentRequest> entity = new HttpEntity<>(addCommentRequest, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, Subscription.class).getBody();
+    }
+
     public Subscription getSubscription(String subscriptionId) {
         String url = String.format("%s/nap/%s/subscriptions/%s", server, user, subscriptionId);
         return restTemplate.getForEntity(url, Subscription.class).getBody();
@@ -104,6 +111,14 @@ public class NapRESTClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DeliveryRequest> entity = new HttpEntity<>(deliveryRequest, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, Delivery.class).getBody();
+    }
+
+    public Delivery addDeliveryComment(AddCommentRequest addCommentRequest){
+        String url = String.format("%s/nap/%s/deliveries/comment", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddCommentRequest> entity = new HttpEntity<>(addCommentRequest, headers);
         return restTemplate.exchange(url, HttpMethod.POST, entity, Delivery.class).getBody();
     }
 
