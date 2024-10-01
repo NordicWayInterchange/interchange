@@ -14,9 +14,9 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -114,6 +114,22 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionToNapSubscription(savedSubscription);
     }
 
+    @RequestMapping(method = RequestMethod.POST, path={"/nap/{actorCommonName}/subscriptions/comment"})
+    public Subscription addSubscriptionComment(@PathVariable("actorCommonName") String actorCommonName, @RequestBody AddCommentRequest addCommentRequest){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
+
+        if(Objects.isNull(addCommentRequest) || Objects.isNull(addCommentRequest.getComment()) || Objects.isNull(addCommentRequest.getId())) {
+            throw new SubscriptionRequestException("Bad api object for Subscription comment request");
+        }
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        LocalSubscription localSubscription = serviceProvider.getSubscription(addCommentRequest.getId());
+        localSubscription.setComment(addCommentRequest.getComment());
+        serviceProviderRepository.save(serviceProvider);
+        return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
+    }
+
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions", "/nap/{actorCommonName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Subscription> getSubscriptions(@PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
@@ -202,6 +218,23 @@ public class NapRestController {
                 .get();
 
         return typeTransformer.transformLocalDeliveryToNapDelivery(savedDelivery);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries/comment"})
+    public Delivery addDeliveryComment(@PathVariable("actorCommonName") String actorCommonName, @RequestBody AddCommentRequest addCommentRequest){
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
+
+        if(Objects.isNull(addCommentRequest) || Objects.isNull(addCommentRequest.getComment()) || Objects.isNull(addCommentRequest.getId())){
+            throw new DeliveryPostException("Bad api object for Delivery comment request");
+        }
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        LocalDelivery localDelivery = serviceProvider.getDelivery(addCommentRequest.getId());
+        localDelivery.setComment(addCommentRequest.getComment());
+        serviceProviderRepository.save(serviceProvider);
+
+        return typeTransformer.transformLocalDeliveryToNapDelivery(localDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)

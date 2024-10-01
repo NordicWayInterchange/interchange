@@ -89,6 +89,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingSubscriptionComment(){
+        String actorCommonName = "actor";
+        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
+        Subscription updated = napRestController.addSubscriptionComment(actorCommonName, new AddCommentRequest(subscription.getId(), "First subscription"));
+        assertThat(updated.getComment()).isNotEqualTo(null);
+    }
+
+    @Test
     public void testGetSubscriptionsReturnsValidSubscriptions(){
         String actorCommonName = "actor";
         SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
@@ -181,6 +189,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
     }
 
+    @Test
+    public void testAddingDeliveryComment(){
+        String actorCommonName = "actor";
+        Delivery delivery = napRestController.addDelivery(actorCommonName, new DeliveryRequest("originatingCountry='NO'"));
+        Delivery updated = napRestController.addDeliveryComment(actorCommonName, new AddCommentRequest(delivery.getId(), "First delivery"));
+        assertThat(updated.getComment()).isNotEqualTo(null);
+    }
 
     @Test
     public void testGettingNonExistentDeliveryThrowsException(){
