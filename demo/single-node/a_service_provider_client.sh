@@ -5,7 +5,7 @@ CONTAINER=""
 URL=""
 
 if [[ "$#" -ge 1 && $1 == 'messages' ]]; then
-CONTAINER="a_qpid"
+CONTAINER="a-qpid"
 URL="amqps://a.interchangedomain.com"
 
 else
@@ -16,7 +16,6 @@ fi
 docker run \
   -it \
   --rm \
-  --name a_service_provider_client \
   --network=single-node_singletest \
   --dns=172.28.1.1 \
   -v $PWD/../keys/a:/keys \
