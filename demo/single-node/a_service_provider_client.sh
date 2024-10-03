@@ -4,7 +4,7 @@ SERVICE_PROVIDER="king_olav.interchangedomain.com"
 CONTAINER=""
 URL=""
 
-if [ $1 == 'messages' ]; then
+if [[ "$#" -ge 1 && $1 == 'messages' ]]; then
 CONTAINER="a_qpid"
 URL="amqps://a.interchangedomain.com"
 
