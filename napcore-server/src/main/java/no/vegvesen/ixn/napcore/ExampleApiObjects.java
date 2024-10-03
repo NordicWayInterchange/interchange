@@ -2,13 +2,19 @@ package no.vegvesen.ixn.napcore;
 
 public class ExampleApiObjects {
 
+    static final String CSR = """
+            {
+            "csr": LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ3ZUQ0NBYVVDQVFBd2VERWdNQjRHQ1NxR1NJYjNEUUVKQVJZUmJHVmhibVJsY2tCdU0zSmtMbXhwWm1VeApNekF4QmdOVkJBTU1LbkJwYkc5MGFXNTBaWEpqYUdGdVoyVXVaWFV1ZEd4bGVDNXpaUzV1TTNKa0xteHBabVV1CmRHVnpkREVTTUJBR0ExVUVDZ3dKVGpOeVpDQk1hV1psTVFzd0NRWURWUVFHRXdKT1REQ0NBU0l3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFMT0FsZ2hVR1dBY0tCS1ZxYXZXQnZsUHZTaURvdVhNV01oZwp0eGZFQ1pWNDlsYWxINjZLTTRlRExDMCtqWjlBWmpaNGg4TEYyQS9tZENkeE9UK1hlc3N0YjViSjZiRVZxTUkxCkp3RG1ITVZUaHlYWVhialIvU1JkaTUzS0xhcENGcjMrWC8wQi9aZ1F5Y29FNzMySVJMN2NlOVprQ2tuWTRyUEwKVkhrTVFLZVZ6RVEraTlaSGNmNkNmbTVMY1FJU0RrODB3MndTelBXcjF1b3JnTFJuYXN2N1pCenAyWXVjTHlkdAovMHBBa3BKeUJnejRra1Ixck4yOE5IeUM0RXQxdzdzOHFjcVZSMDFsRWRxdUlmUjVjMHJMdzdIZFZzT0EwOHR4ClN3NndlcmpMQndYV3FrT2tuUVdCd2lRZ0FXQmtRVE9pZHZaZ3RQaVZFMkNoSGVDQzVDY0NBd0VBQWFBQU1BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUI0YnZOVG8vVjA3dlcrYnlGRFNoV1pOK05wR3hVbzVXV2N1Nzk1L2lLUgpjK2g5OXUvUnFWY1BPNXkvckJoTVovTUp6VEZZMko2Y3YyK0dZYkJqa1VhTm45MjE2RDhOQU1wRFR6bHEyVFR4CnROYWJ5eE5ubXJYVnZjUXhFZzRDdzlJN3ZXR0VvQzlCN1I1OGxiVGRDNG95M0VBc2J1dHJJT21PRGMvRWR1SnoKMnRSZ3pEeG9OVWRrWWREcFhyRkthTEczRXlTSjFsVEpuN3MzZEl6UCtkdElPOXBjVjJtMUZKQlpsanRWbmpUTgptM2h0UTZtN2JkbXBUTCtTdEEwTUtJZGFmWFE5R2xBS0cxdWNHNCs2RkR3RVhIZmJ4U2drQ3JyQzg0dWt5TGR1CjBJUWs1NUlqTjFnUy84TVZWN0cycm9uN01KSHBNeWFKaWhYMWNGRTd1TjhYCi0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=
+            }
+            """;
     static final String ADDSUBSCRIPTIONRESPONSE = """
             {
               "id" : "3c4c9340-0f75-4bba-93be-8f426e7ce63b",
               "status" : "REQUESTED",
               "selector" : "originatingCountry='NO'",
               "endpoints" : [ ],
-              "lastUpdatedTimestamp" : 1726567848
+              "lastUpdatedTimestamp" : 1726567848,
+              "comment": "subscribe to DATEX messages"
             }
             """;
 
@@ -24,7 +30,8 @@ public class ExampleApiObjects {
                 "maxBandwidth" : null,
                 "maxMessageRate" : null
               } ],
-              "lastUpdatedTimestamp" : 1726567853
+              "lastUpdatedTimestamp" : 1726567853,
+              "comment": "listen to DENM messages"
             } ]
             """;
 
@@ -40,7 +47,8 @@ public class ExampleApiObjects {
                 "maxBandwidth" : null,
                 "maxMessageRate" : null
               } ],
-              "lastUpdatedTimestamp" : 1726567853
+              "lastUpdatedTimestamp" : 1726567853,
+              "comment": "listen to DENM messages"
             }
             """;
 
@@ -72,7 +80,8 @@ public class ExampleApiObjects {
               "status" : "REQUESTED",
               "selector" : "originatingCountry='NO'",
               "endpoints" : [ ],
-              "lastUpdatedTimestamp" : 1726567454
+              "lastUpdatedTimestamp" : 1726567454,
+              "comment": "Delivery for sending datex messages"
             }
             """;
 
@@ -86,7 +95,8 @@ public class ExampleApiObjects {
                 "port" : 5671,
                 "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
               } ],
-              "lastUpdatedTimestamp" : 1726567679
+              "lastUpdatedTimestamp" : 1726567679,
+              "comment": "Deliver messages from Norway"
             }
             """;
 
@@ -100,7 +110,8 @@ public class ExampleApiObjects {
                 "port" : 5671,
                 "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
               } ],
-              "lastUpdatedTimestamp" : 1726567679
+              "lastUpdatedTimestamp" : 1726567679,
+              "comment": "Deliver messages from Norway"
             } ]
             """;
 
