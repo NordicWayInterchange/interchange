@@ -81,7 +81,6 @@ jobs:
           echo "$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
 
       - name: Checkout to interchange-swagger-docs
-        if: github.ref == 'refs/heads/federation-master' || github.ref == 'refs/heads/allow-comment-on-subscriptions-and-deliveries'
         uses: actions/checkout@v4
         with:
           repository: NordicWayInterchange/interchange-swagger-docs
