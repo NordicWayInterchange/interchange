@@ -255,7 +255,7 @@ public class NapRestControllerTest {
         String request = """
                 {
                 "selector": "originatingCountry='NO'",
-                "description": "NO delivery"
+                "description": "NO delivery" 
                 }
                 """;
         String serviceProviderName = "actor";

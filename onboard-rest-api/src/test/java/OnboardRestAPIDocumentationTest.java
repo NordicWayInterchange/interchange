@@ -126,8 +126,8 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
-                localEndpointApis
-
+                localEndpointApis,
+                "DENM subscription"
         );
 
         ObjectMapper mapper = new ObjectMapper();

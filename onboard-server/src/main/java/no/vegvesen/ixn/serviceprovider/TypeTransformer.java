@@ -188,7 +188,8 @@ public class TypeTransformer {
                 localSubscription.getConsumerCommonName(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
                 transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
-                transformLocalEndpointsToLocalEndpointApis(localSubscription.getLocalEndpoints())
+                transformLocalEndpointsToLocalEndpointApis(localSubscription.getLocalEndpoints()),
+                localSubscription.getDescription()
         );
     }
 
