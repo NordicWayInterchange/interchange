@@ -254,11 +254,12 @@ public class NapRestControllerTest {
     public void postDeliveryReturnsStatusOk() throws Exception{
         String request = """
                 {
-                "selector": "originatingCountry='NO'"
+                "selector": "originatingCountry='NO'",
+                "description": "NO delivery"
                 }
                 """;
         String serviceProviderName = "actor";
-        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(),

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
-import static picocli.CommandLine.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "add",
@@ -23,6 +25,8 @@ public class AddNapSubscription implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddNapSubscriptionOption option;
 
+    @Option(names = {"-d", "--description"})
+    String description;
 
     @Override
     public Integer call() throws IOException {
@@ -35,7 +39,10 @@ public class AddNapSubscription implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            SubscriptionRequest request = new SubscriptionRequest(option.selector);
+            if(description == null){
+                description = "Test";
+            }
+            SubscriptionRequest request = new SubscriptionRequest(option.selector, description);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

@@ -76,7 +76,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingSubscriptionWithInvalidSelectorSetsStatusToIllegal(){
         String actorCommonName = "actor";
-        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("1=1"));
+        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("1=1", "invalid sub"));
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
     }
 
@@ -89,7 +89,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingSubscriptionWithValidSelectorReturnsValidSubscriptionAndCreatesServiceProvider(){
         String actorCommonName = "actor";
-        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
+        Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "NO sub"));
         System.out.println(subscription);
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
@@ -99,8 +99,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGetSubscriptionsReturnsValidSubscriptions(){
         String actorCommonName = "actor";
-        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
-        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
+        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'", "NO Sub");
+        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'", "SE Sub");
         napRestController.addSubscription(actorCommonName, request1);
         napRestController.addSubscription(actorCommonName, request2);
 
@@ -114,7 +114,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGetSubscriptionReturnsValidSubscription(){
         String actorCommonName = "actor";
-        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
+        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'", "NO SUb");
         Subscription subscription = napRestController.addSubscription(actorCommonName, request);
         Subscription response = napRestController.getSubscription(actorCommonName, subscription.getId());
 
@@ -131,7 +131,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testSubscriptionIsDeletedCorrectly(){
         String actorCommonName = "actor";
-        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
+        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'", "No sub");
         Subscription subscription = napRestController.addSubscription("actor", request);
         napRestController.deleteSubscription(actorCommonName, subscription.getId().toString());
         assertThat(napRestController.getSubscriptions(actorCommonName).stream().findFirst().get().getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
@@ -140,9 +140,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGettingSubscriptionsReturnsCorrectOrder() throws InterruptedException {
         String actorCommonName = "actor";
-        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
-        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'");
-        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'");
+        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'", "NO sub");
+        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'", "SE sub");
+        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'", "FI sub");
         serviceProviderRepository.save(new ServiceProvider(actorCommonName));
         napRestController.addSubscription(actorCommonName, request1);
         TimeUnit.SECONDS.sleep(1);
@@ -164,7 +164,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingDeliveryWithValidSelectorGivesRequestedDelivery(){
         String actorCommonName = "actor";
-        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     }
@@ -172,7 +172,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingDeliveryWithInvalidSelectorGivesInvalidDelivery(){
         String actorCommonName = "actor";
-        DeliveryRequest deliveryRequest = new DeliveryRequest("1=1");
+        DeliveryRequest deliveryRequest = new DeliveryRequest("1=1", "Invalid delivery");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
     }
@@ -200,7 +200,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testGettingDelivery(){
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
-        Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector));
+        Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector, "NO Delivery"));
         Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
         assertThat(delivery).isNotNull();
         assertThat(delivery.getSelector()).isEqualTo(selector);
@@ -214,13 +214,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String selector3 = "originatingCountry='FI'";
         ServiceProvider sp = new ServiceProvider(actorCommonName);
         sp = serviceProviderRepository.save(sp);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1, "Delivery 1"));
         sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector1)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2, "Delivery 2"));
         sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector2)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3, "Delivery 3"));
         sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector3)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
@@ -271,7 +271,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingDelivery(){
         String actorCommonName = "actor";
-        DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'");
+        DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'", "Test delivery");
         Delivery delivery = napRestController.addDelivery(actorCommonName, request);
 
         napRestController.deleteDelivery(actorCommonName, delivery.getId());
