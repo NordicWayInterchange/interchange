@@ -14,7 +14,7 @@ public class ExampleApiObjects {
               "selector" : "originatingCountry='NO'",
               "endpoints" : [ ],
               "lastUpdatedTimestamp" : 1726567848,
-              "comment": "subscribe to DATEX messages"
+              "description": "subscribe to DATEX messages"
             }
             """;
 
@@ -31,7 +31,7 @@ public class ExampleApiObjects {
                 "maxMessageRate" : null
               } ],
               "lastUpdatedTimestamp" : 1726567853,
-              "comment": "listen to DENM messages"
+              "description": "listen to DENM messages"
             } ]
             """;
 
@@ -48,7 +48,7 @@ public class ExampleApiObjects {
                 "maxMessageRate" : null
               } ],
               "lastUpdatedTimestamp" : 1726567853,
-              "comment": "listen to DENM messages"
+              "description": "listen to DENM messages"
             }
             """;
 
@@ -81,7 +81,7 @@ public class ExampleApiObjects {
               "selector" : "originatingCountry='NO'",
               "endpoints" : [ ],
               "lastUpdatedTimestamp" : 1726567454,
-              "comment": "Delivery for sending datex messages"
+              "description": "Delivery for sending datex messages"
             }
             """;
 
@@ -96,7 +96,7 @@ public class ExampleApiObjects {
                 "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
               } ],
               "lastUpdatedTimestamp" : 1726567679,
-              "comment": "Deliver messages from Norway"
+              "description": "Deliver messages from Norway"
             }
             """;
 
@@ -111,7 +111,7 @@ public class ExampleApiObjects {
                 "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
               } ],
               "lastUpdatedTimestamp" : 1726567679,
-              "comment": "Deliver messages from Norway"
+              "description": "Deliver messages from Norway"
             } ]
             """;
 
