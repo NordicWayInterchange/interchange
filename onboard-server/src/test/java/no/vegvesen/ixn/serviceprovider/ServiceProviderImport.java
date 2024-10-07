@@ -68,7 +68,8 @@ public class ServiceProviderImport {
         for (DeliveryApi deliveryApi : serviceProviderApi.getDeliveries()) {
             LocalDelivery delivery = new LocalDelivery(
                     deliveryApi.getSelector(),
-                    LocalDeliveryStatus.REQUESTED
+                    LocalDeliveryStatus.REQUESTED,
+                    "delivery"
             );
             String exchangeName = null;
             for (DeliveryEndpoint endpoint : deliveryApi.getEndpoints()) {

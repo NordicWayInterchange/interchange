@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -12,23 +13,16 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.junit.jupiter.Container;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -36,7 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -592,7 +586,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createHeadersExchange("cap-ex1");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 		delivery.setExchangeName("my-exchange5");
 
@@ -648,7 +642,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex3");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.setExchangeName("my-exchange6");
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -687,7 +681,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex4");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.setId(1);
 		serviceProvider.addDeliveries(Set.of(delivery));
 		delivery.setExchangeName(exchangeName);
@@ -730,7 +724,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex5");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.setId(1);
 		delivery.setExchangeName("my-exchange9");
 
@@ -792,7 +786,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex7");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "No delivery");
 		delivery.setId(1);
 		delivery.setExchangeName("my-exchange10");
 

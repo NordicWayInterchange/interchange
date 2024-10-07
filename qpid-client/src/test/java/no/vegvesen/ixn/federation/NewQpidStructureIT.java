@@ -179,7 +179,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
-                LocalDeliveryStatus.CREATED
+                LocalDeliveryStatus.CREATED,
+                "DENM delivery"
         );
 
         qpidClient.createDirectExchange(inQueueName);
@@ -321,7 +322,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO'",
-                LocalDeliveryStatus.CREATED
+                LocalDeliveryStatus.CREATED,
+                "NO Delivery"
         );
 
         qpidClient.createDirectExchange(deliveryExchange);
@@ -407,7 +409,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6",
-                LocalDeliveryStatus.CREATED
+                LocalDeliveryStatus.CREATED,
+                "DENM delivery"
         );
 
         qpidClient.createDirectExchange(deliveryExchange);

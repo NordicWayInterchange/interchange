@@ -75,11 +75,6 @@ public class LocalDelivery {
         this.description = description;
     }
 
-    public LocalDelivery(String selector, LocalDeliveryStatus status) {
-        this.selector = selector;
-        this.status = status;
-    }
-
     public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
         this.selector = selector;
         this.status = status;
