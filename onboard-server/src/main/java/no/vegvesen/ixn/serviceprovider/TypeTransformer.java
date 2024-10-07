@@ -87,12 +87,12 @@ public class TypeTransformer {
                 consumerCommonName = serviceProviderName;
             }
         }
-        LocalSubscription newSubscription = new LocalSubscription(addSubscription.getSelector(),consumerCommonName);
+        LocalSubscription newSubscription = new LocalSubscription(addSubscription.getSelector(),consumerCommonName, addSubscription.getDescription());
         return newSubscription;
     }
 
     public LocalDelivery transformDeliveryToLocalDelivery(AddDelivery delivery) {
-        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED);
+        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED, delivery.getDescription());
     }
 
     public AddDeliveriesResponse transformToDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {

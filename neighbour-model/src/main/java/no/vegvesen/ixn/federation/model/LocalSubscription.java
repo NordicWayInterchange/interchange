@@ -52,10 +52,6 @@ public class LocalSubscription {
     public LocalSubscription() {
     }
 
-    public LocalSubscription(String selector, String consumerCommonName) {
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-    }
 
     public LocalSubscription(String selector, String consumerCommonName, String description){
         this.selector = selector;
@@ -197,7 +193,6 @@ public class LocalSubscription {
             return this;
         }
     }
-
 
     @Override
     public boolean equals(Object o) {

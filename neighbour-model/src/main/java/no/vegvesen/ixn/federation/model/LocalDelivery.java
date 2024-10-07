@@ -72,6 +72,12 @@ public class LocalDelivery {
         this.status = status;
     }
 
+    public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
+        this.selector = selector;
+        this.status = status;
+        this.description = description;
+    }
+
     public Integer getId() {
         return id;
     }
