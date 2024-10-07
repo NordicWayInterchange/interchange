@@ -36,7 +36,7 @@ public class LocalDelivery {
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
     @Column
-    private String comment;
+    private String description;
 
     @Column
     private String errorMessage;
@@ -62,9 +62,9 @@ public class LocalDelivery {
         this(id, Collections.emptySet(),selector,status);
     }
 
-    public LocalDelivery(String selector, String comment){
+    public LocalDelivery(String selector, String description){
         this.selector = selector;
-        this.comment = comment;
+        this.description = description;
     }
 
     public LocalDelivery(String selector, LocalDeliveryStatus status) {
@@ -140,12 +140,12 @@ public class LocalDelivery {
         this.endpoints.removeAll(endpointsToRemove);
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getErrorMessage() {
@@ -188,7 +188,7 @@ public class LocalDelivery {
                 ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 ", errorMessage=" + errorMessage +
-                ", comment=" + comment +
+                ", description=" + description +
                 '}';
     }
 }

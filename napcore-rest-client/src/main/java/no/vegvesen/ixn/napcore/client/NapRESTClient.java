@@ -75,11 +75,11 @@ public class NapRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, Subscription.class).getBody();
     }
 
-    public Subscription addSubscriptionComment(AddCommentRequest addCommentRequest){
+    public Subscription addSubscriptionDescription(AddDescriptionRequest addDescriptionRequest){
         String url = String.format("%s/nap/%s/subscriptions/comment", server, user);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddCommentRequest> entity = new HttpEntity<>(addCommentRequest, headers);
+        HttpEntity<AddDescriptionRequest> entity = new HttpEntity<>(addDescriptionRequest, headers);
         return restTemplate.exchange(url, HttpMethod.POST, entity, Subscription.class).getBody();
     }
 
@@ -114,11 +114,11 @@ public class NapRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, Delivery.class).getBody();
     }
 
-    public Delivery addDeliveryComment(AddCommentRequest addCommentRequest){
+    public Delivery addDeliveryComment(AddDescriptionRequest addDescriptionRequest){
         String url = String.format("%s/nap/%s/deliveries/comment", server, user);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddCommentRequest> entity = new HttpEntity<>(addCommentRequest, headers);
+        HttpEntity<AddDescriptionRequest> entity = new HttpEntity<>(addDescriptionRequest, headers);
         return restTemplate.exchange(url, HttpMethod.POST, entity, Delivery.class).getBody();
     }
 

@@ -26,6 +26,9 @@ public class AddDeliveries implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddDeliveriesOption option;
 
+    @Option(names = {"-d", "--description"}, required = false, description = "The delivery description")
+    String description;
+
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -37,6 +40,9 @@ public class AddDeliveries implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         else{
+            if(description == null){
+                description = "test";
+            }
             AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector)));
             AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));

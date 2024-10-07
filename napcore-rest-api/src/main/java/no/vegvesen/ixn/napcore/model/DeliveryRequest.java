@@ -4,7 +4,7 @@ public class DeliveryRequest {
 
     String selector;
 
-    String comment;
+    String description;
 
     public DeliveryRequest() {
     }
@@ -13,9 +13,9 @@ public class DeliveryRequest {
         this.selector = selector;
     }
 
-    public DeliveryRequest(String selector, String comment) {
+    public DeliveryRequest(String selector, String description) {
         this.selector = selector;
-        this.comment = comment;
+        this.description = description;
     }
 
     public String getSelector() {
@@ -26,19 +26,19 @@ public class DeliveryRequest {
         this.selector = selector;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
     public String toString(){
         return "DeliveryRequest{" +
                 "selector='" + selector + '\'' +
-                ", comment=" + comment +
+                ", description=" + description +
                 '}';
     }
 }

@@ -12,7 +12,6 @@ import static picocli.CommandLine.*;
                             GetNapSubscriptions.class,
                             FetchMatchingCapabilities.class,
                             DeleteNapSubscription.class,
-                            AddSubscriptionComment.class
                     },
                     defaultValueProvider = PropertiesDefaultProvider.class,
                     mixinStandardHelpOptions = true

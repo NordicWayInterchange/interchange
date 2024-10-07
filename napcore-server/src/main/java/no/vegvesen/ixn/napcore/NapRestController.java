@@ -102,8 +102,8 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
 
-        if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector())) {
-            throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
+        if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector()) || Objects.isNull(subscriptionRequest.getDescription())) {
+            throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription is missing selector or description.");
         }
 
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
@@ -127,25 +127,6 @@ public class NapRestController {
                 .get();
 
         return typeTransformer.transformLocalSubscriptionToNapSubscription(savedSubscription);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, path={"/nap/{actorCommonName}/subscriptions/comment"})
-    @Tag(name="Subscriptions")
-    @Operation(summary = "Add comment on subscription")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDSUBSCRIPTIONRESPONSE)))})
-    public Subscription addSubscriptionComment(@PathVariable("actorCommonName") String actorCommonName, @RequestBody AddCommentRequest addCommentRequest){
-        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
-
-        if(Objects.isNull(addCommentRequest) || Objects.isNull(addCommentRequest.getComment()) || Objects.isNull(addCommentRequest.getId())) {
-            throw new SubscriptionRequestException("Bad api object for Subscription comment request");
-        }
-
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        LocalSubscription localSubscription = serviceProvider.getSubscription(addCommentRequest.getId());
-        localSubscription.setComment(addCommentRequest.getComment());
-        serviceProviderRepository.save(serviceProvider);
-        return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions", "/nap/{actorCommonName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -224,8 +205,8 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
-        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
-            throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
+        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector()) || Objects.isNull(deliveryRequest.getDescription())){
+            throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector or description");
         }
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
 
@@ -250,26 +231,6 @@ public class NapRestController {
                 .get();
 
         return typeTransformer.transformLocalDeliveryToNapDelivery(savedDelivery);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/deliveries/comment"})
-    @Tag(name = "Deliveries")
-    @Operation(summary = "Add comment on delivery")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDDELIVERIESRESPONSE)))})
-    public Delivery addDeliveryComment(@PathVariable("actorCommonName") String actorCommonName, @RequestBody AddCommentRequest addCommentRequest){
-        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
-
-        if(Objects.isNull(addCommentRequest) || Objects.isNull(addCommentRequest.getComment()) || Objects.isNull(addCommentRequest.getId())){
-            throw new DeliveryPostException("Bad api object for Delivery comment request");
-        }
-
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        LocalDelivery localDelivery = serviceProvider.getDelivery(addCommentRequest.getId());
-        localDelivery.setComment(addCommentRequest.getComment());
-        serviceProviderRepository.save(serviceProvider);
-
-        return typeTransformer.transformLocalDeliveryToNapDelivery(localDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)

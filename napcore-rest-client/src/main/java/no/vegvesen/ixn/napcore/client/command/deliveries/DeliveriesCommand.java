@@ -11,8 +11,7 @@ import static picocli.CommandLine.*;
                 GetNapDelivery.class,
                 GetNapDeliveries.class,
                 DeleteNapDelivery.class,
-                FetchMatchingDeliveryCapabilities.class,
-                AddDeliveryComment.class
+                FetchMatchingDeliveryCapabilities.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true)

@@ -249,6 +249,9 @@ public class OnboardRestController {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
+			if(Objects.isNull(subscription.getDescription())){
+				throw new SubscriptionRequestException("Bad api object for Subscription Request. No description.");
+			}
 			if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
@@ -468,6 +471,9 @@ public class OnboardRestController {
 		for(SelectorApi delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
+			if(localDelivery.getDescription() == null){
+				throw new DeliveryPostException("Bad API object. The delivery has no description");
+			}
 			if (delivery.getSelector() == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");

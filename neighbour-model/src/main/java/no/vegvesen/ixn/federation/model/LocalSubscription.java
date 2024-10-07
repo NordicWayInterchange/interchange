@@ -42,7 +42,7 @@ public class LocalSubscription {
     private Set<LocalConnection> connections = new HashSet<>();
 
     @Column
-    private String comment;
+    private String description;
 
     // ErrorMessage is needed for sending the error message back to the user
     // Any subscription with an error message is deleted shortly after creation
@@ -57,10 +57,10 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(String selector, String consumerCommonName, String comment){
+    public LocalSubscription(String selector, String consumerCommonName, String description){
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
-        this.comment = comment;
+        this.description = description;
     }
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
@@ -176,12 +176,12 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     //TODO lag et objekt av selector??
@@ -222,7 +222,7 @@ public class LocalSubscription {
                 ", selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +
                 ", errorMessage=" + errorMessage +
-                ", comment=" + comment +
+                ", description=" + description +
                 '}';
     }
 }

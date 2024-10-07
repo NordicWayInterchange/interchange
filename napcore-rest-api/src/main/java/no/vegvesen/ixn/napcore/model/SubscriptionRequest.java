@@ -4,7 +4,7 @@ public class SubscriptionRequest {
 
     String selector;
 
-    String comment;
+    String description;
 
     public SubscriptionRequest() {
 
@@ -14,9 +14,9 @@ public class SubscriptionRequest {
         this.selector = selector;
     }
 
-    public SubscriptionRequest(String selector, String comment) {
+    public SubscriptionRequest(String selector, String description) {
         this.selector = selector;
-        this.comment = comment;
+        this.description = description;
     }
 
     public String getSelector() {
@@ -27,12 +27,12 @@ public class SubscriptionRequest {
         this.selector = selector;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

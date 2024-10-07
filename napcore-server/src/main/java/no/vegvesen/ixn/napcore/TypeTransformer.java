@@ -42,11 +42,11 @@ public class TypeTransformer {
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
-        return new LocalSubscription(subscription.getSelector(), nodeName, subscription.getComment());
+        return new LocalSubscription(subscription.getSelector(), nodeName, subscription.getDescription());
     }
 
     public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector(), delivery.getComment());
+        return new LocalDelivery(delivery.getSelector(), delivery.getDescription());
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
@@ -56,7 +56,7 @@ public class TypeTransformer {
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
                 transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp()),
-                localDelivery.getComment()
+                localDelivery.getDescription()
         );
     }
 
@@ -96,7 +96,7 @@ public class TypeTransformer {
                 localSubscription.getSelector(),
                 transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()),
                 transformLocalDateTimeToTimestamp(localSubscription.getLastUpdated()),
-                localSubscription.getComment()
+                localSubscription.getDescription()
         );
         return subscription;
     }
