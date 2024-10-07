@@ -9,8 +9,6 @@ public class DeliveryImportApi {
 
     private Set<DeliveryEndpointImportApi> endpoints;
 
-    private String path;
-
     private String selector;
 
     private DeliveryStatusImportApi status;
@@ -25,12 +23,10 @@ public class DeliveryImportApi {
 
     public DeliveryImportApi(String uuid,
                              Set<DeliveryEndpointImportApi> endpoints,
-                             String path,
                              String selector,
                              DeliveryStatusImportApi status) {
         this.uuid = uuid;
         this.endpoints = endpoints;
-        this.path = path;
         this.selector = selector;
         this.status = status;
     }
@@ -49,14 +45,6 @@ public class DeliveryImportApi {
 
     public void setEndpoints(Set<DeliveryEndpointImportApi> endpoints) {
         this.endpoints = endpoints;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getSelector() {
@@ -80,12 +68,12 @@ public class DeliveryImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, endpoints, path, selector, status);
+        return Objects.hash(uuid, endpoints, selector, status);
     }
 
     @Override
@@ -93,7 +81,6 @@ public class DeliveryImportApi {
         return "DeliveryImportApi{" +
                 "uuid='" + uuid + '\'' +
                 ", endpoints=" + endpoints +
-                ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
                 '}';

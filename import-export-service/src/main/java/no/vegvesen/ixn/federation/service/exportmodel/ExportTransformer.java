@@ -1,8 +1,7 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation.service.exportmodel;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
-import no.vegvesen.ixn.federation.service.exportmodel.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class ExportTransformer {
 
-    private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
+    public long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
         if (lastUpdated != null) {
             return ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
         }

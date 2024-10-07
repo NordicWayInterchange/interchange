@@ -1,0 +1,128 @@
+{
+  "neighbours" : [ {
+    "name" : "my-neighbour",
+    "capabilities" : {
+      "lastCapabilityExchange" : 0,
+      "capabilities" : [ {
+        "application" : {
+          "messageType" : "DATEX2",
+          "publisherId" : "NO00000",
+          "publicationId" : "NO00000:NPRA_DATEX_1",
+          "originatingCountry" : "NO",
+          "protocolVersion" : "DATEX:1.0",
+          "quadTree" : [ "100302" ],
+          "publicationType" : "SituationPublication",
+          "publisherName" : "NPRA"
+        },
+        "metadata" : {
+          "shardCount" : 1,
+          "infoUrl" : "NPRA.info.eu",
+          "redirectPolicy" : "OPTIONAL",
+          "maxBandwidth" : 100,
+          "maxMessageRate" : 100,
+          "repetitionInterval" : 10
+        }
+      } ],
+      "status" : "KNOWN",
+      "lastUpdated" : 1728299714065
+    },
+    "neighbourSubscriptions" : [ {
+      "uuid" : "1dca6100-2c82-49df-9dcc-ddcebb5febfb",
+      "status" : "CREATED",
+      "selector" : "originatingCountry = 'NO'",
+      "path" : "my-interchange.eu/subscriptions/1dca6100-2c82-49df-9dcc-ddcebb5febfb",
+      "consumerCommonName" : "my-neighbour.eu",
+      "endpoints" : [ {
+        "source" : "sub-03261f51-160d-457c-8f8e-da61f3476d45",
+        "host" : "amqps://my-interchange.eu",
+        "port" : 5671,
+        "maxBandwidth" : 100,
+        "maxMessageRate" : 100
+      } ]
+    } ],
+    "ourSubscriptions" : [ {
+      "path" : "my-neighbour.eu/subscriptions/157b7f66-45cd-493b-89da-d045ab6cbe94",
+      "selector" : "publicationId = 'NO00000:NPRA_DATEX_1'",
+      "consumerCommonName" : "my-interchange.eu",
+      "status" : "CREATED",
+      "endpoints" : [ {
+        "source" : "fbe06b55-600b-44aa-9694-7a078c7ece5c",
+        "host" : "amqps://my-neighbour.eu",
+        "port" : 5671,
+        "maxBandwidth" : 100,
+        "maxMessageRate" : 100
+      } ]
+    } ],
+    "controlChannelPort" : null
+  } ],
+  "serviceProviders" : [ {
+    "name" : "my-service-provider",
+    "subscriptions" : [ {
+      "uuid" : "49bd6bdc-d332-4453-8fd8-b112fe92850b",
+      "selector" : "publicationId = 'NO00000:NPRA_DATEX_1' OR publicationId = 'NO00000:NPRA_DATEX_2'",
+      "consumerCommonName" : "my-interchange.eu",
+      "status" : "CREATED",
+      "localEndpoints" : [ {
+        "host" : "amqps://my-interchange.eu",
+        "port" : 5671,
+        "source" : "loc-6d0a8bb0-6e53-424a-86b7-f230f316ba37",
+        "maxBandwidth" : 100,
+        "maxMessageRate" : 100
+      } ],
+      "localConnections" : [ {
+        "source" : "cap-ef174539-8d8c-42f1-b67a-13169033a328",
+        "destination" : "loc-6d0a8bb0-6e53-424a-86b7-f230f316ba37"
+      } ]
+    } ],
+    "capabilities" : [ {
+      "uuid" : "9c29e6f8-3f65-4e5f-944a-9958a50e0a4a",
+      "application" : {
+        "messageType" : "DATEX2",
+        "publisherId" : "NO00000",
+        "publicationId" : "NO00000:NPRA_DATEX_2",
+        "originatingCountry" : "NO",
+        "protocolVersion" : "DATEX:1.0",
+        "quadTree" : [ "100303" ],
+        "publicationType" : "SituationPublication",
+        "publisherName" : "NPRA"
+      },
+      "metadata" : {
+        "shardCount" : 1,
+        "infoUrl" : "NPRA.info.eu",
+        "redirectPolicy" : "OPTIONAL",
+        "maxBandwidth" : 100,
+        "maxMessageRate" : 100,
+        "repetitionInterval" : 10
+      },
+      "status" : "CREATED",
+      "shards" : [ {
+        "shardId" : 1,
+        "exchangeName" : "cap-ef174539-8d8c-42f1-b67a-13169033a328",
+        "selector" : "publisherId = 'NO00000' AND publicationId = 'NO00000:NPRA_DATEX_2' AND originatingCountry = 'NO' AND protocolVersion = 'DATEX:1.0' AND quadTree like '%,100303%' AND publicationType = 'SituationPublication' AND publisherName = 'NPRA'"
+      } ]
+    } ],
+    "deliveries" : [ {
+      "uuid" : "23c9912c-4bcb-43d5-9f38-d9f95b7683f0",
+      "endpoints" : [ {
+        "host" : "amqps://my-interchange.eu",
+        "port" : 5671,
+        "target" : "del-cbb57736-9e9c-4fd1-a6fe-c9ce219a817e",
+        "maxBandwidth" : 100,
+        "maxMessageRate" : 100
+      } ],
+      "selector" : "publicationId = 'NO00000:NPRA_DATEX_2",
+      "status" : "CREATED"
+    } ]
+  } ],
+  "privateChannels" : [ {
+    "uuid" : "6b6dfb93-7625-4668-b7c6-f588347fade7",
+    "serviceProviderName" : "my-service-provider",
+    "peerName" : "other-service-provider",
+    "status" : "CREATED",
+    "endpoint" : {
+      "host" : "amqps://my-interchange.eu",
+      "port" : 5671,
+      "queueName" : "priv-7f8296bb-30df-450e-97e5-28505d51e688"
+    }
+  } ]
+}
