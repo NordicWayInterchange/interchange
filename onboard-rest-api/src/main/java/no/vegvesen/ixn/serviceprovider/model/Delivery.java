@@ -16,19 +16,23 @@ public class Delivery {
     private DeliveryStatus status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String description;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String errorMessage;
 
     public Delivery() {
     }
 
 
-    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage) {
+    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage, String description) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
         this.errorMessage = errorMessage;
+        this.description = description;
     }
     public String getId() {
         return id;
@@ -76,6 +80,14 @@ public class Delivery {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

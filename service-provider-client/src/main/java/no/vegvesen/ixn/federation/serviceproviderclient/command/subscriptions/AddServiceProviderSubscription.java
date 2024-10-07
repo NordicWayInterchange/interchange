@@ -25,8 +25,7 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddServiceProviderSubscriptionOption option;
 
-    @Option(names = {"-d", "--description"}, required = false, description = "The subscription description")
-    String description;
+
 
     @Override
     public Integer call() throws Exception {
@@ -39,10 +38,7 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            if(description == null){
-                description = "Test";
-            }
-            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description)));
+            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

@@ -16,6 +16,10 @@ public class AddSubscription {
 
     public AddSubscription(){}
 
+    public AddSubscription(String selector){
+        this.selector = selector;
+    }
+
     public AddSubscription(String selector, String description){
         this.selector = selector;
         this.description = description;

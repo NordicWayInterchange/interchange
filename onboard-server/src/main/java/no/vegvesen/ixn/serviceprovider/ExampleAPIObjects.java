@@ -211,7 +211,8 @@ public class ExampleAPIObjects {
               "version" : "1.0",
               "name" : "sp-1",
               "deliveries" : [ {
-                "selector" : "originatingCountry = 'NO' and messageType = 'DENM'"
+                "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
+                "description" : "DENM delivery"
               } ]
             }
             """;
@@ -246,7 +247,8 @@ public class ExampleAPIObjects {
                 "path" : "/serviceprovider1/subscriptions/2",
                 "selector" : "originatingCountry = 'SE' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
-                "status" : "REQUESTED"
+                "status" : "REQUESTED",
+                "description" : "SE subscription"
               }, {
                 "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "path" : "/serviceprovider1/subscriptions/1",
@@ -262,9 +264,11 @@ public class ExampleAPIObjects {
               "name" : "serviceprovider1",
               "version" : "1.0",
               "subscriptions" : [ {
-                "selector" : "originatingCountry = 'SE' and messageType = 'DENM'"
+                "selector" : "originatingCountry = 'SE' and messageType = 'DENM'",
+                "description" : "SE subscription"
               }, {
-                "selector" : "originatingCountry = 'NO' and messageType = 'DENM'"
+                "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
+                "description" : "NO subscription"
               } ]
             }
             """;
@@ -285,7 +289,8 @@ public class ExampleAPIObjects {
                 "path" : "/serviceprovider1/subscriptions/2",
                 "selector" : "originatingCountry = 'SE' and messageType = 'DENM'",
                 "consumerCommonName" : "serviceprovider1",
-                "status" : "CREATED"
+                "status" : "CREATED",
+                "description" : "SE subscription"
               } ]
             }
 
@@ -299,6 +304,7 @@ public class ExampleAPIObjects {
               "consumerCommonName" : "serviceprovider1",
               "lastUpdatedTimestamp" : 1684846131664,
               "status" : "CREATED",
+                "description" : "DENM subscription"
               "endpoints" : [ {
                 "host" : "amqps://myserver",
                 "port" : 5671,
@@ -356,7 +362,8 @@ public class ExampleAPIObjects {
                 "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "lastUpdatedTimestamp" : 1684846428079,
-                "status" : "CREATED"
+                "status" : "CREATED",
+                "description" : "DENM delivery"
               } ]
             }
             """;
@@ -369,7 +376,8 @@ public class ExampleAPIObjects {
                 "id" : "550e8400-e29b-41d4-a716-446655440000",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
                 "lastUpdatedTimestamp" : 1684934126952,
-                "status" : "REQUESTED"
+                "status" : "REQUESTED",
+                "description" : "DENM delivery"
               } ]
             }
             """;
@@ -386,7 +394,8 @@ public class ExampleAPIObjects {
               } ],
               "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
               "lastUpdatedTimestamp" : 1684934230041,
-              "status" : "CREATED"
+              "status" : "CREATED",
+              "description" : "DENM delivery"
             }
             """;
     public static final String LISTCAPABILITIESRESPONSE = """

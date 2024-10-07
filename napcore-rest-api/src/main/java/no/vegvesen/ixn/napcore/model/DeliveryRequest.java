@@ -9,6 +9,10 @@ public class DeliveryRequest {
     public DeliveryRequest() {
     }
 
+    public DeliveryRequest(String selector){
+        this.selector = selector;
+    }
+
     public DeliveryRequest(String selector, String description) {
         this.selector = selector;
         this.description = description;

@@ -69,7 +69,8 @@ public class TypeTransformer {
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
-                    subscription.getErrorMessage()));
+                    subscription.getErrorMessage(),
+                    subscription.getDescription()));
 
         }
         return result;
@@ -111,7 +112,8 @@ public class TypeTransformer {
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                     transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus()),
-                    delivery.getErrorMessage()
+                    delivery.getErrorMessage(),
+                    delivery.getDescription()
                     )
             );
         }
@@ -146,7 +148,8 @@ public class TypeTransformer {
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
-                    subscription.getErrorMessage()
+                    subscription.getErrorMessage(),
+                    subscription.getDescription()
                     )
             );
         }
@@ -197,8 +200,8 @@ public class TypeTransformer {
                 createDeliveryPath(serviceProviderName, uuid, localDelivery.getStatus()),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
-                transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())
-
+                transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus()),
+                localDelivery.getDescription()
         );
     }
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {

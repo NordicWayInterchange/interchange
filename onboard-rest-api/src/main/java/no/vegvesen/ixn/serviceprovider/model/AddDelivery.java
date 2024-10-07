@@ -10,6 +10,10 @@ public class AddDelivery {
 
     }
 
+    public AddDelivery(String selector){
+        this.selector = selector;
+    }
+
      public AddDelivery(String selector, String description) {
         this.selector = selector;
         this.description = description;

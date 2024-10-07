@@ -10,6 +10,10 @@ public class SubscriptionRequest {
 
     }
 
+    public SubscriptionRequest(String selector){
+        this.selector = selector;
+    }
+
     public SubscriptionRequest(String selector, String description) {
         this.selector = selector;
         this.description = description;
