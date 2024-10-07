@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
-import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
+import no.vegvesen.ixn.serviceprovider.model.AddDelivery;
 
 import picocli.CommandLine.*;
 
@@ -43,7 +43,7 @@ public class AddDeliveries implements Callable<Integer> {
             if(description == null){
                 description = "test";
             }
-            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector)));
+            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description)));
             AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }

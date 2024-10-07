@@ -16,13 +16,9 @@ public class AddSubscription {
 
     public AddSubscription(){}
 
-    public AddSubscription(String selector){
+    public AddSubscription(String selector, String description){
         this.selector = selector;
-    }
-
-    public AddSubscription(String selector, String consumerCommonName){
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
+        this.description = description;
     }
 
     public AddSubscription(String selector, String consumerCommonName, String description) {
@@ -74,6 +70,7 @@ public class AddSubscription {
         return "AddSubscription{" +
                 "selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +
+                ", description=" + description +
                 '}';
     }
 }

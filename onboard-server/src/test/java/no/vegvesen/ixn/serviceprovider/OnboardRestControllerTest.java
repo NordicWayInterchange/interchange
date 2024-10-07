@@ -174,7 +174,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
-		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider);
+		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider, "DATEX sub");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
 				Collections.singleton(subscription1)
@@ -211,7 +211,7 @@ public class OnboardRestControllerTest {
 		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
 				firstServiceProvider,
 				Collections.singleton(new AddSubscription(
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'", "NO SUB"
 				))
 		);
 
@@ -331,7 +331,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(secondServiceProviderName);
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
-		AddSubscription addSubscription = new AddSubscription(selector);
+		AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
 				Collections.singleton(addSubscription)
@@ -394,7 +394,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 		AddDeliveriesRequest request = new AddDeliveriesRequest(
 				firstServiceProvider,
-				Collections.singleton(new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'"))
+				Collections.singleton(new AddDelivery("messageType = 'DATEX2' and originatingCountry = 'SE'", "DATEX Delivery"))
 		);
 
 		String requestBody = objectMapper.writeValueAsString(request);

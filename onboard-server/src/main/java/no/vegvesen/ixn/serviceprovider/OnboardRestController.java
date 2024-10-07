@@ -468,7 +468,7 @@ public class OnboardRestController {
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
 
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
-		for(SelectorApi delivery : request.getDeliveries()) {
+		for(AddDelivery delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
 			if(localDelivery.getDescription() == null){

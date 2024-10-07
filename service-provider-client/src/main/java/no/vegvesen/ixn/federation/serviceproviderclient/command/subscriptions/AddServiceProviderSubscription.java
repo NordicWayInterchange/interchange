@@ -25,6 +25,9 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddServiceProviderSubscriptionOption option;
 
+    @Option(names = {"-d", "--description"}, required = false, description = "The subscription description")
+    String description;
+
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -36,7 +39,10 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector)));
+            if(description == null){
+                description = "Test";
+            }
+            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

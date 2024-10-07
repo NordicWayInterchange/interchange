@@ -20,8 +20,8 @@ public class SubscriptionTest {
                 .protocolVersion("SSEM:0.0.0")
                 .publisherId("SE90009")
                 .quadTree(List.of("0","1","2","3"))
-                .toSelector()
-        )));
+                .toSelector(),
+                "SSEM sub")));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
@@ -35,7 +35,8 @@ public class SubscriptionTest {
                         .protocolVersion("SSEM:0.0.1")
                         .publisherId("SE90009")
                         .quadTree(List.of("0","1","2","3"))
-                        .toSelector()
+                        .toSelector(),
+                "SSEM sub"
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
@@ -49,7 +50,8 @@ public class SubscriptionTest {
                         .protocolVersion("SSEM:0.0.2")
                         .publisherId("SE90009")
                         .quadTree(List.of("0","1","2","3"))
-                        .toSelector()
+                        .toSelector(),
+                "SSEM sub"
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
@@ -64,7 +66,8 @@ public class SubscriptionTest {
                         .protocolVersion("SSEM:0.0.3")
                         .publisherId("SE90009")
                         .quadTree(List.of("0","1","2","3"))
-                        .toSelector()
+                        .toSelector(),
+                "SSEM sub"
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
@@ -75,7 +78,8 @@ public class SubscriptionTest {
                 new SelectorBuilder()
                         .originatingCountry("NO")
                         .messageType("DENM")
-                        .toSelector()
+                        .toSelector(),
+                "DENM sub"
         )));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }

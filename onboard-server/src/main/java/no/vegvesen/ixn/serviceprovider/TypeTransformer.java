@@ -91,7 +91,7 @@ public class TypeTransformer {
         return newSubscription;
     }
 
-    public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
+    public LocalDelivery transformDeliveryToLocalDelivery(AddDelivery delivery) {
         return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED);
     }
 
