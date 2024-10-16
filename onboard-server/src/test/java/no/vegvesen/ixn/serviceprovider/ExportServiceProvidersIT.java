@@ -20,7 +20,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +73,7 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
         repository.save(serviceProvider);
 
         privateChannelRepository.save(new PrivateChannel(
-                "my-peer",
+                Collections.singleton(new Peer("my-peer")),
                 PrivateChannelStatus.CREATED,
                 new PrivateChannelEndpoint(
                         "my-host",
@@ -121,7 +120,8 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
             Set<PrivateChannelResponseApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-                privateChannels.add(new PrivateChannelResponseApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getUuid()));
+                Set<String> peers = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+                privateChannels.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getUuid()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
