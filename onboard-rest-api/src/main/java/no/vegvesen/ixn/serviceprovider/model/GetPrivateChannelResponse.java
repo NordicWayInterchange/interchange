@@ -4,11 +4,12 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class GetPrivateChannelResponse {
     private String id;
 
-    private String peerName;
+    private Set<String> peers;
 
     private String serviceProviderName;
 
@@ -20,17 +21,17 @@ public class GetPrivateChannelResponse {
     public GetPrivateChannelResponse() {
     }
 
-    public GetPrivateChannelResponse(String id, String peerName , PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, Set<String> peers, PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
-        this.peerName = peerName;
+        this.peers = peers;
         this.serviceProviderName = serviceProviderName;
         this.endpoint = endpoint;
         this.status = status;
     }
 
-    public GetPrivateChannelResponse(String id, String peerName, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, Set<String> peers, String serviceProviderName, PrivateChannelStatusApi status) {
         this.id = id;
-        this.peerName = peerName;
+        this.peers = peers;
         this.serviceProviderName = serviceProviderName;
         this.status = status;
     }
@@ -55,12 +56,12 @@ public class GetPrivateChannelResponse {
         return id;
     }
 
-    public String getPeerName() {
-        return peerName;
+    public Set<String> getPeers() {
+        return peers;
     }
 
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
+    public void setPeers(Set<String> peers) {
+        this.peers = peers;
     }
 
     public String getServiceProviderName() {
@@ -72,26 +73,26 @@ public class GetPrivateChannelResponse {
     }
 
     @Override
-    public boolean equals(Object o){
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         GetPrivateChannelResponse that = (GetPrivateChannelResponse) o;
-        return id.equals(that.id) && peerName.equals(that.peerName) && serviceProviderName.equals(that.serviceProviderName);
+        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && Objects.equals(serviceProviderName, that.serviceProviderName);
     }
 
     @Override
-    public int hashCode(){
-        return Objects.hash(id,peerName, serviceProviderName);
+    public int hashCode() {
+        return Objects.hash(id, peers, serviceProviderName);
     }
 
     @Override
-    public String toString(){
-        return "GetPrivateChannelsResponse{" +
+    public String toString() {
+        return "GetPrivateChannelResponse{" +
                 "id='" + id + '\'' +
-                ", peerName='" + peerName + '\'' +
-                ", serviceProviderName=" + serviceProviderName +
+                ", peers=" + peers +
+                ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", status=" + status +
-                ", endpoint='" + endpoint + '\'' +
-                "}";
+                ", endpoint=" + endpoint +
+                '}';
     }
 }

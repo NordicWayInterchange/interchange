@@ -3,12 +3,13 @@ package no.vegvesen.ixn.serviceprovider.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class PrivateChannelResponseApi {
 
     private String id;
 
-    private String peerName;
+    private Set<String> peers;
 
     private PrivateChannelStatusApi status;
 
@@ -19,19 +20,19 @@ public class PrivateChannelResponseApi {
 
     }
 
-    public PrivateChannelResponseApi(String peerName) {
-        this.peerName = peerName;
+    public PrivateChannelResponseApi(Set<String> peers) {
+        this.peers = peers;
     }
 
-    public PrivateChannelResponseApi(String peerName, PrivateChannelStatusApi status, String id) {
+    public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, String id) {
         this.id = id;
-        this.peerName = peerName;
+        this.peers = peers;
         this.status = status;
     }
 
-    public PrivateChannelResponseApi(String peerName , PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, String id) {
+    public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, PrivateChannelEndpointApi endpoint, String id) {
         this.id = id;
-        this.peerName = peerName;
+        this.peers = peers;
         this.status = status;
         this.endpoint = endpoint;
     }
@@ -63,35 +64,34 @@ public class PrivateChannelResponseApi {
         this.id = id;
     }
 
-    public String getPeerName() {
-        return peerName;
+    public Set<String> getPeers() {
+        return peers;
     }
 
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
-    }
-
-    @Override
-    public int hashCode(){
-        return Objects.hash(endpoint, status, id, peerName);
+    public void setPeers(Set<String> peers) {
+        this.peers = peers;
     }
 
     @Override
-    public boolean equals(Object o){
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelResponseApi that = (PrivateChannelResponseApi) o;
-        return Objects.equals(endpoint, that.endpoint) && Objects.equals(id, that.id) && Objects.equals(status, that.status) && Objects.equals(peerName, that.peerName);
+        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
-    public String toString(){
+    public int hashCode() {
+        return Objects.hash(id, peers, status, endpoint);
+    }
+
+    @Override
+    public String toString() {
         return "PrivateChannelResponseApi{" +
                 "id='" + id + '\'' +
-                ", peerName='" + peerName + '\'' +
+                ", peer=" + peers +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
                 '}';
-
     }
 }

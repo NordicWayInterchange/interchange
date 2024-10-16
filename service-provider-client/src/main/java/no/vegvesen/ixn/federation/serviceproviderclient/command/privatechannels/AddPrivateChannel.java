@@ -10,6 +10,7 @@ import picocli.CommandLine.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 @Command(name = "add", description = "Adding name for client to set up private channel")
@@ -40,10 +41,10 @@ public class AddPrivateChannel implements Callable<Integer> {
     }
 
     static class AddPrivateChannelOption{
-        @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
+        @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 
-        @Option(names = {"-p", "--peername"}, required = true, description = "The subscription selector")
-        String peerName;
+        @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers")
+        Set<String> peerName;
     }
 }

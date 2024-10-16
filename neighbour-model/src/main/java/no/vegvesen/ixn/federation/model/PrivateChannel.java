@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -19,8 +20,10 @@ public class PrivateChannel {
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
 
-    @Column
-    private String peerName;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name="peer_id", foreignKey = @ForeignKey(name="fk_peer_privatechannel"))
+    private Set<Peer> peers;
+
     @Column
     private String serviceProviderName;
 
@@ -32,14 +35,14 @@ public class PrivateChannel {
 
     }
 
-    public PrivateChannel(String peerName, PrivateChannelStatus status, String serviceProviderName) {
-        this.peerName = peerName;
+    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String serviceProviderName) {
+        this.peers = peers;
         this.status = status;
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannel(String peerName, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
-        this.peerName = peerName;
+    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+        this.peers = peers;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
@@ -69,12 +72,12 @@ public class PrivateChannel {
         this.uuid = uuid;
     }
 
-    public String getPeerName() {
-        return peerName;
+    public Set<Peer> getPeers() {
+        return peers;
     }
 
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
+    public void setPeers(Set<Peer> peers) {
+        this.peers = peers;
     }
 
     public PrivateChannelStatus getStatus() {
@@ -96,26 +99,25 @@ public class PrivateChannel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PrivateChannel)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         PrivateChannel that = (PrivateChannel) o;
-        return peerName.equals(that.peerName) &&
-                Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(uuid, that.uuid) && status == that.status && Objects.equals(peers, that.peers) && Objects.equals(serviceProviderName, that.serviceProviderName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(peerName, endpoint);
+        return Objects.hash(uuid, status, peers, serviceProviderName);
     }
 
     @Override
     public String toString() {
         return "PrivateChannel{" +
                 "id=" + id +
-                "uuid=" + uuid +
+                ", uuid='" + uuid + '\'' +
                 ", status=" + status +
-                ", peerName='" + peerName + '\'' +
-                ", serviceProviderName='"+serviceProviderName + '\'' +
-                ", endpoint='" + endpoint + '\'' +
+                ", peers=" + peers +
+                ", serviceProviderName='" + serviceProviderName + '\'' +
+                ", endpoint=" + endpoint +
                 '}';
     }
 }

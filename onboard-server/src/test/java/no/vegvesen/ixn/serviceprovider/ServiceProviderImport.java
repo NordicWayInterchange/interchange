@@ -16,10 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ServiceProviderImport {
     public static ServiceProviderApi[] getServiceProviderApis(Path path) throws IOException {
@@ -96,7 +93,7 @@ public class ServiceProviderImport {
 
         for (PrivateChannelResponseApi privateChannelResponseApi : privateChannelResponseApis) {
             importedPrivateChannels.add(new PrivateChannel(
-                    privateChannelResponseApi.getPeerName(),
+                    Collections.singleton(new Peer("my-peer")),
                     PrivateChannelStatus.REQUESTED,
                     new PrivateChannelEndpoint(
                             privateChannelResponseApi.getEndpoint().getHost(),

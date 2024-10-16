@@ -813,9 +813,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingChannels() {
         String serviceProviderName = "my-service-provider";
 
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-channel"));
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-channel2"));
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-channel3"));
 
         restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
@@ -827,7 +827,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingChannelWithServiceProviderAsPeerName() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(serviceProviderName);
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName));
 
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
@@ -861,7 +861,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingAndDeletingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton("my-channel"));
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
 
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
@@ -889,9 +889,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGettingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-channel"));
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-channel2"));
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-channel3"));
         restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         ListPrivateChannelsResponse response = restController.listPrivateChannels(serviceProviderName);
         assertThat(response.getPrivateChannels().size()).isEqualTo(3);
@@ -900,9 +900,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGettingChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-channel"));
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-channel2"));
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-channel3"));
 
         AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
@@ -931,8 +931,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName_1 = "my-service-provider";
         String serviceProviderName_2 = "my-service-provider2";
 
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(serviceProviderName_1);
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-channel"));
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName_1));
 
         restController.addPrivateChannels(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
         restController.addPrivateChannels(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
@@ -1169,7 +1169,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void privateChannelEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_3";
         String serviceProvider2 = "sp";
-        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi("serviceProvider_uuid_3")));
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(Collections.singleton("serviceProvider_uuid_3"))));
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProvider2, request);
         assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().get().getId()));
         assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().get().getId()));

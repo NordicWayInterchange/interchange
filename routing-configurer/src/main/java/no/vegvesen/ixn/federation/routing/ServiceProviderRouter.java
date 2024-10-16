@@ -217,16 +217,9 @@ public class ServiceProviderRouter {
         }
 
         for (PrivateChannel privateChannel : privateChannels) {
-
-            String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getEndpoint().getQueueName();
 
             if (privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
-                GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                if (peer == null) {
-                    qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                }
-                logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 if (!delta.queueExists(queueName)) {
                     Queue queue = qpidClient.createQueue(queueName);
                     delta.addQueue(queue);
@@ -234,20 +227,26 @@ public class ServiceProviderRouter {
                 logger.info("Creating queue {}", queueName);
                 VirtualHostAccessController provider = qpidClient.getQpidAcl();
                 provider.addExchangeWriteAccess(name, queueName);
-                provider.addExchangeWriteAccess(peerName, queueName);
                 provider.addQueueReadAccess(name, queueName);
-                provider.addQueueReadAccess(peerName, queueName);
+                for (Peer peer : privateChannel.getPeers()) {
+                    GroupMember peerInGroup = qpidClient.getGroupMember(peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    if (peerInGroup == null) {
+                        qpidClient.addMemberToGroup(peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    }
+                    logger.debug("Adding member {} to group {}", peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+
+                    provider.addExchangeWriteAccess(peer.getName(), queueName);
+                    provider.addQueueReadAccess(peer.getName(), queueName);
+                }
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
-                logger.info("Creating queue {} for client {}", queueName, peerName);
+                logger.info("Creating private channel {} for client {}", queueName, name);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
-                GroupMember member = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                long channelsWithPeerAsPeer = privateChannelRepository.countByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED);
-                long channelsWithServiceProviderAsPeer = privateChannelRepository.countByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
+                GroupMember member = qpidClient.getGroupMember(name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME); //TODO: use groupMember from line 213
 
+                long channelsWithServiceProviderAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED).size();
                 long channelsWithServiceProviderAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED);
-                long channelsWithPeerAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(peerName, PrivateChannelStatus.CREATED);
 
                 if (channelsWithServiceProviderAsServiceProvider == 0 && channelsWithServiceProviderAsPeer == 0) {
                     if (member != null && privateChannelsWithStatusCreated.isEmpty()) {
@@ -255,21 +254,26 @@ public class ServiceProviderRouter {
                         logger.debug("Removing member {} from group {}", name, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
                 }
-                if(channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
-                    GroupMember peer = qpidClient.getGroupMember(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                    if (peer != null) {
-                        qpidClient.removeMemberFromGroup(peer, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                        logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                    }
-                }
 
                 VirtualHostAccessController provider = qpidClient.getQpidAcl();
-                provider.removeQueueWriteAccess(peerName, queueName);
+                for (Peer peer : privateChannel.getPeers()) {
+                    long channelsWithPeerAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(peer.getName(), PrivateChannelStatus.CREATED).size();
+                    long channelsWithPeerAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(peer.getName(), PrivateChannelStatus.CREATED);
+
+                    if (channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
+                        GroupMember peerMember = qpidClient.getGroupMember(peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                        if (peerMember != null) {
+                            qpidClient.removeMemberFromGroup(peerMember, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                            logger.info("Removing member {} from group {}", peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                        }
+                    }
+                    provider.removeQueueWriteAccess(peer.getName(), queueName);
+                    provider.removeQueueReadAccess(peer.getName(), queueName);
+                }
                 provider.removeQueueWriteAccess(name, queueName);
-                provider.removeQueueReadAccess(peerName, queueName);
                 provider.removeQueueReadAccess(name, queueName);
                 qpidClient.postQpidAcl(provider);
-                logger.info("Tearing down queue {} for client {}", queueName, peerName);
+                logger.info("Tearing down queue {} for client {}", queueName, name);
                 Queue queue = delta.findByQueueName(queueName);
                 if (queue != null) {
                     qpidClient.removeQueue(queue);

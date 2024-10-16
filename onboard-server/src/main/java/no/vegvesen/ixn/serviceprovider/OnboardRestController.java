@@ -360,11 +360,16 @@ public class OnboardRestController {
 
 		for(PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()){
 
-			if(privateChannelToAdd.getPeerName().equals(serviceProviderName)){
+			if(privateChannelToAdd.getPeers().contains(serviceProviderName)){
 				throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
 			}
 
-			PrivateChannel newPrivateChannel = new PrivateChannel(privateChannelToAdd.getPeerName(), PrivateChannelStatus.REQUESTED, serviceProviderName);
+			Set<Peer> peers = new HashSet<>();
+			for (String name : privateChannelToAdd.getPeers()) {
+				peers.add(new Peer(name));
+			}
+
+			PrivateChannel newPrivateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, serviceProviderName);
 
 			String queueName = "priv-"+UUID.randomUUID();
 			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);

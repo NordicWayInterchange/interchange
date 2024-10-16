@@ -1,27 +1,30 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import java.util.Set;
+
 public class PrivateChannelRequestApi {
-    private String peerName;
+    private Set<String> peers;
 
     public PrivateChannelRequestApi() {
     }
 
-    public PrivateChannelRequestApi(String peerName) {
-        this.peerName = peerName;
+    public PrivateChannelRequestApi(Set<String> peers) {
+        this.peers = peers;
     }
 
-    public String getPeerName() {
-        return peerName;
+    public Set<String> getPeers() {
+        return peers;
     }
 
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
+    public void setPeers(Set<String> peers) {
+        this.peers = peers;
     }
+
     public String toString(){
         return String.format("""
                 PrivateChannelRequestApi{
-                "peerName"  %s
+                "peers"  %s
                 }
-                """, peerName);
+                """, peers);
     }
 }
