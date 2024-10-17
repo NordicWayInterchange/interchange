@@ -4,6 +4,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.napcore.model.PrivateChannelEndpoint;
+import no.vegvesen.ixn.napcore.model.PrivateChannelStatus;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
@@ -148,6 +150,28 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities;
+    }
+
+    public PrivateChannelResponse transformPrivateChannelToPrivateChannelResponse(PrivateChannel privateChannel) {
+        return new PrivateChannelResponse(
+                privateChannel.getUuid(),
+                privateChannel.getPeerName(),
+                transformPrivateChannelStatus(privateChannel.getStatus()),
+                transformPrivateChannelEndpoint(privateChannel.getEndpoint())
+        );
+    }
+
+    public PrivateChannelStatus transformPrivateChannelStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus status) {
+        return switch (status) {
+            case REQUESTED -> PrivateChannelStatus.REQUESTED;
+            case CREATED -> PrivateChannelStatus.CREATED;
+            case TEAR_DOWN -> PrivateChannelStatus.NOT_VALID;
+            default -> PrivateChannelStatus.ILLEGAL;
+        };
+    }
+
+    public PrivateChannelEndpoint transformPrivateChannelEndpoint(no.vegvesen.ixn.federation.model.PrivateChannelEndpoint endpoint) {
+        return new PrivateChannelEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getQueueName());
     }
 
     public Long transformLocalDateTimeToTimestamp(LocalDateTime localDateTime) {

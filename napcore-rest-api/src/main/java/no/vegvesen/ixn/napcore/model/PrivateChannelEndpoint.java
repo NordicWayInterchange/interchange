@@ -1,8 +1,8 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn.napcore.model;
 
 import java.util.Objects;
 
-public class PrivateChannelEndpointApi {
+public class PrivateChannelEndpoint {
 
     private String host;
 
@@ -10,10 +10,11 @@ public class PrivateChannelEndpointApi {
 
     private String queueName;
 
-    public PrivateChannelEndpointApi() {
+    public PrivateChannelEndpoint() {
+
     }
 
-    public PrivateChannelEndpointApi(String host, Integer port, String queueName) {
+    public PrivateChannelEndpoint(String host, Integer port, String queueName) {
         this.host = host;
         this.port = port;
         this.queueName = queueName;
@@ -27,11 +28,11 @@ public class PrivateChannelEndpointApi {
         this.host = host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -44,23 +45,24 @@ public class PrivateChannelEndpointApi {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PrivateChannelEndpointApi that = (PrivateChannelEndpointApi) o;
+        PrivateChannelEndpoint that = (PrivateChannelEndpoint) o;
         return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(queueName, that.queueName);
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(host, port, queueName);
     }
 
+    @Override
     public String toString() {
-        return "PrivateChannelEndpointApi{" +
-                ", host='" + host + '\'' +
+        return "PrivateChannelEndpoint{" +
+                "host='" + host + '\'' +
                 ", port=" + port +
-                ", queueName=" + queueName +
+                ", queueName='" + queueName + '\'' +
                 '}';
     }
 }

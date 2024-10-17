@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
@@ -55,6 +56,9 @@ public class NapRestControllerTest {
 
     @MockBean
     private NeighbourRepository neighbourRepository;
+
+    @MockBean
+    private PrivateChannelRepository privateChannelRepository;
 
     private NapCoreProperties napCoreProperties;
 

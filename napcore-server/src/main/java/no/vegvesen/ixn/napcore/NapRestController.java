@@ -7,11 +7,15 @@ import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
+import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
@@ -40,12 +44,21 @@ import java.util.stream.Collectors;
 public class NapRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;
+
     private final NeighbourRepository neighbourRepository;
+
+    private final PrivateChannelRepository privateChannelRepository;
+
     private final CertService certService;
+
     private final NapCoreProperties napCoreProperties;
+
     private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
+
     private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
+
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
+
     private TypeTransformer typeTransformer = new TypeTransformer();
 
     private CertSigner certSigner;
@@ -54,11 +67,13 @@ public class NapRestController {
     public NapRestController(
             ServiceProviderRepository serviceProviderRepository,
             NeighbourRepository neighbourRepository,
+            PrivateChannelRepository privateChannelRepository,
             CertService certService,
             NapCoreProperties napCoreProperties,
             CertSigner certSigner, CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
+        this.privateChannelRepository = privateChannelRepository;
         this.certService = certService;
         this.napCoreProperties = napCoreProperties;
         this.certSigner = certSigner;
@@ -331,6 +346,33 @@ public class NapRestController {
         serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
         serviceProviderRepository.save(serviceProviderToUpdate);
         logger.info("Updated service provider {}", serviceProviderToUpdate);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    private PrivateChannelResponse addPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @RequestBody PrivateChannelRequest request) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
+
+        if (request == null || request.getPeerName() == null) {
+            throw new PrivateChannelException("Private channel can not be null");
+        }
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+
+        serviceProviderRepository.save(serviceProvider);
+
+        if (request.getPeerName().equals(actorCommonName)) {
+            throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
+        }
+
+        PrivateChannel privateChannel = new PrivateChannel(request.getPeerName(), PrivateChannelStatus.REQUESTED, actorCommonName);
+
+        String queueName = "priv-"+UUID.randomUUID();
+        PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
+        privateChannel.setEndpoint(endpoint);
+
+        PrivateChannel savedPrivateChannel = privateChannelRepository.save(privateChannel);
+        return typeTransformer.transformPrivateChannelToPrivateChannelResponse(savedPrivateChannel);
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
