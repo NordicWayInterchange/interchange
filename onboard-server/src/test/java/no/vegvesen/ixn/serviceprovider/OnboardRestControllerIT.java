@@ -710,6 +710,18 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    void testAddingSubscriptionWithoutDescription(){
+        String serviceProviderName = "service-provider-sub-add";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(
+                new AddSubscription("originatingCountry='NO'", "description"),
+                new AddSubscription("originatingCountry='SE'")
+        ));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(2);
+        assertThat(restController.listSubscriptions(serviceProviderName).getSubscriptions()).hasSize(2);
+    }
+
+    @Test
     public void testDeletingSubscription() {
         LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
@@ -987,6 +999,18 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddingDeliveryWithoutDescription(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+           new AddDelivery("originatingCountry='NO'"),
+           new AddDelivery("originatingCountry='SE'", "description")
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(2);
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
     }
 
     @Test

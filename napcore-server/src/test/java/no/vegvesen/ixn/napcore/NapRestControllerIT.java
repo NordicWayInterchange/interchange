@@ -90,9 +90,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWithValidSelectorReturnsValidSubscriptionAndCreatesServiceProvider(){
         String actorCommonName = "actor";
         Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "NO sub"));
-        System.out.println(subscription);
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
+        assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
+    }
+
+    @Test
+    public void testAddingSubscriptionWithoutDescription(){
+        String actorCommonName = "actor";
+        Subscription subscription1 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
         assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
     }
 
@@ -175,6 +181,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
         DeliveryRequest deliveryRequest = new DeliveryRequest("1=1", "Invalid delivery");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+    }
+
+    @Test
+    public void testAddingDeliveryWithoutDescription(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
     }
 
     @Test
