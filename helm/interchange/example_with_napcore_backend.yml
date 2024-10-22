@@ -15,7 +15,7 @@ napcore_auth0_client_secret: my_secret
 
 # Values:
 external_name: example-node.itsinterchange.eu
-static_external_ip: ""
+static_external_ip: "1.2.3.4"
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
@@ -86,6 +86,7 @@ onboard_server:                                                     # Java appli
   - logger_name: .root
     level: info
 napcore_server:
+  enabled: true
   replicas: 1
   image:
     repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server-app
