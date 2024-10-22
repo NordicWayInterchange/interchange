@@ -1,0 +1,22 @@
+{{ if .Values.napcore_frontend.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-napcore-frontend
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: napcore-frontend
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Chart.Name }}
+    component: napcore-frontend
+    release: {{ .Release.Name }}
+  ports:
+  - name: nap-frontend
+    port: 3000 # TODO externalize
+    targetPort: 3000  # TODO externalize
+    protocol: TCP
+{{- end }}
