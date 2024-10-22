@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TypeTransformer {
 
@@ -155,7 +157,16 @@ public class TypeTransformer {
     public PrivateChannelResponse transformPrivateChannelToPrivateChannelResponse(PrivateChannel privateChannel) {
         return new PrivateChannelResponse(
                 privateChannel.getUuid(),
-                privateChannel.getPeerName(),
+                privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()),
+                transformPrivateChannelStatus(privateChannel.getStatus()),
+                transformPrivateChannelEndpoint(privateChannel.getEndpoint())
+        );
+    }
+
+    public PeerPrivateChannel transformPrivateChannelToPeerPrivateChannel(PrivateChannel privateChannel) {
+        return new PeerPrivateChannel(
+                privateChannel.getUuid(),
+                privateChannel.getServiceProviderName(),
                 transformPrivateChannelStatus(privateChannel.getStatus()),
                 transformPrivateChannelEndpoint(privateChannel.getEndpoint())
         );

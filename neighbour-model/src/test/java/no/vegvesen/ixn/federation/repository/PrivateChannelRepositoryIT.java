@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,5 +74,17 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         repository.saveAll(Arrays.asList(privateChannel1, privateChannel2));
 
         assertThat(repository.findAllByPeerName(peerName)).hasSize(2);
+    }
+
+    @Test
+    public void listOnePrivateChannelWhenAPeerIsAddedTwice() {
+        String serviceProviderName = "king_olav.bouvetinterchange.eu";
+        String peerName = "king_frederik.bouvetinterchange.eu";
+
+        PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(new Peer(peerName), new Peer(peerName))), PrivateChannelStatus.CREATED, serviceProviderName);
+
+        repository.saveAll(Collections.singletonList(privateChannel));
+
+        assertThat(repository.findAllByPeerName(peerName)).hasSize(1);
     }
 }

@@ -3,26 +3,25 @@ package no.vegvesen.ixn.napcore.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
-import java.util.Set;
 
-public class PrivateChannelResponse {
+public class PeerPrivateChannel {
 
     private String id;
 
-    private Set<String> peers;
+    private String owner;
 
     private PrivateChannelStatus status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpoint endpoint;
 
-    public PrivateChannelResponse() {
+    public PeerPrivateChannel() {
 
     }
 
-    public PrivateChannelResponse(String id, Set<String> peers, PrivateChannelStatus status, PrivateChannelEndpoint endpoint) {
+    public PeerPrivateChannel(String id, String owner, PrivateChannelStatus status, PrivateChannelEndpoint endpoint) {
         this.id = id;
-        this.peers = peers;
+        this.owner = owner;
         this.status = status;
         this.endpoint = endpoint;
     }
@@ -35,12 +34,12 @@ public class PrivateChannelResponse {
         this.id = id;
     }
 
-    public Set<String> getPeers() {
-        return peers;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setPeers(Set<String> peers) {
-        this.peers = peers;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public PrivateChannelStatus getStatus() {
@@ -63,20 +62,20 @@ public class PrivateChannelResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PrivateChannelResponse that = (PrivateChannelResponse) o;
-        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        PeerPrivateChannel that = (PeerPrivateChannel) o;
+        return Objects.equals(id, that.id) && Objects.equals(owner, that.owner) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, peers, status, endpoint);
+        return Objects.hash(id, owner, status, endpoint);
     }
 
     @Override
     public String toString() {
-        return "PrivateChannelResponse{" +
+        return "PeerPrivateChannel{" +
                 "id='" + id + '\'' +
-                ", peers=" + peers +
+                ", owner='" + owner + '\'' +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
                 '}';

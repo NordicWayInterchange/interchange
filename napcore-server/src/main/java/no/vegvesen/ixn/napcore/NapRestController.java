@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -353,7 +354,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
 
-        if (request == null || request.getPeerName() == null) {
+        if (request == null || request.getPeers() == null) {
             throw new PrivateChannelException("Private channel can not be null");
         }
 
@@ -361,11 +362,12 @@ public class NapRestController {
 
         serviceProviderRepository.save(serviceProvider);
 
-        if (request.getPeerName().equals(actorCommonName)) {
-            throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
+        if (request.getPeers().contains(actorCommonName)) {
+            throw new PrivateChannelException("Can't add private channel with serviceProviderName in list of peers");
         }
 
-        PrivateChannel privateChannel = new PrivateChannel(request.getPeerName(), PrivateChannelStatus.REQUESTED, actorCommonName);
+        Set<Peer> peers = request.getPeers().stream().map(Peer::new).collect(Collectors.toSet());
+        PrivateChannel privateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, actorCommonName);
 
         String queueName = "priv-"+UUID.randomUUID();
         PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
@@ -373,6 +375,54 @@ public class NapRestController {
 
         PrivateChannel savedPrivateChannel = privateChannelRepository.save(privateChannel);
         return typeTransformer.transformPrivateChannelToPrivateChannelResponse(savedPrivateChannel);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/{privateChannelId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deletePrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Service Provider {}, DELETE private channel {}", actorCommonName, privateChannelId);
+
+        PrivateChannel privateChannelToDelete = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, privateChannelId);
+        if (privateChannelToDelete == null) {
+            throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
+        }
+
+        privateChannelToDelete.setStatus(PrivateChannelStatus.TEAR_DOWN);
+        PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannelToDelete);
+
+        logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PrivateChannelResponse> getPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Listing private channels for service provider {}", actorCommonName);
+
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
+        return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPrivateChannelResponse(p)).collect(Collectors.toList());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/{privateChannelId}")
+    public PrivateChannelResponse getPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get private channel {} for service provider {}", privateChannelId, actorCommonName);
+
+        PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, privateChannelId);
+        if (privateChannel == null) {
+            throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
+        }
+
+        return typeTransformer.transformPrivateChannelToPrivateChannelResponse(privateChannel);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/privatechannels/peer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PeerPrivateChannel> getPeerPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get private channels where peer name is {}", actorCommonName);
+
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
+        return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList());
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
