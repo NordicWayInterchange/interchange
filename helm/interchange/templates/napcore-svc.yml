@@ -1,18 +1,21 @@
+{{ if or .Values.napcore_frontend.enabled .Values.napcore_server.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-napcore-server
-  annotations:
-    cloud.google.com/l4-rbs: "enabled"
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: napcore-server
     release: {{ .Release.Name }}
 spec:
+{{ if .Values.napcore_frontend.enabled }}
+  type: ClusterIP
+{{ else }}
   type: LoadBalancer
   loadBalancerIP: {{ .Values.static_external_ip }}
   externalTrafficPolicy: Cluster
+{{ end }}
   selector:
     app: {{ .Chart.Name }}
     component: napcore-server
@@ -20,3 +23,4 @@ spec:
   ports:
   - name: napcore
     port: {{ .Values.self.nap_provider_port }}
+{{- end }}
