@@ -1,0 +1,26 @@
+{{ if .Values.napcore_frontend.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-interchange-ingress
+  #namespace?
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: portal.{{ .Values.external_name }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-napcore-frontend
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+      - portal.{{ .Values.external_name }}
+      secretName: {{ .Release.Name }}-portal-cert
+{{- end }}
