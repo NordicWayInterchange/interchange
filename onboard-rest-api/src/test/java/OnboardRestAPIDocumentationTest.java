@@ -380,14 +380,14 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void AddPrivateChannelRequest() throws JsonProcessingException {
-        PrivateChannelRequestApi privateChannel = new PrivateChannelRequestApi(Collections.singleton("king_olaf.bouvetinterchange.eu"));
+        PrivateChannelRequestApi privateChannel = new PrivateChannelRequestApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), "my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest("king_gustaf.bouvetinterchange.eu",List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
     public void addPrivateChannelResponse() throws JsonProcessingException {
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.REQUESTED, UUID.randomUUID().toString());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.REQUESTED, "my-channel", UUID.randomUUID().toString());
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
         response.getPrivateChannels().add(privateChannel);
@@ -404,7 +404,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void ListPrivateChannelsResponse()throws JsonProcessingException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.CREATED, endpoint, UUID.randomUUID().toString());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.CREATED, "my-channel", endpoint, UUID.randomUUID().toString());
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }

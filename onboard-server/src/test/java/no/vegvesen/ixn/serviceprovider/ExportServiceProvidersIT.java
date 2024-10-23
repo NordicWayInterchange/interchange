@@ -75,6 +75,7 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
         privateChannelRepository.save(new PrivateChannel(
                 Collections.singleton(new Peer("my-peer")),
                 PrivateChannelStatus.CREATED,
+                "my-channel",
                 new PrivateChannelEndpoint(
                         "my-host",
                         5671,
@@ -121,7 +122,7 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
             for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
                 Set<String> peers = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
-                privateChannels.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getUuid()));
+                privateChannels.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), endpointApi, privateChannel.getUuid()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);

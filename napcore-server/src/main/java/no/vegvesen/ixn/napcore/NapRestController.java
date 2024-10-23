@@ -367,7 +367,7 @@ public class NapRestController {
         }
 
         Set<Peer> peers = request.getPeers().stream().map(Peer::new).collect(Collectors.toSet());
-        PrivateChannel privateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, actorCommonName);
+        PrivateChannel privateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, request.getDescription(), actorCommonName);
 
         String queueName = "priv-"+UUID.randomUUID();
         PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);

@@ -28,8 +28,8 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         String serviceProviderName2 = "king_gustaf.bouvetinterchange.eu";
         String peerName = "king_frederik.bouvetinterchange.eu";
 
-        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, serviceProviderName1);
-        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, serviceProviderName2);
+        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, "my-channel-1", serviceProviderName1);
+        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, "my-channel-2", serviceProviderName2);
 
         repository.saveAll(Arrays.asList(privateChannel1, privateChannel2));
 
@@ -42,8 +42,8 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         String serviceProviderName2 = "king_gustaf.bouvetinterchange.eu";
         String peerName = "king_frederik.bouvetinterchange.eu";
 
-        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.REQUESTED, serviceProviderName1);
-        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, serviceProviderName2);
+        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.REQUESTED, "my-channel-1", serviceProviderName1);
+        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, "my-channel-2", serviceProviderName2);
 
         repository.saveAll(Arrays.asList(privateChannel1, privateChannel2));
 
@@ -55,7 +55,7 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         String serviceProviderName = "king_olav.bouvetinterchange.eu";
         String peerName = "king_frederik.bouvetinterchange.eu";
 
-        PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.REQUESTED, serviceProviderName);
+        PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 
         repository.saveAll(Collections.singleton(privateChannel));
 
@@ -68,8 +68,8 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         String serviceProviderName2 = "king_gustaf.bouvetinterchange.eu";
         String peerName = "king_frederik.bouvetinterchange.eu";
 
-        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, serviceProviderName1);
-        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, serviceProviderName2);
+        PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, "my-channel-1", serviceProviderName1);
+        PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer(peerName)), PrivateChannelStatus.CREATED, "my-channel-2", serviceProviderName2);
 
         repository.saveAll(Arrays.asList(privateChannel1, privateChannel2));
 
@@ -81,7 +81,7 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
         String serviceProviderName = "king_olav.bouvetinterchange.eu";
         String peerName = "king_frederik.bouvetinterchange.eu";
 
-        PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(new Peer(peerName), new Peer(peerName))), PrivateChannelStatus.CREATED, serviceProviderName);
+        PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(new Peer(peerName), new Peer(peerName))), PrivateChannelStatus.CREATED, "my-channel", serviceProviderName);
 
         repository.saveAll(Collections.singletonList(privateChannel));
 

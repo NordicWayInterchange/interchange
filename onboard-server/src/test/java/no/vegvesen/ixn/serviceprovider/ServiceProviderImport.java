@@ -95,6 +95,7 @@ public class ServiceProviderImport {
             importedPrivateChannels.add(new PrivateChannel(
                     Collections.singleton(new Peer("my-peer")),
                     PrivateChannelStatus.REQUESTED,
+                    "my-channel",
                     new PrivateChannelEndpoint(
                             privateChannelResponseApi.getEndpoint().getHost(),
                             privateChannelResponseApi.getEndpoint().getPort(),

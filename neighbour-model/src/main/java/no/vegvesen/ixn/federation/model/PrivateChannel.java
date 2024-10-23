@@ -20,6 +20,9 @@ public class PrivateChannel {
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
 
+    @Column(columnDefinition="TEXT", nullable = false)
+    private String description;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name="peer_id", foreignKey = @ForeignKey(name="fk_peer_privatechannel"))
     private Set<Peer> peers;
@@ -35,15 +38,17 @@ public class PrivateChannel {
 
     }
 
-    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String serviceProviderName) {
+    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String description, String serviceProviderName) {
         this.peers = peers;
         this.status = status;
+        this.description = description;
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String description, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
         this.peers = peers;
         this.status = status;
+        this.description = description;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
     }
@@ -88,6 +93,14 @@ public class PrivateChannel {
         this.status = status;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getServiceProviderName() {
         return serviceProviderName;
     }
@@ -115,6 +128,7 @@ public class PrivateChannel {
                 "id=" + id +
                 ", uuid='" + uuid + '\'' +
                 ", status=" + status +
+                ", description='" + description + '\'' +
                 ", peers=" + peers +
                 ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", endpoint=" + endpoint +

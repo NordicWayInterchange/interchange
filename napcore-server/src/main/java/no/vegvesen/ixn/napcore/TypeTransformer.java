@@ -159,6 +159,7 @@ public class TypeTransformer {
                 privateChannel.getUuid(),
                 privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()),
                 transformPrivateChannelStatus(privateChannel.getStatus()),
+                privateChannel.getDescription(),
                 transformPrivateChannelEndpoint(privateChannel.getEndpoint())
         );
     }

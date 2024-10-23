@@ -125,7 +125,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName");
-		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("private-channel")), PrivateChannelStatus.REQUESTED, endpoint,"service-provider");
+		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("private-channel")), PrivateChannelStatus.REQUESTED, "my-channel", endpoint,"service-provider");
 
 		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
 		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel));
@@ -148,7 +148,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void tearDownQueueForPrivateChannels(){
 		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName");
-		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("private-channel")), PrivateChannelStatus.REQUESTED, endpoint,"service-provider");
+		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("private-channel")), PrivateChannelStatus.REQUESTED, "my-channel", endpoint,"service-provider");
 
 		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
 		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel));
@@ -176,8 +176,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider.getName(),80,"queueName_1");
 		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName_2");
 
-		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("private-channel-1")), PrivateChannelStatus.REQUESTED, endpoint_1,"service-provider");
-		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("private-channel-2")), PrivateChannelStatus.CREATED, endpoint_2, "service-provider");
+		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("private-channel-1")), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint_1,"service-provider");
+		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("private-channel-2")), PrivateChannelStatus.CREATED, "my-channel-2", endpoint_2, "service-provider");
 
 		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
 		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel_1, privateChannel_2));
@@ -206,8 +206,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider.getName(),80,"queueName_1");
 		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider.getName(), 80, "queueName_2");
 
-		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("private-channel-1")), PrivateChannelStatus.REQUESTED, endpoint_1,"service-provider");
-		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-provider")), PrivateChannelStatus.REQUESTED, endpoint_2, "service-provider");
+		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("private-channel-1")), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint_1,"service-provider");
+		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-provider")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint_2, "service-provider");
 
 
 		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
@@ -275,8 +275,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint_1 = new PrivateChannelEndpoint(serviceProvider_1.getName(),80,"queueName_1");
 		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider_2.getName(), 80, "queueName_2");
 
-		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, endpoint_1, "service-1");
-		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, endpoint_2, "service-2");
+		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, "my channel 1", endpoint_1, "service-1");
+		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, "my channel 2", endpoint_2, "service-2");
 
 		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1));
 		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_2.getName())).thenReturn(List.of(privateChannel_2));
@@ -314,9 +314,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint_2 = new PrivateChannelEndpoint(serviceProvider_1.getName(), 80, "queueName_2");
 		PrivateChannelEndpoint endpoint_3 = new PrivateChannelEndpoint(serviceProvider_2.getName(), 80, "queueName_3");
 
-		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("service-2")),PrivateChannelStatus.REQUESTED, endpoint_1, "service-1");
-		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, endpoint_2, "service-1");
-		PrivateChannel privateChannel_3 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, endpoint_3, "service-2");
+		PrivateChannel privateChannel_1 = new PrivateChannel(Collections.singleton(new Peer("service-2")),PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint_1, "service-1");
+		PrivateChannel privateChannel_2 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint_2, "service-1");
+		PrivateChannel privateChannel_3 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, "my-channel-3", endpoint_3, "service-2");
 
 		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_1.getName())).thenReturn(List.of(privateChannel_1, privateChannel_2));
 		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider_2.getName())).thenReturn(List.of(privateChannel_3));

@@ -369,7 +369,7 @@ public class OnboardRestController {
 				peers.add(new Peer(name));
 			}
 
-			PrivateChannel newPrivateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, serviceProviderName);
+			PrivateChannel newPrivateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, privateChannelToAdd.getDescription(), serviceProviderName);
 
 			String queueName = "priv-"+UUID.randomUUID();
 			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);

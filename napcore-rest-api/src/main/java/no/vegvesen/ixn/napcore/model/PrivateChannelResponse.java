@@ -13,6 +13,8 @@ public class PrivateChannelResponse {
 
     private PrivateChannelStatus status;
 
+    private String description;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpoint endpoint;
 
@@ -20,10 +22,11 @@ public class PrivateChannelResponse {
 
     }
 
-    public PrivateChannelResponse(String id, Set<String> peers, PrivateChannelStatus status, PrivateChannelEndpoint endpoint) {
+    public PrivateChannelResponse(String id, Set<String> peers, PrivateChannelStatus status, String description, PrivateChannelEndpoint endpoint) {
         this.id = id;
         this.peers = peers;
         this.status = status;
+        this.description = description;
         this.endpoint = endpoint;
     }
 
@@ -51,6 +54,14 @@ public class PrivateChannelResponse {
         this.status = status;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
     }
@@ -64,12 +75,12 @@ public class PrivateChannelResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelResponse that = (PrivateChannelResponse) o;
-        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, peers, status, endpoint);
+        return Objects.hash(id, peers, status, description, endpoint);
     }
 
     @Override
@@ -78,6 +89,7 @@ public class PrivateChannelResponse {
                 "id='" + id + '\'' +
                 ", peers=" + peers +
                 ", status=" + status +
+                ", description='" + description + '\'' +
                 ", endpoint=" + endpoint +
                 '}';
     }

@@ -546,7 +546,7 @@ public class OnboardRestControllerTest {
 	public void testAddingChannelWithServiceProviderAsPeerName() throws Exception {
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
-		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(Collections.singleton(serviceProviderName))));
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(Collections.singleton(serviceProviderName), "my-channel")));
 
 		mockMvc.perform(
 				post(String.format("/%s/privatechannels", serviceProviderName))
@@ -578,7 +578,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuid(any(),any())).thenReturn(savedPrivateChannel);
@@ -598,7 +598,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, savedPrivateChannel.getUuid())).thenReturn(savedPrivateChannel);
 
@@ -630,7 +630,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any())).thenReturn(savedPrivateChannel);
@@ -647,7 +647,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void testGettingNonExistentChannel() throws Exception {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 
 		mockCertificate(serviceProviderName);
 		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, savedPrivateChannel.getUuid(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
@@ -664,7 +664,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer(serviceProviderName)), PrivateChannelStatus.CREATED,serviceProviderName);
+		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer(serviceProviderName)), PrivateChannelStatus.CREATED, "my-channel", serviceProviderName);
 		when(privateChannelRepository.findAllByPeerName(any())).thenReturn(List.of(privateChannel));
 
 		mockMvc.perform(

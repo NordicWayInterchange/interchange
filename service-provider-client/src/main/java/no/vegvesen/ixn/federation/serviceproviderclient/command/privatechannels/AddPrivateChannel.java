@@ -32,7 +32,7 @@ public class AddPrivateChannel implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peerName)));
+            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peers, option.description)));
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
@@ -45,6 +45,9 @@ public class AddPrivateChannel implements Callable<Integer> {
         File file;
 
         @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers")
-        Set<String> peerName;
+        Set<String> peers;
+
+        @Option(names = {"-d", "--description"}, required = false, description = "The description of the private channel")
+        String description;
     }
 }
