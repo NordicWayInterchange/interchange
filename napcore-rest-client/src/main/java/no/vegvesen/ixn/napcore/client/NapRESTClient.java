@@ -17,7 +17,6 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-
 import javax.net.ssl.SSLContext;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;

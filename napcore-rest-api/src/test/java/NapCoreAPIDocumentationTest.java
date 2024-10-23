@@ -22,7 +22,7 @@ public class NapCoreAPIDocumentationTest {
     @Test
     public void addNapSubscriptionRequestTest() throws JsonProcessingException {
         SubscriptionRequest subscriptionRequest = new SubscriptionRequest(
-                "originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'");
+                "originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "DENM Sub");
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptionRequest));
     }
@@ -42,7 +42,8 @@ public class NapCoreAPIDocumentationTest {
                 SubscriptionStatus.CREATED,
                 "messageType = 'DENM'",
                 new HashSet<>(Collections.singleton(endpoint)),
-                LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()
+                LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond(),
+                ""
         );
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));

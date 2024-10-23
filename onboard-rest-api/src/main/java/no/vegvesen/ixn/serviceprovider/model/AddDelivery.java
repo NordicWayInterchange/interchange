@@ -1,30 +1,30 @@
-package no.vegvesen.ixn.napcore.model;
+package no.vegvesen.ixn.serviceprovider.model;
 
-public class SubscriptionRequest {
+public class AddDelivery {
 
-    String selector;
+    private String selector;
 
-    String description;
+    private String description;
 
-    public SubscriptionRequest() {
+    public AddDelivery() {
 
     }
 
-    public SubscriptionRequest(String selector){
+    public AddDelivery(String selector){
         this.selector = selector;
     }
 
-    public SubscriptionRequest(String selector, String description) {
+     public AddDelivery(String selector, String description) {
         this.selector = selector;
         this.description = description;
+     }
+
+    public void setSelector(String selector) {
+        this.selector = selector;
     }
 
     public String getSelector() {
         return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
     }
 
     public String getDescription() {
@@ -37,9 +37,11 @@ public class SubscriptionRequest {
 
     @Override
     public String toString() {
-        return "SubscriptionRequest{" +
+        return "AddDelivery{" +
                 "selector='" + selector + '\'' +
-                ", description=" + description  +
+                "description=" + description +
                 '}';
     }
 }
+
+

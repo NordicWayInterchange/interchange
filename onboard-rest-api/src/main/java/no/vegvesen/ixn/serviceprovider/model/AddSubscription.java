@@ -12,15 +12,23 @@ public class AddSubscription {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String consumerCommonName;
 
+    String description;
+
     public AddSubscription(){}
 
     public AddSubscription(String selector){
         this.selector = selector;
     }
 
-    public AddSubscription(String selector, String consumerCommonName){
+    public AddSubscription(String selector, String description){
+        this.selector = selector;
+        this.description = description;
+    }
+
+    public AddSubscription(String selector, String consumerCommonName, String description) {
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
+        this.description = description;
     }
 
     public String getSelector() {
@@ -37,6 +45,14 @@ public class AddSubscription {
 
     public void setConsumerCommonName(String consumerCommonName) {
         this.consumerCommonName = consumerCommonName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -58,6 +74,7 @@ public class AddSubscription {
         return "AddSubscription{" +
                 "selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +
+                ", description=" + description +
                 '}';
     }
 }

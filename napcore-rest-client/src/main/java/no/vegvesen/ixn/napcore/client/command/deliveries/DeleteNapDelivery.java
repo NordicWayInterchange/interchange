@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.napcore.client.command.deliveries;
 
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
-import static picocli.CommandLine.*;
+import picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
 @Command(

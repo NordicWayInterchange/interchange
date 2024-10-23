@@ -28,7 +28,7 @@ public class TypeTransformerTest {
 
     @Test
     public void testAddSubscriptionWithEmptyConsumerCommonName() {
-        AddSubscription subscription = new AddSubscription("originatingCountry = 'NO'");
+        AddSubscription subscription = new AddSubscription("originatingCountry = 'NO'", "NO SUB");
 
         TypeTransformer transformer = new TypeTransformer();
 

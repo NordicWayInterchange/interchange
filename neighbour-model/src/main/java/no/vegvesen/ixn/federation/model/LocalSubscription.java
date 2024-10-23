@@ -41,6 +41,9 @@ public class LocalSubscription {
     @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
     private Set<LocalConnection> connections = new HashSet<>();
 
+    @Column
+    private String description;
+
     // ErrorMessage is needed for sending the error message back to the user
     // Any subscription with an error message is deleted shortly after creation
     @Column
@@ -49,11 +52,12 @@ public class LocalSubscription {
     public LocalSubscription() {
     }
 
-    public LocalSubscription(String selector, String consumerCommonName) {
+
+    public LocalSubscription(String selector, String consumerCommonName, String description){
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
+        this.description = description;
     }
-
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
         this.selector = selector;
@@ -152,9 +156,42 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer sub_id) {
+        this.id = sub_id;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
+    }
+
+    public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {
+        if (newStatus.equals(this.status)) {
+            return this;
+        } else {
+            this.status = newStatus;
+            return this;
+        }
     }
 
     @Override
@@ -171,10 +208,6 @@ public class LocalSubscription {
         return Objects.hash(selector, consumerCommonName);
     }
 
-    public Integer getId() {
-        return id;
-    }
-
     @Override
     public String toString() {
         return "LocalSubscription{" +
@@ -184,27 +217,7 @@ public class LocalSubscription {
                 ", selector=" + selector +
                 ", consumerCommonName=" + consumerCommonName +
                 ", errorMessage=" + errorMessage +
+                ", description=" + description +
                 '}';
-    }
-
-    public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {
-        if (newStatus.equals(this.status)) {
-            return this;
-        } else {
-            this.status = newStatus;
-            return this;
-        }
-    }
-
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setId(Integer sub_id) {
-        this.id = sub_id;
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
     }
 }

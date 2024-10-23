@@ -544,7 +544,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "serviceprovider";
         String selector = "";
 
-        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "illegal sub");
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -586,7 +586,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         String serviceProvider = "serviceprovider";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName(), "DATEX sub")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
@@ -598,7 +598,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWithEmptyConsumerCommonName() {
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -612,7 +612,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWithWrongConsumerCommonName() {
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector, "anna");
+        AddSubscription addSubscription = new AddSubscription(selector, "anna", "DATEX sub");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -637,7 +637,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceproviderName,
-                Collections.singleton(new AddSubscription(selector))
+                Collections.singleton(new AddSubscription(selector, "DATEX SUB"))
         );
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
         assertThat(response.getSubscriptions()).hasSize(1);
@@ -667,7 +667,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(serviceProvider);
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceProviderName,
-                Collections.singleton(new AddSubscription(selector))
+                Collections.singleton(new AddSubscription(selector, "Invalid sub"))
         );
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
@@ -682,7 +682,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX sub"))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -704,9 +704,21 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX SUB"))));
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
+    }
+
+    @Test
+    void testAddingSubscriptionWithoutDescription(){
+        String serviceProviderName = "service-provider-sub-add";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(
+                new AddSubscription("originatingCountry='NO'", "description"),
+                new AddSubscription("originatingCountry='SE'")
+        ));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(2);
+        assertThat(restController.listSubscriptions(serviceProviderName).getSubscriptions()).hasSize(2);
     }
 
     @Test
@@ -714,7 +726,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "DATEX SUB");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -755,7 +767,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
                 serviceProviderName,
-                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node"))
+                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node", "DATEX sub"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
@@ -794,7 +806,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGettingSingleSubscription() {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu", "DENM SUB"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
                 addSubscriptions
@@ -975,7 +987,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "my-service-provider";
         String selector = "";
 
-        SelectorApi delivery = new SelectorApi(selector);
+        AddDelivery delivery = new AddDelivery(selector, "illegal delivery");
         AddDeliveriesRequest requestApi = new AddDeliveriesRequest(serviceProviderName, Collections.singleton(delivery));
 
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, requestApi);
@@ -990,13 +1002,25 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingDeliveryWithoutDescription(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+           new AddDelivery("originatingCountry='NO'"),
+           new AddDelivery("originatingCountry='SE'", "description")
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(2);
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
+    }
+
+    @Test
     public void testAddingMoreThanOneIdenticalDeliveries() {
         String serviceProviderName = "my-service-provider";
         String selector = "messageType='DENM'";
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "denm delivery")
                 )
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
@@ -1025,7 +1049,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "invalid delivery")
                 )
         );
 
@@ -1046,7 +1070,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "null delivery")
                 )
         );
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
@@ -1064,7 +1088,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Set.of(
-                        new SelectorApi("messageType = 'DENM'")
+                        new AddDelivery("messageType = 'DENM'", "DENM delivery")
                 )
         );
         restController.addDeliveries(serviceProviderName, request);
@@ -1081,7 +1105,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Set.of(
-                        new SelectorApi("messageType = 'DENM'")
+                        new AddDelivery("messageType = 'DENM'", "DENM delivery")
                 )
         );
         AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
@@ -1111,7 +1135,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "DENM Delivery")
                 )
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
@@ -1157,7 +1181,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void SubscriptionEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_2";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'")));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'", "SUB")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
         assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
         assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));
@@ -1182,7 +1206,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void deliveryEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_4";
         AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
-                new SelectorApi("originatingCountry='NO'")
+                new AddDelivery("originatingCountry='NO'", "NO Delivery")
         ));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertTrue(checkUuid(response.getDeliveries().stream().findFirst().get().getId()));

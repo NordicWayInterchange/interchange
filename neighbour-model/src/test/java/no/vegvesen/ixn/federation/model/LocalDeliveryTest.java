@@ -14,16 +14,19 @@ public class LocalDeliveryTest {
         );
         LocalDelivery localDelivery2 = new LocalDelivery(
                 "messageType = 'DENM'",
-                LocalDeliveryStatus.REQUESTED
+                LocalDeliveryStatus.REQUESTED,
+                "DENM delivery"
         );
         LocalDelivery localDelivery3 = new LocalDelivery(
                 "messageType = 'DENM'",
-                LocalDeliveryStatus.REQUESTED
+                LocalDeliveryStatus.REQUESTED,
+                "DENM delivery"
 
         );
         LocalDelivery localDelivery4 = new LocalDelivery(
                 "messageType = 'DENM'",
-                LocalDeliveryStatus.CREATED
+                LocalDeliveryStatus.CREATED,
+                "DENM delivery"
         );
         assertThat(localDelivery1)
                 .isEqualTo(localDelivery2)
