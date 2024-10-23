@@ -1,13 +1,17 @@
 package no.vegvesen.ixn.federation.capability;
 
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.RedirectStatus;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -230,7 +234,7 @@ class CapabilityMatcherTest {
 		capability.setMetadata(meta);
 
 		String consumerCommonName = "";
-		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'",consumerCommonName);
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'",consumerCommonName, "IVIM sub");
 		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)), consumerCommonName);
 	}
 
@@ -248,7 +252,7 @@ class CapabilityMatcherTest {
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
 		String consumerCommonName = "";
-		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id = 2 or id = 3",consumerCommonName);
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id = 2 or id = 3",consumerCommonName, "SPATEM SUB");
 		System.out.println(localSubscription.getSelector());
 		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();
@@ -281,7 +285,7 @@ class CapabilityMatcherTest {
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		capability.setMetadata(meta);
 		String consumerCommonName = "";
-		LocalSubscription localSubscription = new LocalSubscription("name = 'fish'",consumerCommonName);
+		LocalSubscription localSubscription = new LocalSubscription("name = 'fish'",consumerCommonName, "fish sub");
 		System.out.println(localSubscription.getSelector());
 		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();

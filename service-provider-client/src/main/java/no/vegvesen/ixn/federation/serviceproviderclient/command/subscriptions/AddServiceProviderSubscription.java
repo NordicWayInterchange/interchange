@@ -25,6 +25,8 @@ public class AddServiceProviderSubscription implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddServiceProviderSubscriptionOption option;
 
+
+
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();

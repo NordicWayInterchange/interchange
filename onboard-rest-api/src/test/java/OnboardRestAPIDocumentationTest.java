@@ -11,7 +11,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "kyrre"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "kyrre", "DENM Sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
                 addSubscriptions
@@ -23,8 +23,8 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'"));
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'", "DENM sub"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
                 addSubscriptions
@@ -37,7 +37,7 @@ public class OnboardRestAPIDocumentationTest {
     public void addSingleSubscriptionForSystemTest() throws JsonProcessingException {
         //TODO for local
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
                 addSubscriptions
@@ -56,6 +56,7 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED,
+                null,
                 null));
         subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
@@ -63,6 +64,7 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED,
+                null,
                 null
                 ));
         AddSubscriptionsResponse response = new AddSubscriptionsResponse(
@@ -85,6 +87,7 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
+                null,
                 null));
         subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/2",
@@ -92,6 +95,7 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
+                null,
                 null
         ));
         ListSubscriptionsResponse response = new ListSubscriptionsResponse(
@@ -122,8 +126,8 @@ public class OnboardRestAPIDocumentationTest {
                 "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
-                localEndpointApis
-
+                localEndpointApis,
+                "DENM subscription"
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -262,8 +266,9 @@ public class OnboardRestAPIDocumentationTest {
     public void addDelieriesRequest() throws JsonProcessingException {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 "sp-1",
-                Collections.singleton(new SelectorApi(
-                        "originatingCountry = 'NO' and messageType = 'DENM'"
+                Collections.singleton(new AddDelivery(
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        "DENM delivery"
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -280,6 +285,7 @@ public class OnboardRestAPIDocumentationTest {
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
                         DeliveryStatus.REQUESTED,
+                        null,
                         null
                 ))
         );
@@ -297,6 +303,7 @@ public class OnboardRestAPIDocumentationTest {
                         "originatingCountry = 'NO' and messageType = 'DENM'",
                         System.currentTimeMillis(),
                         DeliveryStatus.CREATED,
+                        null,
                         null
 
                 ))
@@ -318,7 +325,8 @@ public class OnboardRestAPIDocumentationTest {
                 "/sp-1/deliveries/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
-                DeliveryStatus.CREATED
+                DeliveryStatus.CREATED,
+                null
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -370,8 +378,8 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void selectorApi() throws JsonProcessingException {
-        SelectorApi selector = new SelectorApi("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'");
+    public void addDelivery() throws JsonProcessingException {
+        AddDelivery selector = new AddDelivery("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'", "DENM delivery");
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(selector));
     }

@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
 import no.vegvesen.ixn.napcore.model.DeliveryRequest;
-import static picocli.CommandLine.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "add",

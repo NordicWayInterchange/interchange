@@ -743,7 +743,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void setupRoutingWithCapabilityExchanges() throws Exception {
 		LocalDelivery delivery = new LocalDelivery(
 				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
-				LocalDeliveryStatus.CREATED
+				LocalDeliveryStatus.CREATED,
+				"DENM Delivery"
 		);
 		String deliveryExchangeName = "del-ex10";
 

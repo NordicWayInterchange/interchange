@@ -95,6 +95,7 @@ jobs:
           git config --global user.name = "GitHub Actions"
           cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
           cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
+          cp /home/runner/work/interchange/interchange/napcore-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-napcore
           cd interchange-swagger-docs
           git add --all
           git commit --allow-empty -m "Updated swagger.json"
