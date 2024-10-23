@@ -160,6 +160,36 @@ public class NapRESTClient {
         restTemplate.delete(url);
     }
 
+    public PrivateChannelResponse addPrivateChannel(PrivateChannelRequest privateChannelRequest){
+        String url = String.format("%s/nap/%s/privatechannels", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<PrivateChannelRequest> entity = new HttpEntity<>(privateChannelRequest, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelResponse.class).getBody();
+    }
+
+    public void deletePrivateChannel(String privateChannelId){
+        String url = String.format("%s/nap/%s/privatechannels/%s", server, user, privateChannelId);
+        restTemplate.delete(url);
+    }
+
+    public List<PrivateChannelResponse> getPrivateChannels(){
+        String url = String.format("%s/nap/%s/privatechannels", server, user);
+        ResponseEntity<PrivateChannelResponse[]> response = restTemplate.getForEntity(url, PrivateChannelResponse[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public PrivateChannelResponse getPrivateChannel(String privateChannelId){
+        String url = String.format("%s/nap/%s/privatechannels/%s", server, user, privateChannelId);
+        return restTemplate.getForEntity(url, PrivateChannelResponse.class).getBody();
+    }
+
+    public List<PeerPrivateChannel> getPeerPrivateChannels(){
+        String url = String.format("%s/nap/%s/privatechannels/peer", server, user);
+        ResponseEntity<PeerPrivateChannel[]> response = restTemplate.getForEntity(url, PeerPrivateChannel[].class);
+        return Arrays.asList(response.getBody());
+    }
+
     public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");

@@ -298,20 +298,22 @@ public class ExampleAPIObjects {
 
     public static final String GETSUBSCRIPTIONRESPONSE = """
             {
-              "id" : "550e8400-e29b-41d4-a716-446655440000",
-              "path" : "/serviceprovider1/subscriptions/1",
-              "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-              "consumerCommonName" : "serviceprovider1",
-              "lastUpdatedTimestamp" : 1684846131664,
-              "status" : "CREATED",
-                "description" : "DENM subscription"
-              "endpoints" : [ {
-                "host" : "amqps://myserver",
-                "port" : 5671,
-                "source" : "serviceprovider-1",
-                "maxBandwidth" : 0,
-                "maxMessageRate" : 0
-              } ]
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "path": "/serviceprovider1/subscriptions/1",
+                "selector": "originatingCountry = 'NO' and messageType = 'DENM'",
+                "consumerCommonName": "serviceprovider1",
+                "lastUpdatedTimestamp": 1684846131664,
+                "status": "CREATED",
+                "description": "DENM subscription",
+                "endpoints": [
+                    {
+                        "host": "amqps://myserver",
+                        "port": 5671,
+                        "source": "serviceprovider-1",
+                        "maxBandwidth": 0,
+                        "maxMessageRate": 0
+                    }
+                ]
             }
             """;
 
@@ -322,35 +324,64 @@ public class ExampleAPIObjects {
               "name" : "serviceprovider-1",
               "privateChannels" : [ {
                 "id" : "550e8400-e29b-41d4-a716-446655440000",
-                "peerName" : "serviceprovider-2",
-                "status" : "CREATED"
+                "peers": [
+                "serviceprovider-1",
+                "serviceprovider-2"
+                ],
+                "status" : "CREATED",
+                "description": "private channel for bouvet and friends."
               } ]
             }
             """;
 
+    public static final String LISTPEERPRIVATECHANNELSRESPONSE = """
+            {
+                "version": "1.0",
+                "name": "serviceprovider-1",
+                "privateChannels": [
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "serviceproviderName": "king_olav.bouvetinterchange.eu",
+                        "status": "CREATED",
+                        "endpoint": {
+                        "host": "bouvet.itsinterchange.eu",
+                        "port": 5671,
+                        "queueName": "priv-0c6e7d5f-bea8-444e-97aa-2da688eaf7b9"
+                        }
+                    }
+                ]
+            }
+            """;
     public static final String ADDPRIVATECHANNELSRESPONSE = """
             {
               "version" : "1.0",
               "name" : "serviceprovider-1",
               "privateChannels" : [ {
                 "id" : "550e8400-e29b-41d4-a716-446655440000",
-                "peerName" : "serviceprovider-2",
-                "status" : "REQUESTED"
+                "peers": [
+                "serviceprovider-1",
+                "serviceprovider-2"
+                ],
+                "status" : "REQUESTED",
+                "description": "private channel for bouvet and friends"
               }]
             }
             """;
 
     public static final String GETPRIVATECHANNELRESPONSE = """
             {
-              "id" : "550e8400-e29b-41d4-a716-446655440000",
-              "peerName" : "serviceprovider-2",
-              "serviceProviderName" : "serviceprovider-1",
-              "status" : "CREATED",
-              "endpoint" : {
-                "host" : "example.stminterchange.com",
-                "port" : 5671,
-                "queueName" : "priv-bf71c182-dfd8-4543-a644-4dddd36751bd"
-              }
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "peers": [
+                    "serviceprovider-1",
+                    "serviceproivder-2"
+                ],
+                "serviceProviderName": "serviceprovider-1",
+                "status": "CREATED",
+                "endpoint": {
+                    "host": "bouvet.itsinterchange.eu",
+                    "port": 5671,
+                    "queueName": "priv-bf71c182-dfd8-4543-a644-4dddd36751bd"
+                }
             }
             """;
 

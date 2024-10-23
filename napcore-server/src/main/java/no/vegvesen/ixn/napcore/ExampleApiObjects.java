@@ -212,4 +212,65 @@ public class ExampleApiObjects {
             "Publication-1",
             "Publication-2"]
             """;
+
+    static final String ADDPRIVATECHANNELRESPONSE = """
+            {
+                "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                "peers": [
+                    "king_olav.bouvetinterchange.eu",
+                    "king_gustaf.bouvetinterchange.eu"
+                ],
+                "status": "CREATED",
+                "description": "Private channel for bouvet and friends"
+            }
+            """;
+    static final String GETPRIVATECHANNELRESPONSE = """
+            {
+                "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                "peers": [
+                    "king_olav.bouvetinterchange.eu",
+                    "king_gustaf.bouvetinterchange.eu"
+                ],
+                "status": "CREATED",
+                "description": "Private channel for bouvet and friends",
+                "endpoint": {
+                    "host": "bouvet.itsinterchange.eu",
+                    "port": 1337,
+                    "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
+                }
+            }
+            """;
+
+    static final String GETPRIVATECHANNELSRESPONSE = """
+              [
+                  {
+                      "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                      "peers": [
+                          "king_olav.bouvetinterchange.eu",
+                          "king_gustaf.bouvetinterchange.eu"
+                      ],
+                      "status": "CREATED",
+                      "description": "Private channel for bouvet and friends",
+                      "endpoint": {
+                          "host": "bouvet.itsinterchange.eu",
+                          "port": 1337,
+                          "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
+                      }
+                  }
+              ]
+            """;
+    static final String GETPEERPRIVATECHANNELS = """
+            [
+                {
+                    "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                    "owner": "king_olav.bouvetinterchange.eu",
+                    "status": "CREATED",
+                    "endpoint": {
+                        "host": "bouvet.itsinterchange.eu",
+                        "port": 1337,
+                        "queueName": "priv-86651278-add2-4286-bcdf-bcdb69dc72a1"
+                    }
+                }
+            ]
+            """;
 }

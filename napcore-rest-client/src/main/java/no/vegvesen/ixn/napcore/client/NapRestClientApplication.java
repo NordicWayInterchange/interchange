@@ -4,6 +4,7 @@ package no.vegvesen.ixn.napcore.client;
 import no.vegvesen.ixn.napcore.client.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.napcore.client.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.napcore.client.command.keys.KeysCommand;
+import no.vegvesen.ixn.napcore.client.command.privatechannels.PrivatechannelsCommand;
 import no.vegvesen.ixn.napcore.client.command.subscriptions.SubscriptionsCommand;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -26,7 +27,8 @@ subcommands = {
         CapabilitiesCommand.class,
         DeliveriesCommand.class,
         KeysCommand.class,
-        SubscriptionsCommand.class
+        SubscriptionsCommand.class,
+        PrivatechannelsCommand.class
 })
 public class NapRestClientApplication implements Callable<Integer> {
 

@@ -441,7 +441,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/peer"})
 	@Tag(name = "Private Channel")
 	@Operation(summary = "List private channels with service provider as peer")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPRIVATECHANNELSRESPONSE)))})
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPEERPRIVATECHANNELSRESPONSE)))})
 	public ListPeerPrivateChannels listPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);

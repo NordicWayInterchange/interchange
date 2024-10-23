@@ -403,7 +403,11 @@ public class NapRestController {
         logger.info("Updated service provider {}", serviceProviderToUpdate);
     }
 
+
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Add private channel")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDPRIVATECHANNELRESPONSE)))})
     private PrivateChannelResponse addPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @RequestBody PrivateChannelRequest request) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
@@ -433,6 +437,8 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/{privateChannelId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Delete private channel")
     public void deletePrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE private channel {}", actorCommonName, privateChannelId);
@@ -449,6 +455,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get private channels")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELSRESPONSE)))})
     public List<PrivateChannelResponse> getPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing private channels for service provider {}", actorCommonName);
@@ -458,6 +467,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/{privateChannelId}")
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get private channel")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELRESPONSE)))})
     public PrivateChannelResponse getPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel {} for service provider {}", privateChannelId, actorCommonName);
@@ -471,6 +483,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/privatechannels/peer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get private channels with actorCommonName as peer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNELS)))})
     public List<PeerPrivateChannel> getPeerPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channels where peer name is {}", actorCommonName);
