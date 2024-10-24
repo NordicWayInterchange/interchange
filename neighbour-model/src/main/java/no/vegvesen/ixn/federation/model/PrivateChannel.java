@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +36,10 @@ public class PrivateChannel {
     @JoinColumn(name="end_id", foreignKey = @ForeignKey(name="fk_end_privatechannel"))
     private PrivateChannelEndpoint endpoint;
 
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime lastUpdated;
+
     public PrivateChannel() {
 
     }
@@ -53,14 +59,6 @@ public class PrivateChannel {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannelEndpoint getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(PrivateChannelEndpoint endpoint) {
-        this.endpoint = endpoint;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -75,14 +73,6 @@ public class PrivateChannel {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public Set<Peer> getPeers() {
-        return peers;
-    }
-
-    public void setPeers(Set<Peer> peers) {
-        this.peers = peers;
     }
 
     public PrivateChannelStatus getStatus() {
@@ -101,12 +91,36 @@ public class PrivateChannel {
         this.description = description;
     }
 
+    public Set<Peer> getPeers() {
+        return peers;
+    }
+
+    public void setPeers(Set<Peer> peers) {
+        this.peers = peers;
+    }
+
     public String getServiceProviderName() {
         return serviceProviderName;
     }
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
+    }
+
+    public PrivateChannelEndpoint getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(PrivateChannelEndpoint endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     @Override
@@ -132,6 +146,7 @@ public class PrivateChannel {
                 ", peers=" + peers +
                 ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", endpoint=" + endpoint +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }

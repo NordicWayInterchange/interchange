@@ -18,22 +18,27 @@ public class GetPrivateChannelResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
+    private long lastUpdated;
+
     public GetPrivateChannelResponse() {
+
     }
 
-    public GetPrivateChannelResponse(String id, Set<String> peers, PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, Set<String> peers, PrivateChannelEndpointApi endpoint, String serviceProviderName, PrivateChannelStatusApi status, long lastUpdated) {
         this.id = id;
         this.peers = peers;
         this.serviceProviderName = serviceProviderName;
         this.endpoint = endpoint;
         this.status = status;
+        this.lastUpdated = lastUpdated;
     }
 
-    public GetPrivateChannelResponse(String id, Set<String> peers, String serviceProviderName, PrivateChannelStatusApi status) {
+    public GetPrivateChannelResponse(String id, Set<String> peers, String serviceProviderName, PrivateChannelStatusApi status, long lastUpdated) {
         this.id = id;
         this.peers = peers;
         this.serviceProviderName = serviceProviderName;
         this.status = status;
+        this.lastUpdated = lastUpdated;
     }
 
     public PrivateChannelStatusApi getStatus() {
@@ -70,6 +75,14 @@ public class GetPrivateChannelResponse {
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
+    }
+
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     @Override

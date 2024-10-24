@@ -18,16 +18,19 @@ public class PrivateChannelResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpoint endpoint;
 
+    private long lastUpdated;
+
     public PrivateChannelResponse() {
 
     }
 
-    public PrivateChannelResponse(String id, Set<String> peers, PrivateChannelStatus status, String description, PrivateChannelEndpoint endpoint) {
+    public PrivateChannelResponse(String id, Set<String> peers, PrivateChannelStatus status, String description, PrivateChannelEndpoint endpoint, long lastUpdated) {
         this.id = id;
         this.peers = peers;
         this.status = status;
         this.description = description;
         this.endpoint = endpoint;
+        this.lastUpdated = lastUpdated;
     }
 
     public String getId() {
@@ -70,17 +73,25 @@ public class PrivateChannelResponse {
         this.endpoint = endpoint;
     }
 
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelResponse that = (PrivateChannelResponse) o;
-        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
+        return lastUpdated == that.lastUpdated && Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, peers, status, description, endpoint);
+        return Objects.hash(id, peers, status, description, endpoint, lastUpdated);
     }
 
     @Override
@@ -91,6 +102,7 @@ public class PrivateChannelResponse {
                 ", status=" + status +
                 ", description='" + description + '\'' +
                 ", endpoint=" + endpoint +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }

@@ -4,6 +4,9 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class OnboardRestAPIDocumentationTest {
@@ -395,7 +398,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addPrivateChannelResponse() throws JsonProcessingException {
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.REQUESTED, "my-channel", UUID.randomUUID().toString());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.REQUESTED, "my-channel", UUID.randomUUID().toString(), transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
         response.getPrivateChannels().add(privateChannel);
@@ -405,14 +408,14 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void getPrivateChannelResponse() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID().toString(), Collections.singleton("king_olaf.bouvetinterchange.eu"), endpoint, "king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED);
+        GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID().toString(), Collections.singleton("king_olaf.bouvetinterchange.eu"), endpoint, "king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED, transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
     @Test
     public void ListPrivateChannelsResponse()throws JsonProcessingException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.CREATED, "my-channel", endpoint, UUID.randomUUID().toString());
+        PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.CREATED, "my-channel", endpoint, UUID.randomUUID().toString(), transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
@@ -420,7 +423,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void ListPeerPrivateChannels() throws JsonProcessingException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
-        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID().toString(), "king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED, endpoint);
+        PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID().toString(), "king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED, endpoint, transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         ListPeerPrivateChannels response = new ListPeerPrivateChannels("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
@@ -543,6 +546,10 @@ public class OnboardRestAPIDocumentationTest {
 
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
+        return lastUpdated == null ? 0 : ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
 }

@@ -18,19 +18,10 @@ public class PrivateChannelResponseApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
+    private long lastUpdated;
+
     public PrivateChannelResponseApi() {
 
-    }
-
-    public PrivateChannelResponseApi(Set<String> peers) {
-        this.peers = peers;
-    }
-
-    public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, String description, String id) {
-        this.id = id;
-        this.peers = peers;
-        this.status = status;
-        this.description = description;
     }
 
     public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpointApi endpoint, String id) {
@@ -39,6 +30,23 @@ public class PrivateChannelResponseApi {
         this.status = status;
         this.description = description;
         this.endpoint = endpoint;
+    }
+
+    public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, String description, String id, long lastUpdated) {
+        this.id = id;
+        this.peers = peers;
+        this.status = status;
+        this.description = description;
+        this.lastUpdated = lastUpdated;
+    }
+
+    public PrivateChannelResponseApi(Set<String> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpointApi endpoint, String id, long lastUpdated) {
+        this.id = id;
+        this.peers = peers;
+        this.status = status;
+        this.description = description;
+        this.endpoint = endpoint;
+        this.lastUpdated = lastUpdated;
     }
 
     public PrivateChannelEndpointApi getEndpoint() {
@@ -84,17 +92,25 @@ public class PrivateChannelResponseApi {
         this.peers = peers;
     }
 
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelResponseApi that = (PrivateChannelResponseApi) o;
-        return Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
+        return lastUpdated == that.lastUpdated && Objects.equals(id, that.id) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, peers, status, description, endpoint);
+        return Objects.hash(id, peers, status, description, endpoint, lastUpdated);
     }
 
     @Override
@@ -105,6 +121,7 @@ public class PrivateChannelResponseApi {
                 ", status=" + status +
                 ", description='" + description + '\'' +
                 ", endpoint=" + endpoint +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }

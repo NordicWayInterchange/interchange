@@ -35,9 +35,7 @@ public class TypeTransformer {
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
                 capabilityApiTransformer.capabilityToCapabilityApi(capability));
-
     }
-
 
     public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities) {
         Set<CapabilityApi> fetchCapabilities = new HashSet<>();
@@ -56,7 +54,6 @@ public class TypeTransformer {
 
     public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));
-
     }
 
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
@@ -72,11 +69,9 @@ public class TypeTransformer {
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getErrorMessage(),
                     subscription.getDescription()));
-
         }
         return result;
     }
-
 
     public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String serviceProviderName, String nodeName) {
         String consumerCommonName;
@@ -290,43 +285,43 @@ public class TypeTransformer {
         );
     }
 
-    public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel){
+    public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel) {
         if(privateChannel.getEndpoint() != null) {
             PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
         }
         else{
-            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()));
+            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
         }
-        }
+    }
 
-    public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList){
+    public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList) {
         AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelList){
-                response.getPrivateChannels().add(new PrivateChannelResponseApi(privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), privateChannel.getUuid()));
+                response.getPrivateChannels().add(new PrivateChannelResponseApi(privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), privateChannel.getUuid(), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
         }
         return response;
     }
 
-    public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList){
+    public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList) {
         ArrayList<PrivateChannelResponseApi> returnList = new ArrayList<>();
         for(PrivateChannel privateChannel : privateChannelList){
             Set<String> peers = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
-            returnList.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), privateChannel.getUuid()));
+            returnList.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), privateChannel.getUuid(), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
         }
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);
     }
 
-    public ListPeerPrivateChannels transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList){
+    public ListPeerPrivateChannels transformPrivateChannelListToListPrivateChannelsWithServiceProvider(String serviceProviderName, List<PrivateChannel> privateChannelList) {
         List<PeerPrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
         for (PrivateChannel privateChannel : privateChannelList) {
             if(privateChannel.getEndpoint() != null) {
                 PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(), privateChannel.getEndpoint().getPort(), privateChannel.getEndpoint().getQueueName());
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint, transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
             }
             else{
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString())));
+                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
             }
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
