@@ -23,7 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
