@@ -329,7 +329,8 @@ public class ExampleAPIObjects {
                 "serviceprovider-2"
                 ],
                 "status" : "CREATED",
-                "description": "private channel for bouvet and friends."
+                "description": "private channel for bouvet and friends.",
+                "lastUpdated": 1729840858
               } ]
             }
             """;
@@ -347,7 +348,8 @@ public class ExampleAPIObjects {
                         "host": "bouvet.itsinterchange.eu",
                         "port": 5671,
                         "queueName": "priv-0c6e7d5f-bea8-444e-97aa-2da688eaf7b9"
-                        }
+                        },
+                        "lastUpdated": 1729840858
                     }
                 ]
             }
@@ -363,7 +365,8 @@ public class ExampleAPIObjects {
                 "serviceprovider-2"
                 ],
                 "status" : "REQUESTED",
-                "description": "private channel for bouvet and friends"
+                "description": "private channel for bouvet and friends",
+                "lastUpdated": 1729840858
               }]
             }
             """;
@@ -381,7 +384,8 @@ public class ExampleAPIObjects {
                     "host": "bouvet.itsinterchange.eu",
                     "port": 5671,
                     "queueName": "priv-bf71c182-dfd8-4543-a644-4dddd36751bd"
-                }
+                },
+                "lastUpdated": 1729840858
             }
             """;
 

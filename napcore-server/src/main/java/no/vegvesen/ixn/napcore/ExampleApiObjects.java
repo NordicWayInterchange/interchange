@@ -220,8 +220,14 @@ public class ExampleApiObjects {
                     "king_olav.bouvetinterchange.eu",
                     "king_gustaf.bouvetinterchange.eu"
                 ],
-                "status": "CREATED",
-                "description": "Private channel for bouvet and friends"
+                "status": "REQUESTED",
+                "description": "Private channel for bouvet and friends",
+                "endpoint": {
+                    "host": "bouvet.itsinterchange.eu",
+                    "port": 1337,
+                    "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
+                },
+                "lastUpdated": 1729840858
             }
             """;
     static final String GETPRIVATECHANNELRESPONSE = """
@@ -237,7 +243,8 @@ public class ExampleApiObjects {
                     "host": "bouvet.itsinterchange.eu",
                     "port": 1337,
                     "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
-                }
+                },
+                "lastUpdated": 1729840858
             }
             """;
 
@@ -255,7 +262,8 @@ public class ExampleApiObjects {
                           "host": "bouvet.itsinterchange.eu",
                           "port": 1337,
                           "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
-                      }
+                      },
+                      "lastUpdated": 1729840858
                   }
               ]
             """;
@@ -269,7 +277,8 @@ public class ExampleApiObjects {
                         "host": "bouvet.itsinterchange.eu",
                         "port": 1337,
                         "queueName": "priv-86651278-add2-4286-bcdf-bcdb69dc72a1"
-                    }
+                    },
+                    "lastUpdated": 1729840858
                 }
             ]
             """;
