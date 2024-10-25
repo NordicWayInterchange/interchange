@@ -236,7 +236,6 @@ public class ServiceProviderRouter {
                         logger.debug("Adding member {} to group {}", peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
 
-                    provider.addExchangeWriteAccess(peer.getName(), queueName);
                     provider.addQueueReadAccess(peer.getName(), queueName);
                 }
                 qpidClient.postQpidAcl(provider);
@@ -269,7 +268,6 @@ public class ServiceProviderRouter {
                             logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                         }
                     }
-                    provider.removeQueueWriteAccess(peerName, queueName);
                     provider.removeQueueReadAccess(peerName, queueName);
                 }
                 provider.removeQueueWriteAccess(name, queueName);
