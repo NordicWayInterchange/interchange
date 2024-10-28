@@ -235,13 +235,51 @@ public class ServiceProviderRouter {
                         groupMemberNames.add(peerName);
                         logger.debug("Adding member {} to group {}", peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
-
+                    peer.setStatus(PeerStatus.CREATED);
                     provider.addQueueReadAccess(peer.getName(), queueName);
                 }
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating private channel {} for client {}", queueName, name);
                 privateChannelRepository.save(privateChannel);
+            }
+            if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
+                Set<Peer> requestedPeers = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.REQUESTED)).collect(Collectors.toSet());
+                if (!requestedPeers.isEmpty()) {
+                    VirtualHostAccessController provider = qpidClient.getQpidAcl();
+                    for (Peer peer : requestedPeers) {
+                        String peerName = peer.getName();
+                        if (!groupMemberNames.contains(peerName)) {
+                            qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                            groupMemberNames.add(peerName);
+                            logger.debug("Adding member {} to group {}", peer.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                        }
+                        peer.setStatus(PeerStatus.CREATED);
+                        provider.addQueueReadAccess(peer.getName(), queueName);
+                        privateChannelRepository.save(privateChannel);
+                    }
+                }
+
+                Set<Peer> peersToRemove = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.TEAR_DOWN)).collect(Collectors.toSet());
+                if (!peersToRemove.isEmpty()) {
+                    VirtualHostAccessController provider = qpidClient.getQpidAcl();
+                    for (Peer peer : peersToRemove) {
+                        String peerName = peer.getName();
+                        long channelsWithPeerAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).size();
+                        long channelsWithPeerAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(peerName, PrivateChannelStatus.CREATED);
+
+                        if (channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
+                            if (groupMemberNames.contains(peerName)) {
+                                qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                                groupMemberNames.remove(peerName);
+                                logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                            }
+                        }
+                        provider.removeQueueReadAccess(peerName, queueName);
+                    }
+                    privateChannel.removePeers(peersToRemove);
+                    privateChannelRepository.save(privateChannel);
+                }
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
                 long channelsWithServiceProviderAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(privateChannel.getServiceProviderName(), PrivateChannelStatus.CREATED).size();

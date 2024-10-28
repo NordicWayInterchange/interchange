@@ -17,6 +17,8 @@ public class Peer {
 
     private String name;
 
+    private PeerStatus status = PeerStatus.REQUESTED;
+
     public Peer() {
 
     }
@@ -41,6 +43,14 @@ public class Peer {
         this.name = name;
     }
 
+    public PeerStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PeerStatus status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,6 +70,7 @@ public class Peer {
                 "id=" + id +
                 ", uuid='" + uuid + '\'' +
                 ", name='" + name + '\'' +
+                ", status=" + status +
                 '}';
     }
 }

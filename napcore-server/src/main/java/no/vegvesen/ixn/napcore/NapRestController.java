@@ -494,6 +494,73 @@ public class NapRestController {
         return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList());
     }
 
+    @RequestMapping(method = RequestMethod.PATCH, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Add peers to private channel where id is {}", privateChannelId);
+
+        if (request == null || request.getPeersToAdd().isEmpty()) {
+            throw new PrivateChannelException("Cannot add peers when request is empty");
+        }
+
+        PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(actorCommonName, privateChannelId, PrivateChannelStatus.CREATED);
+        if (privateChannel == null) {
+            throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
+        }
+
+        Set<String> peersInChannel = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+        Set<Peer> peersToAdd = new HashSet<>();
+        for (String peerToAdd : request.getPeersToAdd()) {
+            if (!peersInChannel.contains(peerToAdd)) {
+                peersToAdd.add(new Peer(peerToAdd));
+            }
+        }
+        privateChannel.addPeers(peersToAdd);
+
+        PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+        logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerId") String peerId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
+
+        PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(actorCommonName, privateChannelId, PrivateChannelStatus.CREATED);
+        if (privateChannel == null) {
+            throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
+        }
+
+        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getUuid().equals(peerId)).findFirst().orElse(null);
+
+        if (peerToUpdate == null) {
+            throw new NotFoundException(String.format("Could not find peer with id %s in private channel with id %s", peerId, privateChannelId));
+        }
+
+        peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);
+        PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+        logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Delete peer from private channel where id is {} by peer {}", privateChannelId, actorCommonName);
+
+        PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, actorCommonName);
+        if (privateChannel == null) {
+            throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, actorCommonName));
+        }
+
+        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(actorCommonName)).findFirst().get();
+        peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);
+        PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+        logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+    }
+
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {

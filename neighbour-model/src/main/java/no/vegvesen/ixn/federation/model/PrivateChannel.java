@@ -99,6 +99,14 @@ public class PrivateChannel {
         this.peers = peers;
     }
 
+    public void addPeers(Set<Peer> peersToAdd) {
+        peers.addAll(peersToAdd);
+    }
+
+    public void removePeers(Set<Peer> peersToRemove) {
+        peers.removeAll(peersToRemove);
+    }
+
     public String getServiceProviderName() {
         return serviceProviderName;
     }
