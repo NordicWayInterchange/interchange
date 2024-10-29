@@ -317,8 +317,12 @@ public class ServiceProviderRouter {
         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
             for (Shard shard : capability.getMetadata().getShards()) {
                 if (!delta.exchangeHasBindingToQueue(shard.getExchangeName(), "bi-queue")){
-                    qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
-                    delta.addBindingToExchange(shard.getExchangeName(), shard.getSelector(), "bi-queue");
+                    try {
+                        qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
+                        delta.addBindingToExchange(shard.getExchangeName(), shard.getSelector(), "bi-queue");
+                    } catch (Exception e){
+                        logger.info("Could not add binding to exchange {}", shard.getExchangeName());
+                    }
                 }
             }
         }
@@ -369,8 +373,12 @@ public class ServiceProviderRouter {
                                 Shard shard = capability.getMetadata().getShards().get(0);
                                 if (!delta.exchangeHasBindingToQueue(delivery.getExchangeName(), shard.getExchangeName())) {
                                     String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
-                                    qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), shard.getExchangeName(), new Filter(joinedSelector)));
-                                    delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, shard.getExchangeName());
+                                    try {
+                                        qpidClient.addBinding(delivery.getExchangeName(), new Binding(delivery.getExchangeName(), shard.getExchangeName(), new Filter(joinedSelector)));
+                                        delta.addBindingToExchange(delivery.getExchangeName(), joinedSelector, shard.getExchangeName());
+                                    } catch (Exception e){
+                                        logger.info("Could not add binding to exchange {}", delivery.getExchangeName());
+                                    }
                                 }
                             }
                         }
@@ -450,7 +458,11 @@ public class ServiceProviderRouter {
 
     private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
         logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
+        try {
+            qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
+        } catch (Exception e){
+            logger.info("Could not add binding to exchange {}", exchangeName);
+        }
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
@@ -475,10 +487,15 @@ public class ServiceProviderRouter {
                                         Shard shard = capability.getMetadata().getShards().get(0);
                                         if (!existingConnections.contains(shard.getExchangeName())) {
                                             LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                            qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-                                            delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
+                                            try {
+                                                qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+                                                delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
+                                            } catch (Exception e){
+                                                logger.info("Could not add binding to exchange {}", shard.getExchangeName());
+                                            }
                                             LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
                                             subscription.addConnection(connection);
+
                                         }
                                     }
                                 }

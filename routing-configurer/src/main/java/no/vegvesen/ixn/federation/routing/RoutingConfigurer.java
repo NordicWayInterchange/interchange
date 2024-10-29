@@ -6,18 +6,17 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.Shard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Instant;
 import java.util.*;
@@ -175,7 +174,11 @@ public class RoutingConfigurer {
 							//TODO: if capability is sharded, check is the subscription contains chardId as well.
 						} else {
 							Shard shard = cap.getMetadata().getShards().get(0);
+							try {
 								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+							} catch (HttpClientErrorException e){
+								logger.info("Could not add binding to exchange {}", shard.getExchangeName());
+							}
 							}
 						}
 					}
@@ -314,7 +317,11 @@ public class RoutingConfigurer {
 	}
 
 	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.addBinding(exchange, new Binding(exchange, queueName, new Filter(acceptedSubscription.getSelector())));
+		try {
+			qpidClient.addBinding(exchange, new Binding(exchange, queueName, new Filter(acceptedSubscription.getSelector())));
+		} catch (Exception e){
+			logger.info("Could not add binding to exchange {}", exchange);
+		}
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
