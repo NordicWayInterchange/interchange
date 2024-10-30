@@ -268,7 +268,7 @@ public class ServiceProviderRouter {
                         long channelsWithPeerAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).size();
                         long channelsWithPeerAsServiceProvider = privateChannelRepository.countByServiceProviderNameAndStatus(peerName, PrivateChannelStatus.CREATED);
 
-                        if (channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
+                        if (channelsWithPeerAsPeer <= 1 && channelsWithPeerAsServiceProvider == 0) {
                             if (groupMemberNames.contains(peerName)) {
                                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                                 groupMemberNames.remove(peerName);
