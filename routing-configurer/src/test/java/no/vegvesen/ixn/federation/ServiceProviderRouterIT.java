@@ -52,8 +52,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			HOST_NAME,
 			Path.of("qpid")
 			);
-    @Autowired
-    private ServiceProviderRouter serviceProviderRouter;
 
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
