@@ -204,7 +204,6 @@ public class ServiceProviderRouter {
             syncPrivateChannelsWithQpid(privateChannelList, serviceProvider.getName(), delta);
             privateChannelList.stream().filter((a) -> a.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)).forEach(privateChannelRepository::delete);
         }
-
     }
 
     private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
@@ -524,3 +523,4 @@ public class ServiceProviderRouter {
         subscription.getConnections().removeAll(unwantedConnections);
     }
 }
+

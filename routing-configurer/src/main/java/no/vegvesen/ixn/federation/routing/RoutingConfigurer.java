@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Instant;
 import java.util.*;
@@ -176,7 +175,7 @@ public class RoutingConfigurer {
 							Shard shard = cap.getMetadata().getShards().get(0);
 							try {
 								qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-							} catch (HttpClientErrorException e){
+							} catch (Exception e){
 								logger.info("Could not add binding to exchange {}", shard.getExchangeName());
 							}
 							}

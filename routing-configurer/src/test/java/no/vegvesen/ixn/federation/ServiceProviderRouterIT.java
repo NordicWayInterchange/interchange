@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -12,23 +13,16 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.junit.jupiter.Container;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -36,7 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +52,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			HOST_NAME,
 			Path.of("qpid")
 			);
+    @Autowired
+    private ServiceProviderRouter serviceProviderRouter;
 
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
