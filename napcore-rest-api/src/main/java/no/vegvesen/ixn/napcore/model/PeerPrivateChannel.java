@@ -12,6 +12,8 @@ public class PeerPrivateChannel {
 
     private PrivateChannelStatus status;
 
+    private String description;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpoint endpoint;
 
@@ -21,10 +23,11 @@ public class PeerPrivateChannel {
 
     }
 
-    public PeerPrivateChannel(String id, String owner, PrivateChannelStatus status, PrivateChannelEndpoint endpoint, long lastUpdated) {
+    public PeerPrivateChannel(String id, String owner, PrivateChannelStatus status, String description, PrivateChannelEndpoint endpoint, long lastUpdated) {
         this.id = id;
         this.owner = owner;
         this.status = status;
+        this.description = description;
         this.endpoint = endpoint;
         this.lastUpdated = lastUpdated;
     }
@@ -53,6 +56,14 @@ public class PeerPrivateChannel {
         this.status = status;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public PrivateChannelEndpoint getEndpoint() {
         return endpoint;
     }
@@ -74,12 +85,12 @@ public class PeerPrivateChannel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PeerPrivateChannel that = (PeerPrivateChannel) o;
-        return lastUpdated == that.lastUpdated && Objects.equals(id, that.id) && Objects.equals(owner, that.owner) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return lastUpdated == that.lastUpdated && Objects.equals(id, that.id) && Objects.equals(owner, that.owner) && status == that.status && Objects.equals(description, that.description) && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, owner, status, endpoint, lastUpdated);
+        return Objects.hash(id, owner, status, description, endpoint, lastUpdated);
     }
 
     @Override
@@ -88,6 +99,7 @@ public class PeerPrivateChannel {
                 "id='" + id + '\'' +
                 ", owner='" + owner + '\'' +
                 ", status=" + status +
+                ", description='" + description + '\'' +
                 ", endpoint=" + endpoint +
                 ", lastUpdated=" + lastUpdated +
                 '}';
