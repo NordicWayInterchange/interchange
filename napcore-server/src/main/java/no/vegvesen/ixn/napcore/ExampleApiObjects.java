@@ -278,7 +278,8 @@ public class ExampleApiObjects {
                         "port": 1337,
                         "queueName": "priv-86651278-add2-4286-bcdf-bcdb69dc72a1"
                     },
-                    "lastUpdated": 1729840858
+                    "lastUpdated": 1729840858,
+                    "description": "private channel between king olav and king gustaf"
                 }
             ]
             """;

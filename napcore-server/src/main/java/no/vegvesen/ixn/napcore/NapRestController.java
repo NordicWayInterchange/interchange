@@ -497,6 +497,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.PATCH, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
+    @Operation(summary="Add peer to existing private channel")
     public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Add peers to private channel where id is {}", privateChannelId);
@@ -526,6 +527,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
+    @Operation(summary="Delete peer from existing private channel")
     public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerId") String peerId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
@@ -549,6 +551,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
+    @Operation(summary="Remove yourself from private channel where you are member")
     public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by peer {}", privateChannelId, actorCommonName);

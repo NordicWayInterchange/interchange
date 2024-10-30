@@ -472,5 +472,4 @@ public class ExampleAPIObjects {
               }
             }
             """;
-
 }
