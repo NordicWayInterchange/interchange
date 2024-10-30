@@ -171,6 +171,7 @@ public class TypeTransformer {
                 privateChannel.getUuid(),
                 privateChannel.getServiceProviderName(),
                 transformPrivateChannelStatus(privateChannel.getStatus()),
+                privateChannel.getDescription(),
                 transformPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 transformLocalDateTimeToTimestamp(privateChannel.getLastUpdated())
         );
