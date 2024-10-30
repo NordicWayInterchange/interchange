@@ -14,7 +14,10 @@ import picocli.CommandLine.PropertiesDefaultProvider;
                 DeletePrivateChannel.class,
                 GetPeerPrivateChannels.class,
                 GetPrivateChannels.class,
-                GetPrivateChannel.class
+                GetPrivateChannel.class,
+                AddPeerToPrivateChannel.class,
+                DeletePeerFromPrivateChannel.class,
+                PeerDeletePeerFromPrivateChannel.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true)

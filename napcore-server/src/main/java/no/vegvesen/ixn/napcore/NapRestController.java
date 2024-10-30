@@ -524,11 +524,11 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerId}")
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerName}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Delete peer from existing private channel")
-    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerId") String peerId) {
+    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
 
@@ -537,10 +537,10 @@ public class NapRestController {
             throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
         }
 
-        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getUuid().equals(peerId)).findFirst().orElse(null);
+        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerName)).findFirst().orElse(null);
 
         if (peerToUpdate == null) {
-            throw new NotFoundException(String.format("Could not find peer with id %s in private channel with id %s", peerId, privateChannelId));
+            throw new NotFoundException(String.format("Could not find peer with id %s in private channel with id %s", peerName, privateChannelId));
         }
 
         peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);

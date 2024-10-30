@@ -190,6 +190,24 @@ public class NapRESTClient {
         return Arrays.asList(response.getBody());
     }
 
+    public void addPeerToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddPeersRequest> entity = new HttpEntity<>(peersRequest, headers);
+        restTemplate.postForLocation(url, entity);
+    }
+
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
+        restTemplate.delete(url);
+    }
+
+    public void peerDeletePeerFromPrivateChannel(String privateChannelId) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        restTemplate.delete(url);
+    }
+
     public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
