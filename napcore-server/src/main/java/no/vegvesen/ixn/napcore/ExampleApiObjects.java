@@ -283,4 +283,18 @@ public class ExampleApiObjects {
                 }
             ]
             """;
+    static final String GETPEERPRIVATECHANNEL = """
+                {
+                    "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                    "owner": "king_olav.bouvetinterchange.eu",
+                    "status": "CREATED",
+                    "endpoint": {
+                        "host": "bouvet.itsinterchange.eu",
+                        "port": 1337,
+                        "queueName": "priv-86651278-add2-4286-bcdf-bcdb69dc72a1"
+                    },
+                    "lastUpdated": 1729840858,
+                    "description": "private channel between king olav and king gustaf"
+                }
+                """;
 }

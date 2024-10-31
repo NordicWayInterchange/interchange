@@ -15,10 +15,9 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -30,7 +29,6 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
-import org.apache.coyote.Request;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -496,6 +494,9 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get peer private channel")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNEL)))})
     public PeerPrivateChannel getPeerPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel for peer {} where id is {}", actorCommonName, privateChannelId);
