@@ -22,6 +22,9 @@ public class AddPrivateChannel implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddPrivateChannelOption option;
 
+    @Option(names = {"-d", "--description"}, required = false, description = "The description of the private channel")
+    String description;
+
     @Override
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -32,7 +35,7 @@ public class AddPrivateChannel implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peers, option.description)));
+            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peers, description)));
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
@@ -47,7 +50,6 @@ public class AddPrivateChannel implements Callable<Integer> {
         @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers")
         Set<String> peers;
 
-        @Option(names = {"-d", "--description"}, required = false, description = "The description of the private channel")
-        String description;
+
     }
 }
