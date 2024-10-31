@@ -30,6 +30,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import org.apache.coyote.Request;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -492,6 +493,19 @@ public class NapRestController {
 
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
         return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public PeerPrivateChannel getPeerPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get private channel for peer {} where id is {}", actorCommonName, privateChannelId);
+
+        PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, actorCommonName);
+        if (privateChannel == null) {
+            throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, actorCommonName));
+        }
+
+        return typeTransformer.transformPrivateChannelToPeerPrivateChannel(privateChannel);
     }
 
     @RequestMapping(method = RequestMethod.PATCH, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
