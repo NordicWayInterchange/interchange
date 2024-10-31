@@ -540,7 +540,7 @@ public class NapRestController {
         Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerName)).findFirst().orElse(null);
 
         if (peerToUpdate == null) {
-            throw new NotFoundException(String.format("Could not find peer with id %s in private channel with id %s", peerName, privateChannelId));
+            throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", peerName, privateChannelId));
         }
 
         peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);
