@@ -320,7 +320,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMember("peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
 
 		Peer newPeer = new Peer("new-peer");
-		privateChannel.addPeers(new HashSet<>(Arrays.asList(newPeer)));
+		privateChannel.addPeer(newPeer);
 
 		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.singletonList(privateChannel));
 

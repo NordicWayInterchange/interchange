@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -241,6 +242,7 @@ public class ServiceProviderRouter {
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating private channel {} for client {}", queueName, name);
+                privateChannel.setLastUpdated(LocalDateTime.now());
                 privateChannelRepository.save(privateChannel);
             }
             if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
@@ -256,6 +258,7 @@ public class ServiceProviderRouter {
                         }
                         peer.setStatus(PeerStatus.CREATED);
                         provider.addQueueReadAccess(peer.getName(), queueName);
+                        privateChannel.setLastUpdated(LocalDateTime.now());
                         privateChannelRepository.save(privateChannel);
                     }
                 }
@@ -278,6 +281,7 @@ public class ServiceProviderRouter {
                         provider.removeQueueReadAccess(peerName, queueName);
                     }
                     privateChannel.removePeers(peersToRemove);
+                    privateChannel.setLastUpdated(LocalDateTime.now());
                     privateChannelRepository.save(privateChannel);
                 }
             }
@@ -317,6 +321,8 @@ public class ServiceProviderRouter {
                     qpidClient.removeQueue(queue);
                     delta.removeQueue(queue);
                 }
+                privateChannel.setLastUpdated(LocalDateTime.now());
+                privateChannelRepository.save(privateChannel);
             }
         }
     }

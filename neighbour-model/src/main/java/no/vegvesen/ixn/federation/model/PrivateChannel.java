@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +36,6 @@ public class PrivateChannel {
     private PrivateChannelEndpoint endpoint;
 
     @Column
-    @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
     public PrivateChannel() {
@@ -99,8 +97,8 @@ public class PrivateChannel {
         this.peers = peers;
     }
 
-    public void addPeers(Set<Peer> peersToAdd) {
-        peers.addAll(peersToAdd);
+    public void addPeer(Peer peerToAdd) {
+        peers.add(peerToAdd);
     }
 
     public void removePeers(Set<Peer> peersToRemove) {

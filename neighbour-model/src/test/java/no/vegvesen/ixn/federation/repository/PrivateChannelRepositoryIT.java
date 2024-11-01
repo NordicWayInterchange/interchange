@@ -83,7 +83,7 @@ public class PrivateChannelRepositoryIT extends PostgresContainerBase {
 
         PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(new Peer(peerName), new Peer(peerName))), PrivateChannelStatus.CREATED, "my-channel", serviceProviderName);
 
-        repository.saveAll(Collections.singletonList(privateChannel));
+        repository.save(privateChannel);
 
         assertThat(repository.findAllByPeerName(peerName)).hasSize(1);
     }

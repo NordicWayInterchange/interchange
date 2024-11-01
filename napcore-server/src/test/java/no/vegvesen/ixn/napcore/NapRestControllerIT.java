@@ -7,11 +7,14 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
@@ -42,19 +45,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class NapRestControllerIT extends PostgresContainerBase {
 
     @Autowired
-    private  ServiceProviderRepository serviceProviderRepository;
+    private ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
-    private  NeighbourRepository neighbourRepository;
+    private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private PrivateChannelRepository privateChannelRepository;
 
     @MockBean
-    private  CertService certService;
+    private CertService certService;
 
     @MockBean
     private CertSigner certSigner;
 
     @Autowired
-    private  NapCoreProperties napCoreProperties;
+    private NapCoreProperties napCoreProperties;
 
     @Autowired
     private NapRestController napRestController;
@@ -63,6 +69,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void objectsAreAutowired(){
         assertThat(serviceProviderRepository).isNotNull();
         assertThat(neighbourRepository).isNotNull();
+        assertThat(privateChannelRepository).isNotNull();
         assertThat(napCoreProperties).isNotNull();
         assertThat(napRestController).isNotNull();
     }
@@ -99,6 +106,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWithoutDescription(){
         String actorCommonName = "actor";
         Subscription subscription1 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'"));
+        System.out.println(subscription1);
         assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
     }
 
@@ -410,6 +418,74 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testDeletingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testAddingPrivateChannel() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void testAddingPrivateChannelWithRequestAsNull() {
+        String actorCommonName = "actor";
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, null));
+    }
+
+    @Test
+    public void testAddingPrivateChannelWithPeersListAsNull() {
+        String actorCommonName = "actor";
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "my private channel")));
+    }
+
+    @Test
+    public void testAddingPrivateChannelWithEmptyPeersList() {
+        String actorCommonName = "actor";
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(Collections.emptySet(), "my private channel")));
+    }
+
+    @Test
+    public void testDeletingPrivateChannel() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        napRestController.deletePrivateChannel(actorCommonName, response.getId());
+
+        assertThat(privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getStatus()).isEqualTo(no.vegvesen.ixn.federation.model.PrivateChannelStatus.TEAR_DOWN);
+    }
+
+    @Test
+    public void testDeletingPrivateChannelWithNonExistingId() {
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deletePrivateChannel(actorCommonName, "noAnId"));
+    }
+
+    @Test
+    public void testListingPrivateChannels() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request1 = new PrivateChannelRequest(Collections.singleton("peer1"), "My first private channel");
+        PrivateChannelRequest request2 = new PrivateChannelRequest(Collections.singleton("peer2"), "My second private channel");
+
+        napRestController.addPrivateChannel(actorCommonName, request1);
+        napRestController.addPrivateChannel(actorCommonName, request2);
+
+        List<PrivateChannelResponse> response = napRestController.getPrivateChannels(actorCommonName);
+        assertThat(response).hasSize(2);
+    }
+
+    @Test
+    public void testGettingPrivateChannelById() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+
+        PrivateChannelResponse getPrivateChannel = napRestController.getPrivateChannel(actorCommonName, response.getId());
+        assertThat(getPrivateChannel).isNotNull();
     }
 
     @Autowired

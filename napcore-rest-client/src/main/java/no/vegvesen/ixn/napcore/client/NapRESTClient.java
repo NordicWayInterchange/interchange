@@ -190,11 +190,11 @@ public class NapRESTClient {
         return Arrays.asList(response.getBody());
     }
 
-    public void addPeerToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest) {
+    public void addPeerToPrivateChannel(String privateChannelId, AddPeerRequest peerRequest) {
         String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddPeersRequest> entity = new HttpEntity<>(peersRequest, headers);
+        HttpEntity<AddPeerRequest> entity = new HttpEntity<>(peerRequest, headers);
         restTemplate.postForLocation(url, entity);
     }
 
