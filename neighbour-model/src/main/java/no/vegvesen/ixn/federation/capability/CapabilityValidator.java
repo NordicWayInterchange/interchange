@@ -17,6 +17,8 @@ public class CapabilityValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
 
+    private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
+
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
 
@@ -61,9 +63,9 @@ public class CapabilityValidator {
     }
 
     public static boolean validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
-        mandatoryProperties.removeIf(a->a.equals("quadTree") || a.equals("causeCode"));
-        for(String property: mandatoryProperties) {
+        Set<String> properties = new HashSet<>(mandatoryProperties);
+        properties.removeIf(a-> a.equals("quadTree") || a.equals("causeCode"));
+        for(String property: properties) {
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher matcher = validCharacters.matcher(value);
             if (!matcher.matches()) {
