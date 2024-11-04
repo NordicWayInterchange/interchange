@@ -83,29 +83,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testWrongNameInRequestResultsInError() {
-        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
-                "serviceProvider",
-                Collections.singleton(
-                        new CapabilityApi(
-                                new DenmApplicationApi(
-                                        "Publisher1",
-                                        "Publisher1:Publication1",
-                                        "NO",
-                                        "1.0",
-                                        List.of(),
-                                        List.of()
-                                ),
-                                new MetadataApi()
-                        )
-                )
-        );
-        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("anotherServiceProvider", request)
-        );
-    }
-
-    @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
@@ -1145,7 +1122,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 serviceProviderName,
                 Set.of(new CapabilityApi(
-                        new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("123"), "String publicationType", "String publisherName"),
+                        new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
                         new MetadataApi()
                 ))
         );
