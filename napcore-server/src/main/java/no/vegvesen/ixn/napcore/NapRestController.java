@@ -465,7 +465,9 @@ public class NapRestController {
         logger.info("Listing private channels for service provider {}", actorCommonName);
 
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
-        return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPrivateChannelResponse(p)).collect(Collectors.toList());
+        List<PrivateChannelResponse> response = new ArrayList<>(privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPrivateChannelResponse(p)).toList());
+        Collections.sort(response);
+        return response;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/{privateChannelId}")
@@ -493,7 +495,9 @@ public class NapRestController {
         logger.info("Get private channels where peer name is {}", actorCommonName);
 
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
-        return privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList());
+        List<PeerPrivateChannel> response = new ArrayList<>(privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList()));
+        Collections.sort(response);
+        return response;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)

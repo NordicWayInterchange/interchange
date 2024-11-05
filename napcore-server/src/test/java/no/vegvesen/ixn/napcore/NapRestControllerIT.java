@@ -9,6 +9,8 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.Peer;
+import no.vegvesen.ixn.federation.model.PeerStatus;
 import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -461,7 +463,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deletePrivateChannel(actorCommonName, "noAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePrivateChannel(actorCommonName, "notAnId"));
     }
 
     @Test
@@ -486,6 +488,137 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
         PrivateChannelResponse getPrivateChannel = napRestController.getPrivateChannel(actorCommonName, response.getId());
         assertThat(getPrivateChannel).isNotNull();
+    }
+
+    @Test
+    public void testGettingPrivateChannelWithNonExistingId() {
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.getPrivateChannel(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testListingPrivateChannelsForPeer() {
+        String actorCommonName = "actor";
+        String peerName = "peer";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton(peerName), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+
+        List<PeerPrivateChannel> peerChannels = napRestController.getPeerPrivateChannels(peerName);
+        Set<String> owners = peerChannels.stream().map(PeerPrivateChannel::getOwner).collect(Collectors.toSet());
+        assertThat(owners).contains(actorCommonName);
+    }
+
+    @Test
+    public void testGettingPrivateChannelForPeer() {
+        String actorCommonName = "actor";
+        String peerName = "peer";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton(peerName), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+
+        PeerPrivateChannel peerChannel = napRestController.getPeerPrivateChannel(peerName, response.getId());
+        assertThat(peerChannel.getOwner()).isEqualTo(actorCommonName);
+    }
+
+    @Test
+    public void testGettingPrivateChannelForPeerWithNonExistingId() {
+        String peerName = "peer";
+        assertThrows(NotFoundException.class, () -> napRestController.getPeerPrivateChannel(peerName, "notAnId"));
+    }
+
+    @Test
+    public void testAddingPeerToPrivateChannel() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
+        savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
+        privateChannelRepository.save(savedChannel);
+
+        AddPeerRequest newPeer = new AddPeerRequest("newPeer");
+
+        napRestController.addPeerToPrivateChannel(actorCommonName, response.getId(), newPeer);
+        Set<String> peers = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+        assertThat(peers).hasSize(2);
+        assertThat(peers).contains("newPeer");
+    }
+
+    @Test
+    public void testAddingPeerToPrivateChannelWithRequestAsNull() {
+        String actorCommonName = "actor";
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", null));
+    }
+
+    @Test
+    public void testAddingPeerToPrivateChannelWithPeerAsNull() {
+        String actorCommonName = "actor";
+        AddPeerRequest newPeer = new AddPeerRequest(null);
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", newPeer));
+    }
+
+    @Test
+    public void testAddingPeerToPrivateChannelWithNonExistingId() {
+        String actorCommonName = "actor";
+        AddPeerRequest newPeer = new AddPeerRequest("newPeer");
+        assertThrows(NotFoundException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "notAnId", newPeer));
+    }
+
+    @Test
+    public void testDeletingPeerFromPrivateChannel() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", "peerTwo")), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
+        savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
+        privateChannelRepository.save(savedChannel);
+
+        napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "peerTwo");
+        Peer peerToTearDown = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().filter(p -> p.getStatus().equals(PeerStatus.TEAR_DOWN)).findFirst().get();
+        assertThat(peerToTearDown.getName()).isEqualTo("peerTwo");
+    }
+
+    @Test
+    public void testDeletingPeerFromPrivateChannelWithNonExistingId() {
+        String actorCommonName = "actor";
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, "notAnId", "peer"));
+    }
+
+    @Test
+    public void testDeletingPeerFromPrivateChannelWithNonExistingPeer() {
+        String actorCommonName = "actor";
+        PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", "peerTwo")), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
+        savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
+        privateChannelRepository.save(savedChannel);
+
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "nonExistingPeer"));
+    }
+
+    @Test
+    public void testDeletingPeerFromPrivateChannelByPeer() {
+        String actorCommonName = "actor";
+        String peerToDelete = "peerTwo";
+        PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", peerToDelete)), "My private channel");
+
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
+        savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
+        privateChannelRepository.save(savedChannel);
+
+        napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, response.getId());
+        Peer peerToTearDown = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().filter(p -> p.getStatus().equals(PeerStatus.TEAR_DOWN)).findFirst().get();
+        assertThat(peerToTearDown.getName()).isEqualTo("peerTwo");
+    }
+
+    @Test
+    public void testDeletingPeerFromPrivateChannelByPeerWithNonExistingId() {
+        String peerToDelete = "peerToDelete";
+        assertThrows(NotFoundException.class, () -> napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, "notAnId"));
     }
 
     @Autowired

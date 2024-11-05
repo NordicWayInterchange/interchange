@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
 
-public class PeerPrivateChannel {
+public class PeerPrivateChannel implements Comparable<PeerPrivateChannel>{
 
     private String id;
 
@@ -17,7 +17,7 @@ public class PeerPrivateChannel {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpoint endpoint;
 
-    private long lastUpdated;
+    private Long lastUpdated;
 
     public PeerPrivateChannel() {
 
@@ -103,5 +103,19 @@ public class PeerPrivateChannel {
                 ", endpoint=" + endpoint +
                 ", lastUpdated=" + lastUpdated +
                 '}';
+    }
+
+    @Override
+    public int compareTo(PeerPrivateChannel p) {
+        if(p.lastUpdated == null && lastUpdated == null){
+            return 0;
+        }
+        if(p.lastUpdated == null){
+            return 1;
+        }
+        if(lastUpdated == null){
+            return -1;
+        }
+        return Long.compare(p.lastUpdated, lastUpdated);
     }
 }
