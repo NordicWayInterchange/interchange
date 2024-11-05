@@ -152,6 +152,24 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingCapabilityWithIllegalCharacterThrowsException(){
+        DatexApplicationApi app = new DatexApplicationApi("pub", "NO-pub-1", "NO", "1.0", List.of("1200"), "'SituationPublication", "publisherName");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        String serviceProviderName = "my-service-provider";
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("illegal");
+    }
+
+    @Test
     public void testAddingMultipleCapabilitiesWithOneInvalidCapabilityReturnsWithoutSavingAny(){
         String serviceProviderName = "serviceProviderMissingProperties";
         ServiceProvider sp = new ServiceProvider(serviceProviderName);

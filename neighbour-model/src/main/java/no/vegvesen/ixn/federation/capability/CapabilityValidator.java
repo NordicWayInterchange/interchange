@@ -63,13 +63,13 @@ public class CapabilityValidator {
     }
 
     public static boolean validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        Set<String> properties = new HashSet<>(mandatoryProperties);
-        properties.removeIf(a-> a.equals("quadTree") || a.equals("causeCode"));
-        for(String property: properties) {
-            String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
-            Matcher matcher = validCharacters.matcher(value);
-            if (!matcher.matches()) {
-                return false;
+        for(String property: mandatoryProperties) {
+            if(!property.equals("quadTree") && !property.equals("causeCode")) {
+                String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
+                Matcher matcher = validCharacters.matcher(value);
+                if (!matcher.matches()) {
+                    return false;
+                }
             }
         }
         return true;
