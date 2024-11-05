@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -381,6 +382,82 @@ public class OnboardRestController {
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformPrivateChannelListToAddPrivateChannelsResponse(serviceProviderName,savedChannelsList);
+	}
+
+	@RequestMapping(method = RequestMethod.PATCH, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name="Private Channel")
+	@Operation(summary = "Add peer to existing private channel")
+	public void addPeerToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Add peers to private channel where id is {}", privateChannelId);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		if(request == null || request.getPeerToAdd() == null){
+			throw new PrivateChannelException(String.format("Could not find private channel with id %s", privateChannelId));
+		}
+
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
+		if(privateChannel == null){
+			throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
+		}
+
+		Set<String> peersInChannel = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+		if(!peersInChannel.contains(request.getPeerToAdd())){
+			privateChannel.addPeer(new Peer(request.getPeerToAdd()));
+			privateChannel.setLastUpdated(LocalDateTime.now());
+			PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+			logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+		}
+		else{
+			logger.debug("Peer is already in private channel with id {}", privateChannelId);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}/{peerName}")
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name="Private Channel")
+	@Operation(summary="Delete peer from existing private channel")
+	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Service provider {} DELETE peer {} from private channel with id {}", serviceProviderName, peerName, privateChannelId);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
+		if (privateChannel == null) {
+			throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
+		}
+
+		Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerName)).findFirst().orElse(null);
+
+		if (peerToUpdate == null) {
+			throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", peerName, privateChannelId));
+		}
+
+		peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);
+		privateChannel.setLastUpdated(LocalDateTime.now());
+		PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+		logger.debug("Saved updated private channel {}", updatedPrivateChannel);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}")
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	@Tag(name="Private Channel")
+	@Operation(summary="Remove yourself from private channel where you are member")
+	public void peerDeletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Service provider {} DELETE from private channel {} you are peer", serviceProviderName, privateChannelId);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
+		if(privateChannel == null){
+			throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, serviceProviderName));
+		}
+		Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(serviceProviderName)).findFirst().get();
+		peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);
+		privateChannel.setLastUpdated(LocalDateTime.now());
+		PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+		logger.debug("Saved updated private channel {}", updatedPrivateChannel);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
