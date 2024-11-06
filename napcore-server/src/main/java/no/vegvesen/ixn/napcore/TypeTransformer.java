@@ -158,7 +158,7 @@ public class TypeTransformer {
     public PrivateChannelResponse transformPrivateChannelToPrivateChannelResponse(PrivateChannel privateChannel) {
         return new PrivateChannelResponse(
                 privateChannel.getUuid(),
-                privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()),
+                privateChannel.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet()),
                 transformPrivateChannelStatus(privateChannel.getStatus()),
                 privateChannel.getDescription(),
                 transformPrivateChannelEndpoint(privateChannel.getEndpoint()),

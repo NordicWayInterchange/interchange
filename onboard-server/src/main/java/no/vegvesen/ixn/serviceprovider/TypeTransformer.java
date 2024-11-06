@@ -288,7 +288,7 @@ public class TypeTransformer {
     public GetPrivateChannelResponse transformPrivateChannelToGetPrivateChannelResponse(PrivateChannel privateChannel) {
         if(privateChannel.getEndpoint() != null) {
             PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
+            return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().filter(p-> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet()), endpointApi, privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
         }
         else{
             return new GetPrivateChannelResponse(privateChannel.getUuid(), privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
@@ -306,7 +306,7 @@ public class TypeTransformer {
     public ListPrivateChannelsResponse transformPrivateChannelListToListPrivateChannels(String serviceProviderName,List<PrivateChannel> privateChannelList) {
         ArrayList<PrivateChannelResponseApi> returnList = new ArrayList<>();
         for(PrivateChannel privateChannel : privateChannelList){
-            Set<String> peers = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+            Set<String> peers = privateChannel.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet());
             returnList.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), privateChannel.getUuid(), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
         }
         return new ListPrivateChannelsResponse(serviceProviderName, returnList);

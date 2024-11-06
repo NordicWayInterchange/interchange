@@ -104,7 +104,9 @@ public class PrivateChannel {
     public void removePeers(Set<Peer> peersToRemove) {
         peers.removeAll(peersToRemove);
     }
-
+    public void removePeer(Peer peerToRemove){
+        peers.remove(peerToRemove);
+    }
     public String getServiceProviderName() {
         return serviceProviderName;
     }
