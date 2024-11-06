@@ -528,6 +528,10 @@ public class NapRestController {
             throw new PrivateChannelException("Cannot add peer when request is empty");
         }
 
+        if(request.getPeerToAdd().equals(actorCommonName)){
+            throw new PrivateChannelException("Private channel can not have actorCommonName as peer");
+        }
+
         PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(actorCommonName, privateChannelId, PrivateChannelStatus.CREATED);
         if (privateChannel == null) {
             throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));

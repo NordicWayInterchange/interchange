@@ -397,6 +397,10 @@ public class OnboardRestController {
 			throw new PrivateChannelException("Cannot add peers when request is empty");
 		}
 
+		if(request.getPeersToAdd().contains(serviceProviderName)){
+			throw new PrivateChannelException("Private channel can not have serviceProviderName as peer");
+		}
+
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
 		if(privateChannel == null){
 			throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
