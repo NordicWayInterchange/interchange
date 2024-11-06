@@ -1,8 +1,11 @@
 package no.vegvesen.ixn.napcore.client.command.privatechannels;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
+import no.vegvesen.ixn.napcore.model.PeerRequest;
 import picocli.CommandLine.*;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 
 @Command(
@@ -19,14 +22,16 @@ public class DeletePeerFromPrivateChannel implements Callable<Integer> {
     @Parameters(index = "0", description = "The id of the private channel")
     String privateChannelId;
 
-    @Parameters(index = "1", description = "The id of the peer to delete")
-    String peerName;
+    @Option(names = {"-f", "--file"}, required = true)
+    File file;
 
     @Override
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        client.deletePeerFromPrivateChannel(privateChannelId, peerName);
-        System.out.printf("Successfully deleted peer with id %s from private channel with id %s", peerName, privateChannelId);
+        ObjectMapper mapper = new ObjectMapper();
+        PeerRequest request = mapper.readValue(file, PeerRequest.class);
+        client.deletePeerFromPrivateChannel(privateChannelId, request);
+        System.out.printf("Successfully deleted peer with name %s from private channel with id %s", request.getPeerName(), privateChannelId);
         return 0;
     }
 

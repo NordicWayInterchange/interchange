@@ -520,15 +520,15 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Add peer to existing private channel")
-    public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request) {
+    public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody PeerRequest request) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Add peers to private channel where id is {}", privateChannelId);
 
-        if (request == null || request.getPeerToAdd() == null) {
+        if (request == null || request.getPeerName() == null) {
             throw new PrivateChannelException("Cannot add peer when request is empty");
         }
 
-        if(request.getPeerToAdd().equals(actorCommonName)){
+        if(request.getPeerName().equals(actorCommonName)){
             throw new PrivateChannelException("Private channel can not have actorCommonName as peer");
         }
 
@@ -538,8 +538,8 @@ public class NapRestController {
         }
 
         Set<String> peersInChannel = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
-        if (!peersInChannel.contains(request.getPeerToAdd())) {
-            privateChannel.addPeer(new Peer(request.getPeerToAdd()));
+        if (!peersInChannel.contains(request.getPeerName())) {
+            privateChannel.addPeer(new Peer(request.getPeerName()));
             privateChannel.setLastUpdated(LocalDateTime.now());
             PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
             logger.debug("Saved updated private channel {}", updatedPrivateChannel);
@@ -548,11 +548,11 @@ public class NapRestController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerName}")
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/findbettername")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Delete peer from existing private channel")
-    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
+    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody PeerRequest request) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
 
@@ -561,10 +561,10 @@ public class NapRestController {
             throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
         }
 
-        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerName)).findFirst().orElse(null);
+        Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(request.getPeerName())).findFirst().orElse(null);
 
         if (peerToUpdate == null) {
-            throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", peerName, privateChannelId));
+            throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", request.getPeerName(), privateChannelId));
         }
 
         peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);

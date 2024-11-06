@@ -414,13 +414,13 @@ public class OnboardRestController {
 		logger.debug("Saved updated private channel {}", updatedPrivateChannel);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}/{peerName}")
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}/findbettername")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@Tag(name="Private Channel")
 	@Operation(summary="Delete peer from existing private channel")
-	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName){
+	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody DeletePeerRequest peerRequest){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("Service provider {} DELETE peer {} from private channel with id {}", serviceProviderName, peerName, privateChannelId);
+		logger.info("Service provider {} DELETE peer {} from private channel with id {}", serviceProviderName, peerRequest.getPeerName(), privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
@@ -428,10 +428,10 @@ public class OnboardRestController {
 			throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
 		}
 
-		Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerName)).findFirst().orElse(null);
+		Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(peerRequest.getPeerName())).findFirst().orElse(null);
 
 		if (peerToUpdate == null) {
-			throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", peerName, privateChannelId));
+			throw new NotFoundException(String.format("Could not find peer with name %s in private channel with id %s", peerRequest.getPeerName(), privateChannelId));
 		}
 
 		peerToUpdate.setStatus(PeerStatus.TEAR_DOWN);

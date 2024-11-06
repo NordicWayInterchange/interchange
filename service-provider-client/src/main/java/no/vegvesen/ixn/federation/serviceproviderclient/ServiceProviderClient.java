@@ -142,9 +142,12 @@ public class ServiceProviderClient {
         restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeersRequest.class);
     }
 
-    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName){
-        String url = String.format("%s/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
-        restTemplate.delete(url);
+    public void deletePeerFromPrivateChannel(String privateChannelId, DeletePeerRequest request){
+        String url = String.format("%s/%s/privatechannels/peer/%s/findbettername", server, user, privateChannelId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DeletePeerRequest> entity = new HttpEntity<>(request, headers);
+        restTemplate.exchange(url, HttpMethod.DELETE, entity, DeletePeerRequest.class);
     }
 
     public void peerDeletePeerFromPrivateChannel(String privateChannelId){
