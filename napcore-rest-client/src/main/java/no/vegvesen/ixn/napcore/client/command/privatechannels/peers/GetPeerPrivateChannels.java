@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.napcore.client.command.privatechannels;
+package no.vegvesen.ixn.napcore.client.command.privatechannels.peers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(
-        name = "peer",
+        name = "get",
         description = "List private channels where you are peer",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
@@ -19,11 +19,11 @@ import java.util.concurrent.Callable;
 public class GetPeerPrivateChannels implements Callable<Integer> {
 
     @ParentCommand
-    PrivatechannelsCommand parentCommand;
+    PeersCommand parentCommand;
 
     @Override
     public Integer call() throws Exception {
-        NapRESTClient client = parentCommand.getParentCommand().createClient();
+        NapRESTClient client = parentCommand.getParent().getParentCommand().createClient();
         List<PeerPrivateChannel> response = client.getPeerPrivateChannels();
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));

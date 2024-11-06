@@ -2,6 +2,7 @@ package no.vegvesen.ixn.napcore.client.command.privatechannels;
 
 
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
+import no.vegvesen.ixn.napcore.client.command.privatechannels.peers.PeersCommand;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.PropertiesDefaultProvider;
@@ -12,12 +13,9 @@ import picocli.CommandLine.PropertiesDefaultProvider;
         subcommands = {
                 AddPrivateChannel.class,
                 DeletePrivateChannel.class,
-                GetPeerPrivateChannels.class,
                 GetPrivateChannels.class,
                 GetPrivateChannel.class,
-                AddPeerToPrivateChannel.class,
-                DeletePeerFromPrivateChannel.class,
-                PeerDeletePeerFromPrivateChannel.class
+                PeersCommand.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true)

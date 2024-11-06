@@ -1,7 +1,10 @@
-package no.vegvesen.ixn.napcore.client.command.privatechannels;
+package no.vegvesen.ixn.napcore.client.command.privatechannels.peers;
 
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
 
 import java.util.concurrent.Callable;
 
@@ -14,14 +17,14 @@ import java.util.concurrent.Callable;
 public class PeerDeletePeerFromPrivateChannel implements Callable<Integer> {
 
     @ParentCommand
-    PrivatechannelsCommand parentCommand;
+    PeersCommand parentCommand;
 
     @Parameters(index = "0", description = "The id of the private channel")
     String privateChannelId;
 
     @Override
     public Integer call() throws Exception {
-        NapRESTClient client = parentCommand.getParentCommand().createClient();
+        NapRESTClient client = parentCommand.getParent().getParentCommand().createClient();
         client.peerDeletePeerFromPrivateChannel(privateChannelId);
         System.out.printf("Successfully deleted you from private channel with id %s", privateChannelId);
         return 0;

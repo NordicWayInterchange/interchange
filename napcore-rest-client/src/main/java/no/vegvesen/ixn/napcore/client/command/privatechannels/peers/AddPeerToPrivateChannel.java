@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.napcore.client.command.privatechannels;
+package no.vegvesen.ixn.napcore.client.command.privatechannels.peers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
@@ -9,15 +9,15 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 @Command(
-        name = "deletepeer",
-        description = "Delete peer from private channel",
+        name = "add",
+        description = "Add private channel peer from file",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
-public class DeletePeerFromPrivateChannel implements Callable<Integer> {
+public class AddPeerToPrivateChannel implements Callable<Integer> {
 
     @ParentCommand
-    PrivatechannelsCommand parentCommand;
+    PeersCommand parentCommand;
 
     @Parameters(index = "0", description = "The id of the private channel")
     String privateChannelId;
@@ -27,12 +27,11 @@ public class DeletePeerFromPrivateChannel implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        NapRESTClient client = parentCommand.getParentCommand().createClient();
+        NapRESTClient client = parentCommand.getParent().getParentCommand().createClient();
         ObjectMapper mapper = new ObjectMapper();
         PeerRequest request = mapper.readValue(file, PeerRequest.class);
-        client.deletePeerFromPrivateChannel(privateChannelId, request);
-        System.out.printf("Successfully deleted peer with name %s from private channel with id %s", request.getPeerName(), privateChannelId);
+        client.addPeerToPrivateChannel(privateChannelId, request);
+        System.out.printf("successfully added %s to private channel with id %s", request.getPeerName(), privateChannelId);
         return 0;
     }
-
 }
