@@ -195,7 +195,7 @@ public class NapRESTClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddPeerRequest> entity = new HttpEntity<>(peerRequest, headers);
-        restTemplate.postForLocation(url, entity);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeerRequest.class);
     }
 
     public void deletePeerFromPrivateChannel(String privateChannelId, String peerName) {

@@ -388,13 +388,13 @@ public class OnboardRestController {
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@Tag(name="Private Channel")
 	@Operation(summary = "Add peer to existing private channel")
-	public void addPeerToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request){
+	public void addPeerToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add peers to private channel where id is {}", privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(request == null || request.getPeerToAdd() == null){
-			throw new PrivateChannelException(String.format("Could not find private channel with id %s", privateChannelId));
+		if(request == null || request.getPeersToAdd() == null || request.getPeersToAdd().isEmpty()){
+			throw new PrivateChannelException("Cannot add peers when request is empty");
 		}
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
@@ -403,15 +403,11 @@ public class OnboardRestController {
 		}
 
 		Set<String> peersInChannel = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
-		if(!peersInChannel.contains(request.getPeerToAdd())){
-			privateChannel.addPeer(new Peer(request.getPeerToAdd()));
-			privateChannel.setLastUpdated(LocalDateTime.now());
-			PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
-			logger.debug("Saved updated private channel {}", updatedPrivateChannel);
-		}
-		else{
-			logger.debug("Peer is already in private channel with id {}", privateChannelId);
-		}
+		request.getPeersToAdd().removeAll(peersInChannel);
+		request.getPeersToAdd().forEach(peer -> privateChannel.addPeer(new Peer(peer)));
+		privateChannel.setLastUpdated(LocalDateTime.now());
+		PrivateChannel updatedPrivateChannel = privateChannelRepository.save(privateChannel);
+		logger.debug("Saved updated private channel {}", updatedPrivateChannel);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}/{peerName}")

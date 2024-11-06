@@ -134,6 +134,24 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
 
+    public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddPeersRequest> entity = new HttpEntity<>(peersRequest, headers);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeersRequest.class);
+    }
+
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName){
+        String url = String.format("%s/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
+        restTemplate.delete(url);
+    }
+
+    public void peerDeletePeerFromPrivateChannel(String privateChannelId){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        restTemplate.delete(url);
+    }
+
     public String getUser() {
         return user;
     }
