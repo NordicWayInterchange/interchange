@@ -31,6 +31,7 @@ public class CapabilityValidator {
         };
     }
 
+
     public static Set<String> checkProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
         Set<String> notSetProperties = new HashSet<>();
         for (String property: mandatoryProperties) {
@@ -42,9 +43,8 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static boolean quadtreeIsValid(CapabilityApi capability){
-        List<String> quadTree = capability.getApplication().getQuadTree();
-        for(String quadTile : quadTree){
+    public static boolean isQuadTreeValid(List<String> quadTreeTiles){
+        for(String quadTile : quadTreeTiles){
             for(char nextNumber : quadTile.toCharArray()){
                 if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
                     return false;

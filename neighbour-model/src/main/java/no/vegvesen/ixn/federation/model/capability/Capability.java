@@ -1,15 +1,17 @@
 package no.vegvesen.ixn.federation.model.capability;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.*;
 
-import org.hibernate.annotations.UpdateTimestamp;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
+@JsonIgnoreProperties(value = "createdTimestamp")
 public class Capability {
 
     @Id
@@ -33,29 +35,36 @@ public class Capability {
     @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name="fk_cap_shard"))
     private List<CapabilityShard> shards = new ArrayList<>();
 
-    @Column
-    @UpdateTimestamp
-    private LocalDateTime lastUpdated;
+    private LocalDateTime createdTimestamp;
 
     public Capability() {
-
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+    }
+
+    public Capability(Application application, Metadata metadata, LocalDateTime createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = createdTimestamp;
     }
 
     public void setId(Integer id) {
@@ -98,28 +107,12 @@ public class Capability {
         this.status = status;
     }
 
-    public boolean isSharded() {
-        return metadata.getShardCount() > 1;
+    public LocalDateTime getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
-    public Optional<LocalDateTime> getLastUpdated() {
-        return Optional.ofNullable(lastUpdated);
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-    //TODO: Should be removed after fix in NapRestController
-    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
-        Set<Capability> capabilities = new HashSet<>();
-        for(NeighbourCapability i : neighbourCapabilities){
-            capabilities.add(
-                    new Capability(i.getApplication(), i.getMetadata())
-            );
-
-        }
-        return capabilities;
+    public void setCreatedTimestamp(LocalDateTime lastUpdatedTimestamp) {
+        this.createdTimestamp = lastUpdatedTimestamp;
     }
 
     public List<CapabilityShard> getShards() {

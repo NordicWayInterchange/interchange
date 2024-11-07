@@ -38,7 +38,7 @@ public class NapCoreAPIDocumentationTest {
         );
 
         Subscription subscription = new Subscription(
-                1,
+                UUID.randomUUID().toString(),
                 SubscriptionStatus.CREATED,
                 "messageType = 'DENM'",
                 new HashSet<>(Collections.singleton(endpoint)),

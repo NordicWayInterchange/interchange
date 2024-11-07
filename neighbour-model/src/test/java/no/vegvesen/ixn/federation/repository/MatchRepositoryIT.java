@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.federation.repository;
 
-
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -17,10 +15,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class MatchRepositoryIT {
+public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Autowired
     MatchRepository matchRepository;

@@ -3,6 +3,7 @@ package no.vegvesen.ixn.docker.keygen.generator;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -33,7 +34,7 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
     }
     @Override
     protected void configure() {
-        this.withFileSystemBind(keysFolder.toString(),KEYS_INTERNAL_FOLDER);
+        this.copyFileToContainer(MountableFile.forHostPath(keysFolder), KEYS_INTERNAL_FOLDER);
         this.withCommand(intermediateDomain,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }

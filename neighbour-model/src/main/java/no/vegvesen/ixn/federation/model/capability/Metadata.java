@@ -98,6 +98,9 @@ public class Metadata {
     }
 
     public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
+        if (status == null) {
+            return RedirectStatusApi.OPTIONAL;
+        }
         switch (status) {
             case MANDATORY:
                 return RedirectStatusApi.MANDATORY;

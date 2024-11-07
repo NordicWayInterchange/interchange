@@ -11,7 +11,6 @@ on:
       git-ref:
         required: false
         description: 'Specified commit hash or branch name (Optional)'
-
 jobs:
   validate-helm-chart:
     runs-on: ubuntu-latest
@@ -31,7 +30,7 @@ jobs:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Setup helm
-        uses: azure/setup-helm@v3.5
+        uses: azure/setup-helm@v4.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -76,6 +75,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Save tags to files
+        run: |
+          echo "$(git rev-parse --short HEAD)" >> IMAGE_TAG.txt
+          echo "$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
+
       - name: Checkout to interchange-swagger-docs
         if: github.ref == 'refs/heads/federation-master'
         uses: actions/checkout@v4
@@ -108,7 +112,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,onboard-rest-client,jms-client-app,keys-generator]
+        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app, service-provider-client ,keys-generator]
     defaults:
       run:
         shell: bash
@@ -133,10 +137,10 @@ jobs:
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
 
-      - name: Create tag
+      - name: Save tags to variables
         run: |
-          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo "BRANCH_TAG=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
 
       - name: Build the Docker image
         run: |

@@ -31,10 +31,15 @@ public class ServiceProviderRouter {
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
+
     private final PrivateChannelRepository privateChannelRepository;
+
     private final QpidClient qpidClient;
+
     private final MatchRepository matchRepository;
+
     private final OutgoingMatchRepository outgoingMatchRepository;
+
     private final InterchangeNodeProperties nodeProperties;
 
     @Autowired
@@ -46,7 +51,6 @@ public class ServiceProviderRouter {
         this.outgoingMatchRepository = outgoingMatchRepository;
         this.nodeProperties = nodeProperties;
     }
-
 
     public Iterable<ServiceProvider> findServiceProviders() {
         return repository.findAll();

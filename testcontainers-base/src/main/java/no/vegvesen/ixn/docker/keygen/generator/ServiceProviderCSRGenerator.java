@@ -1,12 +1,9 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -35,7 +32,7 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
     }
     @Override
     protected void configure() {
-        this.withFileSystemBind(keysPath.toString(),KEYS_INTERNAL_FOLDER);
+        this.copyFileToContainer(MountableFile.forHostPath(keysPath), KEYS_INTERNAL_FOLDER);
         this.withCommand(username,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }

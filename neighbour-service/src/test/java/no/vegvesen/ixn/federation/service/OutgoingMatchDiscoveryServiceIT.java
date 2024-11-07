@@ -7,12 +7,11 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,8 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class OutgoingMatchDiscoveryServiceIT {
+public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Autowired
     private OutgoingMatchRepository repository;

@@ -33,7 +33,9 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourService neighbourService;
+
 	private final QpidClient qpidClient;
+
 	private final ServiceProviderRouter serviceProviderRouter;
 
 	private final InterchangeNodeProperties interchangeNodeProperties;
@@ -133,23 +135,19 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		//try {
-			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-			Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
-			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
+		logger.debug("Setting up routing for neighbour {}", neighbour.getName());
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
+		Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+		Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
-			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
+		setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
+		allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
-			if(!allAcceptedSubscriptions.isEmpty()){
-				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
-			}
-			neighbourService.saveSetupRouting(neighbour);
-		//} catch (Throwable e) {
-		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		//}
+		if(!allAcceptedSubscriptions.isEmpty()){
+			setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
+		}
+		neighbourService.saveSetupRouting(neighbour);
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {

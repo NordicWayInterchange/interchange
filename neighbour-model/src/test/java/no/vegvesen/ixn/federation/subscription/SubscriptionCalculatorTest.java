@@ -148,7 +148,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
                 capabilities, ""
@@ -304,7 +304,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
-        Set<NeighbourCapability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
@@ -316,7 +316,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
-        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
                 capabilities, "");
@@ -334,4 +334,9 @@ public class SubscriptionCalculatorTest {
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 
+    private NeighbourCapability getDatexNeighbourCapability(String country) {
+        return new NeighbourCapability(
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
+                new Metadata(RedirectStatus.OPTIONAL));
+    }
 }

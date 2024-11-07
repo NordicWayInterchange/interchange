@@ -1,7 +1,0 @@
-Here is the docker command I'm using to run the client from an embedded container
-in this directory:
-docker build -t rest-client .
-in the interchange directory:
-docker-compose -f domain-test.yml up --build
-and in another shell (from the interchange directory):
-docker run -it --dns 172.28.1.1 -v ${PWD}/keys_sp_kyrre:/jks --network interchange_testing_net --entrypoint /bin/sh rest-client
