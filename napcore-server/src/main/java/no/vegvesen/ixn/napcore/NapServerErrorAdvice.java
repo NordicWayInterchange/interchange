@@ -3,10 +3,7 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +70,11 @@ public class NapServerErrorAdvice {
     @ExceptionHandler({SignExeption.class})
     public ResponseEntity<ErrorDetails> cannotSign(SignExeption e) {
         return error(INTERNAL_SERVER_ERROR,e);
+    }
+
+    @ExceptionHandler({PrivateChannelException.class})
+    public ResponseEntity<ErrorDetails> handlePrivateChannelException(PrivateChannelException e){
+        return error(BAD_REQUEST, e);
     }
 
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {

@@ -28,18 +28,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = NapRestController.class)
 @ContextConfiguration(classes = {NapRestController.class, InterchangeNodeProperties.class, NapRestControllerTest.NapCorePropertiesCreator.class})
@@ -64,6 +62,9 @@ public class NapRestControllerTest {
 
     @MockBean
     private CertSigner certSigner;
+
+    @MockBean
+    private TypeTransformer typeTransformer;
 
     @MockBean
     private CertService certService;
@@ -402,6 +403,139 @@ public class NapRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request)
         ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addingPrivateChannelReturnsStatusOk() throws Exception {
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": ["king_gustaf.bouvetinterchange.eu", "king_bjarne.bouvetinterchange.eu"],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void addingPrivateChannelWithActorCommonNameAsPeerReturnsStatusBadRequest() throws Exception {
+        String actorCommonName = "king_gustaf.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": ["king_gustaf.bouvetinterchange.eu", "king_bjarne.bouvetinterchange.eu"],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addingPrivateChannelWithEmptySetOfPeersReturnsStatusBadRequest()throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": [],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(), PrivateChannelStatus.REQUESTED, "king_olav.bouvetinterchange.eu",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getPrivateChannelReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setUuid(UUID.randomUUID().toString());
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        when(privateChannelRepository.findByServiceProviderNameAndUuid(any(), any())).thenReturn(privateChannel);
+
+        mockMvc.perform(
+          get(String.format("/nap/%s/privatechannels/%s", actorCommonName, privateChannel.getUuid()))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getNonExistentPrivateChannelReturnsStatusNotFound() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/%s", actorCommonName, UUID.randomUUID()))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getPrivateChannelsReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels", actorCommonName))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPeerPrivateChannelsReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer", actorCommonName))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPeerPrivateChannelReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setUuid(UUID.randomUUID().toString());
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        when(privateChannelRepository.findByUuidAndPeerName(any(), any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer/%s", actorCommonName, privateChannel.getUuid()))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getNonExistentPeerPrivateChannelReturnsStatusNotFound() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer/%s", actorCommonName, UUID.randomUUID()))
+        ).andExpect(status().isNotFound());
     }
 
     @Configuration
