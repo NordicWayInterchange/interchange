@@ -190,20 +190,17 @@ public class NapRESTClient {
         return Arrays.asList(response.getBody());
     }
 
-    public void addPeerToPrivateChannel(String privateChannelId, PeerRequest peerRequest) {
+    public void addPeerToPrivateChannel(String privateChannelId, AddPeerRequest peerRequest) {
         String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PeerRequest> entity = new HttpEntity<>(peerRequest, headers);
-        restTemplate.exchange(url, HttpMethod.PATCH, entity, PeerRequest.class);
+        HttpEntity<AddPeerRequest> entity = new HttpEntity<>(peerRequest, headers);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeerRequest.class);
     }
 
-    public void deletePeerFromPrivateChannel(String privateChannelId, PeerRequest request) {
-        String url = String.format("%s/nap/%s/privatechannels/peer/%s/findbettername", server, user, privateChannelId);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PeerRequest> entity = new HttpEntity<>(request, headers);
-        restTemplate.exchange(url, HttpMethod.DELETE, entity, PeerRequest.class);
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
+        restTemplate.delete(url);
     }
 
     public void peerDeletePeerFromPrivateChannel(String privateChannelId) {

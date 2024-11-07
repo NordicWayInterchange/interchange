@@ -3,9 +3,7 @@ package no.vegvesen.ixn.napcore;
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MapemApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
@@ -539,7 +537,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        PeerRequest newPeer = new PeerRequest("newPeer");
+        AddPeerRequest newPeer = new AddPeerRequest("newPeer");
 
         napRestController.addPeerToPrivateChannel(actorCommonName, response.getId(), newPeer);
         Set<String> peers = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
@@ -556,14 +554,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingPeerToPrivateChannelWithPeerAsNull() {
         String actorCommonName = "actor";
-        PeerRequest newPeer = new PeerRequest(null);
+        AddPeerRequest newPeer = new AddPeerRequest(null);
         assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", newPeer));
     }
 
     @Test
     public void testAddingPeerToPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        PeerRequest newPeer = new PeerRequest("newPeer");
+        AddPeerRequest newPeer = new AddPeerRequest("newPeer");
         assertThrows(NotFoundException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "notAnId", newPeer));
     }
 
@@ -577,7 +575,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), new PeerRequest("peerTwo"));
+        napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "peerTwo");
         Peer peerToTearDown = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().filter(p -> p.getStatus().equals(PeerStatus.TEAR_DOWN)).findFirst().get();
         assertThat(peerToTearDown.getName()).isEqualTo("peerTwo");
     }
@@ -585,7 +583,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingPeerFromPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, "notAnId", new PeerRequest("peer")));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, "notAnId", "peer"));
     }
 
     @Test
@@ -598,7 +596,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), new PeerRequest("nonExistingPeer")));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "nonExistingPeer"));
     }
 
     @Test

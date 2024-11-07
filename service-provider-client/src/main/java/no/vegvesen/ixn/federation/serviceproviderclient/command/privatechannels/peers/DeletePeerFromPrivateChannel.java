@@ -1,12 +1,8 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.DeletePeerRequest;
 import picocli.CommandLine.*;
-import picocli.CommandLine.PropertiesDefaultProvider;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 
 @Command(
@@ -23,16 +19,14 @@ public class DeletePeerFromPrivateChannel implements Callable<Integer> {
     @Parameters(index = "0", description = "Id of the private channel to delete peer from")
     String privateChannelId;
 
-    @Option(names = {"-f", "--filename"})
-    File file;
+    @Parameters(index = "1", description = "Peer to delete from private channel")
+    String peerName;
 
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
-        DeletePeerRequest request = mapper.readValue(file, DeletePeerRequest.class);
-        client.deletePeerFromPrivateChannel(privateChannelId, request);
-        System.out.printf("Successfully deleted peer with name %s from private channel with id %s", request.getPeerName(), privateChannelId);
+        client.deletePeerFromPrivateChannel(privateChannelId, peerName);
+        System.out.printf("Successfully deleted peer with name %s from private channel with id %s", peerName, privateChannelId);
         return 0;
     }
 }

@@ -360,7 +360,7 @@ public class NapCoreAPIDocumentationTest {
 
     @Test
     public void addPeerToPrivateChannelRequest() throws JsonProcessingException {
-        PeerRequest peerRequest = new PeerRequest("king_olav.bouvetinterchange.eu");
+        AddPeerRequest peerRequest = new AddPeerRequest("king_olav.bouvetinterchange.eu");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(peerRequest));
     }
 
