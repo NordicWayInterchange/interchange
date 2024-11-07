@@ -822,7 +822,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingChannels() {
+    public void testAddingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
 
         PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer-1"), "my-channel-1");
@@ -837,7 +837,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingChannelWithServiceProviderAsPeerName() {
+    public void testAddingPrivateChannelWithServiceProviderAsPeerName() {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName), "my-channel");
 
@@ -846,7 +846,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingNullChannelsRequest() {
+    public void testAddingNullPrivateChannelsRequest() {
         AddPrivateChannelRequest request = null;
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
                 () -> restController.addPrivateChannels("serviceProvider", request)
@@ -854,7 +854,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingNullChannelSet() {
+    public void testAddingNullPrivateChannelSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         request.setPrivateChannels(null);
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
@@ -863,7 +863,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingEmptyChannelsSet() {
+    public void testAddingEmptyPrivateChannelsSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
                 () -> restController.addPrivateChannels("serviceProvider", request)
@@ -871,7 +871,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingAndDeletingChannel() {
+    public void testAddingAndDeletingPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton("my-peer"), "my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
@@ -883,7 +883,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testDeletingNonExistentChannel() {
+    public void testDeletingNonExistentPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "1")
@@ -891,7 +891,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testDeletingInvalidChannelId() {
+    public void testDeletingInvalidPrivateChannelId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "notAnId")
@@ -910,7 +910,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGettingChannel() {
+    public void testGettingPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer-1"), "my-channel-1");
         PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-peer-2"), "my-channel-2");
@@ -923,7 +923,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGettingNonExistentChannel() {
+    public void testGettingNonExistentPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "1")
@@ -931,7 +931,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGettingChannelWithInvalidId() {
+    public void testGettingPrivateChannelWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "notAnId")
@@ -953,6 +953,71 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testAddingPeer(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("king_thomas.bouvetinterchange.eu")));
+        restController.addPeerToPrivateChannel(serviceProviderName, uuid, request);
+        assertThat(privateChannelRepository.findAllByServiceProviderName(serviceProviderName).stream().findFirst().get().getPeers()).hasSize(2);
+    }
+
+    @Test
+    public void addingPeerWithEmptyRequestThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>());
+        assertThrows(PrivateChannelException.class, () -> restController.addPeerToPrivateChannel(serviceProviderName, uuid, request));
+    }
+
+    @Test
+    public void addingPeerWithServiceProviderNameAsPeerThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("my-service-provider")));
+        assertThrows(PrivateChannelException.class, () -> restController.addPeerToPrivateChannel(serviceProviderName, uuid, request));
+    }
+    @Test
+    public void testDeletingPeerFromPrivateChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+
+        restController.deletePeerFromPrivateChannel(serviceProviderName, uuid, "king_gustaf.bouvetinterchange.eu");
+        assertThat(privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, uuid).getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).count()).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeletingPeerFromNonExistentPrivateChannelThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        String uuid = UUID.randomUUID().toString();
+        assertThrows(NotFoundException.class, () -> restController.deletePeerFromPrivateChannel(serviceProviderName, uuid, "nonexistent"));
+    }
+
+    @Test
+    public void testPeerDeletePeerFromPrivateChannel(){
+        String privateChannelOwner = "king_olav.bouvetinterchange.eu";
+        String serviceProviderName = "king_gustaf.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), privateChannelOwner);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        restController.peerDeletePeerFromPrivateChannel(serviceProviderName, uuid);
+        PrivateChannel updated = privateChannelRepository.findByServiceProviderNameAndUuid(privateChannelOwner, uuid);
+        assertThat(updated.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN))).hasSize(0);
     }
 
     @Test

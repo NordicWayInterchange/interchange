@@ -446,7 +446,7 @@ public class OnboardRestController {
 	@Operation(summary="Remove yourself from private channel where you are member")
 	public void peerDeletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("Service provider {} DELETE from private channel {} you are peer", serviceProviderName, privateChannelId);
+		logger.info("Service provider {} DELETE from private channel {} where you are peer", serviceProviderName, privateChannelId);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
