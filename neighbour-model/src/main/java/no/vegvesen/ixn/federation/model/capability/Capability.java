@@ -107,6 +107,10 @@ public class Capability {
         this.status = status;
     }
 
+    public boolean isSharded() {
+        return metadata.getShardCount() > 1;
+    }
+
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }

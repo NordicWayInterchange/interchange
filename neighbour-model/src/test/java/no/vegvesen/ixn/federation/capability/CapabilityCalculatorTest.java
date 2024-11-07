@@ -3,13 +3,13 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +48,7 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateLastUpdateCapabilitiesEmpty() {
         ServiceProvider serviceProvider = new ServiceProvider();
-        LocalDateTime localDateTime = CapabilityCalculator.calculateLastUpdatedCreatedCapabilities(Arrays.asList(serviceProvider));
+        LocalDateTime localDateTime = CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
         assertThat(localDateTime).isNull();
     }
 
@@ -56,94 +56,81 @@ public class CapabilityCalculatorTest {
     void calculateLastUpdatedCapabilitiesOneCap() {
         ServiceProvider serviceProvider = new ServiceProvider();
         LocalDateTime lastUpdated = LocalDateTime.now();
-        Capability capability = new Capability(
-                new DatexApplication("NO-123", "no-pub", "NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-                new Metadata()
-        );
-        capability.setLastUpdated(LocalDateTime.now());
-        capability.setStatus(CapabilityStatus.CREATED);
-
-        Capabilities capabilities = new Capabilities(Collections.singleton(capability));
-
+        Capabilities capabilities = new Capabilities(
+                Sets.newLinkedHashSet(new Capability(
+                        new DatexApplication(
+                                "NO-123",
+                                "no-pub",
+                                "NO",
+                                "1.0",
+                                List.of(),
+                                "SituationPublication",
+                                "publisherName"),
+                        new Metadata())),
+                lastUpdated);
         serviceProvider.setCapabilities(capabilities);
-        LocalDateTime result = CapabilityCalculator.calculateLastUpdatedCreatedCapabilities(Arrays.asList(serviceProvider));
-        assertThat(result).isEqualTo(capability.getLastUpdated().get());
+        LocalDateTime result = CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
+        assertThat(result).isEqualTo(lastUpdated);
     }
 
     @Test
     void calculateLastUpdatedCapabilitiesTwoDates() {
-        LocalDateTime earliest = LocalDateTime.now();
-        LocalDateTime latest = LocalDateTime.now().plusMinutes(5);
-
-        Capability earliestCap = new Capability(
-                new DatexApplication("NO-123", "no-pub-1", "NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-                new Metadata()
-        );
-        earliestCap.setLastUpdated(earliest);
-        earliestCap.setStatus(CapabilityStatus.CREATED);
-
-        Capabilities earliestCaps = new Capabilities(
-                Collections.singleton(earliestCap)
-        );
-
-        Capability latestCap = new Capability(
-                new DatexApplication("NO-123", "no-pub-2", "NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-                new Metadata()
-        );
-        latestCap.setLastUpdated(latest);
-        latestCap.setStatus(CapabilityStatus.CREATED);
-
-        Capabilities latestCaps = new Capabilities(
-                Collections.singleton(latestCap)
-        );
-
+        LocalDateTime earliest = LocalDateTime.of(2021, Month.DECEMBER,3,0,0);
+        LocalDateTime latest = LocalDateTime.of(2021,Month.DECEMBER,4,0,0);
+        Capabilities earliestCap = new Capabilities(
+                Collections.singleton(new Capability(
+                        new DatexApplication(
+                                "NO-123",
+                                "no-pub-1",
+                                "NO",
+                                "1.0",
+                                List.of(),
+                                "SituationPublication",
+                                "publisherName"),
+                        new Metadata())),
+                earliest);
+        Capabilities latestCap = new Capabilities(
+                Collections.singleton(new Capability(
+                        new DatexApplication(
+                                "NO-123",
+                                "no-pub-2",
+                                "NO",
+                                "1.0",
+                                List.of(),
+                                "SituationPublication",
+                                "publisherName"),
+                        new Metadata())),
+                latest);
         ServiceProvider earliestSP = new ServiceProvider();
-        earliestSP.setCapabilities(earliestCaps);
-
+        earliestSP.setCapabilities(earliestCap);
         ServiceProvider latestSP = new ServiceProvider();
-        latestSP.setCapabilities(latestCaps);
-
-        assertThat(CapabilityCalculator.calculateLastUpdatedCreatedCapabilities(Arrays.asList(latestSP,earliestSP))).isEqualTo(latest);
+        latestSP.setCapabilities(latestCap);
+        assertThat(CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(latestSP,earliestSP))).isEqualTo(latest);
     }
 
     @Test
     void calculateGetLastUpdatedLocalCapabilities() {
-        LocalDateTime aCapDate = LocalDateTime.now();
+        LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
         Capability aCap1 = getDatexCapability("SE");
-        aCap1.setLastUpdated(aCapDate);
-        aCap1.setStatus(CapabilityStatus.CREATED);
         Capability aCap2 = getDatexCapability("SE");
-        aCap2.setLastUpdated(aCapDate);
-        aCap2.setStatus(CapabilityStatus.CREATED);
-
         ServiceProvider aServiceProvider = new ServiceProvider();
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2)));
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
 
-        LocalDateTime bCapDate = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
         Capability bCap1 = getDatexCapability("SE");
-        bCap1.setLastUpdated(bCapDate);
-        bCap1.setStatus(CapabilityStatus.CREATED);
         Capability bCap2 = getDatexCapability("SE");
-        bCap2.setLastUpdated(bCapDate);
-        bCap2.setStatus(CapabilityStatus.CREATED);
-
         ServiceProvider bServiceProvider = new ServiceProvider();
-        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(bCap1, bCap2)));
+        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
-        LocalDateTime cCapDate = LocalDateTime.now();
+        LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
         Capability cCap1 = getDatexCapability("FI");
-        cCap1.setLastUpdated(cCapDate);
-        cCap1.setStatus(CapabilityStatus.CREATED);
         Capability cCap2 = getDatexCapability("FI");
-        cCap2.setStatus(CapabilityStatus.CREATED);
-        cCap2.setLastUpdated(cCapDate);
-
         ServiceProvider cServiceProvider = new ServiceProvider();
-        cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2)));
+        cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
 
         List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
 
-        LocalDateTime lastUpdatedCapabilities = CapabilityCalculator.calculateLastUpdatedCreatedCapabilities(serviceProviders);
+        LocalDateTime lastUpdatedCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders);
 
         assertThat(lastUpdatedCapabilities).isEqualTo(bCapDate);
     }

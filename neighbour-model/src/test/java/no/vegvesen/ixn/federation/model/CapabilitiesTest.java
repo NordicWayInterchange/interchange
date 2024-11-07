@@ -1,12 +1,10 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,28 +70,5 @@ public class CapabilitiesTest {
 
         capabilities.replaceCapabilities(new HashSet<>(Arrays.asList(firstCapability,secondCapability)));
         assertThat(capabilities.getCapabilities()).hasSize(2);
-    }
-
-    @Test
-    public void onlyGetLastUpdatedFromCapabilitiesWithStatusCreated() {
-        Capability createdCapability = new Capability(
-                new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singletonList("1"), Collections.singletonList(1)),
-                new Metadata()
-        );
-        createdCapability.setLastUpdated(LocalDateTime.now());
-        createdCapability.setStatus(CapabilityStatus.CREATED);
-
-        Capability requestedCapability = new Capability(
-                new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", Collections.singletonList("2"), Collections.singletonList(2)),
-                new Metadata()
-        );
-        requestedCapability.setLastUpdated(LocalDateTime.now().plusMinutes(5));
-        requestedCapability.setStatus(CapabilityStatus.REQUESTED);
-
-        Capabilities capabilities = new Capabilities(
-                new HashSet<>(Arrays.asList(createdCapability, requestedCapability))
-        );
-
-        assertThat(capabilities.getLastUpdatedCreatedCapabilities()).isEqualTo(createdCapability.getLastUpdated());
     }
 }

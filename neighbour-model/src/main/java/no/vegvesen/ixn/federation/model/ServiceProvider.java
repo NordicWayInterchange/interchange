@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -65,7 +66,6 @@ public class ServiceProvider {
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
 						   LocalDateTime subscriptionUpdated) {
-
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
@@ -165,12 +165,6 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	//TODO: REMOVE
-	public void removeSubscription(LocalSubscription subscription) {
-		subscriptions.remove(subscription);
-		this.subscriptionUpdated = LocalDateTime.now();
-	}
-
 	public void removeSubscriptions(Set<LocalSubscription> subscriptionsToRemove) {
 		subscriptions.removeAll(subscriptionsToRemove);
 		this.subscriptionUpdated = LocalDateTime.now();
@@ -241,7 +235,7 @@ public class ServiceProvider {
 	}
 
 	public Capability getCreatedCapability(String capabilityId){
-		return getCapabilities().getCreatedCapabilities().stream()
+		return getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED).stream()
 				.filter(c->c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));

@@ -58,19 +58,6 @@ public class CapabilityMatcher {
 		}
 	}
 
-	//TODO: Replace with matchLocalCapabilitiesToSelector() in NapRestController and remove
-	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
-		Set<Capability> matches = new HashSet<>();
-		for (Capability capability : capabilities) {
-			boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), selector);
-			if (match) {
-				logger.debug("Selector [{}] matches capability {}", selector, capability);
-				matches.add(capability);
-			}
-		}
-		return matches;
-	}
-
 	public static Set<Capability> matchLocalCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
 		Set<Capability> matches = new HashSet<>();
 		for (Capability capability : capabilities) {

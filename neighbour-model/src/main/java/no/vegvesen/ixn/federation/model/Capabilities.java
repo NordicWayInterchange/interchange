@@ -33,19 +33,6 @@ public class Capabilities {
 		return Optional.ofNullable(lastUpdated);
 	}
 
-	public Optional<LocalDateTime> getLastUpdatedCreatedCapabilities() {
-		LocalDateTime result = null;
-		for (Capability capability : getCapabilitiesByStatus(CapabilityStatus.CREATED)) {
-			Optional<LocalDateTime> lastUpdatedCreated = capability.getLastUpdated();
-			if (lastUpdatedCreated.isPresent()) {
-				if (result == null || lastUpdatedCreated.get().isAfter(result)) {
-					result = lastUpdatedCreated.get();
-				}
-			}
-		}
-		return Optional.ofNullable(result);
-	}
-
 	public void setLastUpdated(LocalDateTime lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
@@ -82,6 +69,10 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
+	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
+		setCapabilities(capabilities);
+	}
+
 	public Capabilities(Set<Capability> capabilities) {
 		setCapabilities(capabilities);
 	}
@@ -111,7 +102,6 @@ public class Capabilities {
 		this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());
 	}
-
 
 	@Override
 	public String toString() {

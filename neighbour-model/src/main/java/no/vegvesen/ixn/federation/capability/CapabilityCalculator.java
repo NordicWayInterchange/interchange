@@ -31,11 +31,11 @@ public class CapabilityCalculator {
         return localCapabilities;
     }
 
-    public static LocalDateTime calculateLastUpdatedCreatedCapabilities(List<ServiceProvider> serviceProviders) {
+    public static LocalDateTime calculateLastUpdatedCapabilities(List<ServiceProvider> serviceProviders) {
         LocalDateTime result = null;
         for (ServiceProvider serviceProvider : serviceProviders) {
             Capabilities capabilities = serviceProvider.getCapabilities();
-            Optional<LocalDateTime> lastUpdated = capabilities.getLastUpdatedCreatedCapabilities();
+            Optional<LocalDateTime> lastUpdated = capabilities.getLastUpdated();
             if (lastUpdated.isPresent()) {
                 if (result == null || lastUpdated.get().isAfter(result)) {
                     result = lastUpdated.get();
@@ -45,7 +45,7 @@ public class CapabilityCalculator {
         return result;
     }
 
-    public static Optional<LocalDateTime> calculateLastUpdatedCreatedCapabilitiesOptional(List<ServiceProvider> serviceProviders) {
-        return Optional.ofNullable(calculateLastUpdatedCreatedCapabilities(serviceProviders));
+    public static Optional<LocalDateTime> calculateLastUpdatedCapabilitiesOptional(List<ServiceProvider> serviceProviders) {
+        return Optional.ofNullable(calculateLastUpdatedCapabilities(serviceProviders));
     }
 }

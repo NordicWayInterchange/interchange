@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -299,7 +300,7 @@ public class NapRestController {
         logger.info("List capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCreatedCapabilities());
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED));
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -359,9 +360,6 @@ public class NapRestController {
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
-    //TODO: Transform here instead of in method where this is used
-    private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
     }
 
     private Set<Capability> getAllLocalCapabilities() {
