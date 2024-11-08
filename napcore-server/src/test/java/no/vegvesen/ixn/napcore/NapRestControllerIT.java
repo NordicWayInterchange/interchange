@@ -621,6 +621,19 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThrows(NotFoundException.class, () -> napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, "notAnId"));
     }
 
+    @Test
+    public void testDeletingPeerFromPrivateChannelRemovesItImmediatelyFromListEndpoint(){
+        String actorCommonName = "actor";
+        String peerToDelete = "peerTwo";
+        privateChannelRepository.save(new PrivateChannel(new HashSet<>(Set.of(new Peer(peerToDelete))), no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED, "test",
+                new no.vegvesen.ixn.federation.model.PrivateChannelEndpoint("test", 1337, "test"),
+                actorCommonName));
+        String privateChannelId = privateChannelRepository.findAllByServiceProviderName(actorCommonName).stream().findFirst().get().getUuid();
+        napRestController.deletePeerFromPrivateChannel(actorCommonName, privateChannelId, peerToDelete);
+
+        assertThat(napRestController.getPrivateChannels(actorCommonName).getFirst().getPeers()).hasSize(0);
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

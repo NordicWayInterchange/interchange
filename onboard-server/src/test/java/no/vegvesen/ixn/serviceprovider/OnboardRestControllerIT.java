@@ -837,6 +837,17 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testDeletingPeerFromPrivateChannelRemovesItImmediatelyFromListEndpoint(){
+        String serviceProviderName = "my-service-provider";
+        privateChannelRepository.save(new PrivateChannel(new HashSet<>(Set.of(new Peer("peerOne"))), no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED, "test",
+                new no.vegvesen.ixn.federation.model.PrivateChannelEndpoint("test", 1337, "test"),
+                serviceProviderName));
+        String privateChannelId = privateChannelRepository.findAllByServiceProviderName(serviceProviderName).getFirst().getUuid();
+        restController.deletePeerFromPrivateChannel(serviceProviderName, privateChannelId, "peerOne");
+        assertThat(restController.listPrivateChannels(serviceProviderName).getPrivateChannels().getFirst().getPeers()).hasSize(0);
+    }
+
+    @Test
     public void testAddingPrivateChannelWithServiceProviderAsPeerName() {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName), "my-channel");

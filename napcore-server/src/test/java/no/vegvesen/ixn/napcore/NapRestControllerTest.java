@@ -64,9 +64,6 @@ public class NapRestControllerTest {
     private CertSigner certSigner;
 
     @MockBean
-    private TypeTransformer typeTransformer;
-
-    @MockBean
     private CertService certService;
 
     @Autowired
