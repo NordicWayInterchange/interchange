@@ -1,0 +1,71 @@
+{{ if .Values.napcore_frontend.enabled }}
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-napcore-frontend
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: napcore-frontend
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.napcore_frontend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: napcore-frontend
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: napcore-frontend
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: napcore-frontend
+          image: "{{ .Values.napcore_frontend.image.repository }}:{{ .Values.napcore_frontend.image.tag }}"
+          env:
+            - name: PFX_KEY_FILENAME
+              value: {{ .Values.napcore_frontend.keystore_file_name }}
+            - name: PFX_PASSPHRASE
+              value: {{ .Values.napcore_keystore_password }}
+            - name: INTERCHANGE_URI
+              value: "https://{{ .Release.Name }}-napcore-server:{{ .Values.self.nap_provider_port}}/nap/"
+            - name: INTERCHANGE_PREFIX
+              value: {{ .Values.napcore_frontend.generated_username_prefix }}
+            - name: NEXTAUTH_SECRET
+              value: {{ .Values.napcore_nextauth_secret }}
+            - name: AUTH0_CLIENT_ID
+              value: {{ .Values.napcore_auth0_client_id }}
+            - name: AUTH0_CLIENT_SECRET
+              value: {{ .Values.napcore_auth0_client_secret }}
+            - name: AUTH0_ISSUER
+              value: {{ .Values.napcore_frontend.napcore_auth0_issuer }}
+            - name: NEXTAUTH_URL
+              value: {{ .Values.napcore_frontend.home_url }}
+          volumeMounts:
+            - mountPath: /app/secret
+              name: napcore-frontend-secret
+          ports:
+            - name: nap-frontend
+              containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /login
+            initialDelaySeconds: 300
+            periodSeconds: 20
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /login
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 10
+      volumes:
+        - name: napcore-frontend-secret
+          secret:
+            secretName: napcore-frontend-secret
+{{- end }}
