@@ -12,7 +12,6 @@ metadata:
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.static_external_ip }}
-  externalTrafficPolicy: Cluster
   selector:
     app: {{ .Chart.Name }}
     component: onboard-server
