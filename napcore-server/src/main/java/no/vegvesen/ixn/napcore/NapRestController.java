@@ -281,7 +281,7 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        serviceProviderToUpdate.getCapabilities().addDataType(capabilityToAdd);
+        serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
                 .stream()
@@ -328,7 +328,7 @@ public class NapRestController {
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+        serviceProviderToUpdate.getCapabilities().removeCapability(capabilityId);
         serviceProviderRepository.save(serviceProviderToUpdate);
         logger.info("Updated service provider {}", serviceProviderToUpdate);
     }
