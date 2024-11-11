@@ -9,11 +9,15 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class CapabilityValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
+
+    private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
 
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
@@ -31,6 +35,21 @@ public class CapabilityValidator {
         };
     }
 
+    public static boolean capabilityHasValidProperties(CapabilityApi capability){
+        ApplicationApi application = capability.getApplication();
+
+        return switch (application){
+            case DatexApplicationApi datex -> validateProperties(datex, CapabilityProperty.mandatoryDatex2PropertyNames);
+            case DenmApplicationApi denm -> validateProperties(denm, CapabilityProperty.mandatoryDenmPropertyNames);
+            case IvimApplicationApi ivim -> validateProperties(ivim, CapabilityProperty.mandatoryIvimPropertyNames);
+            case SpatemApplicationApi spatem -> validateProperties(spatem, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            case MapemApplicationApi mapem -> validateProperties(mapem, CapabilityProperty.mandatorySpatemMapemPropertyNames);
+            case SremApplicationApi srem -> validateProperties(srem, CapabilityProperty.mandatorySremSsemPropertyNames);
+            case SsemApplicationApi ssem -> validateProperties(ssem, CapabilityProperty.mandatorySremSsemPropertyNames);
+            case CamApplicationApi cam -> validateProperties(cam, CapabilityProperty.mandatoryCamPropertyNames);
+            default -> throw new IllegalStateException("Error occurred while validating capability");
+        };
+    }
 
     public static Set<String> checkProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
         Set<String> notSetProperties = new HashSet<>();
@@ -41,6 +60,19 @@ public class CapabilityValidator {
             }
         }
         return notSetProperties;
+    }
+
+    public static boolean validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        for(String property: mandatoryProperties) {
+            if(!property.equals("quadTree") && !property.equals("causeCode")) {
+                String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
+                Matcher matcher = validCharacters.matcher(value);
+                if (!matcher.matches()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){

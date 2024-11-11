@@ -85,10 +85,16 @@ public class OnboardRestController {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
 				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
 			}
+
 			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
 			if (!capabilityProperties.isEmpty()) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
+
+			if(!CapabilityValidator.capabilityHasValidProperties(capability)){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capability));
+			}
+
 			if(!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
 			}
