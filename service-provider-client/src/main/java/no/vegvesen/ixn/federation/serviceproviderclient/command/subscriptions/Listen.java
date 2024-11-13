@@ -77,7 +77,7 @@ public class Listen implements Callable<Integer> {
                 directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
-            sink.start();
+            sink.start(1000);
             counter.await();
         }
         return 0;
