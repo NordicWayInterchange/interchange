@@ -62,8 +62,6 @@ public class NapRestController {
 
     private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
 
-    private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
-
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
 
     private TypeTransformer typeTransformer = new TypeTransformer();

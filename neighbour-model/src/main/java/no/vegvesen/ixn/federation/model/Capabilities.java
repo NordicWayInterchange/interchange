@@ -54,7 +54,7 @@ public class Capabilities {
 				.stream()
 				.filter(dataType -> dataType.getUuid().equals(capabilityId))
 				.findFirst();
-		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
