@@ -5,6 +5,8 @@ import org.apache.qpid.jms.JmsConnectionFactory;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
+import org.apache.qpid.jms.policy.JmsDefaultPrefetchPolicy;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -13,9 +15,14 @@ import java.util.Hashtable;
 public class IxnContext {
 
 	private static final String JMS_JNDI_INITIAL_CONTEXT_FACTORY = "myInitialContextFactoryLookup";
+
 	private static final String JMS_JNDI_RECEIVE_QUEUE_PROPERTY = "receiveQueue";
+
 	private static final String JMS_JNDI_SEND_QUEUE_PROPERTY = "sendQueue";
+
 	private final Context context;
+
+	private Integer prefetch;
 
 	public IxnContext(Object URI, String sendQueue, String receiveQueue) throws NamingException {
 		Hashtable<Object, Object> env = new Hashtable<>();
@@ -30,11 +37,26 @@ public class IxnContext {
 		this.context = new javax.naming.InitialContext(env);
 	}
 
+	public IxnContext(Object URI, String sendQueue, String receiveQueue, Integer prefetch) throws NamingException {
+		Hashtable<Object, Object> env = new Hashtable<>();
+		env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
+		env.put("connectionfactory." + JMS_JNDI_INITIAL_CONTEXT_FACTORY, URI);
+		if (receiveQueue != null) {
+			env.put("queue." + JMS_JNDI_RECEIVE_QUEUE_PROPERTY, receiveQueue);
+		}
+		if (sendQueue != null) {
+			env.put("queue." + JMS_JNDI_SEND_QUEUE_PROPERTY, sendQueue);
+		}
+		this.context = new javax.naming.InitialContext(env);
+		this.prefetch = prefetch;
+	}
+
 	/**
 	 * uses basic authentication
 	 */
 	public Connection createConnection(String username, String password) throws NamingException, JMSException {
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
+		factory.setPrefetchPolicy(getPrefetchPolicy());
 		factory.setPopulateJMSXUserID(true);
 		return factory.createConnection(username, password);
 	}
@@ -44,6 +66,7 @@ public class IxnContext {
 	 */
 	public Connection createConnection(SSLContext sslContext) throws NamingException, JMSException {
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
+		factory.setPrefetchPolicy(getPrefetchPolicy());
 		factory.setPopulateJMSXUserID(true);
 		factory.setSslContext(sslContext);
 		return factory.createConnection();
@@ -54,6 +77,7 @@ public class IxnContext {
 	 */
 	public Connection createConnection() throws NamingException, JMSException {
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
+		factory.setPrefetchPolicy(getPrefetchPolicy());
 		factory.setPopulateJMSXUserID(true);
 		return factory.createConnection();
 	}
@@ -64,5 +88,11 @@ public class IxnContext {
 
 	public Destination getSendQueue() throws NamingException {
 		return (Destination) context.lookup(JMS_JNDI_SEND_QUEUE_PROPERTY);
+	}
+
+	public JmsDefaultPrefetchPolicy getPrefetchPolicy(){
+		JmsDefaultPrefetchPolicy prefetchPolicy = new JmsDefaultPrefetchPolicy();
+		prefetchPolicy.setAll(prefetch == null ? 1000 : prefetch);
+		return prefetchPolicy;
 	}
 }

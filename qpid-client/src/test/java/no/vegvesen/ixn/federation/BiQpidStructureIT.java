@@ -63,7 +63,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
-            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer(1000).receive(1000));
             assertThat(receive).isPresent();
         }
 
@@ -86,7 +86,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         Thread.sleep(6000);
 
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
-            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer(1000).receive(1000));
             assertThat(receive).isNotPresent();
         }
 
@@ -109,7 +109,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         Thread.sleep(4000);
 
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
-            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
+            Optional<Message> receive = Optional.ofNullable(sink.createConsumer(1000).receive(1000));
             assertThat(receive).isNotPresent();
         }
 

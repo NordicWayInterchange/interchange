@@ -17,6 +17,9 @@ public class ReceiveMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
+    @Option(names = {"-p", "--prefetch"}, description = "Set prefetch policy")
+    private Integer prefetch;
+
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -35,7 +38,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
-            sink.start();
+            sink.start(prefetch == null ? 1000 : prefetch);
             counter.await();
         }
         return 0;

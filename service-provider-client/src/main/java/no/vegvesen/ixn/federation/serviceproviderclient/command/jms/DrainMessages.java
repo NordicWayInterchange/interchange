@@ -18,7 +18,7 @@ public class DrainMessages implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         try (Sink sink = new Sink(parentCommand.getUrl(), queueName, parentCommand.createContext())) {
-            MessageConsumer consumer = sink.createConsumer();
+            MessageConsumer consumer = sink.createConsumer(1000);
             while (consumer.receive(500) != null) ;
         }
         return 0;
