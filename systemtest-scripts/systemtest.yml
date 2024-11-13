@@ -99,7 +99,7 @@ services:
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
@@ -158,6 +158,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
     - testing_net
 
@@ -183,6 +184,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -195,8 +197,8 @@ services:
     depends_on:
     - a_db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
+    - "a_qpid:a.qpid.bouvetinterchange.eu"
+    - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
     - "../tmp:/jks"
     environment:
@@ -210,6 +212,7 @@ services:
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
+    - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     - PREFETCH=1000
     networks:
     - testing_net
@@ -302,6 +305,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -322,7 +326,7 @@ services:
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/b.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
@@ -355,6 +359,8 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
+
     networks:
     - testing_net
 
@@ -366,8 +372,8 @@ services:
     depends_on:
       - b_db
     links:
-      - "a_qpid:a.bouvetinterchange.eu"
-      - "b_qpid:b.bouvetinterchange.eu"
+      - "a_qpid:a.qpid.bouvetinterchange.eu"
+      - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -381,6 +387,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
       - PREFETCH=1000
     networks:
     - testing_net

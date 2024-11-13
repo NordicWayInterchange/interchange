@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.FetchMatchingCapabilities;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
@@ -25,7 +24,6 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                FetchMatchingCapabilities.class,
                 MessagesCommand.class
         },
         mixinStandardHelpOptions = true)
@@ -74,7 +72,7 @@ public class ServiceProviderClientApplication{
         return trustStorePassword;
     }
 
-    private SSLContext createSSLContext() {
+    public SSLContext createSSLContext() {
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
                 keystorePassword,
                 KeystoreType.PKCS12);

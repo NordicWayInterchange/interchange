@@ -25,6 +25,8 @@ spec:
       - name: message-collector
         image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
         env:
+        - name: BROKER_EXTERNAL_NAME
+          value: {{ .Values.broker_external_name }}
         - name: PREFETCH
           value: {{ .Values.message_collector.prefetch | quote }}
         - name: POSTGRES_URI

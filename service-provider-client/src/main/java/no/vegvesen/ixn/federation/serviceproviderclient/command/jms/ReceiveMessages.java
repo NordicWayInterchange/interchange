@@ -17,6 +17,9 @@ public class ReceiveMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
+    @Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
+    String directory;
+
     @Option(names = {"-p", "--prefetch"}, description = "Set prefetch policy")
     private Integer prefetch;
 
@@ -35,7 +38,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 parentCommand.getUrl(),
                 queueName,
                 parentCommand.createContext(),
-                new Sink.DefaultMessageListener(),
+                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
             sink.start(prefetch == null ? 1000 : prefetch);
