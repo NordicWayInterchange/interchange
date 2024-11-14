@@ -91,8 +91,9 @@ public class OnboardRestController {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
 
-			if(!CapabilityValidator.capabilityHasValidProperties(capability)){
-				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capability));
+			Map<Boolean, String> capabilityValidator = CapabilityValidator.capabilityHasValidProperties(capability);
+			if(capabilityValidator.containsKey(false)){
+				throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", capabilityValidator.get(false), capability));
 			}
 
 			if(!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){

@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +16,8 @@ public class CapabilityValidator {
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
 
     private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
+
+    private static Pattern countryCodeRegex = Pattern.compile("[A-Z]{2}");
 
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
@@ -35,7 +35,7 @@ public class CapabilityValidator {
         };
     }
 
-    public static boolean capabilityHasValidProperties(CapabilityApi capability){
+    public static Map<Boolean, String> capabilityHasValidProperties(CapabilityApi capability){
         ApplicationApi application = capability.getApplication();
 
         return switch (application){
@@ -62,17 +62,31 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static boolean validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        for(String property: mandatoryProperties) {
-            if(!property.equals("quadTree") && !property.equals("causeCode")) {
-                String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
-                Matcher matcher = validCharacters.matcher(value);
-                if (!matcher.matches()) {
-                    return false;
+    public static Map<Boolean, String> validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        for (String property : mandatoryProperties) {
+            String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
+            Matcher matcher = validCharacters.matcher(value);
+
+            if (!matcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
+                return Map.of(false, property + " contains illegal characters");
+            }
+            if (value.length() >= 255) {
+                return Map.of(false, property + " exceeds character limit of 255");
+            }
+            if(property.equals("originatingCountry")){
+                Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
+                if(!countryCodeMatcher.matches()) {
+                    return Map.of(false, "'"+ value + "'" + " is not a valid country code");
+                }
+            }
+            if(property.equals("publicationId")){
+                String publisherId = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get("publisherId");
+                if(!value.startsWith(publisherId+":")){
+                    return Map.of(false, property + " must start with '<publisherId>:'");
                 }
             }
         }
-        return true;
+        return Map.of();
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){

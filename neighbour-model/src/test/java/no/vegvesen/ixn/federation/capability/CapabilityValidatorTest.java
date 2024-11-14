@@ -392,9 +392,9 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isFalse();
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).isFalse();
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).isFalse();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).containsKey(false);
 
     }
 }

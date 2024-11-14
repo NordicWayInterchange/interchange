@@ -1,28 +1,32 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import jakarta.transaction.Transactional;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-
-import jakarta.transaction.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -30,11 +34,13 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -120,7 +126,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","pub-1-NOOOOOOO:NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(application);
 
@@ -193,7 +199,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testListCapabilities() {
         String serviceProviderName = "serviceprovider";
 
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO00000:pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
@@ -447,7 +453,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
@@ -494,7 +500,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi(
                 app,
@@ -1140,7 +1146,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 serviceProviderName,
                 Set.of(new CapabilityApi(
-                        new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
+                        new DatexApplicationApi("publisherId", "publisherId:123", "NO", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
                         new MetadataApi()
                 ))
         );
@@ -1193,6 +1199,21 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         catch (IllegalArgumentException e){
             return false;
         }
+    }
+
+    @Test
+    public void testAddingCapabilityWithTooManyCharsThrowsException(){
+        StringBuilder longString = new StringBuilder();
+        Random r = new Random();
+        String serviceProviderName = "Sp-1";
+        for(int i = 1; i <= 300; i++){
+            longString.append((char) (r.nextInt(26)+'a'));
+        }
+        CapabilityApi capability = new CapabilityApi(
+                new DatexApplicationApi(longString.toString(),"bouvet-1", "NO","test", List.of("1"), "test", "test"),
+                new MetadataApi());
+
+        assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName,Set.of(capability))));
     }
 
     @Test

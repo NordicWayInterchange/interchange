@@ -281,11 +281,11 @@ public class NapRestController {
 
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s &s", capabilitiesRequest, capabilityProperties));
         }
-
-        if(!CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()))){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capabilityToAdd));
+        Map<Boolean, String> capabilityValidator = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        if(capabilityValidator.containsKey(false)){
+            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", capabilityValidator.get(false), capabilityToAdd));
         }
 
         serviceProviderToUpdate.getCapabilities().addDataType(capabilityToAdd);
