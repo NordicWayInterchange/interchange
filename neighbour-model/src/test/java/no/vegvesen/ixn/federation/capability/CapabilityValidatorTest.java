@@ -3,7 +3,9 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +16,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(
                         "N000000",
-                        "N000000-pub-1",
+                        "N000000:pub-1",
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
@@ -30,7 +32,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
@@ -48,7 +50,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
@@ -61,7 +63,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capabilityNull = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "DATEX2:3.2",
                         List.of("12001"),
@@ -80,7 +82,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "DENM:1.2.2",
                         List.of("12001"),
@@ -97,7 +99,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "DENM:1.2.2",
                         List.of("12001"),
@@ -127,7 +129,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
                         List.of("12001")
@@ -143,7 +145,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new SpatemApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "SPATEM",
                         List.of("12001")
@@ -159,7 +161,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new MapemApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "MAPEM",
                         List.of("12001")
@@ -175,7 +177,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new SsemApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "SSEM",
                         List.of("12001")
@@ -191,7 +193,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new SremApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "SREM",
                         List.of("12001")
@@ -207,7 +209,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new CamApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "CAM",
                         List.of("12001")
@@ -279,7 +281,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "",
                         "IVIM",
                         List.of("12001")
@@ -290,7 +292,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         null,
                         "IVIM",
                         List.of("12001")
@@ -307,7 +309,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "",
                         List.of("12001")
@@ -318,7 +320,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         null,
                         List.of("12001")
@@ -335,7 +337,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
                         List.of()
@@ -346,7 +348,7 @@ public class CapabilityValidatorTest {
         CapabilityApi capabilityNull = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
                         null
@@ -363,10 +365,10 @@ public class CapabilityValidatorTest {
         CapabilityApi capability1 = new CapabilityApi(
                 new IvimApplicationApi(
                         "'NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
-                        List.of()
+                        List.of("1")
                 ),
                 new MetadataApi()
         );
@@ -374,20 +376,20 @@ public class CapabilityValidatorTest {
         CapabilityApi capability2 = new CapabilityApi(
                 new IvimApplicationApi(
                         " NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
-                        List.of()
+                        List.of("2")
                 ),
                 new MetadataApi()
         );
         CapabilityApi capability3 = new CapabilityApi(
                 new IvimApplicationApi(
                         "*NO00000",
-                        "NO00000-pub-1",
+                        "NO00000:pub-1",
                         "NO",
                         "IVIM",
-                        List.of()
+                        List.of("1")
                 ),
                 new MetadataApi()
         );
@@ -395,6 +397,116 @@ public class CapabilityValidatorTest {
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).containsKey(false);
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).containsKey(false);
+    }
 
+    @Test
+    public void testCapabilityWithQuadTreeExceedingCharacterLimit(){
+        StringBuilder quadTile = new StringBuilder();
+        while (quadTile.length() < 300){
+            quadTile.append("1");
+        }
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "'NO00000",
+                        "NO00000:pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of(quadTile.toString())
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+    }
+
+    @Test
+    public void testCapabilityWithQuadTreeInsideLimitButTotalExceeds255(){
+        List<String> quadTree = new ArrayList<>();
+        while(quadTree.size() < 300){
+            quadTree.add("1");
+        }
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "NO00000:pub-1",
+                        "NO",
+                        "IVIM",
+                        quadTree
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).doesNotContainKey(false);
+    }
+
+    @Test
+    public void testCapabilityWithInvalidPublicationIdIsNotValid(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of("1")
+                ),
+                new MetadataApi()
+        );
+        Map<Boolean, String> validator = CapabilityValidator.capabilityHasValidProperties(capability1);
+        assertThat(validator).containsKey(false);
+        assertThat(validator.get(false)).contains("<publisherId>");
+    }
+
+    @Test
+    public void testCapabilityWithInvalidCountryCodeIsNotValid(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "NO00000:pub-1",
+                        "no",
+                        "IVIM",
+                        List.of("1")
+                ),
+                new MetadataApi()
+        );
+        Map<Boolean, String> validator1 = CapabilityValidator.capabilityHasValidProperties(capability1);
+
+        capability1.getApplication().setOriginatingCountry("No");
+        Map<Boolean, String> validator2 = CapabilityValidator.capabilityHasValidProperties(capability1);
+
+        capability1.getApplication().setOriginatingCountry("N");
+        Map<Boolean, String> validator3 = CapabilityValidator.capabilityHasValidProperties(capability1);
+
+        capability1.getApplication().setOriginatingCountry("NOK");
+        Map<Boolean, String> validator4 = CapabilityValidator.capabilityHasValidProperties(capability1);
+
+        capability1.getApplication().setOriginatingCountry("NO");
+        Map<Boolean, String> validator5 = CapabilityValidator.capabilityHasValidProperties(capability1);
+
+        assertThat(validator1).containsKey(false);
+        assertThat(validator1.get(false)).contains("country code");
+        assertThat(validator2).containsKey(false);
+        assertThat(validator2.get(false)).contains("country code");
+        assertThat(validator3).containsKey(false);
+        assertThat(validator3.get(false)).contains("country code");
+        assertThat(validator4).containsKey(false);
+        assertThat(validator4.get(false)).contains("country code");
+        assertThat(validator5).doesNotContainKey(false);
+    }
+
+    @Test
+    public void testCapabilityWithPropertyExceedingCharLimitIsNotValid(){
+        StringBuilder sb = new StringBuilder();
+        while(sb.length() < 280){
+            sb.append("l");
+        }
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "NO00000:pub-1",
+                        "NO",
+                        sb.toString(),
+                        List.of("1")
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
     }
 }

@@ -64,25 +64,35 @@ public class CapabilityValidator {
 
     public static Map<Boolean, String> validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
         for (String property : mandatoryProperties) {
+
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher matcher = validCharacters.matcher(value);
 
             if (!matcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
-                return Map.of(false, property + " contains illegal characters");
+                return Map.of(false, String.format("%s contains illegal characters", property));
             }
-            if (value.length() >= 255) {
-                return Map.of(false, property + " exceeds character limit of 255");
+            if (value.length() > 255 && !property.equals("quadTree")) {
+                return Map.of(false, String.format("%s exceeds character limit of 255", property));
             }
+
             if(property.equals("originatingCountry")){
                 Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                 if(!countryCodeMatcher.matches()) {
-                    return Map.of(false, "'"+ value + "'" + " is not a valid country code");
+                    return Map.of(false, String.format("'%s' is not a valid country code", value));
                 }
             }
-            if(property.equals("publicationId")){
+            else if(property.equals("publicationId")){
                 String publisherId = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get("publisherId");
                 if(!value.startsWith(publisherId+":")){
-                    return Map.of(false, property + " must start with '<publisherId>:'");
+                    return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                }
+            }
+            else if(property.equals("quadTree")){
+                String [] quadTreeTiles = value.split(",");
+                for(String quadTreeTile : quadTreeTiles){
+                    if(quadTreeTile.length() > 255){
+                        return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                    }
                 }
             }
         }

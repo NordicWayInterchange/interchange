@@ -453,7 +453,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200", "1110", "1000001"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
