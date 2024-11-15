@@ -261,9 +261,6 @@ public class OnboardRestController {
 				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
 				localSubscription.setErrorMessage("Bad api object for adding subscription. The selector object was null.");
 			}
-			else if(selector.length() > 255){
-				throw new SubscriptionRequestException(String.format("Bad api object for subscription request. Selector %s exceeds character limit of 255", selector));
-			}
 			else if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
@@ -487,10 +484,7 @@ public class OnboardRestController {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
 			}
-			else if(selector.length() > 255){
-				throw new DeliveryPostException(String.format("Bad api object. Selector %s exceeds character limit of 255", selector));
-			}
-			else if (! JMSSelectorFilterFactory.isValidSelector(selector)) {
+			else if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
 			} else {

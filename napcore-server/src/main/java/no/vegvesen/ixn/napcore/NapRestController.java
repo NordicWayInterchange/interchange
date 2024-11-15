@@ -91,10 +91,6 @@ public class NapRestController {
             throw new SubscriptionRequestException("Bad api object for subscription request, subscription has no selector.");
         }
 
-        if(subscriptionRequest.getSelector().length() > 255){
-            throw new SubscriptionRequestException(String.format("Bad api object for subscription request. Selector %s exceeds character limit of 255", subscriptionRequest.getSelector()));
-        }
-
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
             localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
@@ -184,9 +180,6 @@ public class NapRestController {
             throw new DeliveryPostException("Bad api object for delivery request, delivery has no selector");
         }
 
-        if(deliveryRequest.getSelector().length() > 255){
-            throw new DeliveryPostException(String.format("Bad api object for delivery request. Selector %s exceeds character limit", deliveryRequest.getSelector()));
-        }
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
 
         if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){

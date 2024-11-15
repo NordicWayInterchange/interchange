@@ -74,7 +74,6 @@ public class CapabilityValidator {
             if (value.length() > 255 && !property.equals("quadTree")) {
                 return Map.of(false, String.format("%s exceeds character limit of 255", property));
             }
-
             if(property.equals("originatingCountry")){
                 Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                 if(!countryCodeMatcher.matches()) {

@@ -660,17 +660,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingSubscriptionWithTooLongSelector(){
-        StringBuilder selector = new StringBuilder();
-        while (selector.length() <= 255){
-            selector.append("test");
-        }
-        String serviceProvider = "serviceprovider";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector.toString(), nodeProperties.getName())));
-        assertThrows(SubscriptionRequestException.class, () -> restController.addSubscriptions(serviceProvider, request));
-
-    }
-    @Test
     public void testAddingSubscriptionWithInvalidSelector() {
         String selector = "Invalid selector";
         String serviceProviderName = "serviceprovider";
@@ -1068,22 +1057,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         Delivery delivery = response.getDeliveries().stream().findFirst().get();
         assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
-    }
-
-    @Test
-    public void testAddingDeliveryWithTooLongSelector(){
-        String serviceProviderName = "my-service-provider";
-        StringBuilder selector = new StringBuilder();
-        while (selector.length() <= 255){
-            selector.append("test");
-        }
-        AddDeliveriesRequest request = new AddDeliveriesRequest(
-                serviceProviderName,
-                Collections.singleton(
-                        new SelectorApi(selector.toString())
-                )
-        );
-        assertThrows(DeliveryPostException.class, () -> restController.addDeliveries(serviceProviderName, request));
     }
 
     @Test
