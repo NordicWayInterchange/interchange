@@ -89,7 +89,11 @@ public class NapRestController {
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
 
         if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector())) {
-            throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
+            throw new SubscriptionRequestException("Bad api object for subscription request, subscription has no selector.");
+        }
+
+        if(subscriptionRequest.getSelector().length() > 255){
+            throw new SubscriptionRequestException(String.format("Bad api object for subscription request. Selector %s exceeds character limit of 255", subscriptionRequest.getSelector()));
         }
 
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
@@ -136,7 +140,7 @@ public class NapRestController {
                 .stream()
                 .filter(s -> s.getUuid().equals(subscriptionId))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,actorCommonName)));
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s", subscriptionId, actorCommonName)));
 
         return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
@@ -178,7 +182,11 @@ public class NapRestController {
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
         if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
-            throw new DeliveryPostException("Bad api object for Delivery Request, Delivery has no selector");
+            throw new DeliveryPostException("Bad api object for delivery request, delivery has no selector");
+        }
+
+        if(deliveryRequest.getSelector().length() > 255){
+            throw new DeliveryPostException(String.format("Bad api object for delivery request. Selector %s exceeds character limit", deliveryRequest.getSelector()));
         }
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
 
@@ -283,9 +291,9 @@ public class NapRestController {
         if(!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s &s", capabilitiesRequest, capabilityProperties));
         }
-        Map<Boolean, String> capabilityValidator = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
-        if(capabilityValidator.containsKey(false)){
-            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", capabilityValidator.get(false), capabilityToAdd));
+        Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        if(validatedCapability.containsKey(false)){
+            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
         }
 
         serviceProviderToUpdate.getCapabilities().addDataType(capabilityToAdd);

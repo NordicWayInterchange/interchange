@@ -89,6 +89,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingSubscriptionWithTooLongSelector(){
+        String actorCommonName = "actor";
+        StringBuilder selector = new StringBuilder();
+        while (selector.length() <= 255){
+            selector.append("test");
+        }
+        assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest(selector.toString())));
+    }
+
+    @Test
     public void testGetSubscriptionsReturnsValidSubscriptions(){
         String actorCommonName = "actor";
         SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'");
@@ -159,6 +169,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
         Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+    }
+
+    @Test
+    public void testAddingDeliveryWithTooLongSelector(){
+        String actorCommonName = "actor";
+        StringBuilder selector = new StringBuilder();
+        while (selector.length() <= 255){
+            selector.append("test");
+        }
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector.toString())));
     }
 
     @Test
