@@ -509,4 +509,19 @@ public class CapabilityValidatorTest {
         );
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
     }
+
+    @Test
+    public void testCapabilityWithInvalidPublisherId(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO0000",
+                        "NO0000:pub-1",
+                        "NO",
+                        "test",
+                        List.of("1")
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+    }
 }

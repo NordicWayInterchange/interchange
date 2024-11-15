@@ -102,7 +102,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                         new Capability(
                                 new DatexApplication(
                                         "NO00000",
-                                        "NO-pub-1",
+                                        "NO00000:pub-1",
                                         "NO",
                                         "1.0",
                                         List.of("1200"),
@@ -126,7 +126,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","pub-1-NOOOOOOO:NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
+        DatexApplicationApi application = new DatexApplicationApi("NO00000","NO00000:NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(application);
 
@@ -159,7 +159,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilityWithIllegalCharacterThrowsException(){
-        DatexApplicationApi app = new DatexApplicationApi("pub", "NO-pub-1", "NO", "1.0", List.of("1200"), "'SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("SE12345", "SE12345", "NO", "1.0", List.of("1200"), "'SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
@@ -453,7 +453,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200", "1110", "1000001"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO12345", "NO12345:NO-pub", "NO", "1.0", List.of("1200", "1110", "1000001"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
@@ -500,7 +500,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-123:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO12345", "NO12345:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi(
                 app,
@@ -1146,7 +1146,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 serviceProviderName,
                 Set.of(new CapabilityApi(
-                        new DatexApplicationApi("publisherId", "publisherId:123", "NO", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
+                        new DatexApplicationApi("DK12345", "DK12345:123", "NO", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
                         new MetadataApi()
                 ))
         );

@@ -3,8 +3,8 @@
     "capabilities" : [ {
         "application" : {
             "messageType" : "DENM",
-            "publisherId" : "NO000001",
-            "publicationId" : "NO000001:pub-1",
+            "publisherId" : "NO00000",
+            "publicationId" : "NO00000:pub-1",
             "originatingCountry" : "NO",
             "protocolVersion" : "DENM:1.2.2",
             "quadTree" : [ "12003" ],

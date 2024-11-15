@@ -19,6 +19,8 @@ public class CapabilityValidator {
 
     private static Pattern countryCodeRegex = Pattern.compile("[A-Z]{2}");
 
+    private static Pattern publisherIdRegex = Pattern.compile("[A-Z]{2}[0-9]{5}");
+
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
 
@@ -71,26 +73,34 @@ public class CapabilityValidator {
             if (!matcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
                 return Map.of(false, String.format("%s contains illegal characters", property));
             }
-            if (value.length() > 255 && !property.equals("quadTree")) {
+            if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
                 return Map.of(false, String.format("%s exceeds character limit of 255", property));
             }
-            if(property.equals("originatingCountry")){
-                Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
-                if(!countryCodeMatcher.matches()) {
-                    return Map.of(false, String.format("'%s' is not a valid country code", value));
+            switch (property) {
+                case "publisherId" -> {
+                    Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
+                    if(!publisherIdMatcher.matches()) {
+                        return Map.of(false, String.format("%s must be in format <country code><5 numbers>", property));
+                    }
                 }
-            }
-            else if(property.equals("publicationId")){
-                String publisherId = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get("publisherId");
-                if(!value.startsWith(publisherId+":")){
-                    return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                case "originatingCountry" -> {
+                    Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
+                    if (!countryCodeMatcher.matches()) {
+                        return Map.of(false, String.format("'%s' is not a valid country code", value));
+                    }
                 }
-            }
-            else if(property.equals("quadTree")){
-                String [] quadTreeTiles = value.split(",");
-                for(String quadTreeTile : quadTreeTiles){
-                    if(quadTreeTile.length() > 255){
-                        return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                case "publicationId" -> {
+                    String publisherId = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get("publisherId");
+                    if (!value.startsWith(publisherId + ":")) {
+                        return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                    }
+                }
+                case "quadTree" -> {
+                    String[] quadTreeTiles = value.split(",");
+                    for (String quadTreeTile : quadTreeTiles) {
+                        if (quadTreeTile.length() > 255) {
+                            return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                        }
                     }
                 }
             }
