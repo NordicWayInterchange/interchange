@@ -307,7 +307,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithIllegalCharacterThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "'originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publisherId:p'ublicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
@@ -317,7 +317,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithInvalidQuadTreeThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("124"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publisherId:publicationId", "OG", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
@@ -327,7 +327,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithMissingPropertiesThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", null, List.of("1"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publicationId", "NO", null, List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));

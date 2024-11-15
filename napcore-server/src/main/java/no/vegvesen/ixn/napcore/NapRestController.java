@@ -45,7 +45,6 @@ public class NapRestController {
     private final CertService certService;
     private final NapCoreProperties napCoreProperties;
     private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
-    private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
 
@@ -289,8 +288,9 @@ public class NapRestController {
 
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s &s", capabilitiesRequest, capabilityProperties));
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
+
         Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
         if(validatedCapability.containsKey(false)){
             throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
