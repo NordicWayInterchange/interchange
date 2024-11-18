@@ -291,5 +291,6 @@
         <module>keys-generator</module>
         <module>import-export-service</module>
         <module>service-provider-client</module>
+        <module>import-export-client</module>
     </modules>
 </project>

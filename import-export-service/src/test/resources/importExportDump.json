@@ -24,16 +24,16 @@
         }
       } ],
       "status" : "KNOWN",
-      "lastUpdated" : 1728299714065
+      "lastUpdated" : 1731919685580
     },
     "neighbourSubscriptions" : [ {
-      "uuid" : "1dca6100-2c82-49df-9dcc-ddcebb5febfb",
+      "uuid" : "21143445-72d7-4d92-9c1b-eefee13b107b",
       "status" : "CREATED",
       "selector" : "originatingCountry = 'NO'",
-      "path" : "my-interchange.eu/subscriptions/1dca6100-2c82-49df-9dcc-ddcebb5febfb",
+      "path" : "my-interchange.eu/subscriptions/21143445-72d7-4d92-9c1b-eefee13b107b",
       "consumerCommonName" : "my-neighbour.eu",
       "endpoints" : [ {
-        "source" : "sub-03261f51-160d-457c-8f8e-da61f3476d45",
+        "source" : "sub-6ad0490e-7cd2-4551-bffe-ad13376e8143",
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
         "maxBandwidth" : 100,
@@ -41,12 +41,12 @@
       } ]
     } ],
     "ourSubscriptions" : [ {
-      "path" : "my-neighbour.eu/subscriptions/157b7f66-45cd-493b-89da-d045ab6cbe94",
+      "path" : "my-neighbour.eu/subscriptions/a9dabc4f-d2c1-4b8d-b1b3-9a6c2f195606",
       "selector" : "publicationId = 'NO00000:NPRA_DATEX_1'",
       "consumerCommonName" : "my-interchange.eu",
       "status" : "CREATED",
       "endpoints" : [ {
-        "source" : "fbe06b55-600b-44aa-9694-7a078c7ece5c",
+        "source" : "25e1b24e-ad10-4f76-a252-4d1b645251b2",
         "host" : "amqps://my-neighbour.eu",
         "port" : 5671,
         "maxBandwidth" : 100,
@@ -58,24 +58,24 @@
   "serviceProviders" : [ {
     "name" : "my-service-provider",
     "subscriptions" : [ {
-      "uuid" : "49bd6bdc-d332-4453-8fd8-b112fe92850b",
+      "uuid" : "2bf49879-f797-4d6d-886d-d3cafb9dc475",
       "selector" : "publicationId = 'NO00000:NPRA_DATEX_1' OR publicationId = 'NO00000:NPRA_DATEX_2'",
       "consumerCommonName" : "my-interchange.eu",
       "status" : "CREATED",
       "localEndpoints" : [ {
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
-        "source" : "loc-6d0a8bb0-6e53-424a-86b7-f230f316ba37",
+        "source" : "loc-1fe46b5b-7b61-42a7-8b5f-95522e491777",
         "maxBandwidth" : 100,
         "maxMessageRate" : 100
       } ],
       "localConnections" : [ {
-        "source" : "cap-ef174539-8d8c-42f1-b67a-13169033a328",
-        "destination" : "loc-6d0a8bb0-6e53-424a-86b7-f230f316ba37"
+        "source" : "cap-620114f9-5d74-46e7-9ab7-3e3078d234c4",
+        "destination" : "loc-1fe46b5b-7b61-42a7-8b5f-95522e491777"
       } ]
     } ],
     "capabilities" : [ {
-      "uuid" : "9c29e6f8-3f65-4e5f-944a-9958a50e0a4a",
+      "uuid" : "12e85207-a1cd-4dcf-9e59-9c0ae105362e",
       "application" : {
         "messageType" : "DATEX2",
         "publisherId" : "NO00000",
@@ -97,16 +97,16 @@
       "status" : "CREATED",
       "shards" : [ {
         "shardId" : 1,
-        "exchangeName" : "cap-ef174539-8d8c-42f1-b67a-13169033a328",
+        "exchangeName" : "cap-620114f9-5d74-46e7-9ab7-3e3078d234c4",
         "selector" : "publisherId = 'NO00000' AND publicationId = 'NO00000:NPRA_DATEX_2' AND originatingCountry = 'NO' AND protocolVersion = 'DATEX:1.0' AND quadTree like '%,100303%' AND publicationType = 'SituationPublication' AND publisherName = 'NPRA'"
       } ]
     } ],
     "deliveries" : [ {
-      "uuid" : "23c9912c-4bcb-43d5-9f38-d9f95b7683f0",
+      "uuid" : "8fe03236-0bd8-4a10-8abe-70dec252b377",
       "endpoints" : [ {
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
-        "target" : "del-cbb57736-9e9c-4fd1-a6fe-c9ce219a817e",
+        "target" : "del-1e1e6084-2299-4803-b0a9-b4d1d6baedab",
         "maxBandwidth" : 100,
         "maxMessageRate" : 100
       } ],
@@ -115,14 +115,14 @@
     } ]
   } ],
   "privateChannels" : [ {
-    "uuid" : "6b6dfb93-7625-4668-b7c6-f588347fade7",
+    "uuid" : "544f68e7-7f3d-4bd4-bcfc-3736cb3098ad",
     "serviceProviderName" : "my-service-provider",
     "peerName" : "other-service-provider",
     "status" : "CREATED",
     "endpoint" : {
       "host" : "amqps://my-interchange.eu",
       "port" : 5671,
-      "queueName" : "priv-7f8296bb-30df-450e-97e5-28505d51e688"
+      "queueName" : "priv-5069b4e6-a1de-441d-9e89-814678d322bc"
     }
   } ]
 }
