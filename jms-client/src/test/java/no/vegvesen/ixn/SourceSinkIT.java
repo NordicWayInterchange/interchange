@@ -77,7 +77,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
 
 		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
-		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer(1000);
+		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receive(1000);
 
 	}
@@ -131,7 +131,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Thread.sleep(1000);
 
 		Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext);
-		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer(1000);
+		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receiveNoWait();
 		assertThat(receive).isNull();
 	}
@@ -162,7 +162,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
 		Sink kingHaraldTestQueueSink = new Sink(Url, "expiry-queue", kingHaraldSSlContext);
-		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer(1000);
+		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
 		Message receive = testQueueConsumer.receiveNoWait();
 		assertThat(receive).isNull();
 	}
@@ -197,10 +197,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.build());
 
 		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
-		MessageConsumer testConsumer = sink.createConsumer(1000);
+		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		//TODO this is weird!
-		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
@@ -228,26 +226,20 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		source.sendNonPersistentMessage(message);
 
 		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
-		MessageConsumer testConsumer = sink.createConsumer(1000);
+		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		//TODO this is weird!
-		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
-
-	//TODO how about doing this from different threads?
 	@Test
 	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
 		ImageSource source = new ImageSource(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
 
-		//TODO this is weird!
 		try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext,new ImageMessageListener())) {
-			MessageConsumer testConsumer = sink.createConsumer(1000);
+			MessageConsumer testConsumer = sink.createConsumer();
 			Message receive = testConsumer.receive(1000);
-			sink.getListener().onMessage(receive);
 			assertThat(receive).isNotNull();
 		} catch (Exception e) {
 			fail("unexpected exception",e);

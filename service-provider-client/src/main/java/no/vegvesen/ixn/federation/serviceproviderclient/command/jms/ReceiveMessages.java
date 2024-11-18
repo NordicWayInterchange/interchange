@@ -20,9 +20,6 @@ public class ReceiveMessages implements Callable<Integer> {
     @Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
     String directory;
 
-    @Option(names = {"-p", "--prefetch"}, description = "Set prefetch policy")
-    private Integer prefetch;
-
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -41,7 +38,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
-            sink.start(prefetch == null ? 1000 : prefetch);
+            sink.start();
             counter.await();
         }
         return 0;

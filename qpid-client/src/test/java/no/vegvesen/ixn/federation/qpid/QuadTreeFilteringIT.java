@@ -146,7 +146,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-		MessageConsumer consumer = sink.createConsumer(1000);
+		MessageConsumer consumer = sink.createConsumer();
 
 		Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext);
 		source.start();
@@ -182,7 +182,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-		MessageConsumer consumer = sink.createConsumer(1000);
+		MessageConsumer consumer = sink.createConsumer();
 
 		Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext);
 		source.start();
@@ -212,5 +212,4 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		source.close();
 		return receivedMessage;
 	}
-
 }

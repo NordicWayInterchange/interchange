@@ -17,16 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.junit.jupiter.Container;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.jms.JMSException;
 import javax.naming.NamingException;
@@ -144,7 +138,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
 		verify(privateChannelRepository, times(1)).findAllByStatusAndServiceProviderName(any(), any());
-
 	}
 
 	@Test
@@ -265,8 +258,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
 		router.removeUnwantedSubscriptions(king_gustaf);
 		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
-
 	}
+
 	@Test
 	public void doNotRemovePeerFromGroupWhenTheyAreServiceProviderInAnotherChannel(){
 		ServiceProvider serviceProvider_1 = new ServiceProvider("service-1");
@@ -337,7 +330,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
 		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
 		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
-
 	}
 
 	@Test
@@ -407,7 +399,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalEndpoint endpoint = sinkEndpoints.stream().findFirst().get();
 		Sink readKingGustafQueue = new Sink(amqpsUrl, endpoint.getSource(), kingGustafSslContext);
-		readKingGustafQueue.start(1000);
+		readKingGustafQueue.start();
 
 		Set<LocalDeliveryEndpoint> deliveryEndpoints = king_gustaf.getDeliveries().stream().flatMap(d -> d.getEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(deliveryEndpoints).hasSize(1);
@@ -417,7 +409,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		writeOnrampQueue.start();
 		try {
 			Sink readDlqueue = new Sink(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
-			readDlqueue.start(1000);
+			readDlqueue.start();
 			fail("Should not allow king_gustaf to read from queue not granted access on local endpoint");
 		} catch (Exception ignore) {
 		}
@@ -1229,10 +1221,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
 		router.createBindingsWithMatches();
-		//TODO asserts, verify that the methods are called
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(client.getQueuePublishingLinks(source)).doesNotContain(new Binding(source, name, new Filter("a = b")));
-
 	}
 
 	@Test
@@ -1277,9 +1267,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
 		router.createBindingsWithMatches();
-		//TODO asserts, verify that the methods are called
 		assertThat(client.queueExists(source)).isFalse();
 	}
-
-
 }

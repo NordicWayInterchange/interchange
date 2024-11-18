@@ -51,15 +51,12 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			);
 
 	@Container
-	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer(
 			stores,
 			HOST_NAME,
 			HOST_NAME,
 			Paths.get("docker","producer")
 			).withLogConsumer(new Slf4jLogConsumer(logger));
-
-
 
 	public Sink createSink(String containerUrl, String queueName, CaStores stores, String spName) {
 		return new Sink(
@@ -81,7 +78,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Test
 	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
-
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
@@ -121,16 +117,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						.timestamp(System.currentTimeMillis())
 						.build(), 8000L);
 
-				Message message = sink.createConsumer(1000).receive(2000);
+				Message message = sink.createConsumer().receive(2000);
 				assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
 				assertThat(message.getJMSExpiration()).withFailMessage("Routed message has no expiry specified").isNotEqualTo(0L);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
-
         }
-
 	}
 
 	@Test
@@ -183,14 +176,12 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			Thread.sleep(2000L); // wait for the message to expire with extra margin
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), CONSUMER_SP_NAME, stores, CONSUMER_SP_NAME)) {
-                Message message = sink.createConsumer(1000).receive(1000L);
+                Message message = sink.createConsumer().receive(1000L);
 				assertThat(message).withFailMessage("Received message we expected to be expired").isNull();
 			} catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-
-
 	}
 
 	@Test
@@ -234,16 +225,14 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(senderMessage);
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer(1000);
+                MessageConsumer consumer = sink.createConsumer();
 				Message message = consumer.receive(1000);
 
 				assertThat(message).isNotNull();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-
 	}
 
 	@Test
@@ -290,16 +279,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(senderMessage);
 
             try (Sink sink = createSink(consumerContainer.getAmqpsUrl(), "sp_consumer", stores, CONSUMER_SP_NAME)) {
-                MessageConsumer consumer = sink.createConsumer(1000);
+                MessageConsumer consumer = sink.createConsumer();
 				Message receiveMessage = consumer.receive(1000);
 
 				assertThat(receiveMessage).isNotNull();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-
 	}
-
 }

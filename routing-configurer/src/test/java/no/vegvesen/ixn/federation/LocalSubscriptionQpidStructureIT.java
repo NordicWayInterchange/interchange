@@ -22,15 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -57,8 +52,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
-
     public static final String SP_NAME = "sp-1";
+
     public static final String HOST_NAME = getDockerHost();
 
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(LocalSubscriptionQpidStructureIT.class),"my_ca", HOST_NAME, CONFIGURER_USER, SP_NAME);
@@ -88,7 +83,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         qpidContainer.start();
     }
 
-    //TODO would be nic to be able to do without it :-)
     @MockBean
     ServiceProviderRepository serviceProviderRepository;
 
@@ -100,7 +94,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     @MockBean
     PrivateChannelRepository privateChannelRepository;
-
 
     @Autowired
     QpidClient client;
@@ -145,11 +138,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 sslContext,
                 System.out::println
         ))  {
-            sink.start(1000);
+            sink.start();
 
         } catch (Exception e) {
            throw new RuntimeException(e);
         }
-
     }
 }

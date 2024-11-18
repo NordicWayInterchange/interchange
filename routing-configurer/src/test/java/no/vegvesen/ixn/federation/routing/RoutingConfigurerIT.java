@@ -794,7 +794,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				sub.getEndpoints().stream().findFirst().get().getSource(),
 				sslContext,
 				message -> numMessages.incrementAndGet())) {
-			sink.start(1000);
+			sink.start();
 			try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchangeName,sslContext)) {
 				source.start();
 				String messageText = "This is my DENM message :) ";
@@ -824,11 +824,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void listenerEndpointsAreSavedFromEndpointsList() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
-
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671, new SubscriptionShard("target"));
-
-		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
 
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
 		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(null);
