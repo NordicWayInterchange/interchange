@@ -4,23 +4,22 @@ public class ExampleAPIObjects {
     public static final String REQUESTSUBSCRIPTIONSREQUEST = """
             {
               "version" : "1.1NW3",
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
               "subscriptions" : [ {
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "consumerCommonName" : "node-1"
+                "consumerCommonName" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no"
               } ]
             }
             """;
     public static final String REQUESTSUBSCRIPTIONSRESPONSE = """
             {
               "version" : "1.1NW3",
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "subscriptions" : [ {
-                "id" : "1",
+                "id" : "ddd0c289-ef27-4d0f-9c72-4717513d007f",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "consumerCommonName" : "node-1",
-                "path" : "/subscriptions/1",
-                
+                "consumerCommonName" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
+                "path" : "/subscriptions/ddd0c289-ef27-4d0f-9c72-4717513d007f",
                 "status" : "REQUESTED",
                 "lastUpdatedTimestamp" : 1633525221175
               } ]
@@ -29,40 +28,47 @@ public class ExampleAPIObjects {
     public static final String DENM_CAPABILITY_REQUEST = """
             {
               "version" : "1.1NW3",
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
              "capabilities" : [ {
-                "id" : "1",
-                "path" : "/spi-1/capabilities/1",
+                "id" : "ddd0c289-ef27-4d0f-9c72-4717513d007f",
+                "path" : "/pilotinterchange.eu.bouvet.pilotinterchange.eu/capabilities/ddd0c289-ef27-4d0f-9c72-4717513d007f",
                 "definition" : {
                   "application" : {
                     "messageType" : "DENM",
-                    "publisherId" : "NPRA",
-                    "publicationId" : "pub-1",
+                    "publisherId" : "NO00001",
+                    "publicationId" : "NO00001:25kkd7g2",
                     "originatingCountry" : "NO",
-                    "protocolVersion" : "1.0",
-                    "quadTree" : [ "1234" ],
+                    "protocolVersion" : "DENM:1.2.1",
+                    "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"],
                     "causeCode" : [ 6 ]
                   },
-                  "metadata" : { }
+                  "metadata" : {
+                 "shardCount" : 1,
+                "infoUrl": "https://pub.info.no",
+                "redirectPolicy": "OPTIONAL",
+                "maxBandwidth": 0,
+                "maxMessageRate": 0,
+                "repetitionInterval": 0
+                }
                 }
               } ]
             }
             """;
     public static final String DATEX_CAPABILITY_REQUEST = """
-            "name" : "sp-1",
+            "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
-                  "messageType" : "DATEX",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
-                  "publicationType" : "publicationType",
+                  "messageType" : "DATEX2",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:dk224512f",
+                  "publicationType" : "SituationPublication",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "DATEX2:3.1",
+                  "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : {
-                 "shardCount" : 1,
+                "shardCount" : 1,
                 "infoUrl": "https://pub.info.no",
                 "redirectPolicy": "OPTIONAL",
                 "maxBandwidth": 0,
@@ -74,19 +80,19 @@ public class ExampleAPIObjects {
             """;
     public static final String IVIM_CAPABILITY_REQUEST = """
                         {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "IVIM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "IVIM:1.0",
+                  "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : {
-                 "shardCount" : 1,
+                "shardCount" : 1,
                 "infoUrl": "https://pub.info.no",
                 "redirectPolicy": "OPTIONAL",
                 "maxBandwidth": 0,
@@ -98,16 +104,16 @@ public class ExampleAPIObjects {
             """;
     public static final String SPATEM_CAPABILITY_REQUEST = """
             {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SPATEM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "SPATEM:1.0",
+                   "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : {
                  "shardCount" : 1,
@@ -122,16 +128,16 @@ public class ExampleAPIObjects {
             """;
     public static final String MAPEM_CAPABILITY_REQUEST = """
             {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "MAPEM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "MAPEM:1.0",
+                  "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : {
                 "shardCount" : 1,
@@ -146,16 +152,16 @@ public class ExampleAPIObjects {
             """;
     public static final String SREM_CAPABILITY_REQUEST = """
             {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SREM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "SREM:1.2",
+                  "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : { 
                 "shardCount" : 1,
@@ -170,16 +176,16 @@ public class ExampleAPIObjects {
             """;
     public static final String SSEM_CAPABILITY_REQUEST = """
             {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SSEM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
-                  "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                  "protocolVersion" : "SSEM:1.0",
+                  "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
                 "metadata" : {
                 "shardCount" : 1,
@@ -193,18 +199,18 @@ public class ExampleAPIObjects {
             """;
     public static final String CAM_CAPABILITY_REQUEST = """
             {
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "version" : "1.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "CAM",
-                  "publisherId" : "NPRA",
-                  "publicationId" : "pub-1",
+                  "publisherId" : "NO00001",
+                  "publicationId" : "NO00001:s21924dk",
                   "originatingCountry" : "NO",
                   "protocolVersion" : "1.0",
-                  "quadTree" : [ "1234" ]
+                 "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"]
                 },
-                "metadata" : { 
+                "metadata" : {
                 "shardCount" : 1,
                 "infoUrl": "https://pub.info.no",
                 "redirectPolicy": "OPTIONAL",
@@ -215,22 +221,21 @@ public class ExampleAPIObjects {
               } ]
             }
             """;
-    public static final String UPDATECAPABILITIESRESPONSE = """
-                        
+    public static final String UPDATECAPABILITIESRESPONSE = """  
             {
               "version" : "1.1NW3",
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
              "capabilities" : [ {
-                "id" : "1",
-                "path" : "/spi-1/capabilities/1",
+                "id" : "d4626s9b-8583-4739-ae62-bd1dbc97154a",
+                "path" : "/pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no/capabilities/d4626s9b-8583-4739-ae62-bd1dbc97154a",
                 "definition" : {
                   "application" : {
                     "messageType" : "DENM",
-                    "publisherId" : "NPRA",
-                    "publicationId" : "pub-1",
+                    "publisherId" : "NO00001",
+                    "publicationId" : "NO00001:s21924dk",
                     "originatingCountry" : "NO",
-                    "protocolVersion" : "1.0",
-                    "quadTree" : [ "1234" ],
+                    "protocolVersion" : "DENM:2.2.1",
+                    "quadTree" : [ "1100023322122", "11011222221123", "1101233333112", "11013222211123", "110122331112", "1100011003222"],
                     "causeCode" : [ 6 ]
                   },
                   "metadata" : { }
@@ -242,37 +247,37 @@ public class ExampleAPIObjects {
     public static final String LISTSUBSCRIPTIONSRESPONSE = """
             {
               "version" : "1.1NW3",
-              "name" : "sp-1",
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
               "subscriptions" : [ {
-                "id" : "2",
+                "id" : "d4626s9b-8583-4739-ae62-bd1dbc97154a",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "consumerCommonName" : "node-1",
-                "path" : "/subscriptions/2",
+                "consumerCommonName" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                "path" : "/subscriptions/d4626s9b-8583-4739-ae62-bd1dbc97154a",
                 "status" : "REQUESTED",
                 "lastUpdatedTimestamp" : 1633526284318
               }, {
-                "id" : "1",
+                "id" : "d4626s9b-8583-4739-ae62-bd1dbc97154b",
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "consumerCommonName" : "node-1",
-                "path" : "/subscriptions/1",
+                "consumerCommonName" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                "path" : "/subscriptions/d4626s9b-8583-4739-ae62-bd1dbc97154b",
                 "status" : "REQUESTED",
-                "lastUpdatedTimestamp" : 1633526284318
+                "lastUpdatedTimestamp" : 1633526284319
               } ]
             }
             """;
 
     public static final String POLLSUBSCRIPTIONSRESPONSE = """
             {
-              "id" : "1",
+              "id" : "d4626s9b-8583-4739-ae62-bd1dbc97154a",
               "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-              "consumerCommonName" : "node-1",
-              "path" : "/subscriptions/1",
+              "consumerCommonName" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
+              "path" : "/subscriptions/d4626s9b-8583-4739-ae62-bd1dbc97154a",
               "status" : "CREATED",
               "lastUpdatedTimestamp" : 0,
                "endpoints" : [ {
-                "host" : "amqps://myserver",
+                "host" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
                 "port" : 5671,
-                "source" : "serviceprovider-1",
+                "source" : "loc-8f7b4f7c-3286-4fe5-9221-0479006620d1",
                 "maxBandwidth" : 0,
                 "maxMessageRate" : 0
               } ]

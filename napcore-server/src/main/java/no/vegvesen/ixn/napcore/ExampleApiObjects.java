@@ -57,7 +57,7 @@ public class ExampleApiObjects {
               "application" : {
                 "messageType" : "DENM",
                 "publisherId" : "NO00002",
-                "publicationId" : "NTO002-pub-1222",
+                "publicationId" : "NOO0002:st5421f2",
                 "originatingCountry" : "NO",
                 "protocolVersion" : "DENM:2.3",
                 "quadTree" : [ "123" ],
@@ -120,7 +120,7 @@ public class ExampleApiObjects {
               "application" : {
                 "messageType" : "DENM",
                 "publisherId" : "NO00002",
-                "publicationId" : "NTO002-pub-1222",
+                "publicationId" : "NO00002:tt2125os",
                 "originatingCountry" : "NO",
                 "protocolVersion" : "DENM:2.3",
                 "quadTree" : [ "1111111111111111111111111111111111111111" ],
@@ -143,7 +143,7 @@ public class ExampleApiObjects {
               "application" : {
                 "messageType" : "DENM",
                 "publisherId" : "NO00002",
-                "publicationId" : "NTO002-pub-1222",
+                "publicationId" : "NO00002:abc123d",
                 "originatingCountry" : "NO",
                 "protocolVersion" : "DENM:2.3",
                 "quadTree" : [ "123" ],
@@ -166,10 +166,10 @@ public class ExampleApiObjects {
               "application" : {
                 "messageType" : "DENM",
                 "publisherId" : "NO00002",
-                "publicationId" : "NTO002-pub-1222",
+                "publicationId" : "NO00002:o2a93v2",
                 "originatingCountry" : "NO",
                 "protocolVersion" : "DENM:2.3",
-                "quadTree" : [ "1111111111111111111111111111111111111111" ],
+                "quadTree" : [ "1111111111111111111111", "111111110" ],
                 "causeCode" : [ 6 ]
               },
               "metadata" : {
@@ -189,10 +189,10 @@ public class ExampleApiObjects {
               "application" : {
                 "messageType" : "DENM",
                 "publisherId" : "NO00002",
-                "publicationId" : "NTO002-pub-1222",
+                "publicationId" : "NO00002:abc123d",
                 "originatingCountry" : "NO",
                 "protocolVersion" : "DENM:2.3",
-                "quadTree" : [ "1111111111111111111111111111111111111111" ],
+                "quadTree" : [ "123", "100010", "00001" ],
                 "causeCode" : [ 6 ]
               },
               "metadata" : {
@@ -208,17 +208,17 @@ public class ExampleApiObjects {
 
     static final String GETPUBLICATIONIDSRESPONSE = """
             [
-            "NT0002-pub-1222",
-            "Publication-1",
-            "Publication-2"]
+            "NO00002:abc123a",
+            "NO00002:abc123b",
+            "NO00002:abc123c"]
             """;
 
     static final String ADDPRIVATECHANNELRESPONSE = """
             {
                 "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
                 "peers": [
-                    "king_olav.bouvetinterchange.eu",
-                    "king_gustaf.bouvetinterchange.eu"
+                    "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                    "pilotinterchange.eu.bouvet.pilotinterchange.eu.bippe@stankelbein.no"
                 ],
                 "status": "REQUESTED",
                 "description": "Private channel for bouvet and friends",
@@ -234,8 +234,8 @@ public class ExampleApiObjects {
             {
                 "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
                 "peers": [
-                    "king_olav.bouvetinterchange.eu",
-                    "king_gustaf.bouvetinterchange.eu"
+                    "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                    "pilotinterchange.eu.bouvet.pilotinterchange.eu.bippe@stankelbein.no"
                 ],
                 "status": "CREATED",
                 "description": "Private channel for bouvet and friends",
@@ -253,8 +253,8 @@ public class ExampleApiObjects {
                   {
                       "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
                       "peers": [
-                          "king_olav.bouvetinterchange.eu",
-                          "king_gustaf.bouvetinterchange.eu"
+                        "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                        "pilotinterchange.eu.bouvet.pilotinterchange.eu.bippe@stankelbein.no"
                       ],
                       "status": "CREATED",
                       "description": "Private channel for bouvet and friends",
