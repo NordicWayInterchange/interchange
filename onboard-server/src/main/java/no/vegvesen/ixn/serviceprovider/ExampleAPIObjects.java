@@ -8,7 +8,9 @@ public class ExampleAPIObjects {
               "name": "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
               "privateChannels": [
                 {
-                  "peerName": "pilotinterchange.eu.bouvet.pilotinterchange.eu.johanhansen@bouvet.no"
+                  "peers": ["pilotinterchange.eu.bouvet.pilotinterchange.eu.bippe@stankelbein.no",
+                            "pilotinterchange.eu.bouvet.pilotinterchange.eu.speedy@gonzales.no"],
+                  "description": "private channel for bippe stankelbein and speedy gonzales"
                 }
               ]
             }
@@ -373,7 +375,7 @@ public class ExampleAPIObjects {
                 "pilotinterchange.eu.bouvet.pilotinterchange.eu.speedy@gonzales.no"
                 ],
                 "status" : "REQUESTED",
-                "description": "private channel for bouvet and friends",
+                "description": "private channel for bippe stankelbein and speedy gonzales",
                 "lastUpdated": 1729840858
               }]
             }
