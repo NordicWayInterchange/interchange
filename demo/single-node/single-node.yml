@@ -64,7 +64,6 @@ services:
       - "../qpid/a/config:/config"
       - "../keys/a:/keys"
       - "../../qpid/a/messages:/work/a/messages"
-      - "../tmp/dump:/dump"
     environment:
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
@@ -75,7 +74,6 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
-      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
     depends_on:
     - mock-dns-server
     networks:
