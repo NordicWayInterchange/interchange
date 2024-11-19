@@ -68,9 +68,9 @@ public class CapabilityValidator {
         for (String property : mandatoryProperties) {
 
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
-            Matcher matcher = validCharacters.matcher(value);
+            Matcher validCharMatcher = validCharacters.matcher(value);
 
-            if (!matcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
+            if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
                 return Map.of(false, String.format("%s contains illegal characters", property));
             }
             if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {

@@ -400,7 +400,7 @@ public class CapabilityValidatorTest {
     }
 
     @Test
-    public void testCapabilityWithQuadTreeExceedingCharacterLimit(){
+    public void testCapabilityWithQuadTreeTileExceedingCharacterLimit(){
         StringBuilder quadTile = new StringBuilder();
         while (quadTile.length() < 300){
             quadTile.append("1");
@@ -438,7 +438,7 @@ public class CapabilityValidatorTest {
     }
 
     @Test
-    public void testCapabilityWithInvalidPublicationIdIsNotValid(){
+    public void testCapabilityWithInvalidPublicationId(){
         CapabilityApi capability1 = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
@@ -455,7 +455,7 @@ public class CapabilityValidatorTest {
     }
 
     @Test
-    public void testCapabilityWithInvalidCountryCodeIsNotValid(){
+    public void testCapabilityWithInvalidCountryCode(){
         CapabilityApi capability1 = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
