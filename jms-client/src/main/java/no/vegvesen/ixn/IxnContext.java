@@ -38,27 +38,8 @@ public class IxnContext {
 	}
 
 	public IxnContext(Object URI, String sendQueue, String receiveQueue, Integer prefetch) throws NamingException {
-		Hashtable<Object, Object> env = new Hashtable<>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-		env.put("connectionfactory." + JMS_JNDI_INITIAL_CONTEXT_FACTORY, URI);
-		if (receiveQueue != null) {
-			env.put("queue." + JMS_JNDI_RECEIVE_QUEUE_PROPERTY, receiveQueue);
-		}
-		if (sendQueue != null) {
-			env.put("queue." + JMS_JNDI_SEND_QUEUE_PROPERTY, sendQueue);
-		}
-		this.context = new javax.naming.InitialContext(env);
+		this(URI,sendQueue,receiveQueue);
 		this.prefetch = prefetch;
-	}
-
-	/**
-	 * uses basic authentication
-	 */
-	public Connection createConnection(String username, String password) throws NamingException, JMSException {
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
-		factory.setPrefetchPolicy(getPrefetchPolicy());
-		factory.setPopulateJMSXUserID(true);
-		return factory.createConnection(username, password);
 	}
 
 	/**
@@ -66,19 +47,13 @@ public class IxnContext {
 	 */
 	public Connection createConnection(SSLContext sslContext) throws NamingException, JMSException {
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
-		factory.setPrefetchPolicy(getPrefetchPolicy());
+		if (prefetch != null) {
+			JmsDefaultPrefetchPolicy prefetchPolicy = new JmsDefaultPrefetchPolicy();
+			prefetchPolicy.setAll(prefetch);
+			factory.setPrefetchPolicy(prefetchPolicy);
+		}
 		factory.setPopulateJMSXUserID(true);
 		factory.setSslContext(sslContext);
-		return factory.createConnection();
-	}
-
-	/**
-	 * uses default PKI or settings provided by system properties
-	 */
-	public Connection createConnection() throws NamingException, JMSException {
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
-		factory.setPrefetchPolicy(getPrefetchPolicy());
-		factory.setPopulateJMSXUserID(true);
 		return factory.createConnection();
 	}
 
@@ -90,9 +65,4 @@ public class IxnContext {
 		return (Destination) context.lookup(JMS_JNDI_SEND_QUEUE_PROPERTY);
 	}
 
-	public JmsDefaultPrefetchPolicy getPrefetchPolicy(){
-		JmsDefaultPrefetchPolicy prefetchPolicy = new JmsDefaultPrefetchPolicy();
-		prefetchPolicy.setAll(prefetch == null ? 1000 : prefetch);
-		return prefetchPolicy;
-	}
 }
