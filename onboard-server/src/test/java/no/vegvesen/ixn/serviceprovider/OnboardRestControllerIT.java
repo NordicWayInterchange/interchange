@@ -1365,6 +1365,46 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 .isEqualTo(time);
     }
 
+    @Test
+    public void testIllegalCharsInPathVariable(){
+        String illegal1 = "s*";
+        String legal = "s@_-.A0S5S";
+        String illegal2 = "s#";
+        String illegal3 = "s?";
+        String illegal4 = "s/";
+        String illegal5 = "s;";
+        String illegal6 = "s!";
+        String illegal7 = "s$";
+        String illegal8 = "s&";
+        String illegal9 = "s'";
+        String illegal10 = "s(";
+        String illegal11 = "s[";
+        String illegal12 = "s{";
+        String illegal13 = "s,";
+        String illegal14 = "s=";
+
+
+
+        AddDeliveriesRequest request = new AddDeliveriesRequest(illegal1, Set.of(
+                new SelectorApi("originatingCountry='NO'")
+        ));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal1, request));
+        restController.addDeliveries(legal, request);
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal2, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal3, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal4, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal5, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal6, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal7, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal8, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal9, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal10, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal11, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal12, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal13, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal14, request));
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

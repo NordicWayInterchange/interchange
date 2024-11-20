@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
+import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.PeerStatus;
@@ -355,6 +356,42 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testIllegalCharsInPathVariable(){
+        String illegal1 = "s*";
+        String legal = "s@_-.A0S5S";
+        String illegal2 = "s#";
+        String illegal3 = "s?";
+        String illegal4 = "s/";
+        String illegal5 = "s;";
+        String illegal6 = "s!";
+        String illegal7 = "s$";
+        String illegal8 = "s&";
+        String illegal9 = "s'";
+        String illegal10 = "s(";
+        String illegal11 = "s[";
+        String illegal12 = "s{";
+        String illegal13 = "s,";
+        String illegal14 = "s=";
+
+        DeliveryRequest request = new DeliveryRequest("test");
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request));
+        napRestController.addDelivery(legal, request);
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal2, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal3, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal4, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal5, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal6, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal7, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal8, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal9, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal10, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal11, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal12, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal13, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal14, request));
     }
 
     @Test
