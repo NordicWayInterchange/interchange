@@ -29,6 +29,9 @@ public class Listen implements Callable<Integer> {
     @Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
+    @Option(names = {"-c", "--comment"})
+    String description;
+
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -41,7 +44,7 @@ public class Listen implements Callable<Integer> {
             client.addSubscription(request);
         }
         else if(option.selector != null){
-            client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector))));
+            client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
         }
 
         GetSubscriptionResponse subscription;

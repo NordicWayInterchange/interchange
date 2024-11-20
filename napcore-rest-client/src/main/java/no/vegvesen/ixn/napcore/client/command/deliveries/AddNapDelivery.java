@@ -26,6 +26,9 @@ public class AddNapDelivery implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddNapDeliveryOption option;
 
+    @Option(names = {"-d", "--description"})
+    String description;
+
     @Override
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
@@ -36,7 +39,7 @@ public class AddNapDelivery implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         else {
-            DeliveryRequest request = new DeliveryRequest(option.selector);
+            DeliveryRequest request = new DeliveryRequest(option.selector, description);
             Delivery response = client.addDelivery(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }

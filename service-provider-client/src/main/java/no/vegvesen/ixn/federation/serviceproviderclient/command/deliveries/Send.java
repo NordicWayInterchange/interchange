@@ -49,9 +49,12 @@ public class Send implements Callable<Integer> {
             AddDeliveriesResponse response = client.addDeliveries(request);
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
         }
-        else{
+        else if(option.selector != null){
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
+        }
+        else{
+            deliveryId = option.id;
         }
 
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
@@ -198,5 +201,8 @@ public class Send implements Callable<Integer> {
 
         @Option(names = {"-s", "--selector"}, required = true, description = "The delivery selector")
         String selector;
+
+        @Option(names = {"-i", "--id"}, required = true, description = "The delivery id")
+        String id;
     }
 }

@@ -25,6 +25,9 @@ public class AddNapSubscription implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddNapSubscriptionOption option;
 
+    @Option(names = {"-d", "--description"})
+    String description;
+
     @Override
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
@@ -36,7 +39,7 @@ public class AddNapSubscription implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            SubscriptionRequest request = new SubscriptionRequest(option.selector);
+            SubscriptionRequest request = new SubscriptionRequest(option.selector, description);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
