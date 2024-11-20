@@ -58,12 +58,7 @@ public class OnboardRestController {
 		this.nodeProperties = nodeProperties;
 	}
 
-	private void validatePathVariable(String pathVariable){
-		Matcher matcher = pattern.matcher(pathVariable);
-		if(matcher.matches()){
-			throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
-		}
-	}
+
 
 	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Capability")
@@ -595,5 +590,12 @@ public class OnboardRestController {
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		OnboardMDCUtil.removeLogVariables();
+	}
+
+	private void validatePathVariable(String pathVariable){
+		Matcher matcher = pattern.matcher(pathVariable);
+		if(!matcher.matches()){
+			throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
+		}
 	}
 }

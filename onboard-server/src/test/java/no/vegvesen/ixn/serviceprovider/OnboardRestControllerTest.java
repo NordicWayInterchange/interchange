@@ -670,4 +670,5 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
+
 }
