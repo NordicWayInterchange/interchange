@@ -1023,7 +1023,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
         AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("king_thomas.bouvetinterchange.eu")));
-        restController.addPeerToPrivateChannel(serviceProviderName, uuid, request);
+        restController.addPeersToPrivateChannel(serviceProviderName, uuid, request);
         assertThat(privateChannelRepository.findAllByServiceProviderName(serviceProviderName).stream().findFirst().get().getPeers()).hasSize(2);
     }
 
@@ -1035,7 +1035,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
         AddPeersRequest request = new AddPeersRequest(new ArrayList<>());
-        assertThrows(PrivateChannelException.class, () -> restController.addPeerToPrivateChannel(serviceProviderName, uuid, request));
+        assertThrows(PrivateChannelException.class, () -> restController.addPeersToPrivateChannel(serviceProviderName, uuid, request));
     }
 
     @Test
@@ -1046,7 +1046,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
         AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("my-service-provider")));
-        assertThrows(PrivateChannelException.class, () -> restController.addPeerToPrivateChannel(serviceProviderName, uuid, request));
+        assertThrows(PrivateChannelException.class, () -> restController.addPeersToPrivateChannel(serviceProviderName, uuid, request));
     }
     @Test
     public void testDeletingPeerFromPrivateChannel(){
@@ -1386,7 +1386,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
 
         AddDeliveriesRequest request = new AddDeliveriesRequest(illegal1, Set.of(
-                new SelectorApi("originatingCountry='NO'")
+                new AddDelivery("originatingCountry='NO'")
         ));
         assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal1, request));
         restController.addDeliveries(legal, request);

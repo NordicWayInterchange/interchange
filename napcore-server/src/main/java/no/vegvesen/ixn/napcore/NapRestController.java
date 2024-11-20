@@ -435,6 +435,7 @@ public class NapRestController {
     @Operation(summary = "Add private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDPRIVATECHANNELRESPONSE)))})
     public PrivateChannelResponse addPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @RequestBody PrivateChannelRequest request) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
 
@@ -467,6 +468,7 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Delete private channel")
     public void deletePrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE private channel {}", actorCommonName, privateChannelId);
 
@@ -487,6 +489,7 @@ public class NapRestController {
     @Operation(summary = "Get private channels")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELSRESPONSE)))})
     public List<PrivateChannelResponse> getPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing private channels for service provider {}", actorCommonName);
 
@@ -501,6 +504,7 @@ public class NapRestController {
     @Operation(summary = "Get private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELRESPONSE)))})
     public PrivateChannelResponse getPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel {} for service provider {}", privateChannelId, actorCommonName);
 
@@ -517,6 +521,7 @@ public class NapRestController {
     @Operation(summary = "Get private channels with actorCommonName as peer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNELS)))})
     public List<PeerPrivateChannel> getPeerPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channels where peer name is {}", actorCommonName);
 
@@ -531,6 +536,7 @@ public class NapRestController {
     @Operation(summary = "Get peer private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNEL)))})
     public PeerPrivateChannel getPeerPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel for peer {} where id is {}", actorCommonName, privateChannelId);
 
@@ -547,6 +553,7 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary="Add peer to existing private channel")
     public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Add peers to private channel where id is {}", privateChannelId);
 
@@ -579,6 +586,8 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary="Delete peer from existing private channel")
     public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
+        validatePathVariable(actorCommonName);
+        validatePathVariable(peerName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
 
@@ -604,6 +613,7 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary="Remove yourself from private channel where you are member")
     public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+        validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by peer {}", privateChannelId, actorCommonName);
 
@@ -619,10 +629,10 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
-    private void validatePathVariable(String serviceProviderName){
-        Matcher matcher = pattern.matcher(serviceProviderName);
+    private void validatePathVariable(String pathVariable){
+        Matcher matcher = pattern.matcher(pathVariable);
         if(!matcher.matches()){
-            throw new PathVariableException(String.format("Path variable %s contains illegal characters", serviceProviderName));
+            throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
     }
 

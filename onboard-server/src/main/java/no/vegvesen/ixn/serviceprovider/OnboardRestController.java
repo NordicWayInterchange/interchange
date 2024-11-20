@@ -409,9 +409,10 @@ public class OnboardRestController {
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@Tag(name="Private Channel")
 	@Operation(summary = "Add peer to existing private channel")
-	public void addPeerToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request){
+	public void addPeersToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add peers to private channel where id is {}", privateChannelId);
+		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		if(request == null || request.getPeersToAdd() == null || request.getPeersToAdd().isEmpty()){
@@ -442,6 +443,8 @@ public class OnboardRestController {
 	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} DELETE peer {} from private channel with id {}", serviceProviderName, peerName, privateChannelId);
+		validatePathVariable(serviceProviderName);
+		validatePathVariable(peerName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
@@ -468,6 +471,7 @@ public class OnboardRestController {
 	public void peerDeletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} DELETE from private channel {} where you are peer", serviceProviderName, privateChannelId);
+		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
@@ -620,6 +624,7 @@ public class OnboardRestController {
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE)))})
 	public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		validatePathVariable(serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List local capabilities for service provider {}",serviceProviderName);
 
