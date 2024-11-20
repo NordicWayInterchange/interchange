@@ -1,15 +1,11 @@
 package no.vegvesen.ixn;
 
+import jakarta.jms.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.jms.DeliveryMode;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.MessageProducer;
-
 public class MessageForwardUtil {
-	private static Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);
 	public final static long DEFAULT_TTL_1_DAY = 86_400_000L;
 	public final static long MAX_TTL_8_DAYS = 691_200_000L;
 
@@ -39,7 +35,11 @@ public class MessageForwardUtil {
 			long remainingTimeToLive = getRemainingTimeToLive(message);
 			logger.debug("Sending message with remaining time to live {} to {}", remainingTimeToLive, producer.getDestination());
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message body {}", message.getBody(String.class));
+				if (message instanceof TextMessage) {
+					logger.trace("Message body {}", message.getBody(String.class));
+				} else {
+					logger.trace("Binary message received");
+				}
 			}
 			producer.send(message, message.getJMSDeliveryMode(), Message.DEFAULT_PRIORITY, remainingTimeToLive);
 			logger.debug("Sent message");

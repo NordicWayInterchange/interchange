@@ -129,12 +129,4 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
-	private static HostStore getHostStore(String hostname, Stream<HostStore> stream) {
-		return stream.filter(h -> h.hostname().equals(hostname)).findAny().orElseThrow(() -> new RuntimeException("No store found for hostname: " + hostname));
-	}
-
-	private static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
-		return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
-	}
-
 }
