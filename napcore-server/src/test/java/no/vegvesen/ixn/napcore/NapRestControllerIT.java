@@ -334,6 +334,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String illegal3 = "s?";
         String illegal4 = "s/";
         String illegal5 = "s;";
+        String illegal6 = "s!";
+        String illegal7 = "s$";
+        String illegal8 = "s&";
+        String illegal9 = "s'";
+        String illegal10 = "s(";
+        String illegal11 = "s[";
+        String illegal12 = "s{";
+        String illegal13 = "s,";
+        String illegal14 = "s=";
+
         DeliveryRequest request = new DeliveryRequest("test");
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request));
         napRestController.addDelivery(legal, request);
@@ -341,6 +351,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal3, request));
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal4, request));
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal5, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal6, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal7, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal8, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal9, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal10, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal11, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal12, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal13, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal14, request));
     }
 
     @Test
