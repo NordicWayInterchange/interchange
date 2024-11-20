@@ -11,7 +11,9 @@ import picocli.CommandLine.*;
                 ListDeliveries.class,
                 GetDelivery.class,
                 AddDeliveries.class,
-                DeleteDelivery.class
+                DeleteDelivery.class,
+                FetchMatchingDeliveryCapabilities.class,
+                Send.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true

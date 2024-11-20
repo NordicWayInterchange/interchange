@@ -1,3 +1,4 @@
+static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
   control_channel_port: 443                                         # Specify the control channel port  for the Node
   message_channel_port: 5671                                        # Specify the message channel port  for the Node
@@ -5,6 +6,8 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
+  trust_store: truststore.jks
+  key_store: keystore.p12
 
 qpid:
   replicas: 1
@@ -44,6 +47,8 @@ qpid:
 
 message_collector:
   replicas: 1
+  key_store_type: P12
+  trust_store_type: JKS
 
 neighbour_discoverer:
   replicas: 1
@@ -59,3 +64,13 @@ routing_configurer:
 
 napcore_server:
   replicas: 1
+  enabled: false
+
+napcore_frontend:
+  enabled: false
+#letsencrypt:
+#  server: https://letsencrypt-server
+#  email: my-email@mycompany.com
+#  key_secret_ref: my-key-secret
+#ingress:
+#  name: my-ingress

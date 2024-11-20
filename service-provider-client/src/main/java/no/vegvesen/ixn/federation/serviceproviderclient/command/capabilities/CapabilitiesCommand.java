@@ -9,7 +9,8 @@ import picocli.CommandLine.*;
         subcommands = {
                 GetServiceProviderCapabilities.class,
                 AddServiceProviderCapability.class,
-                DeleteServiceProviderCapability.class
+                DeleteServiceProviderCapability.class,
+                FetchMatchingCapabilities.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
@@ -19,7 +20,7 @@ public class CapabilitiesCommand {
     @ParentCommand
     ServiceProviderClientApplication parentCommand;
 
-    public ServiceProviderClientApplication getParentCommand() {
+    public ServiceProviderClientApplication getParent() {
         return parentCommand;
     }
 }

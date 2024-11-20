@@ -19,6 +19,8 @@ public class InterchangeNodeProperties {
 	 */
 	String name;
 
+	String brokerExternalName;
+
 	/**
 	 * The message channel port for amqps
 	 */
@@ -30,6 +32,14 @@ public class InterchangeNodeProperties {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getBrokerExternalName() {
+		return brokerExternalName;
+	}
+
+	public void setBrokerExternalName(String brokerExternalName) {
+		this.brokerExternalName = brokerExternalName;
 	}
 
 	public String getMessageChannelPort() { return messageChannelPort; }
