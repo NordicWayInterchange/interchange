@@ -1,10 +1,9 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+
+import java.io.File;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -27,6 +26,8 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 public class Message {
 
     String messageText;
+
+    File file;
 
     private String userId;
 
@@ -205,5 +206,17 @@ public class Message {
 
     public void setShardCount(Integer shardCount) {
         this.shardCount = shardCount;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    public String getFileName(){
+        return file != null ? file.getName() : null;
     }
 }

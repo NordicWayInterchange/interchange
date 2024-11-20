@@ -357,4 +357,44 @@ public class CapabilityValidatorTest {
         assertThat(CapabilityValidator.capabilityIsValid(capability)).contains("quadTree");
         assertThat(CapabilityValidator.capabilityIsValid(capabilityNull)).contains("quadTree");
     }
+
+    @Test
+    public void testCapabilityWithInvalidCharactersInPropertiesIsNotValid(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "'NO00000",
+                        "NO00000-pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of()
+                ),
+                new MetadataApi()
+        );
+
+        CapabilityApi capability2 = new CapabilityApi(
+                new IvimApplicationApi(
+                        " NO00000",
+                        "NO00000-pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of()
+                ),
+                new MetadataApi()
+        );
+        CapabilityApi capability3 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "*NO00000",
+                        "NO00000-pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of()
+                ),
+                new MetadataApi()
+        );
+
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isFalse();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).isFalse();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).isFalse();
+
+    }
 }

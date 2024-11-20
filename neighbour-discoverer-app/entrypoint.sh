@@ -16,5 +16,6 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Djavax.net.ssl.keyStoreType=pkcs12 \
      -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
+     -Dinterchange.node-provider.brokerExternalName=${BROKER_EXTERNAL_NAME} \
      ${LOG_LEVELS} \
      -jar neighbour-discoverer.jar
