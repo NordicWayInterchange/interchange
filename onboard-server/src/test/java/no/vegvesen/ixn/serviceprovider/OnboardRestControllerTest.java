@@ -75,7 +75,7 @@ public class OnboardRestControllerTest {
 	@Test
 	void postingCapabilitiesReturnsStatusOk() throws Exception {
 
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
@@ -114,7 +114,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void deletingExistingCapabilitiesReturnsNoContent() throws Exception {
-		String serviceProviderName = "Second Service Provider";
+		String serviceProviderName = "SecondServiceProvider";
 		mockCertificate(serviceProviderName);
 		UUID uuid = UUID.randomUUID();
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
@@ -365,7 +365,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void getCapabilitiesReturnsStatusOk()throws Exception{
-		String serviceProviderName = "First Service Provider";
+		String serviceProviderName = "FirstServiceProvider";
 		mockCertificate(serviceProviderName);
 
 		when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(serviceProviderName));
@@ -390,7 +390,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void postingDeliveryReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 		AddDeliveriesRequest request = new AddDeliveriesRequest(
 				firstServiceProvider,
@@ -423,7 +423,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void listingDeliveriesReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
@@ -445,7 +445,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
@@ -477,7 +477,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void deleteDeliveryReturnsNoContent() throws Exception {
 
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
