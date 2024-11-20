@@ -1265,6 +1265,19 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 .isEqualTo(time);
     }
 
+    @Test
+    public void testIllegalCharsInPathVariable(){
+        String illegal1 = "s*";
+        String legal = "s@_-.A0S5S";
+        String illegal2 = "s!#";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(illegal1, Set.of(
+                new SelectorApi("originatingCountry='NO'")
+        ));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal1, request));
+        restController.addDeliveries(legal, request);
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal2, request));
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

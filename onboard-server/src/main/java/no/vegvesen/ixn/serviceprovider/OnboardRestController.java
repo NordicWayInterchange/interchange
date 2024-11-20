@@ -44,7 +44,7 @@ public class OnboardRestController {
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
-	private static Pattern pattern = Pattern.compile("[^a-zA-Z0-9_\\.\\-@]+");
+	private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,

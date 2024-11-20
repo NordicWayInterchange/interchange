@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
+import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -323,6 +324,17 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testIllegalCharsInPathVariable(){
+        String illegal1 = "s*";
+        String legal = "s@_-.A0S5S";
+        String illegal2 = "s!#";
+        DeliveryRequest request = new DeliveryRequest("test");
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request));
+        napRestController.addDelivery(legal, request);
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal2, request));
     }
 
     @Test

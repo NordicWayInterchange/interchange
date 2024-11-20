@@ -51,7 +51,7 @@ public class NapRestController {
     private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
-    private static Pattern pattern = Pattern.compile("[^a-zA-Z0-9_\\.\\-@]+");
+    private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
     private CertSigner certSigner;
 
     @Autowired
@@ -361,7 +361,7 @@ public class NapRestController {
 
     private void validatePathVariable(String serviceProviderName){
         Matcher matcher = pattern.matcher(serviceProviderName);
-        if(matcher.matches()){
+        if(!matcher.matches()){
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", serviceProviderName));
         }
     }
