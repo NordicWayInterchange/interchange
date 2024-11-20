@@ -21,7 +21,7 @@ public class GetServiceProviderCapabilities implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        ServiceProviderClient client = parentCommand.getParentCommand().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
         ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(serviceProviderCapabilities));

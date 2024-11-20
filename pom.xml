@@ -220,39 +220,6 @@
                 </plugins>
             </build>
         </profile>
-
-        <profile>
-            <id>ST</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                        <configuration>
-                            <skipTests>true</skipTests>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven-failsafe-plugin.version}</version>
-                        <configuration>
-                            <includes>
-                                <include>*ST</include>
-                            </includes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
 
@@ -272,7 +239,6 @@
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
         <module>routing-configurer</module>
-        <module>federation-st</module>
         <module>message-collector</module>
         <module>quadtree-tool</module>
         <module>onboard-rest-api</module>

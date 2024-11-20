@@ -42,7 +42,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Path.of("bi-qpid")
             );
 
-
     @BeforeEach
     public void setUp() {
         sslContext = sslClientContext(stores,"routing_configurer");
@@ -66,7 +65,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isPresent();
         }
-
     }
 
     /*
@@ -89,7 +87,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-
     }
 
     /*
@@ -112,7 +109,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-
     }
 
     private JmsMessage createDenmMessage(Source source, byte[] bytemessage, long ttl) throws JMSException {

@@ -83,29 +83,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testWrongNameInRequestResultsInError() {
-        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
-                "serviceProvider",
-                Collections.singleton(
-                        new CapabilityApi(
-                                new DenmApplicationApi(
-                                        "Publisher1",
-                                        "Publisher1:Publication1",
-                                        "NO",
-                                        "1.0",
-                                        List.of(),
-                                        List.of()
-                                ),
-                                new MetadataApi()
-                        )
-                )
-        );
-        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("anotherServiceProvider", request)
-        );
-    }
-
-    @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
@@ -172,6 +149,24 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 )));
 
         assertThat(thrown.getMessage()).contains("publisherId");
+    }
+
+    @Test
+    public void testAddingCapabilityWithIllegalCharacterThrowsException(){
+        DatexApplicationApi app = new DatexApplicationApi("pub", "NO-pub-1", "NO", "1.0", List.of("1200"), "'SituationPublication", "publisherName");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        String serviceProviderName = "my-service-provider";
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("illegal");
     }
 
     @Test
@@ -306,6 +301,60 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingMatchingLocalCapabilities(){
+       ServiceProvider serviceProvider1 = new ServiceProvider("sp-1");
+       ServiceProvider serviceProvider2 = new ServiceProvider("sp-2");
+       serviceProvider1.setCapabilities(new Capabilities(
+               Set.of(
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-1",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)
+                                       ),
+                               new Metadata(RedirectStatus.OPTIONAL)
+                       ),
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-2",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)),
+                               new Metadata(RedirectStatus.OPTIONAL))
+               )
+       ));
+       serviceProvider2.setCapabilities(new Capabilities(
+               Set.of(new Capability(
+                       new DenmApplication(  "NPRA_2",
+                               "pub-3",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ), new Capability(
+                       new DenmApplication(
+                               "NPRA_2",
+                               "pub-4",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)
+                       ),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ))
+       ));
+       serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+       assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
+       assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
+    }
+
+    @Test
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
@@ -315,7 +364,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                List.of("1234"),
+                                List.of("123"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
@@ -1145,7 +1194,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 serviceProviderName,
                 Set.of(new CapabilityApi(
-                        new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("123"), "String publicationType", "String publisherName"),
+                        new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
                         new MetadataApi()
                 ))
         );

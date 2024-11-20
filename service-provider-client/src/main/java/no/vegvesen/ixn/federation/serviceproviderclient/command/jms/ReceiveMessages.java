@@ -17,6 +17,9 @@ public class ReceiveMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
+    @Option(names = {"-d", "--directory"}, description = "directory to write files", required = false)
+    String directory;
+
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -32,7 +35,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 parentCommand.getUrl(),
                 queueName,
                 parentCommand.createContext(),
-                new Sink.DefaultMessageListener(),
+                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
