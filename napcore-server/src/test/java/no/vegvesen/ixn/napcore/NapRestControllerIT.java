@@ -330,11 +330,17 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testIllegalCharsInPathVariable(){
         String illegal1 = "s*";
         String legal = "s@_-.A0S5S";
-        String illegal2 = "s!#";
+        String illegal2 = "s#";
+        String illegal3 = "s?";
+        String illegal4 = "s/";
+        String illegal5 = "s;";
         DeliveryRequest request = new DeliveryRequest("test");
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request));
         napRestController.addDelivery(legal, request);
         assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal2, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal3, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal4, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal5, request));
     }
 
     @Test

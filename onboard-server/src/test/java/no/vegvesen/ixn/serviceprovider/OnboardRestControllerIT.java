@@ -1269,13 +1269,19 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testIllegalCharsInPathVariable(){
         String illegal1 = "s*";
         String legal = "s@_-.A0S5S";
-        String illegal2 = "s!#";
+        String illegal2 = "s#";
+        String illegal3 = "s?";
+        String illegal4 = "s/";
+        String illegal5 = "s;";
         AddDeliveriesRequest request = new AddDeliveriesRequest(illegal1, Set.of(
                 new SelectorApi("originatingCountry='NO'")
         ));
         assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal1, request));
         restController.addDeliveries(legal, request);
         assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal2, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal3, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal4, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal5, request));
     }
 
     @Autowired
