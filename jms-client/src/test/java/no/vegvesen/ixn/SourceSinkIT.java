@@ -199,8 +199,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		//TODO this is weird!
-		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
@@ -230,24 +228,18 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		//TODO this is weird!
-		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
-
-	//TODO how about doing this from different threads?
 	@Test
 	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
 		ImageSource source = new ImageSource(Url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
 
-		//TODO this is weird!
 		try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext,new ImageMessageListener())) {
 			MessageConsumer testConsumer = sink.createConsumer();
 			Message receive = testConsumer.receive(1000);
-			sink.getListener().onMessage(receive);
 			assertThat(receive).isNotNull();
 		} catch (Exception e) {
 			fail("unexpected exception",e);

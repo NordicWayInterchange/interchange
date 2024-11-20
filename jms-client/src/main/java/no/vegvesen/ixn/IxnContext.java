@@ -5,6 +5,8 @@ import org.apache.qpid.jms.JmsConnectionFactory;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
+import org.apache.qpid.jms.policy.JmsDefaultPrefetchPolicy;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -13,9 +15,14 @@ import java.util.Hashtable;
 public class IxnContext {
 
 	private static final String JMS_JNDI_INITIAL_CONTEXT_FACTORY = "myInitialContextFactoryLookup";
+
 	private static final String JMS_JNDI_RECEIVE_QUEUE_PROPERTY = "receiveQueue";
+
 	private static final String JMS_JNDI_SEND_QUEUE_PROPERTY = "sendQueue";
+
 	private final Context context;
+
+	private Integer prefetch;
 
 	public IxnContext(Object URI, String sendQueue, String receiveQueue) throws NamingException {
 		Hashtable<Object, Object> env = new Hashtable<>();
@@ -30,13 +37,9 @@ public class IxnContext {
 		this.context = new javax.naming.InitialContext(env);
 	}
 
-	/**
-	 * uses basic authentication
-	 */
-	public Connection createConnection(String username, String password) throws NamingException, JMSException {
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
-		factory.setPopulateJMSXUserID(true);
-		return factory.createConnection(username, password);
+	public IxnContext(Object URI, String sendQueue, String receiveQueue, Integer prefetch) throws NamingException {
+		this(URI,sendQueue,receiveQueue);
+		this.prefetch = prefetch;
 	}
 
 	/**
@@ -44,17 +47,13 @@ public class IxnContext {
 	 */
 	public Connection createConnection(SSLContext sslContext) throws NamingException, JMSException {
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
+		if (prefetch != null) {
+			JmsDefaultPrefetchPolicy prefetchPolicy = new JmsDefaultPrefetchPolicy();
+			prefetchPolicy.setAll(prefetch);
+			factory.setPrefetchPolicy(prefetchPolicy);
+		}
 		factory.setPopulateJMSXUserID(true);
 		factory.setSslContext(sslContext);
-		return factory.createConnection();
-	}
-
-	/**
-	 * uses default PKI or settings provided by system properties
-	 */
-	public Connection createConnection() throws NamingException, JMSException {
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
-		factory.setPopulateJMSXUserID(true);
 		return factory.createConnection();
 	}
 
@@ -65,4 +64,5 @@ public class IxnContext {
 	public Destination getSendQueue() throws NamingException {
 		return (Destination) context.lookup(JMS_JNDI_SEND_QUEUE_PROPERTY);
 	}
+
 }

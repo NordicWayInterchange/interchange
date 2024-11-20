@@ -51,15 +51,12 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			);
 
 	@Container
-	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer(
 			stores,
 			HOST_NAME,
 			HOST_NAME,
 			Paths.get("docker","producer")
 			).withLogConsumer(new Slf4jLogConsumer(logger));
-
-
 
 	public Sink createSink(String containerUrl, String queueName, CaStores stores, String spName) {
 		return new Sink(
@@ -81,7 +78,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Test
 	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
-
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
@@ -127,10 +123,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
-
         }
-
 	}
 
 	@Test
@@ -189,8 +182,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
                 throw new RuntimeException(e);
             }
         }
-
-
 	}
 
 	@Test
@@ -241,9 +232,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-
 	}
 
 	@Test
@@ -297,9 +286,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-
 	}
-
 }

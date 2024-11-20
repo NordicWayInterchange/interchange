@@ -15,7 +15,6 @@ public class CountMessages implements Callable<Integer> {
     @ParentCommand
     MessagesCommand parentCommand;
 
-    //TODO will this wait for messages?
     @Override
     public Integer call() throws Exception {
         AtomicLong counter = new AtomicLong();
