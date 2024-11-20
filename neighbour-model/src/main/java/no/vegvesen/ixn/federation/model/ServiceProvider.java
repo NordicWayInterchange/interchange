@@ -178,12 +178,12 @@ public class ServiceProvider {
 	}
 
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
-		return (capabilities.hasDataTypes() ||
+		return (capabilities.hasCapabilities() ||
 				!activeSubscriptions().isEmpty());
 	}
 
 	public boolean hasCapabilities () {
-		return capabilities.hasDataTypes();
+		return capabilities.hasCapabilities();
 	}
 
 	public boolean hasDeliveries () {

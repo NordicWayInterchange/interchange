@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
 import java.util.Set;
-
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @Component
 @Primary
@@ -46,10 +43,9 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 	}
 
-
 	@Override
 	public Set<NeighbourCapability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
-		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
+		String controlChannelUrl = neighbour.getControlChannelUrl("/capabilities");
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
 		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);
@@ -85,5 +81,4 @@ public class NeighbourRESTFacade implements NeighbourFacade {
     	neighbourRESTClient.deleteSubscriptions(url, neighbourName);
 		logger.info("Deleting subscription to neighbour {} with url {}", neighbourName, url);
 	}
-
 }

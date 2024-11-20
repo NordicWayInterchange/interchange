@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import picocli.CommandLine;
 import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
@@ -9,10 +8,10 @@ import java.util.concurrent.Callable;
 @Command(
         name = "delete",
         description = "Delete a service provider subscription",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
-public class DeleteServiceProviderSubscription implements Callable<Integer> {
+public class DeleteSubscription implements Callable<Integer> {
 
     @ParentCommand
     SubscriptionsCommand parentCommand;

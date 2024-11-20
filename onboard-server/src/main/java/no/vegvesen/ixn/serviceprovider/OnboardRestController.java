@@ -62,7 +62,7 @@ public class OnboardRestController {
 			content = @Content(
 					examples = {
 							@ExampleObject(name = "messageType DENM", value = ExampleAPIObjects.ADD_DENM_CAPABILITIESREQUEST),
-							@ExampleObject(name = "messageType DATEX", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
+							@ExampleObject(name = "messageType DATEX2", value = ExampleAPIObjects.ADD_DATEX_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType IVIM", value = ExampleAPIObjects.ADD_IVIM_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType SPATEM", value = ExampleAPIObjects.ADD_SPATEM_CAPABILITIESREQUEST),
 							@ExampleObject(name = "messageType MAPEM", value = ExampleAPIObjects.ADD_MAPEM_CAPABILITIESREQUEST),
@@ -106,7 +106,7 @@ public class OnboardRestController {
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
 		for (Capability newLocalCapability : newLocalCapabilities) {
-			capabilities.addDataType(newLocalCapability);
+			capabilities.addCapability(newLocalCapability);
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
 
@@ -205,7 +205,7 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+		serviceProviderToUpdate.getCapabilities().removeCapability(capabilityId);
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
@@ -510,12 +510,33 @@ public class OnboardRestController {
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTDELIVERIESRESPONSE)))})
 	public ListDeliveriesResponse listDeliveries(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("listing deliveries for service provider ", serviceProviderName);
+		logger.info("listing deliveries for service provider {}", serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
 		OnboardMDCUtil.removeLogVariables();
-		 return response;
+		 return typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries/match"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Delivery")
+	@Operation(summary = "List matching deliveries")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE)))})
+	public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		logger.info("List local capabilities for service provider {}",serviceProviderName);
+
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+		Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
+		if (selector != null) {
+			if (!selector.isEmpty()) {
+				allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
+			}
+		}
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, allCapabilities, Set.of());
+		OnboardMDCUtil.removeLogVariables();
+		return response;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
