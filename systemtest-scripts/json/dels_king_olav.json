@@ -2,6 +2,6 @@
   "version" : "1.0",
   "name" : "king_olav.bouvetinterchange.eu",
   "deliveries" : [ {
-    "selector" : "originatingCountry = 'NO' and publisherId = 'NO00000' and quadTree like '%,12004%'"
+    "selector" : "originatingCountry = 'NO' and publisherId = 'NO00000' and quadTree like '%,12003%'"
   } ]
 }

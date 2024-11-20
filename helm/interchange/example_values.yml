@@ -15,6 +15,7 @@ napcore_auth0_client_secret: my_secret
 
 # Values:
 external_name: example-node.itsinterchange.eu
+broker_external_name: example-node.itsinterchange.eu
 static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu

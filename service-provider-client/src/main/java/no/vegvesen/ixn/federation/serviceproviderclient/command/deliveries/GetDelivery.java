@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
-import picocli.CommandLine;
 import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
@@ -11,7 +10,7 @@ import java.util.concurrent.Callable;
 @Command(
         name = "get",
         description = "Get a single delivery",
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class GetDelivery implements Callable<Integer> {

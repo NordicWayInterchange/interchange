@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -330,15 +331,21 @@ public class NapRestController {
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
             throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
         }
+
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
         }
+
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        serviceProviderToUpdate.getCapabilities().addDataType(capabilityToAdd);
+        if(!CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()))){
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capabilityToAdd));
+        }
+
+        serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
                 .stream()
@@ -396,7 +403,7 @@ public class NapRestController {
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+        serviceProviderToUpdate.getCapabilities().removeCapability(capabilityId);
         serviceProviderRepository.save(serviceProviderToUpdate);
         logger.info("Updated service provider {}", serviceProviderToUpdate);
     }

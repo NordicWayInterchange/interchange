@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -497,7 +496,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
+	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String source = "king_gustaf_source";
 		king_gustaf.addLocalSubscription(new LocalSubscription(
