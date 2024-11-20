@@ -32,6 +32,9 @@ public class Send implements Callable<Integer> {
     @Option(names = {"-b", "--binary"}, description = "Send file")
     boolean binary;
 
+    @Option(names = {"-d", "--description"}, description = "Description of delivery")
+    String description;
+
     @ArgGroup(exclusive = true, multiplicity = "1")
     DeliveriesOption option;
 
@@ -47,7 +50,7 @@ public class Send implements Callable<Integer> {
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
         }
         else{
-            AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector))));
+            AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
             deliveryId = response.getDeliveries().stream().findFirst().get().getId();
         }
 
