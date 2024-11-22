@@ -366,6 +366,9 @@ public class OnboardRestController {
 		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
 		for(PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()){
+			if(privateChannelToAdd.getPeers() == null){
+				privateChannelToAdd.setPeers(new HashSet<>());
+			}
 
 			if(privateChannelToAdd.getPeers().contains(serviceProviderName)){
 				throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");

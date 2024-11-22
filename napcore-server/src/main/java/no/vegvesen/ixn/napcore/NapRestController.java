@@ -417,13 +417,17 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
 
-        if (request == null || request.getPeers() == null || request.getPeers().isEmpty()) {
-            throw new PrivateChannelException("Private channel can not be null or without peers");
+        if (request == null) {
+            throw new PrivateChannelException("Private channel can not be null");
         }
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
         serviceProviderRepository.save(serviceProvider);
+
+        if(request.getPeers() == null){
+            request.setPeers(new HashSet<>());
+        }
 
         if (request.getPeers().contains(actorCommonName)) {
             throw new PrivateChannelException("Can't add private channel with serviceProviderName in list of peers");
