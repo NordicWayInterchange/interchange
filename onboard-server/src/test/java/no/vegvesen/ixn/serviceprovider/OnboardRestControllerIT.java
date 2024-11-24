@@ -909,8 +909,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingPrivateChannelWithNullPeersList() {
         String serviceProviderName = "my-service-provider";
         PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(null, "my-channel");
-
-        assertThat(restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)))).isNotNull();
+        assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
     }
 
     @Test

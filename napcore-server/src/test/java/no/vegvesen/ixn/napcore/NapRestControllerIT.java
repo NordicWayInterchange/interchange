@@ -450,13 +450,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingPrivateChannelWithPeersListAsNull() {
         String actorCommonName = "actor";
-        assertThat(napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "my private channel"))).isNotNull();
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "desc")));
     }
 
     @Test
     public void testAddingPrivateChannelWithEmptyPeersList() {
         String actorCommonName = "actor";
-        assertThat(napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "my private channel"))).isNotNull();
+        assertThat(napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(Set.of(), "my private channel"))).isNotNull();
     }
 
     @Test
