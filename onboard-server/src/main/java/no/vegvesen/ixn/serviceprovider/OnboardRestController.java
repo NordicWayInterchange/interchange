@@ -368,7 +368,7 @@ public class OnboardRestController {
 		for(PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()){
 
 			if(privateChannelToAdd.getPeers() == null){
-				throw new PrivateChannelException("List of peers can not be null");
+				privateChannelToAdd.setPeers(new HashSet<>());
 			}
 
 			if(privateChannelToAdd.getPeers().contains(serviceProviderName)){
