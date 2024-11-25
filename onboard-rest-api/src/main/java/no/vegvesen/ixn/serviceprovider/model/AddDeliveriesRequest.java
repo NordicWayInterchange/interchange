@@ -6,12 +6,12 @@ import java.util.Set;
 public class AddDeliveriesRequest {
     private String version = "1.0";
     private String name;
-    private Set<SelectorApi> deliveries;
+    private Set<AddDelivery> deliveries;
 
     public AddDeliveriesRequest() {
     }
 
-    public AddDeliveriesRequest(String name, Set<SelectorApi> deliveries) {
+    public AddDeliveriesRequest(String name, Set<AddDelivery> deliveries) {
         this.name = name;
         this.deliveries = deliveries;
     }
@@ -32,11 +32,11 @@ public class AddDeliveriesRequest {
         this.name = name;
     }
 
-    public Set<SelectorApi> getDeliveries() {
+    public Set<AddDelivery> getDeliveries() {
         return deliveries;
     }
 
-    public void setDeliveries(Set<SelectorApi> deliveries) {
+    public void setDeliveries(Set<AddDelivery> deliveries) {
         this.deliveries = deliveries;
     }
 

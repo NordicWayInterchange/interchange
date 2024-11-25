@@ -36,6 +36,9 @@ public class LocalDelivery {
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
     @Column
+    private String description;
+
+    @Column
     private String errorMessage;
 
     public LocalDelivery() {
@@ -46,6 +49,14 @@ public class LocalDelivery {
         this.endpoints.addAll(endpoints);
         this.selector = selector;
         this.status = status;
+    }
+
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status, String description) {
+        this.id = id;
+        this.endpoints.addAll(endpoints);
+        this.selector = selector;
+        this.status = status;
+        this.description = description;
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
@@ -59,13 +70,15 @@ public class LocalDelivery {
         this(id, Collections.emptySet(),selector,status);
     }
 
-    public LocalDelivery(String selector){
+    public LocalDelivery(String selector, String description){
         this.selector = selector;
+        this.description = description;
     }
 
-    public LocalDelivery(String selector, LocalDeliveryStatus status) {
+    public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
         this.selector = selector;
         this.status = status;
+        this.description = description;
     }
 
     public Integer getId() {
@@ -136,6 +149,14 @@ public class LocalDelivery {
         this.endpoints.removeAll(endpointsToRemove);
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -176,6 +197,7 @@ public class LocalDelivery {
                 ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 ", errorMessage=" + errorMessage +
+                ", description=" + description +
                 '}';
     }
 }

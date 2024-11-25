@@ -10,6 +10,7 @@ import picocli.CommandLine.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 @Command(name = "add", description = "Adding name for client to set up private channel")
@@ -21,6 +22,9 @@ public class AddPrivateChannel implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddPrivateChannelOption option;
 
+    @Option(names = {"-d", "--description"}, required = false, description = "The description of the private channel")
+    String description;
+
     @Override
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -31,7 +35,7 @@ public class AddPrivateChannel implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peerName)));
+            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peers, description)));
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
@@ -40,10 +44,12 @@ public class AddPrivateChannel implements Callable<Integer> {
     }
 
     static class AddPrivateChannelOption{
-        @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
+        @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 
-        @Option(names = {"-p", "--peername"}, required = true, description = "The subscription selector")
-        String peerName;
+        @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers")
+        Set<String> peers;
+
+
     }
 }
