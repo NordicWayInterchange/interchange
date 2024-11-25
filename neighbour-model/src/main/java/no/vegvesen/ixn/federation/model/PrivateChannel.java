@@ -21,7 +21,7 @@ public class PrivateChannel {
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
 
-    @Column(columnDefinition="TEXT", nullable = false)
+    @Column(columnDefinition="TEXT")
     private String description;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -53,6 +53,13 @@ public class PrivateChannel {
         this.peers = peers;
         this.status = status;
         this.description = description;
+        this.endpoint = privateChannelEndpoint;
+        this.serviceProviderName = serviceProviderName;
+    }
+
+    public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+        this.peers = peers;
+        this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
     }

@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ServiceProviderImport {
     public static ServiceProviderApi[] getServiceProviderApis(Path path) throws IOException {
@@ -93,19 +94,26 @@ public class ServiceProviderImport {
         List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
 
         for (PrivateChannelResponseApi privateChannelResponseApi : privateChannelResponseApis) {
-            importedPrivateChannels.add(new PrivateChannel(
-                    Collections.singleton(new Peer("my-peer")),
+            PrivateChannel newPrivateChannel = new PrivateChannel(
+                    mapPeers(privateChannelResponseApi.getPeers()),
                     PrivateChannelStatus.REQUESTED,
-                    "my-channel",
                     new PrivateChannelEndpoint(
                             privateChannelResponseApi.getEndpoint().getHost(),
                             privateChannelResponseApi.getEndpoint().getPort(),
                             privateChannelResponseApi.getEndpoint().getQueueName()
                     ),
                     serviceProviderName
-            ));
+            );
+            if (privateChannelResponseApi.getDescription() != null) {
+                newPrivateChannel.setDescription(privateChannelResponseApi.getDescription());
+            }
+            importedPrivateChannels.add(newPrivateChannel);
         }
         return importedPrivateChannels;
+    }
+
+    public static Set<Peer> mapPeers(Set<String> peerNames) {
+        return peerNames.stream().map(Peer::new).collect(Collectors.toSet());
     }
 
     public static abstract class PostgreSQLContainerSetup{

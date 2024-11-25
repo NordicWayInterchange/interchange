@@ -13,6 +13,7 @@ public class PrivateChannelResponseApi {
 
     private PrivateChannelStatusApi status;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
