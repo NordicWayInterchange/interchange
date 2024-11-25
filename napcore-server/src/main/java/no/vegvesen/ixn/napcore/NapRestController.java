@@ -439,8 +439,8 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
 
-        if (request == null || request.getPeers() == null || request.getPeers().isEmpty()) {
-            throw new PrivateChannelException("Private channel can not be null or without peers");
+        if (request == null || request.getPeers() == null) {
+            throw new PrivateChannelException("Private channel or peers can not be null");
         }
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);

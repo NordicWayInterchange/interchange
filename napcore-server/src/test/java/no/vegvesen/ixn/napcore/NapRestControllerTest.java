@@ -451,7 +451,7 @@ public class NapRestControllerTest {
     }
 
     @Test
-    public void addingPrivateChannelWithEmptySetOfPeersReturnsStatusBadRequest()throws Exception{
+    public void addingPrivateChannelWithEmptySetOfPeersReturnsStatusOk()throws Exception{
         String actorCommonName = "king_olav.bouvetinterchange.eu";
 
         String request = """
@@ -471,7 +471,7 @@ public class NapRestControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request)
-        ).andExpect(status().isBadRequest());
+        ).andExpect(status().isOk());
     }
 
     @Test
