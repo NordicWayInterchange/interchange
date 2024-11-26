@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
-import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
+import no.vegvesen.ixn.serviceprovider.model.AddDelivery;
 
 import picocli.CommandLine.*;
 
@@ -26,6 +26,9 @@ public class AddDeliveries implements Callable<Integer> {
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddDeliveriesOption option;
 
+    @Option(names = {"-d", "--description"})
+    String description;
+
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -33,18 +36,18 @@ public class AddDeliveries implements Callable<Integer> {
 
         if (option.file != null) {
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
-            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+            AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         else{
-            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new SelectorApi(option.selector)));
-            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description)));
+            AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         return 0;
     }
 
-    static class AddDeliveriesOption{
+    private static class AddDeliveriesOption{
         @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
         File file;
 

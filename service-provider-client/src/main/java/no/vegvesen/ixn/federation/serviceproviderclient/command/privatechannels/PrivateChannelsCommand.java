@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
-import picocli.CommandLine;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers.PeersCommand;
 import picocli.CommandLine.*;
 
 @Command(
@@ -12,9 +12,9 @@ import picocli.CommandLine.*;
                 GetPrivateChannel.class,
                 AddPrivateChannel.class,
                 DeletePrivateChannel.class,
-                GetPeerPrivateChannels.class
+                PeersCommand.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class PrivateChannelsCommand {

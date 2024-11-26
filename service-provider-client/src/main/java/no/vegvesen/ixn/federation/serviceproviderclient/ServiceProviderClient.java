@@ -57,7 +57,15 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,selector).getBody();
     }
 
-    public ListSubscriptionsResponse getServiceProviderSubscriptions() {
+    public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilitiesResponse(String selector){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = String.format("%s/%s/deliveries/match?selector={selector}", server, user);
+        return restTemplate.getForEntity(url, FetchMatchingCapabilitiesResponse.class, selector).getBody();
+    }
+
+    public ListSubscriptionsResponse getSubscriptions() {
         String url = String.format("%s/%s/subscriptions", server, user);
         return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
@@ -83,7 +91,7 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 
-    public AddDeliveriesResponse addServiceProviderDeliveries(AddDeliveriesRequest request) {
+    public AddDeliveriesResponse addDeliveries(AddDeliveriesRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request,headers);
@@ -91,7 +99,7 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddDeliveriesResponse.class).getBody();
     }
 
-    public ListDeliveriesResponse listServiceProviderDeliveries() {
+    public ListDeliveriesResponse listDeliveries() {
         String url = String.format("%s/%s/deliveries",server,user);
         return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
     }
@@ -132,6 +140,24 @@ public class ServiceProviderClient {
     public ListPeerPrivateChannels getPeerPrivateChannels(){
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
+    }
+
+    public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddPeersRequest> entity = new HttpEntity<>(peersRequest, headers);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeersRequest.class);
+    }
+
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName){
+        String url = String.format("%s/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
+        restTemplate.delete(url);
+    }
+
+    public void peerDeletePeerFromPrivateChannel(String privateChannelId){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        restTemplate.delete(url);
     }
 
     public String getUser() {

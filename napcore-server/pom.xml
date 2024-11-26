@@ -58,9 +58,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <version>${springdoc-openapi-starter-webmvc-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>testcontainers-base</artifactId>
-            <version>1.0.13-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

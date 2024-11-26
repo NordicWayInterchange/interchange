@@ -9,13 +9,11 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -159,7 +157,7 @@ public class RoutingConfigurer {
 
 				String queueName = "sub-" + UUID.randomUUID();
 				logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
 				subscription.setEndpoints(Collections.singleton(endpoint));
 
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
@@ -191,7 +189,7 @@ public class RoutingConfigurer {
 
 				String redirectQueue = "re-" + UUID.randomUUID();
 				logger.debug("Creating endpoint {} for subscription with id {}", redirectQueue, subscription.getId());
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), redirectQueue);
 				subscription.setEndpoints(Collections.singleton(endpoint));
 
 				createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);

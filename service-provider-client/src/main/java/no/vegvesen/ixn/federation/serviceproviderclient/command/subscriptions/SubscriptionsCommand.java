@@ -1,19 +1,19 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
-import picocli.CommandLine;
 import picocli.CommandLine.*;
 
 @Command(
         name = "subscriptions",
         description = "list, get, add or delete subscriptions for Service Provider",
         subcommands = {
-                GetServiceProviderSubscriptions.class,
+                GetSubscriptions.class,
                 GetSubscription.class,
-                AddServiceProviderSubscription.class,
-                DeleteServiceProviderSubscription.class
+                AddSubscriptions.class,
+                DeleteSubscription.class,
+                Listen.class
         },
-        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
 )
 public class SubscriptionsCommand {

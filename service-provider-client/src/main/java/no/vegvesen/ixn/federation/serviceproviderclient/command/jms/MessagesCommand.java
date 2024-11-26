@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
-
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import picocli.CommandLine;
 import picocli.CommandLine.*;
@@ -14,7 +13,7 @@ import java.nio.file.Path;
                 DrainMessages.class,
                 ReceiveMessages.class,
                 SendMessage.class,
-                SendPredefinedMessage.class
+                SendPredefinedMessage.class,
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
