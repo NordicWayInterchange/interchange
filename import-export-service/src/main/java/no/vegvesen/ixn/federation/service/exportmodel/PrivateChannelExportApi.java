@@ -1,12 +1,13 @@
 package no.vegvesen.ixn.federation.service.exportmodel;
 
+import java.util.List;
 import java.util.Objects;
 
 public class PrivateChannelExportApi {
 
     private String serviceProviderName;
 
-    private String peerName;
+    private List<String> peers;
 
     private PrivateChannelStatusExportApi status;
 
@@ -21,11 +22,11 @@ public class PrivateChannelExportApi {
     }
 
     public PrivateChannelExportApi(String serviceProviderName,
-                                   String peerName,
+                                   List<String> peers,
                                    PrivateChannelStatusExportApi status,
                                    PrivateChannelEndpointExportApi endpoint) {
         this.serviceProviderName = serviceProviderName;
-        this.peerName = peerName;
+        this.peers = peers;
         this.status = status;
         this.endpoint = endpoint;
     }
@@ -38,12 +39,12 @@ public class PrivateChannelExportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public String getPeerName() {
-        return peerName;
+    public List<String> getPeers() {
+        return peers;
     }
 
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
+    public void setPeers(List<String> peers) {
+        this.peers = peers;
     }
 
     public PrivateChannelStatusExportApi getStatus() {
@@ -67,19 +68,19 @@ public class PrivateChannelExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelExportApi that = (PrivateChannelExportApi) o;
-        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceProviderName, peerName, status, endpoint);
+        return Objects.hash(serviceProviderName, peers, status, endpoint);
     }
 
     @Override
     public String toString() {
         return "PrivateChannelExportApi{" +
                 "serviceProviderName='" + serviceProviderName + '\'' +
-                ", peerName='" + peerName + '\'' +
+                ", peers=" + peers +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
                 '}';

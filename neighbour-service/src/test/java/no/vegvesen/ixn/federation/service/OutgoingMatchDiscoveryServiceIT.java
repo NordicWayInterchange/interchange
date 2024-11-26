@@ -191,7 +191,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchesAreOnlyCreatedWhenCapabilityIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -237,7 +237,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -270,7 +270,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
