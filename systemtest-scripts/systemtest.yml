@@ -268,7 +268,7 @@ services:
     volumes:
       - "../tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=b.bouvetinterchange.eu
