@@ -1,15 +1,15 @@
 package no.vegvesen.ixn.federation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Random;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Entity
 public class Connection {
@@ -84,6 +84,18 @@ public class Connection {
 
         logger.info("Next allowed post time: {}", nextPostAttempt.toString());
         return nextPostAttempt;
+    }
+
+    public LocalDateTime getBackoffStart() {
+        return backoffStart;
+    }
+
+    public LocalDateTime getUnreachableTime() {
+        return unreachableTime;
+    }
+
+    public LocalDateTime getLastFailedConnectionAttempt() {
+        return lastFailedConnectionAttempt;
     }
 
     public LocalDateTime getBackoffStartTime() { return backoffStart; }

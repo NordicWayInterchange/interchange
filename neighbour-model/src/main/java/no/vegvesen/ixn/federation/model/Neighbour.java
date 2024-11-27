@@ -84,6 +84,10 @@ public class Neighbour {
 		this.name = name;
 	}
 
+	public LocalDateTime getLastUpdated() {
+		return lastUpdated;
+	}
+
 	public boolean isIgnore() {
 		return ignore;
 	}
