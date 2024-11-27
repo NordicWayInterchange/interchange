@@ -10,28 +10,43 @@ public class NeighbourApi {
 
     private SubscriptionRequestApi subscriptionRequest;
 
-    private ConnectionApi connection;
+    private ConnectionStatusApi connectionStatus;
 
-    private Long lastUpdated;
+    private long lastFailedConnectionAttempt;
+
+    private long lastUpdated;
 
     private Boolean ignore;
-
-    private String controlChannelPort;
 
     public NeighbourApi() {
     }
 
-    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourSubscriptionRequest, SubscriptionRequestApi subscriptionRequest, ConnectionApi connection, Long lastUpdated, Boolean ignore, String controlChannelPort) {
+    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourSubscriptionRequest, SubscriptionRequestApi subscriptionRequest, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
         this.name = name;
         this.capabilities = capabilities;
         this.neighbourSubscriptionRequest = neighbourSubscriptionRequest;
         this.subscriptionRequest = subscriptionRequest;
-        this.connection = connection;
+        this.connectionStatus = connectionStatus;
+        this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
         this.lastUpdated = lastUpdated;
         this.ignore = ignore;
-        this.controlChannelPort = controlChannelPort;
     }
 
+    public ConnectionStatusApi getConnectionStatus() {
+        return connectionStatus;
+    }
+
+    public void setConnectionStatus(ConnectionStatusApi connectionStatus) {
+        this.connectionStatus = connectionStatus;
+    }
+
+    public long getLastFailedConnectionAttempt() {
+        return lastFailedConnectionAttempt;
+    }
+
+    public void setLastFailedConnectionAttempt(long lastFailedConnectionAttempt) {
+        this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
+    }
 
     public String getName() {
         return name;
@@ -65,19 +80,11 @@ public class NeighbourApi {
         this.subscriptionRequest = subscriptionRequest;
     }
 
-    public ConnectionApi getConnection() {
-        return connection;
-    }
-
-    public void setConnection(ConnectionApi connection) {
-        this.connection = connection;
-    }
-
-    public Long getLastUpdated() {
+    public long getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(Long lastUpdated) {
+    public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
@@ -89,14 +96,6 @@ public class NeighbourApi {
         this.ignore = ignore;
     }
 
-    public String getControlChannelPort() {
-        return controlChannelPort;
-    }
-
-    public void setControlChannelPort(String controlChannelPort) {
-        this.controlChannelPort = controlChannelPort;
-    }
-
     @Override
     public String toString() {
         return "NeighbourApi{" +
@@ -104,10 +103,10 @@ public class NeighbourApi {
                 ", capabilities=" + capabilities +
                 ", neighbourSubscriptionRequest=" + neighbourSubscriptionRequest +
                 ", subscriptionRequest=" + subscriptionRequest +
-                ", connection=" + connection +
+                ", connectionStatus=" + connectionStatus +
+                ", lastFailedConnectionAttempt=" + lastFailedConnectionAttempt +
                 ", lastUpdated=" + lastUpdated +
                 ", ignore=" + ignore +
-                ", controlChannelPort='" + controlChannelPort + '\'' +
                 '}';
     }
 }

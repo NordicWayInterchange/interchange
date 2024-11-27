@@ -26,28 +26,20 @@ public class TypeTransformer {
                     neighbourCapabilitiesToNeighbourCapabilitiesApi(neighbour.getCapabilities()),
                     neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(neighbour.getNeighbourRequestedSubscriptions()),
                     subscriptionRequestToSubscriptionRequestApi(neighbour.getOurRequestedSubscriptions()),
-                    connectionToConnectionApi(neighbour.getControlConnection()),
+                    connectionStatusToConnectionStatusApi(neighbour.getControlConnection().getConnectionStatus()),
+                    localDateTimeToEpochMili(neighbour.getControlConnection().getLastFailedConnectionAttempt()),
                     localDateTimeToEpochMili(neighbour.getLastUpdated()),
-                    neighbour.isIgnore(),
-                    neighbour.getControlChannelPort()
+                    neighbour.isIgnore()
             ));
         }
         return neighbourApiList;
     }
 
-    public ConnectionApi connectionToConnectionApi(Connection connection) {
-        return new ConnectionApi(
-           localDateTimeToEpochMili(connection.getBackoffStartTime()),
-                connection.getBackoffAttempts(),
-                connectionStatusToConnectionStatusApi(connection.getConnectionStatus()),
-                localDateTimeToEpochMili(connection.getUnreachableTime()),
-                localDateTimeToEpochMili(connection.getLastFailedConnectionAttempt())
-        );
-    }
 
-    public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status){
+    public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status) {
         return ConnectionStatusApi.valueOf(status.toString());
     }
+
     public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(SubscriptionRequest subscriptionRequest) {
         return new SubscriptionRequestApi(
                 subscriptionSetToSubscriptionApiSet(subscriptionRequest.getSubscriptions()),

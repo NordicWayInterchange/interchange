@@ -257,5 +257,6 @@
         <module>csr-signer</module>
         <module>keys-generator</module>
         <module>service-provider-client</module>
+        <module>admin-server-app</module>
     </modules>
 </project>

@@ -35,7 +35,7 @@ services:
 
   a_admin:
     build:
-      context: ../admin-server
+      context: ../admin-server-app
     container_name: a_admin
     depends_on:
       - a_db
@@ -225,7 +225,7 @@ services:
 
   b_admin:
     build:
-      context: ../admin-server
+      context: ../admin-server-app
     container_name: b_admin
     depends_on:
       - b_db
@@ -413,7 +413,7 @@ services:
 
   c_admin:
     build:
-      context: ../admin-server
+      context: ../admin-server-app
     container_name: c_admin
     depends_on:
       - c_db

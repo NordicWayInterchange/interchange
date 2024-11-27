@@ -14,6 +14,14 @@ public class ListNeighboursResponse {
         this.neighbours = neighbours;
     }
 
+    public List<NeighbourApi> getNeighbours() {
+        return neighbours;
+    }
+
+    public void setNeighbours(List<NeighbourApi> neighbours) {
+        this.neighbours = neighbours;
+    }
+
     @Override
     public String toString() {
         return "ListNeighboursResponse{" +
