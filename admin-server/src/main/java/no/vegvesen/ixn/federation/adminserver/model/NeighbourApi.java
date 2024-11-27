@@ -6,9 +6,9 @@ public class NeighbourApi {
 
     private NeighbourCapabilitiesApi capabilities;
 
-    private NeighbourSubscriptionRequestApi neighbourSubscriptionRequest;
+    private NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions;
 
-    private SubscriptionRequestApi subscriptionRequest;
+    private SubscriptionRequestApi ourRequestedSubscriptions;
 
     private ConnectionStatusApi connectionStatus;
 
@@ -21,11 +21,11 @@ public class NeighbourApi {
     public NeighbourApi() {
     }
 
-    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourSubscriptionRequest, SubscriptionRequestApi subscriptionRequest, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
+    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
         this.name = name;
         this.capabilities = capabilities;
-        this.neighbourSubscriptionRequest = neighbourSubscriptionRequest;
-        this.subscriptionRequest = subscriptionRequest;
+        this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;
+        this.ourRequestedSubscriptions = ourRequestedSubscriptions;
         this.connectionStatus = connectionStatus;
         this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
         this.lastUpdated = lastUpdated;
@@ -64,20 +64,20 @@ public class NeighbourApi {
         this.capabilities = capabilities;
     }
 
-    public NeighbourSubscriptionRequestApi getNeighbourSubscriptionRequest() {
-        return neighbourSubscriptionRequest;
+    public NeighbourSubscriptionRequestApi getNeighbourRequestedSubscriptions() {
+        return neighbourRequestedSubscriptions;
     }
 
-    public void setNeighbourSubscriptionRequest(NeighbourSubscriptionRequestApi neighbourSubscriptionRequest) {
-        this.neighbourSubscriptionRequest = neighbourSubscriptionRequest;
+    public void setNeighbourRequestedSubscriptions(NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions) {
+        this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;
     }
 
-    public SubscriptionRequestApi getSubscriptionRequest() {
-        return subscriptionRequest;
+    public SubscriptionRequestApi getOurRequestedSubscriptions() {
+        return ourRequestedSubscriptions;
     }
 
-    public void setSubscriptionRequest(SubscriptionRequestApi subscriptionRequest) {
-        this.subscriptionRequest = subscriptionRequest;
+    public void setOurRequestedSubscriptions(SubscriptionRequestApi ourRequestedSubscriptions) {
+        this.ourRequestedSubscriptions = ourRequestedSubscriptions;
     }
 
     public long getLastUpdated() {
@@ -101,8 +101,8 @@ public class NeighbourApi {
         return "NeighbourApi{" +
                 "name='" + name + '\'' +
                 ", capabilities=" + capabilities +
-                ", neighbourSubscriptionRequest=" + neighbourSubscriptionRequest +
-                ", subscriptionRequest=" + subscriptionRequest +
+                ", neighbourRequestedSubscriptions=" + neighbourRequestedSubscriptions +
+                ", ourRequestedSubscriptions=" + ourRequestedSubscriptions +
                 ", connectionStatus=" + connectionStatus +
                 ", lastFailedConnectionAttempt=" + lastFailedConnectionAttempt +
                 ", lastUpdated=" + lastUpdated +

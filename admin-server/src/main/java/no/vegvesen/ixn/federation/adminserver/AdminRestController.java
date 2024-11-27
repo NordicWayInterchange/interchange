@@ -32,6 +32,7 @@ public class AdminRestController {
         return "Hello world";
     }
 
+
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListNeighboursResponse getNeighbours(@PathVariable("adminUser") String adminUser){
         List<Neighbour> neighbourList = neighbourRepository.findAll();
