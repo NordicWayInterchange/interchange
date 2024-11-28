@@ -4,6 +4,8 @@ import java.util.Set;
 
 public class SubscriptionRequestApi {
 
+    private Integer subreq_id;
+
     private Set<SubscriptionApi> subscriptions;
 
     private long successfulRequest;
@@ -11,9 +13,18 @@ public class SubscriptionRequestApi {
     public SubscriptionRequestApi() {
     }
 
-    public SubscriptionRequestApi(Set<SubscriptionApi> subscriptions, long successfulRequest) {
+    public SubscriptionRequestApi(Integer subreq_id, Set<SubscriptionApi> subscriptions, long successfulRequest) {
+        this.subreq_id = subreq_id;
         this.subscriptions = subscriptions;
         this.successfulRequest = successfulRequest;
+    }
+
+    public Integer getSubreq_id() {
+        return subreq_id;
+    }
+
+    public void setSubreq_id(Integer subreq_id) {
+        this.subreq_id = subreq_id;
     }
 
     public Set<SubscriptionApi> getSubscriptions() {
@@ -35,7 +46,8 @@ public class SubscriptionRequestApi {
     @Override
     public String toString() {
         return "SubscriptionRequestApi{" +
-                "subscriptions=" + subscriptions +
+                "subreq_id=" + subreq_id +
+                ", subscriptions=" + subscriptions +
                 ", successfulRequest=" + successfulRequest +
                 '}';
     }

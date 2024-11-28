@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 public class EndpointApi {
 
+    private Integer id;
+
     private String source;
 
     private String host;
@@ -17,13 +19,22 @@ public class EndpointApi {
     public EndpointApi() {
     }
 
-    public EndpointApi(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate, SubscriptionShardApi shard) {
+    public EndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate, SubscriptionShardApi shard) {
+        this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
         this.shard = shard;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getSource() {
@@ -77,7 +88,8 @@ public class EndpointApi {
     @Override
     public String toString() {
         return "EndpointApi{" +
-                "source='" + source + '\'' +
+                "id=" + id +
+                ", source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +

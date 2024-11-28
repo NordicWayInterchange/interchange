@@ -88,6 +88,10 @@ public class Neighbour {
 		return lastUpdated;
 	}
 
+	public Integer getNeighbour_id() {
+		return neighbour_id;
+	}
+
 	public boolean isIgnore() {
 		return ignore;
 	}

@@ -5,6 +5,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 
 public class NeighbourCapabilityApi {
 
+    private Integer id;
+
     private ApplicationApi application;
 
     private MetadataApi metadata;
@@ -14,10 +16,19 @@ public class NeighbourCapabilityApi {
     public NeighbourCapabilityApi() {
     }
 
-    public NeighbourCapabilityApi(ApplicationApi application, MetadataApi metadata, long createdTimestamp) {
+    public NeighbourCapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, long createdTimestamp) {
+        this.id = id;
         this.application = application;
         this.metadata = metadata;
         this.createdTimestamp = createdTimestamp;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public ApplicationApi getApplication() {
@@ -47,7 +58,8 @@ public class NeighbourCapabilityApi {
     @Override
     public String toString() {
         return "NeighbourCapabilityApi{" +
-                "application=" + application +
+                "id=" + id +
+                ", application=" + application +
                 ", metadata=" + metadata +
                 ", createdTimestamp=" + createdTimestamp +
                 '}';

@@ -34,6 +34,14 @@ public class SubscriptionRequest {
 		this.subscription = subscription;
 	}
 
+	public Integer getSubreq_id() {
+		return subreq_id;
+	}
+
+	public void setSubreq_id(Integer subreq_id) {
+		this.subreq_id = subreq_id;
+	}
+
 	public Set<Subscription> getSubscriptions() {
 		return subscription;
 	}

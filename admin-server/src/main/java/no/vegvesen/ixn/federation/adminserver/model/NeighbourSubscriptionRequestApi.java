@@ -4,6 +4,8 @@ import java.util.Set;
 
 public class NeighbourSubscriptionRequestApi {
 
+    private Integer id;
+
     private Set<NeighbourSubscriptionApi> subscriptions;
 
     private Long successfulRequest;
@@ -11,9 +13,18 @@ public class NeighbourSubscriptionRequestApi {
     public NeighbourSubscriptionRequestApi() {
     }
 
-    public NeighbourSubscriptionRequestApi(Set<NeighbourSubscriptionApi> subscriptions, Long successfulRequest) {
+    public NeighbourSubscriptionRequestApi(Integer id, Set<NeighbourSubscriptionApi> subscriptions, Long successfulRequest) {
+        this.id = id;
         this.subscriptions = subscriptions;
         this.successfulRequest = successfulRequest;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Set<NeighbourSubscriptionApi> getSubscriptions() {
@@ -35,6 +46,7 @@ public class NeighbourSubscriptionRequestApi {
     @Override
     public String toString() {
         return "NeighbourSubscriptionRequestApi{" +
+                "id=" + id +
                 ", subscriptions=" + subscriptions +
                 ", successfulRequest=" + successfulRequest +
                 '}';

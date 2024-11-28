@@ -3,6 +3,9 @@ package no.vegvesen.ixn.federation.adminserver.model;
 import java.util.Set;
 
 public class SubscriptionApi {
+
+    private Integer id;
+
     private SubscriptionStatusApi subscriptionStatus;
 
     private String selector;
@@ -20,7 +23,8 @@ public class SubscriptionApi {
     public SubscriptionApi() {
     }
 
-    public SubscriptionApi(SubscriptionStatusApi subscriptionStatus, String selector, String path, int numberOfPolls, String consumerCommonName, Set<EndpointApi> endpoints, long lastUpdatedTimestamp) {
+    public SubscriptionApi(Integer id, SubscriptionStatusApi subscriptionStatus, String selector, String path, int numberOfPolls, String consumerCommonName, Set<EndpointApi> endpoints, long lastUpdatedTimestamp) {
+        this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -28,6 +32,14 @@ public class SubscriptionApi {
         this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public SubscriptionStatusApi getSubscriptionStatus() {
@@ -84,5 +96,19 @@ public class SubscriptionApi {
 
     public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "SubscriptionApi{" +
+                "id=" + id +
+                ", subscriptionStatus=" + subscriptionStatus +
+                ", selector='" + selector + '\'' +
+                ", path='" + path + '\'' +
+                ", numberOfPolls=" + numberOfPolls +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
+                ", endpoints=" + endpoints +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                '}';
     }
 }

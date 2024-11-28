@@ -2,13 +2,24 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 public class SubscriptionShardApi {
 
+    private Integer id;
+
     private String exchangeName;
 
     public SubscriptionShardApi() {
     }
 
-    public SubscriptionShardApi(String exchangeName) {
+    public SubscriptionShardApi(Integer id, String exchangeName) {
+        this.id = id;
         this.exchangeName = exchangeName;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getExchangeName() {
@@ -22,7 +33,8 @@ public class SubscriptionShardApi {
     @Override
     public String toString() {
         return "SubscriptionShardApi{" +
-                "exchangeName='" + exchangeName + '\'' +
+                "id=" + id +
+                ", exchangeName='" + exchangeName + '\'' +
                 '}';
     }
 }

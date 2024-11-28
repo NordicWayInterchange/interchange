@@ -86,14 +86,6 @@ public class Connection {
         return nextPostAttempt;
     }
 
-    public LocalDateTime getBackoffStart() {
-        return backoffStart;
-    }
-
-    public LocalDateTime getUnreachableTime() {
-        return unreachableTime;
-    }
-
     public LocalDateTime getLastFailedConnectionAttempt() {
         return lastFailedConnectionAttempt;
     }

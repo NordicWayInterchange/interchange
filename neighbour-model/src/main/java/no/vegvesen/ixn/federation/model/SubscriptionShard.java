@@ -22,6 +22,14 @@ public class SubscriptionShard {
         this.exchangeName = exchangeName;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getExchangeName() {
         return exchangeName;
     }

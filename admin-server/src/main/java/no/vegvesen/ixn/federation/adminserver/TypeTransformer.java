@@ -22,6 +22,7 @@ public class TypeTransformer {
         List<NeighbourApi> neighbourApiList = new ArrayList<>();
         for (Neighbour neighbour : neighbourList) {
             neighbourApiList.add(new NeighbourApi(
+                    neighbour.getNeighbour_id(),
                     neighbour.getName(),
                     neighbourCapabilitiesToNeighbourCapabilitiesApi(neighbour.getCapabilities()),
                     neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(neighbour.getNeighbourRequestedSubscriptions()),
@@ -42,6 +43,7 @@ public class TypeTransformer {
 
     public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(SubscriptionRequest subscriptionRequest) {
         return new SubscriptionRequestApi(
+                subscriptionRequest.getSubreq_id(),
                 subscriptionSetToSubscriptionApiSet(subscriptionRequest.getSubscriptions()),
                 localDateTimeToEpochMili(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
@@ -51,6 +53,7 @@ public class TypeTransformer {
         Set<SubscriptionApi> subscriptionApiSet = new HashSet<>();
         for (Subscription subscription : subscriptionSet) {
             subscriptionApiSet.add(new SubscriptionApi(
+                    subscription.getId(),
                     subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus()),
                     subscription.getSelector(),
                     subscription.getPath(),
@@ -67,6 +70,7 @@ public class TypeTransformer {
         Set<EndpointApi> endpointApiSet = new HashSet<>();
         for (Endpoint endpoint : subscriptionEndpointSet) {
             endpointApiSet.add(new EndpointApi(
+                    endpoint.getId(),
                     endpoint.getSource(),
                     endpoint.getHost(),
                     endpoint.getPort(),
@@ -80,6 +84,7 @@ public class TypeTransformer {
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
         return new SubscriptionShardApi(
+                subscriptionShard.getId(),
                 subscriptionShard.getExchangeName()
         );
     }
@@ -90,6 +95,7 @@ public class TypeTransformer {
 
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
         return new NeighbourSubscriptionRequestApi(
+                subscriptionRequest.getSubreq_id(),
                 neighbourSubscriptionSetToNeighbourSubscriptionRequestApiSet(subscriptionRequest.getSubscriptions()),
                 localDateTimeToEpochMili(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
@@ -99,7 +105,7 @@ public class TypeTransformer {
         Set<NeighbourSubscriptionApi> neighbourSubscriptionApiSet = new HashSet<>();
         for (NeighbourSubscription neighbourSubscription : neighbourSubscriptions) {
             neighbourSubscriptionApiSet.add(new NeighbourSubscriptionApi(
-                    neighbourSubscription.getUuid(),
+                    neighbourSubscription.getId(),
                     NeighbourSubscriptionStatusApi.CREATED,
                     neighbourSubscription.getSelector(),
                     neighbourSubscription.getPath(),
@@ -128,6 +134,7 @@ public class TypeTransformer {
 
     public NeighbourCapabilitiesApi neighbourCapabilitiesToNeighbourCapabilitiesApi(NeighbourCapabilities neighbourCapabilities) {
         return new NeighbourCapabilitiesApi(
+                neighbourCapabilities.getId(),
                 capabilitiesStatusToCapabilitiesStatusApi(neighbourCapabilities.getStatus()),
                 neighbourCapabilitySetToNeighbourCapabilityApiSet(neighbourCapabilities.getCapabilities()),
                 localDateTimeToEpochMili(neighbourCapabilities.getLastUpdated().orElse(null)),
@@ -145,6 +152,7 @@ public class TypeTransformer {
 
     public NeighbourCapabilityApi neighbourCapabilityToNeighbourCapabilityApi(NeighbourCapability neighbourCapability) {
         return new NeighbourCapabilityApi(
+                neighbourCapability.getId(),
                 neighbourCapability.getApplication().toApi(),
                 neighbourCapability.getMetadata().toApi(),
                 localDateTimeToEpochMili(neighbourCapability.getCreatedTimestamp())
