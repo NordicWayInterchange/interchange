@@ -15,26 +15,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
-@SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
-public class ImportApplication implements CommandLineRunner {
+public class ImportApplication {
 
-    @Autowired
     private NeighbourRepository neighbourRepository;
 
-    @Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
-    @Autowired
     private PrivateChannelRepository privateChannelRepository;
+    private ImportTransformer importTransformer;
+    private ObjectMapper mapper;
 
-    public static void main(String[] args) {
-        SpringApplication.run(ImportApplication.class);
+    public ImportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository, ImportTransformer importTransformer, ObjectMapper mapper) {
+        this.neighbourRepository = neighbourRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.privateChannelRepository = privateChannelRepository;
+        this.importTransformer = importTransformer;
+        this.mapper = mapper;
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        ImportTransformer importTransformer = new ImportTransformer();
-        ObjectMapper mapper = new ObjectMapper();
+    public void run() throws Exception {
+        importTransformer = new ImportTransformer();
+        mapper = new ObjectMapper();
 
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         ImportApi importModel = mapper.readValue(path.toFile(), ImportApi.class);
