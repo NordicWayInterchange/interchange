@@ -31,7 +31,7 @@ public class ImportExportApplication implements CommandLineRunner {
             System.out.println("usage ...");
             System.exit(1);
         }
-        if (args[1].equals("import")) {
+        if (args[0].equals("import")) {
             ImportApplication importApplication = new ImportApplication(
                     neighbourRepository,
                     serviceProviderRepository,
@@ -39,7 +39,7 @@ public class ImportExportApplication implements CommandLineRunner {
                     new ImportTransformer(),
                     new ObjectMapper());
             importApplication.run();
-        } else if (args[1].equals("export")) {
+        } else if (args[0].equals("export")) {
             ExportApplication exportApplication = new ExportApplication(
                     neighbourRepository,
                     serviceProviderRepository,
