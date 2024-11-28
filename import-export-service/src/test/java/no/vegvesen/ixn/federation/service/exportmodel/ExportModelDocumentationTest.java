@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 public class ExportModelDocumentationTest {
@@ -174,7 +175,7 @@ public class ExportModelDocumentationTest {
         return new PrivateChannelExportApi(
                 UUID.randomUUID().toString(),
                 "my-service-provider",
-                "other-service-provider",
+                Set.of(new PeerApi("other-service-provider")),
                 PrivateChannelExportApi.PrivateChannelStatusExportApi.CREATED,
                 new PrivateChannelEndpointExportApi(
                         "amqps://my-interchange.eu",

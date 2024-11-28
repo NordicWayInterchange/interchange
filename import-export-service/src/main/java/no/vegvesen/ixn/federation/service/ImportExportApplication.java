@@ -42,6 +42,7 @@ public class ImportExportApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         //importModel();
         //exportModel;
+        exportModel();
     }
 
     public void importModel() throws Exception {
