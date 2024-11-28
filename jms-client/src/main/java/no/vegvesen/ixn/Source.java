@@ -15,7 +15,6 @@ public class Source implements AutoCloseable {
     private final SSLContext sslContext;
     protected Connection connection;
     private Session session;
-    private Destination queueS;
 	private MessageProducer producer;
 	private static Logger logger = LoggerFactory.getLogger(Source.class);
 
@@ -28,10 +27,9 @@ public class Source implements AutoCloseable {
     public void start() throws NamingException, JMSException {
         IxnContext context = new IxnContext(url, sendQueue, null);
         createConnection(context);
-        queueS = context.getSendQueue();
-		connection.start();
+        connection.start();
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		producer = session.createProducer(queueS);
+		producer = session.createProducer(context.getSendQueue());
     }
 
 	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
@@ -66,24 +64,26 @@ public class Source implements AutoCloseable {
 		try {
 			session.close();
 		} catch (JMSException e) {
-			throw new RuntimeException(e);
+			logger.error("Error closing session", e);
+		} finally {
+			session = null;
 		}
         if (connection != null) {
             try {
                 connection.close();
             } catch (JMSException e) {
-                throw new RuntimeException(e);
-            }
+                logger.error("Error closing connection", e);
+            } finally {
+				connection = null;
+			}
         }
 		try {
 			producer.close();
 		} catch (JMSException e) {
-			throw new RuntimeException(e);
+			logger.error("Error closing producer", e);
+		} finally {
+			producer = null;
 		}
-		connection = null;
-		session = null;
-		producer = null;
-		queueS = null;
 	}
 
 	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
