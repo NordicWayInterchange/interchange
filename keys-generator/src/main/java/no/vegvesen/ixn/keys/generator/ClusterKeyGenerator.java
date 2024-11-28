@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ClusterKeyGenerator {
 
@@ -136,6 +137,15 @@ public class ClusterKeyGenerator {
         }
         return clientStores;
     }
+
+    public static HostStore getHostStore(String hostname, Stream<HostStore> stream) {
+        return stream.filter(h -> h.hostname().equals(hostname)).findAny().orElseThrow(() -> new RuntimeException("No store found for hostname: " + hostname));
+    }
+
+    public static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
+        return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
+    }
+
 
     public record CaStores(String name, CaStore trustStore, List<HostStore> hostStores, List<ClientStore> clientStores, List<CaStores> subCaStores) {}
 
@@ -287,7 +297,7 @@ public class ClusterKeyGenerator {
         X500Name csrSubject = csr.getSubject();
         PublicKey caPublicKey = caCert.getPublicKey();
 
-        X509Certificate certificate = signX509Certificate(csrSubject, subjectPublicKey, issuerSubject, caPublicKey, caPrivateKey, secureRandom);
+        X509Certificate certificate = signX509CaCertificate(csrSubject, subjectPublicKey, issuerSubject, caPublicKey, caPrivateKey, secureRandom);
 
         List<X509Certificate> newCertChain = new ArrayList<>();
         newCertChain.add(certificate);
@@ -295,7 +305,7 @@ public class ClusterKeyGenerator {
         return new CertificateAndCertificateChain(certificate, newCertChain);
     }
 
-    private static X509Certificate signX509Certificate(X500Name subjectName, PublicKey subjectPublicKey, X500Name issuerName, PublicKey issuerPublicKey, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    private static X509Certificate signX509CaCertificate(X500Name subjectName, PublicKey subjectPublicKey, X500Name issuerName, PublicKey issuerPublicKey, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         JcaContentSignerBuilder signerBuilder = createContentSignerBuilder();
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
@@ -309,8 +319,15 @@ public class ClusterKeyGenerator {
                 subjectName,
                 subjectPublicKey
         );
-        certificateBuilder.addExtension(Extension.basicConstraints,true,new BasicConstraints(true));
+
+        //RFC 5280: Trust anchor Basic contraints must assert CA
+        BasicConstraints basicContraints = new BasicConstraints(true);
+        //RFC 5280: Trust anchor must contain basic constraints section marked critical
+        certificateBuilder.addExtension(Extension.basicConstraints,true, basicContraints);
+
+        //RFC 5280: Trust anchor keyUsage must have keyCertSign, cRLsign
         KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign);
+        //RFC 5280: Trust anchor must contain key usage section marked critical
         certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerPublicKey);
@@ -382,7 +399,7 @@ public class ClusterKeyGenerator {
         );
         PublicKey publicKey = keyPair.getPublic();
 
-        X509Certificate cert = signX509Certificate(subject, publicKey, subject, publicKey, keyPair.getPrivate(),secureRandom);
+        X509Certificate cert = signX509CaCertificate(subject, publicKey, subject, publicKey, keyPair.getPrivate(),secureRandom);
         KeyPairAndCertificate details = new KeyPairAndCertificate(keyPair, cert);
         ArrayList<X509Certificate> certificates = new ArrayList<>();
         certificates.add(details.certificate());

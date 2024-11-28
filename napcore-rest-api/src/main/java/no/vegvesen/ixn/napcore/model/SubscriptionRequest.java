@@ -4,12 +4,19 @@ public class SubscriptionRequest {
 
     String selector;
 
+    String description;
+
     public SubscriptionRequest() {
 
     }
 
-    public SubscriptionRequest(String selector) {
+    public SubscriptionRequest(String selector){
         this.selector = selector;
+    }
+
+    public SubscriptionRequest(String selector, String description) {
+        this.selector = selector;
+        this.description = description;
     }
 
     public String getSelector() {
@@ -20,10 +27,19 @@ public class SubscriptionRequest {
         this.selector = selector;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "SubscriptionRequest{" +
                 "selector='" + selector + '\'' +
+                ", description=" + description  +
                 '}';
     }
 }

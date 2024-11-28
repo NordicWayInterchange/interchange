@@ -39,7 +39,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatMatchIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -84,7 +84,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatMultipleMatchesAreCreated() {
-        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -130,7 +130,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatDeliveryHasNoOverlap() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -176,8 +176,8 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
-        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
-        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery");
+        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
