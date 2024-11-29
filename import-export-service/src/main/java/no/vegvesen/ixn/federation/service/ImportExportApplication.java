@@ -9,6 +9,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.nio.file.Paths;
+
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class ImportExportApplication implements CommandLineRunner {
 
@@ -35,10 +37,9 @@ public class ImportExportApplication implements CommandLineRunner {
             ImportApplication importApplication = new ImportApplication(
                     neighbourRepository,
                     serviceProviderRepository,
-                    privateChannelRepository,
-                    new ImportTransformer(),
-                    new ObjectMapper());
-            importApplication.run();
+                    privateChannelRepository
+            );
+            importApplication.run(Paths.get(importApplication.getClass().getClassLoader().getResource("jsonDump.txt").toURI()));
         } else if (args[0].equals("export")) {
             ExportApplication exportApplication = new ExportApplication(
                     neighbourRepository,
