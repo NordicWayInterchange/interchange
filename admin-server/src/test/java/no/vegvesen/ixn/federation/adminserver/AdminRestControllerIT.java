@@ -53,7 +53,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 new Connection()
                 );
         neighbourRepository.save(neighbour);
-        System.out.println(restController.getNeighbours(adminUser));
+        assertThat(restController.getNeighbours("adminUser").getNeighbours()).isNotEmpty();
     }
 
 

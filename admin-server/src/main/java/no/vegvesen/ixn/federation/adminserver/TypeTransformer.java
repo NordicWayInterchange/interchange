@@ -83,10 +83,13 @@ public class TypeTransformer {
     }
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
-        return new SubscriptionShardApi(
-                subscriptionShard.getId(),
-                subscriptionShard.getExchangeName()
-        );
+        if(subscriptionShard != null) {
+            return new SubscriptionShardApi(
+                    subscriptionShard.getId(),
+                    subscriptionShard.getExchangeName()
+            );
+        }
+        else return null;
     }
 
     public SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
