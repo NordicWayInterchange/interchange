@@ -307,7 +307,7 @@ public class ExportTransformer {
     }
 
     private PeerApi transformPeerToPeerApi(Peer peer) {
-        return new PeerApi(peer.getName());
+        return new PeerApi(peer.getName(),peer.getUuid(),peer.getStatus().toString());
     }
 
     public PrivateChannelExportApi.PrivateChannelStatusExportApi transformPrivateChannelStatusToPrivateChannelStatusExportApi(PrivateChannelStatus status) {
