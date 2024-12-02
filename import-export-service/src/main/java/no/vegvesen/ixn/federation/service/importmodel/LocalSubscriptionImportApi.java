@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class LocalSubscriptionImportApi {
 
+    private String uuid;
+
     private String selector;
 
     private String consumerCommonName;
@@ -15,27 +17,37 @@ public class LocalSubscriptionImportApi {
 
     private Set<LocalConnectionImportApi> localConnections;
 
-    public enum LocalSubscriptionStatusImportApi {
-        REQUESTED, CREATED, TEAR_DOWN, ILLEGAL, NOT_VALID, RESUBSCRIBE, ERROR
-    }
 
+
+    public enum LocalSubscriptionStatusImportApi {
+        REQUESTED, CREATED, TEAR_DOWN, ILLEGAL, NOT_VALID, RESUBSCRIBE, ERROR;
+
+    }
     public LocalSubscriptionImportApi() {
     }
-
     public LocalSubscriptionImportApi(String selector,
                                       String consumerCommonName,
                                       LocalSubscriptionStatusImportApi status,
                                       Set<LocalEndpointImportApi> localEndpoints,
-                                      Set<LocalConnectionImportApi> localConnections) {
+                                      Set<LocalConnectionImportApi> localConnections, String uuid) {
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.status = status;
         this.localEndpoints = localEndpoints;
         this.localConnections = localConnections;
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getSelector() {
         return selector;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public void setSelector(String selector) {
