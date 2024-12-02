@@ -317,7 +317,7 @@ public class ImportTransformer {
         );
     }
 
-    public Set<Peer> transformPeersListToPeersSet(List<String> peers) {
+    public Set<Peer> transformPeersListToPeersSet(Set<String> peers) {
         return peers.stream().map(Peer::new).collect(Collectors.toSet());
     }
 
