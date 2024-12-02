@@ -27,7 +27,8 @@ public class NeighbourSubscriptionImportApi {
     public NeighbourSubscriptionImportApi() {
     }
 
-    public NeighbourSubscriptionImportApi(String uuid, NeighbourSubscriptionStatusImportApi status,
+    public NeighbourSubscriptionImportApi(String uuid,
+                                          NeighbourSubscriptionStatusImportApi status,
                                           String selector,
                                           String path,
                                           String consumerCommonName,

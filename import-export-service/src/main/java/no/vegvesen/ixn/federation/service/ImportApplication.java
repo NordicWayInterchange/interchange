@@ -14,11 +14,11 @@ public class ImportApplication {
 
     private NeighbourRepository neighbourRepository;
 
-    private ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
-    private PrivateChannelRepository privateChannelRepository;
-    private ImportTransformer importTransformer;
-    private ObjectMapper mapper;
+    private final PrivateChannelRepository privateChannelRepository;
+    private final ImportTransformer importTransformer;
+    private final ObjectMapper mapper;
 
     public ImportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository) {
         this.neighbourRepository = neighbourRepository;

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -32,9 +33,12 @@ public class ImportTransformer {
 
     public LocalSubscription transformLocalSubscriptionImportApiToLocalSubscription(LocalSubscriptionImportApi localSubscription) {
         LocalSubscription newLocalSubscription = new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+                localSubscription.getUuid(),
                 LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
-                localSubscription.getConsumerCommonName()
+                localSubscription.getConsumerCommonName(),
+                Set.of(),
+                Set.of()
         );
         newLocalSubscription.setLocalEndpoints(localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()));
         newLocalSubscription.setConnections(localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()));
@@ -78,7 +82,7 @@ public class ImportTransformer {
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {
-        Capability newCapability = new Capability(capabilityTransformer.applicationApiToApplication(capability.getApplication()),
+        Capability newCapability = new Capability(capability.getUuid(),capabilityTransformer.applicationApiToApplication(capability.getApplication()),
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
         //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
@@ -130,7 +134,7 @@ public class ImportTransformer {
     }
 
     public LocalDelivery transformDeliveryImportApiToLocalDelivery(DeliveryImportApi delivery) {
-        return new LocalDelivery(delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
+        return new LocalDelivery(delivery.getUuid(),delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 //transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus())
                 LocalDeliveryStatus.REQUESTED
@@ -210,13 +214,15 @@ public class ImportTransformer {
     }
 
     public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription) {
-        return new NeighbourSubscription(
-                transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
+        NeighbourSubscription neighbourSubscription1 = new NeighbourSubscription(
+                neighbourSubscription.getUuid(), transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
                 neighbourSubscription.getSelector(),
                 neighbourSubscription.getPath(),
                 neighbourSubscription.getConsumerCommonName(),
                 neighbourSubscription.getEndpoints().stream().map(this::transformNeighbourEndpointImportApiToNeighbourEndpoint).collect(Collectors.toSet())
         );
+        neighbourSubscription1.setUuid(neighbourSubscription.getUuid());
+        return neighbourSubscription1;
     }
 
     public NeighbourSubscriptionStatus transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi status) {

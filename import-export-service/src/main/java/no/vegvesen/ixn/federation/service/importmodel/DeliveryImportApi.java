@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class DeliveryImportApi {
 
+    private String uuid;
+
     private Set<DeliveryEndpointImportApi> endpoints;
 
     private String path;
@@ -13,22 +15,32 @@ public class DeliveryImportApi {
 
     private DeliveryStatusImportApi status;
 
-    public enum DeliveryStatusImportApi {
-        REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR
-    }
 
+
+    public enum DeliveryStatusImportApi {
+        REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR;
+
+    }
     public DeliveryImportApi() {
 
     }
-
-    public DeliveryImportApi(Set<DeliveryEndpointImportApi> endpoints,
+    public DeliveryImportApi(String uuid, Set<DeliveryEndpointImportApi> endpoints,
                              String path,
                              String selector,
                              DeliveryStatusImportApi status) {
+        this.uuid = uuid;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.status = status;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<DeliveryEndpointImportApi> getEndpoints() {
