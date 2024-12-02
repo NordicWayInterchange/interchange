@@ -1,9 +1,10 @@
+import VerticalSideMenu from "@/components/shared/VerticalSideMenu";
 
 export default function Home() {
 
     return (
-        <div>
-            <h1>Fetched Data:</h1>
-        </div>
+        <>
+            <VerticalSideMenu></VerticalSideMenu>
+        </>
     );
 }
