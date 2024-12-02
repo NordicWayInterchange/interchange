@@ -2,33 +2,46 @@ package no.vegvesen.ixn.federation.service.importmodel;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class PrivateChannelImportApi {
 
+    private String uuid;
+
     private String serviceProviderName;
 
-    private List<String> peers;
+    private Set<String> peers;
 
     private PrivateChannelStatusImportApi status;
 
     private PrivateChannelEndpointImportApi endpoint;
 
-    public enum PrivateChannelStatusImportApi {
-        REQUESTED, CREATED, TEAR_DOWN
-    }
 
+
+    public enum PrivateChannelStatusImportApi {
+        REQUESTED, CREATED, TEAR_DOWN;
+
+    }
     public PrivateChannelImportApi() {
 
     }
-
-    public PrivateChannelImportApi(String serviceProviderName,
-                                   List<String> peers,
+    public PrivateChannelImportApi(String uuid, String serviceProviderName,
+                                   Set<String> peers,
                                    PrivateChannelStatusImportApi status,
                                    PrivateChannelEndpointImportApi endpoint) {
+        this.uuid = uuid;
         this.serviceProviderName = serviceProviderName;
         this.peers = peers;
         this.status = status;
         this.endpoint = endpoint;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getServiceProviderName() {
@@ -39,11 +52,11 @@ public class PrivateChannelImportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public List<String> getPeers() {
+    public Set<String> getPeers() {
         return peers;
     }
 
-    public void setPeerName(List<String> peers) {
+    public void setPeerName(Set<String> peers) {
         this.peers = peers;
     }
 
