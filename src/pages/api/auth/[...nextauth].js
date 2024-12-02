@@ -22,8 +22,7 @@ export const authOptions = {
         signIn: "/login",
     },
     session: {
-        maxAge: 1, // Session expires after 1 second
-        updateAge: 0, // Session is not refreshed (expires immediately)
+        maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,
     },
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
