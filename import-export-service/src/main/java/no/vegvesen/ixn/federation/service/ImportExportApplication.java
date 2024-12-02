@@ -34,12 +34,16 @@ public class ImportExportApplication implements CommandLineRunner {
             System.exit(1);
         }
         if (args[0].equals("import")) {
+            if (args.length != 2) {
+                System.out.println("usage ...");
+                System.exit(2);
+            }
             ImportApplication importApplication = new ImportApplication(
                     neighbourRepository,
                     serviceProviderRepository,
                     privateChannelRepository
             );
-            importApplication.run(Paths.get(importApplication.getClass().getClassLoader().getResource("jsonDump.txt").toURI()));
+            importApplication.run(Paths.get(args[1]));
         } else if (args[0].equals("export")) {
             ExportApplication exportApplication = new ExportApplication(
                     neighbourRepository,

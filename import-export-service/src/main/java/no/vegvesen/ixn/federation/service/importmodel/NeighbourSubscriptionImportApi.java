@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class NeighbourSubscriptionImportApi {
 
+    private String uuid;
+
     private NeighbourSubscriptionStatusImportApi status;
 
     private String selector;
@@ -15,24 +17,34 @@ public class NeighbourSubscriptionImportApi {
 
     private Set<NeighbourEndpointImportApi> endpoints;
 
+
+
     public enum NeighbourSubscriptionStatusImportApi {
-        REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, TEAR_DOWN, RESUBSCRIBE
+        REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, TEAR_DOWN, RESUBSCRIBE;
+
     }
 
     public NeighbourSubscriptionImportApi() {
-
     }
 
-    public NeighbourSubscriptionImportApi(NeighbourSubscriptionStatusImportApi status,
+    public NeighbourSubscriptionImportApi(String uuid, NeighbourSubscriptionStatusImportApi status,
                                           String selector,
                                           String path,
                                           String consumerCommonName,
                                           Set<NeighbourEndpointImportApi> endpoints) {
+        this.uuid = uuid;
         this.status = status;
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
+    }
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public NeighbourSubscriptionStatusImportApi getStatus() {
