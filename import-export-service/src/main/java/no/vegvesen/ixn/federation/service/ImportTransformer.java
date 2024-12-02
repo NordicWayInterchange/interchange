@@ -317,8 +317,12 @@ public class ImportTransformer {
         );
     }
 
-    public Set<Peer> transformPeersListToPeersSet(Set<String> peers) {
-        return peers.stream().map(Peer::new).collect(Collectors.toSet());
+    public Set<Peer> transformPeersListToPeersSet(Set<PeerImportApi> peers) {
+        return peers.stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet());
+    }
+
+    private Peer transformPeerImportApiToPeer(PeerImportApi peerImportApi) {
+        return new Peer(peerImportApi.getUuid(),peerImportApi.getName(),PeerStatus.REQUESTED);
     }
 
     public PrivateChannelStatus transformPrivateChannelStatusImportApiToPrivateChannelStatus(PrivateChannelImportApi.PrivateChannelStatusImportApi status) {
