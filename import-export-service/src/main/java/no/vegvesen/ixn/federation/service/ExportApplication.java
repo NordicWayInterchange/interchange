@@ -16,16 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
-//@SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class ExportApplication {
 
-    //@Autowired
     private NeighbourRepository neighbourRepository;
 
-    //@Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
-    //@Autowired
     private PrivateChannelRepository privateChannelRepository;
 
     public ExportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository) {
