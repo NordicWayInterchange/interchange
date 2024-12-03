@@ -49,11 +49,9 @@ const MiniVariantDrawer: React.FC = () => {
                     '& .MuiDrawer-paper': {
                         width: drawerWidth,
                         boxSizing: 'border-box',
-                        backgroundColor: '#202123',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        color: '#A9B7C6',
                         paddingTop: '70px',
                     },
                 }}
@@ -72,14 +70,14 @@ const MiniVariantDrawer: React.FC = () => {
                                 justifyContent: 'center',
                                 padding: '10px 0',
                                 '&:hover': {
-                                    backgroundColor: '#3E3F41',
+                                    backgroundColor: 'menuHoverColor',
                                 },
                                 '&.Mui-selected': {
-                                    backgroundColor: '#3E3F41',
+                                    backgroundColor: 'menuHoverColor',
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ color: '#A9B7C6', justifyContent: 'center' }}>
+                            <ListItemIcon sx={{ color: 'iconColor', justifyContent: 'center' }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText
@@ -88,7 +86,6 @@ const MiniVariantDrawer: React.FC = () => {
                                     textAlign: 'center',
                                     fontSize: '8px',
                                     marginTop: 1,
-                                    color: '#A9B7C6',
                                 }}
                             />
                         </ListItem>
@@ -101,9 +98,8 @@ const MiniVariantDrawer: React.FC = () => {
                 sx={{
                     flexGrow: 1,
                     p: 3,
-                    backgroundColor: '#2B2B2B',
+                    backgroundColor: 'mainBackgroundColor',
                     minHeight: '100vh',
-                    color: '#A9B7C6',
                 }}
             >
                 <Box sx={{ height: '64px' }} />
