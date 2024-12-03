@@ -77,7 +77,7 @@ const MiniVariantDrawer: React.FC = () => {
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ color: 'iconColor', justifyContent: 'center' }}>
+                            <ListItemIcon sx={{ color: 'textColor', justifyContent: 'center' }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText

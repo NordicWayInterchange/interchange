@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             sx={{
                 zIndex: (theme) => theme.zIndex.drawer + 1,
                 backgroundColor: '#1E1E1E',
-                color: 'iconColor',
+                color: 'textColor',
             }}
         >
             <Toolbar>
