@@ -17,7 +17,10 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @Component
-@CommandLine.Command(name = "import")
+@CommandLine.Command(
+        name = "import",
+        mixinStandardHelpOptions = true
+)
 public class Import implements Callable<Integer> {
 
     @Option(names = {"-p", "--path"}, required = true)
