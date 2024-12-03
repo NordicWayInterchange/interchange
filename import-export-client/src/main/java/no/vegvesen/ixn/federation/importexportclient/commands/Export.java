@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 import no.vegvesen.ixn.federation.service.exportmodel.ExportTransformer;
+import no.vegvesen.ixn.federation.service.exportmodel.Exporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
@@ -20,36 +21,19 @@ import java.util.stream.Collectors;
 @CommandLine.Command(name = "export")
 public class Export implements Callable<Integer> {
 
+    private final Exporter exporter;
+
     @CommandLine.Option(names = {"-p", "--path"})
-    String localPath;
-
-    ServiceProviderRepository serviceProviderRepository;
-
-    NeighbourRepository neighbourRepository;
-
-    PrivateChannelRepository privateChannelRepository;
+    Path localPath;
 
     @Autowired
     public Export(ServiceProviderRepository serviceProviderRepository, NeighbourRepository neighbourRepository, PrivateChannelRepository privateChannelRepository){
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.neighbourRepository = neighbourRepository;
-        this.privateChannelRepository = privateChannelRepository;
+        exporter = new Exporter(serviceProviderRepository,privateChannelRepository,neighbourRepository);
     }
 
     @Override
     public Integer call() throws Exception {
-        ExportTransformer exportTransformer = new ExportTransformer();
-        ObjectMapper mapper = new ObjectMapper();
-
-        ExportApi exportModel = new ExportApi(
-                neighbourRepository.findAll().stream().map(exportTransformer::transformNeighbourToNeighbourExportApi).collect(Collectors.toSet()),
-                serviceProviderRepository.findAll().stream().map(exportTransformer::transformServiceProviderToServiceProviderExportApi).collect(Collectors.toSet()),
-                privateChannelRepository.findAll().stream().map(exportTransformer::transformPrivateChannelToPrivateChannelExportApi).collect(Collectors.toSet())
-        );
-
-        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-        Path path = Paths.get(localPath);
-        writer.writeValue(path.toFile(), exportModel);
+        exporter.exportModel(localPath);
         return 0;
     }
 }
