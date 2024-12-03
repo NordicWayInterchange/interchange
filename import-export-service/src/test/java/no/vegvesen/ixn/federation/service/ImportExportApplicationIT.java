@@ -54,7 +54,7 @@ public class ImportExportApplicationIT extends PostgresContainerBase {
     @Test
     public void importModel() throws Exception {
         Importer importer = new Importer(serviceProviderRepository, privateChannelRepository,neighbourRepository);
-        importer.importModelWithNeighbours(Path.of("src", "test", "resources", "ImportExportDump.json"));
+        importer.importModelWithNeighbours(Path.of("src", "test", "resources", "importExportDump.json"));
 
         assertThat(neighbourRepository.findAll()).hasSize(1);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
