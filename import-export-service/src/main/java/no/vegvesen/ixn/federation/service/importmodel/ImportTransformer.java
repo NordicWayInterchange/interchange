@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -299,11 +300,19 @@ public class ImportTransformer {
 
     public PrivateChannel transformPrivateChannelImportApiToPrivateChannel(PrivateChannelImportApi privateChannel) {
         return new PrivateChannel(privateChannel.getUuid(),
-                privateChannel.getPeerName(),
+                transformPeerImportApiSetToPeerSet(privateChannel.getPeers()),
                 PrivateChannelStatus.REQUESTED,
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
         );
+    }
+
+    private Set<Peer> transformPeerImportApiSetToPeerSet(Set<PeerImportApl> peers) {
+        return peers.stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet());
+    }
+
+    private Peer transformPeerImportApiToPeer(PeerImportApl peerImportApl) {
+        return new Peer(peerImportApl.getName(), peerImportApl.getUuid());
     }
 
     public PrivateChannelStatus transformPrivateChannelStatusImportApiToPrivateChannelStatus(PrivateChannelImportApi.PrivateChannelStatusImportApi status) {

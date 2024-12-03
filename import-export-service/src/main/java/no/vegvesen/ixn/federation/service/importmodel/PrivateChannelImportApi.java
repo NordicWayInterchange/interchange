@@ -1,37 +1,49 @@
 package no.vegvesen.ixn.federation.service.importmodel;
 
+import no.vegvesen.ixn.federation.service.exportmodel.PeerApi;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class PrivateChannelImportApi {
+
+    private Set<PeerImportApl> peers = new HashSet<>();
 
     private String uuid;
 
     private String serviceProviderName;
 
-    private String peerName;
-
     private PrivateChannelStatusImportApi status;
 
     private PrivateChannelEndpointImportApi endpoint;
 
-    public enum PrivateChannelStatusImportApi {
-        REQUESTED, CREATED, TEAR_DOWN
-    }
 
+
+    public enum PrivateChannelStatusImportApi {
+        REQUESTED, CREATED, TEAR_DOWN;
+
+    }
     public PrivateChannelImportApi() {
 
     }
-
     public PrivateChannelImportApi(String uuid,
                                    String serviceProviderName,
-                                   String peerName,
+                                   Set<PeerImportApl> peers,
                                    PrivateChannelStatusImportApi status,
                                    PrivateChannelEndpointImportApi endpoint) {
         this.uuid = uuid;
         this.serviceProviderName = serviceProviderName;
-        this.peerName = peerName;
+        this.peers = peers;
         this.status = status;
         this.endpoint = endpoint;
+    }
+    public Set<PeerImportApl> getPeers() {
+        return peers;
+    }
+
+    public void setPeers(Set<PeerImportApl> peers) {
+        this.peers = peers;
     }
 
     public String getUuid() {
@@ -50,13 +62,6 @@ public class PrivateChannelImportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public String getPeerName() {
-        return peerName;
-    }
-
-    public void setPeerName(String peerName) {
-        this.peerName = peerName;
-    }
 
     public PrivateChannelStatusImportApi getStatus() {
         return status;
@@ -79,12 +84,12 @@ public class PrivateChannelImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelImportApi that = (PrivateChannelImportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peerName, that.peerName) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, serviceProviderName, peerName, status, endpoint);
+        return Objects.hash(uuid, serviceProviderName, status, endpoint);
     }
 
     @Override
@@ -92,7 +97,6 @@ public class PrivateChannelImportApi {
         return "PrivateChannelImportApi{" +
                 "uuid='" + uuid + '\'' +
                 ", serviceProviderName='" + serviceProviderName + '\'' +
-                ", peerName='" + peerName + '\'' +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
                 '}';

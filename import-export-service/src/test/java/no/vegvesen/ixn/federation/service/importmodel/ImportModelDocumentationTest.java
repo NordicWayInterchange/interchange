@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.service.exportmodel.ExportTransformer;
+import no.vegvesen.ixn.federation.service.exportmodel.PeerApi;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -176,7 +178,7 @@ public class ImportModelDocumentationTest {
         return new PrivateChannelImportApi(
                 UUID.randomUUID().toString(),
                 "my-service-provider",
-                "other-service-provider",
+                Set.of(new PeerImportApl("other-service-provider",UUID.randomUUID().toString(),"REQUESTED")),
                 PrivateChannelImportApi.PrivateChannelStatusImportApi.CREATED,
                 new PrivateChannelEndpointImportApi(
                         "amqps://my-interchange.eu",

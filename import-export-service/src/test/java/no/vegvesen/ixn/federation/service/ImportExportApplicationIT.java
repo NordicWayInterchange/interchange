@@ -9,14 +9,19 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.service.exportmodel.Exporter;
+import no.vegvesen.ixn.federation.service.importmodel.Importer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,25 +39,22 @@ public class ImportExportApplicationIT extends PostgresContainerBase {
     @Autowired
     PrivateChannelRepository privateChannelRepository;
 
-    @Autowired
-    ImportExportApplication application;
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("localPath", ()-> "src/test/resources/importExportDump.json");
-    }
+    @TempDir
+    private Path tempDir;
 
     @Test
     public void exportModel() throws Exception {
         neighbourRepository.save(getNeighbour());
         serviceProviderRepository.save(getServiceProvider());
         privateChannelRepository.save(getPrivateChannel());
-        application.exportModel();
+        Exporter exporter = new Exporter(serviceProviderRepository, privateChannelRepository, neighbourRepository);
+        exporter.exportModel(tempDir.resolve("dump.json"));
     }
 
     @Test
     public void importModel() throws Exception {
-        application.importModelWithNeighbours();
+        Importer importer = new Importer(serviceProviderRepository, privateChannelRepository,neighbourRepository);
+        importer.importModelWithNeighbours(Path.of("src", "test", "resources", "ImportExportDump.json"));
 
         assertThat(neighbourRepository.findAll()).hasSize(1);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
@@ -215,7 +217,7 @@ public class ImportExportApplicationIT extends PostgresContainerBase {
     public PrivateChannel getPrivateChannel() {
         return new PrivateChannel(
                 UUID.randomUUID().toString(),
-                "other-service-provider",
+                Set.of(new Peer("other-service-provider", UUID.randomUUID().toString())),
                 PrivateChannelStatus.CREATED,
                 new PrivateChannelEndpoint(
                         "amqps://my-interchange.eu",

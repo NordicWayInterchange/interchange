@@ -24,16 +24,16 @@
         }
       } ],
       "status" : "KNOWN",
-      "lastUpdated" : 1731919685580
+      "lastUpdated" : 1733227885958
     },
     "neighbourSubscriptions" : [ {
-      "uuid" : "21143445-72d7-4d92-9c1b-eefee13b107b",
+      "uuid" : "acea6619-8272-4faa-aeef-d1b3231cb066",
       "status" : "CREATED",
       "selector" : "originatingCountry = 'NO'",
-      "path" : "my-interchange.eu/subscriptions/21143445-72d7-4d92-9c1b-eefee13b107b",
+      "path" : "my-interchange.eu/subscriptions/acea6619-8272-4faa-aeef-d1b3231cb066",
       "consumerCommonName" : "my-neighbour.eu",
       "endpoints" : [ {
-        "source" : "sub-6ad0490e-7cd2-4551-bffe-ad13376e8143",
+        "source" : "sub-2d905e7c-b756-465a-a63e-d38d28b5aecb",
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
         "maxBandwidth" : 100,
@@ -41,12 +41,12 @@
       } ]
     } ],
     "ourSubscriptions" : [ {
-      "path" : "my-neighbour.eu/subscriptions/a9dabc4f-d2c1-4b8d-b1b3-9a6c2f195606",
+      "path" : "my-neighbour.eu/subscriptions/9badc29c-ba1b-4bb3-9e45-086bb5b7d94f",
       "selector" : "publicationId = 'NO00000:NPRA_DATEX_1'",
       "consumerCommonName" : "my-interchange.eu",
       "status" : "CREATED",
       "endpoints" : [ {
-        "source" : "25e1b24e-ad10-4f76-a252-4d1b645251b2",
+        "source" : "2d0c632a-8110-486f-ad1f-3df2948c2d29",
         "host" : "amqps://my-neighbour.eu",
         "port" : 5671,
         "maxBandwidth" : 100,
@@ -58,24 +58,24 @@
   "serviceProviders" : [ {
     "name" : "my-service-provider",
     "subscriptions" : [ {
-      "uuid" : "2bf49879-f797-4d6d-886d-d3cafb9dc475",
+      "uuid" : "a917af25-852e-48ba-bf2a-012ae1f596fd",
       "selector" : "publicationId = 'NO00000:NPRA_DATEX_1' OR publicationId = 'NO00000:NPRA_DATEX_2'",
       "consumerCommonName" : "my-interchange.eu",
       "status" : "CREATED",
       "localEndpoints" : [ {
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
-        "source" : "loc-1fe46b5b-7b61-42a7-8b5f-95522e491777",
+        "source" : "loc-dc9ca211-ee61-40d4-9110-afde4c416c9b",
         "maxBandwidth" : 100,
         "maxMessageRate" : 100
       } ],
       "localConnections" : [ {
-        "source" : "cap-620114f9-5d74-46e7-9ab7-3e3078d234c4",
-        "destination" : "loc-1fe46b5b-7b61-42a7-8b5f-95522e491777"
+        "source" : "cap-5de39964-15fa-42f1-ac14-cc8a3c4468b0",
+        "destination" : "loc-dc9ca211-ee61-40d4-9110-afde4c416c9b"
       } ]
     } ],
     "capabilities" : [ {
-      "uuid" : "12e85207-a1cd-4dcf-9e59-9c0ae105362e",
+      "uuid" : "270eba19-f4fa-4d79-bcf9-c96ae8f85d3f",
       "application" : {
         "messageType" : "DATEX2",
         "publisherId" : "NO00000",
@@ -97,16 +97,16 @@
       "status" : "CREATED",
       "shards" : [ {
         "shardId" : 1,
-        "exchangeName" : "cap-620114f9-5d74-46e7-9ab7-3e3078d234c4",
+        "exchangeName" : "cap-5de39964-15fa-42f1-ac14-cc8a3c4468b0",
         "selector" : "publisherId = 'NO00000' AND publicationId = 'NO00000:NPRA_DATEX_2' AND originatingCountry = 'NO' AND protocolVersion = 'DATEX:1.0' AND quadTree like '%,100303%' AND publicationType = 'SituationPublication' AND publisherName = 'NPRA'"
       } ]
     } ],
     "deliveries" : [ {
-      "uuid" : "8fe03236-0bd8-4a10-8abe-70dec252b377",
+      "uuid" : "24b8f6b1-1f4e-4286-a6d8-81527ef09faf",
       "endpoints" : [ {
         "host" : "amqps://my-interchange.eu",
         "port" : 5671,
-        "target" : "del-1e1e6084-2299-4803-b0a9-b4d1d6baedab",
+        "target" : "del-68c5a480-b9d6-4157-b1f3-8dcff99aada2",
         "maxBandwidth" : 100,
         "maxMessageRate" : 100
       } ],
@@ -115,14 +115,18 @@
     } ]
   } ],
   "privateChannels" : [ {
-    "uuid" : "544f68e7-7f3d-4bd4-bcfc-3736cb3098ad",
+    "uuid" : "57a6696a-e1a8-4a81-a1ef-2195ccfddc7b",
     "serviceProviderName" : "my-service-provider",
-    "peerName" : "other-service-provider",
+    "peers" : [ {
+      "name" : "other-service-provider",
+      "uuid" : "f09f310f-2070-4a45-8832-d96c93cb5a29",
+      "peerStatus" : "REQUESTED"
+    } ],
     "status" : "CREATED",
     "endpoint" : {
       "host" : "amqps://my-interchange.eu",
       "port" : 5671,
-      "queueName" : "priv-5069b4e6-a1de-441d-9e89-814678d322bc"
+      "queueName" : "priv-f55bf446-0f42-4060-9868-6ef7afc98696"
     }
   } ]
 }
