@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import {Box, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
+import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
+import {useSession} from "next-auth/react";
 
 const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 90 },
@@ -34,12 +36,18 @@ const rows: GridRowsProp = [
 ];
 
 const Neighbours: React.FC = () => {
+    const { data: session } = useSession();
+
+    const { data, isLoading } = useFetchNeighbours(
+        session?.user.commonName as string
+    );
+
     const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
     const handleRowClick = (id: number) => {
         setExpandedRow((prevExpandedRow) => (prevExpandedRow === id ? null : id));
     };
-
+    console.log('data', data)
     return (
         <Box sx={{ height: 400, width: "100%" }}>
             <Mainheading>Neighbours</Mainheading>
