@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class CapabilityImportApi {
 
+    private String uuid;
+
     private ApplicationApi application;
 
     private MetadataImportApi metadata;
@@ -15,18 +17,28 @@ public class CapabilityImportApi {
 
     private Set<CapabilityShardImportApi> shards;
 
-    public enum CapabilityStatusImportApi {
-        REQUESTED, CREATED, TEAR_DOWN
-    }
 
+
+    public enum CapabilityStatusImportApi {
+        REQUESTED, CREATED, TEAR_DOWN;
+
+    }
     public CapabilityImportApi() {
 
     }
-
-    public CapabilityImportApi(ApplicationApi application,
+    public CapabilityImportApi(String uuid, ApplicationApi application,
                                MetadataImportApi metadata) {
+        this.uuid = uuid;
         this.application = application;
         this.metadata = metadata;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public ApplicationApi getApplication() {
