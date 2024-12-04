@@ -7,7 +7,7 @@ export default function Home() {
     return (
         <>
             <Box flex={1}>
-                <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
+                <Mainheading>You can see interchange {session?.user?.name}!</Mainheading>
             </Box>
         </>
     );

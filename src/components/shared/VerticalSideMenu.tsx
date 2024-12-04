@@ -1,46 +1,81 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Drawer,
     List,
     ListItem,
     ListItemText,
     ListItemIcon,
-    Typography,
     Box,
     CssBaseline,
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import OtherHousesIcon from '@mui/icons-material/OtherHouses';
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import Groups2Icon from '@mui/icons-material/Groups2';
 import Header from './Header';
-import Neighbours from "@/components/neighbours/Neighbours";
+import {IPages} from "@/interfaces/IPages";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
-const drawerWidth = 100;
+const drawerWidth = 145;
+
+const SIDE_PAGES: Array<IPages> = [
+    {
+        text: "My Interchange",
+        url: "/",
+        icon: <SyncAltIcon />
+    },
+    {
+        text: "Neighbours",
+        url: "/neighbours",
+        icon: <Groups2Icon />
+    },
+];
 
 const VerticalSideMenu: React.FC = () => {
-    const [selectedContent, setSelectedContent] = useState('My interchange');
+    const router = useRouter();
 
-    const menuItems = [
-        { text: 'My interchange', icon: <SettingsIcon />, contentKey: 'My interchange' },
-        { text: 'Neighbours', icon: <OtherHousesIcon />, contentKey: 'Neighbours' },
-    ];
+    const mapPages = (pages: Array<IPages>) => {
+        return pages.map((page: IPages, key: number) => (
+            <Link
+                href={page.url}
+                key={key}
+                style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                }}
+            >
+                <ListItem
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '10px 0',
+                        backgroundColor:
+                            router.asPath === page.url ? "menuHoverColor" : null,
+                        border: "1px solid transparent",
+                        '&:hover': {
+                            backgroundColor: 'menuHoverColor',
+                            border: "1px solid",
+                        },
+                    }}
+                    disablePadding
+                >
 
-    const renderContent = () => {
-        switch (selectedContent) {
-            case 'My interchange':
-                return <Typography variant="h4">My interchange</Typography>;
-            case 'Neighbours':
-                return <Neighbours/>
-            default:
-                return <Typography variant="h4">Select an option from the menu</Typography>;
-        }
+                <ListItemIcon sx={{ color: 'textColor', justifyContent: 'center', marginTop: 1}}>{page.icon}</ListItemIcon>
+                <ListItemText  sx={{
+                    textAlign: 'center',
+                    marginTop: 1,
+                }} primary={page.text} />
+                </ListItem>
+            </Link>
+        ));
     };
+
 
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-
             <Header />
-
             <Drawer
                 variant="permanent"
                 sx={{
@@ -56,53 +91,20 @@ const VerticalSideMenu: React.FC = () => {
                     },
                 }}
             >
-                <List sx={{ width: '100%' }}>
-                    {menuItems.map((item, index) => (
-                        <ListItem
-                            button
-                            key={index}
-                            onClick={() => setSelectedContent(item.contentKey)}
-                            selected={selectedContent === item.contentKey}
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: '10px 0',
-                                '&:hover': {
-                                    backgroundColor: 'menuHoverColor',
-                                },
-                                '&.Mui-selected': {
-                                    backgroundColor: 'menuHoverColor',
-                                },
-                            }}
-                        >
-                            <ListItemIcon sx={{ color: 'textColor', justifyContent: 'center' }}>
-                                {item.icon}
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={item.text}
-                                sx={{
-                                    textAlign: 'center',
-                                    marginTop: 1,
-                                }}
-                            />
-                        </ListItem>
-                    ))}
-                </List>
+                <Box sx={{ padding: 2 }}>
+                    <List>{mapPages(SIDE_PAGES)}</List>
+                </Box>
             </Drawer>
 
             <Box
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    p: 3,
                     backgroundColor: 'mainBackgroundColor',
                     minHeight: '100vh',
                 }}
             >
                 <Box sx={{ height: '64px' }} />
-                {renderContent()}
             </Box>
         </Box>
     );
