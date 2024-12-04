@@ -39,7 +39,7 @@ const VerticalSideMenu: React.FC = () => {
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
 
-            <Header title="Admin ui logo" />
+            <Header />
 
             <Drawer
                 variant="permanent"
