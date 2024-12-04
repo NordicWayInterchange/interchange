@@ -16,7 +16,7 @@ import Neighbours from "@/components/neighbours/Neighbours";
 
 const drawerWidth = 100;
 
-const MiniVariantDrawer: React.FC = () => {
+const VerticalSideMenu: React.FC = () => {
     const [selectedContent, setSelectedContent] = useState('My interchange');
 
     const menuItems = [
@@ -29,7 +29,7 @@ const MiniVariantDrawer: React.FC = () => {
             case 'My interchange':
                 return <Typography variant="h4">My interchange</Typography>;
             case 'Neighbours':
-                return <Neighbours/>;
+                return <Neighbours/>
             default:
                 return <Typography variant="h4">Select an option from the menu</Typography>;
         }
@@ -84,7 +84,6 @@ const MiniVariantDrawer: React.FC = () => {
                                 primary={item.text}
                                 sx={{
                                     textAlign: 'center',
-                                    fontSize: '8px',
                                     marginTop: 1,
                                 }}
                             />
@@ -109,4 +108,4 @@ const MiniVariantDrawer: React.FC = () => {
     );
 };
 
-export default MiniVariantDrawer;
+export default VerticalSideMenu;

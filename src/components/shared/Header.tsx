@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography } from '@mui/material';
+import Subheading from "@/components/shared/typography/Subheading";
 
 interface HeaderProps {
     title: string;
@@ -16,9 +17,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             }}
         >
             <Toolbar>
-                <Typography variant="h6" noWrap>
+                <Subheading>
                     {title}
-                </Typography>
+                </Subheading>
             </Toolbar>
         </AppBar>
     );
