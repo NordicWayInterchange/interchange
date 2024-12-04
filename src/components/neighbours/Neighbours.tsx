@@ -47,7 +47,6 @@ const Neighbours: React.FC = () => {
     const handleRowClick = (id: number) => {
         setExpandedRow((prevExpandedRow) => (prevExpandedRow === id ? null : id));
     };
-    console.log('data', data)
     return (
         <Box sx={{ height: 400, width: "100%" }}>
             <Mainheading>Neighbours</Mainheading>

@@ -4,7 +4,7 @@ import {neighbours} from "@/types/neighbours";
 const fetchNeighbours: (
     commonName: string
 ) => Promise<neighbours[]> = async (commonName: string) => {
-    const res = await fetch(`/api/${commonName}/neighbours`);
+    const res = await fetch(`${commonName}/neighbours`);
     if (res.ok) {
         return res.json();
     } else {
