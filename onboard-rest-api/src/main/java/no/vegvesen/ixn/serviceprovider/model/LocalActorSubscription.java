@@ -20,10 +20,13 @@ public class LocalActorSubscription {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String errorMessage;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String description;
+
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage) {
+    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status, String errorMessage, String description) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -31,6 +34,7 @@ public class LocalActorSubscription {
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
         this.status = status;
         this.errorMessage = errorMessage;
+        this.description = description;
     }
 
     public String getId() {
@@ -83,6 +87,14 @@ public class LocalActorSubscription {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

@@ -14,15 +14,18 @@ public class Subscription implements Comparable<Subscription> {
 
     Long lastUpdatedTimestamp;
 
+    String description;
+
     public Subscription() {
     }
 
-    public Subscription(String id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp) {
+    public Subscription(String id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp, String description) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.description = description;
     }
 
     public String getId() {
@@ -65,6 +68,14 @@ public class Subscription implements Comparable<Subscription> {
         this.selector = selector;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "Subscription{" +
@@ -73,6 +84,7 @@ public class Subscription implements Comparable<Subscription> {
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", description=" + description +
                 '}';
     }
 

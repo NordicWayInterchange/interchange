@@ -16,10 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ServiceProviderImport {
     public static ServiceProviderApi[] getServiceProviderApis(Path path) throws IOException {
@@ -68,7 +66,8 @@ public class ServiceProviderImport {
         for (DeliveryApi deliveryApi : serviceProviderApi.getDeliveries()) {
             LocalDelivery delivery = new LocalDelivery(
                     deliveryApi.getSelector(),
-                    LocalDeliveryStatus.REQUESTED
+                    LocalDeliveryStatus.REQUESTED,
+                    "delivery"
             );
             String exchangeName = null;
             for (DeliveryEndpoint endpoint : deliveryApi.getEndpoints()) {
@@ -95,8 +94,8 @@ public class ServiceProviderImport {
         List<PrivateChannel> importedPrivateChannels = new ArrayList<>();
 
         for (PrivateChannelResponseApi privateChannelResponseApi : privateChannelResponseApis) {
-            importedPrivateChannels.add(new PrivateChannel(
-                    privateChannelResponseApi.getPeerName(),
+            PrivateChannel newPrivateChannel = new PrivateChannel(
+                    mapPeers(privateChannelResponseApi.getPeers()),
                     PrivateChannelStatus.REQUESTED,
                     new PrivateChannelEndpoint(
                             privateChannelResponseApi.getEndpoint().getHost(),
@@ -104,9 +103,17 @@ public class ServiceProviderImport {
                             privateChannelResponseApi.getEndpoint().getQueueName()
                     ),
                     serviceProviderName
-            ));
+            );
+            if (privateChannelResponseApi.getDescription() != null) {
+                newPrivateChannel.setDescription(privateChannelResponseApi.getDescription());
+            }
+            importedPrivateChannels.add(newPrivateChannel);
         }
         return importedPrivateChannels;
+    }
+
+    public static Set<Peer> mapPeers(Set<String> peerNames) {
+        return peerNames.stream().map(Peer::new).collect(Collectors.toSet());
     }
 
     public static abstract class PostgreSQLContainerSetup{

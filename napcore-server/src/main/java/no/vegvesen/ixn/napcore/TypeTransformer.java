@@ -1,9 +1,12 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.napcore.model.PrivateChannelEndpoint;
+import no.vegvesen.ixn.napcore.model.PrivateChannelStatus;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TypeTransformer {
 
@@ -42,11 +46,11 @@ public class TypeTransformer {
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
-        return new LocalSubscription(subscription.getSelector(), nodeName);
+        return new LocalSubscription(subscription.getSelector(), nodeName, subscription.getDescription());
     }
 
     public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector());
+        return new LocalDelivery(delivery.getSelector(), delivery.getDescription());
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
@@ -55,7 +59,8 @@ public class TypeTransformer {
                 localDelivery.getSelector(),
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
-                transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp())
+                transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp()),
+                localDelivery.getDescription()
         );
     }
 
@@ -94,8 +99,8 @@ public class TypeTransformer {
                 transformLocalSubscriptionStatusToNapSubscriptionStatus(localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()),
-                transformLocalDateTimeToTimestamp(localSubscription.getLastUpdated())
-
+                transformLocalDateTimeToTimestamp(localSubscription.getLastUpdated()),
+                localSubscription.getDescription()
         );
         return subscription;
     }
@@ -148,6 +153,41 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities;
+    }
+
+    public PrivateChannelResponse transformPrivateChannelToPrivateChannelResponse(PrivateChannel privateChannel) {
+        return new PrivateChannelResponse(
+                privateChannel.getUuid(),
+                privateChannel.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet()),
+                transformPrivateChannelStatus(privateChannel.getStatus()),
+                privateChannel.getDescription(),
+                transformPrivateChannelEndpoint(privateChannel.getEndpoint()),
+                transformLocalDateTimeToTimestamp(privateChannel.getLastUpdated())
+        );
+    }
+
+    public PeerPrivateChannel transformPrivateChannelToPeerPrivateChannel(PrivateChannel privateChannel) {
+        return new PeerPrivateChannel(
+                privateChannel.getUuid(),
+                privateChannel.getServiceProviderName(),
+                transformPrivateChannelStatus(privateChannel.getStatus()),
+                privateChannel.getDescription(),
+                transformPrivateChannelEndpoint(privateChannel.getEndpoint()),
+                transformLocalDateTimeToTimestamp(privateChannel.getLastUpdated())
+        );
+    }
+
+    public PrivateChannelStatus transformPrivateChannelStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus status) {
+        return switch (status) {
+            case REQUESTED -> PrivateChannelStatus.REQUESTED;
+            case CREATED -> PrivateChannelStatus.CREATED;
+            case TEAR_DOWN -> PrivateChannelStatus.NOT_VALID;
+            default -> PrivateChannelStatus.ILLEGAL;
+        };
+    }
+
+    public PrivateChannelEndpoint transformPrivateChannelEndpoint(no.vegvesen.ixn.federation.model.PrivateChannelEndpoint endpoint) {
+        return new PrivateChannelEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getQueueName());
     }
 
     public Long transformLocalDateTimeToTimestamp(LocalDateTime localDateTime) {
