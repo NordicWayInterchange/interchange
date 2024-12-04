@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {SessionProvider} from "next-auth/react";
 import {ThemeProvider} from "@mui/material";
 import theme from "@/theme/theme";
+import Layout from "@/components/shared/Layout";
 
 export default function App({
                                 Component,
@@ -15,7 +16,9 @@ export default function App({
         <SessionProvider session={session}>
             <QueryClientProvider client={queryClient}>
                 <ThemeProvider theme={theme}>
-                    <Component {...pageProps} />
+                    <Layout>
+                        <Component {...pageProps} />
+                    </Layout>
                 </ThemeProvider>
             </QueryClientProvider>
         </SessionProvider>
