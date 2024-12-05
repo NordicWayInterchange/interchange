@@ -42,41 +42,50 @@ const Neighbours: React.FC = () => {
             ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
-            renderCell: (params) => (
-                <Box
-                    style={{cursor: "pointer"}}
-                    onClick={() => handleCellClick(params.row.capabilities, "capabilities")}
-                >
-            {Array.isArray(params.row.capabilities.capabilities) ? params.row.capabilities.capabilities.length : 0}
-        </Box>
-            ),
+            renderCell: (params) => {
+                const neighbourCapabilities = params.row.capabilities.capabilities;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => handleCellClick(params.row.capabilities, "capabilities")}
+                    >
+                        {Array.isArray(neighbourCapabilities) ? neighbourCapabilities.length : 0}
+                    </Box>
+                );
+            },
         },
         {
             ...dataGridTemplate,
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
-            renderCell: (params) => (
-                <Box
-                    style={{cursor: "pointer"}}
-                    onClick={() => handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")}
-                >
-            {Array.isArray(params.row.ourRequestedSubscriptions.subscriptions) ? params.row.ourRequestedSubscriptions.subscriptions.length : 0}
-        </Box>
-            ),
+            renderCell: (params) => {
+                const ourSubscriptions = params.row.ourRequestedSubscriptions.subscriptions;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")}
+                    >
+                        {Array.isArray(ourSubscriptions) ? ourSubscriptions.length : 0}
+                    </Box>
+                );
+            },
         },
         {
             ...dataGridTemplate,
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
-            renderCell: (params) => (
-                <Box
-                    style={{cursor: "pointer"}}
-                    onClick={() => handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")}
-                >
-            {Array.isArray(params.row.neighbourRequestedSubscriptions.subscriptions) ? params.row.neighbourRequestedSubscriptions.subscriptions.length : 0}
+            renderCell: (params) => {
+                const neighbourSubscriptions = params.row.neighbourRequestedSubscriptions.subscriptions;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")}
+                    >
+                        {Array.isArray(neighbourSubscriptions) ? neighbourSubscriptions.length : 0}
 
-        </Box>
-            ),
+                    </Box>
+                );
+            },
         },
         {
             ...dataGridTemplate,
