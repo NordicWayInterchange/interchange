@@ -4,6 +4,8 @@ import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box} from "@mui/material";
+import {Chip} from "@/components/shared/Chip";
+import {connextionStatusChips} from "@/lib/statusChips";
 
 
 const Neighbours: React.FC = () => {
@@ -12,6 +14,17 @@ const Neighbours: React.FC = () => {
     const { data, isLoading } = useFetchNeighbours(
         session?.user.commonName as string
     );
+
+    const [expandedRows, setExpandedRows] = useState({});
+
+    /*const handleCellClick = (row, field) => {
+        console.log(row);
+        console.log(field);
+        setExpandedRows((prev) => ({
+            ...prev,
+            [row.id]: prev[row.id] === field ? null : field, // Toggle based on field
+        }));
+    };*/
 
     console.log(data);
     const tableHeaders: GridColDef[] = [
@@ -61,13 +74,30 @@ const Neighbours: React.FC = () => {
         </span>
             ),
         },
+        {
+            field: "connectionStatus",
+            headerName: "Connection Status",
+            flex : 1,
+            renderCell: (cell) => {
+                return (
+                    <Chip
+                        color={
+                            connextionStatusChips[
+                                cell.value as keyof typeof connextionStatusChips
+                                ] as any
+                        }
+                        label={cell.value}
+                    />
+                );
+            },
+        },
     ];
 
-    const [selectedDetail, setSelectedDetail] = useState(null);
+    //const [selectedDetail, setSelectedDetail] = useState(null);
 
-    const handleCellClick = (row, field) => {
+    /*const handleCellClick = (row, field) => {
         setSelectedDetail({field, data: row.ourRequestedSubscriptions.subscription});
-    };
+    };*/
     return (
         <Box flex={1}>
             <Mainheading>Subscriptions</Mainheading>
@@ -79,18 +109,7 @@ const Neighbours: React.FC = () => {
                 getRowId={(row) => row.neighbour_id}
                 sort={{ field: "lastUpdated", sort: "desc" }}
             />
-            {selectedDetail && (
-                <div style={{marginTop: 20}}>
-                    <h3>Details for {selectedDetail.field}</h3>
-                    <DataGrid
-                        columns={tableHeaders}
-                        rows={data || []}
-                        loading={isLoading}
-                        getRowId={(row) => row.ourRequestedSubscriptions.subscription.id}
-                        sort={{ field: "lastUpdatedTimestamp", sort: "desc" }}
-                    />
-                </div>
-            )}
+
         </div>
         </Box>
     );

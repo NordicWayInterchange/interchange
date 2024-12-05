@@ -6,8 +6,11 @@ const createColor = (mainColor: any) =>
     augmentColor({ color: { main: mainColor } });
 
 export const SHARED_COLORS = {
+    depricatedRed: createColor("#F8DEDE"),
     grayDark: createColor("#444f55"),
     grayLight: createColor("#DADADA"),
+    depricatedDark: createColor("#7E1010"),
+    depricatedLight: createColor("#F8DEDE"),
     greenDark: createColor("#1D7721"),
     greenLight: createColor("#E8F3E9"),
     blueDark: createColor("#006C9A"),
