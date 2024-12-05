@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {GridColDef} from "@mui/x-data-grid";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box} from "@mui/material";
+import {Box, Divider} from "@mui/material";
 import {Chip} from "@/components/shared/Chip";
 import {connextionStatusChips} from "@/lib/statusChips";
+import DataGrid from "@/components/shared/datagrid/DataGrid";
 
 
 const Neighbours: React.FC = () => {
@@ -101,7 +102,9 @@ const Neighbours: React.FC = () => {
     return (
         <Box flex={1}>
             <Mainheading>Subscriptions</Mainheading>
-        <div style={{height: 400, width: "100%"}}>
+            <Divider sx={{ marginY: 3 }} />
+
+            <div style={{height: 400, width: "100%"}}>
             <DataGrid
                 columns={tableHeaders}
                 rows={data || []}

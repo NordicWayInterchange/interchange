@@ -16,7 +16,7 @@ const theme = createTheme({
         },
         ...ADMIN_UI_COLORS,
         text: {
-            primary: '#A9B7C6',
+            primary: '#FFFFFF',
             secondary: '#000000',
         },
     },

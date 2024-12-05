@@ -28,7 +28,7 @@ export const SHARED_COLORS = {
 export const ADMIN_UI_COLORS = {
     menuHoverColor: '#3E3F41',
     mainBackgroundColor: '#2B2B2B',
-    textColor: '#A9B7C6',
+    textColor: '#FFFFFF', //#A9B7C6
     menuBackgroundColor: '#202123',
     ...SHARED_COLORS,
 };
