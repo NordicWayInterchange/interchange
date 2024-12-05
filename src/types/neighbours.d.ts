@@ -103,11 +103,6 @@ export type Subscription = {
 
 export type ourRequestedSubscriptions = {
     subreq_id: string;
-    subscriptionStatus: SubscriptionStatus;
-    selector: string;
-    path: string;
-    consumerCommonName: string;
-    endpoints: Array<Endpoint>;
-    lastUpdatedTimestamp: number;
-    description: string;
+    subscriptions: Array<Subscription>;
+    successfulRequest: number;
 };
