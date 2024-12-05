@@ -92,6 +92,7 @@ export type Endpoint = {
 
 export type Subscription = {
     subreq_id: string;
+    id: string;
     subscriptionStatus: SubscriptionStatus;
     selector: string;
     path: string;

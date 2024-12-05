@@ -1,4 +1,4 @@
-export const connextionStatusChips = {
+export const connectionStatusChips = {
     CONNECTED: "greenDark",
     FAILED: "depricatedLight",
     UNREACHABLE: "blueLight",

@@ -3,9 +3,9 @@ import {GridColDef} from "@mui/x-data-grid";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, Divider, Typography} from "@mui/material";
+import {Box, ChipProps, Divider, Typography} from "@mui/material";
 import {Chip} from "@/components/shared/Chip";
-import {connextionStatusChips, messageTypeChips, statusChips} from "@/lib/statusChips";
+import {connectionStatusChips, messageTypeChips, statusChips} from "@/lib/statusChips";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 
@@ -20,7 +20,6 @@ const Neighbours: React.FC = () => {
     const [expandedRows, setExpandedRows] = useState({});
 
     const handleCellClick = (row, field) => {
-        console.log('Rowwww', row)
         const rowId = row.id ? row.id : row.subreq_id;
         setExpandedRows((prev) => ({
             ...prev,
@@ -28,7 +27,6 @@ const Neighbours: React.FC = () => {
         }));
     };
 
-    console.log(data);
     const tableHeaders: GridColDef[] = [
         {
             ...dataGridTemplate,
@@ -45,12 +43,12 @@ const Neighbours: React.FC = () => {
             field: "capabilities",
             headerName: "Capabilities",
             renderCell: (params) => (
-                <span
+                <Box
                     style={{cursor: "pointer"}}
                     onClick={() => handleCellClick(params.row.capabilities, "capabilities")}
                 >
             {Array.isArray(params.row.capabilities.capabilities) ? params.row.capabilities.capabilities.length : 0}
-        </span>
+        </Box>
             ),
         },
         {
@@ -58,12 +56,12 @@ const Neighbours: React.FC = () => {
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
             renderCell: (params) => (
-                <span
+                <Box
                     style={{cursor: "pointer"}}
                     onClick={() => handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")}
                 >
             {Array.isArray(params.row.ourRequestedSubscriptions.subscriptions) ? params.row.ourRequestedSubscriptions.subscriptions.length : 0}
-        </span>
+        </Box>
             ),
         },
         {
@@ -71,13 +69,13 @@ const Neighbours: React.FC = () => {
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
             renderCell: (params) => (
-                <span
+                <Box
                     style={{cursor: "pointer"}}
                     onClick={() => handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")}
                 >
             {Array.isArray(params.row.neighbourRequestedSubscriptions.subscriptions) ? params.row.neighbourRequestedSubscriptions.subscriptions.length : 0}
 
-        </span>
+        </Box>
             ),
         },
         {
@@ -88,9 +86,9 @@ const Neighbours: React.FC = () => {
                 return (
                     <Chip
                         color={
-                            connextionStatusChips[
-                                cell.value as keyof typeof connextionStatusChips
-                                ] as any
+                            connectionStatusChips[
+                                cell.value as keyof typeof connectionStatusChips
+                                ] as ChipProps['color']
                         }
                         label={cell.value}
                     />
@@ -120,9 +118,7 @@ const Neighbours: React.FC = () => {
                 { ...dataGridTemplate, field: "messageType", headerName: "Message Type", renderCell: (cell) => {
                         return (
                             <Chip
-                                color={
-                                    messageTypeChips[cell.value as keyof typeof messageTypeChips] as any
-                                }
+                                color={messageTypeChips[cell.value as keyof typeof messageTypeChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
@@ -145,7 +141,7 @@ const Neighbours: React.FC = () => {
                 { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
                         return (
                             <Chip
-                                color={statusChips[cell.value as keyof typeof statusChips] as any}
+                                color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
@@ -172,7 +168,7 @@ const Neighbours: React.FC = () => {
                 { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
                         return (
                             <Chip
-                                color={statusChips[cell.value as keyof typeof statusChips] as any}
+                                color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
