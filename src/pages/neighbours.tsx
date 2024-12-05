@@ -5,7 +5,7 @@ import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box, Divider, Typography} from "@mui/material";
 import {Chip} from "@/components/shared/Chip";
-import {connextionStatusChips} from "@/lib/statusChips";
+import {connextionStatusChips, messageTypeChips, statusChips} from "@/lib/statusChips";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 
@@ -117,7 +117,16 @@ const Neighbours: React.FC = () => {
 
             nestedColumns = [
                 { ...dataGridTemplate, field: "id", headerName: "ID" },
-                { ...dataGridTemplate, field: "messageType", headerName: "Message Type" },
+                { ...dataGridTemplate, field: "messageType", headerName: "Message Type", renderCell: (cell) => {
+                        return (
+                            <Chip
+                                color={
+                                    messageTypeChips[cell.value as keyof typeof messageTypeChips] as any
+                                }
+                                label={cell.value}
+                            />
+                        );
+                    }},
                 { ...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country" }
             ];
         } else if (field === "neighbourRequestedSubscriptions") {
@@ -133,7 +142,14 @@ const Neighbours: React.FC = () => {
             nestedColumns = [
                 { ...dataGridTemplate, field: "id", headerName: "ID" },
                 { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
-                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status"},
+                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                        return (
+                            <Chip
+                                color={statusChips[cell.value as keyof typeof statusChips] as any}
+                                label={cell.value}
+                            />
+                        );
+                    }},
                 {
                     ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",
@@ -153,7 +169,14 @@ const Neighbours: React.FC = () => {
             nestedColumns = [
                 { ...dataGridTemplate, field: "id", headerName: "ID" },
                 { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
-                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status" },
+                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                        return (
+                            <Chip
+                                color={statusChips[cell.value as keyof typeof statusChips] as any}
+                                label={cell.value}
+                            />
+                        );
+                    } },
                 {
                     ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",

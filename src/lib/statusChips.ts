@@ -13,3 +13,14 @@ export const statusChips = {
     RESUBSCRIBE: "yellowLight",
     ERROR: "depricatedLight"
 };
+
+export const messageTypeChips = {
+    DATEX2: "grayLight",
+    DENM: "greenLight",
+    IVIM: "depricatedLight",
+    SPATEM: "pinkLight",
+    MAPEM: "blueLight",
+    SREM: "yellowLight",
+    SSEM: "orangeLight",
+    CAM: "purpleLight",
+};
