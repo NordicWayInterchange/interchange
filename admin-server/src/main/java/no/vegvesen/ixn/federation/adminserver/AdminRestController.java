@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import no.vegvesen.ixn.federation.adminserver.model.ListNeighboursResponse;
+import no.vegvesen.ixn.federation.adminserver.model.NeighbourApi;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +34,8 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListNeighboursResponse getNeighbours(@PathVariable("adminUser") String adminUser){
+    public List<NeighbourApi> getNeighbours(@PathVariable("adminUser") String adminUser){
         List<Neighbour> neighbourList = neighbourRepository.findAll();
-        return typeTransformer.neighbourListToListNeighboursResponse(neighbourList);
+        return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
     }
 }
