@@ -31,19 +31,19 @@ const Neighbours: React.FC = () => {
     console.log(data);
     const tableHeaders: GridColDef[] = [
         {
+            ...dataGridTemplate,
             field: "neighbour_id",
-            headerName: "ID",
-            flex: 1,
+            headerName: "ID"
         },
         {
+            ...dataGridTemplate,
             field: "name",
-            headerName: "Name",
-            flex: 1
+            headerName: "Name"
         },
         {
+            ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
-            flex: 1,
             renderCell: (params) => (
                 <span
                     style={{cursor: "pointer"}}
@@ -54,9 +54,9 @@ const Neighbours: React.FC = () => {
             ),
         },
         {
+            ...dataGridTemplate,
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
-            flex: 1,
             renderCell: (params) => (
                 <span
                     style={{cursor: "pointer"}}
@@ -67,9 +67,9 @@ const Neighbours: React.FC = () => {
             ),
         },
         {
+            ...dataGridTemplate,
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
-            flex: 1,
             renderCell: (params) => (
                 <span
                     style={{cursor: "pointer"}}
@@ -81,9 +81,9 @@ const Neighbours: React.FC = () => {
             ),
         },
         {
+            ...dataGridTemplate,
             field: "connectionStatus",
             headerName: "Connection Status",
-            flex : 1,
             renderCell: (cell) => {
                 return (
                     <Chip
@@ -131,17 +131,16 @@ const Neighbours: React.FC = () => {
             }));
 
             nestedColumns = [
-                { ...dataGridTemplate, field: "id", headerName: "ID", width: 100 },
-                { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name", width: 150 },
-                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", width: 200 },
+                { ...dataGridTemplate, field: "id", headerName: "ID" },
+                { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
+                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status"},
                 {
+                    ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",
                     headerName: "Last Updated",
-                    width: 200,
                 },
             ];
         } else if (field === "ourRequestedSubscriptions") {
-            console.log('hereeee', row)
             nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription) => ({
                 id: subscription.id,
                 consumerCommonName: subscription.consumerCommonName,
@@ -152,22 +151,21 @@ const Neighbours: React.FC = () => {
             }));
 
             nestedColumns = [
-                { field: "id", headerName: "ID", width: 100 },
-                { field: "consumerCommonName", headerName: "Consumer Common Name", width: 150 },
-                { field: "subscriptionStatus", headerName: "Status", width: 200 },
+                { ...dataGridTemplate, field: "id", headerName: "ID" },
+                { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
+                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status" },
                 {
+                    ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",
                     headerName: "Last Updated",
-                    width: 200,
                 },
             ];
         }
 
         return (
-            <Box sx={{ pl: 5, pt: 1, pb: 2 }}>
-                <Typography variant="subtitle1">
-                    Details for {field} of {row.name}
-                </Typography>
+            <Box flex={1}>
+                <Mainheading>{field}</Mainheading>
+                <Divider sx={{ marginY: 4 }} />
                 {nestedData.length > 0 ? (
                     <Box sx={{ height: 300, width: "90%" }}>
                         <DataGrid
@@ -185,10 +183,9 @@ const Neighbours: React.FC = () => {
     };
 
     return (
-        <Box sx={{ height: "100vh", width: "100%" }}>
-            <Typography variant="h4" gutterBottom>
-                Dynamic Nested Table Example
-            </Typography>
+        <Box flex={1}>
+        <Mainheading>Subscriptions</Mainheading>
+            <Divider sx={{ marginY: 4 }} />
             <Box sx={{ height: 400, width: "100%" }}>
                 <DataGrid
                     columns={tableHeaders}
