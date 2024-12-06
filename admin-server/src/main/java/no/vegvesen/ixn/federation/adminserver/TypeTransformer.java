@@ -14,6 +14,10 @@ import java.util.Set;
 
 public class TypeTransformer {
 
+    public ListNeighboursResponse neighbourListToListNeighboursResponse(List<Neighbour> neighbourList) {
+        return new ListNeighboursResponse(neighbourListToNeighbourApiList(neighbourList));
+    }
+
     public List<NeighbourApi> neighbourListToNeighbourApiList(List<Neighbour> neighbourList) {
         List<NeighbourApi> neighbourApiList = new ArrayList<>();
         for (Neighbour neighbour : neighbourList) {

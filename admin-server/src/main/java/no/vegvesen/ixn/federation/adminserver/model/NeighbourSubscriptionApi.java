@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class NeighbourSubscriptionApi {
 
-    private Integer id;
+    private Integer subreq_id;
 
     private NeighbourSubscriptionStatusApi subscriptionStatus;
 
@@ -21,8 +21,8 @@ public class NeighbourSubscriptionApi {
     public NeighbourSubscriptionApi() {
     }
 
-    public NeighbourSubscriptionApi(Integer id, NeighbourSubscriptionStatusApi subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpointApi> endpoints, Long lastUpdatedTimestamp) {
-        this.id = id;
+    public NeighbourSubscriptionApi(Integer subreq_id, NeighbourSubscriptionStatusApi subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+        this.subreq_id = subreq_id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -32,12 +32,12 @@ public class NeighbourSubscriptionApi {
     }
 
 
-    public Integer getId() {
-        return id;
+    public Integer getSubreq_id() {
+        return subreq_id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setSubreq_id(Integer subreq_id) {
+        this.subreq_id = subreq_id;
     }
 
 
@@ -92,7 +92,7 @@ public class NeighbourSubscriptionApi {
     @Override
     public String toString() {
         return "NeighbourSubscriptionApi{" +
-                "id=" + id +
+                "id=" + subreq_id +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +
                 ", path='" + path + '\'' +
