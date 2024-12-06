@@ -3,7 +3,7 @@ import {GridColDef} from "@mui/x-data-grid";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, ChipProps, Divider, Typography} from "@mui/material";
+import {Box, ChipProps, Divider, Drawer, Typography} from "@mui/material";
 import {Chip} from "@/components/shared/Chip";
 import {connectionStatusChips, messageTypeChips, statusChips} from "@/lib/statusChips";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
@@ -18,6 +18,16 @@ const Neighbours: React.FC = () => {
     );
 
     const [expandedRows, setExpandedRows] = useState({});
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+
+    const handleMoreClose = () => {
+        setDrawerOpen(false);
+    };
+
+    const fieldAliasMap = {
+        ourRequestedSubscriptions: "Our Subscriptions",
+        neighbourRequestedSubscriptions: "Neighbour Subscriptions",
+    };
 
     const handleCellClick = (row, field) => {
         const rowId = row.id ? row.id : row.subreq_id;
@@ -119,7 +129,8 @@ const Neighbours: React.FC = () => {
             nestedData = row.capabilities.capabilities.map((capability) => ({
                 id: capability.id,
                 messageType: capability.application.messageType,
-                originatingCountry: capability.application.originatingCountry
+                originatingCountry: capability.application.originatingCountry,
+                createdTimestamp: new Date(capability.createdTimestamp).toLocaleString()
             }));
 
             nestedColumns = [
@@ -132,7 +143,8 @@ const Neighbours: React.FC = () => {
                             />
                         );
                     }},
-                { ...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country" }
+                { ...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country" },
+                { ...dataGridTemplate, field: "createdTimestamp", headerName: "Last updated" }
             ];
         } else if (field === "neighbourRequestedSubscriptions") {
             nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription) => ({
@@ -192,7 +204,7 @@ const Neighbours: React.FC = () => {
 
         return (
             <Box flex={1}>
-                <Mainheading>{field}</Mainheading>
+                <Mainheading>{field.split(" ").map(field => fieldAliasMap[field] || field).join(" ")}</Mainheading>
                 <Divider sx={{ marginY: 4 }} />
                 {nestedData.length > 0 ? (
                     <Box sx={{ height: 300, width: "90%" }}>
@@ -201,6 +213,12 @@ const Neighbours: React.FC = () => {
                             columns={nestedColumns}
                             getRowId={(row) => row.id}
                             sort={{ field: "lastUpdated", sort: "desc" }}
+                        />
+                        <Drawer
+                            variant="temporary"
+                            anchor="right"
+                            open={drawerOpen}
+                            onClose={handleMoreClose}
                         />
                     </Box>
                 ) : (
