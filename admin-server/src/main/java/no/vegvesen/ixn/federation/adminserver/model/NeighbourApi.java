@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 public class NeighbourApi {
 
-    private Integer neighbour_id;
+    private Integer id;
 
     private String name;
 
@@ -23,8 +23,8 @@ public class NeighbourApi {
     public NeighbourApi() {
     }
 
-    public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
-        this.neighbour_id = neighbour_id;
+    public NeighbourApi(Integer id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
+        this.id = id;
         this.name = name;
         this.capabilities = capabilities;
         this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;
@@ -46,12 +46,12 @@ public class NeighbourApi {
         this.ignore = ignore;
     }
 
-    public Integer getNeighbour_id() {
-        return neighbour_id;
+    public Integer getId() {
+        return id;
     }
 
-    public void setNeighbour_id(Integer neighbour_id) {
-        this.neighbour_id = neighbour_id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public ConnectionStatusApi getConnectionStatus() {
@@ -121,7 +121,7 @@ public class NeighbourApi {
     @Override
     public String toString() {
         return "NeighbourApi{" +
-                "neighbour_id=" + neighbour_id +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", capabilities=" + capabilities +
                 ", neighbourRequestedSubscriptions=" + neighbourRequestedSubscriptions +
