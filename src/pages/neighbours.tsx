@@ -8,15 +8,16 @@ import {Chip} from "@/components/shared/Chip";
 import {connectionStatusChips, messageTypeChips, statusChips} from "@/lib/statusChips";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
+import {Neighbours} from "@/types/neighbours";
 
 
 const Neighbours: React.FC = () => {
-    const { data: session } = useSession();
+    const {data: session} = useSession();
 
-    const { data, isLoading } = useFetchNeighbours(
+    const {data, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-
+    const [neighbourRow, setNeighbourRow] = useState<Neighbours>();
     const [expandedRows, setExpandedRows] = useState({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
@@ -35,6 +36,15 @@ const Neighbours: React.FC = () => {
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
         }));
+    };
+
+    const handleOnRowClick = (params: any) => {
+        handleMore(params.row);
+    };
+
+    const handleMore = (neighbour) => {
+        setNeighbourRow(neighbour);
+        setDrawerOpen(true);
     };
 
     const tableHeaders: GridColDef[] = [
@@ -118,7 +128,6 @@ const Neighbours: React.FC = () => {
 
     const renderNestedTable = (row, field) => {
         if (!row || !field) {
-            console.error("Invalid row or field:", row, field);
             return null;
         }
 
@@ -134,17 +143,19 @@ const Neighbours: React.FC = () => {
             }));
 
             nestedColumns = [
-                { ...dataGridTemplate, field: "id", headerName: "ID" },
-                { ...dataGridTemplate, field: "messageType", headerName: "Message Type", renderCell: (cell) => {
+                {...dataGridTemplate, field: "id", headerName: "ID"},
+                {
+                    ...dataGridTemplate, field: "messageType", headerName: "Message Type", renderCell: (cell) => {
                         return (
                             <Chip
                                 color={messageTypeChips[cell.value as keyof typeof messageTypeChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
-                    }},
-                { ...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country" },
-                { ...dataGridTemplate, field: "createdTimestamp", headerName: "Last updated" }
+                    }
+                },
+                {...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country"},
+                {...dataGridTemplate, field: "createdTimestamp", headerName: "Last updated"}
             ];
         } else if (field === "neighbourRequestedSubscriptions") {
             nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription) => ({
@@ -157,16 +168,18 @@ const Neighbours: React.FC = () => {
             }));
 
             nestedColumns = [
-                { ...dataGridTemplate, field: "id", headerName: "ID" },
-                { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
-                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                {...dataGridTemplate, field: "id", headerName: "ID"},
+                {...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name"},
+                {
+                    ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
                         return (
                             <Chip
                                 color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
-                    }},
+                    }
+                },
                 {
                     ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",
@@ -184,16 +197,18 @@ const Neighbours: React.FC = () => {
             }));
 
             nestedColumns = [
-                { ...dataGridTemplate, field: "id", headerName: "ID" },
-                { ...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name" },
-                { ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                {...dataGridTemplate, field: "id", headerName: "ID"},
+                {...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name"},
+                {
+                    ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
                         return (
                             <Chip
                                 color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
                                 label={cell.value}
                             />
                         );
-                    } },
+                    }
+                },
                 {
                     ...dataGridTemplate,
                     field: "lastUpdatedTimestamp",
@@ -205,21 +220,24 @@ const Neighbours: React.FC = () => {
         return (
             <Box flex={1}>
                 <Mainheading>{field.split(" ").map(field => fieldAliasMap[field] || field).join(" ")}</Mainheading>
-                <Divider sx={{ marginY: 4 }} />
+                <Divider sx={{marginY: 4}}/>
                 {nestedData.length > 0 ? (
-                    <Box sx={{ height: 300, width: "90%" }}>
+                    <Box sx={{height: 300, width: "90%"}}>
                         <DataGrid
                             rows={nestedData}
                             columns={nestedColumns}
                             getRowId={(row) => row.id}
-                            sort={{ field: "lastUpdated", sort: "desc" }}
+                            onRowClick={handleOnRowClick}
+                            sort={{field: "lastUpdated", sort: "desc"}}
                         />
-                        <Drawer
-                            variant="temporary"
-                            anchor="right"
-                            open={drawerOpen}
-                            onClose={handleMoreClose}
-                        />
+                        {neighbourRow && (
+                            <Drawer
+                                variant="temporary"
+                                anchor="right"
+                                open={drawerOpen}
+                                onClose={handleMoreClose}
+                            />
+                        )}
                     </Box>
                 ) : (
                     <Typography variant="body2">No data available.</Typography>
@@ -230,25 +248,22 @@ const Neighbours: React.FC = () => {
 
     return (
         <Box flex={1}>
-        <Mainheading>Subscriptions</Mainheading>
-            <Divider sx={{ marginY: 4 }} />
-            <Box sx={{ height: 400, width: "100%" }}>
+            <Mainheading>Subscriptions</Mainheading>
+            <Divider sx={{marginY: 4}}/>
+            <Box sx={{height: 400, width: "100%"}}>
                 <DataGrid
                     columns={tableHeaders}
                     rows={data || []}
                     loading={isLoading}
                     getRowId={(row) => row.neighbour_id}
-                    sort={{ field: "lastUpdated", sort: "desc" }}
+                    sort={{field: "lastUpdated", sort: "desc"}}
                 />
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
-                console.log('rowId', rowId);
                 const row = Array.isArray(data) ? data.find((item) => item.neighbour_id === parseInt(rowId)) : null;
                 const field = expandedRows[rowId];
 
-                console.log("Row:", row, "Field:", field);
                 if (!row) {
-                    console.error(`Row with neighbour_id ${rowId} not found in data.`);
                     return null;
                 }
 

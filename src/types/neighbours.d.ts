@@ -26,7 +26,7 @@ export enum SubscriptionStatus {
 }
 
 
-export type neighbours = {
+export type Neighbours = {
     neighbour_id: number;
     name: string;
     capabilities: Array<NeighbourCapabilities>;
