@@ -83,6 +83,28 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingCapabilitiesWithShardCountExceedingLimitThrowsException(){
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(application);
+        datexNO.setMetadata(new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
+
+        String serviceProviderName = "my-service-provider";
+        assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO))));
+    }
+
+    @Test
+    public void testAddingCapabilitiesWithShardCountWithinLimitDoesNotThrowException(){
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(application);
+        datexNO.setMetadata(new MetadataApi(5, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
+
+        String serviceProviderName = "my-service-provider";
+        assertThat(restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO)))).isNotNull();
+    }
+
+    @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
         DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);

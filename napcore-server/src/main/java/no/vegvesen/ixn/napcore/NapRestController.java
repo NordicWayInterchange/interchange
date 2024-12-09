@@ -362,6 +362,10 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capabilityToAdd));
         }
 
+        if(!CapabilityValidator.shardCountIsValid(capabilitiesRequest.getMetadata())){
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
+        }
+
         serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
