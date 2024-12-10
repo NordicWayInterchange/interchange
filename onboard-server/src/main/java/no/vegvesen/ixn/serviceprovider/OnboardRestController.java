@@ -105,7 +105,7 @@ public class OnboardRestController {
 			if(!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
 			}
-			if(!CapabilityValidator.shardCountIsValid(capability.getMetadata())){
+			if(!CapabilityValidator.isShardCountValid(capability.getMetadata())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capability));
 			}
 		}

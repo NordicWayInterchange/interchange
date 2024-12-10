@@ -75,7 +75,7 @@ public class CapabilityValidator {
         return true;
     }
 
-    public static boolean shardCountIsValid(MetadataApi metadata){
+    public static boolean isShardCountValid(MetadataApi metadata){
         Integer shardCount = metadata.getShardCount();
         return shardCount != null && shardCount >= 1 && shardCount <= 10;
     }
