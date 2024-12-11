@@ -151,7 +151,7 @@ public class RoutingConfigurer {
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			logger.debug("Checking subscription {}", subscription);
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
@@ -183,7 +183,7 @@ public class RoutingConfigurer {
 
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
+			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 

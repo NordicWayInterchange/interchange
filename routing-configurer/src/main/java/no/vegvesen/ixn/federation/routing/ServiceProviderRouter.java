@@ -519,7 +519,7 @@ public class ServiceProviderRouter {
                             .map(LocalConnection::getSource)
                             .collect(Collectors.toSet());
 
-                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelectorWithShards(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
+                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
                             if (!existingConnections.contains(shard.getExchangeName())) {
