@@ -178,7 +178,7 @@ public class OnboardRestController {
 	}
 
 	private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-		return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
 	private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
