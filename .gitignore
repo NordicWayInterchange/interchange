@@ -20,12 +20,12 @@
 /.next/
 /out/
 
-# production
-/build
-
 # misc
 .DS_Store
 *.pem
+
+# production
+/build
 
 # debug
 npm-debug.log*
