@@ -1,12 +1,23 @@
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider, Drawer, Typography} from "@mui/material";
+import {Box, ChipProps, Divider, Typography} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
+import {Neighbours} from "@/types/neighbours";
+import CommonDrawer from "@/components/shared/layout/CommonDrawer";
 
-const nestedGridNeighbours = (row, field) => {
+type Props = {
+    drawerOpen: boolean;
+    neighbourRow: Neighbours | undefined ;
+    field: string;
+    handleMoreClose: () => void;
+    handleOnRowClick: (any) => void;
+};
+
+const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick} : Props) => {
+
     const nestedTableTitle = {
         ourRequestedSubscriptions: "Our Subscriptions",
         neighbourRequestedSubscriptions: "Neighbour Subscriptions",
@@ -116,9 +127,7 @@ const nestedGridNeighbours = (row, field) => {
                         sort={{field: "lastUpdated", sort: "desc"}}
                     />
                     {neighbourRow && (
-                        <Drawer
-                            variant="temporary"
-                            anchor="right"
+                        <CommonDrawer
                             open={drawerOpen}
                             onClose={handleMoreClose}
                         />
