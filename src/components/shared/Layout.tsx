@@ -24,7 +24,7 @@ export default function Layout({ children }: LayoutProps) {
                         height: "100vh",
                         width: "100vw",
                         overflow: "auto",
-                    }}
+                    }}rawer
                 >
                     <Toolbar />
                     {children}

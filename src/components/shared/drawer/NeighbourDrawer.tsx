@@ -24,7 +24,7 @@ type Props = {
 const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const { data: session } = useSession();
-
+    console.log(item)
     const handleClickClose = (close: boolean) => {
         setDialogOpen(close);
     };
@@ -49,7 +49,7 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                             <IconButton onClick={handleMoreClose}>
                                 <CloseIcon />
                             </IconButton>
-                        </ListItem>>
+                        </ListItem>
                         <ListItem>
                             <StyledCard variant={"outlined"}>
                                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>

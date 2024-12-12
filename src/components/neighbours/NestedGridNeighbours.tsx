@@ -6,8 +6,8 @@ import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
 import {Neighbours} from "@/types/neighbours";
-import NeighbourDrawer from "@/components/shared/drawer/NeighbourDrawer";
 import Subheading from "@/components/shared/typography/Subheading";
+import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 
 type Props = {
     drawerOpen: boolean;
@@ -36,7 +36,9 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             id: capability.id,
             messageType: capability.application.messageType,
             originatingCountry: capability.application.originatingCountry,
-            createdTimestamp: new Date(capability.createdTimestamp).toLocaleString()
+            application: capability.application,
+            metadata: capability.metadata,
+            createdTimestamp: new Date(capability.createdTimestamp).toLocaleString(),
         }));
 
         nestedColumns = [
@@ -57,8 +59,11 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
     } else if (field === "neighbourRequestedSubscriptions") {
         nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription) => ({
             id: subscription.subreq_id,
-            consumerCommonName: subscription.consumerCommonName,
             subscriptionStatus: subscription.subscriptionStatus,
+            selector: subscription.selector,
+            path: subscription.path,
+            consumerCommonName: subscription.consumerCommonName,
+            endpoints: subscription.endpoints,
             lastUpdatedTimestamp: new Date(
                 subscription.lastUpdatedTimestamp
             ).toLocaleString(),
@@ -86,8 +91,11 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
     } else if (field === "ourRequestedSubscriptions") {
         nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription) => ({
             id: subscription.id,
-            consumerCommonName: subscription.consumerCommonName,
             subscriptionStatus: subscription.subscriptionStatus,
+            selector: subscription.selector,
+            path: subscription.path,
+            consumerCommonName: subscription.consumerCommonName,
+            endpoints: subscription.endpoints,
             lastUpdatedTimestamp: new Date(
                 subscription.lastUpdatedTimestamp
             ).toLocaleString(),
@@ -131,11 +139,11 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                         onRowClick={handleOnRowClick}
                         sort={{field: "lastUpdated", sort: "desc"}}
                     />
-                    {neighbourRow && (
-                        <NeighbourDrawer
-                            open={drawerOpen}
+                    {neighbourRow && heading === 'capabilities' && (
+                        <CapabilityDrawer
                             handleMoreClose={handleMoreClose}
-                            item={neighbourRow}
+                            open={drawerOpen}
+                            capabilities={neighbourRow}
                         />
                     )}
                 </Box>

@@ -40,6 +40,7 @@ const Neighbours = () => {
     };
 
     const handleMore = (neighbour) => {
+        console.log('neighbour', neighbour)
         setNeighbourRow(neighbour);
         setDrawerOpen(true);
     };
