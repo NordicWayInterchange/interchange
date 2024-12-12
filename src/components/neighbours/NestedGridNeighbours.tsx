@@ -6,7 +6,7 @@ import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
 import {Neighbours} from "@/types/neighbours";
-import CommonDrawer from "@/components/shared/layout/CommonDrawer";
+import NeighbourDrawer from "@/components/shared/drawer/NeighbourDrawer";
 
 type Props = {
     drawerOpen: boolean;
@@ -127,9 +127,10 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                         sort={{field: "lastUpdated", sort: "desc"}}
                     />
                     {neighbourRow && (
-                        <CommonDrawer
+                        <NeighbourDrawer
                             open={drawerOpen}
-                            onClose={handleMoreClose}
+                            handleMoreClose={handleMoreClose}
+                            item={neighbourRow}
                         />
                     )}
                 </Box>

@@ -1,6 +1,9 @@
 import {styled} from "@mui/system";
 import {Button} from "@mui/material";
 
+const width = 600;
+
+
 export const StyledButton = styled(Button)(({}) => ({
     textTransform: 'none',
     marginLeft: 2,
@@ -21,3 +24,12 @@ export const StyledButton = styled(Button)(({}) => ({
         },
     },
 }));
+
+export const drawerStyle = {
+    width: width,
+    flexShrink: 0,
+    "& .MuiDrawer-paper": {
+        width: width,
+        boxSizing: "border-box",
+    },
+}
