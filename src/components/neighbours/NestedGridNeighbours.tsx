@@ -20,6 +20,7 @@ type Props = {
 const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
 
     const nestedTableTitle = {
+        capabilities: "Capabilities",
         ourRequestedSubscriptions: "Our Subscriptions",
         neighbourRequestedSubscriptions: "Neighbour Subscriptions",
     };
@@ -139,7 +140,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                         onRowClick={handleOnRowClick}
                         sort={{field: "lastUpdated", sort: "desc"}}
                     />
-                    {neighbourRow && heading === 'capabilities' && (
+                    {neighbourRow && heading === 'Capabilities' && (
                         <CapabilityDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}

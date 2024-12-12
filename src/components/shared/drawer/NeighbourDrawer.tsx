@@ -51,7 +51,7 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                             </IconButton>
                         </ListItem>
                         <ListItem>
-                            <StyledCard variant={"outlined"}>
+                            <StyledCard variant="outlined">
                                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                                     <Box>
                                         <ListItemText primary={"ID"} secondary={item.id} />
@@ -67,7 +67,7 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                         </ListItem>
                         {item.endpoints?.length > 0 && (
                             <ListItem>
-                                <StyledCard variant={"outlined"}>
+                                <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
                                         <TextField
@@ -117,7 +117,7 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                             </ListItem>
                         )}
                         <ListItem>
-                            <StyledCard variant={"outlined"}>
+                            <StyledCard variant="outlined">
                                 <Typography>Selector</Typography>
                                 <FormControl fullWidth>
                                     <TextField

@@ -1,37 +1,27 @@
 import {
     Box,
-    Card,
-    Drawer, FormControl, IconButton, InputAdornment,
+    Card, CardProps,
+    Drawer, FormControl, IconButton, InputAdornment, InputLabel,
     List,
-    ListItem, ListItemText, TextField,
+    ListItem, ListItemText, MenuItem, Select, TextField,
     Toolbar, Typography
 } from "@mui/material";
-import React, {useState} from "react";
-import {useSession} from "next-auth/react";
+import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {timeConverter} from "@/lib/timeConverter";
 import {styled} from "@mui/material/styles";
-import {drawerStyle} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledButton} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
-import neighbours from "@/pages/neighbours";
+import {Capability} from "@/types/neighbours";
 
 type Props = {
-    capabilities: neighbours;
+    capabilities: Capability;
     open: boolean;
     handleMoreClose: () => void;
 };
 
 const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const {data: session} = useSession();
-    console.log(capabilities)
-    const handleClickClose = (close: boolean) => {
-        setDialogOpen(close);
-    };
 
-    const getAttribute = () => {
-        // return label == "Delivery" ? capabilities.endpoints[0].target: capabilities.endpoints[0].source;
-    };
+    const application = capabilities.application;
 
     return (
         <>
@@ -51,7 +41,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                         </IconButton>
                     </ListItem>
                     <ListItem>
-                        <StyledCard variant={"outlined"}>
+                        <StyledCard variant="outlined">
                             <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                 <Box>
                                     <ListItemText primary={"ID"} secondary={capabilities.id}/>
@@ -65,6 +55,180 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                             </Box>
                         </StyledCard>
                     </ListItem>
+                    <ListItem>
+                        <StyledCard variant="outlined">
+                            <Typography>Publisher</Typography>
+                            <FormControl fullWidth>
+                                <TextField
+                                    value={application.publisherId}
+                                    label="Publisher ID"
+                                    margin="normal"
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <ContentCopy value={application.publisherId} />
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                                <TextField
+                                    value={application.publicationId}
+                                    label="Publication ID"
+                                    margin="normal"
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <ContentCopy value={application.publicationId} />
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                                {application.publicationType && (
+                                    <TextField
+                                        value={application.publicationType}
+                                        label="Publication type"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={application.publicationType} />
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                )}
+                                {application.publisherName && (
+                                    <TextField
+                                        value={application.publisherName}
+                                        label="Publisher name"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={application.publisherName} />
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                )}
+                                <TextField
+                                    value={application.originatingCountry}
+                                    label="Originating Country"
+                                    margin="normal"
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <ContentCopy value={application.originatingCountry} />
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                            </FormControl>
+                        </StyledCard>
+                    </ListItem>
+
+                    <ListItem>
+                        <StyledCard variant="outlined">
+                            <Typography>Message</Typography>
+                            <FormControl fullWidth>
+                                <TextField
+                                    value={application.messageType}
+                                    label="Message Type"
+                                    margin="normal"
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <ContentCopy value={application.messageType} />
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                                <TextField
+                                    value={application.protocolVersion}
+                                    label="Protocol Version"
+                                    margin="normal"
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <ContentCopy value={application.protocolVersion} />
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                                {application.causeCodesDictionary && (
+                                    <FormControl margin="normal">
+                                        <InputLabel>Cause codes</InputLabel>
+                                        <Select
+                                            MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
+                                            label="Cause codes"
+                                            multiple
+                                            defaultValue={application.causeCodesDictionary.map(
+                                                (cause) => {
+                                                    return cause["value"];
+                                                }
+                                            )}
+                                        >
+                                            {application.causeCodesDictionary.map((cause, index) => {
+                                                return (
+                                                    <StyledMenuItem
+                                                        disabled
+                                                        key={index}
+                                                        value={cause.value}
+                                                    >
+                                                        {cause.value}: {cause.label}
+                                                    </StyledMenuItem>
+                                                );
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </FormControl>
+                        </StyledCard>
+                    </ListItem>
+                    <ListItem>
+                        <StyledCard variant="outlined">
+                            <Typography>Quadtree</Typography>
+                            <FormControl
+                                fullWidth
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <TextField
+                                    value={application.quadTree}
+                                    label="Hash"
+                                    margin="normal"
+                                    sx={{
+                                        flexGrow: 1,
+                                        marginRight: 1
+                                    }}
+                                />
+                                <StyledButton
+                                    sx={{mt:2.75}}
+                                    color="buttonThemeColor"
+                                    variant="outlined"
+                                >
+                                    Show map
+                                </StyledButton>
+                            </FormControl>
+                        </StyledCard>
+                    </ListItem>
             </List>
         </Box>
         </Drawer>
@@ -73,24 +237,26 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
 };
 
 
-const StyledCard = styled(Card)(({}) => ({
-    padding: "16px",
-        width
-:
-    "100%",
+const StyledCard = styled(Card)<CardProps>(() => ({
+    padding: '16px',
+    width: '100%',
 }));
 
-const StyledHeaderBox = styled(Box)(({}) => ({
-    display: "flex",
-        alignItems
-:
-    "center",
-        justifyContent
-:
-    "space-between",
-        width
-:
-    "100%",
+const StyledMenuItem = styled(MenuItem)(({}) => ({
+    "&.MuiMenuItem-root": {
+        color: "black",
+        opacity: 1
+    },
+    "&.Mui-disabled": {
+        color: "black",
+        opacity: 1
+    },
+    "&.Mui-selected": {
+        backgroundColor: "white",
+        "&.Mui-focusVisible": {
+            background: "white"
+        }
+    }
 }));
 
 
