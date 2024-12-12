@@ -49,6 +49,8 @@ const VerticalSideMenu: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        borderRadius: 1,
+                        my: 2,
                         padding: '10px 0',
                         backgroundColor:
                             router.asPath === page.url ? "menuHoverColor" : null,
@@ -56,12 +58,13 @@ const VerticalSideMenu: React.FC = () => {
                         '&:hover': {
                             backgroundColor: 'menuHoverColor',
                             border: "1px solid",
+                            borderColor: "menuHoverColor",
                         },
                     }}
                     disablePadding
                 >
 
-                <ListItemIcon sx={{ color: 'textColor', justifyContent: 'center', marginTop: 1}}>{page.icon}</ListItemIcon>
+                <ListItemIcon sx={{ justifyContent: 'center', marginTop: 1}}>{page.icon}</ListItemIcon>
                 <ListItemText  sx={{
                     textAlign: 'center',
                     marginTop: 1,
