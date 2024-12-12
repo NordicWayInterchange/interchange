@@ -288,6 +288,21 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingMatchingDeliveryCapabilitiesExcludesTeardownCapabilities(){
+        String actor = "actor-1";
+        CapabilitiesRequest request = new CapabilitiesRequest(
+                new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+                new MetadataApi()
+        );
+        napRestController.addCapability(actor, request);
+        String capabilityId = napRestController.getCapabilities(actor).getFirst().getId();
+        String selector = "publicationId='publication-id'";
+        assertThat(napRestController.getMatchingDeliveryCapabilities(actor, selector)).hasSize(1);
+        napRestController.deleteCapability(actor, capabilityId);
+        assertThat(napRestController.getMatchingDeliveryCapabilities(actor, selector)).hasSize(0);
+    }
+
+    @Test
     public void testDeletingNonExistentDeliveryThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "1"));
@@ -422,6 +437,21 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testGettingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "notAnId"));
+    }
+
+    @Test
+    public void testGettingMatchingSubscriptionCapabilitiesExcludesTeardownCapabilities(){
+        String actor = "actor-1";
+        CapabilitiesRequest request = new CapabilitiesRequest(
+                new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+                new MetadataApi()
+        );
+        napRestController.addCapability(actor, request);
+        String capabilityId = napRestController.getCapabilities(actor).getFirst().getId();
+        String selector = "publicationId='publication-id'";
+        assertThat(napRestController.getMatchingSubscriptionCapabilities(actor, selector)).hasSize(1);
+        napRestController.deleteCapability(actor, capabilityId);
+        assertThat(napRestController.getMatchingSubscriptionCapabilities(actor, selector)).hasSize(0);
     }
 
     @Test

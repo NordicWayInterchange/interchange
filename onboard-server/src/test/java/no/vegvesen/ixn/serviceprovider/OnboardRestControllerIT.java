@@ -119,6 +119,27 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testListMatchingCapabilitiesDoesNotReturnTearDownCapabilities(){
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        serviceProvider.setCapabilities(new Capabilities(
+                Collections.singleton(new Capability(
+                        new DenmApplication(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                List.of("1234"),
+                                List.of(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
+                ))));
+        serviceProvider = serviceProviderRepository.save(serviceProvider);
+        String capabilityId = serviceProvider.getCapabilities().getCapabilities().stream().findFirst().get().getUuid();
+        assertThat(restController.listMatchingCapabilities(serviceProvider.getName(), "publicationId='pub-1'").getCapabilities()).hasSize(1);
+        restController.deleteCapability(serviceProvider.getName(), capabilityId);
+        assertThat(restController.listMatchingCapabilities(serviceProvider.getName(), "publicationId='pub-1'").getCapabilities()).hasSize(0);
+    }
+
+    @Test
     public void testAddingCapabilityWithInvalidQuadTree(){
         DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12004"), "SituationPublication", "publisherName");
         CapabilityApi datexNO = new CapabilityApi();

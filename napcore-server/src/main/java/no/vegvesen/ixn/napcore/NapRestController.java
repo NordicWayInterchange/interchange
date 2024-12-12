@@ -21,6 +21,7 @@ import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
@@ -656,7 +657,7 @@ public class NapRestController {
     }
 
     private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector).stream().filter(capability -> !capability.getStatus().equals(CapabilityStatus.TEAR_DOWN)).collect(Collectors.toSet());
     }
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
