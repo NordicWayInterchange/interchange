@@ -5,11 +5,7 @@ import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.PathVariableException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.PeerStatus;
 import no.vegvesen.ixn.federation.model.PrivateChannel;
@@ -198,7 +194,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryWithoutDescription(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
-        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
     }
 
@@ -355,7 +351,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         );
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test

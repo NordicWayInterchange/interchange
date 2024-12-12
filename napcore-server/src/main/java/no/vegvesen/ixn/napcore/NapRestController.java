@@ -12,11 +12,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.PathVariableException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.*;
@@ -346,7 +342,7 @@ public class NapRestController {
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
+            throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
