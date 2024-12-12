@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {GridColDef} from "@mui/x-data-grid";
+import {GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
@@ -10,6 +10,7 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Neighbours} from "@/types/neighbours";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
+import Subheading from "@/components/shared/typography/Subheading";
 
 
 const Neighbours = () => {
@@ -34,7 +35,7 @@ const Neighbours = () => {
         }));
     };
 
-    const handleOnRowClick = (params: any) => {
+    const handleOnRowClick = (params: GridRowParams) => {
         handleMore(params.row);
     };
 
@@ -125,6 +126,9 @@ const Neighbours = () => {
     return (
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
+            <Subheading>
+                These are all of neighbours. You can click a row to view more information.
+            </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
                 <DataGrid

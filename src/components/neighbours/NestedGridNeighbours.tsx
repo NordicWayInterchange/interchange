@@ -7,16 +7,17 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
 import {Neighbours} from "@/types/neighbours";
 import NeighbourDrawer from "@/components/shared/drawer/NeighbourDrawer";
+import Subheading from "@/components/shared/typography/Subheading";
 
 type Props = {
     drawerOpen: boolean;
-    neighbourRow: Neighbours | undefined ;
+    neighbourRow: Neighbours | undefined;
     field: string;
     handleMoreClose: () => void;
     handleOnRowClick: (any) => void;
 };
 
-const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick} : Props) => {
+const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
 
     const nestedTableTitle = {
         ourRequestedSubscriptions: "Our Subscriptions",
@@ -113,10 +114,14 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
         ];
     }
 
+    const heading = field.split(" ").map(field => nestedTableTitle[field] || field).join(" ");
     return (
         <Box flex={1}>
-            <Mainheading>{field.split(" ").map(field => nestedTableTitle[field] || field).join(" ")}</Mainheading>
-            <Divider sx={{marginY: 4}}/>
+            <Mainheading>{heading}</Mainheading>
+            <Subheading>
+                These are all of {heading}. You can click a row to view more information.
+            </Subheading>
+            <Divider sx={{marginY: 3}}/>
             {nestedData.length > 0 ? (
                 <Box sx={{height: 300, width: "90%"}}>
                     <DataGrid
