@@ -11,7 +11,7 @@ import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Neighbours} from "@/types/neighbours";
 
 
-const Neighbours: React.FC = () => {
+const Index = () => {
     const {data: session} = useSession();
 
     const {data, isLoading} = useFetchNeighbours(
@@ -25,7 +25,7 @@ const Neighbours: React.FC = () => {
         setDrawerOpen(false);
     };
 
-    const fieldAliasMap = {
+    const nestedTableTitle = {
         ourRequestedSubscriptions: "Our Subscriptions",
         neighbourRequestedSubscriptions: "Neighbour Subscriptions",
     };
@@ -219,7 +219,7 @@ const Neighbours: React.FC = () => {
 
         return (
             <Box flex={1}>
-                <Mainheading>{field.split(" ").map(field => fieldAliasMap[field] || field).join(" ")}</Mainheading>
+                <Mainheading>{field.split(" ").map(field => nestedTableTitle[field] || field).join(" ")}</Mainheading>
                 <Divider sx={{marginY: 4}}/>
                 {nestedData.length > 0 ? (
                     <Box sx={{height: 300, width: "90%"}}>
@@ -248,7 +248,7 @@ const Neighbours: React.FC = () => {
 
     return (
         <Box flex={1}>
-            <Mainheading>Subscriptions</Mainheading>
+            <Mainheading>Neighbours</Mainheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
                 <DataGrid
@@ -277,4 +277,4 @@ const Neighbours: React.FC = () => {
     );
 };
 
-export default Neighbours;
+export default Index;
