@@ -38,38 +38,49 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
+        String id;
         if(option.file != null){
             ObjectMapper mapper = new ObjectMapper();
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
-            client.addSubscription(request);
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
+            id = addSubscriptionsResponse.getSubscriptions().stream()
+                    .filter(s ->
+                            s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
+                                    s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
+                    .findFirst()
+                    .orElseThrow()
+                    .getId();
         }
         else if(option.selector != null){
-            client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
+            id = addSubscriptionsResponse.getSubscriptions().stream()
+                    .filter(s ->
+                            s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
+                                    s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
+                    .findFirst().orElseThrow().getId();
+        } else if (option.id != null) {
+            id = option.id;
+
+        } else {
+            throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        GetSubscriptionResponse subscription;
-
-        if(option.id == null) {
-            ListSubscriptionsResponse listSubscriptionsResponse = client.getSubscriptions();
-            String subscriptionId = listSubscriptionsResponse.getSubscriptions().stream().findFirst().get().getId();
-            subscription = client.getSubscription(subscriptionId);
-        }
-        else{
-            subscription = client.getSubscription(option.id);
-        }
-
-        while (!subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+        GetSubscriptionResponse subscription = client.getSubscription(id);
+        while (subscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
             subscription = client.getSubscription(subscription.getId());
             TimeUnit.SECONDS.sleep(2);
+        }
+
+        if (! subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",subscription.getStatus(),subscription.getId()));
+
         }
 
         LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().get();
         String url = "amqps://"+endpointApi.getHost();
 
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
-        AtomicInteger returnCode = new AtomicInteger(0);
         ExceptionListener exceptionListener = e -> {
-            returnCode.compareAndSet(0, 1);
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
