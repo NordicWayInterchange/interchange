@@ -3,15 +3,13 @@ import {GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, ChipProps, Divider} from "@mui/material";
-import {Chip} from "@/components/shared/Chip";
-import {connectionStatusChips} from "@/lib/statusChips";
+import {Box, Divider} from "@mui/material";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Neighbours} from "@/types/neighbours";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-
+import {Neighbours} from "@/types/neighbours";
+import {StatusCircle} from "@/components/shared/StatusCircle";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -111,14 +109,10 @@ const Neighbours = () => {
             headerName: "Connection Status",
             renderCell: (cell) => {
                 return (
-                    <Chip
-                        color={
-                            connectionStatusChips[
-                                cell.value as keyof typeof connectionStatusChips
-                                ] as ChipProps['color']
-                        }
-                        label={cell.value}
-                    />
+                        <Box style={{ marginBottom: '10px' }}>
+                            <StatusCircle status={cell.value} />
+                            <span style={{ marginLeft: '8px' }}>{cell.value}</span>
+                        </Box>
                 );
             },
         },
