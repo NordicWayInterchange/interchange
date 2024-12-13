@@ -257,16 +257,15 @@ public class NapRestControllerTest {
         String request = """
                 {
                 "selector": "originatingCountry='NO'",
-                "description": "NO delivery" 
+                "description": "NO delivery"
                 }
                 """;
         String serviceProviderName = "actor";
-        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(),
                 Set.of(),
-                Set.of(localDelivery),
+                Set.of(),
                 null
         );
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);

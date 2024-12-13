@@ -675,24 +675,13 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWhenAnIdenticalWithDifferentStatusAlreadyExists() {
         String selector = "messageType = 'DATEX2' and originatingCountry = 'NO'";
         String serviceproviderName = "serviceprovider";
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceproviderName,
-                new Capabilities(Collections.emptySet()),
-                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, nodeProperties.getName())),
-                Collections.emptySet(),
-                LocalDateTime.now()
-        );
-        serviceProviderRepository.save(serviceProvider);
 
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceproviderName,
                 Collections.singleton(new AddSubscription(selector, "DATEX SUB"))
         );
-        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
-        assertThat(response.getSubscriptions()).hasSize(1);
-        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceproviderName);
+        restController.addSubscriptions(serviceproviderName, request);
+        assertThrows(AlreadyExistsException.class, () -> restController.addSubscriptions(serviceproviderName, request));
     }
 
     @Test
@@ -1163,20 +1152,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
-        assertThat(response.getDeliveries()).allMatch(d -> d.getStatus().equals(DeliveryStatus.REQUESTED));
 
-        //change the delivery status in the database
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        assertThat(serviceProvider.getDeliveries()).hasSize(1);
-        serviceProvider.getDeliveries().stream().forEach(d -> d.setStatus(LocalDeliveryStatus.CREATED));
-        serviceProviderRepository.save(serviceProvider);
+        assertThrows(AlreadyExistsException.class, () -> restController.addDeliveries(serviceProviderName, request));
 
-        //now, add the second delivery with original status
-        response = restController.addDeliveries(serviceProviderName, request);
-        assertThat(response.getDeliveries()).hasSize(1);
-
-        serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        assertThat(serviceProvider.getDeliveries()).hasSize(1);
     }
 
     @Test

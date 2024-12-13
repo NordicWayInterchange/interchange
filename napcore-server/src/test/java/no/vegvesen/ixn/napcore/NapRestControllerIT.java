@@ -93,6 +93,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingSubscriptionThatAlreadyExistsThrowsException(){
+        String actorCommonName = "actor";
+        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
+        napRestController.addSubscription(actorCommonName, request);
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addSubscription(actorCommonName, request));
+    }
+
+    @Test
     public void testAddingSubscriptionWithValidSelectorReturnsValidSubscriptionAndCreatesServiceProvider(){
         String actorCommonName = "actor";
         Subscription subscription = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "NO sub"));
@@ -182,6 +190,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
     }
 
+    @Test
+    public void testAddingDeliveryThatAlreadyExistsThrowsException(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
+        napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addDelivery(actorCommonName, deliveryRequest));
+    }
     @Test
     public void testAddingDeliveryWithInvalidSelectorGivesInvalidDelivery(){
         String actorCommonName = "actor";
