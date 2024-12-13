@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
@@ -59,15 +60,13 @@ public class Send implements Callable<Integer> {
 
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
 
-        while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
-            if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)){
-                throw new Exception("Delivery status is not valid");
-            }
+        while (delivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
+            TimeUnit.SECONDS.sleep(3);
             delivery = client.getDelivery(deliveryId);
-            TimeUnit.SECONDS.sleep(2);
         }
-        TimeUnit.SECONDS.sleep(3);
-
+        if (! delivery.getStatus().equals(DeliveryStatus.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(),delivery.getId()));
+        }
         String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
         String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
 
