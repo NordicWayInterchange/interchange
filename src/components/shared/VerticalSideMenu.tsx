@@ -14,13 +14,19 @@ import Header from './Header';
 import {IPages} from "@/interfaces/IPages";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import HouseIcon from "@mui/icons-material/House";
 
 const drawerWidth = 145;
 
 const SIDE_PAGES: Array<IPages> = [
     {
-        text: "My Interchange",
+        text: "Home",
         url: "/",
+        icon: <HouseIcon />
+    },
+    {
+        text: "My Interchange",
+        url: "/myInterchange",
         icon: <SyncAltIcon />
     },
     {
