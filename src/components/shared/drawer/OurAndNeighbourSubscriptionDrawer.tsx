@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { styled } from "@mui/material/styles";
+import {styled} from "@mui/material/styles";
 import {drawerStyle, StyledButton} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
@@ -66,7 +66,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={subscriptions.endpoints[0].host} />
+                                                            <ContentCopy value={subscriptions.endpoints[0].host}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -80,7 +80,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={subscriptions.endpoints[0].source} />
+                                                            <ContentCopy value={subscriptions.endpoints[0].source}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -94,16 +94,69 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={subscriptions.endpoints[0].port.toString()} />,
+                                                            <ContentCopy
+                                                                value={subscriptions.endpoints[0].port.toString()}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />
+                                        {subscriptions.endpoints[0].maxBandwidth && (<TextField
+                                            value={subscriptions.endpoints[0].maxBandwidth || ""}
+                                            label="Max bandwidth"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy
+                                                                value={subscriptions.endpoints[0].maxBandwidth.toString()}/>,
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />)}
+                                        {subscriptions.endpoints[0].maxMessageRate && (<TextField
+                                            value={subscriptions.endpoints[0].maxMessageRate || ""}
+                                            label="Max message rate"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy
+                                                                value={subscriptions.endpoints[0].maxMessageRate.toString()}/>,
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />)}
                                     </FormControl>
                                 </StyledCard>
                             </ListItem>
                         )}
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Typography>Selector</Typography>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        margin="normal"
+                                        multiline
+                                        value={subscriptions.selector || ""}
+                                        rows={4}
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={subscriptions.selector}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                </FormControl>
+                            </StyledCard>
+                        </ListItem>
                     </List>
                 </Box>
             </Drawer>
@@ -133,7 +186,6 @@ const StyledMenuItem = styled(MenuItem)(({}) => ({
         }
     }
 }));
-
 
 
 export default OurAndNeighbourSubscriptionDrawer;
