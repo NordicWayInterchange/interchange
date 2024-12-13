@@ -1,38 +1,26 @@
 import {
     Box,
-    Card,
-    Drawer, FormControl, IconButton, InputAdornment,
+    Card, CardProps,
+    Drawer, FormControl, IconButton, InputAdornment, InputLabel,
     List,
-    ListItem, ListItemText, TextField,
+    ListItem, ListItemText, MenuItem, Select, TextField,
     Toolbar, Typography
 } from "@mui/material";
-import React, { useState } from "react";
-import { useSession } from "next-auth/react";
+import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { timeConverter } from "@/lib/timeConverter";
 import { styled } from "@mui/material/styles";
-import {drawerStyle} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledButton} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
-import neighbours from "@/pages/neighbours";
+import {Subscription} from "@/types/neighbours";
 
 type Props = {
-    item: neighbours;
+    subscriptions: Subscription;
     open: boolean;
     handleMoreClose: () => void;
 };
 
-const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const { data: session } = useSession();
-    console.log(item)
-    const handleClickClose = (close: boolean) => {
-        setDialogOpen(close);
-    };
-
-    const getAttribute = () => {
-       // return label == "Delivery" ? item.endpoints[0].target: item.endpoints[0].source;
-    };
-
+const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose}: Props) => {
+    console.log('subscriot', subscriptions)
     return (
         <>
             <Drawer
@@ -42,71 +30,71 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                 open={open}
                 onClose={handleMoreClose}
             >
-                <Toolbar />
-                <Box sx={{ padding: 1 }}>
+                <Toolbar/>
+                <Box sx={{padding: 1}}>
                     <List>
-                        <ListItem sx={{ justifyContent: "flex-end" }}>
+                        <ListItem sx={{justifyContent: "flex-end"}}>
                             <IconButton onClick={handleMoreClose}>
-                                <CloseIcon />
+                                <CloseIcon/>
                             </IconButton>
                         </ListItem>
                         <ListItem>
                             <StyledCard variant="outlined">
-                                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                                <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                     <Box>
-                                        <ListItemText primary={"ID"} secondary={item.id} />
+                                        <ListItemText primary={"ID"} secondary={subscriptions.id}/>
                                     </Box>
                                     <Box>
                                         <ListItemText
                                             primary={"Last updated"}
-                                            secondary={timeConverter(item.createdTimestamp)}
+                                            secondary={subscriptions.lastUpdatedTimestamp}
                                         />
                                     </Box>
                                 </Box>
                             </StyledCard>
                         </ListItem>
-                        {item.endpoints?.length > 0 && (
+                        {subscriptions.endpoints.length > 0 && (
                             <ListItem>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
                                         <TextField
-                                            value={item.endpoints[0].host || ""}
+                                            value={subscriptions.endpoints[0].host || ""}
                                             label="Host"
                                             margin="normal"
                                             slotProps={{
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={item.endpoints[0].host} />
+                                                            <ContentCopy value={subscriptions.endpoints[0].host} />
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />
                                         <TextField
-                                            value={getAttribute() || ""}
+                                            value={subscriptions.endpoints[0].source || ""}
                                             label="Source"
                                             margin="normal"
                                             slotProps={{
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={item.endpoints[0].source} />
+                                                            <ContentCopy value={subscriptions.endpoints[0].source} />
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />
                                         <TextField
-                                            value={item.endpoints[0].port || ""}
+                                            value={subscriptions.endpoints[0].port || ""}
                                             label="Port"
                                             margin="normal"
                                             slotProps={{
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={item.endpoints[0].port.toString()} />,
+                                                            <ContentCopy value={subscriptions.endpoints[0].port.toString()} />,
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -116,28 +104,6 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
                                 </StyledCard>
                             </ListItem>
                         )}
-                        <ListItem>
-                            <StyledCard variant="outlined">
-                                <Typography>Selector</Typography>
-                                <FormControl fullWidth>
-                                    <TextField
-                                        margin="normal"
-                                        multiline
-                                        value={item.selector || ""}
-                                        rows={4}
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <ContentCopy value={item.selector} />
-                                                    </InputAdornment>
-                                                ),
-                                            },
-                                        }}
-                                    />
-                                </FormControl>
-                            </StyledCard>
-                        </ListItem>
                     </List>
                 </Box>
             </Drawer>
@@ -146,17 +112,28 @@ const NeighbourDrawer = ({item, open, handleMoreClose }: Props) => {
 };
 
 
-const StyledCard = styled(Card)(({}) => ({
-    padding: "16px",
-    width: "100%",
+const StyledCard = styled(Card)<CardProps>(() => ({
+    padding: '16px',
+    width: '100%',
 }));
 
-const StyledHeaderBox = styled(Box)(({}) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+const StyledMenuItem = styled(MenuItem)(({}) => ({
+    "&.MuiMenuItem-root": {
+        color: "black",
+        opacity: 1
+    },
+    "&.Mui-disabled": {
+        color: "black",
+        opacity: 1
+    },
+    "&.Mui-selected": {
+        backgroundColor: "white",
+        "&.Mui-focusVisible": {
+            background: "white"
+        }
+    }
 }));
 
 
-export default NeighbourDrawer;
+
+export default OurAndNeighbourSubscriptionDrawer;

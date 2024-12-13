@@ -8,6 +8,7 @@ import React from "react";
 import {Neighbours} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
+import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
 
 type Props = {
     drawerOpen: boolean;
@@ -145,6 +146,13 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             capabilities={neighbourRow}
+                        />
+                    )}
+                    {neighbourRow && heading === 'Our Subscriptions' && (
+                        <OurAndNeighbourSubscriptionDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            subscriptions={neighbourRow}
                         />
                     )}
                 </Box>
