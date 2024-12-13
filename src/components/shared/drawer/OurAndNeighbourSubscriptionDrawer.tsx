@@ -1,25 +1,28 @@
 import {
     Box,
     Card, CardProps,
-    Drawer, FormControl, IconButton, InputAdornment, InputLabel,
+    Drawer, FormControl, IconButton, InputAdornment,
     List,
-    ListItem, ListItemText, MenuItem, Select, TextField,
+    ListItem, ListItemText, TextField,
     Toolbar, Typography
 } from "@mui/material";
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {styled} from "@mui/material/styles";
-import {drawerStyle, StyledButton} from "@/components/styles/StyledElements";
+import {drawerStyle} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
+import {Chip} from "@/components/shared/Chip";
+import {statusChips} from "@/lib/statusChips";
 
 type Props = {
     subscriptions: Subscription;
     open: boolean;
     handleMoreClose: () => void;
+    heading: string;
 };
 
-const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose}: Props) => {
+const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
     console.log('subscriot', subscriptions)
     return (
         <>
@@ -39,6 +42,19 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                             </IconButton>
                         </ListItem>
                         <ListItem>
+                            <StyledHeaderBox>
+                                <Typography> {heading} details</Typography>
+                                <Chip
+                                    color={
+                                        statusChips[
+                                            subscriptions.subscriptionStatus.toString() as keyof typeof statusChips
+                                            ] as any
+                                    }
+                                    label={subscriptions.subscriptionStatus}
+                                />
+                            </StyledHeaderBox>
+                        </ListItem>
+                        <ListItem>
                             <StyledCard variant="outlined">
                                 <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                     <Box>
@@ -51,6 +67,36 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                         />
                                     </Box>
                                 </Box>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        value={subscriptions.path || ""}
+                                        label="Path"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={subscriptions.path}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                    <TextField
+                                        value={subscriptions.consumerCommonName || ""}
+                                        label="consumer common name"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={subscriptions.consumerCommonName}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                </FormControl>
                             </StyledCard>
                         </ListItem>
                         {subscriptions.endpoints.length > 0 && (
@@ -170,21 +216,11 @@ const StyledCard = styled(Card)<CardProps>(() => ({
     width: '100%',
 }));
 
-const StyledMenuItem = styled(MenuItem)(({}) => ({
-    "&.MuiMenuItem-root": {
-        color: "black",
-        opacity: 1
-    },
-    "&.Mui-disabled": {
-        color: "black",
-        opacity: 1
-    },
-    "&.Mui-selected": {
-        backgroundColor: "white",
-        "&.Mui-focusVisible": {
-            background: "white"
-        }
-    }
+const StyledHeaderBox = styled(Box)(({}) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
 }));
 
 

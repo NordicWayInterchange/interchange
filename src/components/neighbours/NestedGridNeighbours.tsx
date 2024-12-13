@@ -148,11 +148,12 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                             capabilities={neighbourRow}
                         />
                     )}
-                    {neighbourRow && heading === 'Our Subscriptions' && (
+                    {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
                         <OurAndNeighbourSubscriptionDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             subscriptions={neighbourRow}
+                            heading={heading}
                         />
                     )}
                 </Box>

@@ -23,6 +23,8 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
 
     const application = capabilities.application;
 
+    console.log('application', application)
+
     return (
         <>
         <Drawer
@@ -39,6 +41,11 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                         <IconButton onClick={handleMoreClose}>
                             <CloseIcon/>
                         </IconButton>
+                    </ListItem>
+                    <ListItem>
+                        <StyledHeaderBox>
+                            <Typography>Capabilities details</Typography>
+                        </StyledHeaderBox>
                     </ListItem>
                     <ListItem>
                         <StyledCard variant="outlined">
@@ -259,5 +266,11 @@ const StyledMenuItem = styled(MenuItem)(({}) => ({
     }
 }));
 
+const StyledHeaderBox = styled(Box)(({}) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+}));
 
 export default CapabilityDrawer;
