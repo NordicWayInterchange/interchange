@@ -1,9 +1,3 @@
-export const connectionStatusChips = {
-    CONNECTED: "greenDark",
-    FAILED: "depricatedLight",
-    UNREACHABLE: "blueLight",
-};
-
 export const statusChips = {
     REQUESTED: "grayLight",
     CREATED: "greenDark",
