@@ -19,7 +19,7 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [neighbourRow, setNeighbourRow] = useState<Neighbours>();
+    const [neighbourRow, setNeighbourRow] = useState<Neighbours>(null);
     const [expandedRows, setExpandedRows] = useState({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
@@ -41,6 +41,7 @@ const Neighbours = () => {
 
     const handleMore = (neighbour) => {
         console.log('neighbour', neighbour)
+        setNeighbourRow(null);
         setNeighbourRow(neighbour);
         setDrawerOpen(true);
     };
