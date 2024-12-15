@@ -9,7 +9,7 @@ import {
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {styled} from "@mui/material/styles";
-import {drawerStyle} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/Chip";
@@ -26,7 +26,6 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
     if (!subscriptions) {
         return <Typography>Loading...</Typography>;
     }
-    console.log('subscriot', subscriptions)
     return (
         <>
             <Drawer
@@ -144,7 +143,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].port.toString()}/>,
+                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -159,7 +158,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].maxBandwidth.toString()}/>,
+                                                                value={subscriptions.endpoints[0].maxBandwidth.toString() || ''}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -174,7 +173,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].maxMessageRate.toString()}/>,
+                                                                value={subscriptions.endpoints[0].maxMessageRate.toString() || ''}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -219,12 +218,6 @@ const StyledCard = styled(Card)<CardProps>(() => ({
     width: '100%',
 }));
 
-const StyledHeaderBox = styled(Box)(({}) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-}));
 
 
 export default OurAndNeighbourSubscriptionDrawer;

@@ -1,5 +1,5 @@
 import {styled} from "@mui/system";
-import {Button} from "@mui/material";
+import {Box, Button} from "@mui/material";
 
 const width = 600;
 
@@ -33,3 +33,10 @@ export const drawerStyle = {
         boxSizing: "border-box",
     },
 }
+
+export const StyledHeaderBox = styled(Box)(({}) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+}));

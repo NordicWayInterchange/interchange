@@ -133,7 +133,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             {nestedData.length > 0 ? (
-                <Box sx={{height: 300, width: "90%"}}>
+                <Box sx={{height: 300, width: "100%"}}>
                     <DataGrid
                         rows={nestedData}
                         columns={nestedColumns}

@@ -9,7 +9,7 @@ import {
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {styled} from "@mui/material/styles";
-import {drawerStyle, StyledButton} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledButton, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Capability} from "@/types/neighbours";
 
@@ -22,7 +22,6 @@ type Props = {
 const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
 
     const application = capabilities.application;
-    console.log('capabilities', capabilities);
     if (!capabilities || !application) {
         return <Typography>Loading...</Typography>;
     }
@@ -266,13 +265,6 @@ const StyledMenuItem = styled(MenuItem)(({}) => ({
             background: "white"
         }
     }
-}));
-
-const StyledHeaderBox = styled(Box)(({}) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
 }));
 
 export default CapabilityDrawer;
