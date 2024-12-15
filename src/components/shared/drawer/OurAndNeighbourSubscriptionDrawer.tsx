@@ -86,7 +86,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                     />
                                     <TextField
                                         value={subscriptions.consumerCommonName || ""}
-                                        label="consumer common name"
+                                        label="Consumer common name"
                                         margin="normal"
                                         slotProps={{
                                             input: {

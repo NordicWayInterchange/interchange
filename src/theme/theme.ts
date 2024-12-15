@@ -23,6 +23,26 @@ const theme = createTheme({
     typography: {
         fontFamily: heebo.style.fontFamily
     },
+    components: {
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    '& .MuiInput-underline:before': {
+                        borderBottom: '2px solid #000',
+                    },
+                    '& .MuiInput-underline:hover:before': {
+                        borderBottom: '2px solid #000',
+                    },
+                    '& .MuiInput-underline:after': {
+                        borderBottom: '2px solid #000',
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                    },
+                },
+            },
+        },
+    },
 });
 
 export default theme;
