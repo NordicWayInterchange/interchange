@@ -63,7 +63,10 @@ const Neighbours = () => {
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.capabilities, "capabilities")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.capabilities, "capabilities")
+                        }}
                     >
                         {Array.isArray(neighbourCapabilities) ? neighbourCapabilities.length : 0}
                     </Box>
@@ -79,7 +82,10 @@ const Neighbours = () => {
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")
+                        }}
                     >
                         {Array.isArray(ourSubscriptions) ? ourSubscriptions.length : 0}
                     </Box>
@@ -95,7 +101,10 @@ const Neighbours = () => {
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")
+                        }}
                     >
                         {Array.isArray(neighbourSubscriptions) ? neighbourSubscriptions.length : 0}
 
@@ -109,10 +118,10 @@ const Neighbours = () => {
             headerName: "Connection Status",
             renderCell: (cell) => {
                 return (
-                        <Box style={{ marginBottom: '10px' }}>
-                            <StatusCircle status={cell.value} />
-                            <span style={{ marginLeft: '8px' }}>{cell.value}</span>
-                        </Box>
+                    <Box style={{marginBottom: '10px'}}>
+                        <StatusCircle status={cell.value}/>
+                        <span style={{marginLeft: '8px'}}>{cell.value}</span>
+                    </Box>
                 );
             },
         },
