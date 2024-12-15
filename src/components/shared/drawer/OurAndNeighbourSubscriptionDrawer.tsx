@@ -23,6 +23,9 @@ type Props = {
 };
 
 const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
+    if (!subscriptions) {
+        return <Typography>Loading...</Typography>;
+    }
     console.log('subscriot', subscriptions)
     return (
         <>

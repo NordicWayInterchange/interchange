@@ -16,7 +16,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 const Neighbours = () => {
     const {data: session} = useSession();
 
-    const {data, isLoading} = useFetchNeighbours(
+    const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
     const [neighbourRow, setNeighbourRow] = useState<Neighbours>();
@@ -36,7 +36,7 @@ const Neighbours = () => {
     };
 
     const handleOnRowClick = (params: GridRowParams) => {
-        handleMore(params.row);
+        handleMore(params?.row || []);
     };
 
     const handleMore = (neighbour) => {
@@ -134,14 +134,14 @@ const Neighbours = () => {
             <Box sx={{height: 400, width: "100%"}}>
                 <DataGrid
                     columns={tableHeaders}
-                    rows={data || []}
+                    rows={neighbourData || []}
                     loading={isLoading}
                     getRowId={(row) => row.neighbour_id}
                     sort={{field: "lastUpdated", sort: "desc"}}
                 />
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
-                const row = Array.isArray(data) ? data.find((item) => item.neighbour_id === parseInt(rowId)) : null;
+                const row = Array.isArray(neighbourData) ? neighbourData.find((item) => item.neighbour_id === parseInt(rowId)) : null;
                 const field = expandedRows[rowId];
 
                 if (!row) {

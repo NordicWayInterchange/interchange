@@ -22,8 +22,10 @@ type Props = {
 const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
 
     const application = capabilities.application;
-
-    console.log('application', application)
+    console.log('capabilities', capabilities);
+    if (!capabilities || !application) {
+        return <Typography>Loading...</Typography>;
+    }
 
     return (
         <>
