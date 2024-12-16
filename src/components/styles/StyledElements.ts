@@ -1,5 +1,5 @@
 import {styled} from "@mui/system";
-import {Box, Button} from "@mui/material";
+import {Box, Button, Card, CardProps} from "@mui/material";
 
 const width = 600;
 
@@ -39,4 +39,9 @@ export const StyledHeaderBox = styled(Box)(({}) => ({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
+}));
+
+export const StyledCard = styled(Card)<CardProps>(() => ({
+    padding: '16px',
+    width: '100%',
 }));
