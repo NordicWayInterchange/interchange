@@ -675,13 +675,24 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWhenAnIdenticalWithDifferentStatusAlreadyExists() {
         String selector = "messageType = 'DATEX2' and originatingCountry = 'NO'";
         String serviceproviderName = "serviceprovider";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceproviderName,
+                new Capabilities(Collections.emptySet()),
+                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, nodeProperties.getName())),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
 
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceproviderName,
                 Collections.singleton(new AddSubscription(selector, "DATEX SUB"))
         );
-        restController.addSubscriptions(serviceproviderName, request);
-        assertThrows(AlreadyExistsException.class, () -> restController.addSubscriptions(serviceproviderName, request));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceproviderName);
     }
 
     @Test
@@ -1138,23 +1149,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(2);
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
-    }
-
-    @Test
-    public void testAddingMoreThanOneIdenticalDeliveries() {
-        String serviceProviderName = "my-service-provider";
-        String selector = "messageType='DENM'";
-        AddDeliveriesRequest request = new AddDeliveriesRequest(
-                serviceProviderName,
-                Collections.singleton(
-                        new AddDelivery(selector, "denm delivery")
-                )
-        );
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
-        assertThat(response.getDeliveries()).hasSize(1);
-
-        assertThrows(AlreadyExistsException.class, () -> restController.addDeliveries(serviceProviderName, request));
-
     }
 
     @Test
