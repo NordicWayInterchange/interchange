@@ -74,13 +74,8 @@ public class CapabilityMatcher {
 		String capabilityJson = null;
 		if (shardCount > 1) {
 			for (int i = 0; i < shardCount; i++) {
-				try {
-					int shardId = i+1;
-					capabilityJson = mapper.writeValueAsString(application).replace("}", ",\"shardId\":" + shardId + "}");
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-				if (matcher.match(selector, capabilityJson)) {
+				int shardId = i+1;
+				if (matchCapabilityApplicationWithShardToSelector(application, shardId, selector)) {
 					return true;
 				}
 			}
