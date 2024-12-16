@@ -67,7 +67,7 @@ public class ServiceProviderImport {
             LocalDelivery delivery = new LocalDelivery(
                     deliveryApi.getSelector(),
                     LocalDeliveryStatus.REQUESTED,
-                    "delivery"
+                    deliveryApi.getDescription()
             );
             for (DeliveryEndpoint endpoint : deliveryApi.getEndpoints()) {
                 delivery.addEndpoint(new LocalDeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget()));

@@ -25,23 +25,10 @@ public class CapabilityMatcher {
 			for (LocalSubscription subscription : subscriptionSelectors) {
 				if (!subscription.getSelector().isEmpty()) {
 					if (matchConsumerCommonNameToRedirectPolicy(subscription.getConsumerCommonName(), capability.getMetadata().getRedirectPolicy(), ixnName)) {
-						if (capability.isSharded()) {
-							for (int i = 0; i < capability.getMetadata().getShardCount(); i++) {
-								boolean match = matchCapabilityApplicationWithShardToSelector(capability.getApplication(), i + 1, subscription.getSelector());
-								if (match) {
-									logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
-									matches.add(subscription);
-									break;
-								}
-							}
-						} else {
-							if (!selectorIsSharded(subscription.getSelector())) {
-								boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), subscription.getSelector());
-								if (match) {
-									logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
-									matches.add(subscription);
-								}
-							}
+						boolean match = matchApplicationToSelector(capability.getApplication(), subscription.getSelector(), capability.getMetadata().getShardCount());
+						if (match) {
+							logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
+							matches.add(subscription);
 						}
 					}
 				}
@@ -58,22 +45,10 @@ public class CapabilityMatcher {
 		}
 	}
 
-	public static Set<Capability> matchLocalCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
-		Set<Capability> matches = new HashSet<>();
-		for (Capability capability : capabilities) {
-			boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), selector);
-			if (match) {
-				logger.debug("Selector [{}] matches capability {}", selector, capability);
-				matches.add(capability);
-			}
-		}
-		return matches;
-	}
-
 	public static Set<NeighbourCapability> matchNeighbourCapabilitiesToSelector(Set<NeighbourCapability> capabilities, String selector) {
 		Set<NeighbourCapability> matches = new HashSet<>();
 		for (NeighbourCapability capability : capabilities) {
-			boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), selector);
+			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount());
 			if (match) {
 				logger.debug("Selector [{}] matches capability {}", selector, capability);
 				matches.add(capability);
@@ -82,40 +57,39 @@ public class CapabilityMatcher {
 		return matches;
 	}
 
-	public static Set<Capability> matchCapabilitiesToSelectorWithShards(Set<Capability> capabilities, String selector) {
+	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
 		Set<Capability> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
-			if (capability.isSharded()) {
-				for (int i = 0; i < capability.getMetadata().getShardCount(); i++) {
-					boolean match = matchCapabilityApplicationWithShardToSelector(capability.getApplication(), i+1, selector);
-					if (match) {
-						logger.debug("Selector [{}] matches capability {}", selector, capability);
-						matches.add(capability);
-						break;
-					}
-				}
-			} else {
-				if (!selectorIsSharded(selector)) {
-					boolean match = matchCapabilityApplicationToSelector(capability.getApplication(), selector);
-					if (match) {
-						logger.debug("Selector [{}] matches capability {}", selector, capability);
-						matches.add(capability);
-					}
-				}
+			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount());
+			if (match) {
+				logger.debug("Selector [{}] matches capability {}", selector, capability);
+				matches.add(capability);
 			}
 		}
 		return matches;
 	}
 
-	public static boolean matchCapabilityApplicationToSelector(Application application, String selector) {
+	public static boolean matchApplicationToSelector(Application application, String selector, Integer shardCount) {
 		ObjectMapper mapper = new ObjectMapper();
 		String capabilityJson = null;
-		try {
-			capabilityJson = mapper.writeValueAsString(application);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+		if (shardCount > 1) {
+			for (int i = 0; i < shardCount; i++) {
+				int shardId = i+1;
+				if (matchCapabilityApplicationWithShardToSelector(application, shardId, selector)) {
+					return true;
+				}
+			}
+		} else {
+			if (!selectorIsSharded(selector)) {
+				try {
+					capabilityJson = mapper.writeValueAsString(application);
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+				return matcher.match(selector, capabilityJson);
+			}
 		}
-		return matcher.match(selector, capabilityJson);
+		return false;
 	}
 
 	public static boolean matchCapabilityApplicationWithShardToSelector(Application application, Integer shardId, String selector) {

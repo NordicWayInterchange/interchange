@@ -385,7 +385,7 @@ public class NapRestController {
         logger.info("List capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED));
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -658,7 +658,7 @@ public class NapRestController {
     }
 
     private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector);
+        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
     }
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {

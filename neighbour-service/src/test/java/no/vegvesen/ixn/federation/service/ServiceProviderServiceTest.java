@@ -41,105 +41,6 @@ public class ServiceProviderServiceTest {
         service = new ServiceProviderService(serviceProviderRepository, outgoingMatchRepository, matchRepository);
     }
 
-/*    @Test
-    public void updateDeliveryEndpointsAddsNewEndpoints() {
-        ServiceProvider sp = new ServiceProvider("sp");
-        String selector = "originatingCountry = 'NO'";
-
-        LocalDelivery localDelivery = new LocalDelivery(
-                1,
-                selector,
-                LocalDeliveryStatus.CREATED
-        );
-        localDelivery.setExchangeName("my-exchange");
-        sp.addDeliveries(Collections.singleton(localDelivery));
-
-        Capability capability = new Capability(
-                new DenmApplication(
-                        "publisher-1",
-                        "pub-1",
-                        "NO",
-                        "DENM:1.2.2",
-                        List.of("123"),
-                        List.of(1)
-                ),
-                new Metadata()
-        );
-        capability.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addCapability(capability);
-
-        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
-        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
-
-        assertThat(localDelivery.getEndpoints()).hasSize(1);
-    }*/
-
-/*    @Test
-    public void onlyOneEndpointWhenThereIsMoreMatchesWithCapabilities() {
-        ServiceProvider sp = new ServiceProvider("sp");
-        String selector = "originatingCountry = 'NO'";
-
-        LocalDelivery localDelivery = new LocalDelivery(
-                1,
-                selector,
-                LocalDeliveryStatus.CREATED
-        );
-        localDelivery.setExchangeName("my-exchange");
-        sp.addDeliveries(Collections.singleton(localDelivery));
-
-        Capability capability = new Capability(
-                new DenmApplication(
-                        "publisher-1",
-                        "pub-1",
-                        "NO",
-                        "DENM:1.2.2",
-                        List.of("123"),
-                        List.of(1)
-                ),
-                new Metadata()
-        );
-        capability.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addCapability(capability);
-
-        Capability capability1 = new Capability(
-                new DenmApplication(
-                        "publisher-1",
-                        "pub-1",
-                        "NO",
-                        "DENM:1.2.2",
-                        List.of("122"),
-                        List.of(1)
-                ),
-                new Metadata()
-        );
-        capability1.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addCapability(capability1);
-
-        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
-        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
-
-        assertThat(localDelivery.getEndpoints()).hasSize(1);
-    }*/
-
-/*    @Test
-    public void noEndpointAddedWhenThereIsNoExchangePresentAfterMatchWithCapability() {
-        ServiceProvider sp = new ServiceProvider("sp");
-        String selector = "originatingCountry = 'NO'";
-
-        LocalDelivery localDelivery = new LocalDelivery(
-                1,
-                selector,
-                LocalDeliveryStatus.CREATED
-        );
-        sp.addDeliveries(Collections.singleton(localDelivery));
-
-        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
-        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
-
-        assertThat(localDelivery.getEndpoints()).hasSize(0);
-    }*/
-
-
     @Test
     public void updateDeliveryStatusShouldNotChangeTheStatusOfADeliveryThatDoesNotHaveAnExchangeYet() {
         LocalDelivery localDelivery = new LocalDelivery(
@@ -159,6 +60,7 @@ public class ServiceProviderServiceTest {
                 ),
                 new Metadata()
         );
+        capability.getMetadata().setShardCount(1);
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(
