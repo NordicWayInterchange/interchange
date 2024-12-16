@@ -11,7 +11,6 @@ import Subheading from "@/components/shared/typography/Subheading";
 import {Neighbours} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import {timeConverter} from "@/lib/timeConverter";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -55,7 +54,7 @@ const Neighbours = () => {
         {
             ...dataGridTemplate,
             field: "name",
-            headerName: "Name"
+            headerName: "Name",
         },
         {
             ...dataGridTemplate,
@@ -158,7 +157,8 @@ const Neighbours = () => {
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click a row to view more information.
+                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour subscriptions
+                to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
@@ -187,7 +187,7 @@ const Neighbours = () => {
                             noRowsOverlay: CustomEmptyOverlayNeighbours
                         }}
                         onCellClick={(params) => {
-                            setSelectedColumn(params.field);
+                            setSelectedColumn((prev) => (prev === params.field ? null : params.field));
                         }}/>
                 </Box>
             </Box>
