@@ -21,6 +21,7 @@ const Neighbours = () => {
     const [neighbourRow, setNeighbourRow] = useState<Neighbours>(null);
     const [expandedRows, setExpandedRows] = useState({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
@@ -59,6 +60,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourCapabilities = params.row.capabilities.capabilities;
                 return (
@@ -78,6 +80,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const ourSubscriptions = params.row.ourRequestedSubscriptions.subscriptions;
                 return (
@@ -97,6 +100,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourSubscriptions = params.row.neighbourRequestedSubscriptions.subscriptions;
                 return (
@@ -136,16 +140,29 @@ const Neighbours = () => {
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
-                <DataGrid
-                    columns={tableHeaders}
-                    rows={neighbourData || []}
-                    loading={isLoading}
-                    getRowId={(row) => row.neighbour_id}
-                    sort={{field: "lastUpdated", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlayNeighbours
+                <Box
+                    sx={{
+                        height: 400,
+                        width: '100%',
+                        '& .selected-column': {
+                            backgroundColor: '#F8DEDE',
+                            color: 'red',
+                        },
                     }}
-                />
+                >
+                    <DataGrid
+                        columns={tableHeaders}
+                        rows={neighbourData || []}
+                        loading={isLoading}
+                        getRowId={(row) => row.neighbour_id}
+                        sort={{field: "lastUpdated", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlayNeighbours
+                        }}
+                        onCellClick={(params) => {
+                            setSelectedColumn(params.field);
+                        }}/>
+                </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
                 const row = Array.isArray(neighbourData) ? neighbourData.find((item) => item.neighbour_id === parseInt(rowId)) : null;

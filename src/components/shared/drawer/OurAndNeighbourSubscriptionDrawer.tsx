@@ -142,7 +142,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>,
+                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
