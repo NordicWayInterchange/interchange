@@ -1152,6 +1152,34 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingMoreThanOneIdenticalDeliveries() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "messageType='DENM'";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new AddDelivery(selector, "denm delivery")
+                )
+        );
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(response.getDeliveries()).allMatch(d -> d.getStatus().equals(DeliveryStatus.REQUESTED));
+
+        //change the delivery status in the database
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+        serviceProvider.getDeliveries().stream().forEach(d -> d.setStatus(LocalDeliveryStatus.CREATED));
+        serviceProviderRepository.save(serviceProvider);
+
+        //now, add the second delivery with original status
+        response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+    }
+
+    @Test
     public void testAddingDeliveryWithInvalidSelector() {
 
         String serviceProviderName = "my-service-provider";
