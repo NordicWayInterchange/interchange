@@ -49,7 +49,7 @@ const Neighbours = () => {
         {
             ...dataGridTemplate,
             field: "neighbour_id",
-            headerName: "ID"
+            headerName: "ID",
         },
         {
             ...dataGridTemplate,
@@ -60,6 +60,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
+            headerClassName: 'custom-header',
             cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourCapabilities = params.row.capabilities.capabilities;
@@ -80,6 +81,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
+            headerClassName: 'custom-header',
             cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const ourSubscriptions = params.row.ourRequestedSubscriptions.subscriptions;
@@ -100,6 +102,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
+            headerClassName: 'custom-header',
             cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourSubscriptions = params.row.neighbourRequestedSubscriptions.subscriptions;
@@ -147,6 +150,11 @@ const Neighbours = () => {
                         '& .selected-column': {
                             backgroundColor: '#F8DEDE',
                             color: 'red',
+                        },
+                        '& .custom-header': {
+                            backgroundColor: 'headerBackgroundColor',
+                            color: '#fff',
+                            fontWeight: 'bold',
                         },
                     }}
                 >
