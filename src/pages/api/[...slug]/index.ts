@@ -3,9 +3,29 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "@/pages/api/auth/[...nextauth]";
 import {getToken} from "next-auth/jwt";
+import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
+import {Neighbours} from "@/types/neighbours";
 
+
+/*function extractCauseCodes(neighbours: Neighbours) {
+    let causeCodes;
+    if (
+        "causeCode" in capability.application &&
+        capability.application.causeCode
+    ) {
+        causeCodes = capability.application.causeCode.map((causeCode) => {
+            return causeCodesList.find((c) => c.value === causeCode) || { "value": causeCode};
+        });
+    }
+    return causeCodes;
+}*/
 
 const fetchNeighbours = async (params: basicGetParams) => {
+    console.log('MARYAM');
+    debugger
+    const res = await fetchAdminUINeighbours(params);
+    const neigbours: Array<Neighbours> = await res.data;
+    console.log('NONONO', neigbours)
 };
 
 
@@ -44,8 +64,10 @@ const findHandler: (params: any) =>
         selector = "",
     } = params;
     const urlPath = path.join("/");
+    console.log('urlPath', urlPath)
     switch (method) {
         case "GET":
+            debugger
             const possiblePaths = Object.keys(getPaths);
             if (possiblePaths.includes(urlPath)) {
                 return {
@@ -83,6 +105,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    console.log('MARYM')
     const session = await getServerSession(req, res, authOptions);
 
     if (!(await isAuthenticated(req, res))) {

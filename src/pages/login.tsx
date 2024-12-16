@@ -5,7 +5,7 @@ import type {
 import { signIn } from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
-import {Button, Card, Typography} from "@mui/material";
+import { Card, Typography} from "@mui/material";
 import * as React from "react";
 import {StyledButton} from "@/components/styles/StyledElements";
 
