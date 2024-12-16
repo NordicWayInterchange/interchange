@@ -14,7 +14,7 @@ const Header = () => {
             position="fixed"
             sx={{
                 zIndex: (theme) => theme.zIndex.drawer + 1,
-                backgroundColor: '#1E1E1E',
+                backgroundColor: 'headerBackgroundColor',
                 color: 'textColor',
             }}
         >

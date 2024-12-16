@@ -4,7 +4,7 @@ import React from "react";
 const getStatusColor = (status) => {
     switch (status) {
         case 'CONNECTED':
-            return '#4caf50';
+            return '#1D7721';
         case 'FAILED':
             return '#B63434';
         case 'UNREACHABLE':
