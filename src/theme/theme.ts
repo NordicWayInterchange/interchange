@@ -5,7 +5,7 @@ import {ADMIN_UI_COLORS} from "@/theme/colors";
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#FFFFFF', // 202123Primary color (e.g., sidebar background)
+            main: '#3E3F41', // 202123Primary color (e.g., sidebar background)
         },
         secondary: {
             main: '#3E3F41', // Secondary color (e.g., hover effect or buttons)
@@ -27,17 +27,17 @@ const theme = createTheme({
         MuiTextField: {
             styleOverrides: {
                 root: {
-                    '& .MuiInput-underline:before': {
-                        borderBottom: '2px solid #000',
-                    },
-                    '& .MuiInput-underline:hover:before': {
-                        borderBottom: '2px solid #000',
-                    },
-                    '& .MuiInput-underline:after': {
-                        borderBottom: '2px solid #000',
-                    },
                     '& .MuiOutlinedInput-notchedOutline': {
                         border: 'none',
+                    },
+                    '& .MuiInput-underline:before': {
+                        borderBottom: '2px solid #3E3F41',
+                    },
+                    '& .MuiInput-underline:hover:before': {
+                        borderBottom: '2px solid black',
+                    },
+                    '& .MuiInput-underline:after': {
+                        borderBottom: '2px solid black',
                     },
                 },
             },
