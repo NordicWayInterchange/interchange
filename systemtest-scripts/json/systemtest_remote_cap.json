@@ -6,7 +6,7 @@
     "publisherId" : "STV",
     "originatingCountry" : "SE",
     "protocolVersion" : "1.0",
-    "quadTree" : [ ],
-    "causeCode" : [ ]
+    "quadTree" : [ "12" ],
+    "causeCode" : [ 6 ]
   } ]
 }

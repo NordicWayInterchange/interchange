@@ -3,8 +3,7 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +47,16 @@ public class NapServerErrorAdvice {
         return error(BAD_REQUEST, e);
     }
 
+    @ExceptionHandler({DeliveryPostException.class})
+    public ResponseEntity<ErrorDetails> handleDeliveryPostException(DeliveryPostException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({CapabilityPostException.class})
+    public ResponseEntity<ErrorDetails> handleCapabilityPostException(CapabilityPostException e){
+        return error(BAD_REQUEST, e);
+    }
+
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
         return error(NOT_FOUND, e);
@@ -61,6 +70,16 @@ public class NapServerErrorAdvice {
     @ExceptionHandler({SignExeption.class})
     public ResponseEntity<ErrorDetails> cannotSign(SignExeption e) {
         return error(INTERNAL_SERVER_ERROR,e);
+    }
+
+    @ExceptionHandler({PrivateChannelException.class})
+    public ResponseEntity<ErrorDetails> handlePrivateChannelException(PrivateChannelException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({PathVariableException.class})
+    public ResponseEntity<ErrorDetails> handlePathVariableException(PathVariableException e){
+        return error(BAD_REQUEST, e);
     }
 
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {

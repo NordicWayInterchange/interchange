@@ -1,15 +1,19 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.LocalEndpoint;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,28 +28,25 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.*;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = NapRestController.class)
 @ContextConfiguration(classes = {NapRestController.class, InterchangeNodeProperties.class, NapRestControllerTest.NapCorePropertiesCreator.class})
 public class NapRestControllerTest {
 
     public static final String NODE_NAME = "interchangenode";
+
     public static final String NAP_USER_NAME = "napcn";
+
     private MockMvc mockMvc;
 
     @MockBean
@@ -53,6 +54,9 @@ public class NapRestControllerTest {
 
     @MockBean
     private NeighbourRepository neighbourRepository;
+
+    @MockBean
+    private PrivateChannelRepository privateChannelRepository;
 
     private NapCoreProperties napCoreProperties;
 
@@ -65,6 +69,12 @@ public class NapRestControllerTest {
     @Autowired
     private NapRestController restController;
 
+    @MockBean
+    private CapabilityToCapabilityApiTransformer transformer;
+
+    @Autowired
+    private CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
@@ -74,7 +84,6 @@ public class NapRestControllerTest {
                 .alwaysExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .build();
     }
-
 
     @Test
     @DisplayName("Get existing local subscription")
@@ -142,39 +151,42 @@ public class NapRestControllerTest {
     @DisplayName("Get the details of a local subscription")
     public void getSingleLocalSubscription() throws Exception {
         String serviceProviderName = "sp-1";
+        LocalSubscription localSubscription = new LocalSubscription(
+                1,
+                LocalSubscriptionStatus.REQUESTED,
+                "originatingCountry = 'NO'",
+                serviceProviderName,
+                Collections.emptySet(),
+                Collections.singleton(
+                        new LocalEndpoint(
+                                "my-source",
+                                "my-host",
+                                5671,
+                                0,
+                                0
+                        )
+                )
+        );
+        localSubscription.setUuid(UUID.randomUUID().toString());
+
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
                 serviceProviderName,
                 new Capabilities(),
                 Collections.singleton(
-                        new LocalSubscription(
-                                1,
-                                LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'",
-                                serviceProviderName,
-                                Collections.emptySet(),
-                                Collections.singleton(
-                                        new LocalEndpoint(
-                                                "my-source",
-                                                "my-host",
-                                                5671,
-                                                0,
-                                                0
-                                        )
-                                )
-                        )
+                    localSubscription
                 ),
                 null
         );
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         when(serviceProviderRepository.findByName(serviceProviderName)).thenReturn(serviceProvider);
         mockMvc.perform(
-                        get(String.format("/nap/%s/subscriptions/%d",serviceProviderName,serviceProvider.getId()))
+                        get(String.format("/nap/%s/subscriptions/%s",serviceProviderName, localSubscription.getUuid()))
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id",is(1)));
+                .andExpect(jsonPath("$.id",is(localSubscription.getUuid())));
         verify(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         verify(serviceProviderRepository).findByName(serviceProviderName);
     }
@@ -203,23 +215,324 @@ public class NapRestControllerTest {
     }
 
     @Test
-    public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() {
-
+    public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() throws Exception {
+        String request = """
+                {
+                "selector": "originatingCountry='NO'",
+                "extra": "extra"
+                }
+                """;
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/subscriptions", "actor"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void postingInvalidNapSubscriptionRequestReturnsStatusBadRequest() {
-
+    public void postingInvalidNapSubscriptionRequestReturnsStatusBadRequest() throws Exception {
+        String invalidRequest = "";
+        String serviceProviderName = "actor";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                1,
+                serviceProviderName,
+                new Capabilities(),
+                Collections.emptySet(),
+                null
+        );
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/subscriptions", "actor"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest)
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void deletingNapSubscriptionReturnsNoContent() {
-
+    public void postDeliveryReturnsStatusOk() throws Exception{
+        String request = """
+                {
+                "selector": "originatingCountry='NO'",
+                "description": "NO delivery" 
+                }
+                """;
+        String serviceProviderName = "actor";
+        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(),
+                Set.of(),
+                Set.of(localDelivery),
+                null
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
     }
 
     @Test
-    public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() {
+    public void postDeliveryWithExtraFieldsReturnsStatusBadRequest() throws Exception{
+        String request = """
+                {
+                "selector": "originatingCountry='NO'",
+                "extraField": "extraField"
+                """;
 
+        String serviceProviderName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void postDeliveryWithNullSelectorReturnsStatusBadrequest() throws Exception{
+        String request = "{}";
+        String serviceProviderName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                post(String.format("/nap/%s/deliveries", serviceProviderName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void deletingNonExistingNapSubscriptionReturnsStatusNotFound() throws Exception{
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                delete(String.format("/nap/%s/subscriptions/%s", "actor", "1"))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deletingNapSubscriptionWithInvalidIdReturnsStatusNotFound() throws Exception{
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                delete(String.format("/nap/%s/subscriptions/%s", "actor", "notAnId"))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addingCapabilityReturnsStatusOk() throws Exception{
+        String request = """
+                {
+                "application":
+                {
+                "messageType": "DATEX2",
+                "publisherId": "publisherId",
+                "publicationId": "publicationId",
+                "protocolVersion": "protocolVersion",
+                "quadTree": ["123"],
+                "publicationType": "Hello",
+                "publisherName": "hello",
+                "originatingCountry": "NO"
+                },
+                "metadata": {}
+                }
+                """;
+        String actorCommonName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        Capability capability = new Capability(
+                new DatexApplication("publisherId", "publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new Metadata()
+        );
+        capability.setId(1);
+        when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(
+                1,
+                actorCommonName,
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                null
+        ));
+        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
+                new DatexApplicationApi("publisherId", "publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new MetadataApi()
+        ));
+        mockMvc.perform(
+                post(String.format("/nap/%s/capabilities", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void addingCapabilityWithMissingFieldsReturnsStatusBadRequest() throws Exception{
+        String request = """
+                {
+                "application":
+                {
+                "messageType": "DATEX2",
+                "publisherId": "publisherId",
+                "publicationId": "publicationId",
+                "quadTree": ["123"],
+                "publicationType": "Hello",
+                "publisherName": "hello",
+                "originatingCountry": "NO"
+                },
+                "metadata": {}
+                }
+                """;
+        String actorCommonName = "actor";
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
+                new DatexApplicationApi("publisherId", "publicationId","NO", null, List.of("123"), "Hello", "hello"),
+                new MetadataApi()
+        ));
+        mockMvc.perform(
+                post(String.format("/nap/%s/capabilities", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addingPrivateChannelReturnsStatusOk() throws Exception {
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": ["king_gustaf.bouvetinterchange.eu", "king_bjarne.bouvetinterchange.eu"],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void addingPrivateChannelWithActorCommonNameAsPeerReturnsStatusBadRequest() throws Exception {
+        String actorCommonName = "king_gustaf.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": ["king_gustaf.bouvetinterchange.eu", "king_bjarne.bouvetinterchange.eu"],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addingPrivateChannelWithEmptySetOfPeersReturnsStatusOk()throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+
+        String request = """
+                {
+                "peers": [],
+                "description": "Private channel for bouvet service providers"
+                }
+                """;
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(), PrivateChannelStatus.REQUESTED, "king_olav.bouvetinterchange.eu",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        when(privateChannelRepository.save(any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                post(String.format("/nap/%s/privatechannels", actorCommonName))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPrivateChannelReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setUuid(UUID.randomUUID().toString());
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        when(privateChannelRepository.findByServiceProviderNameAndUuid(any(), any())).thenReturn(privateChannel);
+
+        mockMvc.perform(
+          get(String.format("/nap/%s/privatechannels/%s", actorCommonName, privateChannel.getUuid()))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getNonExistentPrivateChannelReturnsStatusNotFound() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/%s", actorCommonName, UUID.randomUUID()))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getPrivateChannelsReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels", actorCommonName))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPeerPrivateChannelsReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer", actorCommonName))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPeerPrivateChannelReturnsStatusOk() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                Set.of(new Peer("king_gustaf.bouvetinterchange.eu"), new Peer("king_bjarne.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), actorCommonName);
+        privateChannel.setUuid(UUID.randomUUID().toString());
+        privateChannel.setLastUpdated(LocalDateTime.now());
+        when(privateChannelRepository.findByUuidAndPeerName(any(), any())).thenReturn(privateChannel);
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer/%s", actorCommonName, privateChannel.getUuid()))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getNonExistentPeerPrivateChannelReturnsStatusNotFound() throws Exception{
+        String actorCommonName = "king_olav.bouvetinterchange.eu";
+        mockMvc.perform(
+                get(String.format("/nap/%s/privatechannels/peer/%s", actorCommonName, UUID.randomUUID()))
+        ).andExpect(status().isNotFound());
     }
 
     @Configuration

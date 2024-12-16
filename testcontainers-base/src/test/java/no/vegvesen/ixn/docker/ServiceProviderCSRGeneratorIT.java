@@ -3,7 +3,6 @@ package no.vegvesen.ixn.docker;
 import no.vegvesen.ixn.docker.keygen.generator.ServiceProviderCSRGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 

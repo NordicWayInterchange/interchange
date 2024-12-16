@@ -9,20 +9,20 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -37,10 +37,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class OnboardRestControllerIT {
-
+public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
@@ -81,29 +79,6 @@ public class OnboardRestControllerIT {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest("serviceProvider", new HashSet<>());
         assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
                 () -> restController.addCapabilities("serviceProvider", request)
-        );
-    }
-
-    @Test
-    public void testWrongNameInRequestResultsInError() {
-        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
-                "serviceProvider",
-                Collections.singleton(
-                        new CapabilityApi(
-                                new DenmApplicationApi(
-                                        "Publisher1",
-                                        "Publisher1:Publication1",
-                                        "NO",
-                                        "1.0",
-                                        List.of(),
-                                        List.of()
-                                ),
-                                new MetadataApi()
-                        )
-                )
-        );
-        assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(
-                () -> restController.addCapabilities("anotherServiceProvider", request)
         );
     }
 
@@ -174,6 +149,24 @@ public class OnboardRestControllerIT {
                 )));
 
         assertThat(thrown.getMessage()).contains("publisherId");
+    }
+
+    @Test
+    public void testAddingCapabilityWithIllegalCharacterThrowsException(){
+        DatexApplicationApi app = new DatexApplicationApi("pub", "NO-pub-1", "NO", "1.0", List.of("1200"), "'SituationPublication", "publisherName");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
+
+        String serviceProviderName = "my-service-provider";
+        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+                new AddCapabilitiesRequest(
+                        serviceProviderName,
+                        Collections.singleton(datexNO)
+                )));
+
+        assertThat(thrown.getMessage()).contains("illegal");
     }
 
     @Test
@@ -308,6 +301,60 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testGettingMatchingLocalCapabilities(){
+       ServiceProvider serviceProvider1 = new ServiceProvider("sp-1");
+       ServiceProvider serviceProvider2 = new ServiceProvider("sp-2");
+       serviceProvider1.setCapabilities(new Capabilities(
+               Set.of(
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-1",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)
+                                       ),
+                               new Metadata(RedirectStatus.OPTIONAL)
+                       ),
+                       new Capability(
+                               new DenmApplication(
+                                       "NPRA",
+                                       "pub-2",
+                                       "NO",
+                                       "1.0",
+                                       List.of("123"),
+                                       List.of(6)),
+                               new Metadata(RedirectStatus.OPTIONAL))
+               )
+       ));
+       serviceProvider2.setCapabilities(new Capabilities(
+               Set.of(new Capability(
+                       new DenmApplication(  "NPRA_2",
+                               "pub-3",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ), new Capability(
+                       new DenmApplication(
+                               "NPRA_2",
+                               "pub-4",
+                               "NO",
+                               "1.0",
+                               List.of("123"),
+                               List.of(6)
+                       ),
+                       new Metadata(RedirectStatus.OPTIONAL)
+               ))
+       ));
+       serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+       assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
+       assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
+    }
+
+    @Test
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
@@ -317,7 +364,7 @@ public class OnboardRestControllerIT {
                                 "pub-1",
                                 "NO",
                                 "1.0",
-                                List.of("1234"),
+                                List.of("123"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
                 ))));
@@ -546,7 +593,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "serviceprovider";
         String selector = "";
 
-        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "illegal sub");
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -588,7 +635,7 @@ public class OnboardRestControllerIT {
     public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         String serviceProvider = "serviceprovider";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName(), "DATEX sub")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
@@ -600,7 +647,7 @@ public class OnboardRestControllerIT {
     public void testAddingSubscriptionWithEmptyConsumerCommonName() {
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -614,7 +661,7 @@ public class OnboardRestControllerIT {
     public void testAddingSubscriptionWithWrongConsumerCommonName() {
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector, "anna");
+        AddSubscription addSubscription = new AddSubscription(selector, "anna", "DATEX sub");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -639,7 +686,7 @@ public class OnboardRestControllerIT {
 
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceproviderName,
-                Collections.singleton(new AddSubscription(selector))
+                Collections.singleton(new AddSubscription(selector, "DATEX SUB"))
         );
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
         assertThat(response.getSubscriptions()).hasSize(1);
@@ -669,7 +716,7 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(serviceProvider);
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceProviderName,
-                Collections.singleton(new AddSubscription(selector))
+                Collections.singleton(new AddSubscription(selector, "Invalid sub"))
         );
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
@@ -684,7 +731,7 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX sub"))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -706,9 +753,21 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName))));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX SUB"))));
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
+    }
+
+    @Test
+    void testAddingSubscriptionWithoutDescription(){
+        String serviceProviderName = "service-provider-sub-add";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(
+                new AddSubscription("originatingCountry='NO'", "description"),
+                new AddSubscription("originatingCountry='SE'")
+        ));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(2);
+        assertThat(restController.listSubscriptions(serviceProviderName).getSubscriptions()).hasSize(2);
     }
 
     @Test
@@ -716,7 +775,7 @@ public class OnboardRestControllerIT {
         LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "DATEX SUB");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -757,7 +816,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
                 serviceProviderName,
-                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node"))
+                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node", "DATEX sub"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
@@ -796,7 +855,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingSingleSubscription() {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu", "DENM SUB"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
                 addSubscriptions
@@ -812,12 +871,12 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingChannels() {
+    public void testAddingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
 
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer-1"), "my-channel-1");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-peer-2"), "my-channel-2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-peer-3"), "my-channel-3");
 
         restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
 
@@ -827,16 +886,40 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingChannelWithServiceProviderAsPeerName() {
+    public void testDeletingPeerFromPrivateChannelRemovesItImmediatelyFromListEndpoint(){
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(serviceProviderName);
+        privateChannelRepository.save(new PrivateChannel(new HashSet<>(Set.of(new Peer("peerOne"))), no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED, "test",
+                new no.vegvesen.ixn.federation.model.PrivateChannelEndpoint("test", 1337, "test"),
+                serviceProviderName));
+        String privateChannelId = privateChannelRepository.findAllByServiceProviderName(serviceProviderName).getFirst().getUuid();
+        restController.deletePeerFromPrivateChannel(serviceProviderName, privateChannelId, "peerOne");
+        assertThat(restController.listPrivateChannels(serviceProviderName).getPrivateChannels().getFirst().getPeers()).hasSize(0);
+    }
+
+    @Test
+    public void testAddingPrivateChannelWithServiceProviderAsPeerName() {
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName), "my-channel");
 
         PrivateChannelException thrown = assertThrows(PrivateChannelException.class, () -> restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel))));
         assertThat(thrown.getMessage()).isEqualTo("Can't add private channel with serviceProviderName as peerName");
     }
 
     @Test
-    public void testAddingNullChannelsRequest() {
+    public void testAddingPrivateChannelWithNullPeersList() {
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(null, "my-channel");
+        assertThat(restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)))).isNotNull();
+    }
+    @Test
+    public void testAddingPrivateChannelWithEmptyPeersList() {
+        String serviceProviderName = "my-service-provider";
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Set.of(), "my-channel");
+        assertThat(restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel)))).isNotNull();
+    }
+
+    @Test
+    public void testAddingNullPrivateChannelsRequest() {
         AddPrivateChannelRequest request = null;
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
                 () -> restController.addPrivateChannels("serviceProvider", request)
@@ -844,7 +927,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingNullChannelSet() {
+    public void testAddingNullPrivateChannelSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         request.setPrivateChannels(null);
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
@@ -853,7 +936,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingEmptyChannelsSet() {
+    public void testAddingEmptyPrivateChannelsSet() {
         AddPrivateChannelRequest request = new AddPrivateChannelRequest();
         assertThatExceptionOfType(PrivateChannelException.class).isThrownBy(
                 () -> restController.addPrivateChannels("serviceProvider", request)
@@ -861,9 +944,9 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testAddingAndDeletingChannel() {
+    public void testAddingAndDeletingPrivateChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi("my-channel");
+        PrivateChannelRequestApi clientChannel = new PrivateChannelRequestApi(Collections.singleton("my-peer"), "my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(clientChannel));
 
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProviderName, request);
@@ -873,7 +956,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingNonExistentChannel() {
+    public void testDeletingNonExistentPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "1")
@@ -881,7 +964,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testDeletingInvalidChannelId() {
+    public void testDeletingInvalidPrivateChannelId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deletePrivateChannel(serviceProviderName, "notAnId")
@@ -891,20 +974,20 @@ public class OnboardRestControllerIT {
     @Test
     public void testGettingPrivateChannels() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer-1"), "my-channel-1");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-peer-2"), "my-channel-2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-peer-3"), "my-channel-3");
         restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         ListPrivateChannelsResponse response = restController.listPrivateChannels(serviceProviderName);
         assertThat(response.getPrivateChannels().size()).isEqualTo(3);
     }
 
     @Test
-    public void testGettingChannel() {
+    public void testGettingPrivateChannel() {
         String serviceProviderName = "my-service-provider";
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi("my-channel2");
-        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi("my-channel3");
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer-1"), "my-channel-1");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton("my-peer-2"), "my-channel-2");
+        PrivateChannelRequestApi clientChannel_3 = new PrivateChannelRequestApi(Collections.singleton("my-peer-3"), "my-channel-3");
 
         AddPrivateChannelResponse privateChannels = restController.addPrivateChannels(serviceProviderName, new AddPrivateChannelRequest(List.of(clientChannel_1, clientChannel_2, clientChannel_3)));
         GetPrivateChannelResponse channelResponse = restController.getPrivateChannel(serviceProviderName, privateChannels.getPrivateChannels().get(0).getId().toString());
@@ -913,7 +996,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGettingNonExistentChannel() {
+    public void testGettingNonExistentPrivateChannel() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "1")
@@ -921,7 +1004,7 @@ public class OnboardRestControllerIT {
     }
 
     @Test
-    public void testGettingChannelWithInvalidId() {
+    public void testGettingPrivateChannelWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.getPrivateChannel(serviceProviderName, "notAnId")
@@ -933,8 +1016,8 @@ public class OnboardRestControllerIT {
         String serviceProviderName_1 = "my-service-provider";
         String serviceProviderName_2 = "my-service-provider2";
 
-        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi("my-channel");
-        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(serviceProviderName_1);
+        PrivateChannelRequestApi clientChannel_1 = new PrivateChannelRequestApi(Collections.singleton("my-peer"), "my-channel");
+        PrivateChannelRequestApi clientChannel_2 = new PrivateChannelRequestApi(Collections.singleton(serviceProviderName_1), "my-other-channel");
 
         restController.addPrivateChannels(serviceProviderName_1, new AddPrivateChannelRequest(List.of(clientChannel_1)));
         restController.addPrivateChannels(serviceProviderName_2, new AddPrivateChannelRequest(List.of(clientChannel_2)));
@@ -943,6 +1026,71 @@ public class OnboardRestControllerIT {
         ListPeerPrivateChannels response_2 = restController.listPeerPrivateChannels(serviceProviderName_2);
         assertThat(response_1.getPrivateChannels().size()).isEqualTo(1);
         assertThat(response_2.getPrivateChannels().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testAddingPeer(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("king_thomas.bouvetinterchange.eu")));
+        restController.addPeersToPrivateChannel(serviceProviderName, uuid, request);
+        assertThat(privateChannelRepository.findAllByServiceProviderName(serviceProviderName).stream().findFirst().get().getPeers()).hasSize(2);
+    }
+
+    @Test
+    public void addingPeerWithEmptyRequestThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>());
+        assertThrows(PrivateChannelException.class, () -> restController.addPeersToPrivateChannel(serviceProviderName, uuid, request));
+    }
+
+    @Test
+    public void addingPeerWithServiceProviderNameAsPeerThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("my-service-provider")));
+        assertThrows(PrivateChannelException.class, () -> restController.addPeersToPrivateChannel(serviceProviderName, uuid, request));
+    }
+    @Test
+    public void testDeletingPeerFromPrivateChannel(){
+        String serviceProviderName = "my-service-provider";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), serviceProviderName);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+
+        restController.deletePeerFromPrivateChannel(serviceProviderName, uuid, "king_gustaf.bouvetinterchange.eu");
+        assertThat(privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, uuid).getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).count()).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeletingPeerFromNonExistentPrivateChannelThrowsException(){
+        String serviceProviderName = "my-service-provider";
+        String uuid = UUID.randomUUID().toString();
+        assertThrows(NotFoundException.class, () -> restController.deletePeerFromPrivateChannel(serviceProviderName, uuid, "nonexistent"));
+    }
+
+    @Test
+    public void testPeerDeletePeerFromPrivateChannel(){
+        String privateChannelOwner = "king_olav.bouvetinterchange.eu";
+        String serviceProviderName = "king_gustaf.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), privateChannelOwner);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        restController.peerDeletePeerFromPrivateChannel(serviceProviderName, uuid);
+        PrivateChannel updated = privateChannelRepository.findByServiceProviderNameAndUuid(privateChannelOwner, uuid);
+        assertThat(updated.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN))).hasSize(0);
     }
 
     @Test
@@ -977,7 +1125,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "my-service-provider";
         String selector = "";
 
-        SelectorApi delivery = new SelectorApi(selector);
+        AddDelivery delivery = new AddDelivery(selector, "illegal delivery");
         AddDeliveriesRequest requestApi = new AddDeliveriesRequest(serviceProviderName, Collections.singleton(delivery));
 
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, requestApi);
@@ -992,13 +1140,25 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingDeliveryWithoutDescription(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+           new AddDelivery("originatingCountry='NO'"),
+           new AddDelivery("originatingCountry='SE'", "description")
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(2);
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
+    }
+
+    @Test
     public void testAddingMoreThanOneIdenticalDeliveries() {
         String serviceProviderName = "my-service-provider";
         String selector = "messageType='DENM'";
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "denm delivery")
                 )
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
@@ -1027,7 +1187,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "invalid delivery")
                 )
         );
 
@@ -1048,7 +1208,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "null delivery")
                 )
         );
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
@@ -1066,7 +1226,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Set.of(
-                        new SelectorApi("messageType = 'DENM'")
+                        new AddDelivery("messageType = 'DENM'", "DENM delivery")
                 )
         );
         restController.addDeliveries(serviceProviderName, request);
@@ -1083,7 +1243,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Set.of(
-                        new SelectorApi("messageType = 'DENM'")
+                        new AddDelivery("messageType = 'DENM'", "DENM delivery")
                 )
         );
         AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
@@ -1113,7 +1273,7 @@ public class OnboardRestControllerIT {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 serviceProviderName,
                 Collections.singleton(
-                        new SelectorApi(selector)
+                        new AddDelivery(selector, "DENM Delivery")
                 )
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
@@ -1147,7 +1307,7 @@ public class OnboardRestControllerIT {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 serviceProviderName,
                 Set.of(new CapabilityApi(
-                        new DatexApplicationApi("String publisherId", "String publicationId", "String originatingCountry", "String protocolVersion", List.of("123"), "String publicationType", "String publisherName"),
+                        new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
                         new MetadataApi()
                 ))
         );
@@ -1159,7 +1319,7 @@ public class OnboardRestControllerIT {
     @Test
     public void SubscriptionEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_2";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'")));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'", "SUB")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
         assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
         assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));
@@ -1171,7 +1331,7 @@ public class OnboardRestControllerIT {
     public void privateChannelEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_3";
         String serviceProvider2 = "sp";
-        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi("serviceProvider_uuid_3")));
+        AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(Collections.singleton("serviceProvider_uuid_3"), "my-channel")));
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProvider2, request);
         assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().get().getId()));
         assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().get().getId()));
@@ -1184,7 +1344,7 @@ public class OnboardRestControllerIT {
     public void deliveryEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_4";
         AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
-                new SelectorApi("originatingCountry='NO'")
+                new AddDelivery("originatingCountry='NO'", "NO Delivery")
         ));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertTrue(checkUuid(response.getDeliveries().stream().findFirst().get().getId()));
@@ -1200,6 +1360,62 @@ public class OnboardRestControllerIT {
         catch (IllegalArgumentException e){
             return false;
         }
+    }
+
+    @Test
+    public void testAddingCapabilityWithAlreadyDefinedCreatedTimestamp(){
+        ServiceProvider sp = new ServiceProvider("sp-1");
+        Capability capability = new Capability(
+                new DatexApplication("bouvet","bouvet-1", "NO","test", List.of("1"), "test", "test"),
+                new Metadata());
+        LocalDateTime time = LocalDateTime.of(1999, 12, 12, 11, 11, 11);
+        capability.setCreatedTimestamp(time);
+        sp.setCapabilities(new Capabilities(Set.of(capability)));
+        serviceProviderRepository.save(sp);
+
+        assertThat(serviceProviderRepository.findByName("sp-1")
+                .getCapabilities().getCapabilities().stream().findFirst().get().getCreatedTimestamp())
+                .isEqualTo(time);
+    }
+
+    @Test
+    public void testIllegalCharsInPathVariable(){
+        String illegal1 = "s*";
+        String legal = "s@_-.A0S5S";
+        String illegal2 = "s#";
+        String illegal3 = "s?";
+        String illegal4 = "s/";
+        String illegal5 = "s;";
+        String illegal6 = "s!";
+        String illegal7 = "s$";
+        String illegal8 = "s&";
+        String illegal9 = "s'";
+        String illegal10 = "s(";
+        String illegal11 = "s[";
+        String illegal12 = "s{";
+        String illegal13 = "s,";
+        String illegal14 = "s=";
+
+
+
+        AddDeliveriesRequest request = new AddDeliveriesRequest(illegal1, Set.of(
+                new AddDelivery("originatingCountry='NO'")
+        ));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal1, request));
+        restController.addDeliveries(legal, request);
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal2, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal3, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal4, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal5, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal6, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal7, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal8, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal9, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal10, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal11, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal12, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal13, request));
+        assertThrows(PathVariableException.class, () -> restController.addDeliveries(illegal14, request));
     }
 
     @Autowired

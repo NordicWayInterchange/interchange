@@ -7,12 +7,11 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,8 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class OutgoingMatchDiscoveryServiceIT {
+public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Autowired
     private OutgoingMatchRepository repository;
@@ -41,7 +39,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatMatchIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -86,7 +84,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatMultipleMatchesAreCreated() {
-        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -132,7 +130,7 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatDeliveryHasNoOverlap() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
@@ -178,8 +176,8 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
-        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
-        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery");
+        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery");
 
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 

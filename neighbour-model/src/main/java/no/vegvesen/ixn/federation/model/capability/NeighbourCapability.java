@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name="neighbour_capability")
@@ -22,18 +22,23 @@ public class NeighbourCapability {
     @JoinColumn(name = "meta", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neigh_cap_meta"))
     private Metadata metadata;
 
+    private LocalDateTime createdTimestamp;
+
     public NeighbourCapability() {
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public NeighbourCapability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public NeighbourCapability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -58,6 +63,14 @@ public class NeighbourCapability {
 
     public void setMetadata(Metadata metadata) {
         this.metadata = metadata;
+    }
+
+    public LocalDateTime getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 
     @Override

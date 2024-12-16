@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import jakarta.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,11 @@ public class MessageForwardUtil {
 			if (remainingTimeToLive >= 0L) {
 				producer.send(message, message.getJMSDeliveryMode(), message.getJMSPriority(), remainingTimeToLive);
 			} else {
-				logger.warn("Discarding message with remaining ttl {}", remainingTimeToLive);
+				if (message instanceof TextMessage) {
+					logger.warn("Discarding message with remaining ttl {}", remainingTimeToLive);
+				} else {
+					logger.trace("Binary message received");
+				}
 			}
 
 		} else {

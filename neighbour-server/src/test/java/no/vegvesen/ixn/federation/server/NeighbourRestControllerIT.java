@@ -13,14 +13,12 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import org.junit.jupiter.api.BeforeEach;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -32,9 +30,8 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @SpringBootTest
-public class NeighbourRestControllerIT {
+public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     NeighbourRestController neighbourRestController;
@@ -53,6 +50,9 @@ public class NeighbourRestControllerIT {
 
     @Autowired
     NeighbourRepository neighbourRepository;
+
+    @Autowired
+    WebApplicationContext context;
 
     @Test
     public void requestSubscriptionsDoesNotIncludeTimeStamp(){
@@ -88,9 +88,6 @@ public class NeighbourRestControllerIT {
 
         assertThat(neighbourRestController.listSubscriptions(neighbour.getName()).toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");
     }
-
-    @Autowired
-    WebApplicationContext context;
 
     @Test
     public void genSwagger() throws Exception {

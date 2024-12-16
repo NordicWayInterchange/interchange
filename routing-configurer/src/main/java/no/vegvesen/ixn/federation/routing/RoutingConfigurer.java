@@ -9,13 +9,11 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +31,9 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourService neighbourService;
+
 	private final QpidClient qpidClient;
+
 	private final ServiceProviderRouter serviceProviderRouter;
 
 	private final InterchangeNodeProperties interchangeNodeProperties;
@@ -133,23 +133,19 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour, QpidDelta delta) {
-		//try {
-			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-			Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-			Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
-			Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
+		logger.debug("Setting up routing for neighbour {}", neighbour.getName());
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
+		Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+		Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
-			setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
-			allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
+		setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
+		allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
 
-			if(!allAcceptedSubscriptions.isEmpty()){
-				setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
-			}
-			neighbourService.saveSetupRouting(neighbour);
-		//} catch (Throwable e) {
-		//	logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		//}
+		if(!allAcceptedSubscriptions.isEmpty()){
+			setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
+		}
+		neighbourService.saveSetupRouting(neighbour);
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {
@@ -165,7 +161,7 @@ public class RoutingConfigurer {
 					if (subscription.getEndpoints().isEmpty()) {
 						String queueName = "sub-" + UUID.randomUUID();
 						logger.debug("Creating endpoint {} for subscription {}", queueName,subscription);
-						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
 						subscription.setEndpoints(Collections.singleton(endpoint));
 					}
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
@@ -200,7 +196,7 @@ public class RoutingConfigurer {
 				if (matchingCaps.stream().filter(m -> ! m.getMetadata().hasShards()).count() == 0) {
 					if (subscription.getEndpoints().isEmpty()) {
 						String redirectQueue = "re-" + UUID.randomUUID();
-						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+						NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), redirectQueue);
 						subscription.setEndpoints(Collections.singleton(endpoint));
 					}
 

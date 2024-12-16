@@ -220,46 +220,12 @@
                 </plugins>
             </build>
         </profile>
-
-        <profile>
-            <id>ST</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                        <configuration>
-                            <skipTests>true</skipTests>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven-failsafe-plugin.version}</version>
-                        <configuration>
-                            <includes>
-                                <include>*ST</include>
-                            </includes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
 
     <modules>
         <module>ssl-utils</module>
         <module>testcontainers-base</module>
-        <module>testcontainers-init-postgres</module>
         <module>jms-client</module>
         <module>api-model</module>
         <module>interchange-spring-security</module>
@@ -273,20 +239,15 @@
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
         <module>routing-configurer</module>
-        <module>federation-st</module>
         <module>message-collector</module>
         <module>quadtree-tool</module>
         <module>onboard-rest-api</module>
         <module>onboard-server</module>
         <module>onboard-server-app</module>
-        <module>onboard-rest-client</module>
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
         <module>routing-configurer-app</module>
-        <module>jms-client-app</module>
-        <module>jms-client-sink-app</module>
-        <module>jms-client-source-app</module>
         <module>qpid-client</module>
         <module>napcore-rest-api</module>
         <module>napcore-server</module>
@@ -294,5 +255,6 @@
         <module>napcore-rest-client</module>
         <module>csr-signer</module>
         <module>keys-generator</module>
+        <module>service-provider-client</module>
     </modules>
 </project>

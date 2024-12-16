@@ -6,6 +6,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -33,8 +34,8 @@ public class TruststoreGenerator extends GenericContainer<TruststoreGenerator> {
     }
     @Override
     protected void configure() {
-        this.withFileSystemBind(caCertPath.getParent().toString(),"/ca-certs");
-        this.withFileSystemBind(targetPath.getParent().toString(),"/out");
+        this.copyFileToContainer(MountableFile.forHostPath(caCertPath.getParent()), "/ca-certs");
+        this.copyFileToContainer(MountableFile.forHostPath(targetPath),"/out");
         String certPathInContainer = "/ca-certs/" + caCertPath.getFileName();
         String keystoreInContainer = "/out/" + targetPath.getFileName();
         this.withCommand(certPathInContainer, keystoreInContainer, password);

@@ -15,9 +15,7 @@ command will remove all containers, networks and volumes in Docker) if you don't
 any containers, network or volumes you want to keep on the Docker host, or remove any 
 conflicting items using `docker container/volume/network rm`.
 
-There are scripts to run the onboard client for a and b (`a_onboard_client.sh` and `b_onboard_client`,
-respectively), as well as demo jms clients for a and b (`jms_client_a.sh` and `jms_client_b`, 
-respectively).
+There are scripts to run the service provider client for a and b (`a_service_provider_client.sh` and `b_service_provider_client.sh`, respectively)
 Example json input files are supplied in the `json` directory.
 
 ## Napcore testing

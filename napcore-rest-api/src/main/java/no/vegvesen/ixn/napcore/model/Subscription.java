@@ -2,9 +2,9 @@ package no.vegvesen.ixn.napcore.model;
 
 import java.util.Set;
 
-public class Subscription {
+public class Subscription implements Comparable<Subscription> {
 
-    Integer id;
+    String id;
 
     SubscriptionStatus status;
 
@@ -14,23 +14,25 @@ public class Subscription {
 
     Long lastUpdatedTimestamp;
 
-    public Subscription() {
+    String description;
 
+    public Subscription() {
     }
 
-    public Subscription(Integer id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp) {
+    public Subscription(String id, SubscriptionStatus status, String selector, Set<SubscriptionEndpoint> endpoints, Long lastUpdatedTimestamp, String description) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.description = description;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -66,6 +68,13 @@ public class Subscription {
         this.selector = selector;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @Override
     public String toString() {
@@ -75,6 +84,21 @@ public class Subscription {
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", description=" + description +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Subscription o) {
+        if(o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null) {
+            return 0;
+        }
+        if(o.lastUpdatedTimestamp == null){
+            return 1;
+        }
+        if(lastUpdatedTimestamp == null){
+            return -1;
+        }
+        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
     }
 }
