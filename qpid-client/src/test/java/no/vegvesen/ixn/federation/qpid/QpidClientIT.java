@@ -153,6 +153,20 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testGetGroupMembersList() {
+		String groupMember1 = "test-group-member-member-1";
+		String groupMember2 = "test-group-member-member-2";
+		client.addMemberToGroup(groupMember1, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+		client.addMemberToGroup(groupMember2, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+
+		List<GroupMember> groupMembers = client.getGroupMembers(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+		assertThat(groupMembers).hasSize(2);
+		List<String> groupMemberNames = groupMembers.stream().map(GroupMember::getName).toList();
+		assertThat(groupMemberNames).contains(groupMember1);
+		assertThat(groupMemberNames).contains(groupMember2);
+	}
+
+	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
 		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
@@ -464,5 +478,12 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void testCreateExchangeCheckIfItsDurable() {
 		Exchange exchange = client.createHeadersExchange("test-create-exchange-is-durable-header");
 		assertThat(exchange.isDurable()).isTrue();
+	}
+
+	@Test
+	public void testGettingExchange() {
+		Queue queue = client.createNonDestructiveQueue("test-non-destructive-queue");
+		assertThat(queue.getEnsureNondestructiveConsumers()).isTrue();
+		assertThat(client.queueExists("test-non-destructive-queue")).isTrue();
 	}
 }

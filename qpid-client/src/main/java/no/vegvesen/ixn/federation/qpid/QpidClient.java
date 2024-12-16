@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -110,6 +111,10 @@ public class QpidClient {
 		return createQueue(new CreateQueueRequest(name, MAX_TTL_15_MINUTES));
 	}
 
+	public Queue createNonDestructiveQueue(String name) {
+		return createQueue(new CreateQueueRequest(name, MAX_TTL_15_MINUTES, true));
+	}
+
 	public Exchange createHeadersExchange(String name) {
 		return createExchange(new CreateExchangeRequest(name,"headers"));
 	}
@@ -197,10 +202,28 @@ public class QpidClient {
 		}
 	}
 
+	public List<GroupMember> getGroupMembers(String groupName) {
+		try {
+			String url = groupsUrl + groupName;
+			logger.debug("Getting from URL {}", url);
+			ResponseEntity<GroupMember[]> response = restTemplate.getForEntity(url, GroupMember[].class);
+			return Arrays.asList(response.getBody());
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
 	public void removeMemberFromGroup(GroupMember member, String groupName) {
 		String url = groupsUrl + groupName + "/" + member.getName();
 		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing user {} from group {}",member.getName(),groupName);
+		logger.info("Removing user {} from group {}", member.getName(), groupName);
+		restTemplate.delete(url);
+	}
+
+	public void removeMemberFromGroup(String groupMemberName, String groupName) {
+		String url = groupsUrl + groupName + "/" + groupMemberName;
+		logger.debug("DELETE to URL {}",url);
+		logger.info("Removing user {} from group {}", groupMemberName, groupName);
 		restTemplate.delete(url);
 	}
 

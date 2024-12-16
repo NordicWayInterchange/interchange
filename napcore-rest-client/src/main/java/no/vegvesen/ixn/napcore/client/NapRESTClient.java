@@ -17,7 +17,6 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-
 import javax.net.ssl.SSLContext;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -158,6 +157,54 @@ public class NapRESTClient {
 
     public void deleteCapability(String capabilityId){
         String url = String.format("%s/nap/%s/capabilities/%s", server, user, capabilityId);
+        restTemplate.delete(url);
+    }
+
+    public PrivateChannelResponse addPrivateChannel(PrivateChannelRequest privateChannelRequest){
+        String url = String.format("%s/nap/%s/privatechannels", server, user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<PrivateChannelRequest> entity = new HttpEntity<>(privateChannelRequest, headers);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelResponse.class).getBody();
+    }
+
+    public void deletePrivateChannel(String privateChannelId){
+        String url = String.format("%s/nap/%s/privatechannels/%s", server, user, privateChannelId);
+        restTemplate.delete(url);
+    }
+
+    public List<PrivateChannelResponse> getPrivateChannels(){
+        String url = String.format("%s/nap/%s/privatechannels", server, user);
+        ResponseEntity<PrivateChannelResponse[]> response = restTemplate.getForEntity(url, PrivateChannelResponse[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public PrivateChannelResponse getPrivateChannel(String privateChannelId){
+        String url = String.format("%s/nap/%s/privatechannels/%s", server, user, privateChannelId);
+        return restTemplate.getForEntity(url, PrivateChannelResponse.class).getBody();
+    }
+
+    public List<PeerPrivateChannel> getPeerPrivateChannels(){
+        String url = String.format("%s/nap/%s/privatechannels/peer", server, user);
+        ResponseEntity<PeerPrivateChannel[]> response = restTemplate.getForEntity(url, PeerPrivateChannel[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public void addPeerToPrivateChannel(String privateChannelId, AddPeerRequest peerRequest) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddPeerRequest> entity = new HttpEntity<>(peerRequest, headers);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeerRequest.class);
+    }
+
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
+        restTemplate.delete(url);
+    }
+
+    public void peerDeletePeerFromPrivateChannel(String privateChannelId) {
+        String url = String.format("%s/nap/%s/privatechannels/peer/%s", server, user, privateChannelId);
         restTemplate.delete(url);
     }
 

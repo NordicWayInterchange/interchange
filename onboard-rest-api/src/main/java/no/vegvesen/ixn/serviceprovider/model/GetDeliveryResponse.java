@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -16,16 +18,20 @@ public class GetDeliveryResponse {
 
     private DeliveryStatus status;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String description;
+
     public GetDeliveryResponse() {
     }
 
-    public GetDeliveryResponse(String id, Set<DeliveryEndpoint> endpoints, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status) {
+    public GetDeliveryResponse(String id, Set<DeliveryEndpoint> endpoints, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String description) {
         this.id = id;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
+        this.description = description;
     }
 
     public String getId() {
@@ -66,6 +72,14 @@ public class GetDeliveryResponse {
 
     public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public DeliveryStatus getStatus() {

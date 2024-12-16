@@ -18,12 +18,6 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
     public OnboardingCapability() {
     }
 
-    public OnboardingCapability(String id, ApplicationApi application, MetadataApi metadata) {
-        this.id = id;
-        this.application = application;
-        this.metadata = metadata;
-    }
-
     public OnboardingCapability(String id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
         this.id = id;
         this.application = application;
