@@ -9,6 +9,7 @@ import {Neighbours} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import {CustomEmptyOverlay, CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 
 type Props = {
     drawerOpen: boolean;
@@ -140,6 +141,9 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                         getRowId={(row) => row.id}
                         onRowClick={handleOnRowClick}
                         sort={{field: "lastUpdated", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlay
+                        }}
                     />
                     {neighbourRow && heading === 'Capabilities' && (
                         <CapabilityDrawer

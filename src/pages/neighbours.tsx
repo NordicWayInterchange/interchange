@@ -10,6 +10,7 @@ import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import {Neighbours} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
+import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -141,6 +142,9 @@ const Neighbours = () => {
                     loading={isLoading}
                     getRowId={(row) => row.neighbour_id}
                     sort={{field: "lastUpdated", sort: "desc"}}
+                    slots={{
+                        noRowsOverlay: CustomEmptyOverlayNeighbours
+                    }}
                 />
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
