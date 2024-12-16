@@ -4,6 +4,7 @@ import {useSession} from "next-auth/react";
 import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import Link from "next/link";
 import React from "react";
+import Subheading from "@/components/shared/typography/Subheading";
 
 export default function Home() {
     const {data: session} = useSession();
@@ -29,9 +30,9 @@ export default function Home() {
             <Box flex={1}>
                 <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
                 <Divider sx={{marginY: 3}}/>
-                <subheading>
+                <Subheading>
                     Dashboard
-                </subheading>
+                </Subheading>
                 <Box sx={{display: "flex", flexDirection: "column", gap: 3}}>
                     <Box
                         sx={{
