@@ -1,6 +1,5 @@
 import {
     Box,
-    Card, CardProps,
     Drawer, FormControl, IconButton, InputAdornment,
     List,
     ListItem, ListItemText, TextField,

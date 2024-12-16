@@ -1,7 +1,7 @@
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider, Typography} from "@mui/material";
+import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
@@ -9,7 +9,7 @@ import {Neighbours} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
-import {CustomEmptyOverlay, CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 
 type Props = {
     drawerOpen: boolean;
@@ -133,37 +133,34 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                 These are all of {heading}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            {nestedData.length > 0 ? (
-                <Box sx={{height: 300, width: "100%"}}>
-                    <DataGrid
-                        rows={nestedData}
-                        columns={nestedColumns}
-                        getRowId={(row) => row.id}
-                        onRowClick={handleOnRowClick}
-                        sort={{field: "lastUpdated", sort: "desc"}}
-                        slots={{
-                            noRowsOverlay: CustomEmptyOverlay
-                        }}
+            <Box sx={{height: 300, width: "100%"}}>
+                <DataGrid
+                    rows={nestedData}
+                    columns={nestedColumns}
+                    getRowId={(row) => row.id}
+                    onRowClick={handleOnRowClick}
+                    sort={{field: "lastUpdated", sort: "desc"}}
+                    slots={{
+                        noRowsOverlay: CustomEmptyOverlay
+                    }}
+                />
+                {neighbourRow && heading === 'Capabilities' && (
+                    <CapabilityDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        capabilities={neighbourRow}
                     />
-                    {neighbourRow && heading === 'Capabilities' && (
-                        <CapabilityDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
-                            capabilities={neighbourRow}
-                        />
-                    )}
-                    {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                        <OurAndNeighbourSubscriptionDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
-                            subscriptions={neighbourRow}
-                            heading={heading}
-                        />
-                    )}
-                </Box>
-            ) : (
-                <Typography variant="body2">No data available.</Typography>
-            )}
+                )}
+                {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
+                    <OurAndNeighbourSubscriptionDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        subscriptions={neighbourRow}
+                        heading={heading}
+                    />
+                )}
+            </Box>
+
         </Box>
     );
 }

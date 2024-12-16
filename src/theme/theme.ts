@@ -24,25 +24,30 @@ const theme = createTheme({
         fontFamily: heebo.style.fontFamily
     },
     components: {
-        MuiTextField: {
+        MuiOutlinedInput: {
             styleOverrides: {
                 root: {
                     '& .MuiOutlinedInput-notchedOutline': {
-                        border: 'none',
+                        display: 'none',
                     },
-                    '& .MuiInput-underline:before': {
+                    '&:before': {
+                        content: '""',
                         borderBottom: '2px solid #3E3F41',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
                     },
-                    '& .MuiInput-underline:hover:before': {
-                        borderBottom: '2px solid black',
+                    '&:hover:before': {
+                        borderBottom: '2px solid #FF9600',
                     },
-                    '& .MuiInput-underline:after': {
-                        borderBottom: '2px solid black',
+                    '&.Mui-focused:before': {
+                        borderBottom: '2px solid #FF9600',
                     },
-                },
+                }
             },
         },
     },
-});
+})
 
 export default theme;
