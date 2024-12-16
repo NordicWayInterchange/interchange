@@ -438,6 +438,18 @@ public class NapRestControllerIT extends PostgresContainerBase {
         request.getApplication().setPublicationId("publi-Id-3");
         napRestController.addCapability(actor2, request);
 
+        ServiceProvider actor1Caps = serviceProviderRepository.findByName(actor1);
+        for (Capability cap : actor1Caps.getCapabilities().getCapabilities()) {
+            cap.setStatus(CapabilityStatus.CREATED);
+        }
+        serviceProviderRepository.save(actor1Caps);
+
+        ServiceProvider actor2Caps = serviceProviderRepository.findByName(actor2);
+        for (Capability cap : actor2Caps.getCapabilities().getCapabilities()) {
+            cap.setStatus(CapabilityStatus.CREATED);
+        }
+        serviceProviderRepository.save(actor2Caps);
+
         assertThat(napRestController.getCapabilities(actor1)).hasSize(2);
         assertThat(napRestController.getCapabilities(actor2)).hasSize(1);
     }
