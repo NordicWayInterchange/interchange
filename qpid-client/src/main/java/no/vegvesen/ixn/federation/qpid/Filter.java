@@ -17,6 +17,10 @@ public class Filter {
         this.filter = filter;
     }
 
+    public Filter(String filter, Integer shardId) {
+        this.filter = filter + "shardId = " + shardId;
+    }
+
     public String getFilter() {
         return filter;
     }
