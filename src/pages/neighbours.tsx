@@ -11,6 +11,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 import {Neighbours} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {timeConverter} from "@/lib/timeConverter";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -124,13 +125,31 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "connectionStatus",
             headerName: "Connection Status",
-            renderCell: (cell) => {
+            renderCell: (params) => {
                 return (
                     <Box style={{marginBottom: '10px'}}>
-                        <StatusCircle status={cell.value}/>
-                        <span style={{marginLeft: '8px'}}>{cell.value}</span>
+                        <StatusCircle status={params.value}/>
+                        <span style={{marginLeft: '8px'}}>{params.value}</span>
                     </Box>
                 );
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "lastFailedConnectionAttempt",
+            headerName: "Last failed connection attempt",
+            renderCell: (params) => {
+                const value = params.row.lastFailedConnectionAttempt;
+                return new Date(value).toLocaleString()
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "lastUpdated",
+            headerName: "Last Updated",
+            renderCell: (params) => {
+                const value = params.row.lastUpdated;
+                return new Date(value).toLocaleString()
             },
         },
     ];
