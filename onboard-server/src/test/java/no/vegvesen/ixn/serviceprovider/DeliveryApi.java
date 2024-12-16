@@ -17,6 +17,8 @@ public class DeliveryApi {
 
     private DeliveryStatusApi status;
 
+    private String description;
+
     public String getId() {
         return id;
     }
@@ -63,5 +65,13 @@ public class DeliveryApi {
 
     public void setStatus(DeliveryStatusApi status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
