@@ -2,10 +2,11 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.*;
+
 import java.util.UUID;
 
 @Entity
@@ -28,7 +29,11 @@ public class Capability {
     private Metadata metadata;
 
     @Enumerated(EnumType.STRING)
-    private CapabilityStatus status = CapabilityStatus.CREATED;
+    private CapabilityStatus status = CapabilityStatus.REQUESTED;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name="fk_cap_shard"))
+    private List<CapabilityShard> shards = new ArrayList<>();
 
     private LocalDateTime createdTimestamp;
 
@@ -102,6 +107,10 @@ public class Capability {
         this.status = status;
     }
 
+    public boolean isSharded() {
+        return metadata.getShardCount() > 1;
+    }
+
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }
@@ -110,12 +119,31 @@ public class Capability {
         this.createdTimestamp = lastUpdatedTimestamp;
     }
 
-    public boolean isSharded() {
-        return metadata.getShardCount() > 1;
+    public List<CapabilityShard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<CapabilityShard> shards) {
+        this.shards.clear();
+        if (shards != null) {
+            this.shards.addAll(shards);
+        }
     }
 
     public boolean hasShards() {
-        return metadata.hasShards();
+        return !shards.isEmpty();
+    }
+
+    public void removeShards() {
+        this.shards.clear();
+    }
+
+    public Set<String> getExchangesFromShards() {
+        Set<String> exchanges = new HashSet<>();
+        for (CapabilityShard shard : shards) {
+            exchanges.add(shard.getExchangeName());
+        }
+        return exchanges;
     }
 
     @Override
@@ -138,7 +166,8 @@ public class Capability {
                 "uuid="+uuid +
                 ", application=" + application +
                 ", metadata=" + metadata +
-                ", status=" + status + '\'' +
+                ", status=" + status +
+                ", shards=" + shards +
                 '}';
     }
 }

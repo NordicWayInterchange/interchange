@@ -74,7 +74,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidContainer.start();
     }
 
-
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
         String exchangeName = "inputExchange";
@@ -93,8 +92,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 new Metadata()
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability);
-
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
 
@@ -191,7 +189,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(exchangeName);
 
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
@@ -340,8 +338,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         String subscriptionSelector = subscription.getSelector();
 
-        String capabilitySelector1 = MessageValidatingSelectorCreator.makeSelector(capability1);
-        String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(capability2);
+        String capabilitySelector1 = MessageValidatingSelectorCreator.makeSelector(capability1, null);
+        String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(capability2, null);
 
         String joinedSelector1 = String.format("(%s) AND (%s)", capabilitySelector1, deliverySelector);
         System.out.println(joinedSelector1);
@@ -418,7 +416,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(capabilityExchange);
 
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 
         String deliverySelector = delivery.getSelector();
 
