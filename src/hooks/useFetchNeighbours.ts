@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {neighbours} from "@/types/neighbours";
+import {Neighbours} from "@/types/neighbours";
 
 const fetchNeighbours: (
     commonName: string
-) => Promise<neighbours[]> = async (commonName: string) => {
+) => Promise<Neighbours[]> = async (commonName: string) => {
     const res = await fetch(`${commonName}/neighbours`);
     if (res.ok) {
         return res.json();
