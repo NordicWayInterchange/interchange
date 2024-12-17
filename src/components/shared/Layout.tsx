@@ -20,6 +20,7 @@ export default function Layout({ children }: LayoutProps) {
                     component="main"
                     sx={{
                         flexGrow: 1,
+                        bgcolor: "mainBackgroundColor",
                         p: 5,
                         height: "100vh",
                         width: "100vw",
@@ -37,6 +38,7 @@ export default function Layout({ children }: LayoutProps) {
         <Box
             component="main"
             sx={{
+                bgcolor: "mainBackgroundColor",
                 height: "100vh",
                 width: "100vw",
                 display: "flex",

@@ -1,6 +1,5 @@
 import {
     Box,
-    Card, CardProps,
     Drawer, FormControl, IconButton, InputAdornment,
     List,
     ListItem, ListItemText, TextField,
@@ -8,8 +7,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {styled} from "@mui/material/styles";
-import {drawerStyle, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/Chip";
@@ -30,6 +28,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
         <>
             <Drawer
                 sx={drawerStyle}
+                PaperProps={{ sx: {backgroundColor: "#F9F9F9"}}}
                 variant="temporary"
                 anchor="right"
                 open={open}
@@ -143,7 +142,7 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>,
+                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -211,13 +210,5 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
         </>
     );
 };
-
-
-const StyledCard = styled(Card)<CardProps>(() => ({
-    padding: '16px',
-    width: '100%',
-}));
-
-
 
 export default OurAndNeighbourSubscriptionDrawer;

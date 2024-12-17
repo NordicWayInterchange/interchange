@@ -1,6 +1,5 @@
 import {
     Box,
-    Card, CardProps,
     Drawer, FormControl, IconButton, InputAdornment, InputLabel,
     List,
     ListItem, ListItemText, MenuItem, Select, TextField,
@@ -9,7 +8,7 @@ import {
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {styled} from "@mui/material/styles";
-import {drawerStyle, StyledButton, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledButton, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Capability} from "@/types/neighbours";
 
@@ -30,6 +29,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
         <>
         <Drawer
             sx={drawerStyle}
+            PaperProps={{ sx: {backgroundColor: "#F9F9F9"}}}
             variant="temporary"
             anchor="right"
             open={open}
@@ -244,11 +244,6 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
 );
 };
 
-
-const StyledCard = styled(Card)<CardProps>(() => ({
-    padding: '16px',
-    width: '100%',
-}));
 
 const StyledMenuItem = styled(MenuItem)(({}) => ({
     "&.MuiMenuItem-root": {

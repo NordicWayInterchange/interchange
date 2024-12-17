@@ -10,6 +10,8 @@ import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import {Neighbours} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
+import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {timeConverter} from "@/lib/timeConverter";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -20,6 +22,7 @@ const Neighbours = () => {
     const [neighbourRow, setNeighbourRow] = useState<Neighbours>(null);
     const [expandedRows, setExpandedRows] = useState({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
@@ -47,23 +50,28 @@ const Neighbours = () => {
         {
             ...dataGridTemplate,
             field: "neighbour_id",
-            headerName: "ID"
+            headerName: "ID",
         },
         {
             ...dataGridTemplate,
             field: "name",
-            headerName: "Name"
+            headerName: "Name",
         },
         {
             ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
+            headerClassName: 'custom-header',
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourCapabilities = params.row.capabilities.capabilities;
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.capabilities, "capabilities")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.capabilities, "capabilities")
+                        }}
                     >
                         {Array.isArray(neighbourCapabilities) ? neighbourCapabilities.length : 0}
                     </Box>
@@ -74,12 +82,17 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
+            headerClassName: 'custom-header',
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const ourSubscriptions = params.row.ourRequestedSubscriptions.subscriptions;
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")
+                        }}
                     >
                         {Array.isArray(ourSubscriptions) ? ourSubscriptions.length : 0}
                     </Box>
@@ -90,12 +103,17 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
+            headerClassName: 'custom-header',
+            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourSubscriptions = params.row.neighbourRequestedSubscriptions.subscriptions;
                 return (
                     <Box
                         style={{cursor: "pointer"}}
-                        onClick={() => handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")}
+                        onClick={() => {
+                            setNeighbourRow(null);
+                            handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")
+                        }}
                     >
                         {Array.isArray(neighbourSubscriptions) ? neighbourSubscriptions.length : 0}
 
@@ -107,13 +125,31 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "connectionStatus",
             headerName: "Connection Status",
-            renderCell: (cell) => {
+            renderCell: (params) => {
                 return (
-                        <Box style={{ marginBottom: '10px' }}>
-                            <StatusCircle status={cell.value} />
-                            <span style={{ marginLeft: '8px' }}>{cell.value}</span>
-                        </Box>
+                    <Box style={{marginBottom: '10px'}}>
+                        <StatusCircle status={params.value}/>
+                        <span style={{marginLeft: '8px'}}>{params.value}</span>
+                    </Box>
                 );
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "lastFailedConnectionAttempt",
+            headerName: "Last failed connection attempt",
+            renderCell: (params) => {
+                const value = params.row.lastFailedConnectionAttempt;
+                return value && timeConverter(value)
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "lastUpdated",
+            headerName: "Last Updated",
+            renderCell: (params) => {
+                const value = params.row.lastUpdated;
+                return value && timeConverter(value)
             },
         },
     ];
@@ -122,17 +158,39 @@ const Neighbours = () => {
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click a row to view more information.
+                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour subscriptions
+                to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
-                <DataGrid
-                    columns={tableHeaders}
-                    rows={neighbourData || []}
-                    loading={isLoading}
-                    getRowId={(row) => row.neighbour_id}
-                    sort={{field: "lastUpdated", sort: "desc"}}
-                />
+                <Box
+                    sx={{
+                        height: 400,
+                        width: '100%',
+                        '& .selected-column': {
+                            backgroundColor: '#F8DEDE',
+                            color: 'red',
+                        },
+                        '& .custom-header': {
+                            backgroundColor: 'headerBackgroundColor',
+                            color: '#fff',
+                            fontWeight: 'bold',
+                        },
+                    }}
+                >
+                    <DataGrid
+                        columns={tableHeaders}
+                        rows={neighbourData || []}
+                        loading={isLoading}
+                        getRowId={(row) => row.neighbour_id}
+                        sort={{field: "lastUpdated", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlayNeighbours
+                        }}
+                        onCellClick={(params) => {
+                            setSelectedColumn((prev) => (prev === params.field ? null : params.field));
+                        }}/>
+                </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
                 const row = Array.isArray(neighbourData) ? neighbourData.find((item) => item.neighbour_id === parseInt(rowId)) : null;

@@ -17,6 +17,8 @@ export default function DataGrid(props: Props) {
                 autoHeight
                 disableRowSelectionOnClick={true}
                 sx={{
+                    backgroundColor: "white",
+                    boxShadow: 1,
                     borderRadius: 1
                 }}
                 initialState={{
@@ -46,10 +48,4 @@ const StyledDataGrid = styled(MuiDataGrid)(({}) => ({
         borderBottom: '2px solid #dd7100 !important',
     },
     "& .MuiDataGrid-columnHeaderTitle": { fontWeight: "bold" },
-    '& .MuiDataGrid-iconButtonContainer': {
-        color: 'white',
-    },
-    '& .MuiDataGrid-sortIcon': {
-        color: 'white',
-    },
 }));

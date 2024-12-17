@@ -5,7 +5,7 @@ import {ADMIN_UI_COLORS} from "@/theme/colors";
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#FFFFFF', // 202123Primary color (e.g., sidebar background)
+            main: '#3E3F41', // 202123Primary color (e.g., sidebar background)
         },
         secondary: {
             main: '#3E3F41', // Secondary color (e.g., hover effect or buttons)
@@ -24,25 +24,30 @@ const theme = createTheme({
         fontFamily: heebo.style.fontFamily
     },
     components: {
-        MuiTextField: {
+        MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    '& .MuiInput-underline:before': {
-                        borderBottom: '2px solid #000',
-                    },
-                    '& .MuiInput-underline:hover:before': {
-                        borderBottom: '2px solid #000',
-                    },
-                    '& .MuiInput-underline:after': {
-                        borderBottom: '2px solid #000',
-                    },
                     '& .MuiOutlinedInput-notchedOutline': {
-                        border: 'none',
+                        display: 'none',
                     },
-                },
+                    '&:before': {
+                        content: '""',
+                        borderBottom: '2px solid #3E3F41',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                    },
+                    '&:hover:before': {
+                        borderBottom: '2px solid #FF9600',
+                    },
+                    '&.Mui-focused:before': {
+                        borderBottom: '2px solid #FF9600',
+                    },
+                }
             },
         },
     },
-});
+})
 
 export default theme;
