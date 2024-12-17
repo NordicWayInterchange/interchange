@@ -256,5 +256,6 @@
         <module>csr-signer</module>
         <module>keys-generator</module>
         <module>service-provider-client</module>
+        <module>import-export-service</module>
     </modules>
 </project>

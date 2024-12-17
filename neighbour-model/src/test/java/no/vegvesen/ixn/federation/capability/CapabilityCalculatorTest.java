@@ -53,7 +53,7 @@ public class CapabilityCalculatorTest {
     }
 
     @Test
-    void calculateLastUpdatedCapabiltiesOneCap() {
+    void calculateLastUpdatedCapabilitiesOneCap() {
         ServiceProvider serviceProvider = new ServiceProvider();
         LocalDateTime lastUpdated = LocalDateTime.now();
         Capabilities capabilities = new Capabilities(
@@ -129,7 +129,6 @@ public class CapabilityCalculatorTest {
         cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
 
         List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
-
 
         LocalDateTime lastUpdatedCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders);
 

@@ -71,7 +71,7 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
     public void pollSubscriptionIncludesTimestamp(){
         Neighbour neighbour = new Neighbour();
         neighbour.setName("neighbour2");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED)));
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED, "neighbour2")));
         neighbour.setNeighbourRequestedSubscriptions(request);
         neighbour = neighbourRepository.save(neighbour);
 
@@ -82,7 +82,7 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
     public void listSubscriptionsDoesNotIncludeTimestamp(){
         Neighbour neighbour = new Neighbour();
         neighbour.setName("neighbour3");
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED)));
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "neighbour3")));
         neighbour.setNeighbourRequestedSubscriptions(request);
         neighbour = neighbourRepository.save(neighbour);
 

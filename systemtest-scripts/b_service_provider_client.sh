@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
+SERVICE_PROVIDER="king_gustaf.bouvetinterchange.eu"
 URL=""
 
 if [ $1 == 'messages' ]; then

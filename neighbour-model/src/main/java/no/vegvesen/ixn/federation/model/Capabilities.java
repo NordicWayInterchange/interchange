@@ -35,8 +35,8 @@ public class Capabilities {
 		setCapabilities(capabilities);
 	}
 
-	public Capabilities(Set<Capability> capabilties, LocalDateTime lastUpdated) {
-		setCapabilities(capabilties);
+	public Capabilities(Set<Capability> capabilities, LocalDateTime lastUpdated) {
+		setCapabilities(capabilities);
 		this.lastUpdated = lastUpdated;
 	}
 
@@ -44,9 +44,15 @@ public class Capabilities {
 		return Collections.unmodifiableSet(capabilities);
 	}
 
-	public Set<Capability> getCreatedCapabilities() {
+	public Set<Capability> getCapabilitiesByStatus(CapabilityStatus status) {
 		return capabilities.stream()
-				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
+				.filter(c -> c.getStatus().equals(status))
+				.collect(Collectors.toSet());
+	}
+
+	public Set<Capability> getCapabilitiesByStatusIsNot(CapabilityStatus status) {
+		return capabilities.stream()
+				.filter(c -> !c.getStatus().equals(status))
 				.collect(Collectors.toSet());
 	}
 
@@ -69,7 +75,7 @@ public class Capabilities {
 	}
 
 	public boolean hasCapabilities() {
-		return !getCreatedCapabilities().isEmpty();
+		return !getCapabilitiesByStatus(CapabilityStatus.CREATED).isEmpty();
 	}
 
 	public void removeCapability(String capabilityId) {
