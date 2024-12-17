@@ -163,6 +163,11 @@ public class TypeTransformer {
     }
 
     private long localDateTimeToEpochMili(LocalDateTime lastUpdated) {
-        return lastUpdated == null ? 0 : ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
+        Long epochSecond = null;
+        if (lastUpdated != null) {
+            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
+        }
+        return epochSecond;
+    }
     }
 }
