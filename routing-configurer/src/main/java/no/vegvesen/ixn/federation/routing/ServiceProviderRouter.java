@@ -546,6 +546,7 @@ public class ServiceProviderRouter {
                     }
                     else{
                         subscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
+                        onTearDown(serviceProvider, subscription, delta);
                         subscription.getLocalEndpoints().clear();
                     }
                 }
