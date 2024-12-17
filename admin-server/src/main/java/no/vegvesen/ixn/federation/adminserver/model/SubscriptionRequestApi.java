@@ -8,12 +8,12 @@ public class SubscriptionRequestApi {
 
     private Set<SubscriptionApi> subscriptions;
 
-    private long successfulRequest;
+    private Long successfulRequest;
 
     public SubscriptionRequestApi() {
     }
 
-    public SubscriptionRequestApi(Integer subreq_id, Set<SubscriptionApi> subscriptions, long successfulRequest) {
+    public SubscriptionRequestApi(Integer subreq_id, Set<SubscriptionApi> subscriptions, Long successfulRequest) {
         this.subreq_id = subreq_id;
         this.subscriptions = subscriptions;
         this.successfulRequest = successfulRequest;
@@ -35,11 +35,11 @@ public class SubscriptionRequestApi {
         this.subscriptions = subscriptions;
     }
 
-    public long getSuccessfulRequest() {
+    public Long getSuccessfulRequest() {
         return successfulRequest;
     }
 
-    public void setSuccessfulRequest(long successfulRequest) {
+    public void setSuccessfulRequest(Long successfulRequest) {
         this.successfulRequest = successfulRequest;
     }
 

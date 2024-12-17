@@ -18,12 +18,12 @@ public class SubscriptionApi {
 
     private Set<EndpointApi> endpoints;
 
-    private long lastUpdatedTimestamp;
+    private Long lastUpdatedTimestamp;
 
     public SubscriptionApi() {
     }
 
-    public SubscriptionApi(Integer id, SubscriptionStatusApi subscriptionStatus, String selector, String path, int numberOfPolls, String consumerCommonName, Set<EndpointApi> endpoints, long lastUpdatedTimestamp) {
+    public SubscriptionApi(Integer id, SubscriptionStatusApi subscriptionStatus, String selector, String path, int numberOfPolls, String consumerCommonName, Set<EndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
@@ -90,11 +90,11 @@ public class SubscriptionApi {
         this.endpoints = endpoints;
     }
 
-    public long getLastUpdatedTimestamp() {
+    public Long getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
 
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
+    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 

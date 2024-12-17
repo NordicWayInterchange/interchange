@@ -10,14 +10,14 @@ public class NeighbourCapabilitiesApi {
 
     private Set<NeighbourCapabilityApi> capabilities;
 
-    private long lastUpdated;
+    private Long lastUpdated;
 
-    private long lastCapabilityExchange;
+    private Long lastCapabilityExchange;
 
     public NeighbourCapabilitiesApi() {
     }
 
-    public NeighbourCapabilitiesApi(Integer id, CapabilitiesStatusApi status, Set<NeighbourCapabilityApi> capabilities, long lastUpdated, long lastCapabilityExchange) {
+    public NeighbourCapabilitiesApi(Integer id, CapabilitiesStatusApi status, Set<NeighbourCapabilityApi> capabilities, Long lastUpdated, Long lastCapabilityExchange) {
         this.id = id;
         this.status = status;
         this.capabilities = capabilities;
@@ -25,12 +25,6 @@ public class NeighbourCapabilitiesApi {
         this.lastCapabilityExchange = lastCapabilityExchange;
     }
 
-    public NeighbourCapabilitiesApi(CapabilitiesStatusApi status, Set<NeighbourCapabilityApi> capabilities, long lastUpdated, long lastCapabilityExchange) {
-        this.status = status;
-        this.capabilities = capabilities;
-        this.lastUpdated = lastUpdated;
-        this.lastCapabilityExchange = lastCapabilityExchange;
-    }
 
     public Integer getId() {
         return id;
@@ -56,19 +50,19 @@ public class NeighbourCapabilitiesApi {
         this.capabilities = capabilities;
     }
 
-    public long getLastUpdated() {
+    public Long getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(long lastUpdated) {
+    public void setLastUpdated(Long lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
-    public long getLastCapabilityExchange() {
+    public Long getLastCapabilityExchange() {
         return lastCapabilityExchange;
     }
 
-    public void setLastCapabilityExchange(long lastCapabilityExchange) {
+    public void setLastCapabilityExchange(Long lastCapabilityExchange) {
         this.lastCapabilityExchange = lastCapabilityExchange;
     }
 

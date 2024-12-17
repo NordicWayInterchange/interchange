@@ -14,16 +14,16 @@ public class NeighbourApi {
 
     private ConnectionStatusApi connectionStatus;
 
-    private long lastFailedConnectionAttempt;
+    private Long lastFailedConnectionAttempt;
 
-    private long lastUpdated;
+    private Long lastUpdated;
 
     private Boolean ignore;
 
     public NeighbourApi() {
     }
 
-    public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
+    public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, Long lastFailedConnectionAttempt, Long lastUpdated, Boolean ignore) {
         this.neighbour_id = neighbour_id;
         this.name = name;
         this.capabilities = capabilities;
@@ -62,11 +62,11 @@ public class NeighbourApi {
         this.connectionStatus = connectionStatus;
     }
 
-    public long getLastFailedConnectionAttempt() {
+    public Long getLastFailedConnectionAttempt() {
         return lastFailedConnectionAttempt;
     }
 
-    public void setLastFailedConnectionAttempt(long lastFailedConnectionAttempt) {
+    public void setLastFailedConnectionAttempt(Long lastFailedConnectionAttempt) {
         this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
     }
 
@@ -102,11 +102,11 @@ public class NeighbourApi {
         this.ourRequestedSubscriptions = ourRequestedSubscriptions;
     }
 
-    public long getLastUpdated() {
+    public Long getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(long lastUpdated) {
+    public void setLastUpdated(Long lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 

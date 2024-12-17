@@ -11,12 +11,12 @@ public class NeighbourCapabilityApi {
 
     private MetadataApi metadata;
 
-    private long createdTimestamp;
+    private Long createdTimestamp;
 
     public NeighbourCapabilityApi() {
     }
 
-    public NeighbourCapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, long createdTimestamp) {
+    public NeighbourCapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
@@ -47,11 +47,11 @@ public class NeighbourCapabilityApi {
         this.metadata = metadata;
     }
 
-    public long getCreatedTimestamp() {
+    public Long getCreatedTimestamp() {
         return createdTimestamp;
     }
 
-    public void setCreatedTimestamp(long createdTimestamp) {
+    public void setCreatedTimestamp(Long createdTimestamp) {
         this.createdTimestamp = createdTimestamp;
     }
 
