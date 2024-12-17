@@ -4,7 +4,8 @@ import {SessionProvider} from "next-auth/react";
 import {ThemeProvider} from "@mui/material";
 import theme from "@/theme/theme";
 import Layout from "@/components/shared/Layout";
-import {AppProps} from "next/app";
+import type { AppProps } from "next/app";
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 
 export default function App({
                                 Component,
@@ -20,6 +21,7 @@ export default function App({
                         <Component {...pageProps} />
                     </Layout>
                 </ThemeProvider>
+                <ReactQueryDevtools />
             </QueryClientProvider>
         </SessionProvider>
     );
