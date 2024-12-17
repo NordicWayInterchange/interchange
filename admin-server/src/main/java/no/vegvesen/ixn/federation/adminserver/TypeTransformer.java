@@ -6,7 +6,6 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +167,5 @@ public class TypeTransformer {
             epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
         }
         return epochSecond;
-    }
     }
 }
