@@ -193,6 +193,15 @@ public class ServiceProvider {
 		return !activeSubscriptions().isEmpty();
 	}
 
+	public boolean hasLegalSubscriptions(){
+		return !legalSubscriptions().isEmpty();
+	}
+
+	public Set<LocalSubscription> legalSubscriptions(){
+		return subscriptions.stream()
+				.filter(sub -> LocalSubscriptionStatus.isAlive(sub.getStatus()) || sub.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP))
+				.collect(Collectors.toSet());
+	}
 	public Set<LocalSubscription> activeSubscriptions() {
 		return subscriptions.stream()
 		.filter(subscription -> LocalSubscriptionStatus.isAlive(subscription.getStatus()))

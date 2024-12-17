@@ -79,6 +79,7 @@ public class ServiceProviderRouter {
 
             serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
+            serviceProvider = syncNoOverlapSubscriptions(serviceProvider, serviceProviders);
             serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
@@ -511,10 +512,9 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
-        if (serviceProvider.hasActiveSubscriptions()) {
+        if (serviceProvider.hasLegalSubscriptions()) {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
-            Set<LocalSubscription> noOverlapSubscriptions = serviceProvider.getSubscriptions().stream().filter(sub -> sub.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP)).collect(Collectors.toSet());
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
                 removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
@@ -524,7 +524,6 @@ public class ServiceProviderRouter {
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
                     if(!matchingCapabilities.isEmpty()) {
                         for (Capability capability : matchingCapabilities) {
-                            System.out.println(capability.getShards());
                             for (CapabilityShard shard : capability.getShards()) {
                                 if (!existingConnections.contains(shard.getExchangeName())) {
                                     if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
@@ -551,15 +550,21 @@ public class ServiceProviderRouter {
                     }
                 }
             }
-            for(LocalSubscription subscription : noOverlapSubscriptions){
-                Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
-                if(!matchingCapabilities.isEmpty()) {
-                    subscription.setStatus(LocalSubscriptionStatus.REQUESTED);
-                }
-            }
             serviceProvider = repository.save(serviceProvider);
         }
         return serviceProvider;
+    }
+
+    public ServiceProvider syncNoOverlapSubscriptions(ServiceProvider serviceProvider, Iterable<ServiceProvider> serviceProviders){
+        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        Set<LocalSubscription> noOverlapSubscriptions = serviceProvider.getSubscriptions().stream().filter(sub -> sub.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP)).collect(Collectors.toSet());
+        for(LocalSubscription subscription : noOverlapSubscriptions){
+            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
+            if(!matchingCapabilities.isEmpty()) {
+                subscription.setStatus(LocalSubscriptionStatus.REQUESTED);
+            }
+        }
+        return repository.save(serviceProvider);
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
