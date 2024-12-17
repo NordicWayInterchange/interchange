@@ -22,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -32,8 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -98,10 +97,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"messageType = 'DATEX2' and originatingCountry = 'NO'",
 				HOST_NAME
 		);
+		Capability capability = new Capability(
+				new DatexApplication("NO12345", "NO12345:1", "NO", "DATEX2:1.1", List.of("1"), "roadworks", "name"),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		capability.getShards().add(new CapabilityShard(1, "nordea", MessageValidatingSelectorCreator.makeSelector(capability, 1)));
+		capability.setStatus(CapabilityStatus.REQUESTED);
 		nordea.addLocalSubscription(localSubscription1);
-
-		when(serviceProviderRepository.save(any())).thenReturn(nordea);
-		nordea = router.syncSubscriptions(nordea, client.getQpidDelta());
+		nordea.getCapabilities().addCapability(capability);
+		when(serviceProviderRepository.save(any())).thenReturn(nordea);router.syncServiceProviders(List.of(nordea), client.getQpidDelta());
+		router.syncServiceProviders(List.of(nordea), client.getQpidDelta());
 		Set<LocalEndpoint> endpoints = nordea.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(endpoints).hasSize(1);
 
@@ -112,7 +117,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		nordea.addLocalSubscription(localSubscription2);
-		nordea = router.syncSubscriptions(nordea, client.getQpidDelta());
+		Capability capability2 = new Capability(
+				new DatexApplication("FI12345", "FI12345:1", "FI", "DATEX2:1.1", List.of("1"), "roadworks", "name"),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		capability2.getShards().add(new CapabilityShard(1, "nordea", MessageValidatingSelectorCreator.makeSelector(capability2, 1)));
+		capability2.setStatus(CapabilityStatus.REQUESTED);
+		nordea.getCapabilities().addCapability(capability2);
+		router.syncServiceProviders(List.of(nordea), client.getQpidDelta());
 		Set<LocalEndpoint> endpoints2 = nordea.getSubscriptions().stream()
 				.filter(s -> s.getSelector().contains("'FI'"))
 				.flatMap(s -> s.getLocalEndpoints().stream())
@@ -554,7 +566,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(outgoingMatch));
 		when(serviceProviderRepository.save(any())).thenReturn(king_gustaf);
 		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
-
+		System.out.println(king_gustaf.getSubscriptions());
 		SSLContext kingGustafSslContext = sslClientContext(stores,"king_gustaf");
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
 
@@ -595,15 +607,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
+		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.NO_OVERLAP);
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
 				.flatMap(s -> s.getLocalEndpoints().stream())
 				.collect(Collectors.toSet());
-		assertThat(localEndpoints).hasSize(1);
-		LocalEndpoint endpoint = localEndpoints.stream().findFirst().get();
+		assertThat(localEndpoints).hasSize(0);
 
-		assertThat(client.queueExists(endpoint.getSource())).isTrue();
 
 		toreDownServiceProvider.setSubscriptions(
 				toreDownServiceProvider.getSubscriptions().stream()
@@ -614,7 +624,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMember(toreDownServiceProvider.getName(),QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).isNull();
-		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
 	@Test
@@ -694,9 +703,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"AND originatingCountry = 'SE'",
 				"my-service-provider");
 
+		Capability capability = new Capability(
+				new DatexApplication("NO12345", "NO12345:1", "NO", "DATEX2:1.1", List.of("01230122", "01230123"), "roadWorks", "name"),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		capability.setStatus(CapabilityStatus.REQUESTED);
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		serviceProvider.addLocalSubscription(sub1);
 		serviceProvider.addLocalSubscription(sub2);
+		serviceProvider.getCapabilities().addCapability(capability);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
@@ -1146,7 +1161,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider mySP = new ServiceProvider("my-sp");
 		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-3", "my-interchange", 5671);
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-3");
@@ -1162,7 +1177,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex15", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex15", MessageValidatingSelectorCreator.makeSelector(denmCapability, 1));
 		client.createHeadersExchange("cap-ex15");
 
 		denmCapability.setShards(Collections.singletonList(shard));
@@ -1171,21 +1186,21 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		mySP.addLocalSubscription(subscription);
 		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
 
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		when(serviceProviderRepository.save(mySP)).thenReturn(mySP);
+		when(serviceProviderRepository.save(otherSP)).thenReturn(otherSP);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
-
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		String queueName = subscription.getLocalEndpoints().stream().findFirst().get().getSource();
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
-
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		System.out.println(subscription);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
-
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(0);
-		assertThat(subscription.getLocalEndpoints()).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
+		assertThat(subscription.getLocalEndpoints()).hasSize(0);
 		assertThat(subscription.getConnections()).hasSize(0);
+		assertThat(subscription.getStatus()).isEqualTo(LocalSubscriptionStatus.NO_OVERLAP);
 	}
 
 	@Test
@@ -1256,13 +1271,19 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void routerPicksUpRequestedLocalSubscription() {
 		LocalSubscription localSubscription = new LocalSubscription(
 				LocalSubscriptionStatus.REQUESTED,
-				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
+				"originatingCountry = 'NO' and messageType = 'DENM'",
 				"a.bouvetinterchange.eu"
 
 		);
+		Capability capability = new Capability(
+				new DenmApplication("NO12345", "NO12345:1", "NO", "DENM:1", List.of("12003"), List.of(6)),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		capability.setStatus(CapabilityStatus.REQUESTED);
+		capability.getShards().add(new CapabilityShard(1, "serviceProvider", MessageValidatingSelectorCreator.makeSelector(capability, 1)));
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"serviceProvider",
-				new Capabilities(),
+				new Capabilities(Set.of(capability)),
 				Collections.singleton(
 						localSubscription
 				),

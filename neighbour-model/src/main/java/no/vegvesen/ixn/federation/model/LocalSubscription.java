@@ -99,7 +99,8 @@ public class LocalSubscription {
 
     public boolean isSubscriptionWanted() {
         return status.equals(LocalSubscriptionStatus.REQUESTED)
-                || status.equals(LocalSubscriptionStatus.CREATED);
+                || status.equals(LocalSubscriptionStatus.CREATED)
+                || status.equals(LocalSubscriptionStatus.NO_OVERLAP);
     }
 
     public String getUuid() {

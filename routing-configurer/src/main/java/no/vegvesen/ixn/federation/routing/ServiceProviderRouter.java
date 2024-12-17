@@ -66,7 +66,6 @@ public class ServiceProviderRouter {
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
             serviceProvider = syncSubscriptions(serviceProvider, delta);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
-
             GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
@@ -102,11 +101,13 @@ public class ServiceProviderRouter {
     public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort, QpidDelta delta) {
         switch (subscription.getStatus()) {
             case REQUESTED:
-                if (subscription.getLocalEndpoints().isEmpty()) {
+            /*    if (subscription.getLocalEndpoints().isEmpty()) {
                     String queueName = "loc-" + UUID.randomUUID().toString();
                     LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeName, Integer.parseInt(messageChannelPort));
                     subscription.getLocalEndpoints().add(endpoint);
                 }
+
+             */
                 //NOTE fallthrough!
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription, delta);
@@ -120,6 +121,9 @@ public class ServiceProviderRouter {
                 //serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
+            case NO_OVERLAP:
+                break;
+
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
                 break;
@@ -169,7 +173,6 @@ public class ServiceProviderRouter {
             String source = endpoint.getSource();
             optionallyCreateQueue(source, serviceProviderName, delta);
         }
-        subscription.setStatus(LocalSubscriptionStatus.CREATED);
     }
 
     public void processRedirectSubscription(LocalSubscription subscription) {
@@ -511,28 +514,47 @@ public class ServiceProviderRouter {
         if (serviceProvider.hasActiveSubscriptions()) {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
+            Set<LocalSubscription> noOverlapSubscriptions = serviceProvider.getSubscriptions().stream().filter(sub -> sub.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP)).collect(Collectors.toSet());
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
                 removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
-
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
                     Set<String> existingConnections = subscription.getConnections().stream()
                             .map(LocalConnection::getSource)
                             .collect(Collectors.toSet());
-
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
-                    for (Capability capability : matchingCapabilities) {
-                        for (CapabilityShard shard : capability.getShards()) {
-                            if (!existingConnections.contains(shard.getExchangeName())) {
-                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
-                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                    qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-                                    delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
-                                    LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
-                                    subscription.addConnection(connection);
+                    if(!matchingCapabilities.isEmpty()) {
+                        for (Capability capability : matchingCapabilities) {
+                            System.out.println(capability.getShards());
+                            for (CapabilityShard shard : capability.getShards()) {
+                                if (!existingConnections.contains(shard.getExchangeName())) {
+                                    if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
+                                        if (subscription.getLocalEndpoints().isEmpty()) {
+                                            String queueName = "loc-" + UUID.randomUUID().toString();
+                                            LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()));
+                                            subscription.getLocalEndpoints().add(endpoint);
+                                            onRequested(serviceProvider.getName(), subscription, qpidClient.getQpidDelta());
+                                        }
+                                        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                        qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+                                        delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
+                                        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
+                                        subscription.addConnection(connection);
+                                        subscription.setStatus(LocalSubscriptionStatus.CREATED);
+                                    }
                                 }
                             }
                         }
                     }
+                    else{
+                        subscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
+                        subscription.getLocalEndpoints().clear();
+                    }
+                }
+            }
+            for(LocalSubscription subscription : noOverlapSubscriptions){
+                Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
+                if(!matchingCapabilities.isEmpty()) {
+                    subscription.setStatus(LocalSubscriptionStatus.REQUESTED);
                 }
             }
             serviceProvider = repository.save(serviceProvider);

@@ -4,6 +4,9 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CamApplication;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -31,8 +34,10 @@ import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -107,7 +112,12 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
                 SP_NAME,
-                new Capabilities(),
+                new Capabilities(Set.of(
+                        new Capability(
+                                new CamApplication("NO12345", "NO12345:1", "NO", "CAM:1", List.of("1")),
+                                new Metadata(RedirectStatus.OPTIONAL)
+                        )
+                )),
                 Collections.singleton(new LocalSubscription(
                         1,
                         LocalSubscriptionStatus.REQUESTED,
