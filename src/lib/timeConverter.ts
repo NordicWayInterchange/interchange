@@ -1,10 +1,5 @@
-/**
- * @Description Converts Unix Epoch to a readable date and time
- * @param time - Unix Epoch
- * @returns {string} - Readable date and time
- */
 export const timeConverter = (time: number): string => {
-    const date = new Date(time * 1000);
+    const date = new Date(time);
     const locale = navigator.language;
 
     const localeDateString = date.toLocaleDateString(locale, {

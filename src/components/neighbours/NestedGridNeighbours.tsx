@@ -10,6 +10,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
     drawerOpen: boolean;
@@ -41,7 +42,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             originatingCountry: capability.application.originatingCountry,
             application: capability.application,
             metadata: capability.metadata,
-            createdTimestamp: new Date(capability.createdTimestamp).toLocaleString(),
+            createdTimestamp: timeConverter(capability.createdTimestamp)
         }));
 
         nestedColumns = [
@@ -67,9 +68,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             path: subscription.path,
             consumerCommonName: subscription.consumerCommonName,
             endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: new Date(
-                subscription.lastUpdatedTimestamp
-            ).toLocaleString(),
+            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [
@@ -99,9 +98,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             path: subscription.path,
             consumerCommonName: subscription.consumerCommonName,
             endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: new Date(
-                subscription.lastUpdatedTimestamp
-            ).toLocaleString(),
+            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [

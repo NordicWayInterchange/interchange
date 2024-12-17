@@ -11,6 +11,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 import {Neighbours} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {timeConverter} from "@/lib/timeConverter";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -139,7 +140,7 @@ const Neighbours = () => {
             headerName: "Last failed connection attempt",
             renderCell: (params) => {
                 const value = params.row.lastFailedConnectionAttempt;
-                return new Date(value).toLocaleString()
+                return value && timeConverter(value)
             },
         },
         {
@@ -148,7 +149,7 @@ const Neighbours = () => {
             headerName: "Last Updated",
             renderCell: (params) => {
                 const value = params.row.lastUpdated;
-                return new Date(value).toLocaleString()
+                return value && timeConverter(value)
             },
         },
     ];
