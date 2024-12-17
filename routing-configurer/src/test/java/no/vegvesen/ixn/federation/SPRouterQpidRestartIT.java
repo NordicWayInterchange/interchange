@@ -115,7 +115,10 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(),
+                new Capabilities(Set.of(new Capability(
+                        new CamApplication("NO12345", "NO12345:1", "NO", "CAM:1", List.of("1")),
+                        new Metadata(RedirectStatus.OPTIONAL)
+                ))),
                 Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -181,7 +184,10 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(),
+                new Capabilities(Set.of(new Capability(
+                         new CamApplication("NO12345", "NO12345:2", "NO", "CAM:1", List.of("1")),
+                         new Metadata(RedirectStatus.OPTIONAL))
+                )),
                 Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
@@ -259,7 +265,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
-        assertThat(client.getQueuePublishingLinks("bi-queue")).hasSize(1);
+        assertThat(client.getQueuePublishingLinks("bi-queue").stream().anyMatch(a -> a.getArguments().getFilter().equals(MessageValidatingSelectorCreator.makeSelector(capability, null)))).isTrue();
     }
 
     @Test

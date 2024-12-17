@@ -566,7 +566,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(outgoingMatch));
 		when(serviceProviderRepository.save(any())).thenReturn(king_gustaf);
 		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
-		System.out.println(king_gustaf.getSubscriptions());
 		SSLContext kingGustafSslContext = sslClientContext(stores,"king_gustaf");
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
 
@@ -1195,10 +1194,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(subscription.getConnections()).hasSize(1);
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
-		System.out.println(subscription);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
-		assertThat(subscription.getLocalEndpoints()).hasSize(0);
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(0);
+		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(0);
 		assertThat(subscription.getStatus()).isEqualTo(LocalSubscriptionStatus.NO_OVERLAP);
 	}

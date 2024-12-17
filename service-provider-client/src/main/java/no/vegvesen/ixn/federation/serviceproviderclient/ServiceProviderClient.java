@@ -119,7 +119,6 @@ public class ServiceProviderClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddPrivateChannelRequest> entity = new HttpEntity<>(privateChannelApi,headers);
         String url = server + "/" + user + "/privatechannels";
-        System.out.println(url);
         return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelResponse.class).getBody();
     }
 

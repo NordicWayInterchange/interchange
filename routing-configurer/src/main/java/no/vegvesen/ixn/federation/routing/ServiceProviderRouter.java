@@ -102,17 +102,12 @@ public class ServiceProviderRouter {
     public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort, QpidDelta delta) {
         switch (subscription.getStatus()) {
             case REQUESTED:
-            /*    if (subscription.getLocalEndpoints().isEmpty()) {
-                    String queueName = "loc-" + UUID.randomUUID().toString();
-                    LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeName, Integer.parseInt(messageChannelPort));
-                    subscription.getLocalEndpoints().add(endpoint);
-                }
-
-             */
                 //NOTE fallthrough!
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription, delta);
                 break;
+            case NO_OVERLAP:
+                onTearDown(serviceProvider, subscription, delta);
             case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
                 onTearDown(serviceProvider, subscription, delta);
@@ -122,9 +117,6 @@ public class ServiceProviderRouter {
                 //serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
-            case NO_OVERLAP:
-                break;
-
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
                 break;
@@ -133,6 +125,7 @@ public class ServiceProviderRouter {
         }
     }
 
+    // Rename?? Remove endpoints, queues e.l.
     private void onTearDown(ServiceProvider serviceProvider, LocalSubscription subscription, QpidDelta delta) {
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
@@ -169,6 +162,7 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
+    // RENAME??? Create queue e.l.
     private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
@@ -177,19 +171,17 @@ public class ServiceProviderRouter {
     }
 
     public void processRedirectSubscription(LocalSubscription subscription) {
-        if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
-            subscription.setStatus(LocalSubscriptionStatus.CREATED);
-        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-            //Just skip
-        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-            subscription.getLocalEndpoints().clear();
-        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
-            subscription.getLocalEndpoints().clear();
-            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
-            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        } else {
-            throw new IllegalStateException("Unknown subscription status encountered");
+        switch (subscription.getStatus()){
+            case REQUESTED -> subscription.setStatus(LocalSubscriptionStatus.CREATED);
+            case CREATED -> {}
+            case TEAR_DOWN -> subscription.getLocalEndpoints().clear();
+            case ILLEGAL -> {
+                subscription.getLocalEndpoints().clear();
+                subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+            }
+            case ERROR -> subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+            case NO_OVERLAP -> {}
+            default -> throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
 
@@ -546,8 +538,6 @@ public class ServiceProviderRouter {
                     }
                     else{
                         subscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
-                        onTearDown(serviceProvider, subscription, delta);
-                        subscription.getLocalEndpoints().clear();
                     }
                 }
             }
