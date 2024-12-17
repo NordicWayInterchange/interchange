@@ -21,11 +21,9 @@ import {Neighbours} from "@/types/neighbours";
 }*/
 
 const fetchNeighbours = async (params: basicGetParams) => {
-    console.log('MARYAM');
     debugger
     const res = await fetchAdminUINeighbours(params);
     const neigbours: Array<Neighbours> = await res.data;
-    console.log('NONONO', neigbours)
 };
 
 
