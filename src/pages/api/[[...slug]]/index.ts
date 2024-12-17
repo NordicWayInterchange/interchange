@@ -86,6 +86,7 @@ const findHandler: (params: any) =>
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
+    console.log('here')
     const secret = process.env.NEXTAUTH_SECRET;
     const token = await getToken({ req, secret, raw: true });
     const session = await getServerSession(req, res, authOptions);

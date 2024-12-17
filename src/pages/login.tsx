@@ -8,6 +8,7 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { Card, Typography} from "@mui/material";
 import * as React from "react";
 import {StyledButton} from "@/components/styles/StyledElements";
+import {dehydrate, QueryClient} from "@tanstack/react-query";
 
 export default function Login({}: InferGetServerSidePropsType<
     typeof getServerSideProps
@@ -49,14 +50,11 @@ export default function Login({}: InferGetServerSidePropsType<
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getServerSession(context.req, context.res, authOptions);
+
     if (session) {
-        return {
-            redirect: {
-                destination: "/",
-                permanent: false,
-            },
-        };
+        return { redirect: { destination: "/" } };
     }
+
     return {
         props: {},
     };
