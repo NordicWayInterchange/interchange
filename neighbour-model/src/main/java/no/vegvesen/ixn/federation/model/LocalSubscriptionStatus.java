@@ -6,6 +6,7 @@ public enum LocalSubscriptionStatus {
     TEAR_DOWN,
     RESUBSCRIBE,
     ILLEGAL,
+    NO_OVERLAP,
     ERROR;
 
     public static boolean isAlive(LocalSubscriptionStatus status) {

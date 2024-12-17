@@ -237,6 +237,8 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
             case ERROR:
                 return LocalActorSubscriptionStatusApi.ERROR;
+            case NO_OVERLAP:
+                return LocalActorSubscriptionStatusApi.NO_OVERLAP;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
         }

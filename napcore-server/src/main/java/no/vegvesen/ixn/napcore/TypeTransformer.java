@@ -132,6 +132,7 @@ public class TypeTransformer {
             case REQUESTED -> SubscriptionStatus.REQUESTED;
             case CREATED -> SubscriptionStatus.CREATED;
             case TEAR_DOWN -> SubscriptionStatus.NOT_VALID;
+            case NO_OVERLAP -> SubscriptionStatus.NO_OVERLAP;
             default -> SubscriptionStatus.ILLEGAL;
         };
     }
