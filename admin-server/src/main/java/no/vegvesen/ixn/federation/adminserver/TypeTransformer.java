@@ -23,8 +23,8 @@ public class TypeTransformer {
                     neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(neighbour.getNeighbourRequestedSubscriptions()),
                     subscriptionRequestToSubscriptionRequestApi(neighbour.getOurRequestedSubscriptions()),
                     connectionStatusToConnectionStatusApi(neighbour.getControlConnection().getConnectionStatus()),
-                    localDateTimeToEpochMili(neighbour.getControlConnection().getLastFailedConnectionAttempt()),
-                    localDateTimeToEpochMili(neighbour.getLastUpdated()),
+                    localDateTimeToTimestamp(neighbour.getControlConnection().getLastFailedConnectionAttempt()),
+                    localDateTimeToTimestamp(neighbour.getLastUpdated()),
                     neighbour.isIgnore()
             ));
         }
@@ -40,7 +40,7 @@ public class TypeTransformer {
         return new SubscriptionRequestApi(
                 subscriptionRequest.getSubreq_id(),
                 subscriptionSetToSubscriptionApiSet(subscriptionRequest.getSubscriptions()),
-                localDateTimeToEpochMili(subscriptionRequest.getSuccessfulRequest().orElse(null))
+                localDateTimeToTimestamp(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
     }
 
@@ -95,7 +95,7 @@ public class TypeTransformer {
         return new NeighbourSubscriptionRequestApi(
                 subscriptionRequest.getSubreq_id(),
                 neighbourSubscriptionSetToNeighbourSubscriptionRequestApiSet(subscriptionRequest.getSubscriptions()),
-                localDateTimeToEpochMili(subscriptionRequest.getSuccessfulRequest().orElse(null))
+                localDateTimeToTimestamp(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
     }
 
@@ -135,8 +135,8 @@ public class TypeTransformer {
                 neighbourCapabilities.getId(),
                 capabilitiesStatusToCapabilitiesStatusApi(neighbourCapabilities.getStatus()),
                 neighbourCapabilitySetToNeighbourCapabilityApiSet(neighbourCapabilities.getCapabilities()),
-                localDateTimeToEpochMili(neighbourCapabilities.getLastUpdated().orElse(null)),
-                localDateTimeToEpochMili(neighbourCapabilities.getLastCapabilityExchange())
+                localDateTimeToTimestamp(neighbourCapabilities.getLastUpdated().orElse(null)),
+                localDateTimeToTimestamp(neighbourCapabilities.getLastCapabilityExchange())
         );
     }
 
@@ -153,7 +153,7 @@ public class TypeTransformer {
                 neighbourCapability.getId(),
                 neighbourCapability.getApplication().toApi(),
                 neighbourCapability.getMetadata().toApi(),
-                localDateTimeToEpochMili(neighbourCapability.getCreatedTimestamp())
+                localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
         );
     }
 
@@ -161,7 +161,7 @@ public class TypeTransformer {
         return CapabilitiesStatusApi.valueOf(capabilitiesStatus.toString());
     }
 
-    private long localDateTimeToEpochMili(LocalDateTime lastUpdated) {
+    private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {
         Long epochSecond = null;
         if (lastUpdated != null) {
             epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
