@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.keys.generator.CARequest;
 import no.vegvesen.ixn.keys.generator.CaResponse;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
+import no.vegvesen.ixn.keys.generator.PasswordGenerator;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

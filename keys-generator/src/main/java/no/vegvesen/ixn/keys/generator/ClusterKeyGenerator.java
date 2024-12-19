@@ -5,6 +5,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.keys.stores.CaStore;
+import no.vegvesen.ixn.keys.stores.CaStores;
+import no.vegvesen.ixn.keys.stores.ClientStore;
+import no.vegvesen.ixn.keys.stores.HostStore;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -37,17 +41,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
@@ -56,14 +50,14 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
+
 
 public class ClusterKeyGenerator {
 
 
     public static CaResponse generate(CARequest caRequest) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
         SecureRandom random = new SecureRandom();
-        CertificateCertificateChainAndKeys topCa = generateTopCa(caRequest.name(), caRequest.country(), random);
+        EntityDescription topCa = generateTopCa(caRequest.name(), caRequest.country(), random);
         List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(), topCa, random);
         List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), topCa);
 
@@ -76,8 +70,8 @@ public class ClusterKeyGenerator {
 
     }
 
-    private static CaResponse generate(CARequest caRequest, CertificateCertificateChainAndKeys parentCa, SecureRandom random) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
-        CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.name(), caRequest.country(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
+    private static CaResponse generate(CARequest caRequest, EntityDescription parentCa, SecureRandom random) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
+        EntityDescription intermediateCa = generateIntermediateCA(caRequest.name(), caRequest.country(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
         List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), intermediateCa);
         List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(),intermediateCa,random);
         List<CaResponse> responses = new ArrayList<>();
@@ -114,76 +108,74 @@ public class ClusterKeyGenerator {
     private static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         List<HostStore> hostStores = new ArrayList<>();
         for (HostResponse hostResponse : hostResponses) {
-            String hostPassword = randomPasswordGenerator.generatePassword();
-            //TODO should we write the string password to file or not?
-            //TODO we could also create the store as a stream, and not use files at all...
-            Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
-            Path outputPath = basePath.resolve(hostResponse.host() + ".p12");
-            makeKeystore(hostResponse.host(), hostPassword, Files.newOutputStream(outputPath), hostResponse.keyDetails().certificateChain(), hostResponse.keyDetails().keyPair().getPrivate());
-            hostStores.add(new HostStore(hostResponse.host(),outputPath,hostPassword));
+            HostStore hostStore = storeHostStore(basePath, randomPasswordGenerator, hostResponse);
+            hostStores.add(hostStore);
         }
         return hostStores;
     }
-    
-    private static List<ClientStore> storeClientStores(Path basePath, PasswordGenerator randomPasswordGenerator, List<ClientResponse> clientResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+
+    private static HostStore storeHostStore(Path basePath, PasswordGenerator randomPasswordGenerator, HostResponse hostResponse) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        String hostPassword = randomPasswordGenerator.generatePassword();
+        //TODO should we write the string password to file or not?
+        //TODO we could also create the store as a stream, and not use files at all...
+        Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
+        Path outputPath = basePath.resolve(hostResponse.host() + ".p12");
+        makeKeystore(hostResponse.host(), hostPassword, Files.newOutputStream(outputPath), hostResponse.keyDetails().certificateChain(), hostResponse.keyDetails().keyPair().getPrivate());
+        return new HostStore(hostResponse.host(), outputPath, hostPassword);
+    }
+
+    public static List<ClientStore> storeClientStores(Path basePath, PasswordGenerator randomPasswordGenerator, List<ClientResponse> clientResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         List<ClientStore> clientStores = new ArrayList<>();
         for (ClientResponse clientResponse : clientResponses) {
-            String clientPassword = randomPasswordGenerator.generatePassword();
-            String name = clientResponse.name();
-            Files.writeString(basePath.resolve(name + ".txt"),clientPassword);
-            Path path = basePath.resolve(name + ".p12");
-            makeKeystore(name, clientPassword, Files.newOutputStream(path), clientResponse.clientDetails().certificateChain(), clientResponse.clientDetails().keyPair().getPrivate());
-            clientStores.add(new ClientStore(name, path,clientPassword));
+            ClientStore clientStore = storeClientStore(basePath, randomPasswordGenerator, clientResponse);
+            clientStores.add(clientStore);
         }
         return clientStores;
     }
 
-    public static HostStore getHostStore(String hostname, Stream<HostStore> stream) {
-        return stream.filter(h -> h.hostname().equals(hostname)).findAny().orElseThrow(() -> new RuntimeException("No store found for hostname: " + hostname));
+    public static ClientStore storeClientStore(Path basePath, PasswordGenerator randomPasswordGenerator, ClientResponse clientResponse) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        String clientPassword = randomPasswordGenerator.generatePassword();
+        String name = clientResponse.name();
+        Files.writeString(basePath.resolve(name + ".txt"),clientPassword);
+        Path path = basePath.resolve(name + ".p12");
+        makeKeystore(name, clientPassword, Files.newOutputStream(path), clientResponse.clientDetails().certificateChain(), clientResponse.clientDetails().keyPair().getPrivate());
+        return new ClientStore(name, path, clientPassword);
     }
 
-    public static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
-        return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
-    }
 
-
-    public record CaStores(String name, CaStore trustStore, List<HostStore> hostStores, List<ClientStore> clientStores, List<CaStores> subCaStores) {}
-
-
-    //A CaResponse gives a truststore,
-    public record CaStore(String name, Path path, String password) {}
-
-    //a HostResponse or a ClientResponse gives a keystore
-    public record HostStore(String hostname, Path path, String password) {}
-
-    public record ClientStore(String clientName, Path path, String password) {}
-    
-    
-    
-    
-    private static List<ClientResponse> getClientResponses(List<ClientRequest> clients, CertificateCertificateChainAndKeys issuer) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    public static List<ClientResponse> getClientResponses(List<ClientRequest> clients, EntityDescription issuer) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         ArrayList<ClientResponse> clientResponses = new ArrayList<>();
         for (ClientRequest clientRequest : clients) {
-            CertificateCertificateChainAndKeys clientDetails = generateSPKeys(clientRequest.name(), clientRequest.country(), clientRequest.email(), issuer.certificate(), issuer.keyPair().getPrivate(), issuer.certificateChain());
-            clientResponses.add(new ClientResponse(clientRequest.name(),clientDetails));
+            ClientResponse response = getClientResponse(issuer, clientRequest);
+            clientResponses.add(response);
         }
         return clientResponses;
     }
 
-    private static List<HostResponse> getHostResponses(List<HostRequest> hosts, CertificateCertificateChainAndKeys issuer, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static ClientResponse getClientResponse(EntityDescription issuer, ClientRequest clientRequest) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        EntityDescription clientDetails = generateSPKeys(clientRequest.name(), clientRequest.country(), clientRequest.email(), issuer.certificate(), issuer.keyPair().getPrivate(), issuer.certificateChain());
+        return new ClientResponse(clientRequest.name(), clientDetails);
+    }
+
+    private static List<HostResponse> getHostResponses(List<HostRequest> hosts, EntityDescription issuer, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         List<HostResponse> hostResponses = new ArrayList<>();
         for (HostRequest hostRequest : hosts) {
-            CertificateCertificateChainAndKeys hostDetails = generateServerCertForHost(hostRequest.name(), issuer.certificate(), issuer.certificateChain(), issuer.keyPair().getPrivate(), random);
-            hostResponses.add(new HostResponse(hostRequest.name(), hostDetails));
+            HostResponse hostResponse = getHostResponse(issuer, random, hostRequest);
+            hostResponses.add(hostResponse);
         }
         return hostResponses;
     }
 
-    public static CertificateCertificateChainAndKeys generateSPKeys(String commonName, String spCountry, String spEmail, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, List<X509Certificate> issuerCertChain) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    private static HostResponse getHostResponse(EntityDescription issuer, SecureRandom random, HostRequest hostRequest) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+        EntityDescription hostDetails = generateServerCertForHost(hostRequest.name(), issuer.certificate(), issuer.certificateChain(), issuer.keyPair().getPrivate(), random);
+        return new HostResponse(hostRequest.name(), hostDetails);
+    }
+
+    public static EntityDescription generateSPKeys(String commonName, String spCountry, String spEmail, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, List<X509Certificate> issuerCertChain) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(commonName, spCountry, spEmail);
         CertSigner certSigner = new CertSigner(issuerPrivateKey, issuerCertificate, issuerCertChain);
         List<X509Certificate> newCertChain = certSigner.sign(spCsr.csr(), commonName);
-        return new CertificateCertificateChainAndKeys(spCsr.keyPair(), newCertChain.get(0),newCertChain);
+        return new EntityDescription(spCsr.keyPair(), newCertChain.get(0),newCertChain);
     }
 
     public static KeyPairAndCsr generateCsrForServiceProviderBC(String name, String country, String email) throws NoSuchAlgorithmException, OperatorCreationException {
@@ -203,7 +195,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    public static CertificateCertificateChainAndKeys generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static EntityDescription generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         KeyPair keyPair = generateKeyPair(2048);
         X500Name subject = new X500Name(
                 String.format(
@@ -256,7 +248,7 @@ public class ClusterKeyGenerator {
         List<X509Certificate> certificateChain = new ArrayList<>();
         certificateChain.add(certificate);
         certificateChain.addAll(issuerCertificateChain);
-        return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
+        return new EntityDescription(keyPair,certificate,certificateChain);
 
     }
 
@@ -291,8 +283,7 @@ public class ClusterKeyGenerator {
 
 
     public static CertificateAndCertificateChain signIntermediateCsr(X509Certificate caCert, List<X509Certificate> certChain,PrivateKey caPrivateKey, PKCS10CertificationRequest csr, SecureRandom secureRandom) throws NoSuchAlgorithmException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, OperatorCreationException {
-        JcaPKCS10CertificationRequest csrWrapper = new JcaPKCS10CertificationRequest(csr);
-        PublicKey subjectPublicKey = csrWrapper.getPublicKey();
+        PublicKey subjectPublicKey = new JcaPKCS10CertificationRequest(csr).getPublicKey();
         X500Name issuerSubject = JcaX500NameUtil.getSubject(caCert);
         X500Name csrSubject = csr.getSubject();
         PublicKey caPublicKey = caCert.getPublicKey();
@@ -385,7 +376,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    public static CertificateCertificateChainAndKeys generateTopCa(String commonName, String ownerCountry, SecureRandom secureRandom) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static EntityDescription generateTopCa(String commonName, String ownerCountry, SecureRandom secureRandom) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
         if (ownerCountry == null) {
             ownerCountry = "NO";
         }
@@ -403,13 +394,13 @@ public class ClusterKeyGenerator {
         KeyPairAndCertificate details = new KeyPairAndCertificate(keyPair, cert);
         ArrayList<X509Certificate> certificates = new ArrayList<>();
         certificates.add(details.certificate());
-        return new CertificateCertificateChainAndKeys(details.keyPair(), details.certificate(),certificates);
+        return new EntityDescription(details.keyPair(), details.certificate(),certificates);
     }
 
-    public static CertificateCertificateChainAndKeys generateIntermediateCA(String commonName, String country, List<X509Certificate> issuerCertChain, X509Certificate issuerCert, PrivateKey issuerKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, CertIOException {
+    public static EntityDescription generateIntermediateCA(String commonName, String country, List<X509Certificate> issuerCertChain, X509Certificate issuerCert, PrivateKey issuerKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, CertIOException {
         KeyPairAndCsr intermediateCsr = generateIntermediateKeypairAndCsr(commonName, country);
         CertificateAndCertificateChain intermediateCert = signIntermediateCsr(issuerCert, issuerCertChain,issuerKey, intermediateCsr.csr(), secureRandom);
-        return new CertificateCertificateChainAndKeys(intermediateCsr.keyPair(),intermediateCert.certificate(),intermediateCert.chain());
+        return new EntityDescription(intermediateCsr.keyPair(),intermediateCert.certificate(),intermediateCert.chain());
     }
 
     public static X509Certificate loadSingleCertificate(Reader reader) throws IOException, CertificateException {
@@ -445,7 +436,7 @@ public class ClusterKeyGenerator {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addDeserializer(
-                CertificateCertificateChainAndKeys.class,
+                EntityDescription.class,
                 new CertificateCertificateChainAndKeysDeserializer()
         );
         mapper.registerModule(module);
@@ -456,7 +447,7 @@ public class ClusterKeyGenerator {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addSerializer(
-                CertificateCertificateChainAndKeys.class,
+                EntityDescription.class,
                 new CertificateCertificateChainAndKeysSerializer()
         );
         mapper.registerModule(module);
@@ -477,10 +468,6 @@ public class ClusterKeyGenerator {
     }
 
 
-    public interface PasswordGenerator {
-        String generatePassword();
-    }
-    
     public static class RandomPasswordGenerator implements PasswordGenerator {
 
         private static final char[] allowedChars = {
@@ -514,13 +501,10 @@ public class ClusterKeyGenerator {
     public record CertificateAndCertificateChain(X509Certificate certificate, List<X509Certificate> chain) {
     }
 
-    public record CertificateCertificateChainAndKeys(KeyPair keyPair, X509Certificate certificate, List<X509Certificate> certificateChain) {
-    }
-
-    public static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<CertificateCertificateChainAndKeys> {
+    public static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<EntityDescription> {
 
         @Override
-        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(EntityDescription value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
             StringWriter keyWriter = new StringWriter();
             Base64.Encoder encoder = Base64.getEncoder();
@@ -539,10 +523,10 @@ public class ClusterKeyGenerator {
         }
     }
 
-    public static class CertificateCertificateChainAndKeysDeserializer extends JsonDeserializer<CertificateCertificateChainAndKeys> {
+    public static class CertificateCertificateChainAndKeysDeserializer extends JsonDeserializer<EntityDescription> {
 
         @Override
-        public CertificateCertificateChainAndKeys deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public EntityDescription deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             Base64.Decoder decoder = Base64.getDecoder();
             JsonNode node = p.readValueAsTree();
             String encodedKeyPair = node.get("keypair").asText();
@@ -564,7 +548,8 @@ public class ClusterKeyGenerator {
             } catch (CertificateException e) {
                 throw new RuntimeException(e);
             }
-            return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
+            return new EntityDescription(keyPair,certificate,certificateChain);
         }
     }
+
 }

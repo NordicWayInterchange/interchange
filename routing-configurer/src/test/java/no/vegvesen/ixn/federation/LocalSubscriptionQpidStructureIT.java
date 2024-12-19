@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -32,7 +33,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -71,8 +71,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         qpidContainer.followOutput(new Slf4jLogConsumer(logger));
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        registry.add("test.ssl.trust-store", stores::getTrustStorePath);
+        registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
         registry.add("interchange.node-provider.name", qpidContainer::getHost);
         registry.add("interchange.node-provider.messageChannelPort", qpidContainer::getAmqpsPort);
         registry.add("interchange.node-provider.brokerExternalName", qpidContainer::getHost);

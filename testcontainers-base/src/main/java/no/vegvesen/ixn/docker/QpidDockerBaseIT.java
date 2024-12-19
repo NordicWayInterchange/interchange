@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.docker;
 
-import no.vegvesen.ixn.keys.generator.*;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStore;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
+import no.vegvesen.ixn.keys.generator.CARequest;
+import no.vegvesen.ixn.keys.generator.CaResponse;
+import no.vegvesen.ixn.keys.stores.CaStore;
+import no.vegvesen.ixn.keys.stores.CaStores;
+import no.vegvesen.ixn.keys.generator.ClientRequest;
+import no.vegvesen.ixn.keys.stores.ClientStore;
+import no.vegvesen.ixn.keys.generator.HostRequest;
+import no.vegvesen.ixn.keys.stores.HostStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -20,7 +24,6 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 
@@ -32,21 +35,16 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		Path imageLocation = getFolderPath("qpid-test");
 		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
 				imageLocation, configPath);
-		Stream<HostStore> stream = stores.hostStores().stream();
-		HostStore hostStore = getHostStore(hostname, stream);
+		HostStore hostStore = stores.getHostStore(hostname);
 		CaStore caStore = stores.trustStore();
-		String keystoreName = hostStore.path().getFileName().toString();
-		String keystorePassword = hostStore.password();
-		String truststoreName = caStore.path().getFileName().toString();
-		String truststorePassword = caStore.password();
-		return new QpidContainer("qpid-it-memory",
+        return new QpidContainer("qpid-it-memory",
 				imageLocation,
 				configPath,
 				caStore.path().getParent(),
-				keystoreName,
-				keystorePassword,
-				truststoreName,
-				truststorePassword,
+                hostStore.path().getFileName().toString(),
+                hostStore.password(),
+                caStore.path().getFileName().toString(),
+                caStore.password(),
 				vhostName);
 	}
 
@@ -87,7 +85,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 
 
 	public static SSLContext sslClientContext(CaStores stores, String serviceProviderName) {
-        ClientStore clientStore = getClientStore(serviceProviderName, stores.clientStores().stream());
+        ClientStore clientStore = stores.getClientStore(serviceProviderName);
 		CaStore caStore = stores.trustStore();
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(
@@ -103,17 +101,8 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
-	public static String getTrustStorePath(CaStores stores) {
-		return stores.trustStore().path().toString();
-	}
-
-	public static String getClientStorePath(String clientName, List<ClientStore> clientStores) {
-		return getClientStore(clientName,clientStores.stream()).path().toString();
-
-	}
-
 	public static SSLContext sslServerContext(CaStores stores, String hostName) {
-		HostStore hostStore = getHostStore(hostName, stores.hostStores().stream());
+		HostStore hostStore = stores.getHostStore(hostName);
 		CaStore trustStore = stores.trustStore();
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(

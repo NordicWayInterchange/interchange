@@ -22,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -31,7 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,8 +58,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		qpidContainer.followOutput(new Slf4jLogConsumer(logger));
 		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
 		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("test.ssl.trust-store", stores::getTrustStorePath);
+		registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
 		registry.add("interchange.node-provider.name", () -> HOST_NAME);
 	}
 

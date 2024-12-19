@@ -15,7 +15,7 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -75,8 +75,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		logger.info("server url: {}", httpUrl);
 		registry.add("routing-configurer.baseUrl", () -> httpsUrl);
 		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("test.ssl.trust-store", () -> stores.getTrustStorePath());
+		registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
 	}
 
 	@BeforeAll

@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Container;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
@@ -44,9 +44,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
 		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
 		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+		registry.add("test.ssl.trust-store", stores::getTrustStorePath);
 		registry.add("test.ssl.keystore-password", () -> stores.trustStore().password());
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
 	}
 
 	@Autowired

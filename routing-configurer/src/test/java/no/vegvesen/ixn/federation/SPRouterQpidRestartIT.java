@@ -12,7 +12,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -66,8 +66,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         logger.info("server url: {}", httpUrl);
         registry.add("routing-configurer.baseUrl", () -> httpsUrl);
         registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        registry.add("test.ssl.trust-store", stores::getTrustStorePath);
+        registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
     }
 
     @BeforeAll

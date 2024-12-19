@@ -11,7 +11,7 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -65,8 +65,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidContainer.followOutput(new Slf4jLogConsumer(logger));
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        registry.add("test.ssl.trust-store", stores::getTrustStorePath);
+        registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
     }
 
     @BeforeAll

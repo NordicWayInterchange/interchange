@@ -4,7 +4,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,8 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		logger.info("server url: {}", qpidContainer.getHttpUrl());
 		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
 		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("test.ssl.trust-store", stores::getTrustStorePath);
+		registry.add("test.ssl.key-store", () -> stores.getClientStorePath("routing_configurer"));
 	}
 
 	@BeforeAll

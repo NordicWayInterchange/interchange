@@ -2,9 +2,7 @@ package no.vegvesen.ixn.keys.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
+import no.vegvesen.ixn.keys.stores.CaStores;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -129,7 +127,7 @@ public class ClusterKeyGeneratorTest {
     @Test
     public void testGenerateTopCaCountryWithDefaultCountryCode() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, CertIOException, SignatureException, InvalidKeyException, NoSuchProviderException {
         CaResponse reponse = ClusterKeyGenerator.generate(new CARequest("mydomain.com", null, List.of(), List.of(), List.of()));
-        CertificateCertificateChainAndKeys ca = reponse.details();
+        EntityDescription ca = reponse.details();
         X500Name issuerName = new X500Name(ca.certificate().getIssuerX500Principal().getName());
         X500Name subjectName = new X500Name(ca.certificate().getSubjectX500Principal().getName());
         assertThat(getCountry(issuerName)).isEqualTo("NO");
@@ -154,8 +152,8 @@ public class ClusterKeyGeneratorTest {
                 List.of(),
                 List.of()
         ));
-        CertificateCertificateChainAndKeys topCa = response.details();
-        CertificateCertificateChainAndKeys intermediateCa = response.caResponses().get(0).details();
+        EntityDescription topCa = response.details();
+        EntityDescription intermediateCa = response.caResponses().get(0).details();
         List<X509Certificate> certificateChain = intermediateCa.certificateChain();
         assertThat(certificateChain).hasSize(2);
         X509Certificate certificate = intermediateCa.certificate();
@@ -194,9 +192,9 @@ public class ClusterKeyGeneratorTest {
 
                 )
         );
-        CertificateCertificateChainAndKeys topCa = response.details();
-        CertificateCertificateChainAndKeys intermediateCa = response.caResponses().get(0).details();
-        CertificateCertificateChainAndKeys subCa = response.caResponses().get(0).caResponses().get(0).details();
+        EntityDescription topCa = response.details();
+        EntityDescription intermediateCa = response.caResponses().get(0).details();
+        EntityDescription subCa = response.caResponses().get(0).caResponses().get(0).details();
         List<X509Certificate> chain = subCa.certificateChain();
         assertThat(chain).hasSize(3);
         assertThat(chain.get(2)).isEqualTo(topCa.certificate());
@@ -219,8 +217,8 @@ public class ClusterKeyGeneratorTest {
                         List.of()
                 )
         );
-        CertificateCertificateChainAndKeys topCa = response.details();
-        CertificateCertificateChainAndKeys host = response.hostResponses().get(0).keyDetails();
+        EntityDescription topCa = response.details();
+        EntityDescription host = response.hostResponses().get(0).keyDetails();
         Collection<List<?>> subjectAlternativeNames = host.certificate().getSubjectAlternativeNames();
         assertThat(subjectAlternativeNames).isNotNull().hasSize(1);
         List<?> san = subjectAlternativeNames.iterator().next();
@@ -246,8 +244,8 @@ public class ClusterKeyGeneratorTest {
                         List.of()
                 )
         );
-        CertificateCertificateChainAndKeys topCa = response.details();
-        CertificateCertificateChainAndKeys host = response.hostResponses().get(0).keyDetails();
+        EntityDescription topCa = response.details();
+        EntityDescription host = response.hostResponses().get(0).keyDetails();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         assertThat(host.certificateChain()).hasSize(2);
         host.certificate().verify(topCa.keyPair().getPublic());
@@ -274,8 +272,8 @@ public class ClusterKeyGeneratorTest {
                         List.of()
                 )
         );
-        CertificateCertificateChainAndKeys intermediate = response.caResponses().get(0).details();
-        CertificateCertificateChainAndKeys host = response.caResponses().get(0).hostResponses().get(0).keyDetails();
+        EntityDescription intermediate = response.caResponses().get(0).details();
+        EntityDescription host = response.caResponses().get(0).hostResponses().get(0).keyDetails();
         assertThat(host.certificateChain()).hasSize(3);
         assertThat(host.certificateChain().get(0)).isEqualTo(host.certificate());
         assertThat(host.certificateChain().get(1)).isEqualTo(intermediate.certificate());
@@ -299,8 +297,8 @@ public class ClusterKeyGeneratorTest {
                         )
                 ))
         );
-        CertificateCertificateChainAndKeys topCa = response.details();
-        CertificateCertificateChainAndKeys sp = response.clientResponses().get(0).clientDetails();
+        EntityDescription topCa = response.details();
+        EntityDescription sp = response.clientResponses().get(0).clientDetails();
         sp.certificate().verify(topCa.keyPair().getPublic());
     }
 
