@@ -45,3 +45,6 @@ next-env.d.ts
 # Ignore log files
 error.log
 *.log
+
+# certificate
+*.p12
