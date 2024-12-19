@@ -2,6 +2,9 @@
   "version" : "1.0",
   "name" : "king_gustaf.bouvetinterchange.eu",
   "deliveries" : [ {
-    "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6"
-  } ]
+    "selector" : "publicationId = 'NO00001-pub-1'"
+  }, {
+    "selector" : "publicationId = 'NO00001-pub-2'"
+  }
+  ]
 }

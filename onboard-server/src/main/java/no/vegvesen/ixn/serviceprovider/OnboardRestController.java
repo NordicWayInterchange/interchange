@@ -132,11 +132,11 @@ public class OnboardRestController {
 
 	private Set<String> allPublicationIds() {
 		Set<String> allPublicationIds = getAllLocalCapabilities().stream()
-				.map(c -> c.getApplication().getPublicationId())
-				.collect(Collectors.toSet());
+						.map(c -> c.getApplication().getPublicationId())
+						.collect(Collectors.toSet());
 		Set<String> neighbourPublicationIds = getAllNeighbourCapabilities().stream()
-				.map(c -> c.getApplication().getPublicationId())
-				.collect(Collectors.toSet());
+						.map(c -> c.getApplication().getPublicationId())
+						.collect(Collectors.toSet());
 		allPublicationIds.addAll(neighbourPublicationIds);
 		return allPublicationIds;
 	}
@@ -179,7 +179,7 @@ public class OnboardRestController {
 	}
 
 	private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-		return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector).stream().filter(capability -> !capability.getStatus().equals(CapabilityStatus.TEAR_DOWN)).collect(Collectors.toSet());
+		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector).stream().filter(capability -> !capability.getStatus().equals(CapabilityStatus.TEAR_DOWN)).collect(Collectors.toSet());
 	}
 
 	private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {

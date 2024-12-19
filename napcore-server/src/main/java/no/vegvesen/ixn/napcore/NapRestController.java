@@ -82,7 +82,8 @@ public class NapRestController {
             PrivateChannelRepository privateChannelRepository,
             CertService certService,
             NapCoreProperties napCoreProperties,
-            CertSigner certSigner, CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer) {
+            CertSigner certSigner,
+            CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.privateChannelRepository = privateChannelRepository;
@@ -384,7 +385,7 @@ public class NapRestController {
         logger.info("List capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCreatedCapabilities());
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -657,7 +658,7 @@ public class NapRestController {
     }
 
     private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchLocalCapabilitiesToSelector(allCapabilities, selector).stream().filter(capability -> !capability.getStatus().equals(CapabilityStatus.TEAR_DOWN)).collect(Collectors.toSet());
+        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector).stream().filter(capability -> !capability.getStatus().equals(CapabilityStatus.TEAR_DOWN)).collect(Collectors.toSet());
     }
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {

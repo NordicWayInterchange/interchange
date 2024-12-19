@@ -21,7 +21,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 List.of(6, 5)
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("publicationId = 'pub-1'");
@@ -45,7 +45,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 List.of("122,123")
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
@@ -70,7 +70,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 "PublisherName"
                         ),
                         new Metadata()
-                )
+                ), null
         );
         assertThat(selector).contains("messageType = 'DATEX2'");
         assertThat(selector).contains("publisherId = 'NO-123'");

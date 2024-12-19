@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataApi {
 
-    private Integer shardCount = 1;
+    private Integer shardCount;
 
     private String infoUrl;
 
