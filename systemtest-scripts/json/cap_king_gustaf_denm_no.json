@@ -1,4 +1,4 @@
-{	"name" : "king_gustaf",
+{	"name" : "king_olav",
   "version" : "1.0",
   "capabilities" : [ {
     "application" : {
@@ -11,7 +11,7 @@
       "causeCode" : [ 6 ]
     },
     "metadata" : {
-      "shardCount" : 1,
+      "shardCount" : 3,
       "infoUrl" : "https://king_gustaf.info.no",
       "redirectPolicy" : "OPTIONAL",
       "maxBandwidth" : 0,

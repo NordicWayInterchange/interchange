@@ -52,6 +52,7 @@ public class NeigbourDiscoveryService {
         logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
         List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
         logger.debug("Got neighbours from DNS {}.", neighbours);
+
         for (Neighbour neighbour : neighbours) {
             String neighbourName = neighbour.getName();
             NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbourName);
@@ -65,7 +66,7 @@ public class NeigbourDiscoveryService {
             NeighbourMDCUtil.removeLogVariables();
         }
     }
-    
+
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByIgnoreIsAndCapabilities_StatusIn(
                 false,

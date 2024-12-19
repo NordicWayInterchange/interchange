@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -71,6 +70,10 @@ public class NeighbourCapability {
 
     public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
         this.createdTimestamp = createdTimestamp;
+    }
+
+    public boolean isSharded() {
+        return metadata.getShardCount() > 1;
     }
 
     @Override

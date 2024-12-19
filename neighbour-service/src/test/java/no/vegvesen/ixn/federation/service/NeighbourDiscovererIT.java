@@ -21,7 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.net.ssl.SSLContext;
 import jakarta.transaction.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
