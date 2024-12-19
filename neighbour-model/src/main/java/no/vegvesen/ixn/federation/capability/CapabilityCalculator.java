@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -24,7 +25,7 @@ public class CapabilityCalculator {
     public static Set<Capability> allCreatedServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
         Set<Capability> localCapabilities = new HashSet<>();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCreatedCapabilities();
+            Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED);
             localCapabilities.addAll(serviceProviderCapabilities);
         }
         return localCapabilities;

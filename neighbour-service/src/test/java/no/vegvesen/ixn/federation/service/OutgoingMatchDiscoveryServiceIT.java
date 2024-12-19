@@ -52,8 +52,9 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
+        cap1.setStatus(CapabilityStatus.CREATED);
 
         Capability cap2 = new Capability(
                 new DenmApplication(
@@ -64,7 +65,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -97,7 +98,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -110,7 +111,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -143,7 +144,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -156,7 +157,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -188,4 +189,118 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         assertThat(repository.findAll()).hasSize(0);
     }
 
+    @Test
+    public void matchesAreOnlyCreatedWhenCapabilityIsCreated() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap1.setStatus(CapabilityStatus.CREATED);
+
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-2",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap2.setStatus(CapabilityStatus.REQUESTED);
+
+        serviceProvider.setCapabilities(new Capabilities(
+                Sets.newHashSet(Arrays.asList(cap1, cap2))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(1);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        serviceProvider.setCapabilities(new Capabilities(
+                Sets.newHashSet(Collections.singletonList(cap))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(0);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        metadata.setShardCount(2);
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                metadata
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        serviceProvider.setCapabilities(new Capabilities(
+                Sets.newHashSet(Collections.singletonList(cap))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(1);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
 }
