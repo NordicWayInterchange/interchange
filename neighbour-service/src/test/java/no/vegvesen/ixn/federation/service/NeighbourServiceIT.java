@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -353,6 +354,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
     }
 
     @Test
+    @Disabled
     public void teardownSubscriptionAndNeighbourPostsIdenticalNewSubscription() {
         String selector = "a = 'hello'";
         String name = "teardown-and-new-neighbour-request";

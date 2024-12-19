@@ -106,6 +106,10 @@ public class Connection {
         this.backoffAttempts = backoffAttempts;
     }
 
+    public LocalDateTime getLastFailedConnectionAttempt() {
+        return lastFailedConnectionAttempt;
+    }
+
     public void setLastFailedConnectionAttempt(LocalDateTime lastFailedConnectionAttempt) {
         this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
     }

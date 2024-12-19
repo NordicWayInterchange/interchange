@@ -30,8 +30,6 @@ public class LocalDelivery {
     @UpdateTimestamp
     private LocalDateTime lastUpdatedTimestamp;
 
-    private String exchangeName = "";
-
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
@@ -79,6 +77,12 @@ public class LocalDelivery {
         this.selector = selector;
         this.status = status;
         this.description = description;
+    }
+
+    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
+        this.endpoints = endpoints;
+        this.selector = selector;
+        this.status = status;
     }
 
     public Integer getId() {
@@ -129,14 +133,6 @@ public class LocalDelivery {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getExchangeName() {
-        return exchangeName;
-    }
-
-    public void setExchangeName(String exchangeName) {
-        this.exchangeName = exchangeName;
-    }
-
     public LocalDeliveryStatus getStatus() {
         return status;
     }
@@ -169,10 +165,6 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
-    public boolean exchangeExists() {
-        return !exchangeName.isEmpty();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -194,7 +186,6 @@ public class LocalDelivery {
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 ", errorMessage=" + errorMessage +
                 ", description=" + description +

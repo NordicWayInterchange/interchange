@@ -258,5 +258,6 @@
         <module>keys-generator</module>
         <module>service-provider-client</module>
         <module>admin-server-app</module>
+        <module>import-export-service</module>
     </modules>
 </project>

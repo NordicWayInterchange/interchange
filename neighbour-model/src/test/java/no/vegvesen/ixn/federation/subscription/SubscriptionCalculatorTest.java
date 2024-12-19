@@ -328,8 +328,8 @@ public class SubscriptionCalculatorTest {
                 .contains("messageType = 'DATEX2'");
     }
 
-    private Capability getDatexCapability(String country) {
-        return new Capability(
+    private NeighbourCapability getDatexCapability(String country) {
+        return new NeighbourCapability(
                 new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }

@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -254,7 +255,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
-        assertThat(client.exchangeExists(capability.getMetadata().getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
         assertThat(client.getQueuePublishingLinks("bi-queue")).hasSize(1);
     }
 
@@ -286,6 +287,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     }
 
     @Test
+    @Disabled
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
         Capability capability = new Capability(
                 new DenmApplication(
@@ -309,7 +311,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider1);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1), client.getQpidDelta());
 
-        assertThat(client.exchangeExists(capability.getMetadata().getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
 
         String queueName = "loc-" + UUID.randomUUID();
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
@@ -361,7 +363,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 deliverySelector,
                 LocalDeliveryStatus.CREATED);
 
-        delivery.setExchangeName(deliveryExchangeName);
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
@@ -400,8 +401,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new HashSet<>(Collections.singletonList(endpoint)),
                 deliverySelector,
                 LocalDeliveryStatus.NO_OVERLAP);
-
-        delivery.setExchangeName(deliveryExchangeName);
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 

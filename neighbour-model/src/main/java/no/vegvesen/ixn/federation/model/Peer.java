@@ -27,6 +27,12 @@ public class Peer {
         this.name = name;
     }
 
+    public Peer(String uuid, String name, PeerStatus status) {
+        this.uuid = uuid;
+        this.name = name;
+        this.status = status;
+    }
+
     public String getUuid() {
         return uuid;
     }

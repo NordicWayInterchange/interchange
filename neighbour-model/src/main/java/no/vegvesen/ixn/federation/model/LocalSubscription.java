@@ -52,20 +52,14 @@ public class LocalSubscription {
     public LocalSubscription() {
     }
 
-
     public LocalSubscription(String selector, String consumerCommonName, String description){
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.description = description;
     }
+
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-    }
-
-    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
-        this.id = id;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
     }
@@ -76,7 +70,6 @@ public class LocalSubscription {
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
     }
-
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
@@ -132,6 +125,10 @@ public class LocalSubscription {
         }
     }
 
+    public void addLocalEndpoint(LocalEndpoint newEndpoint) {
+        localEndpoints.add(newEndpoint);
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -183,6 +180,10 @@ public class LocalSubscription {
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
+    }
+
+    public boolean isSharded() {
+        return selector.contains("shardId");
     }
 
     public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {
