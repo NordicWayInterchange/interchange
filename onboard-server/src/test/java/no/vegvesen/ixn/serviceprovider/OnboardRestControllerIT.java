@@ -1330,7 +1330,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 serviceProviderName,
                 Set.of(new CapabilityApi(
                         new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("123"), "publicationType", "publisherName"),
-                        new MetadataApi()
+                        new MetadataApi(RedirectStatusApi.OPTIONAL)
                 ))
         );
         assertTrue(checkUuid(restController.addCapabilities(serviceProviderName,request).getCapabilities().stream().findFirst().get().getId()));
