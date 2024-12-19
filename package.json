@@ -20,10 +20,12 @@
     "@mui/x-data-grid": "^7.23.0",
     "@tanstack/react-query": "^5.62.7",
     "axios": "^1.7.8",
+    "leaflet": "^1.9.4",
     "next": "15.0.3",
     "next-auth": "^4.24.10",
     "react": "18.3.1",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.54.1",
     "winston": "^3.17.0"
   },
   "devDependencies": {
@@ -31,6 +33,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/jest": "^29.5.14",
+    "@types/leaflet": "^1.9.15",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
