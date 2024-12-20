@@ -56,6 +56,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - ADMIN_NAME=admin.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -278,6 +279,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - ADMIN_NAME=admin.bouvetinterchange.eu
     networks:
       - testing_net
 

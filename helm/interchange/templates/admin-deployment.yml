@@ -47,6 +47,8 @@ spec:
               value: "{{- range .Values.admin_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
+            - name: ADMIN_NAME
+              value: .Values.admin_name
           volumeMounts:
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}

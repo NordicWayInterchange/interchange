@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.NeighbourApi;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +20,17 @@ public class AdminRestController {
 
     private final NeighbourRepository neighbourRepository;
 
+    private final CertService certService;
+
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository){
+    public AdminRestController(NeighbourRepository neighbourRepository, CertService certService){
         this.neighbourRepository = neighbourRepository;
+        this.certService = certService;
     }
-
-    /* TODO
-       Certservice needs to be created. How should admin users be authenticated?
-     */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/test")
-    public String test() {
-        return "Hello world";
-    }
-
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<NeighbourApi> getNeighbours(@PathVariable("adminUser") String adminUser){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminUser);
         List<Neighbour> neighbourList = neighbourRepository.findAll();
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
     }

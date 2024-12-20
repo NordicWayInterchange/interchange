@@ -36,5 +36,11 @@
             <artifactId>neighbour-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>interchange-spring-security</artifactId>
+            <version>1.0.13-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -18,6 +18,7 @@ external_name: example-node.itsinterchange.eu
 broker_external_name: example-node.itsinterchange.eu
 static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
+  admin_name: admin.itsinterchange.eu
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
   control_channel_port: 443                                         # Specify the control channel port  for the Node

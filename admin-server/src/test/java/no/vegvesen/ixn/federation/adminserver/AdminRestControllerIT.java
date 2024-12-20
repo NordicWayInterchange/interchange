@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -9,6 +10,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 import java.util.Set;
@@ -26,6 +28,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Autowired
     AdminRestController restController;
 
+    @MockBean
+    CertService certService;
+
     @Test
     public void contextLoads(){}
 
@@ -36,7 +41,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
     @Test
     public void testGetNeighbours(){
-        String adminUser = "";
+        String adminUser = "adminUser";
         Neighbour neighbour = new Neighbour(
                 "neighbour",
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN,

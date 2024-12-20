@@ -14,5 +14,6 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dserver.ssl.trust-store=${TRUST_STORE}\
      -Dserver.ssl.trust-store-password=${TRUST_STORE_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
+     -Dadmin.name=${ADMIN_NAME} \
      ${LOG_LEVELS} \
      -jar admin-server.jar
