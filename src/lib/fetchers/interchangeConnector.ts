@@ -12,7 +12,7 @@ const fetchIXN: (
     selector?: string
 ) => Promise<any> = async (actorCommonName, path, ) => {
     console.log('HERE')
-    const uri = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+    const uri = process.env.INTERCHANGE_URI || "";
     console.log('uri', uri)
     const uriPath = `${actorCommonName}${path}`;
     const params: { selector?: string } = {};
