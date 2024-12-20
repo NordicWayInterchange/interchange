@@ -53,7 +53,7 @@ public class ServiceProviderService {
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
             Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
-            if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
+            if (localSubscription.isSubscriptionWanted()) {
                 List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
                     Set<LocalEndpoint> endpoints = transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints());
@@ -73,6 +73,7 @@ public class ServiceProviderService {
                 }
                 if (matches.isEmpty()) {
                     localSubscription.getLocalEndpoints().clear();
+                    localSubscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
                 }
             }
             localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
