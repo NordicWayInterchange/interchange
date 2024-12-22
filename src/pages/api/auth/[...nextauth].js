@@ -6,6 +6,11 @@ export const authOptions = {
     /**
      * @Description Providers client id/secret
      */
+    secret: process.env.NEXTAUTH_SECRET,
+    session: {
+        maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,
+        strategy: "jwt",
+    },
     providers: [
         Auth0Provider({
             clientId: process.env.AUTH0_CLIENT_ID,
@@ -18,13 +23,13 @@ export const authOptions = {
             },
         }),
     ],
+    debug: true,
     pages: {
         signIn: "/login",
     },
-    session: {
-        maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,
+    jwt: {
+        encryption: true,
     },
-    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
         async session({ session, token }) {
             session.user.commonName = process.env.INTERCHANGE_URI + token.email;

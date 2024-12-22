@@ -23,7 +23,8 @@ import {Neighbours} from "@/types/neighbours";
 const fetchNeighbours = async (params: basicGetParams) => {
     debugger
     const res = await fetchAdminUINeighbours(params);
-    const neigbours: Array<Neighbours> = await res.data;
+    //const neigbours: Array<Neighbours> = await res.data;
+
 };
 
 
@@ -65,18 +66,13 @@ const findHandler: (params: any) =>
     console.log('urlPath', urlPath)
     switch (method) {
         case "GET":
-            debugger
             const possiblePaths = Object.keys(getPaths);
-            if (possiblePaths.includes(urlPath)) {
+            const lastSegment = path[path.length - 1];
+            const fn = getPaths[lastSegment];
+            if (possiblePaths.includes(lastSegment)) {
                 return {
-                    fn: getPaths[urlPath],
+                    fn,
                     params: { actorCommonName, selector },
-                };
-            }
-            if (path.length > 1 && possiblePaths.includes(path[0])) {
-                return {
-                    fn: getPaths[path[0]],
-                    params: { actorCommonName, pathParam: path[1] },
                 };
             }
 

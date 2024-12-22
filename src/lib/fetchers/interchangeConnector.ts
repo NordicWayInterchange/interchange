@@ -10,12 +10,13 @@ const fetchIXN: (
     actorCommonName: string,
     path: string,
     selector?: string
-) => Promise<any> = async (actorCommonName, path, ) => {
-    console.log('HERE')
+) => Promise<any> = async (actorCommonName, path, selector = "") => {
     const uri = process.env.INTERCHANGE_URI || "";
-    console.log('uri', uri)
     const uriPath = `${actorCommonName}${path}`;
     const params: { selector?: string } = {};
+    if (selector) {
+        params.selector = selector;
+    }
 
     return await axios.get(uri + uriPath, {
         params,
@@ -39,7 +40,5 @@ export type basicGetFunction = (params: basicGetParams) => Promise<any>;
 
 export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
     const { actorCommonName} = params;
-    debugger;
-    console.log('actorCommonName', actorCommonName)
     return await fetchIXN(actorCommonName, "/neighbours");
 };
