@@ -17,12 +17,24 @@ const fetchIXN: (
     if (selector) {
         params.selector = selector;
     }
-
+    try {
     return await axios.get(uri + uriPath, {
         params,
         headers,
         httpsAgent: tlsAgent,
     });
+} catch (error) {
+    if (error.response) {
+        console.error("Server responded with an error:", error.response.data);
+        return { error: "Server Error", statusCode: error.response.status, message: error.response.data };
+    } else if (error.request) {
+        console.error("No response received from server:", error.request);
+        return { error: "No Response", message: "No response from server", request: error.request };
+    } else {
+        console.error("Error setting up the request:", error.message);
+        return { error: "Request Setup Error", message: error.message };
+    }
+}
 };
 
 export type basicGetParams = {

@@ -21,9 +21,9 @@ import {Neighbours} from "@/types/neighbours";
 }*/
 
 const fetchNeighbours = async (params: basicGetParams) => {
-    debugger
     const res = await fetchAdminUINeighbours(params);
-    //const neigbours: Array<Neighbours> = await res.data;
+    const neigbours: Array<Neighbours> = await res.data;
+    console.log(neigbours);
 
 };
 
@@ -62,8 +62,6 @@ const findHandler: (params: any) =>
         actorCommonName,
         selector = "",
     } = params;
-    const urlPath = path.join("/");
-    console.log('urlPath', urlPath)
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
@@ -82,7 +80,6 @@ const findHandler: (params: any) =>
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
-    console.log('here')
     const secret = process.env.NEXTAUTH_SECRET;
     const token = await getToken({ req, secret, raw: true });
     const session = await getServerSession(req, res, authOptions);
@@ -100,7 +97,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    console.log('MARYM')
     const session = await getServerSession(req, res, authOptions);
 
     if (!(await isAuthenticated(req, res))) {
