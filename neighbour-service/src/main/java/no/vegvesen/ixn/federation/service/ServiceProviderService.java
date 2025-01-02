@@ -75,6 +75,9 @@ public class ServiceProviderService {
                     localSubscription.getLocalEndpoints().clear();
                     localSubscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
                 }
+                else {
+                    localSubscription.setStatus(LocalSubscriptionStatus.CREATED);
+                }
             }
             localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
             localSubscription.getLocalEndpoints().addAll(newEndpoints);

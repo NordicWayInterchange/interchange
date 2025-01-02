@@ -10,6 +10,6 @@ public enum LocalSubscriptionStatus {
     ERROR;
 
     public static boolean isAlive(LocalSubscriptionStatus status) {
-        return CREATED.equals(status) || REQUESTED.equals(status);
+        return CREATED.equals(status) || REQUESTED.equals(status) || NO_OVERLAP.equals(status);
     }
 }
