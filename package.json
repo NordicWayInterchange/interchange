@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "prod": "next build && next start -p 3001",
+    "lint": "next lint",
+    "test": "jest",
+    "watch": "jest --watch",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",
