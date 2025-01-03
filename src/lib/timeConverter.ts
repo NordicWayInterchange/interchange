@@ -1,6 +1,6 @@
 export const timeConverter = (time: number): string => {
     const date = new Date(time * 1000);
-    const locale = navigator.language;
+    const locale = navigator.language || 'en-GB';
 
     const localeDateString = date.toLocaleDateString(locale, {
         day: "2-digit",
