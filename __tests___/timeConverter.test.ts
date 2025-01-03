@@ -8,7 +8,7 @@ describe("Can correctly convert Unix Epoch", () => {
       get: jest.fn().mockReturnValue('en-GB'),
     });
 
-    expect(timeConverter(epoch)).toBe(englishDateFormat);
+    expect(timeConverter(epoch)).toEqual(englishDateFormat);
   });
 
   afterEach(() => {
