@@ -7,6 +7,7 @@ self:                                                               # ------ Gen
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
   admin_port: "4343"
+  admin_name: "admin.itsinterchange.eu"
 
   trust_store: truststore.jks
   key_store: keystore.p12

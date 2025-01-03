@@ -39,6 +39,8 @@ spec:
               value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
             - name: TRUST_STORE_PASSWORD
               value: {{ .Values.trust_store_password | quote }}
+            - name: ADMIN_NAME
+              value: {{ .Values.self.admin_name | quote }}
             - name: KEY_STORE
               value: "{{ .Values.self.secret_mount_path }}key_store.p12"
             - name: KEY_STORE_PASSWORD
@@ -47,8 +49,7 @@ spec:
               value: "{{- range .Values.admin_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
-            - name: ADMIN_NAME
-              value: {{ .Values.admin_name | quote }}
+
           volumeMounts:
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}
