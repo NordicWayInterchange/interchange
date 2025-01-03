@@ -7,6 +7,7 @@ import {
   rectangleStyleSelect,
 } from "./RectangleStyles";
 import quadAdapter from "../adapters/QuadAdapter";
+import { Tooltip } from 'react-leaflet';
 
 export default function QuadtreeGenerator({
   quadtree,
@@ -86,7 +87,9 @@ export default function QuadtreeGenerator({
           hash={hash}
           bounds={bounds}
           pathOptions={rectangleStyleSelect}
-        />
+        >
+        <Tooltip permanent>{hash}</Tooltip>
+        </Rectangle>
       );
     });
 

@@ -41,6 +41,7 @@ export default function MapDialog(props: Props) {
   const [discard, setDiscard] = useState(false);
 
   const handleDiscard = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     quadtreeCallback && quadtreeCallback([]);
     setDiscard((current) => !current);
   };
