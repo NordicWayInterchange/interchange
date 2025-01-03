@@ -103,11 +103,11 @@ jobs:
         working-directory: ./
 
       - name: checkout to client docs project
-        run: |
-          with:
-            repository: NordicWayInterchange/serviceprovider-client-documentation
-            token: ${{ secrets.REPO_ACCESS_TOKEN }}
-            path: serviceprovider-client-documentation 
+        uses: actions/checkout@v4
+        with:
+          repository: NordicWayInterchange/serviceprovider-client-documentation
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: serviceprovider-client-documentation
 
       - name: Push client docs to github pages
         run: |
