@@ -121,7 +121,6 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
-          apt install asciidoctor
           asciidoctor --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs --destination-dir=./serviceprovider-client-documentation *.adoc
           cd ./serviceprovider-client-documentation
           git add --all
