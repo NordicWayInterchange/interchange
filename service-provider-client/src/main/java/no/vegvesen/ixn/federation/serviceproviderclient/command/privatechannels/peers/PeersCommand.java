@@ -5,7 +5,7 @@ import picocli.CommandLine.*;
 
 @Command(
         name="peers",
-        description = "Get, add and delete peers from private channels you own. Remove yourself from other private channels",
+        description = "get, add and delete peers from private channels you own. Remove yourself from other private channels",
         subcommands = {
                 GetPeerPrivateChannels.class,
                 AddPeersToPrivateChannel.class,

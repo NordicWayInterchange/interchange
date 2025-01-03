@@ -6,7 +6,7 @@ import picocli.CommandLine.*;
 
 @Command(
         name = "privatechannels",
-        description = "Manage private channels for a Service Provider",
+        description = "manage private channels for a service provider",
         subcommands = {
                 GetPrivateChannels.class,
                 GetPrivateChannel.class,

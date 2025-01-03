@@ -6,7 +6,7 @@ import picocli.CommandLine.*;
 
 @Command(
         name = "deliveries",
-        description = "Get, add list or delete deliveries for a Service Provider",
+        description = "get, add, list or delete deliveries for a service provider",
         subcommands = {
                 ListDeliveries.class,
                 GetDelivery.class,
