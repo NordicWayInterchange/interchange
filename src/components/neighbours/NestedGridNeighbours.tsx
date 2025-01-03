@@ -5,7 +5,7 @@ import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
-import {Neighbours} from "@/types/neighbours";
+import {Capability, Subscription} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
@@ -14,7 +14,7 @@ import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
     drawerOpen: boolean;
-    neighbourRow: Neighbours | undefined;
+    neighbourRow: Capability | Subscription | undefined;
     field: string;
     handleMoreClose: () => void;
     handleOnRowClick: (any) => void;
@@ -145,14 +145,14 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                     <CapabilityDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
-                        capabilities={neighbourRow}
+                        capabilities={neighbourRow as Capability}
                     />
                 )}
                 {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
                     <OurAndNeighbourSubscriptionDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
-                        subscriptions={neighbourRow}
+                        subscriptions={neighbourRow as Subscription}
                         heading={heading}
                     />
                 )}

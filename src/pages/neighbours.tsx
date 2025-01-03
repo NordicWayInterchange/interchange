@@ -8,7 +8,7 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import {Neighbours} from "@/types/neighbours";
+import {Capability, Subscription} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
@@ -19,7 +19,7 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [neighbourRow, setNeighbourRow] = useState<Neighbours>(null);
+    const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability>(null);
     const [expandedRows, setExpandedRows] = useState({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
@@ -37,12 +37,8 @@ const Neighbours = () => {
     };
 
     const handleOnRowClick = (params: GridRowParams) => {
-        handleMore(params?.row || []);
-    };
-
-    const handleMore = (neighbour) => {
         setNeighbourRow(null);
-        setNeighbourRow(neighbour);
+        setNeighbourRow(params?.row || []);
         setDrawerOpen(true);
     };
 
@@ -163,21 +159,7 @@ const Neighbours = () => {
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
-                <Box
-                    sx={{
-                        height: 400,
-                        width: '100%',
-                        '& .selected-column': {
-                            backgroundColor: '#F8DEDE',
-                            color: 'red',
-                        },
-                        '& .custom-header': {
-                            backgroundColor: 'headerBackgroundColor',
-                            color: '#fff',
-                            fontWeight: 'bold',
-                        },
-                    }}
-                >
+                <Box sx={tableHeaderStyling}>
                     <DataGrid
                         columns={tableHeaders}
                         rows={neighbourData || []}
@@ -217,4 +199,17 @@ const Neighbours = () => {
     );
 };
 
+const tableHeaderStyling = {
+    height: 400,
+    width: '100%',
+    '& .selected-column': {
+        backgroundColor: '#F8DEDE',
+        color: 'red',
+    },
+    '& .custom-header': {
+        backgroundColor: 'headerBackgroundColor',
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+}
 export default Neighbours;
