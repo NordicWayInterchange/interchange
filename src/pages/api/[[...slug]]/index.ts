@@ -5,6 +5,14 @@ import {getToken} from "next-auth/jwt";
 import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import {Session} from "next-auth";
+
+interface CustomSession extends Session {
+    user: {
+        commonName: string;
+        email?: string;
+    };
+}
 
 /*function extractCauseCodes(neighbours: Neighbours) {
     let causeCodes;
@@ -80,13 +88,16 @@ const findHandler: (params: any) =>
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
     const secret = process.env.NEXTAUTH_SECRET;
     const token = await getToken({ req, secret, raw: true });
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerSession(req as any, res as any, authOptions as any);
+
+    const typedSession = session as CustomSession;
+
 
     return !(
         !token ||
         !session ||
         !req.query.slug ||
-        !session.user ||
+        !typedSession.user ||
         session.user.commonName !== req.query.slug[0]
     );
 };
@@ -95,7 +106,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerSession(req as any, res as any, authOptions as any);
 
     if (!session?.user?.email) {
         logger.info(
