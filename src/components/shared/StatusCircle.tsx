@@ -1,9 +1,8 @@
 import {Box} from "@mui/material";
 import React from "react";
-import {ConnectionStatus} from "@/types/neighbours";
 
-const getStatusColor = (status: ConnectionStatus) => {
-    switch (status) {
+const getStatusColor = (status: any) => {
+    switch (status.status) {
         case 'CONNECTED':
             return '#1D7721';
         case 'FAILED':
@@ -14,7 +13,7 @@ const getStatusColor = (status: ConnectionStatus) => {
             return '#9e9e9e';
     }
 };
-export const StatusCircle = ({ status}: ConnectionStatus ) => {
+export const StatusCircle = ( status: any) => {
     const color = getStatusColor(status);
     return (
         <Box

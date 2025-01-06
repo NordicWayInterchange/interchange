@@ -177,33 +177,6 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                         },
                                     }}
                                 />
-                                {application.causeCodesDictionary && (
-                                    <FormControl margin="normal">
-                                        <InputLabel>Cause codes</InputLabel>
-                                        <Select
-                                            MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
-                                            label="Cause codes"
-                                            multiple
-                                            defaultValue={application.causeCodesDictionary.map(
-                                                (cause) => {
-                                                    return cause["value"];
-                                                }
-                                            )}
-                                        >
-                                            {application.causeCodesDictionary.map((cause, index) => {
-                                                return (
-                                                    <StyledMenuItem
-                                                        disabled
-                                                        key={index}
-                                                        value={cause.value}
-                                                    >
-                                                        {cause.value}: {cause.label}
-                                                    </StyledMenuItem>
-                                                );
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                )}
                             </FormControl>
                         </StyledCard>
                     </ListItem>
@@ -229,7 +202,6 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                 />
                                 <StyledButton
                                     sx={{mt:2.75}}
-                                    color="buttonThemeColor"
                                     variant="outlined"
                                 >
                                     Show map

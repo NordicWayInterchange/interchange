@@ -1,10 +1,10 @@
 import logger from "@/lib/logger";
 import {NextApiRequest, NextApiResponse} from "next";
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
-import {authOptions} from "@/pages/api/auth/[...nextauth]";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 /*function extractCauseCodes(neighbours: Neighbours) {
     let causeCodes;
