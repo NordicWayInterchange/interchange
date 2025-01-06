@@ -11,6 +11,7 @@ import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
+import {GridColDef} from "@mui/x-data-grid";
 
 type Props = {
     row: any;
@@ -23,7 +24,7 @@ type Props = {
 
 const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
 
-    const nestedTableTitle = {
+    const nestedTableTitle: { [key: string]: string } = {
         capabilities: "Capabilities",
         ourRequestedSubscriptions: "Our Subscriptions",
         neighbourRequestedSubscriptions: "Neighbour Subscriptions",
@@ -33,11 +34,12 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
         return null;
     }
 
-    let nestedData = [];
-    let nestedColumns = [];
+    let nestedData: object[] = [];
+    let nestedColumns: GridColDef[] = [];
+
 
     if (field === "capabilities") {
-        nestedData = row.capabilities.capabilities.map((capability) => ({
+        nestedData = row.capabilities.capabilities.map((capability: any) => ({
             id: capability.id,
             messageType: capability.application.messageType,
             originatingCountry: capability.application.originatingCountry,
@@ -62,7 +64,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             {...dataGridTemplate, field: "createdTimestamp", headerName: "Last updated"}
         ];
     } else if (field === "neighbourRequestedSubscriptions") {
-        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription) => ({
+        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
             id: subscription.subreq_id,
             subscriptionStatus: subscription.subscriptionStatus,
             selector: subscription.selector,
@@ -92,7 +94,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             },
         ];
     } else if (field === "ourRequestedSubscriptions") {
-        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription) => ({
+        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
             id: subscription.id,
             subscriptionStatus: subscription.subscriptionStatus,
             selector: subscription.selector,
