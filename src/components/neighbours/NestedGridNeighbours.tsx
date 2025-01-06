@@ -13,11 +13,12 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
+    row: any;
     drawerOpen: boolean;
     neighbourRow: Capability | Subscription | undefined;
     field: string;
     handleMoreClose: () => void;
-    handleOnRowClick: (any) => void;
+    handleOnRowClick: (arg0: any) => void;
 };
 
 const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
