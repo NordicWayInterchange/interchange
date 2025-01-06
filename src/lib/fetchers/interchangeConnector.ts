@@ -1,0 +1,56 @@
+import {getTLSAgent} from "@/lib/fetchers/sslAgent";
+import axios from "axios";
+
+const headers = {
+    Accept: "application/json",
+};
+const tlsAgent = getTLSAgent();
+
+const fetchIXN: (
+    actorCommonName: string,
+    path: string,
+    selector?: string
+) => Promise<any> = async (actorCommonName, path, selector = "") => {
+    const uri = process.env.INTERCHANGE_URI || "";
+    const uriPath = `${actorCommonName}${path}`;
+    const params: { selector?: string } = {};
+    if (selector) {
+        params.selector = selector;
+    }
+    try {
+    return await axios.get(uri + uriPath, {
+        params,
+        headers,
+        httpsAgent: tlsAgent,
+    });
+} catch (error) {
+    if (error.response) {
+        console.error("Server responded with an error:", error.response.data);
+        return { error: "Server Error", statusCode: error.response.status, message: error.response.data };
+    } else if (error.request) {
+        console.error("No response received from server:", error.request);
+        return { error: "No Response", message: "No response from server", request: error.request };
+    } else {
+        console.error("Error setting up the request:", error.message);
+        return { error: "Request Setup Error", message: error.message };
+    }
+}
+};
+
+export type basicGetParams = {
+    actorCommonName: string;
+    selector?: string;
+};
+export type extendedGetParams = {
+    actorCommonName: string;
+    pathParam?: string;
+    selector?: string;
+};
+
+export type basicGetFunction = (params: basicGetParams) => Promise<any>;
+
+
+export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
+    const { actorCommonName} = params;
+    return await fetchIXN(actorCommonName, "/neighbours");
+};

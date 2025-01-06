@@ -3,9 +3,27 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "@/pages/api/auth/[...nextauth]";
 import {getToken} from "next-auth/jwt";
+import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
+import {Neighbours} from "@/types/neighbours";
 
+
+/*function extractCauseCodes(neighbours: Neighbours) {
+    let causeCodes;
+    if (
+        "causeCode" in capability.application &&
+        capability.application.causeCode
+    ) {
+        causeCodes = capability.application.causeCode.map((causeCode) => {
+            return causeCodesList.find((c) => c.value === causeCode) || { "value": causeCode};
+        });
+    }
+    return causeCodes;
+}*/
 
 const fetchNeighbours = async (params: basicGetParams) => {
+    const res = await fetchAdminUINeighbours(params);
+    const neigbours: Array<Neighbours> = await res.data;
+    return [res.status, neigbours];
 };
 
 
@@ -43,20 +61,15 @@ const findHandler: (params: any) =>
         actorCommonName,
         selector = "",
     } = params;
-    const urlPath = path.join("/");
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
-            if (possiblePaths.includes(urlPath)) {
+            const lastSegment = path[path.length - 1];
+            const fn = getPaths[lastSegment];
+            if (possiblePaths.includes(lastSegment)) {
                 return {
-                    fn: getPaths[urlPath],
+                    fn,
                     params: { actorCommonName, selector },
-                };
-            }
-            if (path.length > 1 && possiblePaths.includes(path[0])) {
-                return {
-                    fn: getPaths[path[0]],
-                    params: { actorCommonName, pathParam: path[1] },
                 };
             }
 

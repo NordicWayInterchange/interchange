@@ -29,6 +29,7 @@ const Neighbours = () => {
     };
 
     const handleCellClick = (row, field) => {
+        setExpandedRows('');
         const rowId = row.id ? row.id : row.subreq_id;
         setExpandedRows((prev) => ({
             ...prev,
