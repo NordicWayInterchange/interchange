@@ -8,7 +8,6 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { Card, Typography} from "@mui/material";
 import * as React from "react";
 import {StyledButton} from "@/components/styles/StyledElements";
-import {dehydrate, QueryClient} from "@tanstack/react-query";
 
 export default function Login({}: InferGetServerSidePropsType<
     typeof getServerSideProps
