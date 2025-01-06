@@ -1,11 +1,10 @@
 import logger from "@/lib/logger";
 import {NextApiRequest, NextApiResponse} from "next";
-import {getServerSession} from "next-auth/next";
-import {authOptions} from "@/pages/api/auth/[...nextauth]";
+import { getServerSession } from 'next-auth';
 import {getToken} from "next-auth/jwt";
 import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
-
+import {authOptions} from "@/pages/api/auth/[...nextauth]";
 
 /*function extractCauseCodes(neighbours: Neighbours) {
     let causeCodes;
@@ -98,16 +97,21 @@ export default async function handler(
 ) {
     const session = await getServerSession(req, res, authOptions);
 
+    if (!session?.user?.email) {
+        logger.info(
+            "Access denied - No session or user email not available."
+        );
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
     if (!(await isAuthenticated(req, res))) {
         logger.info(
-            "Access denied - " +
-            "User with email: " +
+            "Access denied - User with email: " +
             session.user.email +
-            ", don't have permission to perform this action"
+            ", doesn't have permission to perform this action"
         );
 
-        return res
-            .status(403)
+        return res.status(403)
             .json({ description: `Access denied - You don't have permission` });
     }
 
