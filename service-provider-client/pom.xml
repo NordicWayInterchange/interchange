@@ -121,11 +121,7 @@
                         <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand</argument>
                         <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand</argument>
                         <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand</argument>
-                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.CountMessages</argument>
-                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.DrainMessages</argument>
-                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.ReceiveMessages</argument>
-                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.SendMessage</argument>
-                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.SendPredefinedMessage</argument>
+                        <argument>no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand</argument>
                     </arguments>
                 </configuration>
                 <dependencies>
@@ -136,37 +132,6 @@
                         <type>jar</type>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>2.1.0</version>
-                <executions>
-                    <execution>
-                        <id>output-html</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <backend>html5</backend>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>output-manpage</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <backend>manpage</backend>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sourceDirectory>${project.build.directory}/generated-picocli-docs</sourceDirectory>
-                </configuration>
             </plugin>
         </plugins>
     </build>
