@@ -31,7 +31,7 @@ export const authOptions = {
     },
     callbacks: {
         async session({ session, token }) {
-            session.user.commonName = process.env.INTERCHANGE_URI + token.email;
+            session.user.commonName = process.env.INTERCHANGE_PREFIX + token.email;
             return session;
         },
     },
