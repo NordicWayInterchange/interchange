@@ -123,11 +123,11 @@ jobs:
           git config --global user.name = "GitHub Actions"
           asciidoctor --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs --destination-dir=./serviceprovider-client-documentation /home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs/*.adoc
           cd ./serviceprovider-client-documentation
-          mv capabilities*.html capabilities
-          mv subscriptions*.html subscriptions
-          mv privatechannels*.html privatechannels
-          mv deliveries*.html deliveries
-          mv messages*.html messages
+          mv -n capabilities*.html capabilities; rm -f capabilities*.html
+          mv -n subscriptions*.html subscriptions; rm -f subscriptions*.html
+          mv -n privatechannels*.html privatechannels; rm -f privatechannels*.html
+          mv -n deliveries*.html deliveries; rm -f deliveries*.html
+          mv -n messages*.html messages; rm -f messages*.html
           git add --all
           git commit --allow-empty -m "Updated html files"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/serviceprovider-client-documentation.git --force
