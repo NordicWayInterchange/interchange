@@ -23,7 +23,7 @@ const fetchIXN: (
         headers,
         httpsAgent: tlsAgent,
     });
-} catch (error) {
+} catch (error: any) {
     if (error.response) {
         console.error("Server responded with an error:", error.response.data);
         return { error: "Server Error", statusCode: error.response.status, message: error.response.data };

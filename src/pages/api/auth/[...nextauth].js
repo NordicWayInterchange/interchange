@@ -9,7 +9,6 @@ export const authOptions = {
     secret: process.env.NEXTAUTH_SECRET,
     session: {
         maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,
-        strategy: "jwt",
     },
     providers: [
         Auth0Provider({
@@ -37,9 +36,15 @@ export const authOptions = {
         },
     },
     logger: {
-        warn: (message) => console.warn(message),
-        debug: (message) => console.debug(message),
-        error: (message, error) => console.error(message, error),
+        error(code, metadata) {
+            logger.error({ code, metadata });
+        },
+        warn(code) {
+            logger.warn({ code });
+        },
+        debug(code) {
+            logger.debug({ code });
+        },
     },
     events: {
         async signIn(message) {
