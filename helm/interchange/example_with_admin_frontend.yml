@@ -117,10 +117,7 @@ admin_frontend:
     generated_username_prefix: admin.example-node.itsinterchange.eu
     admin_auth0_issuer: my_auth0_issuer
     home_url: https://portal.example-node.itsinterchange.eu
-    letsencrypt:
-      server: https://letsencrypt-server
-      email: my-email@mycompany.com
-      key_secret_ref: my-key-secret
-      ingress:
-        name: my-ingress
-        external_portal_ip: 10.0.0.1
+admin_ingress:
+  enabled: true
+  name: my-admin-ingress
+  external_admin_ip: 1.2.3.4
