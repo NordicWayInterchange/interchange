@@ -55,7 +55,7 @@ public class TypeTransformer {
                     subscription.getNumberOfPolls(),
                     subscription.getConsumerCommonName(),
                     endpointSetToEndpointApiSet(subscription.getEndpoints()),
-                    subscription.getLastUpdatedTimestamp()
+                    timestampMillisecondsToSeconds(subscription.getLastUpdatedTimestamp())
             ));
         }
         return subscriptionApiSet;
@@ -109,7 +109,7 @@ public class TypeTransformer {
                     neighbourSubscription.getPath(),
                     neighbourSubscription.getConsumerCommonName(),
                     neighbourEndpointSetToNeighbourEndpointApiSet(neighbourSubscription.getEndpoints()),
-                    neighbourSubscription.getLastUpdatedTimestamp()
+                    timestampMillisecondsToSeconds(neighbourSubscription.getLastUpdatedTimestamp())
             ));
         }
         return neighbourSubscriptionApiSet;
@@ -167,5 +167,8 @@ public class TypeTransformer {
             epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
         }
         return epochSecond;
+    }
+    private Long timestampMillisecondsToSeconds(Long timestamp){
+        return timestamp/1000;
     }
 }
