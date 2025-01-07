@@ -3,12 +3,15 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListPeerPrivateChannels;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "get", description = "Get all private channels with service provider as peer")
+@Command(name = "get", description = "Get all private channels with service provider as peer",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class GetPeerPrivateChannels implements Callable<Integer> {
 
     @ParentCommand

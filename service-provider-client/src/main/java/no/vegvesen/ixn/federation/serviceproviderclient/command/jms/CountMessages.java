@@ -6,7 +6,9 @@ import picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Command(name = "count", description = "Count number of messages until client is killed by Ctrl+C")
+@Command(name = "count", description = "Count number of messages until client is killed by Ctrl+C",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class CountMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")

@@ -16,7 +16,9 @@ import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
-@Command(name = "send", description = "Sending a message from JSON")
+@Command(name = "send", description = "Sending a message from JSON",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class SendMessage implements Callable<Integer> {
 
     @Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")

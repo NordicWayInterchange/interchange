@@ -11,7 +11,9 @@ import java.util.concurrent.Callable;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.DENM;
 
-@Command(name = "sendpredefined", description = "Sending a message that i predefined")
+@Command(name = "sendpredefined", description = "Sending a message that i predefined",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class SendPredefinedMessage implements Callable<Integer> {
 
     @ParentCommand

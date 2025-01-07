@@ -5,6 +5,7 @@ import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -17,7 +18,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Command(name = "listen", description = "Add subscription and receive messages")
+@Command(name = "listen", description = "Add subscription and receive messages",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class Listen implements Callable<Integer> {
 
     @ParentCommand

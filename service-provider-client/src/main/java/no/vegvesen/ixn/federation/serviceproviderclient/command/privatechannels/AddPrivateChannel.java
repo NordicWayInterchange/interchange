@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-@Command(name = "add", description = "Adding name for client to set up private channel")
+@Command(name = "add", description = "Adding name for client to set up private channel",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true)
 public class AddPrivateChannel implements Callable<Integer> {
 
     @ParentCommand
