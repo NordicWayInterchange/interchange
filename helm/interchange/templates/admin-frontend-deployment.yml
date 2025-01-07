@@ -28,7 +28,7 @@ spec:
             - name: PFX_KEY_FILENAME
               value: {{ .Values.admin_frontend.keystore_file_name }}
             - name: PFX_PASSPHRASE
-              {{ .Values.admin_keystore_password }}
+              value: {{ .Values.admin_keystore_password }}
             - name: INTERCHANGE_URI
               value: "https://{{ .Release.Name }}-admin-server:{{ .Values.self.admin_port }}/admin"
             - name: INTERCHANGE_PREFIX
