@@ -16,8 +16,8 @@ import {GridColDef} from "@mui/x-data-grid";
 type Props = {
     row: any;
     drawerOpen: boolean;
-    neighbourRow: Capability | Subscription | undefined;
-    field: string;
+    neighbourRow: Capability | Subscription | null;
+    field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };

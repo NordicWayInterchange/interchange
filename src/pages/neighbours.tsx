@@ -13,14 +13,18 @@ import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 
+type ExpandedRows = {
+    [key: string]: string | null;
+};
+
 const Neighbours = () => {
     const {data: session} = useSession();
 
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability>(null);
-    const [expandedRows, setExpandedRows] = useState({});
+    const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability | null>(null);
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
 
@@ -28,8 +32,8 @@ const Neighbours = () => {
         setDrawerOpen(false);
     };
 
-    const handleCellClick = (row, field) => {
-        setExpandedRows('');
+    const handleCellClick = (row: any, field: any) => {
+        setExpandedRows({});
         const rowId = row.id ? row.id : row.subreq_id;
         setExpandedRows((prev) => ({
             ...prev,

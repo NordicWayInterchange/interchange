@@ -98,7 +98,7 @@ const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
         !session ||
         !req.query.slug ||
         !typedSession.user ||
-        session.user.commonName !== req.query.slug[0]
+        typedSession.user.commonName !== req.query.slug[0]
     );
 };
 
@@ -107,23 +107,19 @@ export default async function handler(
     res: NextApiResponse
 ) {
     const session = await getServerSession(req as any, res as any, authOptions as any);
+    const typedSession = session as CustomSession;
 
-    if (!session?.user?.email) {
-        logger.info(
-            "Access denied - No session or user email not available."
-        );
+    if (!typedSession?.user?.email) {
+        logger.info("Access denied - No session or user email not available.");
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
     if (!(await isAuthenticated(req, res))) {
-        logger.info(
-            "Access denied - User with email: " +
-            session.user.email +
-            ", doesn't have permission to perform this action"
-        );
+        logger.info("Access denied - User with email: " +
+            typedSession.user.email +
+            ", doesn't have permission to perform this action");
 
-        return res.status(403)
-            .json({ description: `Access denied - You don't have permission` });
+        return res.status(403).json({ description: `Access denied - You don't have permission` });
     }
 
     const slug = Array.isArray(req.query.slug)
@@ -158,10 +154,10 @@ export default async function handler(
                         method: req.method,
                         httpStatus: status,
                         url: req.url,
-                        user: session.user,
+                        user: typedSession.user,
                         slug: req.query.slug,
                     })
-                    .info();
+                    .info({params: params, method: method, httpsStatus: status, url: req.url, user: typedSession.user, slug: req.query.slug});
 
                 return res.status(status).json(data);
             } catch (error: any) {
