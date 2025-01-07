@@ -30,7 +30,7 @@ spec:
             - name: PFX_PASSPHRASE
               value: {{ .Values.admin_keystore_password }}
             - name: INTERCHANGE_URI
-              value: "https://{{ .Release.Name }}-admin-server:{{ .Values.self.admin_port }}/admin"
+              value: "https://{{ .Release.Name }}-admin-server:{{ .Values.self.admin_port }}/admin/"
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.admin_frontend.generated_username_prefix }}
             - name: NEXTAUTH_SECRET
