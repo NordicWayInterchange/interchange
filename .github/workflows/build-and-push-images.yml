@@ -109,15 +109,11 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           path: serviceprovider-client-documentation
 
-      - name: generate man pages
-        uses: tonynv/asciidoctor-action@master
-        with:
-          program: asciidoctor --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs --destination-dir=./serviceprovider-client-documentation /home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs/*.adoc
-
       - name: Push client docs to github pages
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
+          asciidoctor --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs --destination-dir=./serviceprovider-client-documentation /home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs/*.adoc
           cd ./serviceprovider-client-documentation
           mv -n capabilities*.html capabilities; rm -f capabilities*.html
           mv -n subscriptions*.html subscriptions; rm -f subscriptions*.html
