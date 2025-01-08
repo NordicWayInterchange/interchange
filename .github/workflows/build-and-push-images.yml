@@ -102,14 +102,6 @@ jobs:
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
         working-directory: ./
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7
-
-      - uses: reitzig/actions-asciidoctor@v2.0.2
-        with:
-          version: 2.0.18
-
       - name: checkout to client docs project
         uses: actions/checkout@v4
         with:
