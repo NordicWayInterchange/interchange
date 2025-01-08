@@ -26,7 +26,10 @@ const Neighbours = () => {
     const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability | null>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-    const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
+    const [highlightedCell, setHighlightedCell] = useState<{
+        id: number | null;
+        field: string | null;
+    }>({id: null, field: null});
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
@@ -63,7 +66,6 @@ const Neighbours = () => {
             field: "capabilities",
             headerName: "Capabilities",
             headerClassName: 'custom-header',
-            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourCapabilities = params.row.capabilities.capabilities;
                 return (
@@ -84,7 +86,6 @@ const Neighbours = () => {
             field: "ourRequestedSubscriptions",
             headerName: "Our Subscriptions",
             headerClassName: 'custom-header',
-            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const ourSubscriptions = params.row.ourRequestedSubscriptions.subscriptions;
                 return (
@@ -105,7 +106,6 @@ const Neighbours = () => {
             field: "neighbourRequestedSubscriptions",
             headerName: "Neighbour Subscriptions",
             headerClassName: 'custom-header',
-            cellClassName: (params) => (params.field === selectedColumn ? 'selected-column' : ''),
             renderCell: (params) => {
                 const neighbourSubscriptions = params.row.neighbourRequestedSubscriptions.subscriptions;
                 return (
@@ -175,8 +175,14 @@ const Neighbours = () => {
                             noRowsOverlay: CustomEmptyOverlayNeighbours
                         }}
                         onCellClick={(params) => {
-                            setSelectedColumn((prev) => (prev === params.field ? null : params.field));
-                        }}/>
+                            setHighlightedCell({ id: params.id as number, field: params.field });
+
+                        }}
+                        getCellClassName={(params) =>
+                            highlightedCell.id === params.id && highlightedCell.field === params.field
+                                ? "highlighted-cell"
+                                : ""
+                        }/>
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
@@ -207,9 +213,8 @@ const Neighbours = () => {
 const tableHeaderStyling = {
     height: 400,
     width: '100%',
-    '& .selected-column': {
+    '& .highlighted-cell': {
         backgroundColor: '#F8DEDE',
-        color: 'red',
     },
     '& .custom-header': {
         backgroundColor: 'headerBackgroundColor',
