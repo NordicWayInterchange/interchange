@@ -5,12 +5,13 @@ import {
     ListItem, ListItemText, MenuItem, Select, TextField,
     Toolbar, Typography
 } from "@mui/material";
-import React from "react";
+import React, {useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {styled} from "@mui/material/styles";
 import {drawerStyle, StyledButton, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Capability} from "@/types/neighbours";
+import MapDialog from "@/components/map/MapDialog";
 
 type Props = {
     capabilities: Capability;
@@ -19,201 +20,214 @@ type Props = {
 };
 
 const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
-
+    const [openMap, setOpenMap] = useState<boolean>(false);
     const application = capabilities.application;
     if (!capabilities || !application) {
         return <Typography>Loading...</Typography>;
     }
 
+    const handleClose = () => {
+        setOpenMap(false);
+    };
+
     return (
         <>
-        <Drawer
-            sx={drawerStyle}
-            PaperProps={{ sx: {backgroundColor: "#F9F9F9"}}}
-            variant="temporary"
-            anchor="right"
-            open={open}
-            onClose={handleMoreClose}
-        >
-            <Toolbar/>
-            <Box sx={{padding: 1}}>
-                <List>
-                    <ListItem sx={{justifyContent: "flex-end"}}>
-                        <IconButton onClick={handleMoreClose}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </ListItem>
-                    <ListItem>
-                        <StyledHeaderBox>
-                            <Typography>Capabilities details</Typography>
-                        </StyledHeaderBox>
-                    </ListItem>
-                    <ListItem>
-                        <StyledCard variant="outlined">
-                            <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                                <Box>
-                                    <ListItemText primary={"ID"} secondary={capabilities.id}/>
+            <Drawer
+                sx={drawerStyle}
+                PaperProps={{sx: {backgroundColor: "#F9F9F9"}}}
+                variant="temporary"
+                anchor="right"
+                open={open}
+                onClose={handleMoreClose}
+            >
+                <Toolbar/>
+                <Box sx={{padding: 1}}>
+                    <List>
+                        <ListItem sx={{justifyContent: "flex-end"}}>
+                            <IconButton onClick={handleMoreClose}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </ListItem>
+                        <ListItem>
+                            <StyledHeaderBox>
+                                <Typography>Capabilities details</Typography>
+                            </StyledHeaderBox>
+                        </ListItem>
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                                    <Box>
+                                        <ListItemText primary={"ID"} secondary={capabilities.id}/>
+                                    </Box>
+                                    <Box>
+                                        <ListItemText
+                                            primary={"Last updated"}
+                                            secondary={capabilities.createdTimestamp}
+                                        />
+                                    </Box>
                                 </Box>
-                                <Box>
-                                    <ListItemText
-                                        primary={"Last updated"}
-                                        secondary={capabilities.createdTimestamp}
-                                    />
-                                </Box>
-                            </Box>
-                        </StyledCard>
-                    </ListItem>
-                    <ListItem>
-                        <StyledCard variant="outlined">
-                            <Typography>Publisher</Typography>
-                            <FormControl fullWidth>
-                                <TextField
-                                    value={application.publisherId}
-                                    label="Publisher ID"
-                                    margin="normal"
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <ContentCopy value={application.publisherId} />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                                <TextField
-                                    value={application.publicationId}
-                                    label="Publication ID"
-                                    margin="normal"
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <ContentCopy value={application.publicationId} />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                                {application.publicationType && (
+                            </StyledCard>
+                        </ListItem>
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Typography>Publisher</Typography>
+                                <FormControl fullWidth>
                                     <TextField
-                                        value={application.publicationType}
-                                        label="Publication type"
+                                        value={application.publisherId}
+                                        label="Publisher ID"
                                         margin="normal"
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={application.publicationType} />
+                                                        <ContentCopy value={application.publisherId}/>
                                                     </InputAdornment>
                                                 ),
                                             },
                                         }}
                                     />
-                                )}
-                                {application.publisherName && (
                                     <TextField
-                                        value={application.publisherName}
-                                        label="Publisher name"
+                                        value={application.publicationId}
+                                        label="Publication ID"
                                         margin="normal"
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={application.publisherName} />
+                                                        <ContentCopy value={application.publicationId}/>
                                                     </InputAdornment>
                                                 ),
                                             },
                                         }}
                                     />
-                                )}
-                                <TextField
-                                    value={application.originatingCountry}
-                                    label="Originating Country"
-                                    margin="normal"
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <ContentCopy value={application.originatingCountry} />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </FormControl>
-                        </StyledCard>
-                    </ListItem>
+                                    {application.publicationType && (
+                                        <TextField
+                                            value={application.publicationType}
+                                            label="Publication type"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={application.publicationType}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {application.publisherName && (
+                                        <TextField
+                                            value={application.publisherName}
+                                            label="Publisher name"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={application.publisherName}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    <TextField
+                                        value={application.originatingCountry}
+                                        label="Originating Country"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={application.originatingCountry}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                </FormControl>
+                            </StyledCard>
+                        </ListItem>
 
-                    <ListItem>
-                        <StyledCard variant="outlined">
-                            <Typography>Message</Typography>
-                            <FormControl fullWidth>
-                                <TextField
-                                    value={application.messageType}
-                                    label="Message Type"
-                                    margin="normal"
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <ContentCopy value={application.messageType} />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                                <TextField
-                                    value={application.protocolVersion}
-                                    label="Protocol Version"
-                                    margin="normal"
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <ContentCopy value={application.protocolVersion} />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </FormControl>
-                        </StyledCard>
-                    </ListItem>
-                    <ListItem>
-                        <StyledCard variant="outlined">
-                            <Typography>Quadtree</Typography>
-                            <FormControl
-                                fullWidth
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center"
-                                }}
-                            >
-                                <TextField
-                                    value={application.quadTree}
-                                    label="Hash"
-                                    margin="normal"
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Typography>Message</Typography>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        value={application.messageType}
+                                        label="Message Type"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={application.messageType}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                    <TextField
+                                        value={application.protocolVersion}
+                                        label="Protocol Version"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={application.protocolVersion}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+
+                                </FormControl>
+                            </StyledCard>
+                        </ListItem>
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Typography>Quadtree</Typography>
+                                <FormControl
+                                    fullWidth
                                     sx={{
-                                        flexGrow: 1,
-                                        marginRight: 1
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        alignItems: "center"
                                     }}
-                                />
-                                <StyledButton
-                                    sx={{mt:2.75}}
-                                    variant="outlined"
                                 >
-                                    Show map
-                                </StyledButton>
-                            </FormControl>
-                        </StyledCard>
-                    </ListItem>
-            </List>
-        </Box>
-        </Drawer>
-</>
-);
+                                    <TextField
+                                        value={application.quadTree}
+                                        label="Hash"
+                                        margin="normal"
+                                        sx={{
+                                            flexGrow: 1,
+                                            marginRight: 1
+                                        }}
+                                    />
+                                    <StyledButton
+                                        sx={{mt: 2.75}}
+
+                                        variant="outlined"
+                                        onClick={() => setOpenMap(true)}
+                                    >
+                                        Show map
+                                    </StyledButton>
+                                </FormControl>
+                            </StyledCard>
+                        </ListItem>
+                    </List>
+                </Box>
+            </Drawer>
+            <MapDialog
+                open={openMap}
+                onClose={handleClose}
+                quadtree={application.quadTree}
+                interactive={false}
+            />
+        </>
+    );
 };
 
 
