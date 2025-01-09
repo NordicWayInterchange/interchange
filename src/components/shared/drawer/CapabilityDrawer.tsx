@@ -12,6 +12,7 @@ import {drawerStyle, StyledButton, StyledCard, StyledHeaderBox} from "@/componen
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Capability} from "@/types/neighbours";
 import MapDialog from "@/components/map/MapDialog";
+import {extractMatchingCauseCodes} from "@/lib/extractMatchingCauseCodes";
 
 type Props = {
     capabilities: Capability;
@@ -29,6 +30,8 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
     const handleClose = () => {
         setOpenMap(false);
     };
+
+    const causeCode = extractMatchingCauseCodes(application?.causeCode);
 
     return (
         <>
@@ -182,7 +185,34 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             },
                                         }}
                                     />
+                                    {causeCode.length > 0 && (
+                                        <FormControl margin="normal">
+                                            <InputLabel>Cause codes</InputLabel>
+                                            <Select
+                                                MenuProps={{PaperProps: {sx: {maxHeight: 200}}}}
+                                                label="Cause codes"
+                                                multiple
+                                                defaultValue={causeCode.map(
+                                                    (cause) => {
+                                                        return cause["value"];
+                                                    }
+                                                )}
+                                            >
+                                                {causeCode.map((cause, index) => {
+                                                    return (
+                                                        <StyledMenuItem
+                                                            disabled
+                                                            key={index}
+                                                            value={cause.value}
+                                                        >
+                                                            {cause.value}: {cause.label}
+                                                        </StyledMenuItem>
+                                                    );
+                                                })}
 
+                                            </Select>
+                                        </FormControl>
+                                    )}
                                 </FormControl>
                             </StyledCard>
                         </ListItem>

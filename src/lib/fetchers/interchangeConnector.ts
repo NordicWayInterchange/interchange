@@ -14,9 +14,6 @@ const fetchIXN: (
     const uri = process.env.INTERCHANGE_URI || "";
     const uriPath = `${actorCommonName}${path}`;
     const params: { selector?: string } = {};
-    if (selector) {
-        params.selector = selector;
-    }
     try {
     return await axios.get(uri + uriPath, {
         params,
@@ -39,11 +36,6 @@ const fetchIXN: (
 
 export type basicGetParams = {
     actorCommonName: string;
-    selector?: string;
-};
-export type extendedGetParams = {
-    actorCommonName: string;
-    pathParam?: string;
     selector?: string;
 };
 
