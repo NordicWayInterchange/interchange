@@ -199,7 +199,7 @@ public class ServiceProvider {
 
 	public Set<LocalSubscription> legalSubscriptions(){
 		return subscriptions.stream()
-				.filter(sub -> LocalSubscriptionStatus.isAlive(sub.getStatus()) || sub.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP))
+				.filter(sub -> LocalSubscriptionStatus.isAlive(sub.getStatus()))
 				.collect(Collectors.toSet());
 	}
 	public Set<LocalSubscription> activeSubscriptions() {

@@ -76,10 +76,9 @@ public class ServiceProviderRouter {
                     qpidClient.removeMemberFromGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
-
             serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
-            serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
+            serviceProvider = syncLocalsubscriptionsToAllCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
     }
@@ -124,7 +123,6 @@ public class ServiceProviderRouter {
         }
     }
 
-    // Rename?? Remove endpoints, queues e.l.
     private void onTearDown(ServiceProvider serviceProvider, LocalSubscription subscription, QpidDelta delta) {
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
@@ -161,7 +159,6 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
-    // RENAME??? Create queue e.l.
     private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
@@ -372,7 +369,6 @@ public class ServiceProviderRouter {
         Set<Capability> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
-
         if (!tearDownCapabilities.isEmpty()) {
             for (Capability capability : tearDownCapabilities) {
                 if (capability.hasShards()) {
@@ -502,55 +498,11 @@ public class ServiceProviderRouter {
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
     }
 
-    public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
-        if (serviceProvider.hasLegalSubscriptions()) {
-            Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-            Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
-            for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
-                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    Set<String> existingConnections = subscription.getConnections().stream()
-                            .map(LocalConnection::getSource)
-                            .collect(Collectors.toSet());
-                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
-                    if(!matchingCapabilities.isEmpty()) {
-                        for (Capability capability : matchingCapabilities) {
-                            for (CapabilityShard shard : capability.getShards()) {
-                                if (!existingConnections.contains(shard.getExchangeName())) {
-                                    if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
-                                        if (subscription.getLocalEndpoints().isEmpty()) {
-                                            String queueName = "loc-" + UUID.randomUUID().toString();
-                                            LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()));
-                                            subscription.getLocalEndpoints().add(endpoint);
-                                            onRequested(serviceProvider.getName(), subscription, qpidClient.getQpidDelta());
-                                        }
-                                        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                        qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-                                        delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
-                                        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
-                                        subscription.addConnection(connection);
-                                        subscription.setStatus(LocalSubscriptionStatus.CREATED);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        subscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
-                    }
-                }
-            }
-            serviceProvider = repository.save(serviceProvider);
-        }
-        return serviceProvider;
-    }
-
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
         Set<String> existingConnections = new HashSet<>();
         for (Capability cap : capabilities) {
             existingConnections.addAll(cap.getExchangesFromShards());
         }
-
         Set<LocalConnection> unwantedConnections = new HashSet<>();
         for (LocalConnection connection : subscription.getConnections()) {
             if (!existingConnections.contains(connection.getSource())) {
@@ -558,5 +510,51 @@ public class ServiceProviderRouter {
             }
         }
         subscription.getConnections().removeAll(unwantedConnections);
+    }
+
+    public ServiceProvider syncLocalsubscriptionsToAllCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
+        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        for (LocalSubscription localSubscription : serviceProvider.getSubscriptions().stream().filter(LocalSubscription::isSubscriptionWanted).collect(Collectors.toSet())) {
+            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, localSubscription.getSelector());
+            List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+            if (matches.isEmpty() && matchingCapabilities.isEmpty()) {
+                localSubscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
+                localSubscription.getLocalEndpoints().clear();
+            } else {
+                if (localSubscription.getLocalEndpoints().isEmpty()) {
+                    String queueName = "loc-" + UUID.randomUUID();
+                    LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()));
+                    localSubscription.getLocalEndpoints().add(endpoint);
+                    onRequested(serviceProvider.getName(), localSubscription, delta);
+                    localSubscription.setStatus(LocalSubscriptionStatus.CREATED);
+                }
+            }
+            syncLocalsubscriptionToServiceProviderCapabilities(localSubscription, serviceProvider, matchingCapabilities, delta, serviceProviders);
+        }
+        return repository.save(serviceProvider);
+    }
+
+    public void syncLocalsubscriptionToServiceProviderCapabilities(LocalSubscription subscription, ServiceProvider serviceProvider, Set<Capability> matchingCapabilities, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
+        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
+        if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+            Set<String> existingConnections = subscription.getConnections().stream()
+                    .map(LocalConnection::getSource)
+                    .collect(Collectors.toSet());
+            for (Capability capability : matchingCapabilities) {
+                for (CapabilityShard shard : capability.getShards()) {
+                    if (!existingConnections.contains(shard.getExchangeName())) {
+                        if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
+                            LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                            qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+                            delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
+                            LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
+                            subscription.addConnection(connection);
+                            subscription.setStatus(LocalSubscriptionStatus.CREATED);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
