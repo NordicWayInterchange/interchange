@@ -1099,7 +1099,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalsubscriptionsToAllCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
-		verify(serviceProviderRepository, times(2)).save(any());
+		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
@@ -1147,7 +1147,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalsubscriptionsToAllCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
 
-		verify(serviceProviderRepository, times(2)).save(any());
+		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
