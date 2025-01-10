@@ -568,7 +568,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
 		SSLContext kingGustafSslContext = sslClientContext(stores,"king_gustaf");
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
-		System.out.println(king_gustaf.getCapabilities().getCapabilities());
 		Set<LocalEndpoint> sinkEndpoints = king_gustaf.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(sinkEndpoints).hasSize(1);
 
