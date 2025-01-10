@@ -185,27 +185,27 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             },
                                         }}
                                     />
-                                    {causeCode.length > 0 && (
+                                    {causeCode?.length > 0 && (
                                         <FormControl margin="normal">
                                             <InputLabel>Cause codes</InputLabel>
                                             <Select
                                                 MenuProps={{PaperProps: {sx: {maxHeight: 200}}}}
                                                 label="Cause codes"
                                                 multiple
-                                                defaultValue={causeCode.map(
+                                                defaultValue={causeCode?.map(
                                                     (cause) => {
                                                         return cause["value"];
                                                     }
                                                 )}
                                             >
-                                                {causeCode.map((cause, index) => {
+                                                {causeCode?.map((cause, index) => {
                                                     return (
                                                         <StyledMenuItem
                                                             disabled
                                                             key={index}
                                                             value={cause.value}
                                                         >
-                                                            {cause.value}: {cause.label}
+                                                            {cause.value}{cause.label ? ':' : ''} {cause.label}
                                                         </StyledMenuItem>
                                                     );
                                                 })}
