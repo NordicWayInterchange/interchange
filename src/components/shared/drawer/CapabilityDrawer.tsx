@@ -185,7 +185,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             },
                                         }}
                                     />
-                                    {causeCode?.length > 0 && (
+                                    {causeCode && causeCode.length > 0 && (
                                         <FormControl margin="normal">
                                             <InputLabel>Cause codes</InputLabel>
                                             <Select
