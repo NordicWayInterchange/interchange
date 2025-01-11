@@ -359,6 +359,26 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingCapabilityWithInvalidXThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
+                new MetadataApi()
+        );
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setPublisherId("DK12345");
+        capabilitiesRequest.getApplication().setOriginatingCountry("NOK");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setOriginatingCountry("NO");
+        capabilitiesRequest.getApplication().setProtocolVersion("*!!!");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setProtocolVersion("protocolVersion");
+        capabilitiesRequest.getApplication().setPublicationId("DK12345-publicationId");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+
+    }
+
+    @Test
     public void testIllegalCharsInPathVariable(){
         String illegal1 = "s*";
         String legal = "s@_-.A0S5S";
