@@ -359,7 +359,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingCapabilityWithInvalidXThrowsException(){
+    public void testAddingCapabilityWithInvalidPropertiesThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
                 new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
