@@ -29,12 +29,14 @@ public class AdminRestController {
 
     private Logger logger = LoggerFactory.getLogger(AdminRestController.class);
 
+    private QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, CertService certService, AdminProperties adminProperties){
+    public AdminRestController(NeighbourRepository neighbourRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
         this.neighbourRepository = neighbourRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
+        this.qpidService = qpidService;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,5 +45,19 @@ public class AdminRestController {
         logger.info("List neighbours for admin user {}", adminUser);
         List<Neighbour> neighbourList = neighbourRepository.findAll();
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("Log - exchange exists - requesting user {}", adminUser);
+        return qpidService.exchangeExists(exchangeName);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues/{queueName}")
+    public Object queueExists(@PathVariable("adminUser") String adminUser, @PathVariable("queueName") String queueName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("Log - queue exists - requesting user {}", adminUser);
+        return qpidService.queueExists(queueName);
     }
 }
