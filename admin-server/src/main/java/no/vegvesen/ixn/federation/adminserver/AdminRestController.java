@@ -34,13 +34,15 @@ public class AdminRestController {
 
     private Logger logger = LoggerFactory.getLogger(AdminRestController.class);
 
+    private QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
+        this.qpidService = qpidService;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,5 +59,19 @@ public class AdminRestController {
         logger.info("List service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("Log - exchange exists - requesting user {}", adminUser);
+        return qpidService.exchangeExists(exchangeName);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues/{queueName}")
+    public Object queueExists(@PathVariable("adminUser") String adminUser, @PathVariable("queueName") String queueName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("Log - queue exists - requesting user {}", adminUser);
+        return qpidService.queueExists(queueName);
     }
 }
