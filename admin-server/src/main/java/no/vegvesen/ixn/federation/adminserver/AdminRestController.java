@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import no.vegvesen.ixn.federation.adminserver.model.NeighbourApi;
+import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import no.vegvesen.ixn.federation.adminserver.model.*;
+import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 

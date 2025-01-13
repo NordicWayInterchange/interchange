@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.model;
+package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
