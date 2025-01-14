@@ -1,12 +1,13 @@
 package no.vegvesen.ixn.federation.adminserver.model;
-import no.vegvesen.ixn.napcore.model.DeliveryStatus;
+import no.vegvesen.ixn.federation.adminserver.InterchangeDeliveryStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class InterchangeDeliveryApi {
     private String id;
 
-    private DeliveryStatus status;
+    private InterchangeDeliveryStatus status;
 
     private String selector;
 
@@ -17,7 +18,7 @@ public class InterchangeDeliveryApi {
     public InterchangeDeliveryApi() {
     }
 
-    public InterchangeDeliveryApi(String id, String selector, DeliveryStatus status, List<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public InterchangeDeliveryApi(String id, String selector, InterchangeDeliveryStatus status, List<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
@@ -41,11 +42,11 @@ public class InterchangeDeliveryApi {
         this.selector = selector;
     }
 
-    public DeliveryStatus getStatus() {
+    public InterchangeDeliveryStatus getStatus() {
         return status;
     }
 
-    public void setStatus(DeliveryStatus status) {
+    public void setStatus(InterchangeDeliveryStatus status) {
         this.status = status;
     }
 
