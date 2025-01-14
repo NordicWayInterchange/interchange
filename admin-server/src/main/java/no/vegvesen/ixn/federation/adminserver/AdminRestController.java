@@ -47,7 +47,7 @@ public class AdminRestController {
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}")
     public Object exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - exchange exists - requesting user {}", adminUser);
