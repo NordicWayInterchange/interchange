@@ -1,68 +1,81 @@
 package no.vegvesen.ixn.federation.adminserver.model;
-
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-
-import java.util.Set;
+import no.vegvesen.ixn.napcore.model.DeliveryStatus;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InterchangeDeliveryApi {
-    private Integer id;
+    private String id;
 
-    private ApplicationApi application;
+    private DeliveryStatus status;
 
-    private MetadataApi metadata;
+    private String selector;
 
-    private Long createdTimestamp;
+    private List<InterchangeDeliveryEndpointApi> endpoints = new ArrayList<>();
+
+    private Long lastUpdatedTimestamp;
 
     public InterchangeDeliveryApi() {
     }
 
-    public InterchangeDeliveryApi(Integer id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
+    public InterchangeDeliveryApi(String id, String selector, DeliveryStatus status, List<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
-        this.application = application;
-        this.metadata = metadata;
-        this.createdTimestamp = createdTimestamp;
+        this.selector = selector;
+        this.status = status;
+        this.endpoints = endpoints;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public ApplicationApi getApplication() {
-        return application;
+    public String getSelector() {
+        return selector;
     }
 
-    public void setApplication(ApplicationApi application) {
-        this.application = application;
+    public void setSelector(String selector) {
+        this.selector = selector;
     }
 
-    public MetadataApi getMetadata() {
-        return metadata;
+    public DeliveryStatus getStatus() {
+        return status;
     }
 
-    public void setMetadata(MetadataApi metadata) {
-        this.metadata = metadata;
+    public void setStatus(DeliveryStatus status) {
+        this.status = status;
     }
 
-    public Long getCreatedTimestamp() {
-        return createdTimestamp;
+    public List<InterchangeDeliveryEndpointApi> getEndpoints() {
+        return endpoints;
     }
 
-    public void setCreatedTimestamp(Long createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
+    public void setEndpoints(List<InterchangeDeliveryEndpointApi> endpoints) {
+        this.endpoints.clear();
+        if(endpoints != null){
+            this.endpoints.addAll(endpoints);
+        }
+    }
+
+    public Long getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     @Override
     public String toString() {
         return "InterchangeDeliveryApi{" +
                 "id=" + id +
-                ", application=" + application +
-                ", metadata=" + metadata +
-                ", createdTimestamp=" + createdTimestamp +
-                '}';
+                ", status=" + status +
+                ", selector='" + selector + '\'' +
+                ", endpoints=" + endpoints  +
+                ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
+                "}";
     }
 }

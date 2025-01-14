@@ -4,40 +4,34 @@ import java.util.Set;
 
 public class InterchangeSubscriptionApi {
 
-    private Integer subreq_id;
+    private String id;
 
     private InterchangeSubscriptionStatusApi subscriptionStatus;
 
     private String selector;
 
-    private String path;
-
-    private String consumerCommonName;
-
-    private Set<InterchangeEndpointApi> endpoints;
+    private Set<InterchangeSubscriptionEndpointApi> endpoints;
 
     private Long lastUpdatedTimestamp;
 
     public InterchangeSubscriptionApi() {
     }
 
-    public InterchangeSubscriptionApi(Integer subreq_id, InterchangeSubscriptionStatusApi subscriptionStatus, String selector, String path, String consumerCommonName, Set<InterchangeEndpointApi> endpoints, Long lastUpdatedTimestamp) {
-        this.subreq_id = subreq_id;
+    public InterchangeSubscriptionApi(String id, InterchangeSubscriptionStatusApi subscriptionStatus, String selector, Set<InterchangeSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+        this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
 
-    public Integer getSubreq_id() {
-        return subreq_id;
+    public String getId() {
+        return id;
     }
 
-    public void setSubreq_id(Integer subreq_id) {
-        this.subreq_id = subreq_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
 
@@ -57,27 +51,12 @@ public class InterchangeSubscriptionApi {
         this.selector = selector;
     }
 
-    public String getPath() {
-        return path;
-    }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getConsumerCommonName() {
-        return consumerCommonName;
-    }
-
-    public void setConsumerCommonName(String consumerCommonName) {
-        this.consumerCommonName = consumerCommonName;
-    }
-
-    public Set<InterchangeEndpointApi> getEndpoints() {
+    public Set<InterchangeSubscriptionEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<InterchangeEndpointApi> endpoints) {
+    public void setEndpoints(Set<InterchangeSubscriptionEndpointApi> endpoints) {
         this.endpoints = endpoints;
     }
 
@@ -92,11 +71,9 @@ public class InterchangeSubscriptionApi {
     @Override
     public String toString() {
         return "InterchangeSubscriptionApi{" +
-                "id=" + subreq_id +
+                "id=" + id +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +
-                ", path='" + path + '\'' +
-                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", endpoints=" + endpoints +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';

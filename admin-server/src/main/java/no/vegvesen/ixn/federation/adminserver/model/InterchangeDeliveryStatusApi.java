@@ -6,5 +6,4 @@ public enum InterchangeDeliveryStatusApi {
     ILLEGAL,
     NOT_VALID,
     NO_OVERLAP
-
 }

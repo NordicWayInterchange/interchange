@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
-public class InterchangeSubscriptionStatusApi {
+public enum InterchangeSubscriptionStatusApi {
     REQUESTED,
     CREATED,
     ILLEGAL,
