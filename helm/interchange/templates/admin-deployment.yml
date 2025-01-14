@@ -33,6 +33,8 @@ spec:
               value: {{ .Values.postgres_password }}
             - name: SERVER_NAME
               value: {{ .Values.external_name | quote }}
+            - name: BASE_URL
+              value: https://{{ .Release.Name }}-qpid-http
             - name: SP_CHNL_PORT
               value: {{ .Values.self.admin_port | quote }}
             - name: TRUST_STORE
