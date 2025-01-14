@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 import no.vegvesen.ixn.federation.adminserver.InterchangeDeliveryStatus;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class InterchangeDeliveryApi {
     private String id;
@@ -11,14 +10,15 @@ public class InterchangeDeliveryApi {
 
     private String selector;
 
-    private List<InterchangeDeliveryEndpointApi> endpoints = new ArrayList<>();
+    private Set<InterchangeDeliveryEndpointApi> endpoints = new HashSet<>();
 
     private Long lastUpdatedTimestamp;
 
     public InterchangeDeliveryApi() {
     }
 
-    public InterchangeDeliveryApi(String id, String selector, InterchangeDeliveryStatus status, List<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public InterchangeDeliveryApi(String id, String selector, InterchangeDeliveryStatus status,
+                                  Set<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
@@ -50,11 +50,11 @@ public class InterchangeDeliveryApi {
         this.status = status;
     }
 
-    public List<InterchangeDeliveryEndpointApi> getEndpoints() {
+    public Set<InterchangeDeliveryEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(List<InterchangeDeliveryEndpointApi> endpoints) {
+    public void setEndpoints(Set<InterchangeDeliveryEndpointApi> endpoints) {
         this.endpoints.clear();
         if(endpoints != null){
             this.endpoints.addAll(endpoints);

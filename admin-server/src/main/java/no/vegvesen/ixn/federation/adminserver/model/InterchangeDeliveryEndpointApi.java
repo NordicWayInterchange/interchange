@@ -16,12 +16,12 @@ public class InterchangeDeliveryEndpointApi {
     private Integer maxMessageRate;
     public InterchangeDeliveryEndpointApi() {}
 
-    public InterchangeDeliveryEndpointApi(Integer id, String host, Integer port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
-        this.id = id;
+    public InterchangeDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+        //this.id = id;
         this.host = host;
         this.port = port;
         this.target = target;
-        this.selector = selector;
+        //this.selector = selector; @ToDo: add selector?
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
@@ -85,11 +85,9 @@ public class InterchangeDeliveryEndpointApi {
     @Override
     public String toString() {
         return "InterchangeDeliveryEndpointApi{" +
-                "id='" + id + '\'' +
                 "host='" + host + "'" +
                 "port=" + port +
                 "target='" + target + "'" +
-                "selector='" + selector + "'" +
                 "maxBandwidth=" + maxBandwidth +
                 "maxMessageRate=" + maxMessageRate +
                 "}";

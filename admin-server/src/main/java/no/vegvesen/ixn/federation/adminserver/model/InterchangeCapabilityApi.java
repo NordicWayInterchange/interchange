@@ -2,21 +2,23 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.model.capability.Application;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 
 public class InterchangeCapabilityApi {
 
     private Integer id;
 
-    private ApplicationApi application;
+    private Application application;
 
-    private MetadataApi metadata;
+    private Metadata metadata;
 
     private Long createdTimestamp;
 
     public InterchangeCapabilityApi() {
     }
 
-    public InterchangeCapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
+    public InterchangeCapabilityApi(Integer id, Application application, Metadata metadata, Long createdTimestamp) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
@@ -31,19 +33,19 @@ public class InterchangeCapabilityApi {
         this.id = id;
     }
 
-    public ApplicationApi getApplication() {
+    public Application getApplication() {
         return application;
     }
 
-    public void setApplication(ApplicationApi application) {
+    public void setApplication(Application application) {
         this.application = application;
     }
 
-    public MetadataApi getMetadata() {
+    public Metadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(MetadataApi metadata) {
+    public void setMetadata(Metadata metadata) {
         this.metadata = metadata;
     }
 

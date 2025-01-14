@@ -1,15 +1,23 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
+import java.util.Set;
+
 public class InterchangeApi {
 
-    private InterchangeCapabilityApi capabilities;
+    private Set<InterchangeSubscriptionApi> subscriptions;
 
-    private InterchangeSubscriptionApi subscriptions;
+    private Set<InterchangeCapabilityApi> capabilities;
 
-    private InterchangeDeliveryApi deliveries;
+    private Set<InterchangeDeliveryApi> deliveries;
+
+    private InterchangeServiceProvider interchangeServiceProvider;
 
 
-    public InterchangeApi(InterchangeCapabilityApi capabilities, InterchangeSubscriptionApi subscriptions, InterchangeDeliveryApi deliveries) {
+    public InterchangeApi(
+            Set<InterchangeSubscriptionApi> subscriptions,
+            Set<InterchangeCapabilityApi> capabilities,
+            Set<InterchangeDeliveryApi> deliveries) {
+        this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
     }
@@ -18,28 +26,28 @@ public class InterchangeApi {
 
     }
 
-    public InterchangeCapabilityApi getInterchangeCapabilityApi() {
-        return capabilities;
-    }
-
-    public void setInterchangeCapabilityApi(InterchangeCapabilityApi capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    public InterchangeDeliveryApi getInterchangeDeliveryApi() {
-        return deliveries;
-    }
-
-    public void setInterchangeDeliveryApi(InterchangeDeliveryApi deliveries) {
-        this.deliveries = deliveries;
-    }
-
-    public InterchangeSubscriptionApi getInterchangeSubscriptionApi() {
+    public Set<InterchangeSubscriptionApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setInterchangeSubscriptionApi(InterchangeSubscriptionApi subscriptions) {
+    public void setSubscriptions(Set<InterchangeSubscriptionApi> subscriptions) {
         this.subscriptions = subscriptions;
+    }
+
+    public Set<InterchangeCapabilityApi> getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(Set<InterchangeCapabilityApi> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    public Set<InterchangeDeliveryApi> getDeliveries() {
+        return deliveries;
+    }
+
+    public void setDeliveries(Set<InterchangeDeliveryApi> deliveries) {
+        this.deliveries = deliveries;
     }
 
     @Override
