@@ -11,8 +11,11 @@ public class InterchangeApi {
 
     public InterchangeApi(InterchangeCapabilityApi capabilities, InterchangeSubscriptionApi subscriptions, InterchangeDeliveryApi deliveries) {
         this.capabilities = capabilities;
-        this.subscriptions = subscriptions;
         this.deliveries = deliveries;
+    }
+
+    public InterchangeApi() {
+
     }
 
     public InterchangeCapabilityApi getInterchangeCapabilityApi() {

@@ -5,7 +5,9 @@ import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class AdminRestController {
 
     private final NeighbourRepository neighbourRepository;
 
+    private final ServiceProviderRepository serviceProviderRepository;
+
     private final CertService certService;
 
     private final AdminProperties adminProperties;
@@ -32,8 +36,9 @@ public class AdminRestController {
 
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, CertService certService, AdminProperties adminProperties){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties){
         this.neighbourRepository = neighbourRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
     }
@@ -50,5 +55,8 @@ public class AdminRestController {
     public List<InterchangeApi> getInterchange(@PathVariable("adminUser") String adminUser){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("List interchange for admin user {}", adminUser);
+
+        List<ServiceProvider> interchangeList = serviceProviderRepository.findAll();
+        return typeTransformer.interchangeListToInterchangeApiList(interchangeList);
     }
 }

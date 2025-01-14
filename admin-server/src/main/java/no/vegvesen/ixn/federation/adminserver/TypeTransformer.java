@@ -31,6 +31,15 @@ public class TypeTransformer {
         return neighbourApiList;
     }
 
+    public List<InterchangeApi> interchangeListToInterchangeApiList(List<ServiceProvider> interchangeList) {
+        List<InterchangeApi> interchangeApiList = new ArrayList<>();
+        for (ServiceProvider serviceProvider : interchangeList) {
+            Capabilities capabilities = serviceProvider.getCapabilities();
+            interchangeApiList.add(new InterchangeApi());
+        }
+        return interchangeApiList;
+    }
+
 
     public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status) {
         return ConnectionStatusApi.valueOf(status.toString());
@@ -77,6 +86,21 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
+    public Set<InterchangeSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
+        Set<InterchangeSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
+        for (LocalEndpoint endpoint : subscriptionLocalEndpointSet) {
+            endpointApiSet.add(new InterchangeSubscriptionEndpointApi(
+                    null,
+                    endpoint.getSource(),
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate()
+            ));
+        }
+        return endpointApiSet;
+    }
+
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
         if(subscriptionShard != null) {
             return new SubscriptionShardApi(
@@ -91,6 +115,10 @@ public class TypeTransformer {
         return SubscriptionStatusApi.valueOf(subscriptionStatus.toString());
     }
 
+    public InterchangeSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
+        return InterchangeSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
+    }
+
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
         return new NeighbourSubscriptionRequestApi(
                 subscriptionRequest.getSubreq_id(),
@@ -98,6 +126,22 @@ public class TypeTransformer {
                 localDateTimeToTimestamp(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
     }
+
+
+    public Set<InterchangeSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
+        Set<InterchangeSubscriptionApi> subscriptionApiSet = new HashSet<>();
+        for (LocalSubscription subscription : subscriptionSet) {
+            subscriptionApiSet.add(new InterchangeSubscriptionApi(
+                    subscription.getId().toString(),
+                    localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getSelector(),
+                    localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
+                    null
+            ));
+        }
+        return subscriptionApiSet;
+    }
+
 
     public Set<NeighbourSubscriptionApi> neighbourSubscriptionSetToNeighbourSubscriptionRequestApiSet(Set<NeighbourSubscription> neighbourSubscriptions) {
         Set<NeighbourSubscriptionApi> neighbourSubscriptionApiSet = new HashSet<>();
