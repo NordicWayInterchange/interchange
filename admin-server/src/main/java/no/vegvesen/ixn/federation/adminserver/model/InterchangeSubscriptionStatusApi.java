@@ -4,9 +4,7 @@ public enum InterchangeSubscriptionStatusApi {
     REQUESTED,
     CREATED,
     ILLEGAL,
-    NO_OVERLAP,
-    GIVE_UP,
-    FAILED,
+    ERROR,
     TEAR_DOWN,
     RESUBSCRIBE
 }

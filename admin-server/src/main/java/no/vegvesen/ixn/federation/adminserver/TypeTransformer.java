@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
@@ -34,8 +35,13 @@ public class TypeTransformer {
     public List<InterchangeApi> interchangeListToInterchangeApiList(List<ServiceProvider> interchangeList) {
         List<InterchangeApi> interchangeApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : interchangeList) {
-            Capabilities capabilities = serviceProvider.getCapabilities();
-            interchangeApiList.add(new InterchangeApi());
+            interchangeApiList.add(new InterchangeApi(
+                    localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
+                    null,
+                    //capablitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
+                    localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
+
+            );
         }
         return interchangeApiList;
     }
@@ -101,6 +107,33 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
+    public Set<InterchangeDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
+        Set<InterchangeDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
+        for (LocalDeliveryEndpoint endpoint : deliveryLocalEndpointSet) {
+            deliveryEndpointApiSet.add(new InterchangeDeliveryEndpointApi(
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getTarget(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate()
+            ));
+        }
+        return deliveryEndpointApiSet;
+    }
+
+    public Set<InterchangeCapabilityApi> capablitiesSetToCapabilitiesApiSet(Set<Capability> capabilitiesSet) {
+        Set<InterchangeCapabilityApi> capabilityApiSet = new HashSet<>();
+        for (Capability capability : capabilitiesSet) {
+            capabilityApiSet.add(new InterchangeCapabilityApi(
+                    capability.getId(),
+                    capability.getApplication(),
+                    capability.getMetadata(),
+                    null
+            ));
+        }
+        return capabilityApiSet;
+    }
+
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
         if(subscriptionShard != null) {
             return new SubscriptionShardApi(
@@ -117,6 +150,10 @@ public class TypeTransformer {
 
     public InterchangeSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
         return InterchangeSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
+    }
+
+    public InterchangeDeliveryStatus localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
+        return InterchangeDeliveryStatus.valueOf(localDeliveryStatus.toString());
     }
 
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
@@ -140,6 +177,21 @@ public class TypeTransformer {
             ));
         }
         return subscriptionApiSet;
+    }
+
+
+    public Set<InterchangeDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
+        Set<InterchangeDeliveryApi> deliveriesApiSet = new HashSet<>();
+        for (LocalDelivery delivery : deliveriesSet) {
+            deliveriesApiSet.add(new InterchangeDeliveryApi(
+                    delivery.getId().toString(),
+                    delivery.getSelector(),
+                    localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
+                    localDeliveryEndpointSetToEndpointApiSet(delivery.getEndpoints()),
+                    null
+            ));
+        }
+        return deliveriesApiSet;
     }
 
 

@@ -10,8 +10,6 @@ public class InterchangeApi {
 
     private Set<InterchangeDeliveryApi> deliveries;
 
-    private InterchangeServiceProvider interchangeServiceProvider;
-
 
     public InterchangeApi(
             Set<InterchangeSubscriptionApi> subscriptions,
