@@ -33,6 +33,12 @@ public class QpidService {
 
     public boolean bindingExists(String exchangeName, String queueName){
         QpidDelta delta = qpidClient.getQpidDelta();
-        return delta.exchangeHasBindingToQueue(exchangeName, queueName);
+        try{
+          boolean exists = delta.exchangeHasBindingToQueue(exchangeName, queueName);
+          return exists;
+        }
+        catch(Exception e){
+            return false;
+        }
     }
 }

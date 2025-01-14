@@ -95,6 +95,7 @@ public class TestSSLProperties {
 
 	private static String getFilePathFromClasspathResource(String classpathResource) {
 		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
+		System.out.println(classpathResource);
 		if (resource != null) {
 			return resource.getFile();
 		}
