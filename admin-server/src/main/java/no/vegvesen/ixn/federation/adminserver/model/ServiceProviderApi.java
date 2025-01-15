@@ -6,14 +6,14 @@ public class ServiceProviderApi {
 
     private Set<ServiceProviderSubscriptionApi> subscriptions;
 
-    private Set<ServiceProviderCapabilityApi> capabilities;
+    private ServiceProviderCapabilityApi capabilities;
 
     private Set<ServiceProviderDeliveryApi> deliveries;
 
 
     public ServiceProviderApi(
             Set<ServiceProviderSubscriptionApi> subscriptions,
-            Set<ServiceProviderCapabilityApi> capabilities,
+            ServiceProviderCapabilityApi capabilities,
             Set<ServiceProviderDeliveryApi> deliveries) {
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
@@ -32,11 +32,11 @@ public class ServiceProviderApi {
         this.subscriptions = subscriptions;
     }
 
-    public Set<ServiceProviderCapabilityApi> getCapabilities() {
+    public ServiceProviderCapabilityApi getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<ServiceProviderCapabilityApi> capabilities) {
+    public void setCapabilities(ServiceProviderCapabilityApi capabilities) {
         this.capabilities = capabilities;
     }
 

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
+import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.Application;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 
@@ -16,11 +17,10 @@ public class ServiceProviderCapabilityApi {
     public ServiceProviderCapabilityApi() {
     }
 
-    public ServiceProviderCapabilityApi(Integer id, Application application, Metadata metadata, Long createdTimestamp) {
-        this.id = id;
-        this.application = application;
-        this.metadata = metadata;
-        this.createdTimestamp = createdTimestamp;
+    private Capabilities capabilities;
+
+    public ServiceProviderCapabilityApi(Capabilities capabilities) {
+        this.capabilities = capabilities;
     }
 
     public Integer getId() {
@@ -55,13 +55,18 @@ public class ServiceProviderCapabilityApi {
         this.createdTimestamp = createdTimestamp;
     }
 
+    public void setCapabilities(Capabilities capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    public Capabilities getCapabilities() {
+        return capabilities;
+    }
+
     @Override
     public String toString() {
         return "ServiceProviderCapabilityApi{" +
-                "id=" + id +
-                ", application=" + application +
-                ", metadata=" + metadata +
-                ", createdTimestamp=" + createdTimestamp +
+                ", capabilities=" + capabilities +
                 '}';
     }
 }

@@ -37,14 +37,13 @@ public class TypeTransformer {
         for (ServiceProvider serviceProvider : serviceProviderList) {
             serviceProviderApiList.add(new ServiceProviderApi(
                     localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
-                    null,
-                    //capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
+                    capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
                     localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
             );
         }
         return serviceProviderApiList;
     }
-    
+
     public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status) {
         return ConnectionStatusApi.valueOf(status.toString());
     }
@@ -119,17 +118,8 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public Set<ServiceProviderCapabilityApi> capabilitiesSetToCapabilitiesApiSet(Set<Capability> capabilitiesSet) {
-        Set<ServiceProviderCapabilityApi> capabilityApiSet = new HashSet<>();
-        for (Capability capability : capabilitiesSet) {
-            capabilityApiSet.add(new ServiceProviderCapabilityApi(
-                    capability.getId(),
-                    capability.getApplication(),
-                    capability.getMetadata(),
-                    null
-            ));
-        }
-        return capabilityApiSet;
+    public ServiceProviderCapabilityApi capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
+           return new ServiceProviderCapabilityApi(capabilities);
     }
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {

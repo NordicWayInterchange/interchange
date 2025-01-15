@@ -2,14 +2,11 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 public class ServiceProviderDeliveryEndpointApi {
 
-    private Integer id;
     private String host;
 
     private Integer port;
 
     private String target;
-
-    private String selector;
 
     private Integer maxBandwidth;
 
@@ -21,17 +18,8 @@ public class ServiceProviderDeliveryEndpointApi {
         this.host = host;
         this.port = port;
         this.target = target;
-        //this.selector = selector; @ToDo: add selector?
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getHost() {
@@ -56,14 +44,6 @@ public class ServiceProviderDeliveryEndpointApi {
 
     public void setTarget(String target) {
         this.target = target;
-    }
-
-    public String getSelector() {
-        return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
     }
 
     public Integer getMaxBandwidth() {
