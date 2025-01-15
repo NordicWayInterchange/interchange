@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,8 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         QpidService.class,
         QpidClient.class,
         QpidClientConfig.class,
-        TestSSLConfig.class,
-        TestSSLProperties.class,
         RoutingConfigurerProperties.class,
 })
 public class QpidServiceIT extends QpidDockerBaseIT {
