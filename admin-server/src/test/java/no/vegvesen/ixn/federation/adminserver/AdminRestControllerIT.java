@@ -7,16 +7,17 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @SpringBootTest(classes = TestApplication.class)
@@ -24,6 +25,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     NeighbourRepository neighbourRepository;
+
+    @Autowired
+    ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
     AdminRestController restController;
@@ -37,6 +41,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Test
     public void repositoriesAreAutowired(){
         assertThat(neighbourRepository).isNotNull();
+        assertThat(serviceProviderRepository).isNotNull();
         assertThat(restController).isNotNull();
     }
     @Test
@@ -61,5 +66,23 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getNeighbours("adminUser")).isNotEmpty();
     }
 
+    @Test
+    public void testGetServiceProvider() {
+        String adminUser = "adminUser";
+        Set<LocalSubscription> subscriptionSet = new HashSet<>();
+        LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
+        LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
 
+        subscriptionSet.add(requestedSubscription);
+        subscriptionSet.add(createdSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                subscriptionSet
+        );
+
+        serviceProvider.addLocalSubscriptions(subscriptionSet);
+        serviceProviderRepository.save(serviceProvider);
+        assertThat(restController.getServiceProvider(adminUser)).isNotEmpty();
+        assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
+    }
 }
