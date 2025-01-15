@@ -40,13 +40,11 @@ public class TypeTransformer {
                     null,
                     //capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
                     localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
-
             );
         }
         return serviceProviderApiList;
     }
-
-
+    
     public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status) {
         return ConnectionStatusApi.valueOf(status.toString());
     }
@@ -173,7 +171,7 @@ public class TypeTransformer {
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
                     localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
-                    null
+                    localDateTimeToTimestamp(subscription.getLastUpdated())
             ));
         }
         return subscriptionApiSet;
@@ -188,7 +186,7 @@ public class TypeTransformer {
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
                     localDeliveryEndpointSetToEndpointApiSet(delivery.getEndpoints()),
-                    null
+                    localDateTimeToTimestamp(delivery.getLastUpdatedTimestamp())
             ));
         }
         return deliveriesApiSet;
