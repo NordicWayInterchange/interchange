@@ -1,11 +1,9 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.model.capability.Application;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 
-public class InterchangeCapabilityApi {
+public class ServiceProviderCapabilityApi {
 
     private Integer id;
 
@@ -15,10 +13,10 @@ public class InterchangeCapabilityApi {
 
     private Long createdTimestamp;
 
-    public InterchangeCapabilityApi() {
+    public ServiceProviderCapabilityApi() {
     }
 
-    public InterchangeCapabilityApi(Integer id, Application application, Metadata metadata, Long createdTimestamp) {
+    public ServiceProviderCapabilityApi(Integer id, Application application, Metadata metadata, Long createdTimestamp) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
@@ -59,7 +57,7 @@ public class InterchangeCapabilityApi {
 
     @Override
     public String toString() {
-        return "InterchangeCapabilityApi{" +
+        return "ServiceProviderCapabilityApi{" +
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +

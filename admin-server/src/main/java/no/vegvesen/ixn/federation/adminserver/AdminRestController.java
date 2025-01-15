@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import no.vegvesen.ixn.federation.adminserver.model.InterchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -51,12 +51,12 @@ public class AdminRestController {
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/interchange", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<InterchangeApi> getInterchange(@PathVariable("adminUser") String adminUser){
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProviderApi> getServiceProvider(@PathVariable("adminUser") String adminUser){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("List interchange for admin user {}", adminUser);
+        logger.info("List service provider for admin user {}", adminUser);
 
-        List<ServiceProvider> interchangeList = serviceProviderRepository.findAll();
-        return typeTransformer.interchangeListToInterchangeApiList(interchangeList);
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }
 }

@@ -1,24 +1,24 @@
 package no.vegvesen.ixn.federation.adminserver.model;
-import no.vegvesen.ixn.federation.adminserver.InterchangeDeliveryStatus;
+import no.vegvesen.ixn.federation.adminserver.ServiceProviderDeliveryStatus;
 
 import java.util.*;
 
-public class InterchangeDeliveryApi {
+public class ServiceProviderDeliveryApi {
     private String id;
 
-    private InterchangeDeliveryStatus status;
+    private ServiceProviderDeliveryStatus status;
 
     private String selector;
 
-    private Set<InterchangeDeliveryEndpointApi> endpoints = new HashSet<>();
+    private Set<ServiceProviderDeliveryEndpointApi> endpoints = new HashSet<>();
 
     private Long lastUpdatedTimestamp;
 
-    public InterchangeDeliveryApi() {
+    public ServiceProviderDeliveryApi() {
     }
 
-    public InterchangeDeliveryApi(String id, String selector, InterchangeDeliveryStatus status,
-                                  Set<InterchangeDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public ServiceProviderDeliveryApi(String id, String selector, ServiceProviderDeliveryStatus status,
+                                  Set<ServiceProviderDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
@@ -42,19 +42,19 @@ public class InterchangeDeliveryApi {
         this.selector = selector;
     }
 
-    public InterchangeDeliveryStatus getStatus() {
+    public ServiceProviderDeliveryStatus getStatus() {
         return status;
     }
 
-    public void setStatus(InterchangeDeliveryStatus status) {
+    public void setStatus(ServiceProviderDeliveryStatus status) {
         this.status = status;
     }
 
-    public Set<InterchangeDeliveryEndpointApi> getEndpoints() {
+    public Set<ServiceProviderDeliveryEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<InterchangeDeliveryEndpointApi> endpoints) {
+    public void setEndpoints(Set<ServiceProviderDeliveryEndpointApi> endpoints) {
         this.endpoints.clear();
         if(endpoints != null){
             this.endpoints.addAll(endpoints);
@@ -71,7 +71,7 @@ public class InterchangeDeliveryApi {
 
     @Override
     public String toString() {
-        return "InterchangeDeliveryApi{" +
+        return "ServiceProviderDeliveryApi{" +
                 "id=" + id +
                 ", status=" + status +
                 ", selector='" + selector + '\'' +

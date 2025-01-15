@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-public enum InterchangeDeliveryStatus {
+public enum ServiceProviderDeliveryStatus {
     REQUESTED,
     CREATED,
     ILLEGAL,

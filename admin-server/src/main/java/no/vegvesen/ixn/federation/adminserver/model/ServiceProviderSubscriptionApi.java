@@ -2,22 +2,22 @@ package no.vegvesen.ixn.federation.adminserver.model;
 
 import java.util.Set;
 
-public class InterchangeSubscriptionApi {
+public class ServiceProviderSubscriptionApi {
 
     private String id;
 
-    private InterchangeSubscriptionStatusApi subscriptionStatus;
+    private ServiceProviderSubscriptionStatusApi subscriptionStatus;
 
     private String selector;
 
-    private Set<InterchangeSubscriptionEndpointApi> endpoints;
+    private Set<ServiceProviderSubscriptionEndpointApi> endpoints;
 
     private Long lastUpdatedTimestamp;
 
-    public InterchangeSubscriptionApi() {
+    public ServiceProviderSubscriptionApi() {
     }
 
-    public InterchangeSubscriptionApi(String id, InterchangeSubscriptionStatusApi subscriptionStatus, String selector, Set<InterchangeSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public ServiceProviderSubscriptionApi(String id, ServiceProviderSubscriptionStatusApi subscriptionStatus, String selector, Set<ServiceProviderSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
@@ -35,11 +35,11 @@ public class InterchangeSubscriptionApi {
     }
 
 
-    public InterchangeSubscriptionStatusApi getSubscriptionStatus() {
+    public ServiceProviderSubscriptionStatusApi getSubscriptionStatus() {
         return subscriptionStatus;
     }
 
-    public void setSubscriptionStatus(InterchangeSubscriptionStatusApi subscriptionStatus) {
+    public void setSubscriptionStatus(ServiceProviderSubscriptionStatusApi subscriptionStatus) {
         this.subscriptionStatus = subscriptionStatus;
     }
 
@@ -52,11 +52,11 @@ public class InterchangeSubscriptionApi {
     }
 
 
-    public Set<InterchangeSubscriptionEndpointApi> getEndpoints() {
+    public Set<ServiceProviderSubscriptionEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<InterchangeSubscriptionEndpointApi> endpoints) {
+    public void setEndpoints(Set<ServiceProviderSubscriptionEndpointApi> endpoints) {
         this.endpoints = endpoints;
     }
 
@@ -70,7 +70,7 @@ public class InterchangeSubscriptionApi {
 
     @Override
     public String toString() {
-        return "InterchangeSubscriptionApi{" +
+        return "ServiceProviderSubscriptionApi{" +
                 "id=" + id +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +

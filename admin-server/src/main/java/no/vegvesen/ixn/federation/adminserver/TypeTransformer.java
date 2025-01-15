@@ -32,18 +32,18 @@ public class TypeTransformer {
         return neighbourApiList;
     }
 
-    public List<InterchangeApi> interchangeListToInterchangeApiList(List<ServiceProvider> interchangeList) {
-        List<InterchangeApi> interchangeApiList = new ArrayList<>();
-        for (ServiceProvider serviceProvider : interchangeList) {
-            interchangeApiList.add(new InterchangeApi(
+    public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
+        List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            serviceProviderApiList.add(new ServiceProviderApi(
                     localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
                     null,
-                    //capablitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
+                    //capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
                     localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
 
             );
         }
-        return interchangeApiList;
+        return serviceProviderApiList;
     }
 
 
@@ -92,10 +92,10 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
-    public Set<InterchangeSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
-        Set<InterchangeSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
+    public Set<ServiceProviderSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
+        Set<ServiceProviderSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
         for (LocalEndpoint endpoint : subscriptionLocalEndpointSet) {
-            endpointApiSet.add(new InterchangeSubscriptionEndpointApi(
+            endpointApiSet.add(new ServiceProviderSubscriptionEndpointApi(
                     null,
                     endpoint.getSource(),
                     endpoint.getHost(),
@@ -107,10 +107,10 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
-    public Set<InterchangeDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
-        Set<InterchangeDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
+    public Set<ServiceProviderDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
+        Set<ServiceProviderDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
         for (LocalDeliveryEndpoint endpoint : deliveryLocalEndpointSet) {
-            deliveryEndpointApiSet.add(new InterchangeDeliveryEndpointApi(
+            deliveryEndpointApiSet.add(new ServiceProviderDeliveryEndpointApi(
                     endpoint.getHost(),
                     endpoint.getPort(),
                     endpoint.getTarget(),
@@ -121,10 +121,10 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public Set<InterchangeCapabilityApi> capablitiesSetToCapabilitiesApiSet(Set<Capability> capabilitiesSet) {
-        Set<InterchangeCapabilityApi> capabilityApiSet = new HashSet<>();
+    public Set<ServiceProviderCapabilityApi> capabilitiesSetToCapabilitiesApiSet(Set<Capability> capabilitiesSet) {
+        Set<ServiceProviderCapabilityApi> capabilityApiSet = new HashSet<>();
         for (Capability capability : capabilitiesSet) {
-            capabilityApiSet.add(new InterchangeCapabilityApi(
+            capabilityApiSet.add(new ServiceProviderCapabilityApi(
                     capability.getId(),
                     capability.getApplication(),
                     capability.getMetadata(),
@@ -148,12 +148,12 @@ public class TypeTransformer {
         return SubscriptionStatusApi.valueOf(subscriptionStatus.toString());
     }
 
-    public InterchangeSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
-        return InterchangeSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
+    public ServiceProviderSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
+        return ServiceProviderSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
     }
 
-    public InterchangeDeliveryStatus localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
-        return InterchangeDeliveryStatus.valueOf(localDeliveryStatus.toString());
+    public ServiceProviderDeliveryStatus localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
+        return ServiceProviderDeliveryStatus.valueOf(localDeliveryStatus.toString());
     }
 
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
@@ -165,10 +165,10 @@ public class TypeTransformer {
     }
 
 
-    public Set<InterchangeSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
-        Set<InterchangeSubscriptionApi> subscriptionApiSet = new HashSet<>();
+    public Set<ServiceProviderSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
+        Set<ServiceProviderSubscriptionApi> subscriptionApiSet = new HashSet<>();
         for (LocalSubscription subscription : subscriptionSet) {
-            subscriptionApiSet.add(new InterchangeSubscriptionApi(
+            subscriptionApiSet.add(new ServiceProviderSubscriptionApi(
                     subscription.getId().toString(),
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
@@ -180,10 +180,10 @@ public class TypeTransformer {
     }
 
 
-    public Set<InterchangeDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
-        Set<InterchangeDeliveryApi> deliveriesApiSet = new HashSet<>();
+    public Set<ServiceProviderDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
+        Set<ServiceProviderDeliveryApi> deliveriesApiSet = new HashSet<>();
         for (LocalDelivery delivery : deliveriesSet) {
-            deliveriesApiSet.add(new InterchangeDeliveryApi(
+            deliveriesApiSet.add(new ServiceProviderDeliveryApi(
                     delivery.getId().toString(),
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),

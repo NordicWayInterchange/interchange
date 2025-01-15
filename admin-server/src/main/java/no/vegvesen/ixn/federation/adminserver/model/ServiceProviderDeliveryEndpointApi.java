@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
-public class InterchangeDeliveryEndpointApi {
+public class ServiceProviderDeliveryEndpointApi {
 
     private Integer id;
     private String host;
@@ -14,9 +14,9 @@ public class InterchangeDeliveryEndpointApi {
     private Integer maxBandwidth;
 
     private Integer maxMessageRate;
-    public InterchangeDeliveryEndpointApi() {}
+    public ServiceProviderDeliveryEndpointApi() {}
 
-    public InterchangeDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+    public ServiceProviderDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
         //this.id = id;
         this.host = host;
         this.port = port;
@@ -84,7 +84,7 @@ public class InterchangeDeliveryEndpointApi {
 
     @Override
     public String toString() {
-        return "InterchangeDeliveryEndpointApi{" +
+        return "ServiceProviderDeliveryEndpointApi{" +
                 "host='" + host + "'" +
                 "port=" + port +
                 "target='" + target + "'" +

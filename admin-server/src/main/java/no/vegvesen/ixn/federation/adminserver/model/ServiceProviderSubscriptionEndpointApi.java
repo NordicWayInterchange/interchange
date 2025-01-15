@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model;
 
-public class InterchangeSubscriptionEndpointApi {
+public class ServiceProviderSubscriptionEndpointApi {
 
     private Integer id;
 
@@ -14,9 +14,9 @@ public class InterchangeSubscriptionEndpointApi {
 
     private Integer maxMessageRate;
 
-    public InterchangeSubscriptionEndpointApi() {}
+    public ServiceProviderSubscriptionEndpointApi() {}
 
-    public InterchangeSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+    public ServiceProviderSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this.id = id;
         this.source = source;
         this.host = host;
@@ -75,7 +75,7 @@ public class InterchangeSubscriptionEndpointApi {
 
     @Override
     public String toString() {
-        return "InterchangeSubscriptionEndpointApi{" +
+        return "serviceProviderSubscriptionEndpointApi{" +
                 "id='" + id + '\'' +
                 ", source='" + source + '\'' +
                 ", host='" + host + '\'' +
