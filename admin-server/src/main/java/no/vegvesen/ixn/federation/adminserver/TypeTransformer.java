@@ -126,7 +126,7 @@ public class TypeTransformer {
         for (Capabilities capability : capabilitiesSet) {
             capabilityApiSet.add(new ServiceProviderCapabilityApi(
                     capability.getCapabilities(),
-                    localDateTimeToTimestamp(capability.getLastUpdated())
+                    localDateTimeToTimestamp(capability.getLastUpdated().orElse(null))
             ));
         }
         return capabilityApiSet;

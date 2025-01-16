@@ -8,7 +8,6 @@ import java.util.Set;
 
 public class ServiceProviderCapabilityApi {
 
-    private Integer id;
 
     private Long lastUpdated;
 
@@ -20,14 +19,6 @@ public class ServiceProviderCapabilityApi {
     public ServiceProviderCapabilityApi(Set<Capability> capabilities, Long lastUpdated) {
         this.capabilities = capabilities;
         this.lastUpdated = lastUpdated;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public void setCapabilities(Set<Capability>  capabilities) {
@@ -50,6 +41,7 @@ public class ServiceProviderCapabilityApi {
     public String toString() {
         return "ServiceProviderCapabilityApi{" +
                 ", capabilities=" + capabilities +
+                ", lastUpdatedTimestamp: " + lastUpdated +
                 '}';
     }
 }
