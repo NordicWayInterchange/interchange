@@ -14,7 +14,6 @@ public class ServiceProviderDeliveryEndpointApi {
     public ServiceProviderDeliveryEndpointApi() {}
 
     public ServiceProviderDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
-        //this.id = id;
         this.host = host;
         this.port = port;
         this.target = target;
