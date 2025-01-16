@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
+import no.vegvesen.ixn.testssl.SSLContextConfig;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -26,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         QpidClient.class,
         QpidClientConfig.class,
         RoutingConfigurerProperties.class,
+        SSLContextConfig.class,
+        TestSSLProperties.class
 })
 public class QpidServiceIT extends QpidDockerBaseIT {
 
