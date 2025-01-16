@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.model;
+package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.Application;
