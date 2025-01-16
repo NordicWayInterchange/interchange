@@ -10,19 +10,16 @@ public class ServiceProviderCapabilityApi {
 
     private Integer id;
 
-    private Application application;
-
-    private Metadata metadata;
-
-    private Long createdTimestamp;
+    private Long lastUpdated;
 
     public ServiceProviderCapabilityApi() {
     }
 
     private Set<Capability>  capabilities;
 
-    public ServiceProviderCapabilityApi(Set<Capability> capabilities) {
+    public ServiceProviderCapabilityApi(Set<Capability> capabilities, Long lastUpdated) {
         this.capabilities = capabilities;
+        this.lastUpdated = lastUpdated;
     }
 
     public Integer getId() {
@@ -33,36 +30,20 @@ public class ServiceProviderCapabilityApi {
         this.id = id;
     }
 
-    public Application getApplication() {
-        return application;
-    }
-
-    public void setApplication(Application application) {
-        this.application = application;
-    }
-
-    public Metadata getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Metadata metadata) {
-        this.metadata = metadata;
-    }
-
-    public Long getCreatedTimestamp() {
-        return createdTimestamp;
-    }
-
-    public void setCreatedTimestamp(Long createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
-    }
-
     public void setCapabilities(Set<Capability>  capabilities) {
         this.capabilities = capabilities;
     }
 
     public Set<Capability> getCapabilities() {
         return capabilities;
+    }
+
+    public Long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     @Override
