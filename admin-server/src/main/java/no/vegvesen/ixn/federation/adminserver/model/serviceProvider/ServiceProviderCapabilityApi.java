@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.Application;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+
+import java.util.Set;
 
 public class ServiceProviderCapabilityApi {
 
@@ -17,9 +19,9 @@ public class ServiceProviderCapabilityApi {
     public ServiceProviderCapabilityApi() {
     }
 
-    private Capabilities capabilities;
+    private Set<Capability>  capabilities;
 
-    public ServiceProviderCapabilityApi(Capabilities capabilities) {
+    public ServiceProviderCapabilityApi(Set<Capability> capabilities) {
         this.capabilities = capabilities;
     }
 
@@ -55,11 +57,11 @@ public class ServiceProviderCapabilityApi {
         this.createdTimestamp = createdTimestamp;
     }
 
-    public void setCapabilities(Capabilities capabilities) {
+    public void setCapabilities(Set<Capability>  capabilities) {
         this.capabilities = capabilities;
     }
 
-    public Capabilities getCapabilities() {
+    public Set<Capability> getCapabilities() {
         return capabilities;
     }
 

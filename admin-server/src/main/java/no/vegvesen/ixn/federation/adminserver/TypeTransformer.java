@@ -118,8 +118,17 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public ServiceProviderCapabilityApi capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
-           return new ServiceProviderCapabilityApi(capabilities);
+    public Set<ServiceProviderCapabilityApi> capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
+        Set<Capabilities> capabilitiesSet = new HashSet<>();
+        capabilitiesSet.add(capabilities);
+
+        Set<ServiceProviderCapabilityApi> capabilityApiSet = new HashSet<>();
+        for (Capabilities capability : capabilitiesSet) {
+            capabilityApiSet.add(new ServiceProviderCapabilityApi(
+                    capability.getCapabilities()
+            ));
+        }
+        return capabilityApiSet;
     }
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
