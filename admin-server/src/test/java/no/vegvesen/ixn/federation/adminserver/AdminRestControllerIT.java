@@ -13,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
@@ -36,16 +35,18 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     CertService certService;
 
     @Test
-    public void contextLoads(){}
+    public void contextLoads() {
+    }
 
     @Test
-    public void repositoriesAreAutowired(){
+    public void repositoriesAreAutowired() {
         assertThat(neighbourRepository).isNotNull();
         assertThat(serviceProviderRepository).isNotNull();
         assertThat(restController).isNotNull();
     }
+
     @Test
-    public void testGetNeighbours(){
+    public void testGetNeighbours() {
         String adminUser = "adminUser";
         Neighbour neighbour = new Neighbour(
                 "neighbour",
@@ -61,7 +62,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 )),
                 new SubscriptionRequest(),
                 new Connection()
-                );
+        );
         neighbourRepository.save(neighbour);
         assertThat(restController.getNeighbours("adminUser")).isNotEmpty();
     }
@@ -77,10 +78,12 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         subscriptionSet.add(createdSubscription);
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
-                subscriptionSet
+                new Capabilities(),
+                subscriptionSet,
+                Collections.emptySet(),
+                LocalDateTime.now()
         );
 
-        serviceProvider.addLocalSubscriptions(subscriptionSet);
         serviceProviderRepository.save(serviceProvider);
         assertThat(restController.getServiceProvider(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
