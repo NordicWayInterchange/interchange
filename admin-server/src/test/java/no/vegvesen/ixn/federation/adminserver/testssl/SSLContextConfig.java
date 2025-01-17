@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.testssl;
+package no.vegvesen.ixn.federation.adminserver.testssl;
 
 
 import no.vegvesen.ixn.federation.adminserver.TestSSLProperties;
