@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(classes = TestApplication.class)
@@ -30,6 +32,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @MockBean
     CertService certService;
+
+    @MockBean
+    QpidService qpidService;
 
     @Test
     public void contextLoads(){}
@@ -61,5 +66,21 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getNeighbours("adminUser")).isNotEmpty();
     }
 
+    @Test
+    public void testQueueExists(){
+        when(qpidService.queueExists(any())).thenReturn(true);
+        assertThat(restController.queueExists("adminUser", "queue")).isTrue();
+    }
 
+    @Test
+    public void testExchangeExists(){
+        when(qpidService.exchangeExists(any())).thenReturn(true);
+        assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
+    }
+
+    @Test
+    public void testBindingExists(){
+        when(qpidService.bindingExists(any(), any())).thenReturn(true);
+        assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
+    }
 }
