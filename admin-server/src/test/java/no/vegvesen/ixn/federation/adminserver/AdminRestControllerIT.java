@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(classes = TestApplication.class)
@@ -33,6 +35,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @MockBean
     CertService certService;
+
+    @MockBean
+    QpidService qpidService;
 
     @Test
     public void contextLoads() {
@@ -73,6 +78,11 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
+    @Test
+    public void testQueueExists(){
+        when(qpidService.queueExists(any())).thenReturn(true);
+        assertThat(restController.queueExists("adminUser", "queue")).isTrue();
+    }
 
         subscriptionSet.add(requestedSubscription);
         subscriptionSet.add(createdSubscription);
@@ -87,5 +97,16 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(serviceProvider);
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
+    }
+    @Test
+    public void testExchangeExists(){
+        when(qpidService.exchangeExists(any())).thenReturn(true);
+        assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
+    }
+
+    @Test
+    public void testBindingExists(){
+        when(qpidService.bindingExists(any(), any())).thenReturn(true);
+        assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
     }
 }
