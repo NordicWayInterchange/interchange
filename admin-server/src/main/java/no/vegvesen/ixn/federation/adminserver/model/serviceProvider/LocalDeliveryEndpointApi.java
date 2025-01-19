@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-public class ServiceProviderDeliveryEndpointApi {
+public class LocalDeliveryEndpointApi {
 
     private String host;
 
@@ -11,9 +11,9 @@ public class ServiceProviderDeliveryEndpointApi {
     private Integer maxBandwidth;
 
     private Integer maxMessageRate;
-    public ServiceProviderDeliveryEndpointApi() {}
+    public LocalDeliveryEndpointApi() {}
 
-    public ServiceProviderDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
         this.host = host;
         this.port = port;
         this.target = target;

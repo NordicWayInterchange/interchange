@@ -4,17 +4,17 @@ import java.util.Set;
 
 public class ServiceProviderApi {
 
-    private Set<ServiceProviderSubscriptionApi> subscriptions;
+    private Set<LocalSubscriptionApi> subscriptions;
 
-    private Set<ServiceProviderCapabilityApi> capabilities;
+    private Set<CapabilityApi> capabilities;
 
-    private Set<ServiceProviderDeliveryApi> deliveries;
+    private Set<LocalDeliveryApi> deliveries;
 
 
     public ServiceProviderApi(
-            Set<ServiceProviderSubscriptionApi> subscriptions,
-            Set<ServiceProviderCapabilityApi> capabilities,
-            Set<ServiceProviderDeliveryApi> deliveries) {
+            Set<LocalSubscriptionApi> subscriptions,
+            Set<CapabilityApi> capabilities,
+            Set<LocalDeliveryApi> deliveries) {
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
@@ -24,27 +24,27 @@ public class ServiceProviderApi {
 
     }
 
-    public Set<ServiceProviderSubscriptionApi> getSubscriptions() {
+    public Set<LocalSubscriptionApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<ServiceProviderSubscriptionApi> subscriptions) {
+    public void setSubscriptions(Set<LocalSubscriptionApi> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
-    public Set<ServiceProviderCapabilityApi> getCapabilities() {
+    public Set<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<ServiceProviderCapabilityApi> capabilities) {
+    public void setCapabilities(Set<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 
-    public Set<ServiceProviderDeliveryApi> getDeliveries() {
+    public Set<LocalDeliveryApi> getDeliveries() {
         return deliveries;
     }
 
-    public void setDeliveries(Set<ServiceProviderDeliveryApi> deliveries) {
+    public void setDeliveries(Set<LocalDeliveryApi> deliveries) {
         this.deliveries = deliveries;
     }
 

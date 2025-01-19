@@ -89,10 +89,10 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
-    public Set<ServiceProviderSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
-        Set<ServiceProviderSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
+    public Set<LocalSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
+        Set<LocalSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
         for (LocalEndpoint endpoint : subscriptionLocalEndpointSet) {
-            endpointApiSet.add(new ServiceProviderSubscriptionEndpointApi(
+            endpointApiSet.add(new LocalSubscriptionEndpointApi(
                     null,
                     endpoint.getSource(),
                     endpoint.getHost(),
@@ -104,10 +104,10 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
-    public Set<ServiceProviderDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
-        Set<ServiceProviderDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
+    public Set<LocalDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
+        Set<LocalDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
         for (LocalDeliveryEndpoint endpoint : deliveryLocalEndpointSet) {
-            deliveryEndpointApiSet.add(new ServiceProviderDeliveryEndpointApi(
+            deliveryEndpointApiSet.add(new LocalDeliveryEndpointApi(
                     endpoint.getHost(),
                     endpoint.getPort(),
                     endpoint.getTarget(),
@@ -118,13 +118,13 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public Set<ServiceProviderCapabilityApi> capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
+    public Set<CapabilityApi> capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
         Set<Capabilities> capabilitiesSet = new HashSet<>();
         capabilitiesSet.add(capabilities);
 
-        Set<ServiceProviderCapabilityApi> capabilityApiSet = new HashSet<>();
+        Set<CapabilityApi> capabilityApiSet = new HashSet<>();
         for (Capabilities capability : capabilitiesSet) {
-            capabilityApiSet.add(new ServiceProviderCapabilityApi(
+            capabilityApiSet.add(new CapabilityApi(
                     capability.getCapabilities(),
                     localDateTimeToTimestamp(capability.getLastUpdated().orElse(null))
             ));
@@ -146,8 +146,8 @@ public class TypeTransformer {
         return SubscriptionStatusApi.valueOf(subscriptionStatus.toString());
     }
 
-    public ServiceProviderSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
-        return ServiceProviderSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
+    public LocalSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
+        return LocalSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
     }
 
     public ServiceProviderDeliveryStatus localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
@@ -163,10 +163,10 @@ public class TypeTransformer {
     }
 
 
-    public Set<ServiceProviderSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
-        Set<ServiceProviderSubscriptionApi> subscriptionApiSet = new HashSet<>();
+    public Set<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
+        Set<LocalSubscriptionApi> subscriptionApiSet = new HashSet<>();
         for (LocalSubscription subscription : subscriptionSet) {
-            subscriptionApiSet.add(new ServiceProviderSubscriptionApi(
+            subscriptionApiSet.add(new LocalSubscriptionApi(
                     subscription.getId().toString(),
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
@@ -178,10 +178,10 @@ public class TypeTransformer {
     }
 
 
-    public Set<ServiceProviderDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
-        Set<ServiceProviderDeliveryApi> deliveriesApiSet = new HashSet<>();
+    public Set<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
+        Set<LocalDeliveryApi> deliveriesApiSet = new HashSet<>();
         for (LocalDelivery delivery : deliveriesSet) {
-            deliveriesApiSet.add(new ServiceProviderDeliveryApi(
+            deliveriesApiSet.add(new LocalDeliveryApi(
                     delivery.getId().toString(),
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),

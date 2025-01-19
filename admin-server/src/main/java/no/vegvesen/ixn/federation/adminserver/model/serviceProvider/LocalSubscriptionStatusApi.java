@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-public enum ServiceProviderDeliveryStatusApi {
+public enum LocalSubscriptionStatusApi {
     REQUESTED,
     CREATED,
     ILLEGAL,
-    NOT_VALID,
-    NO_OVERLAP
+    ERROR,
+    TEAR_DOWN,
+    RESUBSCRIBE
 }

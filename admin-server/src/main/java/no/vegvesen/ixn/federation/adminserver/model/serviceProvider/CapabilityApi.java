@@ -1,22 +1,20 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import no.vegvesen.ixn.federation.model.capability.Application;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
 
 import java.util.Set;
 
-public class ServiceProviderCapabilityApi {
+public class CapabilityApi {
 
 
     private Long lastUpdated;
 
-    public ServiceProviderCapabilityApi() {
+    public CapabilityApi() {
     }
 
     private Set<Capability>  capabilities;
 
-    public ServiceProviderCapabilityApi(Set<Capability> capabilities, Long lastUpdated) {
+    public CapabilityApi(Set<Capability> capabilities, Long lastUpdated) {
         this.capabilities = capabilities;
         this.lastUpdated = lastUpdated;
     }

@@ -3,22 +3,22 @@ import no.vegvesen.ixn.federation.adminserver.ServiceProviderDeliveryStatus;
 
 import java.util.*;
 
-public class ServiceProviderDeliveryApi {
+public class LocalDeliveryApi {
     private String id;
 
     private ServiceProviderDeliveryStatus status;
 
     private String selector;
 
-    private Set<ServiceProviderDeliveryEndpointApi> endpoints = new HashSet<>();
+    private Set<LocalDeliveryEndpointApi> endpoints = new HashSet<>();
 
     private Long lastUpdatedTimestamp;
 
-    public ServiceProviderDeliveryApi() {
+    public LocalDeliveryApi() {
     }
 
-    public ServiceProviderDeliveryApi(String id, String selector, ServiceProviderDeliveryStatus status,
-                                  Set<ServiceProviderDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public LocalDeliveryApi(String id, String selector, ServiceProviderDeliveryStatus status,
+                            Set<LocalDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
@@ -50,11 +50,11 @@ public class ServiceProviderDeliveryApi {
         this.status = status;
     }
 
-    public Set<ServiceProviderDeliveryEndpointApi> getEndpoints() {
+    public Set<LocalDeliveryEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<ServiceProviderDeliveryEndpointApi> endpoints) {
+    public void setEndpoints(Set<LocalDeliveryEndpointApi> endpoints) {
         this.endpoints.clear();
         if(endpoints != null){
             this.endpoints.addAll(endpoints);

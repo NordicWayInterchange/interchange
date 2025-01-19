@@ -2,22 +2,22 @@ package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import java.util.Set;
 
-public class ServiceProviderSubscriptionApi {
+public class LocalSubscriptionApi {
 
     private String id;
 
-    private ServiceProviderSubscriptionStatusApi subscriptionStatus;
+    private LocalSubscriptionStatusApi subscriptionStatus;
 
     private String selector;
 
-    private Set<ServiceProviderSubscriptionEndpointApi> endpoints;
+    private Set<LocalSubscriptionEndpointApi> endpoints;
 
     private Long lastUpdatedTimestamp;
 
-    public ServiceProviderSubscriptionApi() {
+    public LocalSubscriptionApi() {
     }
 
-    public ServiceProviderSubscriptionApi(String id, ServiceProviderSubscriptionStatusApi subscriptionStatus, String selector, Set<ServiceProviderSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi subscriptionStatus, String selector, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
@@ -35,11 +35,11 @@ public class ServiceProviderSubscriptionApi {
     }
 
 
-    public ServiceProviderSubscriptionStatusApi getSubscriptionStatus() {
+    public LocalSubscriptionStatusApi getSubscriptionStatus() {
         return subscriptionStatus;
     }
 
-    public void setSubscriptionStatus(ServiceProviderSubscriptionStatusApi subscriptionStatus) {
+    public void setSubscriptionStatus(LocalSubscriptionStatusApi subscriptionStatus) {
         this.subscriptionStatus = subscriptionStatus;
     }
 
@@ -52,11 +52,11 @@ public class ServiceProviderSubscriptionApi {
     }
 
 
-    public Set<ServiceProviderSubscriptionEndpointApi> getEndpoints() {
+    public Set<LocalSubscriptionEndpointApi> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<ServiceProviderSubscriptionEndpointApi> endpoints) {
+    public void setEndpoints(Set<LocalSubscriptionEndpointApi> endpoints) {
         this.endpoints = endpoints;
     }
 

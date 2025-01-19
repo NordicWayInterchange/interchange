@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-public class ServiceProviderSubscriptionEndpointApi {
+public class LocalSubscriptionEndpointApi {
 
     private Integer id;
 
@@ -14,9 +14,9 @@ public class ServiceProviderSubscriptionEndpointApi {
 
     private Integer maxMessageRate;
 
-    public ServiceProviderSubscriptionEndpointApi() {}
+    public LocalSubscriptionEndpointApi() {}
 
-    public ServiceProviderSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this.id = id;
         this.source = source;
         this.host = host;
