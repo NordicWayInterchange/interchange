@@ -196,6 +196,10 @@ public class LocalSubscription {
         }
     }
 
+    public boolean isRedirect(String serviceProviderName) {
+        return consumerCommonName.equals(serviceProviderName);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

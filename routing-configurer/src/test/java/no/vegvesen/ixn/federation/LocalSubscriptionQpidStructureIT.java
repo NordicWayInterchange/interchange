@@ -129,6 +129,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         QpidDelta delta = client.getQpidDelta();
+        when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(new Match()));
         router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {

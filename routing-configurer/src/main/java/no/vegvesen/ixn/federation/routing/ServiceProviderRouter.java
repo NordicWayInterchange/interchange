@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -20,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
@@ -78,7 +78,7 @@ public class ServiceProviderRouter {
             }
             serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
-            serviceProvider = syncLocalsubscriptionsToAllCapabilities(serviceProvider, delta, serviceProviders);
+            //serviceProvider = syncLocalSubscriptionsToAllCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
         }
     }
@@ -100,6 +100,7 @@ public class ServiceProviderRouter {
     public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort, QpidDelta delta) {
         switch (subscription.getStatus()) {
             case REQUESTED:
+                updateLocalSubscriptionEndpoints(subscription);
                 //NOTE fallthrough!
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription, delta);
@@ -159,11 +160,37 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
-    private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
-        for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
-            String source = endpoint.getSource();
-            optionallyCreateQueue(source, serviceProviderName, delta);
+    public void updateLocalSubscriptionEndpoints(LocalSubscription localSubscription) {
+        List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+        if (!matches.isEmpty() || !localSubscription.getConnections().isEmpty()) {
+            if (localSubscription.getLocalEndpoints().isEmpty()) {
+                String queueName = "loc-" + UUID.randomUUID();
+                LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()));
+                localSubscription.getLocalEndpoints().add(endpoint);
+                localSubscription.setStatus(LocalSubscriptionStatus.CREATED);
+            }
+        } else if (!localSubscription.getLocalEndpoints().isEmpty()) {
+            localSubscription.setStatus(LocalSubscriptionStatus.CREATED);
+        } else {
+            if (localSubscription.getLastUpdated() != null &&
+                LocalDateTime.now().minusMinutes(10).isAfter(localSubscription.getLastUpdated())) {
+                localSubscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
+            }
         }
+    }
+
+    private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
+        subscription.getLocalEndpoints().forEach(endpoint ->
+                optionallyCreateQueue(endpoint.getSource(), serviceProviderName, delta)
+        );
+        /*List<Match> matches = matchRepository.findAllByLocalSubscriptionId(subscription.getId());
+        if (matches.isEmpty() && subscription.getConnections().isEmpty()) {
+            subscription.setStatus(LocalSubscriptionStatus.NO_OVERLAP);
+        } else {
+            subscription.getLocalEndpoints().forEach(endpoint ->
+                    optionallyCreateQueue(endpoint.getSource(), serviceProviderName, delta)
+            );
+        }*/
     }
 
     public void processRedirectSubscription(LocalSubscription subscription) {
@@ -461,48 +488,78 @@ public class ServiceProviderRouter {
     }
 
     @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
-    public void createBindingsWithMatches() {
+    public void createBindingsForLocalSubscriptions() {
         List<ServiceProvider> serviceProviders = repository.findAll();
         QpidDelta delta = qpidClient.getQpidDelta();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
-                if (localSubscription.isSubscriptionWanted() && !localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
-                    if (!localSubscription.getLocalEndpoints().isEmpty()) {
-                        List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                        for (Match match : matches) {
-                            if (match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                                for (Endpoint endpoint : match.getSubscription().getEndpoints()) {
-                                    if (endpoint.hasShard()) {
-                                        Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
-                                        if (exchange != null) {
-                                            for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                                Queue queue = delta.findByQueueName(queueName);
-                                                if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
-                                                    bindQueueToSubscriptionExchange(queueName, exchange.getName(), localSubscription);
-                                                    delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
-                                                }
-                                            }
-                                        }
-                                    }
+            Set<LocalSubscription> wantedSubscriptions = serviceProvider.getSubscriptions().stream()
+                    .filter(l -> l.isSubscriptionWanted()
+                            && !l.isRedirect(serviceProvider.getName())
+                            && !l.getLocalEndpoints().isEmpty())
+                    .collect(Collectors.toSet());
+            for (LocalSubscription localSubscription : wantedSubscriptions) {
+                List<Match> matches = matchRepository.findAllByLocalSubscriptionIdAndSubscription_SubscriptionStatus(localSubscription.getId(), SubscriptionStatus.CREATED);
+                for (Match match : matches) {
+                    Set<Endpoint> shardedEndpoints = match.getSubscription().getEndpoints().stream()
+                            .filter(Endpoint::hasShard)
+                            .collect(Collectors.toSet());
+                    for (Endpoint endpoint : shardedEndpoints) {
+                        Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
+                        if (exchange != null) {
+                            localSubscription.getLocalEndpoints().stream()
+                                    .map(LocalEndpoint::getSource)
+                                    .forEach(bindToExchange(delta, exchange.getName(), localSubscription.getSelector()));
+                            /*Set<String> queues = localSubscription.getLocalEndpoints().stream()
+                                    .map(LocalEndpoint::getSource)
+                                    .collect(Collectors.toSet());
+                            for (String queueName : queues) {
+                                Queue queue = delta.findByQueueName(queueName);
+                                if (queue != null && !delta.getDestinationsFromExchangeName(exchange.getName()).contains(queueName)) {
+                                    bindQueueToExchange(queueName, exchange.getName(), localSubscription.getSelector());
+                                    delta.addBindingToExchange(exchange.getName(), localSubscription.getSelector(), queueName);
                                 }
-                            }
+                            }*/
                         }
                     }
+                }
+                for (LocalConnection connection : localSubscription.getConnections()) {
+                    localSubscription.getLocalEndpoints().stream()
+                            .map(LocalEndpoint::getSource)
+                            .forEach(bindToExchange(delta, connection.getSource(), localSubscription.getSelector()));
+                    /*for (String queueName : queues) {
+                        Queue queue = delta.findByQueueName(queueName);
+                        if (queue != null && !delta.getDestinationsFromExchangeName(connection.getSource()).contains(queueName)) {
+                            bindQueueToExchange(queueName, connection.getSource(), localSubscription.getSelector());
+                            delta.addBindingToExchange(connection.getSource(), localSubscription.getSelector(), queueName);
+                        }
+                    }*/
                 }
             }
         }
     }
 
-    private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
-        logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector())));
+    Consumer<String> bindToExchange(QpidDelta delta, String source, String selector) {
+        return q -> {
+            Queue queue = delta.findByQueueName(q);
+            if (queue != null && !delta.getDestinationsFromExchangeName(source).contains(q)) {
+                bindQueueToExchange(q, source, selector);
+                delta.addBindingToExchange(source, selector, q);
+            }
+        };
     }
 
-    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
-        Set<String> existingConnections = new HashSet<>();
-        for (Capability cap : capabilities) {
-            existingConnections.addAll(cap.getExchangesFromShards());
-        }
+    private void bindQueueToExchange(String queueName, String exchangeName, String selector) {
+        logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
+        qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
+    }
+
+    /*public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
+        Set<String> existingConnections = capabilities.stream()
+                .flatMap(capability -> capability.getShards()
+                        .stream()
+                        .map(CapabilityShard::getExchangeName))
+                .collect(Collectors.toSet());
+
         Set<LocalConnection> unwantedConnections = new HashSet<>();
         for (LocalConnection connection : subscription.getConnections()) {
             if (!existingConnections.contains(connection.getSource())) {
@@ -510,9 +567,9 @@ public class ServiceProviderRouter {
             }
         }
         subscription.getConnections().removeAll(unwantedConnections);
-    }
+    }*/
 
-    public ServiceProvider syncLocalsubscriptionsToAllCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
+    /*public ServiceProvider syncLocalSubscriptionsToAllCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
         Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
         for (LocalSubscription localSubscription : serviceProvider.getSubscriptions().stream().filter(LocalSubscription::isSubscriptionWanted).collect(Collectors.toSet())) {
             Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, localSubscription.getSelector());
@@ -529,12 +586,12 @@ public class ServiceProviderRouter {
                     localSubscription.setStatus(LocalSubscriptionStatus.CREATED);
                 }
             }
-            syncLocalsubscriptionToServiceProviderCapabilities(localSubscription, serviceProvider, matchingCapabilities, delta, serviceProviders);
+            syncLocalSubscriptionToServiceProviderCapabilities(localSubscription, serviceProvider, matchingCapabilities, delta, serviceProviders);
         }
         return repository.save(serviceProvider);
-    }
+    }*/
 
-    public void syncLocalsubscriptionToServiceProviderCapabilities(LocalSubscription subscription, ServiceProvider serviceProvider, Set<Capability> matchingCapabilities, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
+    /*public void syncLocalSubscriptionToServiceProviderCapabilities(LocalSubscription subscription, ServiceProvider serviceProvider, Set<Capability> matchingCapabilities, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
         Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
         removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
         if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
@@ -556,5 +613,5 @@ public class ServiceProviderRouter {
                 }
             }
         }
-    }
+    }*/
 }

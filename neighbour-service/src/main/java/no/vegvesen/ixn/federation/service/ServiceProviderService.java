@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -14,6 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,7 +26,9 @@ public class ServiceProviderService {
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderService.class);
 
     private ServiceProviderRepository serviceProviderRepository;
+
     private OutgoingMatchRepository outgoingMatchRepository;
+
     private MatchRepository matchRepository;
 
     @Autowired
@@ -39,6 +44,7 @@ public class ServiceProviderService {
             String name = serviceProvider.getName();
             updateLocalSubscriptionWithRedirectEndpoints(name);
             updateDeliveryStatus(name, host, port);
+            updateLocalSubscriptionWithLocalConnections(name, serviceProviders);
             removeTearDownCapabilities(name);
             removeTearDownIllegalAndErrorDeliveries(name);
         }
@@ -47,7 +53,7 @@ public class ServiceProviderService {
     public void updateLocalSubscriptionWithRedirectEndpoints(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
-                .filter(l -> l.getConsumerCommonName().equals(serviceProvider.getName()))
+                .filter(l -> l.isRedirect(serviceProviderName))
                 .collect(Collectors.toSet());
 
         for (LocalSubscription localSubscription : redirectSubscriptions) {
@@ -118,6 +124,45 @@ public class ServiceProviderService {
         }
     }
 
+    public void updateLocalSubscriptionWithLocalConnections(String serviceProviderName, Iterable<ServiceProvider> serviceProviders) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        Set<LocalSubscription> wantedSubscriptions = serviceProvider.getSubscriptions().stream().filter(LocalSubscription::isSubscriptionWanted).collect(Collectors.toSet());
+        for (LocalSubscription localSubscription : wantedSubscriptions) {
+            removeUnusedLocalConnectionsFromLocalSubscription(localSubscription, allCapabilities);
+            if (!localSubscription.isRedirect(serviceProviderName)) {
+                Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, localSubscription.getSelector());
+                Set<String> existingConnections = localSubscription.getConnections().stream()
+                        .map(LocalConnection::getSource)
+                        .collect(Collectors.toSet());
+                for (Capability capability : matchingCapabilities) {
+                    for (CapabilityShard shard : capability.getShards()) {
+                        if (!existingConnections.contains(shard.getExchangeName())) {
+                            localSubscription.addConnection(new LocalConnection(shard.getExchangeName()));
+                        }
+                    }
+                }
+            }
+        }
+        serviceProviderRepository.save(serviceProvider);
+    }
+
+    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
+        Set<String> existingConnections = capabilities.stream()
+                .flatMap(capability -> capability.getShards()
+                        .stream()
+                        .map(CapabilityShard::getExchangeName))
+                .collect(Collectors.toSet());
+
+        Set<LocalConnection> unwantedConnections = new HashSet<>();
+        for (LocalConnection connection : subscription.getConnections()) {
+            if (!existingConnections.contains(connection.getSource())) {
+                unwantedConnections.add(connection);
+            }
+        }
+        subscription.getConnections().removeAll(unwantedConnections);
+    }
+
     public void removeTearDownCapabilities(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 
@@ -176,5 +221,4 @@ public class ServiceProviderService {
         }
         return localEndpoints;
     }
-
 }

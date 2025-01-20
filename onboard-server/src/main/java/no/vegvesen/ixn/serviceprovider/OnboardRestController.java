@@ -287,6 +287,7 @@ public class OnboardRestController {
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		Set<LocalSubscription> savedSubscriptions = saved.getSavedSubscriptions(localSubscriptions);
+		savedSubscriptions.forEach(s -> System.out.println(s.getLastUpdated()));
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);

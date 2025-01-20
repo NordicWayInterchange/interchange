@@ -639,6 +639,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        LocalSubscription sub = serviceProviderRepository.findByName(serviceProvider).getSubscriptions().stream().filter(s -> s.getUuid().equals(subscription.getId())).findFirst().get();
+        System.out.println("----------");
+        System.out.println(sub.getLastUpdated());
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
     }

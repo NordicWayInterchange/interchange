@@ -30,6 +30,10 @@ public class LocalConnection {
         this(null,source,destination);
     }
 
+    public LocalConnection(String source) {
+        this(null,source,null);
+    }
+
     public String getSource() {
         return source;
     }
