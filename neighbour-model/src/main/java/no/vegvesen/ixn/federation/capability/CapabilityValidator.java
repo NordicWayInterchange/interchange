@@ -105,7 +105,7 @@ public class CapabilityValidator {
                 }
             }
         }
-        return Map.of();
+        return Map.of(true, "");
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){
