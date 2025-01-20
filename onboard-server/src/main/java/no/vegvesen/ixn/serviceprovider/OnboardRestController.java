@@ -86,7 +86,7 @@ public class OnboardRestController {
 		if (capabilityApi == null || capabilityApi.getCapabilities() == null || capabilityApi.getCapabilities().isEmpty()) {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
-
+		System.out.println(capabilityApi);
 		Set<String> allPublicationIds = allPublicationIds();
 		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {

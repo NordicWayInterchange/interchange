@@ -77,7 +77,7 @@ public class CapabilityValidator {
 
     public static boolean isShardCountValid(MetadataApi metadata){
         Integer shardCount = metadata.getShardCount();
-        return shardCount != null && shardCount >= 1 && shardCount <= 10;
+        return shardCount == null || shardCount >= 1 && shardCount <= 10;
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){
