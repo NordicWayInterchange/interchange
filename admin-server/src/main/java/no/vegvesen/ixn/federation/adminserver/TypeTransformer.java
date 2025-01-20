@@ -126,6 +126,7 @@ public class TypeTransformer {
         for (Capabilities capability : capabilitiesSet) {
             capabilityApiSet.add(new CapabilityApi(
                     capability.getCapabilities(),
+                    capability.getLastCapabilityExchange(),
                     localDateTimeToTimestamp(capability.getLastUpdated().orElse(null))
             ));
         }
@@ -170,6 +171,10 @@ public class TypeTransformer {
                     subscription.getId().toString(),
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
+                    subscription.getDescription(),
+                    subscription.getErrorMessage(),
+                    subscription.getConnections(),
                     localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
                     localDateTimeToTimestamp(subscription.getLastUpdated())
             ));

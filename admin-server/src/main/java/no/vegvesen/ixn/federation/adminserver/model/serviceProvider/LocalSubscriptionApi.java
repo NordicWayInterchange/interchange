@@ -1,12 +1,15 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
+import no.vegvesen.ixn.federation.model.LocalConnection;
+
+import java.util.HashSet;
 import java.util.Set;
 
 public class LocalSubscriptionApi {
 
     private String id;
 
-    private LocalSubscriptionStatusApi subscriptionStatus;
+    private LocalSubscriptionStatusApi localSubscriptionStatus;
 
     private String selector;
 
@@ -14,13 +17,24 @@ public class LocalSubscriptionApi {
 
     private Long lastUpdatedTimestamp;
 
-    public LocalSubscriptionApi() {
-    }
+    private String consumerCommonName;
 
-    public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi subscriptionStatus, String selector, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+    private Set<LocalConnection> connections = new HashSet<>();
+
+    private String description;
+
+    private String errorMessage;
+
+
+    public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi localSubscriptionStatus, String selector, String consumerCommonName,
+                                String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
-        this.subscriptionStatus = subscriptionStatus;
+        this.localSubscriptionStatus = localSubscriptionStatus;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+        this.description = description;
+        this.connections.addAll(connections);
+        this.errorMessage = errorMessage;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
@@ -35,12 +49,12 @@ public class LocalSubscriptionApi {
     }
 
 
-    public LocalSubscriptionStatusApi getSubscriptionStatus() {
-        return subscriptionStatus;
+    public LocalSubscriptionStatusApi getLocalSubscriptionStatus() {
+        return localSubscriptionStatus;
     }
 
-    public void setSubscriptionStatus(LocalSubscriptionStatusApi subscriptionStatus) {
-        this.subscriptionStatus = subscriptionStatus;
+    public void setLocalSubscriptionStatus(LocalSubscriptionStatusApi localSubscriptionStatus) {
+        this.localSubscriptionStatus = localSubscriptionStatus;
     }
 
     public String getSelector() {
@@ -68,13 +82,50 @@ public class LocalSubscriptionApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
+    public Set<LocalConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Set<LocalConnection> connections) {
+        this.connections = connections;
+    }
+
+    public void addConnection(LocalConnection connection) {
+        connections.add(connection);
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public String toString() {
         return "ServiceProviderSubscriptionApi{" +
                 "id=" + id +
-                ", subscriptionStatus=" + subscriptionStatus +
+                ", localSubscriptionStatus=" + localSubscriptionStatus +
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints +
+                ", consumerCommonName=" + consumerCommonName +
+                ", errorMessage=" + errorMessage +
+                ", description=" + description +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
