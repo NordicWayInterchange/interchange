@@ -93,7 +93,7 @@ public class TypeTransformer {
         Set<LocalSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
         for (LocalEndpoint endpoint : subscriptionLocalEndpointSet) {
             endpointApiSet.add(new LocalSubscriptionEndpointApi(
-                    null,
+                    endpoint.getId(),
                     endpoint.getSource(),
                     endpoint.getHost(),
                     endpoint.getPort(),
