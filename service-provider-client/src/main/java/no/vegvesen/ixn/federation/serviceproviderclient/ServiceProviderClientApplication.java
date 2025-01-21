@@ -26,7 +26,8 @@ import static picocli.CommandLine.*;
                 PrivateChannelsCommand.class,
                 MessagesCommand.class
         },
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class ServiceProviderClientApplication{
 
     @Parameters(index = "0", paramLabel = "SERVER", description = "URL to connect to")

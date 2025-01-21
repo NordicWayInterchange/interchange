@@ -10,7 +10,8 @@ import java.util.concurrent.Callable;
 
 @Command(name = "list", description = "list the private channels of a Service Provider",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class GetPrivateChannels implements Callable<Integer> {
 
     @ParentCommand

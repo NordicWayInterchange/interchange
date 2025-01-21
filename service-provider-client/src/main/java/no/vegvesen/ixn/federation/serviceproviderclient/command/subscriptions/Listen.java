@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Command(name = "listen", description = "Add subscription and receive messages",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class Listen implements Callable<Integer> {
 
     @ParentCommand

@@ -9,7 +9,8 @@ import java.util.concurrent.Callable;
         name = "delete",
         description = "Delete peer from private channel",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class DeletePeerFromPrivateChannel implements Callable<Integer> {
 

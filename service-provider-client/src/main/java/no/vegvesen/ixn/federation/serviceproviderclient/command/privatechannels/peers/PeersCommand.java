@@ -13,7 +13,8 @@ import picocli.CommandLine.*;
                 PeerDeletePeerFromPrivateChannel.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class PeersCommand {
 

@@ -23,7 +23,8 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 @Command(name="send",
         description = "Add delivery and send message",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class Send implements Callable<Integer> {
 
     @ParentCommand

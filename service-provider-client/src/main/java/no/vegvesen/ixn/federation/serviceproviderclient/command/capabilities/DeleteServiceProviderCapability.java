@@ -5,7 +5,8 @@ import java.util.concurrent.Callable;
 
 @Command(name = "delete", description = "Delete a service provider capability",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class DeleteServiceProviderCapability implements Callable<Integer> {
 
     @ParentCommand

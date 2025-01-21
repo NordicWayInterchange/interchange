@@ -16,7 +16,8 @@ import java.nio.file.Path;
                 SendPredefinedMessage.class,
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
         )
 public class MessagesCommand implements JmsTopCommand {
 

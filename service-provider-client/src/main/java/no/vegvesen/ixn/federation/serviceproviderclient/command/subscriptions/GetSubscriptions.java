@@ -11,7 +11,8 @@ import java.util.concurrent.Callable;
         name = "list",
         description = "List the service provider subscriptions",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class GetSubscriptions implements Callable<Integer> {
 

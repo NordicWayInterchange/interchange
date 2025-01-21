@@ -14,7 +14,8 @@ import picocli.CommandLine.*;
                 Listen.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class SubscriptionsCommand {
 

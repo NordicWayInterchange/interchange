@@ -11,7 +11,8 @@ import java.util.concurrent.Callable;
         name = "get",
         description = "Get a single delivery",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class GetDelivery implements Callable<Integer> {
 
