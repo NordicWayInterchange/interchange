@@ -11,21 +11,20 @@ export default function ServiceProviders() {
 import {Box, Divider} from "@mui/material";
 import Subheading from "@/components/shared/typography/Subheading";
 import React, {useState} from "react";
-import TabMenu from "@/components/shared/TabMenu";
 import {GridColDef} from "@mui/x-data-grid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Capability, Subscription} from "@/types/neighbours";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import {useSession} from "next-auth/react";
+import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
 
-   /* const {data: serviceProviderData, isLoading} = useFetchServiceProvider(
+    const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
-    );*/
+    );
 
     const [serviceProviderRow, setServiceProviderRow] = useState<Subscription | Capability | null>(null);
 
@@ -103,7 +102,7 @@ export default function ServiceProviders() {
                     <Box>
                         <DataGrid
                             columns={serviceProviderTableHeader}
-                            rows={neighbourData || []}
+                            rows={serviceProviderData || []}
                             loading={isLoading}
                             getRowId={(row) => row.neighbour_id}
                             sort={{field: "lastUpdated", sort: "desc"}}
