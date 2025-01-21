@@ -9,7 +9,7 @@ public class LocalSubscriptionApi {
 
     private String id;
 
-    private LocalSubscriptionStatusApi localSubscriptionStatus;
+    private LocalSubscriptionStatusApi status;
 
     private String selector;
 
@@ -26,10 +26,10 @@ public class LocalSubscriptionApi {
     private String errorMessage;
 
 
-    public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi localSubscriptionStatus, String selector, String consumerCommonName,
+    public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi status, String selector, String consumerCommonName,
                                 String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
         this.id = id;
-        this.localSubscriptionStatus = localSubscriptionStatus;
+        this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.description = description;
@@ -50,11 +50,11 @@ public class LocalSubscriptionApi {
 
 
     public LocalSubscriptionStatusApi getLocalSubscriptionStatus() {
-        return localSubscriptionStatus;
+        return status;
     }
 
-    public void setLocalSubscriptionStatus(LocalSubscriptionStatusApi localSubscriptionStatus) {
-        this.localSubscriptionStatus = localSubscriptionStatus;
+    public void setLocalSubscriptionStatus(LocalSubscriptionStatusApi status) {
+        this.status = status;
     }
 
     public String getSelector() {
@@ -120,7 +120,7 @@ public class LocalSubscriptionApi {
     public String toString() {
         return "ServiceProviderSubscriptionApi{" +
                 "id=" + id +
-                ", localSubscriptionStatus=" + localSubscriptionStatus +
+                ", status=" + status +
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints +
                 ", consumerCommonName=" + consumerCommonName +

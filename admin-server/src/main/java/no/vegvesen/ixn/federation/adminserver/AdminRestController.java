@@ -51,8 +51,8 @@ public class AdminRestController {
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServiceProviderApi> getServiceProvider(@PathVariable("adminUser") String adminUser){
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("List service provider for admin user {}", adminUser);
 

@@ -68,7 +68,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetServiceProvider() {
+    public void testgetServiceProviders() {
         String adminUser = "adminUser";
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
@@ -85,7 +85,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         );
 
         serviceProviderRepository.save(serviceProvider);
-        assertThat(restController.getServiceProvider(adminUser)).isNotEmpty();
+        assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
     }
 }
