@@ -86,7 +86,7 @@ public class OnboardRestController {
 		if (capabilityApi == null || capabilityApi.getCapabilities() == null || capabilityApi.getCapabilities().isEmpty()) {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
-		System.out.println(capabilityApi);
+
 		Set<String> allPublicationIds = allPublicationIds();
 		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
@@ -105,6 +105,7 @@ public class OnboardRestController {
 			if(!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
 			}
+
 			if(!CapabilityValidator.isShardCountValid(capability.getMetadata())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capability));
 			}

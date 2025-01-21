@@ -4,7 +4,6 @@ import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -343,10 +342,7 @@ public class NapRestControllerTest {
                 "publisherName": "hello",
                 "originatingCountry": "NO"
                 },
-                "metadata": {
-                "shardCount": 1,
-                "redirectPolicy" : "OPTIONAL"
-                }
+                "metadata": {}
                 }
                 """;
         // Integer shardCount, String infoUrl, RedirectStatusApi redirectPolicy, Integer maxBandwidth, Integer maxMessageRate, Integer repetitionInterval
@@ -354,7 +350,7 @@ public class NapRestControllerTest {
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         Capability capability = new Capability(
                 new DatexApplication("publisherId", "publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         capability.setId(1);
         when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(
@@ -366,7 +362,7 @@ public class NapRestControllerTest {
         ));
         when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
                 new DatexApplicationApi("publisherId", "publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         ));
         mockMvc.perform(
                 post(String.format("/nap/%s/capabilities", actorCommonName))

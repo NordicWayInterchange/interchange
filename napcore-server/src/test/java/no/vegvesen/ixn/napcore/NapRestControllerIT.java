@@ -261,17 +261,17 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String selector = "originatingCountry='NO'";
         CapabilitiesRequest request1 = new CapabilitiesRequest(
           new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
-          new MetadataApi(RedirectStatusApi.OPTIONAL)
+          new MetadataApi()
         );
 
         CapabilitiesRequest request2 = new CapabilitiesRequest(
                 new DatexApplicationApi("pub-id","publication-id-2","SE","1", List.of("1"), "type","name"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
 
         CapabilitiesRequest request3 = new CapabilitiesRequest(
                 new DatexApplicationApi("pub-id","publication-id-3","NO","1", List.of("1"), "type","name"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
         napRestController.addCapability(actor1, request1);
         napRestController.addCapability(actor1, request2);
@@ -310,7 +310,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
                 new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
         OnboardingCapability response = napRestController.addCapability(actorCommonName, capabilitiesRequest);
         assertThat(response).isNotNull();
@@ -371,7 +371,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
                 new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolversion", List.of("1"), "test", "test"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
@@ -450,7 +450,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actor2 = "actor-2";
         CapabilitiesRequest request = new CapabilitiesRequest(
                 new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
         napRestController.addCapability(actor1, request);
         request.getApplication().setPublicationId("publi-Id-2");
@@ -479,7 +479,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         CapabilitiesRequest request = new CapabilitiesRequest(
                 new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
-                new MetadataApi(RedirectStatusApi.OPTIONAL)
+                new MetadataApi()
         );
         OnboardingCapability response = napRestController.addCapability(actorCommonName, request);
         napRestController.deleteCapability(actorCommonName, response.getId());
