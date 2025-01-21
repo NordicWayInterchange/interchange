@@ -1368,10 +1368,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingCapabilityWithTooManyCharsThrowsException(){
         StringBuilder longString = new StringBuilder();
-        Random r = new Random();
         String serviceProviderName = "Sp-1";
         for(int i = 1; i <= 300; i++){
-            longString.append((char) (r.nextInt(26)+'a'));
+            longString.append('a');
         }
         CapabilityApi capability = new CapabilityApi(
                 new DatexApplicationApi(longString.toString(),"bouvet-1", "NO","test", List.of("1"), "test", "test"),
