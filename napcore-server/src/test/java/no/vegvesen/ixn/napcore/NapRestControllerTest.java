@@ -345,7 +345,7 @@ public class NapRestControllerTest {
                 "metadata": {}
                 }
                 """;
-        // Integer shardCount, String infoUrl, RedirectStatusApi redirectPolicy, Integer maxBandwidth, Integer maxMessageRate, Integer repetitionInterval
+
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         Capability capability = new Capability(
