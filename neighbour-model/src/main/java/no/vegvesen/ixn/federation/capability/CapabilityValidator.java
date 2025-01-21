@@ -90,7 +90,7 @@ public class CapabilityValidator {
                     }
                 }
                 case "publicationId" -> {
-                    String publisherId = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get("publisherId");
+                    String publisherId = applicationApi.getPublisherId();
                     if (!value.startsWith(publisherId + ":")) {
                         return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
                     }
