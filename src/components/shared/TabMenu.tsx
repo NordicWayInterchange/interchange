@@ -3,6 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import ServiceProviderSubscription from "@/pages/api/serviceProviders/serviceProviderSubscription";
 
 function TabMenu() {
     const [activeTab, setActiveTab] = useState(0);
@@ -24,7 +25,7 @@ function TabMenu() {
             </Tabs>
 
             <Box sx={{ p: 2 }}>
-                {activeTab === 0 && <Typography>Subscriptions</Typography>}
+                {activeTab === 0 && <ServiceProviderSubscription/>}
                 {activeTab === 1 && <Typography>Capabilities</Typography>}
                 {activeTab === 2 && <Typography>Deliveries</Typography>}
             </Box>
