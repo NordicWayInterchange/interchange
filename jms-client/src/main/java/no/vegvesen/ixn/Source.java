@@ -61,12 +61,14 @@ public class Source implements AutoCloseable {
 
 	@Override
     public void close() {
-		try {
-			session.close();
-		} catch (JMSException e) {
-			logger.error("Error closing session", e);
-		} finally {
-			session = null;
+		if (session != null) {
+			try {
+				session.close();
+			} catch (JMSException e) {
+				logger.error("Error closing session", e);
+			} finally {
+				session = null;
+			}
 		}
         if (connection != null) {
             try {
@@ -77,12 +79,14 @@ public class Source implements AutoCloseable {
 				connection = null;
 			}
         }
-		try {
-			producer.close();
-		} catch (JMSException e) {
-			logger.error("Error closing producer", e);
-		} finally {
-			producer = null;
+		if (producer != null) {
+			try {
+				producer.close();
+			} catch (JMSException e) {
+				logger.error("Error closing producer", e);
+			} finally {
+				producer = null;
+			}
 		}
 	}
 
