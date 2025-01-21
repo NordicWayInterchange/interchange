@@ -1,61 +1,87 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
+import no.vegvesen.ixn.federation.model.capability.*;
 
-import no.vegvesen.ixn.federation.model.capability.Capability;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.time.LocalDateTime;
-import java.util.Set;
 
 public class CapabilityApi {
 
 
     private Integer id;
 
-    private Long lastUpdated;
-
-    private LocalDateTime lastCapabilityExchange;
+    private Long createdTimestamp;
 
     public CapabilityApi() {
     }
 
-    private Set<Capability>  capabilities;
+    private Application application;
 
-    public CapabilityApi(Set<Capability> capabilities, LocalDateTime lastCapabilityExchange, Long lastUpdated) {
-        this.capabilities = capabilities;
-        this.lastCapabilityExchange = lastCapabilityExchange;
-        this.lastUpdated = lastUpdated;
+    private Metadata metadata;
+
+    private CapabilityStatus status = CapabilityStatus.REQUESTED;
+
+    private List<CapabilityShard> shards = new ArrayList<>();
+
+    public CapabilityApi(Application application, Metadata metadata, List<CapabilityShard> shards, CapabilityStatus status, Long createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.shards = shards;
+        this.status = status;
+        this.createdTimestamp = createdTimestamp;
     }
 
-    public void setCapabilities(Set<Capability>  capabilities) {
-        this.capabilities = capabilities;
+    public Application getApplication() {
+        return application;
     }
 
-    public Set<Capability> getCapabilities() {
-        return capabilities;
+    public void setApplication(Application application) {
+        this.application = application;
     }
 
-    public LocalDateTime getLastCapabilityExchange() {
-        return lastCapabilityExchange;
+    public Metadata getMetadata() {
+        return metadata;
     }
 
-    public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
-        this.lastCapabilityExchange = lastCapabilityExchange;
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
 
+
+    public List<CapabilityShard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<CapabilityShard> shards) {
+        this.shards.clear();
+        if (shards != null) {
+            this.shards.addAll(shards);
+        }
+    }
 
     public Long getLastUpdated() {
-        return lastUpdated;
+        return createdTimestamp;
     }
 
     public void setLastUpdated(Long lastUpdated) {
-        this.lastUpdated = lastUpdated;
+        this.createdTimestamp = lastUpdated;
+    }
+
+    public CapabilityStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CapabilityStatus status) {
+        this.status = status;
     }
 
     public String toString() {
         return "ServiceProviderCapabilityApi{" +
                 "id=" + id +
-                ", dataTypes=" + capabilities +
-                ", lastCapabilityExchange=" + lastCapabilityExchange +
-                ", lastUpdatedTimestamp: " + lastUpdated +
+                "application=" + application +
+                ", metadata=" + metadata +
+                ", shards=" + shards +
+                ", createdTimestamp: " + createdTimestamp +
                 '}';
     }
 }

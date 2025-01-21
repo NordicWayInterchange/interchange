@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 public class TypeTransformer {
 
@@ -36,8 +38,9 @@ public class TypeTransformer {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
             serviceProviderApiList.add(new ServiceProviderApi(
+                    serviceProvider.getName(),
                     localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
-                    capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities()),
+                    capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities().getCapabilities()),
                     localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
             );
         }
@@ -118,16 +121,16 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public Set<CapabilityApi> capabilitiesSetToCapabilitiesApiSet(Capabilities capabilities) {
-        Set<Capabilities> capabilitiesSet = new HashSet<>();
-        capabilitiesSet.add(capabilities);
+    public Set<CapabilityApi> capabilitiesSetToCapabilitiesApiSet(Set<Capability> capabilities) {
 
         Set<CapabilityApi> capabilityApiSet = new HashSet<>();
-        for (Capabilities capability : capabilitiesSet) {
+        for (Capability capability : capabilities) {
             capabilityApiSet.add(new CapabilityApi(
-                    capability.getCapabilities(),
-                    capability.getLastCapabilityExchange(),
-                    localDateTimeToTimestamp(capability.getLastUpdated().orElse(null))
+                    capability.getApplication(),
+                    capability.getMetadata(),
+                    capability.getShards(),
+                    capability.getStatus(),
+                    localDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         return capabilityApiSet;

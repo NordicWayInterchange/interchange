@@ -15,7 +15,7 @@ public class LocalSubscriptionApi {
 
     private Set<LocalSubscriptionEndpointApi> endpoints;
 
-    private Long lastUpdatedTimestamp;
+    private Long lastUpdated;
 
     private String consumerCommonName;
 
@@ -27,7 +27,7 @@ public class LocalSubscriptionApi {
 
 
     public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi localSubscriptionStatus, String selector, String consumerCommonName,
-                                String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+                                String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
         this.id = id;
         this.localSubscriptionStatus = localSubscriptionStatus;
         this.selector = selector;
@@ -36,7 +36,7 @@ public class LocalSubscriptionApi {
         this.connections.addAll(connections);
         this.errorMessage = errorMessage;
         this.endpoints = endpoints;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.lastUpdated = lastUpdated;
     }
 
 
@@ -74,12 +74,12 @@ public class LocalSubscriptionApi {
         this.endpoints = endpoints;
     }
 
-    public Long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
+    public Long getLastUpdated() {
+        return lastUpdated;
     }
 
-    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     public String getConsumerCommonName() {
@@ -126,7 +126,7 @@ public class LocalSubscriptionApi {
                 ", consumerCommonName=" + consumerCommonName +
                 ", errorMessage=" + errorMessage +
                 ", description=" + description +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }

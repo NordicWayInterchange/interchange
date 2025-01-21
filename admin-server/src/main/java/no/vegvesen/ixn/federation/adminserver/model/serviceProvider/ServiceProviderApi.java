@@ -1,8 +1,11 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class ServiceProviderApi {
+
+    private String name;
 
     private Set<LocalSubscriptionApi> subscriptions;
 
@@ -12,6 +15,7 @@ public class ServiceProviderApi {
 
 
     public ServiceProviderApi(
+            String name,
             Set<LocalSubscriptionApi> subscriptions,
             Set<CapabilityApi> capabilities,
             Set<LocalDeliveryApi> deliveries) {
@@ -22,6 +26,14 @@ public class ServiceProviderApi {
 
     public ServiceProviderApi() {
 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Set<LocalSubscriptionApi> getSubscriptions() {
@@ -51,6 +63,7 @@ public class ServiceProviderApi {
     @Override
     public String toString() {
         return "serviceProviderApi{" +
+                "name='" + name + '\'' +
                 ", capabilities=" + capabilities +
                 ", subscriptions=" + subscriptions +
                 ", deliveries=" + deliveries +
