@@ -3,8 +3,8 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.model.capability.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class CapabilityApi {
@@ -23,9 +23,9 @@ public class CapabilityApi {
 
     private CapabilityStatus status = CapabilityStatus.REQUESTED;
 
-    private List<CapabilityShard> shards = new ArrayList<>();
+    private Set<CapabilityShardApi> shards = new HashSet<>();
 
-    public CapabilityApi(ApplicationApi application, MetadataApi metadata, List<CapabilityShard> shards, CapabilityStatus status, Long createdTimestamp) {
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards, CapabilityStatus status, Long createdTimestamp) {
         this.application = application;
         this.metadata = metadata;
         this.shards = shards;
@@ -50,11 +50,11 @@ public class CapabilityApi {
     }
 
 
-    public List<CapabilityShard> getShards() {
+    public Set<CapabilityShardApi> getShards() {
         return shards;
     }
 
-    public void setShards(List<CapabilityShard> shards) {
+    public void setShards(Set<CapabilityShardApi> shards) {
         this.shards.clear();
         if (shards != null) {
             this.shards.addAll(shards);

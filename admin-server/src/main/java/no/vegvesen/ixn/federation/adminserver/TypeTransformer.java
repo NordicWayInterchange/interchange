@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
@@ -128,7 +129,7 @@ public class TypeTransformer {
             capabilityApiSet.add(new CapabilityApi(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
-                    capability.getShards(),
+                    capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
                     capability.getStatus(),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
@@ -248,6 +249,22 @@ public class TypeTransformer {
             neighbourCapabilityApiSet.add(neighbourCapabilityToNeighbourCapabilityApi(capability));
         }
         return neighbourCapabilityApiSet;
+    }
+
+    public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
+        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+        for (CapabilityShard capabilityShard : capabilityShards) {
+            capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
+        }
+        return capabilityShardApiSet;
+    }
+
+    public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
+        return new CapabilityShardApi(
+                capabilityShard.getShardId(),
+                capabilityShard.getExchangeName(),
+                capabilityShard.getSelector()
+        );
     }
 
     public NeighbourCapabilityApi neighbourCapabilityToNeighbourCapabilityApi(NeighbourCapability neighbourCapability) {
