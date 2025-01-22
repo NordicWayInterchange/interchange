@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class ServiceProviderApi {
 
@@ -19,6 +18,7 @@ public class ServiceProviderApi {
             Set<LocalSubscriptionApi> subscriptions,
             Set<CapabilityApi> capabilities,
             Set<LocalDeliveryApi> deliveries) {
+        this.name = name;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;

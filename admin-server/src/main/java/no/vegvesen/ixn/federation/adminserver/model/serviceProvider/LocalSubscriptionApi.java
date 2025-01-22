@@ -49,11 +49,11 @@ public class LocalSubscriptionApi {
     }
 
 
-    public LocalSubscriptionStatusApi getLocalSubscriptionStatus() {
+    public LocalSubscriptionStatusApi getStatus() {
         return status;
     }
 
-    public void setLocalSubscriptionStatus(LocalSubscriptionStatusApi status) {
+    public void setStatus(LocalSubscriptionStatusApi status) {
         this.status = status;
     }
 

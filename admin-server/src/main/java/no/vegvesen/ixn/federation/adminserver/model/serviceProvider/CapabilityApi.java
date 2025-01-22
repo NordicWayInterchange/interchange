@@ -1,4 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
+import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.model.capability.*;
 
 import java.util.ArrayList;
@@ -15,15 +17,15 @@ public class CapabilityApi {
     public CapabilityApi() {
     }
 
-    private Application application;
+    private ApplicationApi application;
 
-    private Metadata metadata;
+    private MetadataApi metadata;
 
     private CapabilityStatus status = CapabilityStatus.REQUESTED;
 
     private List<CapabilityShard> shards = new ArrayList<>();
 
-    public CapabilityApi(Application application, Metadata metadata, List<CapabilityShard> shards, CapabilityStatus status, Long createdTimestamp) {
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, List<CapabilityShard> shards, CapabilityStatus status, Long createdTimestamp) {
         this.application = application;
         this.metadata = metadata;
         this.shards = shards;
@@ -31,19 +33,19 @@ public class CapabilityApi {
         this.createdTimestamp = createdTimestamp;
     }
 
-    public Application getApplication() {
+    public ApplicationApi getApplication() {
         return application;
     }
 
-    public void setApplication(Application application) {
+    public void setApplication(ApplicationApi application) {
         this.application = application;
     }
 
-    public Metadata getMetadata() {
+    public MetadataApi getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public void setMetadata(MetadataApi metadata) {
         this.metadata = metadata;
     }
 
@@ -59,12 +61,12 @@ public class CapabilityApi {
         }
     }
 
-    public Long getLastUpdated() {
+    public Long getCreatedTimestamp() {
         return createdTimestamp;
     }
 
-    public void setLastUpdated(Long lastUpdated) {
-        this.createdTimestamp = lastUpdated;
+    public void setCreatedTimestamp(Long createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 
     public CapabilityStatus getStatus() {

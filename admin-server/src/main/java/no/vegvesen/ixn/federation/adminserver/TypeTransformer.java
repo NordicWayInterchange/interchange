@@ -126,8 +126,8 @@ public class TypeTransformer {
         Set<CapabilityApi> capabilityApiSet = new HashSet<>();
         for (Capability capability : capabilities) {
             capabilityApiSet.add(new CapabilityApi(
-                    capability.getApplication(),
-                    capability.getMetadata(),
+                    capability.getApplication().toApi(),
+                    capability.getMetadata().toApi(),
                     capability.getShards(),
                     capability.getStatus(),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
