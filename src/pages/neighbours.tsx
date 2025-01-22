@@ -78,8 +78,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(neighbourCapabilities) ?
-                            <span style={{textDecoration: "underline"}}> {neighbourCapabilities.length} </span> :
-                            <span style={{textDecoration: "underline"}}> {0} </span>}
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {neighbourCapabilities.length} </span> :
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
                     </Box>
                 );
             },
@@ -100,8 +100,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(ourSubscriptions) ?
-                            <span style={{textDecoration: "underline"}}> {ourSubscriptions.length} </span> :
-                            <span style={{textDecoration: "underline"}}> {0} </span>}
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {ourSubscriptions.length} </span> :
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
                     </Box>
                 );
             },
@@ -122,8 +122,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(neighbourSubscriptions) ?
-                            <span style={{textDecoration: "underline"}}> {neighbourSubscriptions.length} </span> :
-                            <span style={{textDecoration: "underline"}}> {0} </span>}
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {neighbourSubscriptions.length} </span> :
+                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
 
                     </Box>
                 );
@@ -188,6 +188,8 @@ const Neighbours = () => {
                             setHighlightedCell({ id: params.id as number, field: params.field });
                         }}
                         getCellClassName={(params) =>
+                            (params.field === 'capabilities' || params.field === 'ourRequestedSubscriptions'
+                                || params.field === 'neighbourRequestedSubscriptions') &&
                             highlightedCell.id === params.id && highlightedCell.field === params.field
                                 ? "highlighted-cell"
                                 : ""
@@ -201,7 +203,6 @@ const Neighbours = () => {
                 if (!row) {
                     return null;
                 }
-
                 return (
                     <Box key={rowId}>
                         <NestedGridNeighbours
