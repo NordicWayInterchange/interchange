@@ -45,7 +45,6 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             originatingCountry: capability.application.originatingCountry,
             application: capability.application,
             metadata: capability.metadata,
-            createdTimestamp: timeConverter(capability.createdTimestamp)
         }));
 
         nestedColumns = [
@@ -61,7 +60,6 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                 }
             },
             {...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country"},
-            {...dataGridTemplate, field: "createdTimestamp", headerName: "Last updated"}
         ];
     } else if (field === "neighbourRequestedSubscriptions") {
         nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
