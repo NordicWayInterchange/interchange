@@ -64,7 +64,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                     </Box>
                                     <Box>
                                         <ListItemText
-                                            primary={"Last updated"}
+                                            primary={"Created"}
                                             secondary={capabilities.createdTimestamp}
                                         />
                                     </Box>

@@ -25,8 +25,8 @@ const SIDE_PAGES: Array<IPages> = [
         icon: <HouseIcon />
     },
     {
-        text: "My Interchange",
-        url: "/myInterchange",
+        text: "Service Providers",
+        url: "/serviceProviders",
         icon: <SyncAltIcon />
     },
     {

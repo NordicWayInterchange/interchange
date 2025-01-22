@@ -45,6 +45,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             originatingCountry: capability.application.originatingCountry,
             application: capability.application,
             metadata: capability.metadata,
+            createdTimestamp: timeConverter(capability.createdTimestamp)
         }));
 
         nestedColumns = [
@@ -60,6 +61,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                 }
             },
             {...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country"},
+            {...dataGridTemplate, field: "createdTimestamp", headerName: "Created"}
         ];
     } else if (field === "neighbourRequestedSubscriptions") {
         nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
@@ -132,6 +134,19 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 300, width: "100%"}}>
+                {heading === 'Capabilities' && (
+                <DataGrid
+                    rows={nestedData}
+                    columns={nestedColumns}
+                    getRowId={(row) => row.id}
+                    onRowClick={handleOnRowClick}
+                    sort={{field: "createdTimestamp", sort: "desc"}}
+                    slots={{
+                        noRowsOverlay: CustomEmptyOverlay
+                    }}
+                />
+                )}
+                {(heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
                 <DataGrid
                     rows={nestedData}
                     columns={nestedColumns}
@@ -142,6 +157,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                         noRowsOverlay: CustomEmptyOverlay
                     }}
                 />
+                )}
                 {neighbourRow && heading === 'Capabilities' && (
                     <CapabilityDrawer
                         handleMoreClose={handleMoreClose}

@@ -19,8 +19,8 @@ export default function Home() {
             count: neighbourData?.length,
         },
         {
-            header: 'INTERCHANGES',
-            url: "myInterchange",
+            header: 'SERVICE PROVIDERS',
+            url: "serviceProviders",
             count: 0
         }
     ];
