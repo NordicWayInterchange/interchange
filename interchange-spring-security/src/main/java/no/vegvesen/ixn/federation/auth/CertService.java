@@ -26,6 +26,7 @@ public class CertService{
 	public void checkIfCommonNameMatchesNapName(String napName) {
 		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
 		String commonName = principal.getName();
+
 		if (!commonName.equals(napName)) {
 			logger.error("Received request from {}, but CN on certificate did not match the NAP. Rejecting...", commonName);
 			String errorMessage = "Received request from %s, but CN on certificate did not match the NAP. Rejecting...";
