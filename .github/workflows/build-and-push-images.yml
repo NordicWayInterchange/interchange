@@ -103,17 +103,14 @@ jobs:
         working-directory: ./
 
       - uses: ruby/setup-ruby@v1
-        if: github.ref == 'refs/heads/federation-master'
         with:
           ruby-version: 2.7
 
       - uses: reitzig/actions-asciidoctor@v2.0.2
-        if: github.ref == 'refs/heads/federation-master'
         with:
           version: 2.0.18
 
       - name: checkout to client docs project
-        if: github.ref == 'refs/heads/federation-master'
         uses: actions/checkout@v4
         with:
           repository: NordicWayInterchange/serviceprovider-client-documentation
@@ -121,11 +118,13 @@ jobs:
           path: serviceprovider-client-documentation
 
       - name: Push client docs to github pages
-        if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
-          asciidoctor --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs --destination-dir=./serviceprovider-client-documentation /home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs/*.adoc
+          asciidoctor -a nofooter --backend=html5 --source-dir=/home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs \
+          --destination-dir=./serviceprovider-client-documentation \
+          /home/runner/work/interchange/interchange/service-provider-client/target/generated-picocli-docs/*.adoc
+          
           cd ./serviceprovider-client-documentation
           mv capabilities*.html capabilities; mv subscriptions*.html subscriptions; mv privatechannels*.html privatechannels; mv deliveries*.html deliveries; mv messages*.html messages
           git add --all
