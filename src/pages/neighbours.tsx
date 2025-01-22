@@ -60,6 +60,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "name",
             headerName: "Name",
+            flex: 2
         },
         {
             ...dataGridTemplate,
@@ -76,7 +77,9 @@ const Neighbours = () => {
                             handleCellClick(params.row.capabilities, "capabilities")
                         }}
                     >
-                        {Array.isArray(neighbourCapabilities) ? neighbourCapabilities.length : 0}
+                        {Array.isArray(neighbourCapabilities) ?
+                            <span style={{textDecoration: "underline"}}> {neighbourCapabilities.length} </span> :
+                            <span style={{textDecoration: "underline"}}> {0} </span>}
                     </Box>
                 );
             },
@@ -96,7 +99,9 @@ const Neighbours = () => {
                             handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")
                         }}
                     >
-                        {Array.isArray(ourSubscriptions) ? ourSubscriptions.length : 0}
+                        {Array.isArray(ourSubscriptions) ?
+                            <span style={{textDecoration: "underline"}}> {ourSubscriptions.length} </span> :
+                            <span style={{textDecoration: "underline"}}> {0} </span>}
                     </Box>
                 );
             },
@@ -116,7 +121,9 @@ const Neighbours = () => {
                             handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")
                         }}
                     >
-                        {Array.isArray(neighbourSubscriptions) ? neighbourSubscriptions.length : 0}
+                        {Array.isArray(neighbourSubscriptions) ?
+                            <span style={{textDecoration: "underline"}}> {neighbourSubscriptions.length} </span> :
+                            <span style={{textDecoration: "underline"}}> {0} </span>}
 
                     </Box>
                 );
@@ -139,6 +146,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "lastFailedConnectionAttempt",
             headerName: "Last failed connection attempt",
+            flex: 2,
             renderCell: (params) => {
                 const value = params.row.lastFailedConnectionAttempt;
                 return value && timeConverter(value)
@@ -148,6 +156,7 @@ const Neighbours = () => {
             ...dataGridTemplate,
             field: "lastUpdated",
             headerName: "Last Updated",
+            flex: 2,
             renderCell: (params) => {
                 const value = params.row.lastUpdated;
                 return value && timeConverter(value)
@@ -159,7 +168,8 @@ const Neighbours = () => {
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour subscriptions
+                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour
+                subscriptions
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
@@ -176,7 +186,6 @@ const Neighbours = () => {
                         }}
                         onCellClick={(params) => {
                             setHighlightedCell({ id: params.id as number, field: params.field });
-
                         }}
                         getCellClassName={(params) =>
                             highlightedCell.id === params.id && highlightedCell.field === params.field
