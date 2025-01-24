@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Command(name = "listen", description = "Add subscription and receive messages")
 public class Listen implements Callable<Integer> {
@@ -23,7 +22,7 @@ public class Listen implements Callable<Integer> {
     @ParentCommand
     SubscriptionsCommand parentCommand;
 
-    @ArgGroup(exclusive = true, multiplicity = "1")
+    @ArgGroup(multiplicity = "1")
     SubscriptionsOption option;
 
     @Option(names = {"-d", "--directory"}, description = "directory to save messages")
@@ -48,7 +47,7 @@ public class Listen implements Callable<Integer> {
                             s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
                                     s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
                     .findFirst()
-                    .orElseThrow()
+                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
         }
         else if(option.selector != null){
@@ -57,7 +56,9 @@ public class Listen implements Callable<Integer> {
                     .filter(s ->
                             s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
                                     s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
-                    .findFirst().orElseThrow().getId();
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
+                    .getId();
         } else if (option.id != null) {
             id = option.id;
 
@@ -76,7 +77,12 @@ public class Listen implements Callable<Integer> {
 
         }
 
-        LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().get();
+        LocalEndpointApi endpointApi = client
+                .getSubscription(subscription.getId())
+                .getEndpoints()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s",id)));
         String url = "amqps://"+endpointApi.getHost();
 
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
