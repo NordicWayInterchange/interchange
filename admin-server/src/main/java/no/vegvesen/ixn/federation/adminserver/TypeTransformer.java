@@ -1,7 +1,11 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
@@ -10,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 public class TypeTransformer {
 
@@ -31,6 +36,18 @@ public class TypeTransformer {
         return neighbourApiList;
     }
 
+    public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
+        List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            serviceProviderApiList.add(new ServiceProviderApi(
+                    serviceProvider.getName(),
+                    localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
+                    capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities().getCapabilities()),
+                    localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
+            );
+        }
+        return serviceProviderApiList;
+    }
 
     public ConnectionStatusApi connectionStatusToConnectionStatusApi(ConnectionStatus status) {
         return ConnectionStatusApi.valueOf(status.toString());
@@ -77,6 +94,55 @@ public class TypeTransformer {
         return endpointApiSet;
     }
 
+    public Set<LocalSubscriptionEndpointApi> localEndpointSetToEndpointApiSet(Set<LocalEndpoint> subscriptionLocalEndpointSet) {
+        Set<LocalSubscriptionEndpointApi> endpointApiSet = new HashSet<>();
+        for (LocalEndpoint endpoint : subscriptionLocalEndpointSet) {
+            endpointApiSet.add(new LocalSubscriptionEndpointApi(
+                    endpoint.getId(),
+                    endpoint.getSource(),
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate()
+            ));
+        }
+        return endpointApiSet;
+    }
+
+    public Set<LocalDeliveryEndpointApi> localDeliveryEndpointSetToEndpointApiSet(Set<LocalDeliveryEndpoint> deliveryLocalEndpointSet) {
+        Set<LocalDeliveryEndpointApi> deliveryEndpointApiSet = new HashSet<>();
+        for (LocalDeliveryEndpoint endpoint : deliveryLocalEndpointSet) {
+            deliveryEndpointApiSet.add(new LocalDeliveryEndpointApi(
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getTarget(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate()
+            ));
+        }
+        return deliveryEndpointApiSet;
+    }
+
+    public Set<CapabilityApi> capabilitiesSetToCapabilitiesApiSet(Set<Capability> capabilities) {
+
+        Set<CapabilityApi> capabilityApiSet = new HashSet<>();
+        for (Capability capability : capabilities) {
+            capabilityApiSet.add(new CapabilityApi(
+                    capability.getId(),
+                    capability.getApplication().toApi(),
+                    capability.getMetadata().toApi(),
+                    capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
+                    capabilityStatusToCapabilityStatusApi(capability.getStatus()),
+                    localDateTimeToTimestamp(capability.getCreatedTimestamp())
+            ));
+        }
+        return capabilityApiSet;
+    }
+
+    public CapabilityStatusApi capabilityStatusToCapabilityStatusApi(CapabilityStatus capabilityStatus) {
+        return CapabilityStatusApi.valueOf(capabilityStatus.toString());
+    }
+
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
         if (subscriptionShard != null) {
             return new SubscriptionShardApi(
@@ -90,6 +156,14 @@ public class TypeTransformer {
         return SubscriptionStatusApi.valueOf(subscriptionStatus.toString());
     }
 
+    public LocalSubscriptionStatusApi localSubscriptionStatusToSubscriptionStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
+        return LocalSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
+    }
+
+    public LocalDeliveryStatusApi localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
+        return LocalDeliveryStatusApi.valueOf(localDeliveryStatus.toString());
+    }
+
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
         return new NeighbourSubscriptionRequestApi(
                 subscriptionRequest.getSubreq_id(),
@@ -97,6 +171,42 @@ public class TypeTransformer {
                 localDateTimeToTimestamp(subscriptionRequest.getSuccessfulRequest().orElse(null))
         );
     }
+
+
+    public Set<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
+        Set<LocalSubscriptionApi> subscriptionApiSet = new HashSet<>();
+        for (LocalSubscription subscription : subscriptionSet) {
+            subscriptionApiSet.add(new LocalSubscriptionApi(
+                    subscription.getId().toString(),
+                    localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
+                    subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
+                    subscription.getDescription(),
+                    subscription.getErrorMessage(),
+                    subscription.getConnections(),
+                    localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
+                    localDateTimeToTimestamp(subscription.getLastUpdated())
+            ));
+        }
+        return subscriptionApiSet;
+    }
+
+
+    public Set<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
+        Set<LocalDeliveryApi> deliveriesApiSet = new HashSet<>();
+        for (LocalDelivery delivery : deliveriesSet) {
+            deliveriesApiSet.add(new LocalDeliveryApi(
+                    delivery.getId().toString(),
+                    delivery.getSelector(),
+                    localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
+                    localDeliveryEndpointSetToEndpointApiSet(delivery.getEndpoints()),
+                    delivery.getDescription(),
+                    localDateTimeToTimestamp(delivery.getLastUpdatedTimestamp())
+            ));
+        }
+        return deliveriesApiSet;
+    }
+
 
     public Set<NeighbourSubscriptionApi> neighbourSubscriptionSetToNeighbourSubscriptionRequestApiSet(Set<NeighbourSubscription> neighbourSubscriptions) {
         Set<NeighbourSubscriptionApi> neighbourSubscriptionApiSet = new HashSet<>();
@@ -145,6 +255,22 @@ public class TypeTransformer {
             neighbourCapabilityApiSet.add(neighbourCapabilityToNeighbourCapabilityApi(capability));
         }
         return neighbourCapabilityApiSet;
+    }
+
+    public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
+        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+        for (CapabilityShard capabilityShard : capabilityShards) {
+            capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
+        }
+        return capabilityShardApiSet;
+    }
+
+    public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
+        return new CapabilityShardApi(
+                capabilityShard.getShardId(),
+                capabilityShard.getExchangeName(),
+                capabilityShard.getSelector()
+        );
     }
 
     public NeighbourCapabilityApi neighbourCapabilityToNeighbourCapabilityApi(NeighbourCapability neighbourCapability) {
