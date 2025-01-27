@@ -13,15 +13,18 @@ public class LocalDeliveryApi {
 
     private Long lastUpdatedTimestamp;
 
+    private String description;
+
     public LocalDeliveryApi() {
     }
 
     public LocalDeliveryApi(String id, String selector, LocalDeliveryStatusApi status,
-                            Set<LocalDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+                            Set<LocalDeliveryEndpointApi> endpoints, String description, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.status = status;
         this.endpoints = endpoints;
+        this.description = description;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
@@ -60,6 +63,14 @@ public class LocalDeliveryApi {
         }
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Long getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
@@ -75,6 +86,7 @@ public class LocalDeliveryApi {
                 ", status=" + status +
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints  +
+                ", description=" + description  +
                 ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
                 "}";
     }

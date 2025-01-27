@@ -201,6 +201,7 @@ public class TypeTransformer {
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
                     localDeliveryEndpointSetToEndpointApiSet(delivery.getEndpoints()),
+                    delivery.getDescription(),
                     localDateTimeToTimestamp(delivery.getLastUpdatedTimestamp())
             ));
         }
