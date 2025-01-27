@@ -55,7 +55,7 @@ public class TypeTransformer {
                     subscription.getNumberOfPolls(),
                     subscription.getConsumerCommonName(),
                     endpointSetToEndpointApiSet(subscription.getEndpoints()),
-                    timestampMillisecondsToSeconds(subscription.getLastUpdatedTimestamp())
+                    subscription.getLastUpdatedTimestamp()
             ));
         }
         return subscriptionApiSet;
@@ -78,13 +78,12 @@ public class TypeTransformer {
     }
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
-        if(subscriptionShard != null) {
+        if (subscriptionShard != null) {
             return new SubscriptionShardApi(
                     subscriptionShard.getId(),
                     subscriptionShard.getExchangeName()
             );
-        }
-        else return null;
+        } else return null;
     }
 
     public SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
@@ -109,7 +108,7 @@ public class TypeTransformer {
                     neighbourSubscription.getPath(),
                     neighbourSubscription.getConsumerCommonName(),
                     neighbourEndpointSetToNeighbourEndpointApiSet(neighbourSubscription.getEndpoints()),
-                    timestampMillisecondsToSeconds(neighbourSubscription.getLastUpdatedTimestamp())
+                    neighbourSubscription.getLastUpdatedTimestamp()
             ));
         }
         return neighbourSubscriptionApiSet;
@@ -164,11 +163,8 @@ public class TypeTransformer {
     private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {
         Long epochSecond = null;
         if (lastUpdated != null) {
-            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toEpochSecond();
+            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
         return epochSecond;
-    }
-    private Long timestampMillisecondsToSeconds(Long timestamp){
-        return timestamp/1000;
     }
 }
