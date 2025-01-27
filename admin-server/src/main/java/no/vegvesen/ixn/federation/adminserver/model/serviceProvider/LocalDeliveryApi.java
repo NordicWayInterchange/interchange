@@ -1,12 +1,11 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
-import no.vegvesen.ixn.federation.adminserver.ServiceProviderDeliveryStatus;
 
 import java.util.*;
 
 public class LocalDeliveryApi {
     private String id;
 
-    private ServiceProviderDeliveryStatus status;
+    private LocalDeliveryStatusApi status;
 
     private String selector;
 
@@ -17,7 +16,7 @@ public class LocalDeliveryApi {
     public LocalDeliveryApi() {
     }
 
-    public LocalDeliveryApi(String id, String selector, ServiceProviderDeliveryStatus status,
+    public LocalDeliveryApi(String id, String selector, LocalDeliveryStatusApi status,
                             Set<LocalDeliveryEndpointApi> endpoints, Long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
@@ -42,11 +41,11 @@ public class LocalDeliveryApi {
         this.selector = selector;
     }
 
-    public ServiceProviderDeliveryStatus getStatus() {
+    public LocalDeliveryStatusApi getStatus() {
         return status;
     }
 
-    public void setStatus(ServiceProviderDeliveryStatus status) {
+    public void setStatus(LocalDeliveryStatusApi status) {
         this.status = status;
     }
 

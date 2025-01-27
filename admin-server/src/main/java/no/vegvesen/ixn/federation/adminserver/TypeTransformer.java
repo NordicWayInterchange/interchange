@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
@@ -127,14 +128,19 @@ public class TypeTransformer {
         Set<CapabilityApi> capabilityApiSet = new HashSet<>();
         for (Capability capability : capabilities) {
             capabilityApiSet.add(new CapabilityApi(
+                    capability.getId(),
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
-                    capability.getStatus(),
+                    capabilityStatusToCapabilityStatusApi(capability.getStatus()),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         return capabilityApiSet;
+    }
+
+    public CapabilityStatusApi capabilityStatusToCapabilityStatusApi(CapabilityStatus capabilityStatus) {
+        return CapabilityStatusApi.valueOf(capabilityStatus.toString());
     }
 
     public SubscriptionShardApi subscriptionShardToSubscriptionShardApi(SubscriptionShard subscriptionShard) {
@@ -155,8 +161,8 @@ public class TypeTransformer {
         return LocalSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
     }
 
-    public ServiceProviderDeliveryStatus localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
-        return ServiceProviderDeliveryStatus.valueOf(localDeliveryStatus.toString());
+    public LocalDeliveryStatusApi localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
+        return LocalDeliveryStatusApi.valueOf(localDeliveryStatus.toString());
     }
 
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {

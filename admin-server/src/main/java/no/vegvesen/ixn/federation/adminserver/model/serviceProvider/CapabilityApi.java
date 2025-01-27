@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.model.capability.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,16 +20,25 @@ public class CapabilityApi {
 
     private MetadataApi metadata;
 
-    private CapabilityStatus status = CapabilityStatus.REQUESTED;
+    private CapabilityStatusApi status = CapabilityStatusApi.REQUESTED;
 
     private Set<CapabilityShardApi> shards = new HashSet<>();
 
-    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards, CapabilityStatus status, Long createdTimestamp) {
+    public CapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards, CapabilityStatusApi status, Long createdTimestamp) {
+        this.id = id;
         this.application = application;
         this.metadata = metadata;
         this.shards = shards;
         this.status = status;
         this.createdTimestamp = createdTimestamp;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public ApplicationApi getApplication() {
@@ -69,11 +77,11 @@ public class CapabilityApi {
         this.createdTimestamp = createdTimestamp;
     }
 
-    public CapabilityStatus getStatus() {
+    public CapabilityStatusApi getStatus() {
         return status;
     }
 
-    public void setStatus(CapabilityStatus status) {
+    public void setStatus(CapabilityStatusApi status) {
         this.status = status;
     }
 
