@@ -2,7 +2,7 @@ import logger from "@/lib/logger";
 import {NextApiRequest, NextApiResponse} from "next";
 import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
-import {fetchAdminUINeighbours} from "@/lib/fetchers/interchangeConnector";
+import {fetchAdminUINeighbours, fetchAdminUIServiceProviders} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
@@ -14,25 +14,17 @@ interface CustomSession extends Session {
     };
 }
 
-/*function extractCauseCodes(neighbours: Neighbours) {
-    let causeCodes;
-    if (
-        "causeCode" in capability.application &&
-        capability.application.causeCode
-    ) {
-        causeCodes = capability.application.causeCode.map((causeCode) => {
-            return causeCodesList.find((c) => c.value === causeCode) || { "value": causeCode};
-        });
-    }
-    return causeCodes;
-}*/
-
 const fetchNeighbours = async (params: basicGetParams) => {
     const res = await fetchAdminUINeighbours(params);
-    const neigbours: Array<Neighbours> = await res.data;
-    return [res.status, neigbours];
+    const neighbours: Array<Neighbours> = await res.data;
+    return [res.status, neighbours];
 };
 
+const fetchServiceProviders = async (params: basicGetParams) => {
+    const res = await fetchAdminUIServiceProviders(params);
+    const serviceProviders: Array<Neighbours> = await res.data;
+    return [res.status, serviceProviders];
+};
 
 export type basicGetParams = {
     actorCommonName: string;
@@ -51,6 +43,7 @@ const getPaths: {
     [key: string]: basicGetFunction | extendedGetFunction;
 } = {
     "neighbours": fetchNeighbours,
+    "serviceProviders": fetchServiceProviders,
 };
 const findHandler: (params: any) =>
     | {

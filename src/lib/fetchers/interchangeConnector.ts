@@ -10,7 +10,7 @@ const fetchIXN: (
     actorCommonName: string,
     path: string,
     selector?: string
-) => Promise<any> = async (actorCommonName, path, selector = "") => {
+) => Promise<any> = async (actorCommonName, path) => {
     const uri = process.env.INTERCHANGE_URI || "";
     const uriPath = `${actorCommonName}${path}`;
     const params: { selector?: string } = {};
@@ -45,4 +45,9 @@ export type basicGetFunction = (params: basicGetParams) => Promise<any>;
 export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
     const { actorCommonName} = params;
     return await fetchIXN(actorCommonName, "/neighbours");
+};
+
+export const fetchAdminUIServiceProviders: basicGetFunction = async (params) => {
+    const { actorCommonName} = params;
+    return await fetchIXN(actorCommonName, "/serviceProviders");
 };

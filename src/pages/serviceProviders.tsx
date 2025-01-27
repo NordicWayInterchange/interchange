@@ -1,13 +1,4 @@
 import Mainheading from "@/components/shared/typography/Mainheading";
-<<<<<<< HEAD
-import {Box} from "@mui/material";
-
-export default function ServiceProviders() {
-    return (
-        <>
-            <Box flex={1}>
-                <Mainheading>Service Providers</Mainheading>
-=======
 import {Box, Divider} from "@mui/material";
 import Subheading from "@/components/shared/typography/Subheading";
 import React, {useState} from "react";
@@ -132,7 +123,6 @@ export default function ServiceProviders() {
                             }/>
                     </Box>
                 </Box>
->>>>>>> 10f79bb (Added serviceProvider main page)
             </Box>
         </>
     );
