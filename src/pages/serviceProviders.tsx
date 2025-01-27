@@ -13,11 +13,17 @@ import Subheading from "@/components/shared/typography/Subheading";
 import React, {useState} from "react";
 import {GridColDef} from "@mui/x-data-grid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Capability, Subscription} from "@/types/neighbours";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
-import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {
+    CustomEmptyOverlayServiceProviders
+} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {useSession} from "next-auth/react";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
+import {
+    ServiceProviderCapabilities,
+    ServiceProviderDeliveries,
+    ServiceProviderSubscriptions
+} from "@/types/serviceProviders";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
@@ -26,9 +32,14 @@ export default function ServiceProviders() {
         session?.user.commonName as string
     );
 
-    const [serviceProviderRow, setServiceProviderRow] = useState<Subscription | Capability | null>(null);
+    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null>(null);
+    const [highlightedCell, setHighlightedCell] = useState<{
+        id: number | null;
+        field: string | null;
+    }>({id: null, field: null});
 
-    const serviceProviderTableHeader: GridColDef[] = [
+
+    const serviceProviderTableHeaders: GridColDef[] = [
         {
             ...dataGridTemplate,
             field: "name",
@@ -95,21 +106,30 @@ export default function ServiceProviders() {
             <Box flex={1}>
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
-                    These are all of all service providers. You can click a row to view more information.
+                    These are all of all service providers. You can click on capabilities, subscriptions or deliveries cell
+                    to view more information.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 400, width: "100%"}}>
                     <Box>
                         <DataGrid
-                            columns={serviceProviderTableHeader}
+                            columns={serviceProviderTableHeaders}
                             rows={serviceProviderData || []}
                             loading={isLoading}
-                            getRowId={(row) => row.neighbour_id}
+                            getRowId={(row) => row.id}
                             sort={{field: "lastUpdated", sort: "desc"}}
                             slots={{
-                                noRowsOverlay: CustomEmptyOverlayNeighbours
+                                noRowsOverlay: CustomEmptyOverlayServiceProviders
                             }}
-                        />
+                            onCellClick={(params) => {
+                                setHighlightedCell({ id: params.id as number, field: params.field });
+
+                            }}
+                            getCellClassName={(params) =>
+                                highlightedCell.id === params.id && highlightedCell.field === params.field
+                                    ? "highlighted-cell"
+                                    : ""
+                            }/>
                     </Box>
                 </Box>
 >>>>>>> 10f79bb (Added serviceProvider main page)

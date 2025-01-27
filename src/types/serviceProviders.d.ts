@@ -1,12 +1,14 @@
-import {CapabilitiesStatus, Capability} from "@/types/neighbours";
+import {Application, CapabilitiesStatus, Capability, Metadata} from "@/types/neighbours";
 
 export type ServiceProviders = {
     name: string;
     subscriptions: Array<ServiceProviderSubscriptions>;
+    capabilities: Array<ServiceProviderCapabilities>;
+    deliveries: Array<ServiceProviderDeliveries>;
 };
 
 export type ServiceProviderSubscriptions = {
-    id: string;
+    id: number;
     status: SubscriptionStatus;
     selector: string;
     endpoints: Array<Endpoint>;
@@ -15,6 +17,29 @@ export type ServiceProviderSubscriptions = {
     connections: Array<Connection>
     description: string;
     errorMessage: string;
+};
+
+export type ServiceProviderCapabilities = {
+    id: number;
+    application: Application;
+    metadata: Metadata;
+    status: CapabilitiesStatus;
+    createdTimestamp: number;
+};
+
+export enum CapabilitiesStatus {
+    UNKNOWN = "unknown",
+    KNOWN = "known",
+    FAILED = "failed"
+}
+
+export type ServiceProviderDeliveries = {
+    id: string;
+    selector: string;
+    status: DeliveryStatus;
+    endpoints: Array<Endpoint>;
+    lastUpdatedTimestamp: number;
+    description: string;
 };
 
 export enum SubscriptionStatus {
@@ -26,6 +51,15 @@ export enum SubscriptionStatus {
     RESUBSCRIBE = "resubscribe",
     ERROR = "error"
 }
+
+export enum DeliveryStatus {
+    REQUESTED = "requested",
+    CREATED = "created",
+    ILLEGAL = "illegal",
+    NOT_VALID = "not_valid",
+    NO_OVERLAP = "no_overlap",
+}
+
 
 export type Endpoint = {
     host: string;

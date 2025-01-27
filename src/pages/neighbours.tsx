@@ -168,13 +168,13 @@ const Neighbours = () => {
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour
-                subscriptions
+                These are all of neighbours. You can click on capabilities, our subscriptions or neighbour
+                subscriptions cell
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 400, width: "100%"}}>
-                <Box sx={tableHeaderStyling}>
+                <Box sx={StyledTableHeader}>
                     <DataGrid
                         columns={tableHeaders}
                         rows={neighbourData || []}
@@ -220,7 +220,7 @@ const Neighbours = () => {
     );
 };
 
-const tableHeaderStyling = {
+const StyledTableHeader = {
     height: 400,
     width: '100%',
     '& .highlighted-cell': {

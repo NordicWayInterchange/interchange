@@ -39,7 +39,7 @@ export type Neighbours = {
 };
 
 export type NeighbourCapabilities = {
-    id: string;
+    id: number;
     status: CapabilitiesStatus;
     capabilities: Capability;
     lastUpdated: number;
@@ -47,7 +47,7 @@ export type NeighbourCapabilities = {
 };
 
 export type Capability = {
-    id: string;
+    id: number;
     application: Application;
     metadata: Metadata;
     createdTimestamp: number;
@@ -75,7 +75,7 @@ export type Metadata = {
 };
 
 export type neighbourRequestedSubscriptions = {
-    id: string;
+    id: number;
     subscriptions: Array<Subscription>;
     successfulRequest: number;
 }
@@ -91,7 +91,7 @@ export type Endpoint = {
 
 
 export type Subscription = {
-    subreq_id: string;
+    subreq_id: number;
     id: string;
     subscriptionStatus: SubscriptionStatus;
     selector: string;
@@ -103,7 +103,7 @@ export type Subscription = {
 };
 
 export type ourRequestedSubscriptions = {
-    subreq_id: string;
+    subreq_id: number;
     subscriptions: Array<Subscription>;
     successfulRequest: number;
 };
