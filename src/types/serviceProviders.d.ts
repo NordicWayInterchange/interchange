@@ -1,6 +1,7 @@
 import {Application, CapabilitiesStatus, Capability, Metadata} from "@/types/neighbours";
 
 export type ServiceProviders = {
+    id: number;
     name: string;
     subscriptions: Array<ServiceProviderSubscriptions>;
     capabilities: Array<ServiceProviderCapabilities>;

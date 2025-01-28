@@ -2,7 +2,7 @@ import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box, Divider} from "@mui/material";
 import Subheading from "@/components/shared/typography/Subheading";
 import React, {useState} from "react";
-import {GridColDef} from "@mui/x-data-grid";
+import {GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/types/serviceProviders";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
+import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
@@ -44,6 +45,12 @@ export default function ServiceProviders() {
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
         }));
+    };
+
+    const handleOnRowClick = (params: GridRowParams) => {
+        setServiceProviderRow(null);
+        setServiceProviderRow(params?.row || []);
+        setDrawerOpen(true);
     };
 
     const serviceProviderTableHeaders: GridColDef[] = [
@@ -154,6 +161,26 @@ export default function ServiceProviders() {
                             }/>
                     </Box>
                 </Box>
+                {Object.keys(expandedRows).map((rowId) => {
+                    const row = Array.isArray(serviceProviderData) ? serviceProviderData.find((item) => item.id === parseInt(rowId)) : null;
+                    const field = expandedRows[rowId];
+
+                    if (!row) {
+                        return null;
+                    }
+                    return (
+                        <Box key={rowId}>
+                            <NestedGridServiceProviders
+                                row={row}
+                                field={field}
+                                drawerOpen={drawerOpen}
+                                serviceProviderRow={serviceProviderRow}
+                                handleMoreClose={handleMoreClose}
+                                handleOnRowClick={handleOnRowClick}
+                             />
+                        </Box>
+                    );
+                })}
             </Box>
         </>
     );
