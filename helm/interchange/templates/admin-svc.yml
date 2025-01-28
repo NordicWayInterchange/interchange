@@ -1,4 +1,4 @@
-{{ if or .Values.admin_frontend.enabled  .Values.admin_server.enabled }}
+{{ if .Values.admin_server.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
