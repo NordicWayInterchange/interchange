@@ -4,6 +4,7 @@ import java.util.Set;
 
 public class ServiceProviderApi {
 
+    private Integer id;
     private String name;
 
     private Set<LocalSubscriptionApi> subscriptions;
@@ -14,10 +15,12 @@ public class ServiceProviderApi {
 
 
     public ServiceProviderApi(
+            Integer id,
             String name,
             Set<LocalSubscriptionApi> subscriptions,
             Set<CapabilityApi> capabilities,
             Set<LocalDeliveryApi> deliveries) {
+        this.id = id;
         this.name = name;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
@@ -27,6 +30,15 @@ public class ServiceProviderApi {
     public ServiceProviderApi() {
 
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
 
     public String getName() {
         return name;
@@ -63,6 +75,7 @@ public class ServiceProviderApi {
     @Override
     public String toString() {
         return "serviceProviderApi{" +
+                "id=" + id +
                 "name='" + name + '\'' +
                 ", capabilities=" + capabilities +
                 ", subscriptions=" + subscriptions +
