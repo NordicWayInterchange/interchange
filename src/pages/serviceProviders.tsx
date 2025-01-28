@@ -16,7 +16,7 @@ import {
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import {ExpandedRows} from "@/types/expandedRows";
-import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
+import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
 
 export default function ServiceProviders() {
@@ -69,6 +69,7 @@ export default function ServiceProviders() {
             ...dataGridTemplate,
             field: "subscriptions",
             headerName: "Subscriptions",
+            headerClassName: 'custom-header',
             renderCell: (params) => {
                 const serviceSubscriptions = params.row.subscriptions;
                 return (
@@ -90,6 +91,7 @@ export default function ServiceProviders() {
             ...dataGridTemplate,
             field: "capabilities",
             headerName: "Capabilities",
+            headerClassName: 'custom-header',
             renderCell: (params) => {
                 const serviceProviderCapabilities = params.row.capabilities;
                 return (
@@ -111,6 +113,7 @@ export default function ServiceProviders() {
             ...dataGridTemplate,
             field: "deliveries",
             headerName: "Deliveries",
+            headerClassName: 'custom-header',
             renderCell: (params) => {
                 const serviceProviderDeliveries = params.row.deliveries;
                 return (
@@ -135,12 +138,12 @@ export default function ServiceProviders() {
             <Box flex={1}>
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
-                    These are all of all service providers. You can click on capabilities, subscriptions or deliveries cell
+                    These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell
                     to view more information.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 300, width: "100%"}}>
-                    <Box>
+                    <Box sx={StyledTableHeader}>
                         <DataGrid
                             columns={serviceProviderTableHeaders}
                             rows={serviceProviderData || []}
@@ -155,6 +158,8 @@ export default function ServiceProviders() {
 
                             }}
                             getCellClassName={(params) =>
+                                (params.field === 'subscriptions' || params.field === 'capabilities'
+                                    || params.field === 'deliveries') &&
                                 highlightedCell.id === params.id && highlightedCell.field === params.field
                                     ? "highlighted-cell"
                                     : ""

@@ -13,7 +13,7 @@ import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {ExpandedRows} from "@/types/expandedRows";
-import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
+import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -217,17 +217,4 @@ const Neighbours = () => {
         </Box>
     );
 };
-
-const StyledTableHeader = {
-    height: 400,
-    width: '100%',
-    '& .highlighted-cell': {
-        backgroundColor: '#F8DEDE',
-    },
-    '& .custom-header': {
-        backgroundColor: 'headerBackgroundColor',
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-}
 export default Neighbours;
