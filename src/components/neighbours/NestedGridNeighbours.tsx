@@ -133,7 +133,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                 These are all of {heading}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 300, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
                 {heading === 'Capabilities' && (
                 <DataGrid
                     rows={nestedData}

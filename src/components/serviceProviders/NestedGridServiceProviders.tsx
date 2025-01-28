@@ -130,7 +130,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 300, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
                 {field === 'Capabilities' && (
                     <DataGrid
                         rows={nestedData}
@@ -153,21 +153,6 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                         slots={{
                             noRowsOverlay: CustomEmptyOverlay
                         }}
-                    />
-                )}
-                {serviceProviderRow && field === 'capabilities' && (
-                    <CapabilityDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        capabilities={serviceProviderRow as Capability}
-                    />
-                )}
-                {serviceProviderRow && (field === 'Our Subscriptions' || field === 'Neighbour Subscriptions') && (
-                    <OurAndNeighbourSubscriptionDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={serviceProviderRow as Subscription}
-                        heading={field}
                     />
                 )}
             </Box>

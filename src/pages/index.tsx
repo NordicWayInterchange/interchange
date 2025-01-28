@@ -19,14 +19,14 @@ export default function Home() {
 
     const shortcuts = [
         {
-            header: 'NEIGHBOURS',
-            url: "/neighbours",
-            count: neighbourData?.length,
-        },
-        {
             header: 'SERVICE PROVIDERS',
             url: "/serviceProviders",
             count: serviceProvidersData?.length
+        },
+        {
+            header: 'NEIGHBOURS',
+            url: "/neighbours",
+            count: neighbourData?.length,
         }
     ];
 
