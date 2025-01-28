@@ -48,10 +48,10 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                 <Chip
                                     color={
                                         statusChips[
-                                            subscriptions.subscriptionStatus.toString() as keyof typeof statusChips
+                                            subscriptions.subscriptionStatus?.toString() ? subscriptions.subscriptionStatus.toString() : subscriptions.status.toString() as keyof typeof statusChips
                                             ] as any
                                     }
-                                    label={subscriptions.subscriptionStatus}
+                                    label={subscriptions.subscriptionStatus ? subscriptions.subscriptionStatus : subscriptions.status}
                                 />
                             </StyledHeaderBox>
                         </ListItem>

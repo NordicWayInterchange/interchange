@@ -94,6 +94,7 @@ export type Subscription = {
     subreq_id: number;
     id: string;
     subscriptionStatus: SubscriptionStatus;
+    status: SubscriptionStatus;
     selector: string;
     path: string;
     consumerCommonName: string;

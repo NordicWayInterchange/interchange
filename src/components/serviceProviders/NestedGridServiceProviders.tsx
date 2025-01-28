@@ -14,6 +14,9 @@ import {
     ServiceProviderDeliveries,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
+import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
+import {Capability, Subscription} from "@/types/neighbours";
+import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
 
 type Props = {
     row: any;
@@ -149,6 +152,21 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                         slots={{
                             noRowsOverlay: CustomEmptyOverlay
                         }}
+                    />
+                )}
+                {serviceProviderRow && field === 'capabilities' && (
+                    <CapabilityDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        capabilities={serviceProviderRow as Capability}
+                    />
+                )}
+                {serviceProviderRow && (field === 'subscriptions' || field === 'deliveries') && (
+                    <OurAndNeighbourSubscriptionDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        subscriptions={serviceProviderRow as Subscription}
+                        heading={field}
                     />
                 )}
             </Box>
