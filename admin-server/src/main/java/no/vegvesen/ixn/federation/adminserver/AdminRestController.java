@@ -55,7 +55,6 @@ public class AdminRestController {
     public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("List service provider for admin user {}", adminUser);
-
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }

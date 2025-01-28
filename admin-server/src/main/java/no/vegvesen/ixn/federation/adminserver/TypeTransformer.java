@@ -40,6 +40,7 @@ public class TypeTransformer {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
             serviceProviderApiList.add(new ServiceProviderApi(
+                    serviceProvider.getId(),
                     serviceProvider.getName(),
                     localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
                     capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities().getCapabilities()),
