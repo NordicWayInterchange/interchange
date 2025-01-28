@@ -49,5 +49,5 @@ export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
 
 export const fetchAdminUIServiceProviders: basicGetFunction = async (params) => {
     const { actorCommonName} = params;
-    return await fetchIXN(actorCommonName, "/serviceProviders");
+    return await fetchIXN(actorCommonName, "/serviceproviders");
 };

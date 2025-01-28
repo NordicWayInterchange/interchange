@@ -43,7 +43,7 @@ const getPaths: {
     [key: string]: basicGetFunction | extendedGetFunction;
 } = {
     "neighbours": fetchNeighbours,
-    "serviceProviders": fetchServiceProviders,
+    "serviceproviders": fetchServiceProviders,
 };
 const findHandler: (params: any) =>
     | {

@@ -4,7 +4,7 @@ import {ServiceProviders} from "@/types/serviceProviders";
 const fetchServiceProviders: (
     commonName: string
 ) => Promise<ServiceProviders[]> = async (commonName: string) => {
-    const res = await fetch(`/api/${commonName}/serviceProviders`);
+    const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         return res.json();
     } else {
@@ -15,7 +15,7 @@ const fetchServiceProviders: (
 
 const useFetchServiceProviders = (commonName: string) => {
     return useQuery({
-        queryKey: ["serviceProviders"],
+        queryKey: ["serviceproviders"],
         queryFn: () => fetchServiceProviders(commonName),
     });
 };
