@@ -8,9 +8,6 @@ import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import {Capability, Subscription} from "@/types/neighbours";
-import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
 import React from "react";
 import {
     ServiceProviderCapabilities,
@@ -39,15 +36,21 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
     if (field === "capabilities") {
         nestedData = row.capabilities.map((capability: any) => ({
             id: capability.id,
+            publisherId: capability.application.publisherId,
+            publicationId: capability.application.publicationId,
             messageType: capability.application.messageType,
+            protocolVersion: capability.application.protocolVersion,
             originatingCountry: capability.application.originatingCountry,
             application: capability.application,
             metadata: capability.metadata,
+            status: capability.status,
+            shards: capability.shards,
             createdTimestamp: timeConverter(capability.createdTimestamp)
         }));
 
         nestedColumns = [
-            {...dataGridTemplate, field: "id", headerName: "ID"},
+            {...dataGridTemplate, field: "publisherId", headerName: "Publisher ID"},
+            {...dataGridTemplate, field: "publicationId", headerName: "Publication ID"},
             {
                 ...dataGridTemplate, field: "messageType", headerName: "Message Type", renderCell: (cell) => {
                     return (
@@ -58,25 +61,26 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     );
                 }
             },
+            {...dataGridTemplate, field: "protocolVersion", headerName: "Protocol version"},
             {...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country"},
             {...dataGridTemplate, field: "createdTimestamp", headerName: "Created"}
         ];
     } else if (field === "subscriptions") {
         nestedData = row.subscriptions.map((subscription: any) => ({
-            id: subscription.subreq_id,
-            subscriptionStatus: subscription.subscriptionStatus,
+            id: subscription.id,
+            status: subscription.status,
             selector: subscription.selector,
-            path: subscription.path,
+            errorMessage: subscription.errorMessage,
             consumerCommonName: subscription.consumerCommonName,
+            description: subscription.description,
             endpoints: subscription.endpoints,
             lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
-            {...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name"},
             {
-                ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
                     return (
                         <Chip
                             color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
@@ -85,28 +89,23 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     );
                 }
             },
-            {
-                ...dataGridTemplate,
-                field: "lastUpdatedTimestamp",
-                headerName: "Last Updated",
-            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"},
         ];
     } else if (field === "deliveries") {
         nestedData = row.deliveries.map((subscription: any) => ({
             id: subscription.id,
-            subscriptionStatus: subscription.subscriptionStatus,
+            status: subscription.status,
             selector: subscription.selector,
-            path: subscription.path,
-            consumerCommonName: subscription.consumerCommonName,
+            description: subscription.description,
             endpoints: subscription.endpoints,
             lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
-            {...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer Common Name"},
             {
-                ...dataGridTemplate, field: "subscriptionStatus", headerName: "Status", renderCell: (cell) => {
+                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
                     return (
                         <Chip
                             color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
@@ -115,11 +114,8 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     );
                 }
             },
-            {
-                ...dataGridTemplate,
-                field: "lastUpdatedTimestamp",
-                headerName: "Last Updated",
-            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"}
         ];
     }
 
@@ -131,7 +127,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 450, width: "100%"}}>
-                {field === 'Capabilities' && (
+                {field === 'capabilities' && (
                     <DataGrid
                         rows={nestedData}
                         columns={nestedColumns}
