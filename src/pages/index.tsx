@@ -5,6 +5,7 @@ import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import Link from "next/link";
 import React from "react";
 import Subheading from "@/components/shared/typography/Subheading";
+import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 
 export default function Home() {
     const {data: session} = useSession();
@@ -12,16 +13,20 @@ export default function Home() {
         session?.user.commonName as string
     );
 
+    const {data: serviceProvidersData} = useFetchServiceProviders(
+        session?.user.commonName as string
+    );
+
     const shortcuts = [
+        {
+            header: 'SERVICE PROVIDERS',
+            url: "/serviceProviders",
+            count: serviceProvidersData?.length
+        },
         {
             header: 'NEIGHBOURS',
             url: "/neighbours",
             count: neighbourData?.length,
-        },
-        {
-            header: 'SERVICE PROVIDERS',
-            url: "serviceProviders",
-            count: 0
         }
     ];
 
@@ -57,7 +62,7 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 150,
+                                        width: 170,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"

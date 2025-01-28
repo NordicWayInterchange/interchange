@@ -12,10 +12,8 @@ import {Capability, Subscription} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
-
-type ExpandedRows = {
-    [key: string]: string | null;
-};
+import {ExpandedRows} from "@/types/expandedRows";
+import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -78,8 +76,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(neighbourCapabilities) ?
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {neighbourCapabilities.length} </span> :
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
+                            <StyledBorderlineSpan> {neighbourCapabilities.length} </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan>}
                     </Box>
                 );
             },
@@ -100,8 +98,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(ourSubscriptions) ?
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {ourSubscriptions.length} </span> :
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
+                            <StyledBorderlineSpan> {ourSubscriptions.length} </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan>}
                     </Box>
                 );
             },
@@ -122,8 +120,8 @@ const Neighbours = () => {
                         }}
                     >
                         {Array.isArray(neighbourSubscriptions) ?
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {neighbourSubscriptions.length} </span> :
-                            <span style={{textDecoration: "underline", fontWeight: 'bold'}}> {0} </span>}
+                            <StyledBorderlineSpan> {neighbourSubscriptions.length} </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan>}
 
                     </Box>
                 );
@@ -168,13 +166,13 @@ const Neighbours = () => {
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on capabilities, our subscriptions and neighbour
-                subscriptions
+                These are all of neighbours. You can click on capabilities, our subscriptions or neighbour
+                subscriptions cell
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
-            <Box sx={{height: 400, width: "100%"}}>
-                <Box sx={tableHeaderStyling}>
+            <Box sx={{height: 450, width: "100%"}}>
+                <Box sx={StyledTableHeader}>
                     <DataGrid
                         columns={tableHeaders}
                         rows={neighbourData || []}
@@ -219,17 +217,4 @@ const Neighbours = () => {
         </Box>
     );
 };
-
-const tableHeaderStyling = {
-    height: 400,
-    width: '100%',
-    '& .highlighted-cell': {
-        backgroundColor: '#F8DEDE',
-    },
-    '& .custom-header': {
-        backgroundColor: 'headerBackgroundColor',
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-}
 export default Neighbours;

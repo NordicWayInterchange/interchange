@@ -1,34 +1,32 @@
+import {GridColDef} from "@mui/x-data-grid";
+import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
 import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import DataGrid from "@/components/shared/datagrid/DataGrid";
-import React from "react";
-import {Capability, Subscription} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import {timeConverter} from "@/lib/timeConverter";
-import {GridColDef} from "@mui/x-data-grid";
+import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
+import {Capability, Subscription} from "@/types/neighbours";
+import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import React from "react";
+import {
+    ServiceProviderCapabilities,
+    ServiceProviderDeliveries,
+    ServiceProviderSubscriptions
+} from "@/types/serviceProviders";
 
 type Props = {
     row: any;
     drawerOpen: boolean;
-    neighbourRow: Capability | Subscription | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };
-
-const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
-
-    const nestedTableTitle: { [key: string]: string } = {
-        capabilities: "Capabilities",
-        ourRequestedSubscriptions: "Our Subscriptions",
-        neighbourRequestedSubscriptions: "Neighbour Subscriptions",
-    };
+const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
 
     if (!row || !field) {
         return null;
@@ -39,7 +37,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
 
 
     if (field === "capabilities") {
-        nestedData = row.capabilities.capabilities.map((capability: any) => ({
+        nestedData = row.capabilities.map((capability: any) => ({
             id: capability.id,
             messageType: capability.application.messageType,
             originatingCountry: capability.application.originatingCountry,
@@ -63,8 +61,8 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             {...dataGridTemplate, field: "originatingCountry", headerName: "Originating Country"},
             {...dataGridTemplate, field: "createdTimestamp", headerName: "Created"}
         ];
-    } else if (field === "neighbourRequestedSubscriptions") {
-        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
+    } else if (field === "subscriptions") {
+        nestedData = row.subscriptions.map((subscription: any) => ({
             id: subscription.subreq_id,
             subscriptionStatus: subscription.subscriptionStatus,
             selector: subscription.selector,
@@ -93,8 +91,8 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                 headerName: "Last Updated",
             },
         ];
-    } else if (field === "ourRequestedSubscriptions") {
-        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
+    } else if (field === "deliveries") {
+        nestedData = row.deliveries.map((subscription: any) => ({
             id: subscription.id,
             subscriptionStatus: subscription.subscriptionStatus,
             selector: subscription.selector,
@@ -125,52 +123,36 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
         ];
     }
 
-    const heading = field.split(" ").map(field => nestedTableTitle[field] || field).join(" ");
     return (
         <Box flex={1}>
-            <Mainheading>{heading}</Mainheading>
+            <Mainheading>{field}</Mainheading>
             <Subheading>
-                These are all of {heading}. You can click a row to view more information.
+                These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 450, width: "100%"}}>
-                {heading === 'Capabilities' && (
-                <DataGrid
-                    rows={nestedData}
-                    columns={nestedColumns}
-                    getRowId={(row) => row.id}
-                    onRowClick={handleOnRowClick}
-                    sort={{field: "createdTimestamp", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlay
-                    }}
-                />
-                )}
-                {(heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                <DataGrid
-                    rows={nestedData}
-                    columns={nestedColumns}
-                    getRowId={(row) => row.id}
-                    onRowClick={handleOnRowClick}
-                    sort={{field: "lastUpdated", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlay
-                    }}
-                />
-                )}
-                {neighbourRow && heading === 'Capabilities' && (
-                    <CapabilityDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        capabilities={neighbourRow as Capability}
+                {field === 'Capabilities' && (
+                    <DataGrid
+                        rows={nestedData}
+                        columns={nestedColumns}
+                        getRowId={(row) => row.id}
+                        onRowClick={handleOnRowClick}
+                        sort={{field: "createdTimestamp", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlay
+                        }}
                     />
                 )}
-                {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                    <OurAndNeighbourSubscriptionDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={neighbourRow as Subscription}
-                        heading={heading}
+                {(field === 'subscriptions' || field === 'deliveries') && (
+                    <DataGrid
+                        rows={nestedData}
+                        columns={nestedColumns}
+                        getRowId={(row) => row.id}
+                        onRowClick={handleOnRowClick}
+                        sort={{field: "lastUpdated", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlay
+                        }}
                     />
                 )}
             </Box>
@@ -178,4 +160,4 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
         </Box>
     );
 }
-export default nestedGridNeighbours;
+export default nestedGridServiceProviders;

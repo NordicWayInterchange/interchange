@@ -45,3 +45,23 @@ export const StyledCard = styled(Card)<CardProps>(() => ({
     padding: '16px',
     width: '100%',
 }));
+
+export const StyledBorderlineSpan = styled("span")({
+    textDecoration: "underline",
+    fontWeight: "bold",
+});
+
+
+export const StyledTableHeader = {
+    height: 400,
+    width: '100%',
+    '& .highlighted-cell': {
+        backgroundColor: '#F8DEDE',
+    },
+    '& .custom-header': {
+        backgroundColor: 'headerBackgroundColor',
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+}
+

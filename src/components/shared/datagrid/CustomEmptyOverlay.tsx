@@ -13,6 +13,17 @@ export const CustomEmptyOverlayNeighbours = () => {
     );
 };
 
+export const CustomEmptyOverlayServiceProviders = () => {
+    return (
+        <StyledGridOverlay>
+            <StyledBox>
+                <SentimentNeutralIcon fontSize="medium" color="disabled" sx={{ mt: -0.5 }} />
+                Could not find any service providers in the network!
+            </StyledBox>
+        </StyledGridOverlay>
+    );
+};
+
 export const CustomEmptyOverlay = () => {
     return (
         <StyledGridOverlay>
