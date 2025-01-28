@@ -5,10 +5,15 @@ import {useFetchNeighbours} from "@/hooks/useFetchNeighbours";
 import Link from "next/link";
 import React from "react";
 import Subheading from "@/components/shared/typography/Subheading";
+import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 
 export default function Home() {
     const {data: session} = useSession();
     const {data: neighbourData} = useFetchNeighbours(
+        session?.user.commonName as string
+    );
+
+    const {data: serviceProvidersData} = useFetchServiceProviders(
         session?.user.commonName as string
     );
 
@@ -19,9 +24,9 @@ export default function Home() {
             count: neighbourData?.length,
         },
         {
-            header: 'INTERCHANGES',
-            url: "myInterchange",
-            count: 0
+            header: 'SERVICE PROVIDERS',
+            url: "/serviceProviders",
+            count: serviceProvidersData?.length
         }
     ];
 
@@ -57,7 +62,7 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 150,
+                                        width: 170,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
