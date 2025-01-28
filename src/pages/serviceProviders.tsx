@@ -15,9 +15,13 @@ import {
     ServiceProviderDeliveries,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
+import {ExpandedRows} from "@/types/expandedRows";
+import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
@@ -29,12 +33,30 @@ export default function ServiceProviders() {
         field: string | null;
     }>({id: null, field: null});
 
+    const handleMoreClose = () => {
+        setDrawerOpen(false);
+    };
+
+    const handleCellClick = (row: any, field: any) => {
+        setExpandedRows({});
+        const rowId = row.id ? row.id : row.subreq_id;
+        setExpandedRows((prev) => ({
+            ...prev,
+            [rowId]: prev[rowId] === field ? null : field,
+        }));
+    };
 
     const serviceProviderTableHeaders: GridColDef[] = [
         {
             ...dataGridTemplate,
+            field: "id",
+            headerName: "ID",
+        },
+        {
+            ...dataGridTemplate,
             field: "name",
-            headerName: "Domain name",
+            flex: 4,
+            headerName: "Domain name"
         },
         {
             ...dataGridTemplate,
@@ -47,9 +69,12 @@ export default function ServiceProviders() {
                         style={{cursor: "pointer"}}
                         onClick={() => {
                             setServiceProviderRow(null);
+                            handleCellClick(params.row.subscriptions, "subscriptions")
                         }}
                     >
-                        {Array.isArray(serviceSubscriptions) ? serviceSubscriptions.length : 0}
+                        {Array.isArray(serviceSubscriptions) ?
+                            <StyledBorderlineSpan> {serviceSubscriptions.length} </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> : 0 </StyledBorderlineSpan>}
                     </Box>
                 );
             },
@@ -65,9 +90,12 @@ export default function ServiceProviders() {
                         style={{cursor: "pointer"}}
                         onClick={() => {
                             setServiceProviderRow(null);
+                            handleCellClick(params.row.capabilities, "capabilities")
                         }}
                     >
-                        {Array.isArray(serviceProviderCapabilities) ? serviceProviderCapabilities.length : 0}
+                        {Array.isArray(serviceProviderCapabilities) ?
+                            <StyledBorderlineSpan> {serviceProviderCapabilities.length} </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
                     </Box>
                 );
             },
@@ -83,9 +111,12 @@ export default function ServiceProviders() {
                         style={{cursor: "pointer"}}
                         onClick={() => {
                             setServiceProviderRow(null);
+                            handleCellClick(params.row.deliveries, "deliveries")
                         }}
                     >
-                        {Array.isArray(serviceProviderDeliveries) ? serviceProviderDeliveries.length : 0}
+                        {Array.isArray(serviceProviderDeliveries) ?
+                            <StyledBorderlineSpan> {serviceProviderDeliveries.length}  </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
                     </Box>
                 );
             },
@@ -101,7 +132,7 @@ export default function ServiceProviders() {
                     to view more information.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
-                <Box sx={{height: 400, width: "100%"}}>
+                <Box sx={{height: 300, width: "100%"}}>
                     <Box>
                         <DataGrid
                             columns={serviceProviderTableHeaders}

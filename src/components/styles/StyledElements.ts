@@ -45,3 +45,9 @@ export const StyledCard = styled(Card)<CardProps>(() => ({
     padding: '16px',
     width: '100%',
 }));
+
+export const StyledBorderlineSpan = styled("span")({
+    textDecoration: "underline",
+    fontWeight: "bold",
+});
+
