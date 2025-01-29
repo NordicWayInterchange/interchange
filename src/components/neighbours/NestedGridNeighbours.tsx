@@ -8,7 +8,7 @@ import React from "react";
 import {Capability, Subscription} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {GridColDef} from "@mui/x-data-grid";
@@ -21,6 +21,18 @@ type Props = {
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };
+
+function extractedSubscriptionAttributes(subscription: any) {
+    return {
+        id: subscription.id ? subscription.id : subscription.subreq_id,
+        subscriptionStatus: subscription.subscriptionStatus,
+        selector: subscription.selector,
+        path: subscription.path,
+        consumerCommonName: subscription.consumerCommonName,
+        endpoints: subscription.endpoints,
+        lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
+    };
+}
 
 const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
 
@@ -64,15 +76,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             {...dataGridTemplate, field: "createdTimestamp", headerName: "Created"}
         ];
     } else if (field === "neighbourRequestedSubscriptions") {
-        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
-            id: subscription.subreq_id,
-            subscriptionStatus: subscription.subscriptionStatus,
-            selector: subscription.selector,
-            path: subscription.path,
-            consumerCommonName: subscription.consumerCommonName,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
-        }));
+        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => extractedSubscriptionAttributes(subscription));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
@@ -94,15 +98,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             },
         ];
     } else if (field === "ourRequestedSubscriptions") {
-        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
-            id: subscription.id,
-            subscriptionStatus: subscription.subscriptionStatus,
-            selector: subscription.selector,
-            path: subscription.path,
-            consumerCommonName: subscription.consumerCommonName,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
-        }));
+        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => extractedSubscriptionAttributes(subscription));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
@@ -166,7 +162,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                     />
                 )}
                 {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                    <OurAndNeighbourSubscriptionDrawer
+                    <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={neighbourRow as Subscription}

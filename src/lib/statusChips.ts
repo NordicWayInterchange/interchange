@@ -6,7 +6,7 @@ export const statusChips = {
     NO_OVERLAP: "blueLight",
     RESUBSCRIBE: "yellowLight",
     ERROR: "depricatedLight"
-};
+} as const;
 
 export const messageTypeChips = {
     DATEX2: "grayLight",

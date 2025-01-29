@@ -1,5 +1,5 @@
 export const timeConverter = (time: number): string => {
-    const date = new Date(time * 1000);
+    const date = new Date(time);
     const locale = navigator.language || 'en-GB';
 
     const localeDateString = date.toLocaleDateString(locale, {

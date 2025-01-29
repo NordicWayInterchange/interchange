@@ -38,9 +38,8 @@ export default function ServiceProviders() {
         setDrawerOpen(false);
     };
 
-    const handleCellClick = (row: any, field: any) => {
+    const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
-        const rowId = row.id ? row.id : row.subreq_id;
         setExpandedRows((prev) => ({
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
@@ -76,8 +75,9 @@ export default function ServiceProviders() {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
+                            const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.subscriptions, "subscriptions")
+                            handleCellClick(params.row.subscriptions, "subscriptions", rowId)
                         }}
                     >
                         {Array.isArray(serviceSubscriptions) ?
@@ -98,8 +98,9 @@ export default function ServiceProviders() {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
+                            const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.capabilities, "capabilities")
+                            handleCellClick(params.row.capabilities, "capabilities", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderCapabilities) ?
@@ -120,8 +121,9 @@ export default function ServiceProviders() {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
+                            const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.deliveries, "deliveries")
+                            handleCellClick(params.row.deliveries, "deliveries", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderDeliveries) ?

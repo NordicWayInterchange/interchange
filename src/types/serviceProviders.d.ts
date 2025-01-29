@@ -25,8 +25,15 @@ export type ServiceProviderCapabilities = {
     application: Application;
     metadata: Metadata;
     status: CapabilitiesStatus;
+    shards: Array<Shard>;
     createdTimestamp: number;
 };
+
+export type Shard = {
+    shardId: number;
+    exchangeName: string;
+    selector: string;
+}
 
 export enum CapabilitiesStatus {
     UNKNOWN = "unknown",
