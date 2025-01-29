@@ -28,6 +28,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
     const subscriptionStatus = (subscriptions as any)?.subscriptionStatus;
     const consumerCommonName = (subscriptions as any)?.consumerCommonName;
     const path = (subscriptions as any)?.path;
+    const errorMessage = (subscriptions as any)?.errorMessage;
     return (
         <>
             <Drawer
@@ -188,6 +189,29 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                                 },
                                             }}
                                         />)}
+                                    </FormControl>
+                                </StyledCard>
+                            </ListItem>
+                        )}
+                        {errorMessage && (
+                            <ListItem>
+                                <StyledCard variant="outlined">
+                                    <Typography>Error message</Typography>
+                                    <FormControl fullWidth>
+                                        <TextField
+                                            value={errorMessage || ""}
+                                            label="Error message"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={errorMessage}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
                                     </FormControl>
                                 </StyledCard>
                             </ListItem>
