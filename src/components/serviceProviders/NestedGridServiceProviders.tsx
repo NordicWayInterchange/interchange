@@ -16,7 +16,7 @@ import {
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import {Capability, Subscription} from "@/types/neighbours";
-import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 
 type Props = {
     row: any;
@@ -77,7 +77,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
             consumerCommonName: subscription.consumerCommonName,
             description: subscription.description,
             endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
+            lastUpdated: timeConverter(subscription.lastUpdated)
         }));
 
         nestedColumns = [
@@ -93,7 +93,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                 }
             },
             {...dataGridTemplate, field: "description", headerName: "Description"},
-            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"},
+            {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"},
         ];
     } else if (field === "deliveries") {
         nestedData = row.deliveries.map((subscription: any) => ({
@@ -158,14 +158,14 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     <CapabilityDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
-                        capabilities={serviceProviderRow as Capability}
+                        capabilities={serviceProviderRow as ServiceProviderCapabilities}
                     />
                 )}
                 {serviceProviderRow && (field === 'subscriptions' || field === 'deliveries') && (
-                    <OurAndNeighbourSubscriptionDrawer
+                    <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
-                        subscriptions={serviceProviderRow as Subscription}
+                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                         heading={field}
                     />
                 )}

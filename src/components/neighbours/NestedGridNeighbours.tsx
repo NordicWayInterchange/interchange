@@ -8,7 +8,7 @@ import React from "react";
 import {Capability, Subscription} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import OurAndNeighbourSubscriptionDrawer from "@/components/shared/drawer/OurAndNeighbourSubscriptionDrawer";
+import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {GridColDef} from "@mui/x-data-grid";
@@ -166,7 +166,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
                     />
                 )}
                 {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                    <OurAndNeighbourSubscriptionDrawer
+                    <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={neighbourRow as Subscription}

@@ -12,23 +12,27 @@ import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/Chip";
 import {statusChips} from "@/lib/statusChips";
+import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
 
 type Props = {
-    subscriptions: Subscription;
+    subscriptions: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
     open: boolean;
     handleMoreClose: () => void;
     heading: string;
 };
 
-const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
+const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
     if (!subscriptions) {
         return <Typography>Loading...</Typography>;
     }
+    const subscriptionStatus = (subscriptions as any)?.subscriptionStatus;
+    const consumerCommonName = (subscriptions as any)?.consumerCommonName;
+    const path = (subscriptions as any)?.path;
     return (
         <>
             <Drawer
                 sx={drawerStyle}
-                PaperProps={{ sx: {backgroundColor: "#F9F9F9"}}}
+                PaperProps={{sx: {backgroundColor: "#F9F9F9"}}}
                 variant="temporary"
                 anchor="right"
                 open={open}
@@ -48,10 +52,10 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                 <Chip
                                     color={
                                         statusChips[
-                                            subscriptions.subscriptionStatus?.toString() ? subscriptions.subscriptionStatus.toString() : subscriptions.status.toString() as keyof typeof statusChips
+                                            subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString() as keyof typeof statusChips
                                             ] as any
                                     }
-                                    label={subscriptions.subscriptionStatus ? subscriptions.subscriptionStatus : subscriptions.status}
+                                    label={subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString()}
                                 />
                             </StyledHeaderBox>
                         </ListItem>
@@ -69,34 +73,38 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                     </Box>
                                 </Box>
                                 <FormControl fullWidth>
-                                    <TextField
-                                        value={subscriptions.path || ""}
-                                        label="Path"
-                                        margin="normal"
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <ContentCopy value={subscriptions.path}/>
-                                                    </InputAdornment>
-                                                ),
-                                            },
-                                        }}
-                                    />
-                                    <TextField
-                                        value={subscriptions.consumerCommonName || ""}
-                                        label="Consumer common name"
-                                        margin="normal"
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <ContentCopy value={subscriptions.consumerCommonName}/>
-                                                    </InputAdornment>
-                                                ),
-                                            },
-                                        }}
-                                    />
+                                    {path && (
+                                        <TextField
+                                            value={path || ""}
+                                            label="Path"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={path || ""}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {consumerCommonName && (
+                                        <TextField
+                                            value={consumerCommonName || ""}
+                                            label="Consumer common name"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={consumerCommonName}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 </FormControl>
                             </StyledCard>
                         </ListItem>
@@ -119,20 +127,22 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
                                                 },
                                             }}
                                         />
-                                        <TextField
-                                            value={subscriptions.endpoints[0].source || ""}
-                                            label="Source"
-                                            margin="normal"
-                                            slotProps={{
-                                                input: {
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <ContentCopy value={subscriptions.endpoints[0].source}/>
-                                                        </InputAdornment>
-                                                    ),
-                                                },
-                                            }}
-                                        />
+                                        {subscriptions.endpoints[0].source && (
+                                            <TextField
+                                                value={subscriptions.endpoints[0].source || ""}
+                                                label="Source"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy value={subscriptions.endpoints[0].source}/>
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                        )}
                                         <TextField
                                             value={subscriptions.endpoints[0].port || ""}
                                             label="Port"
@@ -211,4 +221,4 @@ const OurAndNeighbourSubscriptionDrawer = ({subscriptions, open, handleMoreClose
     );
 };
 
-export default OurAndNeighbourSubscriptionDrawer;
+export default CommonDrawer;
