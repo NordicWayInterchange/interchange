@@ -69,7 +69,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                     <Box>
                                         <ListItemText
                                             primary={"Last updated"}
-                                            secondary={subscriptions.lastUpdatedTimestamp}
+                                            secondary={subscriptions.lastUpdatedTimestamp ? subscriptions.lastUpdatedTimestamp : (subscriptions as any)?.lastUpdated}
                                         />
                                     </Box>
                                 </Box>
