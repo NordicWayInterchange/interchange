@@ -22,6 +22,18 @@ type Props = {
     handleOnRowClick: (arg0: any) => void;
 };
 
+function extractedSubscriptionAttributes(subscription: any) {
+    return {
+        id: subscription.id ? subscription.id : subscription.subreq_id,
+        subscriptionStatus: subscription.subscriptionStatus,
+        selector: subscription.selector,
+        path: subscription.path,
+        consumerCommonName: subscription.consumerCommonName,
+        endpoints: subscription.endpoints,
+        lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
+    };
+}
+
 const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
 
     const nestedTableTitle: { [key: string]: string } = {
@@ -64,15 +76,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             {...dataGridTemplate, field: "createdTimestamp", headerName: "Created"}
         ];
     } else if (field === "neighbourRequestedSubscriptions") {
-        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
-            id: subscription.subreq_id,
-            subscriptionStatus: subscription.subscriptionStatus,
-            selector: subscription.selector,
-            path: subscription.path,
-            consumerCommonName: subscription.consumerCommonName,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
-        }));
+        nestedData = row.neighbourRequestedSubscriptions.subscriptions.map((subscription: any) => extractedSubscriptionAttributes(subscription));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
@@ -94,15 +98,7 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             },
         ];
     } else if (field === "ourRequestedSubscriptions") {
-        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => ({
-            id: subscription.id,
-            subscriptionStatus: subscription.subscriptionStatus,
-            selector: subscription.selector,
-            path: subscription.path,
-            consumerCommonName: subscription.consumerCommonName,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
-        }));
+        nestedData = row.ourRequestedSubscriptions.subscriptions.map((subscription: any) => extractedSubscriptionAttributes(subscription));
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},

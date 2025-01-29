@@ -15,7 +15,6 @@ import {
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import {Capability, Subscription} from "@/types/neighbours";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 
 type Props = {
