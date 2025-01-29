@@ -121,9 +121,13 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
         ];
     }
 
+    function getHeader() {
+        return field?.charAt(0).toUpperCase() + field?.slice(1);
+    }
+
     return (
         <Box flex={1}>
-            <Mainheading>{field}</Mainheading>
+            <Mainheading>{getHeader()}</Mainheading>
             <Subheading>
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
