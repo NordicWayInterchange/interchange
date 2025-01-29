@@ -21,6 +21,15 @@ type Props = {
     heading: string;
 };
 
+const colorMapping: Record<string, "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"> = {
+    greenDark: "success",
+    depricatedLight: "error",
+    yellowLight: "warning",
+    blueLight: "info",
+    pinkLight: "error",
+    grayLight: "default",
+};
+
 const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
     if (!subscriptions) {
         return <Typography>Loading...</Typography>;
@@ -29,6 +38,8 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
     const consumerCommonName = (subscriptions as any)?.consumerCommonName;
     const path = (subscriptions as any)?.path;
     const errorMessage = (subscriptions as any)?.errorMessage;
+    const statusKey = (subscriptionStatus?.toString() || subscriptions.status.toString()) as keyof typeof statusChips;
+    const chipColor = colorMapping[statusChips[statusKey]] || "default";
     return (
         <>
             <Drawer
@@ -51,12 +62,8 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                             <StyledHeaderBox>
                                 <Typography> {heading} details</Typography>
                                 <Chip
-                                    color={
-                                        statusChips[
-                                            subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString() as keyof typeof statusChips
-                                            ] || "defaultColor"
-                                    }
-                                    label={subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString()}
+                                    color={chipColor}
+                                    label={statusKey}
                                 />
                             </StyledHeaderBox>
                         </ListItem>
