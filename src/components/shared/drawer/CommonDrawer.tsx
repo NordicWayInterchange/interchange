@@ -54,7 +54,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                     color={
                                         statusChips[
                                             subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString() as keyof typeof statusChips
-                                            ] as any
+                                            ] || "defaultColor"
                                     }
                                     label={subscriptionStatus ? subscriptionStatus?.toString() : subscriptions.status.toString()}
                                 />
