@@ -31,8 +31,6 @@ jobs:
 
       - name: Setup helm
         uses: azure/setup-helm@v4.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Templating Interchange helm chart
         working-directory: ./helm/interchange
