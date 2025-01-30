@@ -1,6 +1,6 @@
 services:
   a-napcore-client:
-    #image: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend:1.0
+    #image: ghcr.io/nordicwayinterchange/napcore-frontend:1.0
     build:
       context: ../../napcore-frontend/
     depends_on:

@@ -1,6 +1,6 @@
 # Interchange Helm charts
 
-The helm charts in this folder is uploaded to the registry at oci://europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/helm/interchange
+The helm charts in this folder is uploaded to the registry at oci://ghcr.io/nordicwayinterchange/interchange
 The current version can be located by looking at the version listed in the chart file [here](https://raw.githubusercontent.com/NordicWayInterchange/interchange/federation-master/helm/interchange/Chart.yaml)
 
 
