@@ -152,7 +152,7 @@ jobs:
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
 
       - name: Login to Github container registry
-        uses: docker/login-action@3.3.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: ghcr.io
           username: "Github Actions"
