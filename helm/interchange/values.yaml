@@ -6,6 +6,9 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
   nap_name: "nap"                                                   # Name of the napcore user connected to the napcore server
+  admin_port: "4343"
+  admin_name: "admin.itsinterchange.eu"
+
   trust_store: truststore.jks
   key_store: keystore.p12
 
@@ -44,6 +47,10 @@ qpid:
   # - name: odin
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
+
+admin_server:
+  replicas: 1
+  enabled: false
 
 message_collector:
   replicas: 1

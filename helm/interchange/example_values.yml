@@ -18,6 +18,7 @@ external_name: example-node.itsinterchange.eu
 broker_external_name: example-node.itsinterchange.eu
 static_external_ip: ""
 self:                                                               # ------ General node settings ----------------
+  admin_name: admin.itsinterchange.eu
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
   control_channel_port: 443                                         # Specify the control channel port  for the Node
@@ -25,7 +26,7 @@ self:                                                               # ------ Gen
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the onboarding server REST controller
   nap_name: nap.example-node.itsinterchange.eu                      # Name of the napcore user connected to the napcore server
-
+  admin_port: "4343"
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
   image:
@@ -86,6 +87,14 @@ onboard_server:                                                     # Java appli
   logging:
   - logger_name: .root
     level: info
+admin_server:
+  replicas: 1
+  image:
+    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/admin-server
+    tag: "c6b1cf8"
+  logging:
+    - logger_name: .root
+      level: info
 napcore_server:
   replicas: 1
   image:
