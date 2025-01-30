@@ -67,5 +67,4 @@ jobs:
 
       - name: helm push to Github container registry
         run: |
-          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
           helm push ${{ env.HELM_CHART }} oci://ghcr.io/nordicwayinterchange
