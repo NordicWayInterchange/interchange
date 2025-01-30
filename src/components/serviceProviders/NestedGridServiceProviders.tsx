@@ -81,6 +81,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
+            {...dataGridTemplate, field: "consumerCommonName", headerName: "Consumer common name"},
             {
                 ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
                     return (
