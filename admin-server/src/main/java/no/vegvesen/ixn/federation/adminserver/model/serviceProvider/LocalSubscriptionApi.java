@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LocalSubscriptionApi {
+public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
 
     private String id;
 
@@ -112,6 +112,20 @@ public class LocalSubscriptionApi {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public int compareTo(LocalSubscriptionApi o) {
+        if(o.lastUpdated == null && lastUpdated == null) {
+            return 0;
+        }
+        if(lastUpdated == null) {
+            return -1;
+        }
+        if(o.lastUpdated == null){
+            return 1;
+        }
+        return Long.compare(lastUpdated, o.lastUpdated);
     }
 
     @Override
