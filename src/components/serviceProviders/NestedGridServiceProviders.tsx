@@ -19,6 +19,7 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/shared/NestedGridConnections";
+import { v4 as uuidv4 } from 'uuid';
 
 type Props = {
     row: any;
@@ -31,7 +32,7 @@ type Props = {
 const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
     const [connectionRow, setConnectionRow] = useState<ServiceProviderSubscriptions | null>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
-
+    const uniqueKey = `${uuidv4()}`;
 
     const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
@@ -243,7 +244,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 return (
                     <Box key={rowId}>
                             <NestedGridConnections
-                            key={`${rowId}-${Math.floor(Math.random() * 10000)}`}
+                            key={uniqueKey}
                             row={serviceProviderRow}
                             field={field}
                             drawerOpen={drawerOpen}
