@@ -29,6 +29,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.54.1",
     "react-leaflet": "^4.2.1",
+    "uuid": "^11.0.5",
     "winston": "^3.17.0"
   },
   "devDependencies": {

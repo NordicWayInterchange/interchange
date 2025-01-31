@@ -8,7 +8,7 @@ import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import React from "react";
+import React, {useState} from "react";
 import {
     ServiceProviderCapabilities,
     ServiceProviderDeliveries,
@@ -16,6 +16,9 @@ import {
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
+import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
+import {ExpandedRows} from "@/types/expandedRows";
+import NestedGridConnections from "@/components/shared/NestedGridConnections";
 
 type Props = {
     row: any;
@@ -25,15 +28,28 @@ type Props = {
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };
-const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
+const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
+    const [connectionRow, setConnectionRow] = useState<ServiceProviderSubscriptions | null>(null);
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
+
+    const handleCellClick = (row: any, field: any, rowId: number) => {
+        setExpandedRows({});
+        setExpandedRows((prev) => ({
+            ...prev,
+            [rowId]: prev[rowId] === field ? null : field,
+        }));
+    };
     if (!row || !field) {
         return null;
     }
 
-    let nestedData: object[] = [];
-    let nestedColumns: GridColDef[] = [];
+    console.log('field', field)
 
+    let nestedData: object[] = [];
+    let nestedConnectionData: object[] = [];
+    let nestedColumns: GridColDef[] = [];
+    let nestedConnectionColumns: GridColDef[] = [];
 
     if (field === "capabilities") {
         nestedData = row.capabilities.map((capability: any) => ({
@@ -74,10 +90,25 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
             selector: subscription.selector,
             errorMessage: subscription.errorMessage,
             consumerCommonName: subscription.consumerCommonName,
+            connections: subscription.connections,
             description: subscription.description,
             endpoints: subscription.endpoints,
             lastUpdated: timeConverter(subscription.lastUpdated)
         }));
+        nestedConnectionData = row.subscriptions.flatMap((subscription: any) => {
+            return subscription.connections.map((connection: any) => ({
+                id: `${subscription.id}`,
+                connectionId: connection.id,
+                source: connection.source,
+                destination: connection.destination
+            }));
+        });
+
+        nestedConnectionColumns = [
+            {...dataGridTemplate, field: "id", headerName: "ID"},
+            {...dataGridTemplate, field: "source", headerName: "Source"},
+            {...dataGridTemplate, field: "destination", headerName: "Destination"},
+        ];
 
         nestedColumns = [
             {...dataGridTemplate, field: "id", headerName: "ID"},
@@ -92,6 +123,26 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     );
                 }
             },
+
+            {...dataGridTemplate, field: "connections", headerName: "connections",
+                renderCell: (params) => {
+                    const connections = params.row.connections;
+                    return (
+                        <Box
+                            style={{cursor: "pointer"}}
+                            onClick={() => {
+                                const rowId = params.row.id;
+                                console.log('rowId', rowId)
+                                setConnectionRow(null);
+                                handleCellClick(params.row.connections, "connections", rowId)
+                            }}
+                        >
+                            {Array.isArray(connections) ?
+                                <StyledBorderlineSpan> {connections.length} </StyledBorderlineSpan> :
+                                <StyledBorderlineSpan> : 0 </StyledBorderlineSpan>}
+                        </Box>
+                    );
+                },},
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"},
         ];
@@ -125,6 +176,10 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
     function getHeader() {
         return field?.charAt(0).toUpperCase() + field?.slice(1);
     }
+
+    console.log('nestedConnectionData', nestedConnectionData)
+    console.log('nestedData', nestedData)
+
 
     return (
         <Box flex={1}>
@@ -165,7 +220,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                         capabilities={serviceProviderRow as ServiceProviderCapabilities}
                     />
                 )}
-                {serviceProviderRow && (field === 'subscriptions' || field === 'deliveries') && (
+                {serviceProviderRow && (field === 'subscriptions' || field === 'deliveries') && !nestedConnectionData &&(
                     <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
@@ -174,8 +229,32 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
                     />
                 )}
             </Box>
+            {Object.keys(expandedRows).map((rowId) => {
+                const field = expandedRows[rowId];
 
+                if (!row) {
+                    return null;
+                }
+                console.log('nestedConnectionData', nestedConnectionData)
+                console.log('selectedRow?.id', serviceProviderRow?.id)
+                const filteredConnections = nestedConnectionData.filter(
+                    (connection: any) => connection.id === serviceProviderRow?.id
+                );
+                return (
+                    <Box key={rowId}>
+                            <NestedGridConnections
+                            key={`${rowId}-${Math.floor(Math.random() * 10000)}`}
+                            row={serviceProviderRow}
+                            field={field}
+                            drawerOpen={drawerOpen}
+                            nestedConnectionData={filteredConnections}
+                            nestedConnectionColumns={nestedConnectionColumns}
+                            handleMoreClose={handleMoreClose}
+                            handleOnRowClick={handleOnRowClick}/>
+                    </Box>
+                );
+            })}
         </Box>
     );
 }
-export default nestedGridServiceProviders;
+export default NestedGridServiceProviders;
