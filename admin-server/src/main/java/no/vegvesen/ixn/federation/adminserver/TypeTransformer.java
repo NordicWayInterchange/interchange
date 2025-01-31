@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnectionApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
@@ -34,12 +35,24 @@ public class TypeTransformer {
                     connectionStatusToConnectionStatusApi(neighbour.getControlConnection().getConnectionStatus()),
                     localDateTimeToTimestamp(neighbour.getControlConnection().getLastFailedConnectionAttempt()),
                     localDateTimeToTimestamp(neighbour.getLastUpdated()),
-                    neighbour.isIgnore()
+                    neighbour.isIgnore(),
+                    connectionToConnectionApi(neighbour.getControlConnection()),
+                    neighbour.getControlChannelPort()
             ));
         }
         return neighbourApiList;
     }
 
+    public ConnectionApi connectionToConnectionApi(Connection connection){
+        return new ConnectionApi(
+                connection.getId(),
+                connection.getBackoffStart(),
+                connection.getBackoffAttempts(),
+                connectionStatusToConnectionStatusApi(connection.getConnectionStatus()),
+                connection.getUnreachableTime(),
+                connection.getLastFailedConnectionAttempt()
+        );
+    }
     public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
@@ -216,7 +229,7 @@ public class TypeTransformer {
                     subscription.getConsumerCommonName(),
                     subscription.getDescription(),
                     subscription.getErrorMessage(),
-                    subscription.getConnections(),
+                    localConnectionToLocalConnectionApiSet(subscription.getConnections()),
                     localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
                     localDateTimeToTimestamp(subscription.getLastUpdated())
             ));
@@ -224,6 +237,13 @@ public class TypeTransformer {
         return subscriptionApiSet;
     }
 
+    public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {
+        Set<LocalConnectionApi> localConnectionApiSet = new HashSet<>();
+        for(LocalConnection localConnection : localConnectionSet) {
+            localConnectionApiSet.add(new LocalConnectionApi(localConnection.getId(), localConnection.getSource(), localConnection.getDestination()));
+        }
+        return localConnectionApiSet;
+    }
 
     public Set<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
         Set<LocalDeliveryApi> deliveriesApiSet = new HashSet<>();
