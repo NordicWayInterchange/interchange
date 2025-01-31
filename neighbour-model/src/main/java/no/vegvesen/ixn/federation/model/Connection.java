@@ -86,6 +86,34 @@ public class Connection {
         return nextPostAttempt;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static void setLogger(Logger logger) {
+        Connection.logger = logger;
+    }
+
+    public LocalDateTime getBackoffStart() {
+        return backoffStart;
+    }
+
+    public LocalDateTime getUnreachableTime() {
+        return unreachableTime;
+    }
+
+    public void setUnreachableTime(LocalDateTime unreachableTime) {
+        this.unreachableTime = unreachableTime;
+    }
+
     public LocalDateTime getLastFailedConnectionAttempt() {
         return lastFailedConnectionAttempt;
     }
