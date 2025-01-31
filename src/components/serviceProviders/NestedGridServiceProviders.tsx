@@ -16,10 +16,9 @@ import {
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
-import {StyledBorderlineSpan} from "@/components/styles/StyledElements";
+import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
-import NestedGridConnections from "@/components/shared/NestedGridConnections";
-import { v4 as uuidv4 } from 'uuid';
+import NestedGridConnections from "@/components/shared/NestedGridConnection";
 
 type Props = {
     row: any;
@@ -32,8 +31,11 @@ type Props = {
 const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
     const [connectionRow, setConnectionRow] = useState<ServiceProviderSubscriptions | null>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
-    const uniqueKey = `${uuidv4()}`;
 
+    const [highlightedCell, setHighlightedCell] = useState<{
+        id: number | null;
+        field: string | null;
+    }>({id: null, field: null});
     const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
@@ -98,8 +100,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
         }));
         nestedConnectionData = row.subscriptions.flatMap((subscription: any) => {
             return subscription.connections.map((connection: any) => ({
-                id: `${subscription.id}`,
-                connectionId: connection.id,
+                subscriptionId: `${subscription.id}`,
+                id: connection.id,
                 source: connection.source,
                 destination: connection.destination
             }));
@@ -178,8 +180,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
         return field?.charAt(0).toUpperCase() + field?.slice(1);
     }
 
-    console.log('nestedConnectionData', nestedConnectionData)
-    console.log('nestedData', nestedData)
+    console.log('highlightedCell', highlightedCell)
 
 
     return (
@@ -189,7 +190,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 450, width: "100%"}}>
+            <Box sx={StyledTableHeader}>
                 {field === 'capabilities' && (
                     <DataGrid
                         rows={nestedData}
@@ -212,6 +213,16 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                         slots={{
                             noRowsOverlay: CustomEmptyOverlay
                         }}
+                        onCellClick={(params) => {
+                            setHighlightedCell({ id: params.id as number, field: params.field });
+
+                        }}
+                        getCellClassName={(params) =>
+                            (params.field === 'connections') &&
+                            highlightedCell.id === params.id && highlightedCell.field === params.field
+                                ? "highlighted-cell"
+                                : ""
+                        }
                     />
                 )}
                 {serviceProviderRow && field === 'capabilities' && (
@@ -236,22 +247,16 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 if (!row) {
                     return null;
                 }
-                console.log('nestedConnectionData', nestedConnectionData)
-                console.log('selectedRow?.id', serviceProviderRow?.id)
                 const filteredConnections = nestedConnectionData.filter(
-                    (connection: any) => connection.id === serviceProviderRow?.id
+                    (connection: any) => connection.subscriptionId === serviceProviderRow?.id
                 );
                 return (
                     <Box key={rowId}>
                             <NestedGridConnections
-                            key={uniqueKey}
                             row={serviceProviderRow}
-                            field={field}
-                            drawerOpen={drawerOpen}
                             nestedConnectionData={filteredConnections}
                             nestedConnectionColumns={nestedConnectionColumns}
-                            handleMoreClose={handleMoreClose}
-                            handleOnRowClick={handleOnRowClick}/>
+                            />
                     </Box>
                 );
             })}
