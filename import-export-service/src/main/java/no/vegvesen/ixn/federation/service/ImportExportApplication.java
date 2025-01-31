@@ -1,56 +1,28 @@
 package no.vegvesen.ixn.federation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.vegvesen.ixn.federation.service.commands.ImportExportCommand;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.nio.file.Paths;
+import org.springframework.context.ApplicationContext;
+import picocli.CommandLine;
+import picocli.spring.PicocliSpringFactory;
 
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class ImportExportApplication implements CommandLineRunner {
 
-    @Autowired
-    private NeighbourRepository neighbourRepository;
 
-    @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    private PrivateChannelRepository privateChannelRepository;
+    ApplicationContext applicationContext;
 
     public static void main(String[] args) {
+        //SpringApplication application = new SpringApplication(ImportExportApplication.class);
+        //application.setDefaultProperties();
         SpringApplication.run(ImportExportApplication.class, args);
     }
 
+
     @Override
-    public void run(String... args) throws Exception {
-        if (args.length == 0) {
-            System.out.println("usage ...");
-            System.exit(1);
-        }
-        if (args[0].equals("import")) {
-            if (args.length != 2) {
-                System.out.println("usage ...");
-                System.exit(2);
-            }
-            ImportApplication importApplication = new ImportApplication(
-                    neighbourRepository,
-                    serviceProviderRepository,
-                    privateChannelRepository
-            );
-            importApplication.run(Paths.get(args[1]));
-        } else if (args[0].equals("export")) {
-            ExportApplication exportApplication = new ExportApplication(
-                    neighbourRepository,
-                    serviceProviderRepository,
-                    privateChannelRepository
-            );
-            exportApplication.run();
-        }
+    public void run(String... args) {
+        new CommandLine(new ImportExportCommand(), new PicocliSpringFactory(applicationContext)).execute(args);
     }
 }
