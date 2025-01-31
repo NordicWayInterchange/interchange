@@ -1,16 +1,8 @@
-import {GridColDef} from "@mui/x-data-grid";
-import {timeConverter} from "@/lib/timeConverter";
-import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Chip} from "@/components/shared/Chip";
-import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider} from "@mui/material";
+import {Box, Divider, Typography} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 
-import React, {useState} from "react";
-import {
-    Connection,
-} from "@/types/serviceProviders";
+import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 
@@ -21,12 +13,11 @@ type Props = {
     nestedConnectionColumns: any;
 };
 const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColumns}: Props) => {
-    console.log('row', row)
     return (
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>
             <Subheading>
-                These are all of connections for subscription with Id: {row.id}
+                These are all of connections for subscription with Id:  <span style={{ fontWeight: 'bold'}}>{row.id} </span>
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <DataGrid

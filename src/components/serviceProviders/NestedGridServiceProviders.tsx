@@ -47,8 +47,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
         return null;
     }
 
-    console.log('field', field)
-
     let nestedData: object[] = [];
     let nestedConnectionData: object[] = [];
     let nestedColumns: GridColDef[] = [];
@@ -127,7 +125,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 }
             },
 
-            {...dataGridTemplate, field: "connections", headerName: "connections",
+            {...dataGridTemplate, field: "connections", headerName: "Connections",
                 renderCell: (params) => {
                     const connections = params.row.connections;
                     return (
@@ -135,7 +133,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                             style={{cursor: "pointer"}}
                             onClick={() => {
                                 const rowId = params.row.id;
-                                console.log('rowId', rowId)
                                 setConnectionRow(null);
                                 handleCellClick(params.row.connections, "connections", rowId)
                             }}
@@ -180,8 +177,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
         return field?.charAt(0).toUpperCase() + field?.slice(1);
     }
 
-    console.log('highlightedCell', highlightedCell)
-
 
     return (
         <Box flex={1}>
@@ -218,7 +213,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
 
                         }}
                         getCellClassName={(params) =>
-                            (params.field === 'connections') &&
+                            params.field === 'connections' &&
                             highlightedCell.id === params.id && highlightedCell.field === params.field
                                 ? "highlighted-cell"
                                 : ""
@@ -232,7 +227,15 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                         capabilities={serviceProviderRow as ServiceProviderCapabilities}
                     />
                 )}
-                {serviceProviderRow && (field === 'subscriptions' || field === 'deliveries') && !nestedConnectionData &&(
+                {serviceProviderRow && field === 'subscriptions' && highlightedCell.field !='connections' &&(
+                    <CommonDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                        heading={field}
+                    />
+                )}
+                {serviceProviderRow && field === 'deliveries'&&(
                     <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
