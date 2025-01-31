@@ -122,7 +122,7 @@ const nestedGridServiceProviders = ({row, field, drawerOpen, serviceProviderRow,
     }
 
     function getHeader() {
-        return field?.charAt(0).toUpperCase() + field?.slice(1);
+        return field ? field.charAt(0).toUpperCase() + field.slice(1) : '';
     }
 
     return (
