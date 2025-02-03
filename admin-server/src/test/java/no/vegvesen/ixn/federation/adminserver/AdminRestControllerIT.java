@@ -19,7 +19,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @SpringBootTest(classes = TestApplication.class)
@@ -74,28 +73,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testQueueExists(){
+    public void testQueueExists() {
         when(qpidService.queueExists(any())).thenReturn(true);
         assertThat(restController.queueExists("adminUser", "queue")).isTrue();
     }
+
     @Test
     public void testgetServiceProviders() {
         String adminUser = "adminUser";
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
-
-    @Test
-    public void testExchangeExists(){
-        when(qpidService.exchangeExists(any())).thenReturn(true);
-        assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
-    }
-
-    @Test
-    public void testBindingExists(){
-        when(qpidService.bindingExists(any(), any())).thenReturn(true);
-        assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
-    }
         subscriptionSet.add(requestedSubscription);
         subscriptionSet.add(createdSubscription);
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -110,4 +98,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
     }
+
+    @Test
+    public void testExchangeExists() {
+        when(qpidService.exchangeExists(any())).thenReturn(true);
+        assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
+    }
+
+    @Test
+    public void testBindingExists() {
+        when(qpidService.bindingExists(any(), any())).thenReturn(true);
+        assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
+    }
+
 }
