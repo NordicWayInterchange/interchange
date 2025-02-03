@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.model;
+package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
 public class NeighbourApi {
 
@@ -25,17 +25,6 @@ public class NeighbourApi {
 
     public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, Long lastFailedConnectionAttempt, Long lastUpdated, Boolean ignore) {
         this.neighbour_id = neighbour_id;
-        this.name = name;
-        this.capabilities = capabilities;
-        this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;
-        this.ourRequestedSubscriptions = ourRequestedSubscriptions;
-        this.connectionStatus = connectionStatus;
-        this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
-        this.lastUpdated = lastUpdated;
-        this.ignore = ignore;
-    }
-
-    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
         this.name = name;
         this.capabilities = capabilities;
         this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;

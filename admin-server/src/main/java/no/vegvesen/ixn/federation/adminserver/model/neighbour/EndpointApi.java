@@ -1,39 +1,32 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
-import jakarta.persistence.*;
-import java.util.Objects;
+public class EndpointApi {
 
-@Entity
-@Table(name = "local_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "source"}))
-public class LocalEndpoint {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_endpoint_seq")
-    @Column(name = "id")
     private Integer id;
 
     private String source;
+
     private String host;
+
     private Integer port;
+
     private Integer maxBandwidth;
+
     private Integer maxMessageRate;
 
-    public LocalEndpoint() {
+    private SubscriptionShardApi shard;
 
+    public EndpointApi() {
     }
 
-    public LocalEndpoint(String source, String host, Integer port) {
-        this.source = source;
-        this.host = host;
-        this.port = port;
-    }
-
-    public LocalEndpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+    public EndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate, SubscriptionShardApi shard) {
+        this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.shard = shard;
     }
 
     public Integer getId() {
@@ -84,30 +77,25 @@ public class LocalEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof LocalEndpoint)) return false;
-        LocalEndpoint that = (LocalEndpoint) o;
-        return source.equals(that.source) &&
-                host.equals(that.host) &&
-                port.equals(that.port);
+    public SubscriptionShardApi getShard() {
+        return shard;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(source, host, port);
+    public void setShard(SubscriptionShardApi shard) {
+        this.shard = shard;
     }
+
 
     @Override
     public String toString() {
-        return "LocalEndpoint{" +
+        return "EndpointApi{" +
                 "id=" + id +
                 ", source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", shard=" + shard +
                 '}';
     }
 }

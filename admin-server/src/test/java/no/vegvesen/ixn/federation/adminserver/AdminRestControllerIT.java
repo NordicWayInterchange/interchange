@@ -7,16 +7,16 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @SpringBootTest(classes = TestApplication.class)
@@ -26,21 +26,27 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     NeighbourRepository neighbourRepository;
 
     @Autowired
+    ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
     AdminRestController restController;
 
     @MockBean
     CertService certService;
 
     @Test
-    public void contextLoads(){}
+    public void contextLoads() {
+    }
 
     @Test
-    public void repositoriesAreAutowired(){
+    public void repositoriesAreAutowired() {
         assertThat(neighbourRepository).isNotNull();
+        assertThat(serviceProviderRepository).isNotNull();
         assertThat(restController).isNotNull();
     }
+
     @Test
-    public void testGetNeighbours(){
+    public void testGetNeighbours() {
         String adminUser = "adminUser";
         Neighbour neighbour = new Neighbour(
                 "neighbour",
@@ -56,10 +62,30 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 )),
                 new SubscriptionRequest(),
                 new Connection()
-                );
+        );
         neighbourRepository.save(neighbour);
         assertThat(restController.getNeighbours("adminUser")).isNotEmpty();
     }
 
+    @Test
+    public void testgetServiceProviders() {
+        String adminUser = "adminUser";
+        Set<LocalSubscription> subscriptionSet = new HashSet<>();
+        LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
+        LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
 
+        subscriptionSet.add(requestedSubscription);
+        subscriptionSet.add(createdSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                new Capabilities(),
+                subscriptionSet,
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+
+        serviceProviderRepository.save(serviceProvider);
+        assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
+        assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
+    }
 }

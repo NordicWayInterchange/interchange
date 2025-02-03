@@ -50,6 +50,7 @@ qpid:
 
 admin_server:
   replicas: 1
+  enabled: false
 
 message_collector:
   replicas: 1

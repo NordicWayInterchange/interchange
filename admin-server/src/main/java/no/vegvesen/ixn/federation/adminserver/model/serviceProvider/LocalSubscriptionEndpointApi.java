@@ -1,6 +1,6 @@
-package no.vegvesen.ixn.federation.adminserver.model;
+package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-public class EndpointApi {
+public class LocalSubscriptionEndpointApi {
 
     private Integer id;
 
@@ -14,19 +14,15 @@ public class EndpointApi {
 
     private Integer maxMessageRate;
 
-    private SubscriptionShardApi shard;
+    public LocalSubscriptionEndpointApi() {}
 
-    public EndpointApi() {
-    }
-
-    public EndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate, SubscriptionShardApi shard) {
+    public LocalSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
-        this.shard = shard;
     }
 
     public Integer getId() {
@@ -77,24 +73,15 @@ public class EndpointApi {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public SubscriptionShardApi getShard() {
-        return shard;
-    }
-
-    public void setShard(SubscriptionShardApi shard) {
-        this.shard = shard;
-    }
-
     @Override
     public String toString() {
-        return "EndpointApi{" +
-                "id=" + id +
+        return "serviceProviderSubscriptionEndpointApi{" +
+                "id='" + id + '\'' +
                 ", source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
-                ", shard=" + shard +
                 '}';
     }
 }

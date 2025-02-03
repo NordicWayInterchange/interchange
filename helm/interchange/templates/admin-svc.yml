@@ -1,3 +1,4 @@
+{{ if .Values.admin_server.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -20,3 +21,4 @@ spec:
   ports:
     - name: onboard
       port: {{ .Values.self.admin_port }}
+{{- end }}
