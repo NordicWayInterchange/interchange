@@ -28,7 +28,14 @@ type Props = {
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };
-const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, serviceProviderRow, handleMoreClose, handleOnRowClick}: Props) => {
+const NestedGridServiceProviders: React.FC<Props> = ({
+                                                         row,
+                                                         field,
+                                                         drawerOpen,
+                                                         serviceProviderRow,
+                                                         handleMoreClose,
+                                                         handleOnRowClick
+                                                     }: Props) => {
     const [connectionRow, setConnectionRow] = useState<ServiceProviderSubscriptions | null>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
@@ -125,7 +132,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 }
             },
 
-            {...dataGridTemplate, field: "connections", headerName: "Connections",
+            {
+                ...dataGridTemplate, field: "connections", headerName: "Connections",
                 renderCell: (params) => {
                     const connections = params.row.connections;
                     return (
@@ -142,7 +150,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                                 <StyledBorderlineSpan> : 0 </StyledBorderlineSpan>}
                         </Box>
                     );
-                },},
+                },
+            },
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"},
         ];
@@ -186,40 +195,25 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={StyledTableHeader}>
-                {field === 'capabilities' && (
-                    <DataGrid
-                        rows={nestedData}
-                        columns={nestedColumns}
-                        getRowId={(row) => row.id}
-                        onRowClick={handleOnRowClick}
-                        sort={{field: "createdTimestamp", sort: "desc"}}
-                        slots={{
-                            noRowsOverlay: CustomEmptyOverlay
-                        }}
-                    />
-                )}
-                {(field === 'subscriptions' || field === 'deliveries') && (
-                    <DataGrid
-                        rows={nestedData}
-                        columns={nestedColumns}
-                        getRowId={(row) => row.id}
-                        onRowClick={handleOnRowClick}
-                        sort={{field: "lastUpdated", sort: "desc"}}
-                        slots={{
-                            noRowsOverlay: CustomEmptyOverlay
-                        }}
-                        onCellClick={(params) => {
-                            setHighlightedCell({ id: params.id as number, field: params.field });
-
-                        }}
-                        getCellClassName={(params) =>
-                            params.field === 'connections' &&
-                            highlightedCell.id === params.id && highlightedCell.field === params.field
-                                ? "highlighted-cell"
-                                : ""
-                        }
-                    />
-                )}
+                <DataGrid
+                    rows={nestedData}
+                    columns={nestedColumns}
+                    getRowId={(row) => row.id}
+                    onRowClick={handleOnRowClick}
+                    sort={{field: "createdTimestamp", sort: "desc"}}
+                    slots={{
+                        noRowsOverlay: CustomEmptyOverlay
+                    }}
+                    onCellClick={(params) => {
+                        setHighlightedCell({id: params.id as number, field: params.field});
+                    }}
+                    getCellClassName={(params) =>
+                        params.field === 'connections' &&
+                        highlightedCell.id === params.id && highlightedCell.field === params.field
+                            ? "highlighted-cell"
+                            : ""
+                    }
+                />
                 {serviceProviderRow && field === 'capabilities' && (
                     <CapabilityDrawer
                         handleMoreClose={handleMoreClose}
@@ -227,15 +221,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                         capabilities={serviceProviderRow as ServiceProviderCapabilities}
                     />
                 )}
-                {serviceProviderRow && field === 'subscriptions' && highlightedCell.field !='connections' &&(
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={field}
-                    />
-                )}
-                {serviceProviderRow && field === 'deliveries'&&(
+                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') || (serviceProviderRow && field === 'deliveries') && (
                     <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
@@ -244,9 +230,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                     />
                 )}
             </Box>
-            {Object.keys(expandedRows).map((rowId) => {
-                const field = expandedRows[rowId];
-
+            {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
                 if (!row) {
                     return null;
                 }
@@ -255,14 +239,14 @@ const NestedGridServiceProviders: React.FC<Props> = ({row, field, drawerOpen, se
                 );
                 return (
                     <Box key={rowId}>
-                            <NestedGridConnections
+                        <NestedGridConnections
                             row={serviceProviderRow}
                             nestedConnectionData={filteredConnections}
                             nestedConnectionColumns={nestedConnectionColumns}
-                            />
+                        />
                     </Box>
                 );
-            })}
+            }) : null}
         </Box>
     );
 }

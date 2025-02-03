@@ -17,7 +17,7 @@ const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColum
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>
             <Subheading>
-                These are all of connections for subscription with Id:  <span style={{ fontWeight: 'bold'}}>{row.id} </span>
+                These are all of connections for subscription with Id:  <span style={{ fontWeight: 'bold'}}>{row?.id} </span>
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <DataGrid
