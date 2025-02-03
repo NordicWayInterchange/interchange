@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.service.importmodel;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class PrivateChannelImportApi {
 
@@ -10,7 +9,7 @@ public class PrivateChannelImportApi {
 
     private String serviceProviderName;
 
-    private Set<PeerImportApi> peers;
+    private List<String> peers;
 
     private PrivateChannelStatusImportApi status;
 
@@ -26,7 +25,7 @@ public class PrivateChannelImportApi {
 
     }
     public PrivateChannelImportApi(String uuid, String serviceProviderName,
-                                   Set<PeerImportApi> peers,
+                                   List<String> peers,
                                    PrivateChannelStatusImportApi status,
                                    PrivateChannelEndpointImportApi endpoint) {
         this.uuid = uuid;
@@ -52,11 +51,11 @@ public class PrivateChannelImportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public Set<PeerImportApi> getPeers() {
+    public List<String> getPeers() {
         return peers;
     }
 
-    public void setPeerName(Set<PeerImportApi> peers) {
+    public void setPeerName(List<String> peers) {
         this.peers = peers;
     }
 

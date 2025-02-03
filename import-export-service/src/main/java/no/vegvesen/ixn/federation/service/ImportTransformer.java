@@ -309,11 +309,25 @@ public class ImportTransformer {
     }
 
     public PrivateChannel transformPrivateChannelImportApiToPrivateChannel(PrivateChannelImportApi privateChannel) {
-        return new PrivateChannel(transformPeersListToPeersSet(privateChannel.getPeers()),
+        return new PrivateChannel(
+                //transformPeersListToPeersSet(privateChannel.getPeers()),
+                transformStringListPeerNameToPeer(privateChannel.getPeers()),
                 //transformPrivateChannelStatusImportApiToPrivateChannelStatus(privateChannel.getStatus()),
                 PrivateChannelStatus.REQUESTED,
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
+        );
+    }
+
+    private Set<Peer> transformStringListPeerNameToPeer(List<String> peerNameList) {
+        return peerNameList.stream().map(this::transformStringPeerNameToPeer).collect(Collectors.toSet());
+    }
+
+    public Peer transformStringPeerNameToPeer(String peerName) {
+        return new Peer(
+            peerName,
+            UUID.randomUUID().toString(),
+            PeerStatus.REQUESTED
         );
     }
 
