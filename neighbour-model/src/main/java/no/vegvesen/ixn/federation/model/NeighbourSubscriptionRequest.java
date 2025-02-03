@@ -35,6 +35,14 @@ public class NeighbourSubscriptionRequest {
         this.subscription.addAll(subscription);
     }
 
+    public Integer getSubreq_id() {
+        return subreq_id;
+    }
+
+    public void setSubreq_id(Integer subreq_id) {
+        this.subreq_id = subreq_id;
+    }
+
     public Set<NeighbourSubscription> getSubscriptions() {
         return subscription;
     }
