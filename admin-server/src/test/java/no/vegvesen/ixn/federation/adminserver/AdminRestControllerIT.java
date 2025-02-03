@@ -73,6 +73,12 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testQueueExists() {
+        when(qpidService.queueExists(any())).thenReturn(true);
+        assertThat(restController.queueExists("adminUser", "queue")).isTrue();
+    }
+
+    @Test
     public void testgetServiceProviders() {
         String adminUser = "adminUser";
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
@@ -98,15 +104,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
     }
+
     @Test
-    public void testExchangeExists(){
+    public void testExchangeExists() {
         when(qpidService.exchangeExists(any())).thenReturn(true);
         assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
     }
 
     @Test
-    public void testBindingExists(){
+    public void testBindingExists() {
         when(qpidService.bindingExists(any(), any())).thenReturn(true);
         assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
     }
+
 }
