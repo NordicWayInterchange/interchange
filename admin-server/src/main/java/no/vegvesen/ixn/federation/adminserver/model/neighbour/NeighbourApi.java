@@ -35,17 +35,6 @@ public class NeighbourApi {
         this.ignore = ignore;
     }
 
-    public NeighbourApi(String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, long lastFailedConnectionAttempt, long lastUpdated, Boolean ignore) {
-        this.name = name;
-        this.capabilities = capabilities;
-        this.neighbourRequestedSubscriptions = neighbourRequestedSubscriptions;
-        this.ourRequestedSubscriptions = ourRequestedSubscriptions;
-        this.connectionStatus = connectionStatus;
-        this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
-        this.lastUpdated = lastUpdated;
-        this.ignore = ignore;
-    }
-
     public Integer getNeighbour_id() {
         return neighbour_id;
     }

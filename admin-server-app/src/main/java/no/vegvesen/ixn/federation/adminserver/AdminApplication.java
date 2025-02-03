@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"no.vegvesen.ixn.*"})
-public class AdminServerAppApplication {
+public class AdminApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AdminServerAppApplication.class, args);
+        SpringApplication.run(AdminApplication.class, args);
     }
 
 }

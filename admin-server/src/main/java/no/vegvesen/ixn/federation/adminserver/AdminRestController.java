@@ -1,10 +1,13 @@
 package no.vegvesen.ixn.federation.adminserver;
 
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class AdminRestController {
 
     private final NeighbourRepository neighbourRepository;
 
+    private final ServiceProviderRepository serviceProviderRepository;
+
     private final CertService certService;
 
     private final AdminProperties adminProperties;
@@ -32,8 +37,9 @@ public class AdminRestController {
     private QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
         this.neighbourRepository = neighbourRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
         this.qpidService = qpidService;
@@ -45,6 +51,14 @@ public class AdminRestController {
         logger.info("List neighbours for admin user {}", adminUser);
         List<Neighbour> neighbourList = neighbourRepository.findAll();
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("List service provider for admin user {}", adminUser);
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}")

@@ -1,34 +1,23 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import jakarta.persistence.*;
-import java.util.Objects;
+public class LocalSubscriptionEndpointApi {
 
-@Entity
-@Table(name = "local_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "source"}))
-public class LocalEndpoint {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_endpoint_seq")
-    @Column(name = "id")
     private Integer id;
 
     private String source;
+
     private String host;
+
     private Integer port;
+
     private Integer maxBandwidth;
+
     private Integer maxMessageRate;
 
-    public LocalEndpoint() {
+    public LocalSubscriptionEndpointApi() {}
 
-    }
-
-    public LocalEndpoint(String source, String host, Integer port) {
-        this.source = source;
-        this.host = host;
-        this.port = port;
-    }
-
-    public LocalEndpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalSubscriptionEndpointApi(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+        this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
@@ -85,24 +74,9 @@ public class LocalEndpoint {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof LocalEndpoint)) return false;
-        LocalEndpoint that = (LocalEndpoint) o;
-        return source.equals(that.source) &&
-                host.equals(that.host) &&
-                port.equals(that.port);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(source, host, port);
-    }
-
-    @Override
     public String toString() {
-        return "LocalEndpoint{" +
-                "id=" + id +
+        return "serviceProviderSubscriptionEndpointApi{" +
+                "id='" + id + '\'' +
                 ", source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
