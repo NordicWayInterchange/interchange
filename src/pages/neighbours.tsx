@@ -15,6 +15,7 @@ import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import ControlConnectionDrawer from "@/components/neighbours/ControlConnectionDrawer";
 import {IFirstNeighbourTable} from "@/interfaces/IFirstNeighbourTable";
+import {ControlConnection} from "@/types/neighbours";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -208,8 +209,9 @@ const Neighbours = () => {
                     {displayControlConnectionDrawer && (<ControlConnectionDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            controlConnection={firstTableRow?.controlConnection}/>
-                    )}
+                            controlConnection={firstTableRow?.controlConnection ?? ({} as ControlConnection)}/>
+
+                        )}
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
