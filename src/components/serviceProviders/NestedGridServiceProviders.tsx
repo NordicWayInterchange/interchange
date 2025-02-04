@@ -180,13 +180,14 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         ];
     }
 
-    function getHeader() {
+    const getHeader = () => {
         return field ? field.charAt(0).toUpperCase() + field.slice(1) : '';
     }
+    const headerContent = getHeader();
 
     return (
         <Box flex={1}>
-            <Mainheading>{getHeader()}</Mainheading>
+            <Mainheading>{headerContent}</Mainheading>
             <Subheading>
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
@@ -223,7 +224,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={getHeader()}
+                        heading={headerContent}
                     />
                 )}
                 {serviceProviderRow && field === 'deliveries' && (
@@ -231,7 +232,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={getHeader()}
+                        heading={headerContent}
                     />
                 )}
             </Box>

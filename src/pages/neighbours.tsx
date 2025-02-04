@@ -14,6 +14,7 @@ import {timeConverter} from "@/lib/timeConverter";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import ControlConnectionDrawer from "@/components/neighbours/ControlConnectionDrawer";
+import {IFirstNeighbourTable} from "@/interfaces/IFirstNeighbourTable";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -21,7 +22,7 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [firstTableRow, setFirstTableRow] = useState(null);
+    const [firstTableRow, setFirstTableRow] = useState<IFirstNeighbourTable | null>(null);
     const [firstTableFieldName, setFirstTableFieldName] = useState('');
     const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
