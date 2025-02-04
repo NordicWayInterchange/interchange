@@ -8,12 +8,13 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import {Capability, Subscription} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
+import ControlConnectionDrawer from "@/components/neighbours/ControlConnectionDrawer";
+import {IFirstNeighbourTable} from "@/interfaces/IFirstNeighbourTable";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -21,7 +22,9 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability | null>(null);
+    const [firstTableRow, setFirstTableRow] = useState<IFirstNeighbourTable | null>(null);
+    const [firstTableFieldName, setFirstTableFieldName] = useState('');
+    const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [highlightedCell, setHighlightedCell] = useState<{
@@ -42,9 +45,15 @@ const Neighbours = () => {
         }));
     };
 
-    const handleOnRowClick = (params: GridRowParams) => {
-        setNeighbourRow(null);
-        setNeighbourRow(params?.row || []);
+    const handleOnSecondTableRowClick = (params: GridRowParams) => {
+        setSecondTableRow(null);
+        setSecondTableRow(params?.row || []);
+        setDrawerOpen(true);
+    };
+
+    const handleOnFirstTableRowClick = (params: GridRowParams) => {
+        setFirstTableRow(null);
+        setFirstTableRow(params?.row || []);
         setDrawerOpen(true);
     };
 
@@ -71,7 +80,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.capabilities, "capabilities")
                         }}
                     >
@@ -93,7 +102,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")
                         }}
                     >
@@ -115,7 +124,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")
                         }}
                     >
@@ -161,13 +170,15 @@ const Neighbours = () => {
             },
         },
     ];
-
+    const displayControlConnectionDrawer = firstTableRow && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
+        || firstTableFieldName === 'neighbourRequestedSubscriptions');
     return (
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on capabilities, our subscriptions or neighbour
-                subscriptions cell
+                These are all of neighbours. You can click on each row to see control connection details. You can also
+                click on
+                each capabilities, our subscriptions or neighbour subscriptions cell
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
@@ -184,6 +195,7 @@ const Neighbours = () => {
                         }}
                         onCellClick={(params) => {
                             setHighlightedCell({ id: params.id as number, field: params.field });
+                            setFirstTableFieldName(params.field);
                         }}
                         getCellClassName={(params) =>
                             (params.field === 'capabilities' || params.field === 'ourRequestedSubscriptions'
@@ -191,7 +203,13 @@ const Neighbours = () => {
                             highlightedCell.id === params.id && highlightedCell.field === params.field
                                 ? "highlighted-cell"
                                 : ""
-                        }/>
+                        }
+                        onRowClick={handleOnFirstTableRowClick}/>
+                    {displayControlConnectionDrawer && (<ControlConnectionDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            controlConnection={firstTableRow?.controlConnection}/>
+                    )}
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
@@ -207,9 +225,9 @@ const Neighbours = () => {
                             row={row}
                             field={field}
                             drawerOpen={drawerOpen}
-                            neighbourRow={neighbourRow}
+                            neighbourRow={secondTableRow}
                             handleMoreClose={handleMoreClose}
-                            handleOnRowClick={handleOnRowClick}
+                            handleOnRowClick={handleOnSecondTableRowClick}
                         />
                     </Box>
                 );

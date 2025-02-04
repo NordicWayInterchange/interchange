@@ -18,7 +18,7 @@ import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
-import NestedGridConnections from "@/components/shared/NestedGridConnection";
+import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
 
 type Props = {
     row: any;
@@ -180,14 +180,14 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         ];
     }
 
-    function getHeader() {
+    const getHeader = () => {
         return field ? field.charAt(0).toUpperCase() + field.slice(1) : '';
     }
+    const headerContent = getHeader();
 
-    console.log('field', serviceProviderRow && field === 'subscriptions' && highlightedCell.field !== 'connections')
     return (
         <Box flex={1}>
-            <Mainheading>{getHeader()}</Mainheading>
+            <Mainheading>{headerContent}</Mainheading>
             <Subheading>
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
@@ -224,7 +224,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={field}
+                        heading={headerContent}
                     />
                 )}
                 {serviceProviderRow && field === 'deliveries' && (
@@ -232,7 +232,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={field}
+                        heading={headerContent}
                     />
                 )}
             </Box>
