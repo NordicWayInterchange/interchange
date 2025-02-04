@@ -184,7 +184,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         return field ? field.charAt(0).toUpperCase() + field.slice(1) : '';
     }
 
-    console.log('field', serviceProviderRow && field === 'subscriptions' && highlightedCell.field !== 'connections')
     return (
         <Box flex={1}>
             <Mainheading>{getHeader()}</Mainheading>
@@ -224,7 +223,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={field}
+                        heading={getHeader()}
                     />
                 )}
                 {serviceProviderRow && field === 'deliveries' && (
@@ -232,7 +231,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
                         subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={field}
+                        heading={getHeader()}
                     />
                 )}
             </Box>

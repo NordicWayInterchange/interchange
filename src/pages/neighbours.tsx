@@ -169,11 +169,14 @@ const Neighbours = () => {
             },
         },
     ];
+    const displayControlConnectionDrawer = firstTableRow && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
+        || firstTableFieldName === 'neighbourRequestedSubscriptions');
     return (
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on each row to see control connection details. You can also click on
+                These are all of neighbours. You can click on each row to see control connection details. You can also
+                click on
                 each capabilities, our subscriptions or neighbour subscriptions cell
                 to view more information.
             </Subheading>
@@ -201,12 +204,11 @@ const Neighbours = () => {
                                 : ""
                         }
                         onRowClick={handleOnFirstTableRowClick}/>
-                    { !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
-                        || firstTableFieldName === 'neighbourRequestedSubscriptions') &&(<ControlConnectionDrawer
+                    {displayControlConnectionDrawer && (<ControlConnectionDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             controlConnection={firstTableRow?.controlConnection}/>
-                        )}
+                    )}
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
