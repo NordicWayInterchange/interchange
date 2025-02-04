@@ -23,7 +23,7 @@ const Neighbours = () => {
     );
     const [firstTableRow, setFirstTableRow] = useState(null);
     const [firstTableFieldName, setFirstTableFieldName] = useState('');
-    const [secondTableRow, setSecondTableRow] = useState<>(null);
+    const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [highlightedCell, setHighlightedCell] = useState<{
