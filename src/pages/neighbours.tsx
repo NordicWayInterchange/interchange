@@ -8,7 +8,6 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import {Capability, ControlConnection, Subscription} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
@@ -22,6 +21,8 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
+    const [firstTableRow, setFirstTableRow] = useState<>(null);
+    const [firstTableFieldName, setFirstTableFieldName] = useState<>('');
     const [neighbourRow, setNeighbourRow] = useState<>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -46,6 +47,12 @@ const Neighbours = () => {
     const handleOnRowClick = (params: GridRowParams) => {
         setNeighbourRow(null);
         setNeighbourRow(params?.row || []);
+        setDrawerOpen(true);
+    };
+
+    const handleOnFirstTableRowClick = (params: GridRowParams) => {
+        setFirstTableRow(null);
+        setFirstTableRow(params?.row || []);
         setDrawerOpen(true);
     };
 
@@ -162,13 +169,12 @@ const Neighbours = () => {
             },
         },
     ];
-    console.log('neighborr', neighbourRow)
     return (
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
-                These are all of neighbours. You can click on capabilities, our subscriptions or neighbour
-                subscriptions cell
+                These are all of neighbours. You can click on each row to see control connection details. You can also click on
+                each capabilities, our subscriptions or neighbour subscriptions cell
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
@@ -185,6 +191,7 @@ const Neighbours = () => {
                         }}
                         onCellClick={(params) => {
                             setHighlightedCell({ id: params.id as number, field: params.field });
+                            setFirstTableFieldName(params.field);
                         }}
                         getCellClassName={(params) =>
                             (params.field === 'capabilities' || params.field === 'ourRequestedSubscriptions'
@@ -193,12 +200,13 @@ const Neighbours = () => {
                                 ? "highlighted-cell"
                                 : ""
                         }
-                        onRowClick={handleOnRowClick}/>
-                        <ControlConnectionDrawer
+                        onRowClick={handleOnFirstTableRowClick}/>
+                    { !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
+                        || firstTableFieldName === 'neighbourRequestedSubscriptions') &&(<ControlConnectionDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            controlConnection={neighbourRow?.controlConnection}
-                        />
+                            controlConnection={firstTableRow?.controlConnection}/>
+                        )}
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
