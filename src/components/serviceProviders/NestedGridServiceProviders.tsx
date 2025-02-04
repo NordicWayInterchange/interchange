@@ -36,9 +36,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                                                          handleMoreClose,
                                                          handleOnRowClick
                                                      }: Props) => {
-    const [connectionRow, setConnectionRow] = useState<ServiceProviderSubscriptions | null>(null);
-    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -141,7 +140,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             style={{cursor: "pointer"}}
                             onClick={() => {
                                 const rowId = params.row.id;
-                                setConnectionRow(null);
                                 handleCellClick(params.row.connections, "connections", rowId)
                             }}
                         >
@@ -186,7 +184,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         return field ? field.charAt(0).toUpperCase() + field.slice(1) : '';
     }
 
-
+    console.log('field', serviceProviderRow && field === 'subscriptions' && highlightedCell.field !== 'connections')
     return (
         <Box flex={1}>
             <Mainheading>{getHeader()}</Mainheading>
@@ -221,7 +219,15 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         capabilities={serviceProviderRow as ServiceProviderCapabilities}
                     />
                 )}
-                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') || (serviceProviderRow && field === 'deliveries') && (
+                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
+                    <CommonDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                        heading={field}
+                    />
+                )}
+                {serviceProviderRow && field === 'deliveries' && (
                     <CommonDrawer
                         handleMoreClose={handleMoreClose}
                         open={drawerOpen}
