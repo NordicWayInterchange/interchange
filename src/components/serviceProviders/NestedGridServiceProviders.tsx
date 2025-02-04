@@ -18,7 +18,7 @@ import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
-import NestedGridConnections from "@/components/serviceProviders/NestedGridConnection";
+import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
 
 type Props = {
     row: any;

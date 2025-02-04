@@ -8,12 +8,13 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import {Capability, Subscription} from "@/types/neighbours";
+import {Capability, ControlConnection, Subscription} from "@/types/neighbours";
 import {StatusCircle} from "@/components/shared/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
+import ControlConnectionDrawer from "@/components/neighbours/ControlConnectionDrawer";
 
 const Neighbours = () => {
     const {data: session} = useSession();
@@ -21,7 +22,7 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [neighbourRow, setNeighbourRow] = useState<Subscription | Capability | null>(null);
+    const [neighbourRow, setNeighbourRow] = useState<>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [highlightedCell, setHighlightedCell] = useState<{
@@ -161,7 +162,7 @@ const Neighbours = () => {
             },
         },
     ];
-
+    console.log('neighborr', neighbourRow)
     return (
         <Box flex={1}>
             <Mainheading>Neighbours</Mainheading>
@@ -191,7 +192,13 @@ const Neighbours = () => {
                             highlightedCell.id === params.id && highlightedCell.field === params.field
                                 ? "highlighted-cell"
                                 : ""
-                        }/>
+                        }
+                        onRowClick={handleOnRowClick}/>
+                        <ControlConnectionDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            controlConnection={neighbourRow?.controlConnection}
+                        />
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
