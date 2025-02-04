@@ -64,7 +64,7 @@ public class Match {
     }
 
     public boolean localSubscriptionIsTearDown() {
-        return !localSubscription.isSubscriptionWanted();
+        return localSubscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN);
     }
 
     @Override

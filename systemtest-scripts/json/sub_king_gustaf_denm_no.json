@@ -3,6 +3,6 @@
     "subscriptions" : [ {
         "selector" : "publicationId = 'NO00000-pub-1'"
     }, {
-        "selector" : "publicationId = 'NO00000-pub-2'"
+        "selector" : "publicationId = 'NO00001-pub-1'"
     }]
 }

@@ -12,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "local_subscriptions")
 public class LocalSubscription {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="id")
@@ -44,8 +45,6 @@ public class LocalSubscription {
     @Column
     private String description;
 
-    // ErrorMessage is needed for sending the error message back to the user
-    // Any subscription with an error message is deleted shortly after creation
     @Column
     private String errorMessage;
 
@@ -95,12 +94,6 @@ public class LocalSubscription {
 
     public LocalSubscriptionStatus getStatus() {
         return status;
-    }
-
-    public boolean isSubscriptionWanted() {
-        return status.equals(LocalSubscriptionStatus.REQUESTED)
-                || status.equals(LocalSubscriptionStatus.CREATED)
-                || status.equals(LocalSubscriptionStatus.NO_OVERLAP);
     }
 
     public String getUuid() {
@@ -176,15 +169,6 @@ public class LocalSubscription {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    //TODO lag et objekt av selector??
-    public String bindKey() {
-        return "" + selector.hashCode();
-    }
-
-    public boolean isSharded() {
-        return selector.contains("shardId");
     }
 
     public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {

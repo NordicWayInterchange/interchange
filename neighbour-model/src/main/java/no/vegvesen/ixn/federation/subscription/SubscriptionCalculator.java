@@ -26,7 +26,7 @@ public class SubscriptionCalculator {
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider
                     .getSubscriptions()
                     .stream()
-                    .filter(subscription -> LocalSubscriptionStatus.CREATED.equals(subscription.getStatus()) || LocalSubscriptionStatus.NO_OVERLAP.equals(subscription.getStatus()))
+                    .filter(subscription -> LocalSubscriptionStatus.isAlive(subscription.getStatus()))
                     .collect(Collectors.toSet());
             logger.debug("Service Provider Subscriptions: {}", serviceProviderSubscriptions);
             localSubscriptions.addAll(serviceProviderSubscriptions);

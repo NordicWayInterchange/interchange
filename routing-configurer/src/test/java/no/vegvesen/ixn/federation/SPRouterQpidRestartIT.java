@@ -124,7 +124,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-        //when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(new Match()));
+        when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(new Match()));
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }

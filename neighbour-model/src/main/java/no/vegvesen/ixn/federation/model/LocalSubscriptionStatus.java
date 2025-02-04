@@ -10,6 +10,10 @@ public enum LocalSubscriptionStatus {
     ERROR;
 
     public static boolean isAlive(LocalSubscriptionStatus status) {
-        return CREATED.equals(status) || REQUESTED.equals(status) || NO_OVERLAP.equals(status);
+        return CREATED.equals(status) || REQUESTED.equals(status);
+    }
+
+    public static boolean isToRemove(LocalSubscriptionStatus status) {
+        return TEAR_DOWN.equals(status) || ILLEGAL.equals(status);
     }
 }

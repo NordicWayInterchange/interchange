@@ -82,13 +82,14 @@ public class SubscriptionCalculatorTest {
     }
 
     @Test
-    void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
-        LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
-        LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
+    void calculateLocalSubscriptionsShouldReturnDataTypesFromAliveSubs() {
+        LocalSubscription requestedSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
+        LocalSubscription createdSub = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
+        LocalSubscription noOverlapSub = new LocalSubscription(LocalSubscriptionStatus.NO_OVERLAP,"messageType = 'DATEX2' AND originatingCountry = 'SE'",myName);
         ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-        serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
-        Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
-        assertThat(localSubscriptions).hasSize(1);
+        serviceProvider.setSubscriptions(Sets.newLinkedHashSet(requestedSub,createdSub, noOverlapSub));
+        Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Collections.singletonList(serviceProvider));
+        assertThat(localSubscriptions).hasSize(2);
     }
 
     @Test

@@ -186,22 +186,9 @@ public class ServiceProvider {
 						|| d.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP))
 				.collect(Collectors.toSet());
 
-		return validDeliveries.size() > 0;
+		return !validDeliveries.isEmpty();
 	}
 
-	public boolean hasActiveSubscriptions() {
-		return !activeSubscriptions().isEmpty();
-	}
-
-	public boolean hasLegalSubscriptions(){
-		return !legalSubscriptions().isEmpty();
-	}
-
-	public Set<LocalSubscription> legalSubscriptions(){
-		return subscriptions.stream()
-				.filter(sub -> LocalSubscriptionStatus.isAlive(sub.getStatus()))
-				.collect(Collectors.toSet());
-	}
 	public Set<LocalSubscription> activeSubscriptions() {
 		return subscriptions.stream()
 		.filter(subscription -> LocalSubscriptionStatus.isAlive(subscription.getStatus()))
@@ -236,8 +223,7 @@ public class ServiceProvider {
 	}
 
 	public Capability getCapability(String capabilityId){
-		return
-				getCapabilities().getCapabilities().stream()
+		return getCapabilities().getCapabilities().stream()
 						.filter(c-> c.getUuid().equals(capabilityId))
 						.findFirst()
 						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));

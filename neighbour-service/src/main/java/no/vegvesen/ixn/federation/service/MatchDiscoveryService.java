@@ -31,7 +31,7 @@ public class MatchDiscoveryService {
             for (LocalSubscription localSubscription : localSubscriptions) {
                 for (Neighbour neighbour : neighbours) {
                     for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                        if ((subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) && (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED) || localSubscription.getStatus().equals(LocalSubscriptionStatus.NO_OVERLAP))) {
+                        if ((subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) && LocalSubscriptionStatus.isAlive(localSubscription.getStatus())) {
                             if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
                                     Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                 if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {

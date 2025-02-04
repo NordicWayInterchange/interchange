@@ -16,7 +16,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component
@@ -59,7 +58,7 @@ public class ServiceProviderService {
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
             Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
-            if (localSubscription.isSubscriptionWanted()) {
+            if (LocalSubscriptionStatus.isAlive(localSubscription.getStatus())) {
                 List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
                     Set<LocalEndpoint> endpoints = transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints());
@@ -127,7 +126,7 @@ public class ServiceProviderService {
     public void updateLocalSubscriptionWithLocalConnections(String serviceProviderName, Iterable<ServiceProvider> serviceProviders) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-        Set<LocalSubscription> wantedSubscriptions = serviceProvider.getSubscriptions().stream().filter(LocalSubscription::isSubscriptionWanted).collect(Collectors.toSet());
+        Set<LocalSubscription> wantedSubscriptions = serviceProvider.getSubscriptions().stream().filter(sub -> LocalSubscriptionStatus.isAlive(sub.getStatus())).collect(Collectors.toSet());
         for (LocalSubscription localSubscription : wantedSubscriptions) {
             removeUnusedLocalConnectionsFromLocalSubscription(localSubscription, allCapabilities);
             if (!localSubscription.isRedirect(serviceProviderName)) {

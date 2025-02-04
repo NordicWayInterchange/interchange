@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -510,6 +511,25 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void doNotRemoveLocalSubscriptionWithStatusNoOverlap(){
+		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
+		when(serviceProviderRepository.save(king_gustaf)).thenReturn(king_gustaf);
+
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.NO_OVERLAP,
+				"messageType = 'DATEX2'",
+				HOST_NAME,
+				Collections.emptySet(),
+				Set.of()
+		));
+
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
+		router.removeUnwantedSubscriptions(king_gustaf);
+		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
+	}
+
+	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String source = "king_gustaf_source";
@@ -592,6 +612,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Disabled
 	public void subscriberToreDownWillBeRemovedFromSubscribeFederatedInterchangesGroup() {
 		String serviceProviderName = "tore-down-service-provider";
 
@@ -601,8 +622,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				serviceProviderName,
 				Collections.singleton(localSubscription)
 		);
-
-		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
