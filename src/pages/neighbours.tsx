@@ -21,9 +21,9 @@ const Neighbours = () => {
     const {data: neighbourData, isLoading} = useFetchNeighbours(
         session?.user.commonName as string
     );
-    const [firstTableRow, setFirstTableRow] = useState<>(null);
-    const [firstTableFieldName, setFirstTableFieldName] = useState<>('');
-    const [neighbourRow, setNeighbourRow] = useState<>(null);
+    const [firstTableRow, setFirstTableRow] = useState(null);
+    const [firstTableFieldName, setFirstTableFieldName] = useState('');
+    const [secondTableRow, setSecondTableRow] = useState<>(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [highlightedCell, setHighlightedCell] = useState<{
@@ -44,9 +44,9 @@ const Neighbours = () => {
         }));
     };
 
-    const handleOnRowClick = (params: GridRowParams) => {
-        setNeighbourRow(null);
-        setNeighbourRow(params?.row || []);
+    const handleOnSecondTableRowClick = (params: GridRowParams) => {
+        setSecondTableRow(null);
+        setSecondTableRow(params?.row || []);
         setDrawerOpen(true);
     };
 
@@ -79,7 +79,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.capabilities, "capabilities")
                         }}
                     >
@@ -101,7 +101,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.ourRequestedSubscriptions, "ourRequestedSubscriptions")
                         }}
                     >
@@ -123,7 +123,7 @@ const Neighbours = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            setNeighbourRow(null);
+                            setSecondTableRow(null);
                             handleCellClick(params.row.neighbourRequestedSubscriptions, "neighbourRequestedSubscriptions")
                         }}
                     >
@@ -224,9 +224,9 @@ const Neighbours = () => {
                             row={row}
                             field={field}
                             drawerOpen={drawerOpen}
-                            neighbourRow={neighbourRow}
+                            neighbourRow={secondTableRow}
                             handleMoreClose={handleMoreClose}
-                            handleOnRowClick={handleOnRowClick}
+                            handleOnRowClick={handleOnSecondTableRowClick}
                         />
                     </Box>
                 );
