@@ -27,14 +27,19 @@ const Neighbours = () => {
     const [firstTableFieldName, setFirstTableFieldName] = useState('');
     const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
-    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [firstDrawerOpen, setFirstDrawerOpen] = useState<boolean>(false);
+    const [secondDrawerOpen, setSecondDrawerOpen] = useState<boolean>(false);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
 
-    const handleMoreClose = () => {
-        setDrawerOpen(false);
+    const handleFirstDrawerClose = () => {
+        setFirstDrawerOpen(false);
+    };
+
+    const handleSecondTableClose = () => {
+        setSecondDrawerOpen(false);
     };
 
     const handleCellClick = (row: any, field: any) => {
@@ -49,13 +54,13 @@ const Neighbours = () => {
     const handleOnSecondTableRowClick = (params: GridRowParams) => {
         setSecondTableRow(null);
         setSecondTableRow(params?.row || []);
-        setDrawerOpen(true);
+        setSecondDrawerOpen(true);
     };
 
     const handleOnFirstTableRowClick = (params: GridRowParams) => {
         setFirstTableRow(null);
         setFirstTableRow(params?.row || []);
-        setDrawerOpen(true);
+        setFirstDrawerOpen(true);
     };
 
     const tableHeaders: GridColDef[] = [
@@ -207,8 +212,8 @@ const Neighbours = () => {
                         }
                         onRowClick={handleOnFirstTableRowClick}/>
                     {displayControlConnectionDrawer && (<ControlConnectionDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
+                            handleMoreClose={handleFirstDrawerClose}
+                            open={firstDrawerOpen}
                             controlConnection={firstTableRow?.controlConnection ?? ({} as ControlConnection)}/>
 
                         )}
@@ -226,9 +231,9 @@ const Neighbours = () => {
                         <NestedGridNeighbours
                             row={row}
                             field={field}
-                            drawerOpen={drawerOpen}
+                            drawerOpen={secondDrawerOpen}
                             neighbourRow={secondTableRow}
-                            handleMoreClose={handleMoreClose}
+                            handleMoreClose={handleSecondTableClose}
                             handleOnRowClick={handleOnSecondTableRowClick}
                         />
                     </Box>
