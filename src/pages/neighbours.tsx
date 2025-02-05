@@ -33,6 +33,7 @@ const Neighbours = () => {
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
+    const [isFlashing, setIsFlashing] = useState(false);
 
     const handleFirstDrawerClose = () => {
         setFirstDrawerOpen(false);
@@ -49,6 +50,8 @@ const Neighbours = () => {
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
         }));
+        setIsFlashing(true);
+        setTimeout(() => setIsFlashing(false), 300);
     };
 
     const handleOnSecondTableRowClick = (params: GridRowParams) => {
@@ -235,6 +238,7 @@ const Neighbours = () => {
                             neighbourRow={secondTableRow}
                             handleMoreClose={handleSecondTableClose}
                             handleOnRowClick={handleOnSecondTableRowClick}
+                            isFlashing={isFlashing}
                         />
                     </Box>
                 );

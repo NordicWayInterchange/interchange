@@ -6,15 +6,16 @@ import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {Chip} from "@/components/shared/Chip";
-import {timeConverter} from "@/lib/timeConverter";
+import { motion } from "framer-motion";
 
 
 type Props = {
     row: any;
     nestedConnectionData: any;
     nestedConnectionColumns: any;
+    isFlashing: boolean;
 };
-const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColumns}: Props) => {
+const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColumns, isFlashing}: Props) => {
     return (
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>
@@ -26,16 +27,22 @@ const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColum
                 />
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <DataGrid
-                rows={nestedConnectionData}
-                columns={nestedConnectionColumns}
-                getRowId={(row) => row.id}
-                sort={{field: "createdTimestamp", sort: "desc"}}
-                slots={{
-                    noRowsOverlay: CustomEmptyOverlay
-                }}
-            />
+            <motion.div
+                animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
+                transition={{duration: 0.3, ease: "easeInOut"}}
+                style={{padding: "5px", borderRadius: "8px"}}
+            >
+                <DataGrid
+                    rows={nestedConnectionData}
+                    columns={nestedConnectionColumns}
+                    getRowId={(row) => row.id}
+                    sort={{field: "createdTimestamp", sort: "desc"}}
+                    slots={{
+                        noRowsOverlay: CustomEmptyOverlay
+                    }}
+                />
+            </motion.div>
         </Box>
-    );
+);
 }
 export default NestedGridConnections;

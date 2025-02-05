@@ -19,6 +19,7 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
+import { motion } from "framer-motion";
 
 type Props = {
     row: any;
@@ -27,6 +28,7 @@ type Props = {
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
+    isFlashing: boolean;
 };
 const NestedGridServiceProviders: React.FC<Props> = ({
                                                          row,
@@ -34,7 +36,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                                                          drawerOpen,
                                                          serviceProviderRow,
                                                          handleMoreClose,
-                                                         handleOnRowClick
+                                                         handleOnRowClick,
+                                                         isFlashing
                                                      }: Props) => {
 
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
@@ -193,48 +196,54 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={StyledTableHeader}>
-                <DataGrid
-                    rows={nestedData}
-                    columns={nestedColumns}
-                    getRowId={(row) => row.id}
-                    onRowClick={handleOnRowClick}
-                    sort={{field: "createdTimestamp", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlay
-                    }}
-                    onCellClick={(params) => {
-                        setHighlightedCell({id: params.id as number, field: params.field});
-                    }}
-                    getCellClassName={(params) =>
-                        params.field === 'connections' &&
-                        highlightedCell.id === params.id && highlightedCell.field === params.field
-                            ? "highlighted-cell"
-                            : ""
-                    }
-                />
-                {serviceProviderRow && field === 'capabilities' && (
-                    <CapabilityDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        capabilities={serviceProviderRow as ServiceProviderCapabilities}
+                <motion.div
+                    animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
+                    transition={{duration: 0.3, ease: "easeInOut"}}
+                    style={{padding: "5px", borderRadius: "8px"}}
+                >
+                    <DataGrid
+                        rows={nestedData}
+                        columns={nestedColumns}
+                        getRowId={(row) => row.id}
+                        onRowClick={handleOnRowClick}
+                        sort={{field: "createdTimestamp", sort: "desc"}}
+                        slots={{
+                            noRowsOverlay: CustomEmptyOverlay
+                        }}
+                        onCellClick={(params) => {
+                            setHighlightedCell({id: params.id as number, field: params.field});
+                        }}
+                        getCellClassName={(params) =>
+                            params.field === 'connections' &&
+                            highlightedCell.id === params.id && highlightedCell.field === params.field
+                                ? "highlighted-cell"
+                                : ""
+                        }
                     />
-                )}
-                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={headerContent}
-                    />
-                )}
-                {serviceProviderRow && field === 'deliveries' && (
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={headerContent}
-                    />
-                )}
+                </motion.div>
+                    {serviceProviderRow && field === 'capabilities' && (
+                        <CapabilityDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            capabilities={serviceProviderRow as ServiceProviderCapabilities}
+                        />
+                    )}
+                    {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
+                        <CommonDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            heading={headerContent}
+                        />
+                    )}
+                    {serviceProviderRow && field === 'deliveries' && (
+                        <CommonDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            heading={headerContent}
+                        />
+                    )}
             </Box>
             {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
                 if (!row) {
@@ -249,6 +258,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             row={serviceProviderRow}
                             nestedConnectionData={filteredConnections}
                             nestedConnectionColumns={nestedConnectionColumns}
+                            isFlashing={isFlashing}
                         />
                     </Box>
                 );
