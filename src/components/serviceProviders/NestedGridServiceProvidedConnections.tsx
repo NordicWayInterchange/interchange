@@ -5,6 +5,8 @@ import Subheading from "@/components/shared/typography/Subheading";
 import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {Chip} from "@/components/shared/Chip";
+import {timeConverter} from "@/lib/timeConverter";
 
 
 type Props = {
@@ -17,7 +19,11 @@ const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColum
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>
             <Subheading>
-                These are all of connections for subscription with Id:  <span style={{ fontWeight: 'bold'}}>{row?.id} </span>
+                These are all of connections for subscription with Id:
+                <Chip
+                    color="orangeLight"
+                    label={row?.id}
+                />
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <DataGrid

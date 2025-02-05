@@ -124,15 +124,17 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
     const getSubheading = () => {
         if (heading === 'Capabilities') {
             return (
-            <Box>
-                These are all of Capabilities with last capability exchange
+                <Box>
+                    These are all of Capabilities with last capability exchange
+
                 <Chip
                     color="orangeLight"
                     label={timeConverter(row.capabilities.lastCapabilityExchange)}
                 />
-            </Box>
-                );
-            } else return `These are all of ${heading}. You can click a row to view more information.`;
+                . You can click a row to view more information.
+                </Box>
+        );
+        } else return `These are all of ${heading}. You can click a row to view more information.`;
     }
 
     return (
