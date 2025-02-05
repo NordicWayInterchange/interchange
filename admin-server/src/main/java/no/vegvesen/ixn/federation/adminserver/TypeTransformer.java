@@ -107,8 +107,8 @@ public class TypeTransformer {
         );
     }
 
-    public Set<SubscriptionApi> subscriptionSetToSubscriptionApiSet(Set<Subscription> subscriptionSet) {
-        Set<SubscriptionApi> subscriptionApiSet = new HashSet<>();
+    public List<SubscriptionApi> subscriptionSetToSubscriptionApiSet(Set<Subscription> subscriptionSet) {
+        List<SubscriptionApi> subscriptionApiSet = new ArrayList<>();
         for (Subscription subscription : subscriptionSet) {
             subscriptionApiSet.add(new SubscriptionApi(
                     subscription.getId(),
@@ -121,7 +121,7 @@ public class TypeTransformer {
                     subscription.getLastUpdatedTimestamp()
             ));
         }
-        return subscriptionApiSet;
+        return subscriptionApiSet.stream().sorted().toList();
     }
 
     public Set<EndpointApi> endpointSetToEndpointApiSet(Set<Endpoint> subscriptionEndpointSet) {
