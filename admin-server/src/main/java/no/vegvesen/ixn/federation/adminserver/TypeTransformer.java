@@ -59,9 +59,9 @@ public class TypeTransformer {
             serviceProviderApiList.add(new ServiceProviderApi(
                     serviceProvider.getId(),
                     serviceProvider.getName(),
-                    localSubscriptionSetToSubscriptionApiSet(serviceProvider.getSubscriptions()),
-                    capabilitiesSetToCapabilitiesApiSet(serviceProvider.getCapabilities().getCapabilities()),
-                    localDeliveriesSetToDeliveriesApiSet(serviceProvider.getDeliveries()))
+                    localSubscriptionSetToSubscriptionApiList(serviceProvider.getSubscriptions()),
+                    capabilitiesSetToCapabilitiesApiList(serviceProvider.getCapabilities().getCapabilities()),
+                    localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))
             );
         }
         return serviceProviderApiList;
@@ -169,11 +169,10 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
-    public Set<CapabilityApi> capabilitiesSetToCapabilitiesApiSet(Set<Capability> capabilities) {
-
-        Set<CapabilityApi> capabilityApiSet = new HashSet<>();
+    public List<CapabilityApi> capabilitiesSetToCapabilitiesApiList(Set<Capability> capabilities) {
+        List<CapabilityApi> capabilityApiList = new ArrayList<>();
         for (Capability capability : capabilities) {
-            capabilityApiSet.add(new CapabilityApi(
+            capabilityApiList.add(new CapabilityApi(
                     capability.getId(),
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
@@ -182,7 +181,7 @@ public class TypeTransformer {
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
-        return capabilityApiSet;
+        return capabilityApiList.stream().sorted().toList();
     }
 
     public CapabilityStatusApi capabilityStatusToCapabilityStatusApi(CapabilityStatus capabilityStatus) {
@@ -219,10 +218,10 @@ public class TypeTransformer {
     }
 
 
-    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiSet(Set<LocalSubscription> subscriptionSet) {
-        List<LocalSubscriptionApi> subscriptionApiSet = new ArrayList<>();
+    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiList(Set<LocalSubscription> subscriptionSet) {
+        List<LocalSubscriptionApi> subscriptionApiList = new ArrayList<>();
         for (LocalSubscription subscription : subscriptionSet) {
-            subscriptionApiSet.add(new LocalSubscriptionApi(
+            subscriptionApiList.add(new LocalSubscriptionApi(
                     subscription.getId().toString(),
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
@@ -234,7 +233,7 @@ public class TypeTransformer {
                     localDateTimeToTimestamp(subscription.getLastUpdated())
             ));
         }
-        return subscriptionApiSet.stream().sorted().toList();
+        return subscriptionApiList.stream().sorted().toList();
     }
 
     public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {
@@ -245,10 +244,10 @@ public class TypeTransformer {
         return localConnectionApiSet;
     }
 
-    public Set<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiSet(Set<LocalDelivery> deliveriesSet) {
-        Set<LocalDeliveryApi> deliveriesApiSet = new HashSet<>();
+    public List<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiList(Set<LocalDelivery> deliveriesSet) {
+        List<LocalDeliveryApi> deliveriesApiList = new ArrayList<>();
         for (LocalDelivery delivery : deliveriesSet) {
-            deliveriesApiSet.add(new LocalDeliveryApi(
+            deliveriesApiList.add(new LocalDeliveryApi(
                     delivery.getId().toString(),
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
@@ -257,7 +256,7 @@ public class TypeTransformer {
                     localDateTimeToTimestamp(delivery.getLastUpdatedTimestamp())
             ));
         }
-        return deliveriesApiSet;
+        return deliveriesApiList.stream().sorted().toList();
     }
 
 

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import java.util.List;
-import java.util.Set;
+
 
 public class ServiceProviderApi {
 
@@ -10,17 +10,17 @@ public class ServiceProviderApi {
 
     private List<LocalSubscriptionApi> subscriptions;
 
-    private Set<CapabilityApi> capabilities;
+    private List<CapabilityApi> capabilities;
 
-    private Set<LocalDeliveryApi> deliveries;
+    private List<LocalDeliveryApi> deliveries;
 
 
     public ServiceProviderApi(
             Integer id,
             String name,
             List<LocalSubscriptionApi> subscriptions,
-            Set<CapabilityApi> capabilities,
-            Set<LocalDeliveryApi> deliveries) {
+            List<CapabilityApi> capabilities,
+            List<LocalDeliveryApi> deliveries) {
         this.id = id;
         this.name = name;
         this.subscriptions = subscriptions;
@@ -57,19 +57,19 @@ public class ServiceProviderApi {
         this.subscriptions = subscriptions;
     }
 
-    public Set<CapabilityApi> getCapabilities() {
+    public List<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilityApi> capabilities) {
+    public void setCapabilities(List<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 
-    public Set<LocalDeliveryApi> getDeliveries() {
+    public List<LocalDeliveryApi> getDeliveries() {
         return deliveries;
     }
 
-    public void setDeliveries(Set<LocalDeliveryApi> deliveries) {
+    public void setDeliveries(List<LocalDeliveryApi> deliveries) {
         this.deliveries = deliveries;
     }
 
