@@ -44,13 +44,13 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                         </ListItem>
                         <ListItem>
 
-                        <StyledHeaderBox>
-                            <Typography> Control connection details</Typography>
-                            <Box style={{marginBottom: '10px'}}>
-                                <StatusCircle status={connectionStatus}/>
-                                <span style={{marginLeft: '8px'}}>{connectionStatus}</span>
-                            </Box>
-                        </StyledHeaderBox>
+                            <StyledHeaderBox>
+                                <Typography> Control connection details</Typography>
+                                <Box style={{marginBottom: '10px'}}>
+                                    <StatusCircle status={connectionStatus}/>
+                                    <span style={{marginLeft: '8px'}}>{connectionStatus}</span>
+                                </Box>
+                            </StyledHeaderBox>
                         </ListItem>
                         <ListItem>
                             <StyledCard variant="outlined">
@@ -70,7 +70,8 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                         <ListItemText
                                             primary={
                                                 <Typography variant="body2">
-                                                    Backoff start: <b> {controlConnection.backoffStart ? timeConverter(controlConnection.backoffStart) : ''} </b>
+                                                    Backoff start: <Typography component="span"
+                                                                               fontWeight="bold"> {controlConnection.backoffStart ? timeConverter(controlConnection.backoffStart) : ''} </Typography>
                                                 </Typography>
                                             }
                                         />
@@ -79,7 +80,8 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                         <ListItemText
                                             primary={
                                                 <Typography variant="body2">
-                                                    Backoff attempts: <b> {controlConnection.backoffAttempts} </b>
+                                                    Backoff attempts: <Typography component="span"
+                                                                                  fontWeight="bold"> {controlConnection.backoffAttempts} </Typography>
                                                 </Typography>
                                             }
                                         />
@@ -88,7 +90,8 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                         <ListItemText
                                             primary={
                                                 <Typography variant="body2">
-                                                    Unreachable time: <b> {controlConnection.unreachableTime ? timeConverter(controlConnection.unreachableTime) : ''} </b>
+                                                    Unreachable time: <Typography component="span"
+                                                                                  fontWeight="bold"> {controlConnection.unreachableTime ? timeConverter(controlConnection.unreachableTime) : ''} </Typography>
                                                 </Typography>
                                             }
                                         />
@@ -97,7 +100,8 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                         <ListItemText
                                             primary={
                                                 <Typography variant="body2">
-                                                    Last failed Connection attempt: <b> {controlConnection.lastFailedConnectionAttempt ? timeConverter(controlConnection.lastFailedConnectionAttempt) : ''} </b>
+                                                    Last failed Connection
+                                                    attempt: {controlConnection.lastFailedConnectionAttempt ? timeConverter(controlConnection.lastFailedConnectionAttempt) : ''}
                                                 </Typography>
                                             }
                                         />
