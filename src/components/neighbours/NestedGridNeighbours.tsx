@@ -1,7 +1,7 @@
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider} from "@mui/material";
+import {Box, ChipProps, Divider, Typography} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import React from "react";
@@ -120,13 +120,26 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             },
         ];
     }
-
     const heading = field.split(" ").map(field => nestedTableTitle[field] || field).join(" ");
+    const getSubheading = () => {
+        if (heading === 'Capabilities') {
+            return (
+            <Box>
+                These are all of Capabilities with last capability exchange
+                <Chip
+                    color="orangeLight"
+                    label={timeConverter(row.capabilities.lastCapabilityExchange)}
+                />
+            </Box>
+                );
+            } else return `These are all of ${heading}. You can click a row to view more information.`;
+    }
+
     return (
         <Box flex={1}>
             <Mainheading>{heading}</Mainheading>
             <Subheading>
-                These are all of {heading}. You can click a row to view more information.
+                {getSubheading()}
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 450, width: "100%"}}>
