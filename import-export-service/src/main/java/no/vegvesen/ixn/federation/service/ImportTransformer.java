@@ -77,8 +77,7 @@ public class ImportTransformer {
     }
 
     public LocalConnection transformLocalConnectionImportApiToLocalConnection(LocalConnectionImportApi localConnection) {
-        return new LocalConnection(localConnection.getSource(),
-                localConnection.getDestination());
+        return new LocalConnection(localConnection.getSource());
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {

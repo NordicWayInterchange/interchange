@@ -6,16 +6,12 @@ public class LocalConnectionExportApi {
 
     private String source;
 
-    private String destination;
-
     public LocalConnectionExportApi() {
 
     }
 
-    public LocalConnectionExportApi(String source,
-                                    String destination) {
+    public LocalConnectionExportApi(String source) {
         this.source = source;
-        this.destination = destination;
     }
 
     public String getSource() {
@@ -26,32 +22,23 @@ public class LocalConnectionExportApi {
         this.source = source;
     }
 
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalConnectionExportApi that = (LocalConnectionExportApi) o;
-        return Objects.equals(source, that.source) && Objects.equals(destination, that.destination);
+        return Objects.equals(source, that.source);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source, destination);
+        return Objects.hash(source);
     }
 
     @Override
     public String toString() {
         return "LocalConnectionExportApi{" +
                 "source='" + source + '\'' +
-                ", destination='" + destination + '\'' +
                 '}';
     }
 }

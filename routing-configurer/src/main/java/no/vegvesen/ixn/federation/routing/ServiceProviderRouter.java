@@ -85,7 +85,7 @@ public class ServiceProviderRouter {
     public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
         if (!serviceProvider.getSubscriptions().isEmpty()) {
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                if (!subscription.isRedirect(serviceProvider.getName())) {
                     processSubscription(serviceProvider, subscription, delta);
                 } else {
                     processRedirectSubscription(subscription);

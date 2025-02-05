@@ -70,8 +70,7 @@ public class ExportTransformer {
     }
 
     public LocalConnectionExportApi transformLocalConnectionToLocalConnectionExportApi(LocalConnection localConnection) {
-        return new LocalConnectionExportApi(localConnection.getSource(),
-                localConnection.getDestination());
+        return new LocalConnectionExportApi(localConnection.getSource());
     }
 
     public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {

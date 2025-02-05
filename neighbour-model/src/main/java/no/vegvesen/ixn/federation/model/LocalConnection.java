@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_connections", uniqueConstraints = @UniqueConstraint(columnNames = {"source", "destination"}))
+@Table(name = "local_connections", uniqueConstraints = @UniqueConstraint(columnNames = {"source"}))
 public class LocalConnection {
 
     @Id
@@ -14,24 +14,17 @@ public class LocalConnection {
 
     private String source;
 
-    private String destination;
-
     public LocalConnection() {
 
     }
 
-    public LocalConnection(Integer id, String source, String destination) {
+    public LocalConnection(Integer id, String source) {
         this.id = id;
         this.source = source;
-        this.destination = destination;
-    }
-
-    public LocalConnection(String source, String destination) {
-        this(null,source,destination);
     }
 
     public LocalConnection(String source) {
-        this(null,source,null);
+        this(null,source);
     }
 
     public String getSource() {
@@ -40,14 +33,6 @@ public class LocalConnection {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
     }
 
     public Integer getId() {
@@ -59,11 +44,11 @@ public class LocalConnection {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalConnection that = (LocalConnection) o;
-        return Objects.equals(source, that.source) && Objects.equals(destination, that.destination);
+        return Objects.equals(source, that.source);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source, destination);
+        return Objects.hash(source);
     }
 }
