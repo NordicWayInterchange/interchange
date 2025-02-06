@@ -128,12 +128,11 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
             return (
                 <Box>
                     These are all of Capabilities with last capability exchange
-
-                <Chip
-                    color="orangeLight"
-                    label={timeConverter(row.capabilities.lastCapabilityExchange)}
-                />
-                . You can click a row to view more information.
+                    <Chip
+                        label={timeConverter(row.capabilities.lastCapabilityExchange)}
+                        sx={{ backgroundColor: "#ffbf7d", color: "black" }}
+                    />
+                    . You can click a row to view more information.
                 </Box>
         );
         } else return `These are all of ${heading}. You can click a row to view more information.`;

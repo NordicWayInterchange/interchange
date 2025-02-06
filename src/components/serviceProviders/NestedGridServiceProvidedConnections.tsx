@@ -1,4 +1,4 @@
-import {Box, Divider, Typography} from "@mui/material";
+import {Box, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 
@@ -22,8 +22,8 @@ const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColum
             <Subheading>
                 These are all of connections for subscription with Id:
                 <Chip
-                    color="orangeLight"
                     label={row?.id}
+                    sx={{ backgroundColor: "#ffbf7d", color: "black" }}
                 />
             </Subheading>
             <Divider sx={{marginY: 3}}/>
