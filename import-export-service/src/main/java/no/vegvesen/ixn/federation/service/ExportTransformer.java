@@ -74,7 +74,9 @@ public class ExportTransformer {
     }
 
     public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {
-        return new CapabilityExportApi(capability.getApplication().toApi(),
+        return new CapabilityExportApi(
+                capability.getUuid(),
+                capability.getApplication().toApi(),
                 transformMetadataToMetadataExportApi(capability.getMetadata()),
                 transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
                 capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
