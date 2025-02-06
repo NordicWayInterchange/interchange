@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class CapabilityExportApi {
 
+    private String uuid;
+
     private ApplicationApi application;
 
     private MetadataExportApi metadata;
@@ -23,14 +25,22 @@ public class CapabilityExportApi {
 
     }
 
-    public CapabilityExportApi(ApplicationApi application,
+    public CapabilityExportApi(String uuid, ApplicationApi application,
                                MetadataExportApi metadata,
                                CapabilityStatusExportApi status,
                                Set<CapabilityShardExportApi> shards) {
+        this.uuid = uuid;
         this.application = application;
         this.metadata = metadata;
         this.status = status;
         this.shards = shards;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public ApplicationApi getApplication() {
