@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -82,7 +81,9 @@ public class ImportTransformer {
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {
-        Capability newCapability = new Capability(capability.getUuid(),capabilityTransformer.applicationApiToApplication(capability.getApplication()),
+        Capability newCapability = new Capability(
+                capability.getUuid() == null ? UUID.randomUUID().toString() : capability.getUuid(),
+                capabilityTransformer.applicationApiToApplication(capability.getApplication()),
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
         //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
