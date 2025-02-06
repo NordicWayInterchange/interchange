@@ -5,15 +5,15 @@ import java.util.Objects;
 public class PeerExportApi {
     private String name;
     private String uuid;
-    private String peerstatus;
+    private String peerStatus;
 
     public PeerExportApi() {
     }
 
-    public PeerExportApi(String name, String uuid, String peerstatus) {
+    public PeerExportApi(String name, String uuid, String peerStatus) {
         this.name = name;
         this.uuid = uuid;
-        this.peerstatus = peerstatus;
+        this.peerStatus = peerStatus;
     }
 
     public String getName() {
@@ -32,23 +32,23 @@ public class PeerExportApi {
         this.uuid = uuid;
     }
 
-    public String getPeerstatus() {
-        return peerstatus;
+    public String getPeerStatus() {
+        return peerStatus;
     }
 
-    public void setPeerstatus(String peerstatus) {
-        this.peerstatus = peerstatus;
+    public void setPeerStatus(String peerStatus) {
+        this.peerStatus = peerStatus;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PeerExportApi that = (PeerExportApi) o;
-        return Objects.equals(name, that.name) && Objects.equals(uuid, that.uuid) && Objects.equals(peerstatus, that.peerstatus);
+        return Objects.equals(name, that.name) && Objects.equals(uuid, that.uuid) && Objects.equals(peerStatus, that.peerStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, uuid, peerstatus);
+        return Objects.hash(name, uuid, peerStatus);
     }
 }
