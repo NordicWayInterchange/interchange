@@ -315,4 +315,62 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
         service.updateLocalSubscriptionWithRedirectEndpoints(serviceProviderName);
     }
+
+    @Test
+    public void importRedirectLocalSubscriptionMultipleEndpointsWillNotWork() {
+        String serviceProviderName = "no-import-service-provider";
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription localSub = new LocalSubscription(
+                LocalSubscriptionStatus.CREATED,
+                selector,
+                serviceProviderName
+        );
+
+        String source1 = "redirect-source-1";
+        String source2 = "redirect-source-2";
+        String host1 = "redirect-host-1";
+        String host2 = "redirect-host-2";
+        Integer port = 5671;
+
+        LocalEndpoint localEndpoint1 = new LocalEndpoint(source1, host1, port);
+        localSub.addLocalEndpoint(localEndpoint1);
+
+        LocalEndpoint localEndpoint2 = new LocalEndpoint(source2, host2, port);
+        localSub.addLocalEndpoint(localEndpoint2);
+
+        serviceProvider.addLocalSubscription(localSub);
+        repository.save(serviceProvider);
+
+        Subscription subscription1 = new Subscription(selector, SubscriptionStatus.CREATED, serviceProviderName);
+
+        Endpoint endpoint1 = new Endpoint(source1, host1, port);
+        subscription1.setEndpoints(Collections.singleton(endpoint1));
+
+        Neighbour neighbour1 = new Neighbour(
+                "our-neighbour-1",
+                new NeighbourCapabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest(Collections.singleton(subscription1)));
+
+        Subscription subscription2 = new Subscription(selector, SubscriptionStatus.CREATED, serviceProviderName);
+
+        Endpoint endpoint2 = new Endpoint(source2, host2, port);
+        subscription2.setEndpoints(Collections.singleton(endpoint2));
+
+        Neighbour neighbour2 = new Neighbour(
+                "our-neighbour-2",
+                new NeighbourCapabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest(Collections.singleton(subscription2)));
+
+        neighbourRepository.saveAll(Arrays.asList(neighbour1, neighbour2));
+
+        matchRepository.save(new Match(localSub, subscription1, serviceProviderName));
+        matchRepository.save(new Match(localSub, subscription2, serviceProviderName));
+
+        service.updateLocalSubscriptionWithRedirectEndpoints(serviceProviderName);
+        assertThat(localSub.getLocalEndpoints()).hasSize(2);
+    }
 }
