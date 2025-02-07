@@ -51,33 +51,33 @@ public class ServiceProviderService {
                 .collect(Collectors.toSet());
 
         for (LocalSubscription localSubscription : redirectSubscriptions) {
-            Set<LocalEndpoint> newEndpoints = new HashSet<>();
-            Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-                List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                for (Match match : matches) {
-                    Set<LocalEndpoint> endpoints = transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints());
-                    if (!localSubscription.getLocalEndpoints().equals(endpoints)) {
-                        for (LocalEndpoint endpoint : endpoints) {
-                            if (!localSubscription.getLocalEndpoints().contains(endpoint)) {
-                                newEndpoints.add(endpoint);
-                            }
-                        }
+                Set<LocalEndpoint> newEndpoints = new HashSet<>();
+                Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
+                Set<LocalEndpoint> allEndpointsFromNeighbours = new HashSet<>();
+                matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())
+                        .forEach(match -> allEndpointsFromNeighbours.addAll(
+                                transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints())
+                        ));
 
-                        for (LocalEndpoint endpoint : localSubscription.getLocalEndpoints()) {
-                            if (endpoints.contains(endpoint)) {
-                                endpointsToRemove.add(endpoint);
-                            }
-                        }
+                for (LocalEndpoint endpoint : allEndpointsFromNeighbours) {
+                    if (!localSubscription.getLocalEndpoints().contains(endpoint)) {
+                        newEndpoints.add(endpoint);
                     }
                 }
-                if (matches.isEmpty()) {
+                localSubscription.getLocalEndpoints().addAll(newEndpoints);
+
+                for (LocalEndpoint endpoint : localSubscription.getLocalEndpoints()) {
+                    if (!allEndpointsFromNeighbours.contains(endpoint)) {
+                        endpointsToRemove.add(endpoint);
+                    }
+                }
+                localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
+
+                if (allEndpointsFromNeighbours.isEmpty()) {
                     localSubscription.getLocalEndpoints().clear();
                 }
             }
-            localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
-            localSubscription.getLocalEndpoints().addAll(newEndpoints);
-
         }
         serviceProviderRepository.save(serviceProvider);
     }
@@ -160,17 +160,15 @@ public class ServiceProviderService {
     }
 
     public Set<LocalEndpoint> transformEndpointsToLocalEndpoints(Set<Endpoint> endpoints) {
-        Set<LocalEndpoint> localEndpoints = new HashSet<>();
-        for (Endpoint endpoint : endpoints) {
-            LocalEndpoint localEndpoint = new LocalEndpoint(
-                    endpoint.getSource(),
-                    endpoint.getHost(),
-                    endpoint.getPort(),
-                    endpoint.getMaxBandwidth(),
-                    endpoint.getMaxMessageRate());
-            localEndpoints.add(localEndpoint);
-        }
-        return localEndpoints;
+        return endpoints.stream()
+                .map(endpoint ->
+                        new LocalEndpoint(
+                                endpoint.getSource(),
+                                endpoint.getHost(),
+                                endpoint.getPort(),
+                                endpoint.getMaxBandwidth(),
+                                endpoint.getMaxMessageRate()))
+                .collect(Collectors.toSet());
     }
 
 }

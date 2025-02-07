@@ -314,6 +314,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         matchRepository.save(new Match(localSub, subscription, serviceProviderName));
 
         service.updateLocalSubscriptionWithRedirectEndpoints(serviceProviderName);
+        assertThat(localSub.getLocalEndpoints()).hasSize(1);
     }
 
     @Test
