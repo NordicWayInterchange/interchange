@@ -67,6 +67,7 @@ public class QpidDelta {
         return result;
     }
 
+    //TODO is this the level at which we should throw an exception?
     public void addBindingToExchange(String exchangeName, String selector, String destination) {
         findExchangeByName(exchangeName).ifPresent(ex -> ex.addBinding(new Binding(
                 exchangeName,
@@ -78,7 +79,7 @@ public class QpidDelta {
     public boolean exchangeHasBindingToQueue(String exchangeName, String queueName) {
         return findExchangeByName(exchangeName)
                 .map(value -> value.isBoundToQueue(queueName))
-                .orElse(false);
+                .orElseThrow(() -> new ExchangeNotFoundException("Could not find exchange " + exchangeName));
     }
 
     public Exchange findByExchangeName(String exchangeName) {

@@ -3,8 +3,10 @@ package no.vegvesen.ixn.federation.qpid;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class QpidDeltaTest {
 
@@ -29,5 +31,33 @@ public class QpidDeltaTest {
 
         assertThat(delta.findByExchangeName("3")).isNull();
 
+    }
+
+    @Test
+    public void exchangeHasBindingToQueue() {
+        Exchange exchange1 = new Exchange("E1");
+        Exchange exchange2 = new Exchange("E2");
+        Queue queue1 = new Queue("Q1");
+        exchange1.addBinding(new Binding("B1","Q1",new Filter("test")));
+        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
+        assertThat(delta.exchangeHasBindingToQueue("E1","Q1")).isTrue();
+    }
+
+    @Test
+    public void exchangeHasBindingToQueueFalse() {
+        Exchange exchange1 = new Exchange("E1");
+        Exchange exchange2 = new Exchange("E2");
+        Queue queue1 = new Queue("Q1");
+        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
+        assertThat(delta.exchangeHasBindingToQueue("E1","Q1")).isFalse();
+    }
+
+    @Test
+    public void exchangeHasBindingToQueueWhenExchangeDowsNotExist() {
+        Exchange exchange1 = new Exchange("E1");
+        Exchange exchange2 = new Exchange("E2");
+        Queue queue1 = new Queue("Q1");
+        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
+        assertThatThrownBy(() -> delta.exchangeHasBindingToQueue("E3","Q1")).isInstanceOf(ExchangeNotFoundException.class);
     }
 }
