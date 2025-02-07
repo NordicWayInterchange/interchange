@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,17 +31,17 @@ public class ImportTransformer {
     }
 
     public LocalSubscription transformLocalSubscriptionImportApiToLocalSubscription(LocalSubscriptionImportApi localSubscription) {
-        LocalSubscription newLocalSubscription = new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+        return new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
                 localSubscription.getUuid(),
                 LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
-                Set.of(),
-                Set.of()
+                localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()),
+                localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet())
         );
-        newLocalSubscription.setLocalEndpoints(localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()));
-        newLocalSubscription.setConnections(localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()));
-        return newLocalSubscription;
+        //newLocalSubscription.setLocalEndpoints(localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()));
+        //newLocalSubscription.setConnections(localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()));
+        //return newLocalSubscription;
     }
 
     public LocalSubscriptionStatus transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi status) {
@@ -312,22 +311,19 @@ public class ImportTransformer {
 
     public PrivateChannel transformPrivateChannelImportApiToPrivateChannel(PrivateChannelImportApi privateChannel) {
         return new PrivateChannel(
-                transformPeersListToPeersSet(privateChannel.getPeers()),
-                //transformStringListPeerNameToPeer(privateChannel.getPeers()),
-                //transformPrivateChannelStatusImportApiToPrivateChannelStatus(privateChannel.getStatus()),
+                privateChannel.getPeers().stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet()),
                 PrivateChannelStatus.REQUESTED,
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
         );
     }
 
-
-    public Set<Peer> transformPeersListToPeersSet(List<PeerImportApi> peers) {
-        return peers.stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet());
-    }
-
-    private Peer transformPeerImportApiToPeer(PeerImportApi peerImportApi) {
-        return new Peer(peerImportApi.getUuid(),peerImportApi.getName(),PeerStatus.REQUESTED);
+    public Peer transformPeerImportApiToPeer(PeerImportApi peer) {
+        return new Peer(
+                peer.getName(),
+                peer.getUuid(),
+                PeerStatus.REQUESTED
+        );
     }
 
     public PrivateChannelStatus transformPrivateChannelStatusImportApiToPrivateChannelStatus(PrivateChannelImportApi.PrivateChannelStatusImportApi status) {

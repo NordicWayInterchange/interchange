@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.service.exportmodel.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExportTransformer {
@@ -294,14 +293,10 @@ public class ExportTransformer {
 
     public PrivateChannelExportApi transformPrivateChannelToPrivateChannelExportApi(PrivateChannel privateChannel) {
         return new PrivateChannelExportApi(privateChannel.getServiceProviderName(),
-                transportPeersToPeersList(privateChannel.getPeers()),
+                privateChannel.getPeers().stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet()),
                 transformPrivateChannelStatusToPrivateChannelStatusExportApi(privateChannel.getStatus()),
                 transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint())
         );
-    }
-
-    public Set<PeerExportApi> transportPeersToPeersList(Set<Peer> peers) {
-        return peers.stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet());
     }
 
     public PeerExportApi transformPeerToPeerExportApi(Peer peer) {
