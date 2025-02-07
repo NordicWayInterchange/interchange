@@ -9,7 +9,7 @@ public class PrivateChannelImportApi {
 
     private String serviceProviderName;
 
-    private List<String> peers;
+    private List<PeerImportApi> peers;
 
     private PrivateChannelStatusImportApi status;
 
@@ -24,8 +24,9 @@ public class PrivateChannelImportApi {
     public PrivateChannelImportApi() {
 
     }
-    public PrivateChannelImportApi(String uuid, String serviceProviderName,
-                                   List<String> peers,
+    public PrivateChannelImportApi(String uuid,
+                                   String serviceProviderName,
+                                   List<PeerImportApi> peers,
                                    PrivateChannelStatusImportApi status,
                                    PrivateChannelEndpointImportApi endpoint) {
         this.uuid = uuid;
@@ -51,11 +52,11 @@ public class PrivateChannelImportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public List<String> getPeers() {
+    public List<PeerImportApi> getPeers() {
         return peers;
     }
 
-    public void setPeerName(List<String> peers) {
+    public void setPeerName(List<PeerImportApi> peers) {
         this.peers = peers;
     }
 
