@@ -12,6 +12,7 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {GridColDef} from "@mui/x-data-grid";
+import { motion } from "framer-motion";
 
 type Props = {
     row: any;
@@ -20,6 +21,7 @@ type Props = {
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
+    isFlashing: boolean;
 };
 
 function extractedSubscriptionAttributes(subscription: any) {
@@ -34,7 +36,7 @@ function extractedSubscriptionAttributes(subscription: any) {
     };
 }
 
-const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick}: Props) => {
+const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick, isFlashing}: Props) => {
 
     const nestedTableTitle: { [key: string]: string } = {
         capabilities: "Capabilities",
@@ -120,58 +122,78 @@ const nestedGridNeighbours = ({row, field, drawerOpen, neighbourRow, handleMoreC
             },
         ];
     }
-
     const heading = field.split(" ").map(field => nestedTableTitle[field] || field).join(" ");
+    const getSubheading = () => {
+        if (heading === 'Capabilities') {
+            return (
+                <Box>
+                    These are all of Capabilities with last capability exchange
+                    <Chip
+                        label={timeConverter(row.capabilities.lastCapabilityExchange)}
+                        sx={{ backgroundColor: "#ffbf7d", color: "black" }}
+                    />
+                    . You can click a row to view more information.
+                </Box>
+        );
+        } else return `These are all of ${heading}. You can click a row to view more information.`;
+    }
+
     return (
         <Box flex={1}>
             <Mainheading>{heading}</Mainheading>
             <Subheading>
-                These are all of {heading}. You can click a row to view more information.
+                {getSubheading()}
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 450, width: "100%"}}>
-                {heading === 'Capabilities' && (
-                <DataGrid
-                    rows={nestedData}
-                    columns={nestedColumns}
-                    getRowId={(row) => row.id}
-                    onRowClick={handleOnRowClick}
-                    sort={{field: "createdTimestamp", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlay
-                    }}
-                />
-                )}
-                {(heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                <DataGrid
-                    rows={nestedData}
-                    columns={nestedColumns}
-                    getRowId={(row) => row.id}
-                    onRowClick={handleOnRowClick}
-                    sort={{field: "lastUpdated", sort: "desc"}}
-                    slots={{
-                        noRowsOverlay: CustomEmptyOverlay
-                    }}
-                />
-                )}
+                <motion.div
+                    animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
+                    transition={{duration: 0.3, ease: "easeInOut"}}
+                    style={{padding: "5px", borderRadius: "8px"}}
+                >
+                    {heading === 'Capabilities' && (
+                        <DataGrid
+                            rows={nestedData}
+                            columns={nestedColumns}
+                            getRowId={(row) => row.id}
+                            onRowClick={handleOnRowClick}
+                            sort={{field: "createdTimestamp", sort: "desc"}}
+                            slots={{
+                                noRowsOverlay: CustomEmptyOverlay
+                            }}
+                        />
+                    )}
+                    {(heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
+                        <DataGrid
+                            rows={nestedData}
+                            columns={nestedColumns}
+                            getRowId={(row) => row.id}
+                            onRowClick={handleOnRowClick}
+                            sort={{field: "lastUpdated", sort: "desc"}}
+                            slots={{
+                                noRowsOverlay: CustomEmptyOverlay
+                            }}
+                        />
+                    )}
+                </motion.div>
                 {neighbourRow && heading === 'Capabilities' && (
-                    <CapabilityDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        capabilities={neighbourRow as Capability}
-                    />
-                )}
-                {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        subscriptions={neighbourRow as Subscription}
-                        heading={heading}
-                    />
-                )}
+                        <CapabilityDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            capabilities={neighbourRow as Capability}
+                        />
+                    )}
+                    {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
+                        <CommonDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            subscriptions={neighbourRow as Subscription}
+                            heading={heading}
+                        />
+                    )}
             </Box>
 
         </Box>
-    );
+);
 }
-export default nestedGridNeighbours;
+export default NestedGridNeighbours;

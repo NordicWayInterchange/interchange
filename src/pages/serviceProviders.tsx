@@ -34,6 +34,8 @@ export default function ServiceProviders() {
         field: string | null;
     }>({id: null, field: null});
 
+    const [isFlashing, setIsFlashing] = useState(false);
+
     const handleMoreClose = () => {
         setDrawerOpen(false);
     };
@@ -44,6 +46,8 @@ export default function ServiceProviders() {
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
         }));
+        setIsFlashing(true);
+        setTimeout(() => setIsFlashing(false), 300);
     };
 
     const handleOnRowClick = (params: GridRowParams) => {
@@ -184,7 +188,8 @@ export default function ServiceProviders() {
                                 serviceProviderRow={serviceProviderRow}
                                 handleMoreClose={handleMoreClose}
                                 handleOnRowClick={handleOnRowClick}
-                             />
+                                isFlashing={isFlashing}
+                            />
                         </Box>
                     );
                 })}

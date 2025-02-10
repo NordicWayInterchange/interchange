@@ -31,9 +31,10 @@ export type Neighbours = {
     name: string;
     capabilities: Array<NeighbourCapabilities>;
     neighbourRequestedSubscriptions: neighbourRequestedSubscriptions;
-    ourRequestedSubscriptions: ourRequestedSubscriptions;
+    ourRequestedSubscriptions: OurRequestedSubscriptions;
     connectionStatus: ConnectionStatus;
     lastFailedConnectionAttempt: number;
+    controlConnection: ControlConnection;
     lastUpdated: number;
     ignore: boolean;
 };
@@ -103,8 +104,17 @@ export type Subscription = {
     description: string;
 };
 
-export type ourRequestedSubscriptions = {
+export type OurRequestedSubscriptions = {
     subreq_id: number;
     subscriptions: Array<Subscription>;
     successfulRequest: number;
 };
+
+export type ControlConnection = {
+    id: number;
+    backoffStart: number;
+    backoffAttempts: number;
+    connectionStatus: string;
+    unreachableTime: number;
+    lastFailedConnectionAttempt: number;
+}

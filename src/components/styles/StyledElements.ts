@@ -56,7 +56,7 @@ export const StyledTableHeader = {
     height: 400,
     width: '100%',
     '& .highlighted-cell': {
-        backgroundColor: '#F8DEDE',
+        backgroundColor: '#ffbf7d',
     },
     '& .custom-header': {
         backgroundColor: 'headerBackgroundColor',
