@@ -320,8 +320,8 @@ public class ImportTransformer {
 
     public Peer transformPeerImportApiToPeer(PeerImportApi peer) {
         return new Peer(
-                peer.getName(),
                 peer.getUuid(),
+                peer.getName(),
                 PeerStatus.REQUESTED
         );
     }
