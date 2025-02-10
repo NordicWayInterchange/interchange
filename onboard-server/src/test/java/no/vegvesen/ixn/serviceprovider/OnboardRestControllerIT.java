@@ -98,10 +98,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilitiesWithShardCountWithinLimitDoesNotThrowException(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
-        CapabilityApi datexNO = new CapabilityApi();
-        datexNO.setApplication(application);
-        datexNO.setMetadata(new MetadataApi(5, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
+        DatexApplicationApi application = new DatexApplicationApi("NOOOOOO","NOOOOOO:NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        MetadataApi metadata = new MetadataApi(5, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1);
+        CapabilityApi datexNO = new CapabilityApi(application,metadata);
 
         String serviceProviderName = "my-service-provider";
         assertThat(restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO)))).isNotNull();

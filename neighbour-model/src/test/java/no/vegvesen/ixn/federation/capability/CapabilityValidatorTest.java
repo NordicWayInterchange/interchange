@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class CapabilityValidatorTest {
 
@@ -529,7 +530,7 @@ public class CapabilityValidatorTest {
     public void testCapabilityWithInvalidShardCountIsNotValid(){
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
-                        " NO00000",
+                        "NO00000",
                         "NO00000-pub-1",
                         "NO",
                         "IVIM",
@@ -538,5 +539,28 @@ public class CapabilityValidatorTest {
                 new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
         );
         assertThat(CapabilityValidator.isShardCountValid(capability.getMetadata())).isFalse();
+    }
+
+    @Test
+    public void testCapabilityValidWithValidShardCount() {
+        CapabilityApi datexNO = new CapabilityApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000:NO-pub-1",
+                         "NO",
+                          "1.0",
+                           List.of("12003"),
+                            "SituationPublication",
+                             "publisherName"
+                ),
+                new MetadataApi(5,
+                        "test",
+                         RedirectStatusApi.OPTIONAL,
+                          1,
+                           1,
+                            1
+                )
+        );
+        assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).isEmpty();
     }
 }
