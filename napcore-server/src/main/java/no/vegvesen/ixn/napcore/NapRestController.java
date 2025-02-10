@@ -183,7 +183,7 @@ public class NapRestController {
                 .stream()
                 .filter(s -> s.getUuid().equals(subscriptionId))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,actorCommonName)));
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s", subscriptionId, actorCommonName)));
 
         return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
@@ -238,6 +238,7 @@ public class NapRestController {
         if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
         }
+
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
@@ -365,8 +366,9 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        if(!CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()))){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capabilityToAdd));
+        Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        if(validatedCapability.containsKey(false)){
+            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
         }
 
         if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){

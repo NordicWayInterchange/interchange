@@ -271,17 +271,17 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actor2 = "actor-2";
         String selector = "originatingCountry='NO'";
         CapabilitiesRequest request1 = new CapabilitiesRequest(
-          new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+          new DatexApplicationApi("DK12345","DK12345:publication-id","NO","1", List.of("1"), "type","name"),
           new MetadataApi()
         );
 
         CapabilitiesRequest request2 = new CapabilitiesRequest(
-                new DatexApplicationApi("pub-id","publication-id-2","SE","1", List.of("1"), "type","name"),
+                new DatexApplicationApi("DK12345","DK12345:publication-id-2","SE","1", List.of("1"), "type","name"),
                 new MetadataApi()
         );
 
         CapabilitiesRequest request3 = new CapabilitiesRequest(
-                new DatexApplicationApi("pub-id","publication-id-3","NO","1", List.of("1"), "type","name"),
+                new DatexApplicationApi("DK12345","DK12345:publication-id-3","NO","1", List.of("1"), "type","name"),
                 new MetadataApi()
         );
         napRestController.addCapability(actor1, request1);
@@ -320,7 +320,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapability(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
+                new DatexApplicationApi("DK12345", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         OnboardingCapability response = napRestController.addCapability(actorCommonName, capabilitiesRequest);
@@ -351,7 +351,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithIllegalCharacterThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "'originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publisherId:p'ublicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
@@ -361,7 +361,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithInvalidQuadTreeThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("124"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publisherId:publicationId", "OG", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
@@ -371,7 +371,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithMissingPropertiesThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", null, List.of("1"), "test", "test"),
+                new DatexApplicationApi("publisherId", "publicationId", "NO", null, List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
@@ -381,12 +381,32 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingCapabilityWithDuplicatePublicationIdThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
-                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolversion", List.of("1"), "test", "test"),
+                new DatexApplicationApi("DK12345", "DK12345:publicationId", "NO", "protocolversion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
         assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testAddingCapabilityWithInvalidPropertiesThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
+                new MetadataApi()
+        );
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setPublisherId("DK12345");
+        capabilitiesRequest.getApplication().setOriginatingCountry("NOK");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setOriginatingCountry("NO");
+        capabilitiesRequest.getApplication().setProtocolVersion("*!!!");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        capabilitiesRequest.getApplication().setProtocolVersion("protocolVersion");
+        capabilitiesRequest.getApplication().setPublicationId("DK12345-publicationId");
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+
     }
 
     @Test
@@ -460,13 +480,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actor1 = "actor";
         String actor2 = "actor-2";
         CapabilitiesRequest request = new CapabilitiesRequest(
-                new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
+                new DatexApplicationApi("DK12345", "DK12345:id", "NO", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
                 new MetadataApi()
         );
         napRestController.addCapability(actor1, request);
-        request.getApplication().setPublicationId("publi-Id-2");
+        request.getApplication().setPublicationId("DK12345:publi-Id-2");
         napRestController.addCapability(actor1, request);
-        request.getApplication().setPublicationId("publi-Id-3");
+        request.getApplication().setPublicationId("DK12345:publi-Id-3");
         napRestController.addCapability(actor2, request);
 
         ServiceProvider actor1Caps = serviceProviderRepository.findByName(actor1);
@@ -489,7 +509,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testDeletingCapability(){
         String actorCommonName = "actor";
         CapabilitiesRequest request = new CapabilitiesRequest(
-                new DatexApplicationApi("pubId", "publi-Id", "originatingCountry", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
+                new DatexApplicationApi("DK12345", "DK12345:Id", "NO", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
                 new MetadataApi()
         );
         OnboardingCapability response = napRestController.addCapability(actorCommonName, request);

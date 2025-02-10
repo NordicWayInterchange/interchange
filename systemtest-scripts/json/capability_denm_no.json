@@ -4,7 +4,7 @@
         "application" : {
             "messageType" : "DENM",
             "publisherId" : "NO00000",
-            "publicationId" : "NO00000-pub-1",
+            "publicationId" : "NO00000:pub-1",
             "originatingCountry" : "NO",
             "protocolVersion" : "DENM:1.2.2",
             "quadTree" : [ "12003" ],
