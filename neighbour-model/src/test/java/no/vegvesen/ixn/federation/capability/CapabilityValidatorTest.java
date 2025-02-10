@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class CapabilityValidatorTest {
 
@@ -561,6 +560,6 @@ public class CapabilityValidatorTest {
                             1
                 )
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).isEmpty();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).containsKey(true);
     }
 }
