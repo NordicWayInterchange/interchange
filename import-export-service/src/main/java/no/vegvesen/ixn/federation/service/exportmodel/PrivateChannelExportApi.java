@@ -1,13 +1,13 @@
 package no.vegvesen.ixn.federation.service.exportmodel;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class PrivateChannelExportApi {
 
     private String serviceProviderName;
 
-    private List<String> peers;
+    private Set<PeerExportApi> peers;
 
     private PrivateChannelStatusExportApi status;
 
@@ -22,7 +22,7 @@ public class PrivateChannelExportApi {
     }
 
     public PrivateChannelExportApi(String serviceProviderName,
-                                   List<String> peers,
+                                   Set<PeerExportApi> peers,
                                    PrivateChannelStatusExportApi status,
                                    PrivateChannelEndpointExportApi endpoint) {
         this.serviceProviderName = serviceProviderName;
@@ -39,11 +39,11 @@ public class PrivateChannelExportApi {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public List<String> getPeers() {
+    public Set<PeerExportApi> getPeers() {
         return peers;
     }
 
-    public void setPeers(List<String> peers) {
+    public void setPeers(Set<PeerExportApi> peers) {
         this.peers = peers;
     }
 

@@ -7,8 +7,6 @@ import no.vegvesen.ixn.federation.service.exportmodel.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExportTransformer {
@@ -75,7 +73,9 @@ public class ExportTransformer {
     }
 
     public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {
-        return new CapabilityExportApi(capability.getApplication().toApi(),
+        return new CapabilityExportApi(
+                capability.getUuid(),
+                capability.getApplication().toApi(),
                 transformMetadataToMetadataExportApi(capability.getMetadata()),
                 transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
                 capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
@@ -177,7 +177,7 @@ public class ExportTransformer {
         return new NeighbourCapabilitiesExportApi(transformLocalDateTimeToEpochMili(neighbourCapabilities.getLastCapabilityExchange()),
                 neighbourCapabilities.getCapabilities().stream().map(this::transformNeighbourCapabilityToNeighbourCapabilityExportApi).collect(Collectors.toSet()),
                 transformCapabilitiesStatusToCapabilitiesStatusExportApi(neighbourCapabilities.getStatus()),
-                transformLocalDateTimeToEpochMili(neighbourCapabilities.getLastUpdated().get())
+                transformLocalDateTimeToEpochMili(neighbourCapabilities.getLastUpdated().orElseGet(() -> null))
         );
     }
 
@@ -293,14 +293,18 @@ public class ExportTransformer {
 
     public PrivateChannelExportApi transformPrivateChannelToPrivateChannelExportApi(PrivateChannel privateChannel) {
         return new PrivateChannelExportApi(privateChannel.getServiceProviderName(),
-                transformPeersToPeersList(privateChannel.getPeers()),
+                privateChannel.getPeers().stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet()),
                 transformPrivateChannelStatusToPrivateChannelStatusExportApi(privateChannel.getStatus()),
                 transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint())
         );
     }
 
-    public List<String> transformPeersToPeersList(Set<Peer> peers) {
-        return peers.stream().map(Peer::getName).collect(Collectors.toList());
+    public PeerExportApi transformPeerToPeerExportApi(Peer peer) {
+        return new PeerExportApi(
+                peer.getName(),
+                peer.getUuid(),
+                peer.getStatus().toString()
+        );
     }
 
     public PrivateChannelExportApi.PrivateChannelStatusExportApi transformPrivateChannelStatusToPrivateChannelStatusExportApi(PrivateChannelStatus status) {
