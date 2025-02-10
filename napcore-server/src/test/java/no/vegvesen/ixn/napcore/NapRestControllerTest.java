@@ -344,6 +344,7 @@ public class NapRestControllerTest {
                 "metadata": {}
                 }
                 """;
+
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         Capability capability = new Capability(

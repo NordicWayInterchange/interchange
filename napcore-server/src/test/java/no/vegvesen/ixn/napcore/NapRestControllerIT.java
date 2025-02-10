@@ -328,6 +328,26 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingCapabilityWithShardCountExceedingLimitThrowsException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
+                new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
+        );
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+    }
+
+    @Test
+    public void testAddingCapabilityWithShardCountWithinLimitDoesNotThrowException(){
+        String actorCommonName = "actor";
+        CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(
+                new DatexApplicationApi("publisherId", "publicationId", "originatingCountry", "protocolVersion", List.of("1"), "test", "test"),
+                new MetadataApi(9, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
+        );
+        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
+    }
+
+    @Test
     public void testAddingCapabilityWithIllegalCharacterThrowsException(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(

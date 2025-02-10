@@ -395,6 +395,20 @@ public class CapabilityValidatorTest {
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isFalse();
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).isFalse();
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).isFalse();
+    }
 
+    @Test
+    public void testCapabilityWithInvalidShardCountIsNotValid(){
+        CapabilityApi capability = new CapabilityApi(
+                new IvimApplicationApi(
+                        " NO00000",
+                        "NO00000-pub-1",
+                        "NO",
+                        "IVIM",
+                        List.of()
+                ),
+                new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
+        );
+        assertThat(CapabilityValidator.isShardCountValid(capability.getMetadata())).isFalse();
     }
 }
