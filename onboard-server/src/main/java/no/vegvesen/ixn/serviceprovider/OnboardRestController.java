@@ -90,7 +90,7 @@ public class OnboardRestController {
 		Set<String> allPublicationIds = allPublicationIds();
 		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
-				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
+				throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists.", capability));
 			}
 
 			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
@@ -584,6 +584,7 @@ public class OnboardRestController {
 		for(AddDelivery delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
+
 			if (delivery.getSelector() == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");

@@ -5,11 +5,7 @@ import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.PathVariableException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.PeerStatus;
 import no.vegvesen.ixn.federation.model.PrivateChannel;
@@ -94,6 +90,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionWithNullSelectorThrowsException(){
         String actorCommonName = "actor";
         assertThrows(SubscriptionRequestException.class, () -> napRestController.addSubscription(actorCommonName, new SubscriptionRequest()));
+    }
+
+    @Test
+    public void testAddingSubscriptionThatAlreadyExistsThrowsException(){
+        String actorCommonName = "actor";
+        SubscriptionRequest request = new SubscriptionRequest("originatingCountry='NO'");
+        napRestController.addSubscription(actorCommonName, request);
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addSubscription(actorCommonName, request));
     }
 
     @Test
@@ -187,6 +191,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingDeliveryThatAlreadyExistsThrowsException(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
+        napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addDelivery(actorCommonName, deliveryRequest));
+    }
+    @Test
     public void testAddingDeliveryWithInvalidSelectorGivesInvalidDelivery(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("1=1", "Invalid delivery");
@@ -198,7 +209,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryWithoutDescription(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
-        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
     }
 
@@ -355,7 +366,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         );
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test

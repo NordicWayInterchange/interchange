@@ -109,7 +109,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         String serviceProviderName = "my-service-provider";
 
-        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+        AlreadyExistsException thrown = assertThrows(AlreadyExistsException.class, () -> restController.addCapabilities(serviceProviderName,
                 new AddCapabilitiesRequest(
                         serviceProviderName,
                         Collections.singleton(datexNO)
@@ -237,7 +237,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         String serviceProviderName = "my-service-provider";
 
-        CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName,
+        AlreadyExistsException thrown = assertThrows(AlreadyExistsException.class, () -> restController.addCapabilities(serviceProviderName,
                 new AddCapabilitiesRequest(
                         serviceProviderName,
                         Collections.singleton(datexNO)
