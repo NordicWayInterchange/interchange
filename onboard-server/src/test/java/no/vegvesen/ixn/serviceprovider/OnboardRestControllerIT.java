@@ -98,7 +98,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilitiesWithShardCountWithinLimitDoesNotThrowException(){
-        DatexApplicationApi application = new DatexApplicationApi("NOOOOOO","NOOOOOO:NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        DatexApplicationApi application = new DatexApplicationApi("NO00000","NO00000:NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
         MetadataApi metadata = new MetadataApi(5, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1);
         CapabilityApi datexNO = new CapabilityApi(application,metadata);
 
@@ -108,7 +108,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilityWithPublisherIdMatchingALocalCapability() {
-        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO-pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+        DatexApplicationApi app = new DatexApplicationApi("NO00000", "NO00000:pub-1", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
         MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(app);
