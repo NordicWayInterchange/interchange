@@ -145,7 +145,7 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
                 {getSubheading()}
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 500, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
                 <motion.div
                     animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
                     transition={{duration: 0.3, ease: "easeInOut"}}

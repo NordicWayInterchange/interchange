@@ -191,7 +191,7 @@ const Neighbours = () => {
                 to view more information.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
-            <Box sx={{height: 500, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
                     <DataGrid
                         columns={tableHeaders}

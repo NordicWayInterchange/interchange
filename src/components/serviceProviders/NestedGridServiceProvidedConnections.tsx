@@ -27,7 +27,7 @@ const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColum
                 />
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 550, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
             <motion.div
                 animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
                 transition={{duration: 0.3, ease: "easeInOut"}}

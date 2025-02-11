@@ -195,7 +195,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 550, width: "100%"}}>
+            <Box sx={{height: 450, width: "100%"}}>
             <Box sx={StyledTableHeader}>
                 <motion.div
                     animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
@@ -248,12 +248,13 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     )}
             </Box>
             {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
-                if (!row) {
-                    return null;
-                }
                 const filteredConnections = nestedConnectionData.filter(
                     (connection: any) => connection.subscriptionId === serviceProviderRow?.id
                 );
+                if (!row || !serviceProviderRow) {
+                    return null;
+                }
+
                 return (
                     <Box key={rowId} sx={{height: 100, width: "100%"}}>
                         <NestedGridConnections
