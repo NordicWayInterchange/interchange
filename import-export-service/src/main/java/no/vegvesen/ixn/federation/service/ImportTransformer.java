@@ -31,7 +31,7 @@ public class ImportTransformer {
     }
 
     public LocalSubscription transformLocalSubscriptionImportApiToLocalSubscription(LocalSubscriptionImportApi localSubscription) {
-        return new LocalSubscription(//transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(localSubscription.getStatus()),
+        return new LocalSubscription(
                 localSubscription.getUuid(),
                 LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
@@ -39,9 +39,6 @@ public class ImportTransformer {
                 localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet())
         );
-        //newLocalSubscription.setLocalEndpoints(localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()));
-        //newLocalSubscription.setConnections(localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()));
-        //return newLocalSubscription;
     }
 
     public LocalSubscriptionStatus transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi status) {
@@ -82,11 +79,10 @@ public class ImportTransformer {
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {
         Capability newCapability = new Capability(
-                capability.getUuid() == null ? UUID.randomUUID().toString() : capability.getUuid(),
+                capability.getUuid(),
                 capabilityTransformer.applicationApiToApplication(capability.getApplication()),
                 transformMetadataImportApiToMetadata(capability.getMetadata())
         );
-        //newCapability.setStatus(transformCapabilityStatusImportApiToCapabilityStatus(capability.getStatus()));
         newCapability.setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
         return newCapability;
     }
