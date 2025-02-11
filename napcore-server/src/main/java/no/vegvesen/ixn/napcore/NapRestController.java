@@ -154,7 +154,7 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionToNapSubscription(savedSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions", "/nap/{actorCommonName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Subscriptions")
     @Operation(summary = "Get subscriptions")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.LISTSUBSCRIPTIONSRESPONSE)))})
