@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class PrivateChannelExportApi {
 
+    private String uuid;
+
     private String serviceProviderName;
 
     private Set<PeerExportApi> peers;
@@ -21,10 +23,12 @@ public class PrivateChannelExportApi {
 
     }
 
-    public PrivateChannelExportApi(String serviceProviderName,
+    public PrivateChannelExportApi(String uuid,
+                                   String serviceProviderName,
                                    Set<PeerExportApi> peers,
                                    PrivateChannelStatusExportApi status,
                                    PrivateChannelEndpointExportApi endpoint) {
+        this.uuid = uuid;
         this.serviceProviderName = serviceProviderName;
         this.peers = peers;
         this.status = status;
@@ -59,27 +63,35 @@ public class PrivateChannelExportApi {
         return endpoint;
     }
 
-    public void setEndpoints(PrivateChannelEndpointExportApi endpoint) {
+    public void setEndpoint(PrivateChannelEndpointExportApi endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelExportApi that = (PrivateChannelExportApi) o;
-        return Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceProviderName, peers, status, endpoint);
+        return Objects.hash(uuid, serviceProviderName, peers, status, endpoint);
     }
 
     @Override
     public String toString() {
         return "PrivateChannelExportApi{" +
-                "serviceProviderName='" + serviceProviderName + '\'' +
+                "uuid='" + uuid + '\'' +
+                ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", peers=" + peers +
                 ", status=" + status +
                 ", endpoint=" + endpoint +

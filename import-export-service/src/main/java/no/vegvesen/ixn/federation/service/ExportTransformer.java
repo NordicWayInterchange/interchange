@@ -28,7 +28,9 @@ public class ExportTransformer {
     }
 
     public LocalSubscriptionExportApi transformLocalSubscriptionToLocalSubscriptionExportApi(LocalSubscription localSubscription) {
-        return new LocalSubscriptionExportApi(localSubscription.getSelector(),
+        return new LocalSubscriptionExportApi(
+                localSubscription.getUuid(),
+                localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusExportApi(localSubscription.getStatus()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointToLocalEndpointExportApi).collect(Collectors.toSet()),
@@ -126,7 +128,9 @@ public class ExportTransformer {
     }
 
     public DeliveryExportApi transformDeliveryToDeliveryExportApi(LocalDelivery delivery) {
-        return new DeliveryExportApi(delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
+        return new DeliveryExportApi(
+                delivery.getUuid(),
+                delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus())
                 );
@@ -202,7 +206,9 @@ public class ExportTransformer {
     }
 
     public NeighbourSubscriptionExportApi transformNeighbourSubscriptionToNeighbourSubscriptionExportApi(NeighbourSubscription neighbourSubscription) {
-        return new NeighbourSubscriptionExportApi(transformNeighbourSubscriptionStatusToNeighbourSubscriptionStatusExportApi(neighbourSubscription.getSubscriptionStatus()),
+        return new NeighbourSubscriptionExportApi(
+                neighbourSubscription.getUuid(),
+                transformNeighbourSubscriptionStatusToNeighbourSubscriptionStatusExportApi(neighbourSubscription.getSubscriptionStatus()),
                 neighbourSubscription.getSelector(),
                 neighbourSubscription.getPath(),
                 neighbourSubscription.getConsumerCommonName(),
@@ -292,7 +298,9 @@ public class ExportTransformer {
     }
 
     public PrivateChannelExportApi transformPrivateChannelToPrivateChannelExportApi(PrivateChannel privateChannel) {
-        return new PrivateChannelExportApi(privateChannel.getServiceProviderName(),
+        return new PrivateChannelExportApi(
+                privateChannel.getUuid(),
+                privateChannel.getServiceProviderName(),
                 privateChannel.getPeers().stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet()),
                 transformPrivateChannelStatusToPrivateChannelStatusExportApi(privateChannel.getStatus()),
                 transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint())
