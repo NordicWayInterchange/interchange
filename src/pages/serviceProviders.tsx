@@ -148,7 +148,7 @@ export default function ServiceProviders() {
                     to view more information.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
-                <Box sx={{height: 450, width: "100%"}}>
+                <Box sx={{height: 500, width: "100%"}}>
                     <Box sx={StyledTableHeader}>
                         <DataGrid
                             columns={serviceProviderTableHeaders}

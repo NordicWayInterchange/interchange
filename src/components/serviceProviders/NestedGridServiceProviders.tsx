@@ -41,7 +41,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                                                      }: Props) => {
 
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
-    const [filteredConnections, setFilteredConnections] = useState([]);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -196,6 +195,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
+            <Box sx={{height: 700, width: "100%"}}>
             <Box sx={StyledTableHeader}>
                 <motion.div
                     animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
@@ -222,6 +222,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         }
                     />
                 </motion.div>
+            </Box>
                     {serviceProviderRow && field === 'capabilities' && (
                         <CapabilityDrawer
                             handleMoreClose={handleMoreClose}
@@ -254,7 +255,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     (connection: any) => connection.subscriptionId === serviceProviderRow?.id
                 );
                 return (
-                    <Box key={rowId}>
+                    <Box key={rowId} sx={{height: 100, width: "100%"}}>
                         <NestedGridConnections
                             row={serviceProviderRow}
                             nestedConnectionData={filteredConnections}
