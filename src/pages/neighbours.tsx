@@ -179,7 +179,7 @@ const Neighbours = () => {
             },
         },
     ];
-    const displayControlConnectionDrawer = firstTableRow && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
+    const displayControlConnectionDrawer = firstTableRow && firstTableRow?.controlConnection && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
         || firstTableFieldName === 'neighbourRequestedSubscriptions');
     return (
         <Box flex={1}>

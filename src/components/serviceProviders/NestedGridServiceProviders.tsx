@@ -41,6 +41,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                                                      }: Props) => {
 
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+    const [filteredConnections, setFilteredConnections] = useState([]);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
