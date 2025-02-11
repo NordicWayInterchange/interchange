@@ -195,7 +195,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 These are all of {field}. You can click a row to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 700, width: "100%"}}>
+            <Box sx={{height: 550, width: "100%"}}>
             <Box sx={StyledTableHeader}>
                 <motion.div
                     animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
