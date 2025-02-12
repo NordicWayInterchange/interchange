@@ -215,7 +215,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String user = "user-read-non-existing-queue";
 		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
 		assertThatNoException().isThrownBy(
-				() -> client.addReadAccess(user,"this-queue-does-not-exist")
+				() -> client.addReadAccess(user,new Queue("this-queue-does-not-exist"))
 		);
 	}
 
@@ -223,9 +223,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void testAddAclForNonExisitingUser() {
 		String user = "this-user-does-not-exist";
 		String exchangeName = "non-existing-user-exchange";
-		client.createHeadersExchange(exchangeName);
+		Exchange headersExchange = client.createHeadersExchange(exchangeName);
 		assertThatNoException().isThrownBy(
-				() -> client.addWriteAccess(user,exchangeName)
+				() -> client.addWriteAccess(user,headersExchange)
 		);
 	}
 
@@ -294,14 +294,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
 
-		client.addReadAccess(subscriberName, queueName);
+		Queue queue = new Queue(queueName);
+		client.addReadAccess(subscriberName, queue);
 
 		AclRule queueReadAccessRule = VirtualHostAccessController.createQueueReadAccessRule(subscriberName, queueName);
 
 		VirtualHostAccessController provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueReadAccessRule)).isTrue();
 
-		client.removeReadAccess(subscriberName, queueName);
+		client.removeReadAccess(subscriberName, queue);
 
 		provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
@@ -310,21 +311,22 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void removeReadAccessThatDoesNotExist() {
 		assertThatNoException().isThrownBy(
-				() -> client.removeReadAccess("htis-subscriber-does-not-exist","this-queue-does-not-exist")
+				() -> client.removeReadAccess("htis-subscriber-does-not-exist",new Queue("this-queue-does-not-exist"))
 		);
 	}
 
 	@Test
 	public void writeAccessIsAdded() {
 		String subscriberName = "catfish";
-		String queueName = "catfish";
+		String exchangeName = "catfish";
 
-		client.addWriteAccess(subscriberName, queueName);
-		AclRule queueWriteAccessRule = VirtualHostAccessController.createExchangeWriteAccessRule(subscriberName, queueName);
+		Exchange exchange = new Exchange(exchangeName);
+		client.addWriteAccess(subscriberName, exchange);
+		AclRule queueWriteAccessRule = VirtualHostAccessController.createExchangeWriteAccessRule(subscriberName, exchangeName);
 		VirtualHostAccessController provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
 
-		client.removeWriteAccess(subscriberName, queueName);
+		client.removeWriteAccess(subscriberName, exchange);
 
 		provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isFalse();

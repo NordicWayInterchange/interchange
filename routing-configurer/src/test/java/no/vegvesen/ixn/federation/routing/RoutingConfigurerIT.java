@@ -329,8 +329,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);
 
-		client.createDirectExchange(deliveryExchangeName);
-		client.addWriteAccess(sp.getName(), deliveryExchangeName);
+		Exchange directExchange = client.createDirectExchange(deliveryExchangeName);
+		client.addWriteAccess(sp.getName(), directExchange);
 		client.addBinding(deliveryExchangeName, new Binding(deliveryExchangeName, cap.getShards().get(0).getExchangeName(), new Filter(joinedSelector)));
 
 		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
@@ -803,7 +803,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		Queue queue = client.createQueue(queueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
-		client.addReadAccess(neighbourName,queue.getName());
+		client.addReadAccess(neighbourName,queue);
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
 		assertThat(client
@@ -851,8 +851,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
-		client.addReadAccess(neighbourName,queue.getName());
-		client.addReadAccess(neighbourName,nonTeardownQueue.getName());
+		client.addReadAccess(neighbourName,queue);
+		client.addReadAccess(neighbourName,nonTeardownQueue);
 
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
@@ -898,7 +898,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		Queue queue = client.createQueue(queueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
-		client.addReadAccess(neighbourSPName,queue.getName());
+		client.addReadAccess(neighbourSPName,queue);
 		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
@@ -949,8 +949,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
-		client.addReadAccess(neighbourSPName,queue.getName());
-		client.addReadAccess(neighbourSPName,nonTeardownQueue.getName());
+		client.addReadAccess(neighbourSPName,queue);
+		client.addReadAccess(neighbourSPName,nonTeardownQueue);
 		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
@@ -1011,8 +1011,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
-		client.addReadAccess(neighbourSPName,queue.getName());
-		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue.getName());
+		client.addReadAccess(neighbourSPName,queue);
+		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue);
 		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 		client.addMemberToGroup(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 

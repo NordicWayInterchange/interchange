@@ -134,7 +134,7 @@ public class ServiceProviderRouter {
             String source = endpoint.getSource();
             Queue queue = delta.findByQueueName(source);
             if (queue != null) {
-                qpidClient.removeReadAccess(serviceProvider.getName(), source);
+                qpidClient.removeReadAccess(serviceProvider.getName(), queue);
                 qpidClient.removeQueue(queue);
                 delta.removeQueue(queue);
                 logger.info("Removed queue for LocalSubscription {}", subscription);
@@ -194,7 +194,7 @@ public class ServiceProviderRouter {
         if (queue == null) {
             logger.info("Creating queue {}", queueName);
             queue = qpidClient.createQueue(queueName);
-            qpidClient.addReadAccess(serviceProviderName, queueName);
+            qpidClient.addReadAccess(serviceProviderName, queue);
             delta.addQueue(queue);
         }
     }
@@ -416,7 +416,7 @@ public class ServiceProviderRouter {
                         Exchange exchange = delta.findByExchangeName(exchangeName);
                         if (exchange == null) {
                             exchange = qpidClient.createDirectExchange(exchangeName);
-                            qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
+                            qpidClient.addWriteAccess(serviceProvider.getName(), exchange);
                             delta.addExchange(exchange);
                         }
                     }
@@ -470,7 +470,7 @@ public class ServiceProviderRouter {
                                 Exchange exchange = delta.findByExchangeName(target);
                                 if (exchange != null) {
                                     logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-                                    qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                                    qpidClient.removeWriteAccess(serviceProvider.getName(), exchange);
                                     qpidClient.removeExchange(exchange);
                                     delta.removeExchange(exchange);
                                 }

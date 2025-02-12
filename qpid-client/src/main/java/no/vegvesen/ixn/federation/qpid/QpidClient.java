@@ -235,31 +235,31 @@ public class QpidClient {
 		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
 
-	public void addReadAccess(String subscriberName, String queue) {
+	public void addReadAccess(String subscriberName, Queue queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.addQueueReadAccess(subscriberName, queue);
-		logger.info("Adding read access for {} to queue {}",subscriberName,queue);
-        postQpidAcl(provider);
-	}
-
-	public void addWriteAccess(String subscriberName, String queue) {
-		VirtualHostAccessController provider = getQpidAcl();
-		provider.addExchangeWriteAccess(subscriberName, queue);
-		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
-        postQpidAcl(provider);
-	}
-
-	public void removeReadAccess(String subscriberName, String queue) {
-		VirtualHostAccessController provider = getQpidAcl();
-		provider.removeQueueReadAccess(subscriberName,queue);
-		logger.info("Removing read access for {} to queue {}", subscriberName, queue);
+		provider.addQueueReadAccess(subscriberName, queue.getName());
+		logger.info("Adding read access for {} to queue {}",subscriberName,queue.getName());
 		postQpidAcl(provider);
 	}
 
-	public void removeWriteAccess(String subscriberName, String queue) {
+	public void addWriteAccess(String subscriberName, Exchange exchange) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.removeQueueWriteAccess(subscriberName,queue);
-		logger.info("Removing write access for {} to queue {}", subscriberName,queue);
+		provider.addExchangeWriteAccess(subscriberName, exchange.getName());
+		logger.info("Adding write access for {} to queue {}",subscriberName,exchange.getName());
+		postQpidAcl(provider);
+	}
+
+	public void removeReadAccess(String subscriberName, Queue queue) {
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.removeQueueReadAccess(subscriberName,queue.getName());
+		logger.info("Removing read access for {} to queue {}", subscriberName, queue.getName());
+		postQpidAcl(provider);
+	}
+
+	public void removeWriteAccess(String subscriberName, Exchange exchange) {
+		VirtualHostAccessController provider = getQpidAcl();
+		provider.removeQueueWriteAccess(subscriberName,exchange.getName());
+		logger.info("Removing write access for {} to queue {}", subscriberName,exchange.getName());
 		postQpidAcl(provider);
 	}
 

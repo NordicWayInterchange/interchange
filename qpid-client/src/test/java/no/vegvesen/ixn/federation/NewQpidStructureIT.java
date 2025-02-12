@@ -181,11 +181,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 "DENM delivery"
         );
 
-        qpidClient.createDirectExchange(inQueueName);
-        qpidClient.addWriteAccess("king_gustaf", inQueueName);
+        Exchange directExchange = qpidClient.createDirectExchange(inQueueName);
+        qpidClient.addWriteAccess("king_gustaf", directExchange);
 
-        qpidClient.createQueue(outQueueName);
-        qpidClient.addReadAccess("king_gustaf", outQueueName);
+        Queue queue = qpidClient.createQueue(outQueueName);
+        qpidClient.addReadAccess("king_gustaf", queue);
 
         qpidClient.createHeadersExchange(exchangeName);
 
@@ -242,8 +242,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String input = "input_exchange";
         String output = "output_exchange";
 
-        qpidClient.createHeadersExchange(input);
-        qpidClient.addWriteAccess("king_gustaf", input);
+        Exchange headersExchange = qpidClient.createHeadersExchange(input);
+        qpidClient.addWriteAccess("king_gustaf", headersExchange);
 
         qpidClient.createHeadersExchange(output);
 
@@ -324,11 +324,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 "NO Delivery"
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
-        qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
+        Exchange directExchange = qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.addWriteAccess("king_gustaf", directExchange);
 
-        qpidClient.createQueue(subscriptionQueue);
-        qpidClient.addReadAccess("king_gustaf", subscriptionQueue);
+        Queue queue = qpidClient.createQueue(subscriptionQueue);
+        qpidClient.addReadAccess("king_gustaf", queue);
 
         qpidClient.createHeadersExchange(capabilityExchange1);
 
@@ -411,8 +411,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 "DENM delivery"
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
-        qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
+        Exchange directExchange = qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.addWriteAccess("king_gustaf", directExchange);
 
         qpidClient.createHeadersExchange(capabilityExchange);
 

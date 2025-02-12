@@ -88,12 +88,11 @@ public class RoutingConfigurer {
 			for (NeighbourSubscription sub : subscriptions) {
 				for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
 					Queue queue = qpidClient.getQueue(endpoint.getSource());
+					String consumerCommonName = sub.getConsumerCommonName();
 					if (queue != null) {
 						qpidClient.removeQueue(queue);
+						qpidClient.removeReadAccess(consumerCommonName, queue);
 					}
-
-					String consumerCommonName = sub.getConsumerCommonName();
-					qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 					if (! consumerCommonName.equals(neighbour.getName())) {
 						redirectedServiceProviders.add(consumerCommonName);
 					}
@@ -314,7 +313,7 @@ public class RoutingConfigurer {
 		Queue queue = delta.findByQueueName(queueName);
 		if (queue == null) {
 			queue = qpidClient.createQueue(queueName);
-			qpidClient.addReadAccess(subscriberName, queueName);
+			qpidClient.addReadAccess(subscriberName, queue);
 			delta.addQueue(queue);
 		}
 	}
