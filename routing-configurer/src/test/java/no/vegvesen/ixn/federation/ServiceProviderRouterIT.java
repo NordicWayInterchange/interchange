@@ -789,8 +789,53 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
-		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(1);
+		QpidDelta delta = client.getQpidDelta();
+		Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(1);
 	}
+
+	@Test
+	public void createTargetAndConnectForServiceProviderWhenCapabilityExchangeDoesNotExist() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
+		CapabilityShard shard = new CapabilityShard(1, "cap-non-exist-ex1", "publicationId = 'pub-1'");
+		denmCapability.setShards(Collections.singletonList(shard));
+
+
+		String deliveryExchangeName = "my-exchange-non-exist5";
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		verify(serviceProviderRepository, times(1)).save(any());
+
+		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
+		QpidDelta qpidDelta = client.getQpidDelta();
+		Exchange deliveryExchange = qpidDelta.findByExchangeName(deliveryExchangeName);
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(0);
+	}
+
 
 	@Test
 	public void createMultipleTargetsAndConnectForServiceProvider() {
@@ -840,7 +885,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
-		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(2);
+		QpidDelta delta = client.getQpidDelta();
+		Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(2);
 	}
 
 	@Test
@@ -1031,7 +1079,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
-		assertThat(client.getQpidDelta().getDestinationsFromExchangeName(deliveryExchangeName)).hasSize(3);
+		QpidDelta delta = client.getQpidDelta();
+		Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(3);
 	}
 
 	@Test

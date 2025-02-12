@@ -311,8 +311,9 @@ public class RoutingConfigurer {
 	}
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
-		if (!delta.queueExists(queueName)) {
-			Queue queue = qpidClient.createQueue(queueName);
+		Queue queue = delta.findByQueueName(queueName);
+		if (queue == null) {
+			queue = qpidClient.createQueue(queueName);
 			qpidClient.addReadAccess(subscriberName, queueName);
 			delta.addQueue(queue);
 		}

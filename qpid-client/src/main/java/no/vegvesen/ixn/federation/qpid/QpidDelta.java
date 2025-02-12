@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class QpidDelta {
 
@@ -31,16 +30,6 @@ public class QpidDelta {
         queues.remove(queue);
     }
 
-    public boolean exchangeExists(String exchangeName) {
-        return exchanges.stream()
-                .anyMatch(e -> e.getName().equals(exchangeName));
-    }
-
-    public boolean queueExists(String queueName) {
-        return queues.stream()
-                .anyMatch(q -> q.getName().equals(queueName));
-    }
-
     public Queue findByQueueName(String queueName) {
         return findQueueByName(queueName).orElse(null);
     }
@@ -55,31 +44,6 @@ public class QpidDelta {
         return exchanges.stream()
                 .filter(e -> e.getName().equals(exchangeName))
                 .findFirst();
-    }
-
-    public Set<String> getDestinationsFromExchangeName(String exchangeName) {
-        Set<String> result = new HashSet<>();
-        if (findExchangeByName(exchangeName).isPresent()) {
-            result = findExchangeByName(exchangeName).get().getBindings().stream()
-                    .map(Binding::getDestination)
-                    .collect(Collectors.toSet());
-        }
-        return result;
-    }
-
-    //TODO is this the level at which we should throw an exception?
-    public void addBindingToExchange(String exchangeName, String selector, String destination) {
-        findExchangeByName(exchangeName).ifPresent(ex -> ex.addBinding(new Binding(
-                exchangeName,
-                destination,
-                new Filter(selector)
-        )));
-    }
-
-    public boolean exchangeHasBindingToQueue(String exchangeName, String queueName) {
-        return findExchangeByName(exchangeName)
-                .map(value -> value.isBoundToQueue(queueName))
-                .orElseThrow(() -> new ExchangeNotFoundException("Could not find exchange " + exchangeName));
     }
 
     public Exchange findByExchangeName(String exchangeName) {

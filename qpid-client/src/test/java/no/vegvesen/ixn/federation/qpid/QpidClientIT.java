@@ -26,10 +26,6 @@ import java.util.Map;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
- * the actual hostname would normally end up as something like "localhost".
- */
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 public class QpidClientIT extends QpidDockerBaseIT {
 
@@ -400,8 +396,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
-
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch( b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -418,7 +415,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -435,7 +434,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -452,7 +453,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
+		Exchange qpidExchange = delta.findByExchangeName(deliveryExchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(capabilityExchange)).isTrue();
 	}
 
 

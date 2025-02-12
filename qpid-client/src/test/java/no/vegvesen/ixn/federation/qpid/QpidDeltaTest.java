@@ -34,46 +34,17 @@ public class QpidDeltaTest {
     }
 
     @Test
-    public void exchangeHasBindingToQueue() {
-        Exchange exchange1 = new Exchange("E1");
-        Exchange exchange2 = new Exchange("E2");
-        Queue queue1 = new Queue("Q1");
-        exchange1.addBinding(new Binding("B1","Q1",new Filter("test")));
-        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
-        assertThat(delta.exchangeHasBindingToQueue("E1","Q1")).isTrue();
-    }
-
-    @Test
-    public void exchangeHasBindingToQueueFalse() {
-        Exchange exchange1 = new Exchange("E1");
-        Exchange exchange2 = new Exchange("E2");
-        Queue queue1 = new Queue("Q1");
-        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
-        assertThat(delta.exchangeHasBindingToQueue("E1","Q1")).isFalse();
-    }
-
-    @Test
     public void testAddingBindingToExchange() {
         QpidDelta delta = new QpidDelta(
                 List.of(new Exchange("E1")),
                 List.of(new Queue("Q1"))
         );
         Exchange e1 = delta.findByExchangeName("E1");
-        assertThat(e1.isBoundToQueue("Q1")).isFalse();
+        assertThat(e1.isBoundTo("Q1")).isFalse();
 
         Binding binding = new Binding("b1","Q1",new Filter("test"));
         e1.addBinding(binding);
-        assertThat(e1.isBoundToQueue("Q1")).isTrue();
-
-
+        assertThat(e1.isBoundTo("Q1")).isTrue();
     }
 
-    @Test
-    public void exchangeHasBindingToQueueWhenExchangeDoesNotExist() {
-        Exchange exchange1 = new Exchange("E1");
-        Exchange exchange2 = new Exchange("E2");
-        Queue queue1 = new Queue("Q1");
-        QpidDelta delta = new QpidDelta(List.of(exchange1, exchange2),List.of(queue1));
-        assertThatThrownBy(() -> delta.exchangeHasBindingToQueue("E3","Q1")).isInstanceOf(ExchangeNotFoundException.class);
-    }
 }
