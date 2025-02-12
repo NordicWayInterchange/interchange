@@ -67,6 +67,14 @@ public class Capability {
         this.createdTimestamp = createdTimestamp;
     }
 
+    public Capability(String uuid, Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }

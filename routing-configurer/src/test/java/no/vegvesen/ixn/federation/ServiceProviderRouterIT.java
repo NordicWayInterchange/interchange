@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -32,6 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -1688,5 +1690,52 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
 		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
 		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
+	}
+
+
+	@Test
+	public void bindNonExistingCapabilityExchangeToBiQueue() {
+		Queue queue = client.getQueue("bi-queue");
+		assertThat(queue).isNotNull();
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"my-service-provider",
+				new Capabilities(
+						Set.of(
+								new Capability(
+										"123-323",
+										new DatexApplication(
+												"NO12345",
+												"NO12345:001",
+												"NO",
+												"1.0",
+												List.of("1234"),
+												"type",
+												"publisher"
+										),
+										new Metadata(
+												"https://mysite.com",
+												1,
+												RedirectStatus.OPTIONAL,
+												0,
+												0,
+												0
+										),
+										List.of(
+												new CapabilityShard(
+														1,
+														"this-exchange-does-not-exist-shard-1",
+														"publicationId = 'NO12345:001' and shardId = 1"
+												)
+										)
+								)
+						)
+				),
+				Set.of(),
+				Set.of(),
+				null
+		);
+
+		assertThatNoException().isThrownBy( () -> router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta()));
 	}
 }

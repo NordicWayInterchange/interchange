@@ -365,9 +365,15 @@ public class ServiceProviderRouter {
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
             for (CapabilityShard shard : capability.getShards()) {
-                if (!delta.exchangeHasBindingToQueue(shard.getExchangeName(), "bi-queue")){
-                    qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector())));
-                    delta.addBindingToExchange(shard.getExchangeName(), shard.getSelector(), "bi-queue");
+                Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                if (exchange != null) {
+                    if (! exchange.isBoundToQueue("bi-queue")) {
+                        Binding binding = new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector()));
+                        qpidClient.addBinding(shard.getExchangeName(), binding);
+                        exchange.addBinding(binding);
+                    }
+                } else {
+                    logger.info("Could not bind capability {}, shard with exchange name {} to bi-queue, exchange does not exist", capability.getUuid(), shard.getExchangeName());
                 }
             }
         }

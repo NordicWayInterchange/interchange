@@ -53,7 +53,23 @@ public class QpidDeltaTest {
     }
 
     @Test
-    public void exchangeHasBindingToQueueWhenExchangeDowsNotExist() {
+    public void testAddingBindingToExchange() {
+        QpidDelta delta = new QpidDelta(
+                List.of(new Exchange("E1")),
+                List.of(new Queue("Q1"))
+        );
+        Exchange e1 = delta.findByExchangeName("E1");
+        assertThat(e1.isBoundToQueue("Q1")).isFalse();
+
+        Binding binding = new Binding("b1","Q1",new Filter("test"));
+        e1.addBinding(binding);
+        assertThat(e1.isBoundToQueue("Q1")).isTrue();
+
+
+    }
+
+    @Test
+    public void exchangeHasBindingToQueueWhenExchangeDoesNotExist() {
         Exchange exchange1 = new Exchange("E1");
         Exchange exchange2 = new Exchange("E2");
         Queue queue1 = new Queue("Q1");
