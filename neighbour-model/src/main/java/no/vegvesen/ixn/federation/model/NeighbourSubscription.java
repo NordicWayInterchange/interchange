@@ -14,6 +14,7 @@ public class NeighbourSubscription {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_sub_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)

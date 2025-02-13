@@ -18,6 +18,7 @@ public class Capability {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
