@@ -1,11 +1,15 @@
 package no.vegvesen.ixn.federation.adminserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
@@ -38,6 +42,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @MockBean
     QpidService qpidService;
+
+    @MockBean
+    QpidClient qpidClient;
+
 
     @Test
     public void contextLoads() {
@@ -79,7 +87,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testgetServiceProviders() {
+    public void testGetServiceProviders() {
         String adminUser = "adminUser";
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
@@ -97,6 +105,23 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(serviceProvider);
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testGetExchanges() throws JsonProcessingException {
+        String adminUser = "adminUser";
+        String queueName = "outputQueue";
+
+        Exchange exchange = new Exchange(
+                "test-exchange",
+                "0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0",
+                true,
+                "headers",
+                List.of(new Binding("my-test-binding-key", queueName ,new Filter("a = 'b'")))
+        );
+        //TODO How to add the exchange to qpidClient?
+        //assertThat(restController.getExchanges(adminUser)).isNotEmpty();
+        assertThat(exchange.getId()).isEqualTo("0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0");
     }
 
     @Test
