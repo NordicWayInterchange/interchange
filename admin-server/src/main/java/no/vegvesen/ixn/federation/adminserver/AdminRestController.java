@@ -69,10 +69,15 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
-    public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) throws JsonProcessingException {
+    public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - exchange exists - requesting user {}", adminUser);
-        List<Exchange> exchangesList = qpidClient.getAllExchanges();
+        List<Exchange> exchangesList;
+        try {
+            exchangesList = qpidClient.getAllExchanges();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return typeTransformer.exchangeListToExchangeApiList(exchangesList);
     }
 
