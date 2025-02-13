@@ -1,11 +1,15 @@
 package no.vegvesen.ixn.federation.adminserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.qpid.Exchange;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -28,6 +32,8 @@ public class AdminRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;
 
+    private final QpidClient qpidClient;
+
     private final CertService certService;
 
     private final AdminProperties adminProperties;
@@ -37,9 +43,10 @@ public class AdminRestController {
     private QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, QpidClient qpidClient, CertService certService, AdminProperties adminProperties, QpidService qpidService){
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
+        this.qpidClient = qpidClient;
         this.certService = certService;
         this.adminProperties = adminProperties;
         this.qpidService = qpidService;
@@ -59,6 +66,14 @@ public class AdminRestController {
         logger.info("List service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
+    public List<ExchangeApi> getexchanges(@PathVariable("adminUser") String adminUser) throws JsonProcessingException {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("Log - exchange exists - requesting user {}", adminUser);
+        List<Exchange> exchangesList = qpidClient.getAllExchanges();
+        return typeTransformer.exchangeListToExchangeApiList(exchangesList);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}")
