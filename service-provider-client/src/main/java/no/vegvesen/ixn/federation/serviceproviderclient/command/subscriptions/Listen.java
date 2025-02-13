@@ -43,9 +43,6 @@ public class Listen implements Callable<Integer> {
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
             id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .filter(s ->
-                            s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
-                                    s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
@@ -53,9 +50,6 @@ public class Listen implements Callable<Integer> {
         else if(option.selector != null){
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
             id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .filter(s ->
-                            s.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED) ||
-                                    s.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
