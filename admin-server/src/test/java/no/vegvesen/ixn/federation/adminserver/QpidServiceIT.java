@@ -109,6 +109,6 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     public void testGetExchanges() {
         Exchange result = client.createDirectExchange("test-exchange");
         assertThat(result.getName()).isEqualTo("test-exchange");
-        assertThat(service.getExchanges()).isNotEmpty();
+        assertThat(service.getAllExchanges()).isNotEmpty();
     }
 }
