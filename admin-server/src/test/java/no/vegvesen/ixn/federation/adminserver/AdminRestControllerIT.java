@@ -43,10 +43,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @MockBean
     QpidService qpidService;
 
-    @MockBean
-    QpidClient qpidClient;
-
-
     @Test
     public void contextLoads() {
     }
@@ -119,9 +115,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 "headers",
                 List.of(new Binding("my-test-binding-key", queueName ,new Filter("a = 'b'")))
         );
-        //TODO How to add the exchange to qpidClient?
-        //assertThat(restController.getExchanges(adminUser)).isNotEmpty();
         assertThat(exchange.getId()).isEqualTo("0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0");
+        when(qpidService.exchangeExists(any())).thenReturn(true);
+        assertThat(restController.getExchanges(adminUser)).isNotEmpty();
     }
 
     @Test
