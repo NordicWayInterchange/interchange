@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.adminserver.exceptions.HandleJsonProcessingExc
 import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,14 @@ public class QpidService {
     public List<Exchange> getAllExchanges() {
         try {
             return qpidClient.getAllExchanges();
+        } catch (JsonProcessingException e) {
+            throw new HandleJsonProcessingException("JSON processing error: {}", e);
+        }
+    }
+
+    public List<Queue> getAllQueues() {
+        try {
+            return qpidClient.getAllQueues();
         } catch (JsonProcessingException e) {
             throw new HandleJsonProcessingException("JSON processing error: {}", e);
         }

@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
@@ -126,6 +127,16 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(exchange.getId()).isEqualTo("0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0");
         when(qpidService.getAllExchanges()).thenReturn(List.of(exchange));
         assertThat(restController.getExchanges(adminUser)).isNotEmpty();
+    }
+
+    @Test
+    public void testGetQueues()  {
+        String adminUser = "adminUser";
+        Queue queue = new Queue("1");
+
+        assertThat(queue.getName()).isEqualTo("1");
+        when(qpidService.getAllQueues()).thenReturn(List.of(queue));
+        assertThat(restController.getQueues(adminUser)).isNotEmpty();
     }
 
     @Test
