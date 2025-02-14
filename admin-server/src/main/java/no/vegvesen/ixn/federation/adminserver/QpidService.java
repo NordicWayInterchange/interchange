@@ -1,15 +1,14 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.exceptions.HandleJsonProcessingException;
 import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 
 import java.util.List;
 
@@ -51,9 +50,7 @@ public class QpidService {
         try {
             return qpidClient.getAllExchanges();
         } catch (JsonProcessingException e) {
-            ResponseEntity<String> response = adminServerErrorAdvice.handleJsonProcessingException(e);
-            logger.error("JSON processing error: {}", response.getBody());
-            return Collections.emptyList();
+            throw new HandleJsonProcessingException("JSON processing error: {}", e);
         }
     }
 
