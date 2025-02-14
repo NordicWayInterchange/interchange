@@ -32,8 +32,6 @@ public class AdminRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;
 
-    private final QpidClient qpidClient;
-
     private final CertService certService;
 
     private final AdminProperties adminProperties;
@@ -43,10 +41,9 @@ public class AdminRestController {
     private QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, QpidClient qpidClient, CertService certService, AdminProperties adminProperties, QpidService qpidService){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
-        this.qpidClient = qpidClient;
         this.certService = certService;
         this.adminProperties = adminProperties;
         this.qpidService = qpidService;
@@ -72,12 +69,7 @@ public class AdminRestController {
     public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - exchange exists - requesting user {}", adminUser);
-        List<Exchange> exchangesList;
-        try {
-            exchangesList = qpidClient.getAllExchanges();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        List<Exchange> exchangesList = qpidService.getExchanges();
         return typeTransformer.exchangeListToExchangeApiList(exchangesList);
     }
 
