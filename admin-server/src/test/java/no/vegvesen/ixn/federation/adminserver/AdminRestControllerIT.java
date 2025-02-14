@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
@@ -9,7 +8,6 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
@@ -36,6 +34,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     AdminRestController restController;
+
+    @MockBean
+    QpidClient qpidClient;
 
     @MockBean
     CertService certService;
@@ -73,7 +74,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 new Connection()
         );
         neighbourRepository.save(neighbour);
-        assertThat(restController.getNeighbours("adminUser")).isNotEmpty();
+        assertThat(restController.getNeighbours(adminUser)).isNotEmpty();
     }
 
     @Test
@@ -110,7 +111,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetExchanges() throws JsonProcessingException {
+    public void testGetExchanges()  {
         String adminUser = "adminUser";
         String queueName = "outputQueue";
 
@@ -121,8 +122,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 "headers",
                 List.of(new Binding("my-test-binding-key", queueName ,new Filter("a = 'b'")))
         );
+
         assertThat(exchange.getId()).isEqualTo("0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0");
-        when(qpidService.exchangeExists(any())).thenReturn(true);
+        when(qpidService.getAllExchanges()).thenReturn(List.of(exchange));
         assertThat(restController.getExchanges(adminUser)).isNotEmpty();
     }
 
