@@ -67,7 +67,7 @@ public class AdminRestController {
     public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - exchange exists - requesting user {}", adminUser);
-        List<Exchange> exchangesList = qpidService.getExchanges();
+        List<Exchange> exchangesList = qpidService.getAllExchanges();
         return typeTransformer.exchangeListToExchangeApiList(exchangesList);
     }
 

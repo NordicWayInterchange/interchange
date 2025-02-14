@@ -17,10 +17,6 @@ public class QpidService {
 
     private final QpidClient qpidClient;
 
-    private static final Logger logger = LoggerFactory.getLogger(QpidClient.class);
-
-    private final AdminServerErrorAdvice adminServerErrorAdvice = new AdminServerErrorAdvice();
-
 
     @Autowired
     public QpidService(QpidClient qpidClient) {
@@ -46,7 +42,7 @@ public class QpidService {
         }
     }
 
-    public List<Exchange> getExchanges() {
+    public List<Exchange> getAllExchanges() {
         try {
             return qpidClient.getAllExchanges();
         } catch (JsonProcessingException e) {
