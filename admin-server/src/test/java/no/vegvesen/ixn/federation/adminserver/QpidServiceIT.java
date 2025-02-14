@@ -104,4 +104,11 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
     }
+
+    @Test
+    public void testGetExchanges() {
+        Exchange result = client.createDirectExchange("test-exchange");
+        assertThat(result.getName()).isEqualTo("test-exchange");
+        assertThat(service.getExchanges()).isNotEmpty();
+    }
 }

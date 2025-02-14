@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
@@ -9,7 +8,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.qpid.Exchange;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -36,9 +34,9 @@ public class AdminRestController {
 
     private final AdminProperties adminProperties;
 
-    private Logger logger = LoggerFactory.getLogger(AdminRestController.class);
+    private final Logger logger = LoggerFactory.getLogger(AdminRestController.class);
 
-    private QpidService qpidService;
+    private final QpidService qpidService;
 
     @Autowired
     public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
