@@ -31,7 +31,6 @@ public class QpidClientConfig {
 		SSLConnectionSocketFactory sslConnectionSocketFactory = SSLConnectionSocketFactoryBuilder
 				.create()
 				.setSslContext(sslContext)
-				.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 		PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
 				.create()
