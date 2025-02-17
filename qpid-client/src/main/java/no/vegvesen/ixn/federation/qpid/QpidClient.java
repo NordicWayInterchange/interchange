@@ -42,7 +42,9 @@ public class QpidClient {
 
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 
-	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
+	private static final String GROUPS_URL_PATTERN = "%s/api/latest/group/default";
+
+	private static final String GROUP_MEMBER_URL_PATTERN = "%s/api/latest/groupmember/default/";
 
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
@@ -56,7 +58,8 @@ public class QpidClient {
 	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
-	private final String groupsUrl;
+	private final String groupMembersURL;
+	private final String groupsURL;
 	private final RestTemplate restTemplate;
 	private final String aclRulesUrl;
 	private final String allQueuesUrl;
@@ -65,20 +68,22 @@ public class QpidClient {
 	private final String connectionUrl;
 	private final String queryApiUrl;
 
+
 	public QpidClient(String baseUrl,
 					  String vhostName,
 					  RestTemplate restTemplate) {
 		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
-		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
+		this.groupMembersURL = String.format(GROUP_MEMBER_URL_PATTERN, baseUrl);
+		this.groupsURL = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
-		this.restTemplate = restTemplate;
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
 		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN,baseUrl);
 		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
 		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
+		this.restTemplate = restTemplate;
 	}
 
 	/**
@@ -192,9 +197,14 @@ public class QpidClient {
 		logger.info("Removed exchange {}", exchange.getName());
 	}
 
+	public List<Group> getGroups() {
+		ResponseEntity<Group[]> response = restTemplate.getForEntity(groupsURL, Group[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 	public GroupMember getGroupMember(String memberName, String groupName) {
 		try {
-			String url = groupsUrl + groupName + "/" + memberName;
+			String url = groupMembersURL + groupName + "/" + memberName;
 			logger.debug("GETting from URL {}", url);
 			return restTemplate.getForEntity(url, GroupMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
@@ -204,7 +214,7 @@ public class QpidClient {
 
 	public List<GroupMember> getGroupMembers(String groupName) {
 		try {
-			String url = groupsUrl + groupName;
+			String url = groupMembersURL + groupName;
 			logger.debug("Getting from URL {}", url);
 			ResponseEntity<GroupMember[]> response = restTemplate.getForEntity(url, GroupMember[].class);
 			return Arrays.asList(response.getBody());
@@ -214,14 +224,14 @@ public class QpidClient {
 	}
 
 	public void removeMemberFromGroup(GroupMember member, String groupName) {
-		String url = groupsUrl + groupName + "/" + member.getName();
+		String url = groupMembersURL + groupName + "/" + member.getName();
 		logger.debug("DELETE to URL {}",url);
 		logger.info("Removing user {} from group {}", member.getName(), groupName);
 		restTemplate.delete(url);
 	}
 
 	public void removeMemberFromGroup(String groupMemberName, String groupName) {
-		String url = groupsUrl + groupName + "/" + groupMemberName;
+		String url = groupMembersURL + groupName + "/" + groupMemberName;
 		logger.debug("DELETE to URL {}",url);
 		logger.info("Removing user {} from group {}", groupMemberName, groupName);
 		restTemplate.delete(url);
@@ -231,7 +241,7 @@ public class QpidClient {
 	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
 		logger.info("Adding member {} to group {}",memberName,groupName);
-		String url = groupsUrl + groupName;
+		String url = groupMembersURL + groupName;
 		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
 
@@ -323,7 +333,8 @@ public class QpidClient {
 		try {
 			List<Queue> allQueues = getAllQueues();
 			List<Exchange> allExchanges = getAllExchanges();
-			return new QpidDelta(allExchanges,allQueues);
+			List<GroupMember> privateChannelUsers = getGroupMembers(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+			return new QpidDelta(allExchanges,allQueues, privateChannelUsers);
 
 		} catch (JsonProcessingException e) {
 			logger.error("Could not parse qpid delta");
