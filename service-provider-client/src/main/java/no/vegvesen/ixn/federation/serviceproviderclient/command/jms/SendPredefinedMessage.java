@@ -34,6 +34,7 @@ public class SendPredefinedMessage implements Callable<Integer> {
                     .bytesMessage(messageText.getBytes(StandardCharsets.UTF_8))
                     .userId("anna")
                     .messageType(DENM)
+                    .publicationId("NO00001:DENM")
                     .publisherId("NO00001")
                     .originatingCountry("NO")
                     .protocolVersion("DENM:1.2.2")
