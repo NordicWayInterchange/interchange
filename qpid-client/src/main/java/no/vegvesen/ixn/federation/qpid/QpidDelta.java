@@ -55,7 +55,7 @@ public class QpidDelta {
 
     public Optional<PrivateChannelMember> findPrivateChannelUserByName(String privateChannelUserName) {
         return privateChannelUsers.stream()
-                .filter(u -> u.getName().equals(privateChannelUserName))
+                .filter(u -> u.name().equals(privateChannelUserName))
                 .findFirst();
     }
 

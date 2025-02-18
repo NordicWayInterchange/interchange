@@ -26,7 +26,7 @@ public class QpidClient {
 
 	public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
 
-	public static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
+	private static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
 
 	public final static long MAX_TTL_15_MINUTES = 900_000L;
 
@@ -204,7 +204,7 @@ public class QpidClient {
 
 	public PrivateChannelMember getPrivateChannelGroupMember(String memberName) {
 		try {
-			String url = groupsURL + "/" + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + memberName;
+			String url = groupMembersURL + "/" + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + memberName;
 			logger.debug("GETting from {}", url);
 			return restTemplate.getForEntity(url, PrivateChannelMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
@@ -270,9 +270,9 @@ public class QpidClient {
 	}
 
 	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
-		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.getName();
+		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
 		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing private channel user {}", member.getName());
+		logger.info("Removing private channel user {}", member.name());
 		restTemplate.delete(url);
 	}
 

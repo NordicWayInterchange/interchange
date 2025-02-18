@@ -135,9 +135,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(client.queueExists(privateChannel.getEndpoint().getQueueName())).isTrue();
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider.getName())).isNotNull();
 		for (Peer peer : privateChannel.getPeers()) {
-			assertThat(client.getGroupMember(peer.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+			assertThat(client.getPrivateChannelGroupMember(peer.getName())).isNotNull();
 		}
 
 		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
@@ -160,9 +160,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.queueExists(privateChannel.getEndpoint().getQueueName())).isFalse();
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider.getName())).isNull();
 		for (Peer peer : privateChannel.getPeers()) {
-			assertThat(client.getGroupMember(peer.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+			assertThat(client.getPrivateChannelGroupMember(peer.getName())).isNull();
 		}
 
 		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
@@ -190,7 +190,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
-		assertThat(client.getGroupMember(serviceProvider.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider.getName())).isNotNull();
 
 		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
 		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
@@ -226,7 +226,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(0L,0L);
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
-		assertThat(client.getGroupMember(serviceProvider1.getName(),QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider1.getName())).isNotNull();
 
 		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
 		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
@@ -261,8 +261,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(), any())).thenReturn(0L, 1L);
 
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
-		assertThat(client.getGroupMember(serviceProvider1.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember(serviceProvider2.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider1.getName())).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider2.getName())).isNotNull();
 
 		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
 		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
@@ -297,7 +297,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(List.of(privateChannel2));
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
-		assertThat(client.getGroupMember(serviceProvider2.getName(), QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(serviceProvider2.getName())).isNotNull();
 
 		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
 		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
@@ -319,7 +319,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
 		Peer newPeer = new Peer("new-peer");
 		privateChannel.addPeer(newPeer);
@@ -329,7 +329,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(newPeer.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("new-peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("new-peer")).isNotNull();
 
 		verify(privateChannelRepository, times(2)).save(any());
 		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
@@ -353,8 +353,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
 		assertThat(peer2.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("peer-1", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember("peer-2", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer-1")).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer-2")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
 
@@ -365,7 +365,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
 		assertThat(privateChannel.getPeers()).hasSize(1);
-		assertThat(client.getGroupMember("peer-2", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNull();
+		assertThat(client.getPrivateChannelGroupMember("peer-2")).isNull();
 
 		verify(privateChannelRepository, times(2)).save(any());
 		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
@@ -393,7 +393,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
 		assertThat(peer2.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
 
@@ -406,7 +406,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel1.getPeers()).hasSize(1);
 		assertThat(privateChannel2.getPeers()).hasSize(0);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
 		verify(privateChannelRepository, times(3)).save(any());
 		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
@@ -433,8 +433,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("my-service-provider-1", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember("peer", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("my-service-provider-1")).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
 
 		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel2));
@@ -444,7 +444,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(peer2.getStatus()).isEqualTo(PeerStatus.CREATED);
-		assertThat(client.getGroupMember("my-service-provider-2", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("my-service-provider-2")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
 
@@ -454,7 +454,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(privateChannel2.getPeers()).hasSize(0);
-		assertThat(client.getGroupMember("my-service-provider-1", QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember("my-service-provider-1")).isNotNull();
 
 		verify(privateChannelRepository, times(3)).save(any());
 		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());

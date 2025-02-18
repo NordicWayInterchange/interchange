@@ -149,17 +149,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void testGetGroupMembersList() {
-		String groupMember1 = "test-group-member-member-1";
-		String groupMember2 = "test-group-member-member-2";
-		client.addMemberToGroup(groupMember1, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-		client.addMemberToGroup(groupMember2, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+	public void testGetPrivateChannelGroupMembersList() {
+		String groupMember1 = "test-private-channel-group-member-member-1";
+		String groupMember2 = "test-private-channel-group-member-member-2";
+		PrivateChannelMember member1 = client.addPrivateChannelMemberToGroup(groupMember1);
+		PrivateChannelMember member2 = client.addPrivateChannelMemberToGroup(groupMember2);
 
-		List<GroupMember> groupMembers = client.getGroupMembers(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+		List<PrivateChannelMember> groupMembers = client.getPrivateChannelGroupMembers();
 		assertThat(groupMembers).hasSize(2);
-		List<String> groupMemberNames = groupMembers.stream().map(GroupMember::getName).toList();
-		assertThat(groupMemberNames).contains(groupMember1);
-		assertThat(groupMemberNames).contains(groupMember2);
+		assertThat(groupMembers).contains(member1,member2);
 	}
 
 	@Test

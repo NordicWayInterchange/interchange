@@ -22,7 +22,7 @@ public class PrivateChannelMemberTest {
 
         List<PrivateChannelMember> groupMembers = mapper.readValue(inputFile.toFile(),collectionType);
         for (PrivateChannelMember groupMember : groupMembers) {
-            System.out.println(groupMember.getName());
+            System.out.println(groupMember.name());
         }
 
     }
