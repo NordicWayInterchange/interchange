@@ -3,7 +3,7 @@
 SERVICE_PROVIDER="king_olav.interchangedomain.com"
 URL=""
 
-if [ $1 == 'messages' ]; then
+if [ "$1" == 'messages' ]; then
 URL="amqps://a.qpid.interchangedomain.com"
 
 else

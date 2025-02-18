@@ -9,9 +9,12 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -22,13 +25,17 @@ import java.util.concurrent.Callable;
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         subcommands = {
-           KeysGeneratorApplication.Keys.class
+                KeysGeneratorApplication.Keys.class
         }
 )
 public class KeysGeneratorApplication {
 
 
-    @Command(name = "generate", description = "Generate keys from input JSON to target folder")
+    @Command(
+            name = "generate",
+            description = "Generate keys from input JSON to target folder",
+            mixinStandardHelpOptions = true
+    )
     public static class Keys implements Callable<Integer> {
         @Option(names = "-f", required = true, description = "Path to intput JSON file")
         private Path intputFile;
