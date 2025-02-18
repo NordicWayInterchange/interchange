@@ -8,14 +8,14 @@ public class QpidDelta {
 
     List<Queue> queues = new ArrayList<>();
 
-    List<GroupMember> privateChannelUsers = new ArrayList<>();
+    List<PrivateChannelMember> privateChannelUsers = new ArrayList<>();
 
     public QpidDelta(List<Exchange> exchanges, List<Queue> queues) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
     }
 
-    public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<GroupMember> privateChannelUsers) {
+    public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<PrivateChannelMember> privateChannelUsers) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
         this.privateChannelUsers.addAll(privateChannelUsers);
@@ -53,21 +53,21 @@ public class QpidDelta {
                 .findFirst();
     }
 
-    public Optional<GroupMember> findPrivateChannelUserByName(String privateChannelUserName) {
+    public Optional<PrivateChannelMember> findPrivateChannelUserByName(String privateChannelUserName) {
         return privateChannelUsers.stream()
                 .filter(u -> u.getName().equals(privateChannelUserName))
                 .findFirst();
     }
 
-    public GroupMember findByPrivateChannelUserName(String serviceProviderUserName) {
+    public PrivateChannelMember findByPrivateChannelUserName(String serviceProviderUserName) {
         return findPrivateChannelUserByName(serviceProviderUserName).orElse(null);
     }
 
-    public void removePrivateChannelUser(GroupMember privateChannelUser) {
+    public void removePrivateChannelUser(PrivateChannelMember privateChannelUser) {
         privateChannelUsers.remove(privateChannelUser);
     }
 
-    public void addPrivateChannelUser(GroupMember privateChannelUser) {
+    public void addPrivateChannelUser(PrivateChannelMember privateChannelUser) {
         privateChannelUsers.add(privateChannelUser);
     }
 

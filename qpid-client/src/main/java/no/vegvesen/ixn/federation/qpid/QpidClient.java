@@ -202,6 +202,23 @@ public class QpidClient {
 		return Arrays.asList(response.getBody());
 	}
 
+	public PrivateChannelMember getPrivateChannelGroupMember(String memberName) {
+		try {
+			String url = groupsURL + "/" + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + memberName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, PrivateChannelMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
+	public List<PrivateChannelMember> getPrivateChannelGroupMembers() {
+			String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
+			logger.debug("Getting from URL {}", url);
+			ResponseEntity<PrivateChannelMember[]> response = restTemplate.getForEntity(url, PrivateChannelMember[].class);
+			return Arrays.asList(response.getBody());
+	}
+
 	public GroupMember getGroupMember(String memberName, String groupName) {
 		try {
 			String url = groupMembersURL + groupName + "/" + memberName;
@@ -244,6 +261,21 @@ public class QpidClient {
 		String url = groupMembersURL + groupName;
 		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
+
+	public PrivateChannelMember addPrivateChannelMemberToGroup(String memberName) {
+		PrivateChannelMember privateChannelMember = new PrivateChannelMember(memberName);
+		logger.info("Adding private channel member to group {}",memberName);
+		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
+		return restTemplate.postForEntity(url,privateChannelMember,PrivateChannelMember.class).getBody();
+	}
+
+	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
+		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.getName();
+		logger.debug("DELETE to URL {}",url);
+		logger.info("Removing private channel user {}", member.getName());
+		restTemplate.delete(url);
+	}
+
 
 	public void addReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
@@ -333,7 +365,7 @@ public class QpidClient {
 		try {
 			List<Queue> allQueues = getAllQueues();
 			List<Exchange> allExchanges = getAllExchanges();
-			List<GroupMember> privateChannelUsers = getGroupMembers(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+			List<PrivateChannelMember> privateChannelUsers = getPrivateChannelGroupMembers();
 			return new QpidDelta(allExchanges,allQueues, privateChannelUsers);
 
 		} catch (JsonProcessingException e) {
