@@ -175,10 +175,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void createAndDeleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
-		GroupMember groupMember = client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
-		client.removeMemberFromGroup(groupMember,FEDERATED_GROUP_NAME);
+		NeighbourMember groupMember = client.addNeighbourMemberToGroup(deleteUser);
+		client.removeNeighbourMemberFromGroup(groupMember);
 		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
-				() -> client.removeMemberFromGroup(groupMember, FEDERATED_GROUP_NAME)
+				() -> client.removeNeighbourMemberFromGroup(groupMember)
 		);
 	}
 

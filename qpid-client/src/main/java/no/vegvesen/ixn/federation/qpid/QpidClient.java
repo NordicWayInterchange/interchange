@@ -20,11 +20,11 @@ import java.util.List;
 @ConfigurationPropertiesScan
 public class QpidClient {
 
-	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
+	private static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
 
-	public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
+	private static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
 
 	private static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
 
@@ -100,7 +100,7 @@ public class QpidClient {
 	int ping() {
 		ResponseEntity<String> response = restTemplate.getForEntity(pingURL, String.class);
 		logger.debug(response.getBody());
-		return response.getStatusCodeValue();
+		return response.getStatusCode().value();
 	}
 
 	public boolean addBinding(String source, Binding binding) {
@@ -219,6 +219,20 @@ public class QpidClient {
 			return Arrays.asList(response.getBody());
 	}
 
+	public PrivateChannelMember addPrivateChannelMemberToGroup(String memberName) {
+		PrivateChannelMember privateChannelMember = new PrivateChannelMember(memberName);
+		logger.info("Adding private channel member '{}' to group",memberName);
+		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
+		return restTemplate.postForEntity(url,privateChannelMember,PrivateChannelMember.class).getBody();
+	}
+
+	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
+		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
+		logger.debug("DELETE to URL {}",url);
+		logger.info("Removing private channel member '{}' from group", member.name());
+		restTemplate.delete(url);
+	}
+
 	public RemoteServiceProviderMember getRemoteServiceProviderMember(String memberName) {
 		try {
 			String url = groupMembersURL + "/" + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + memberName;
@@ -235,6 +249,43 @@ public class QpidClient {
 		ResponseEntity<RemoteServiceProviderMember[]> response = restTemplate.getForEntity(url, RemoteServiceProviderMember[].class);
 		return Arrays.asList(response.getBody());
 
+	}
+
+	public RemoteServiceProviderMember addRemoteServiceProvicerMemberToGroup(String memberName) {
+		RemoteServiceProviderMember member = new RemoteServiceProviderMember(memberName);
+		logger.info("Adding remote service provider member '{}' to group",memberName);
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
+		return restTemplate.postForEntity(url,member,RemoteServiceProviderMember.class).getBody();
+	}
+
+	public void removeRemoteServiceProviderMemberFromGroup(RemoteServiceProviderMember member) {
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.name();
+		logger.info("Removing remote service provider member '{}' from group",member.name());
+		restTemplate.delete(url);
+	}
+
+	public NeighbourMember getNeighbourMember(String memberName) {
+		try {
+			String url = groupMembersURL + FEDERATED_GROUP_NAME + "/" + memberName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, NeighbourMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
+	public void removeNeighbourMemberFromGroup(NeighbourMember member) {
+		String url = groupMembersURL + FEDERATED_GROUP_NAME + "/" + member.name();
+		logger.debug("DELETE to URL {}",url);
+		logger.info("Removing neighbour member '{}' from group",member.name());
+		restTemplate.delete(url);
+	}
+
+	public NeighbourMember addNeighbourMemberToGroup(String memberName) {
+		NeighbourMember member = new NeighbourMember(memberName);
+		logger.info("Adding neighbour member '{}' to group",memberName);
+		String url = groupMembersURL + FEDERATED_GROUP_NAME;
+		return restTemplate.postForEntity(url,member,NeighbourMember.class).getBody();
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
@@ -279,33 +330,6 @@ public class QpidClient {
 		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
 
-	public RemoteServiceProviderMember addRemoteServiceProvicerMemberToGroup(String memberName) {
-		RemoteServiceProviderMember member = new RemoteServiceProviderMember(memberName);
-		logger.info("Adding remote service provider member '{}' to group",memberName);
-		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
-		return restTemplate.postForEntity(url,member,RemoteServiceProviderMember.class).getBody();
-	}
-
-	public void removeRemoteServiceProviderMemberFromGroup(RemoteServiceProviderMember member) {
-		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.name();
-		logger.info("Removing remote service provider member '{}' from group",member.name());
-		restTemplate.delete(url);
-	}
-
-	public PrivateChannelMember addPrivateChannelMemberToGroup(String memberName) {
-		PrivateChannelMember privateChannelMember = new PrivateChannelMember(memberName);
-		logger.info("Adding private channel member '{}' to group",memberName);
-		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
-		return restTemplate.postForEntity(url,privateChannelMember,PrivateChannelMember.class).getBody();
-	}
-
-	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
-		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
-		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing private channel member '{}' from group", member.name());
-		restTemplate.delete(url);
-	}
-
 
 	public void addReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
@@ -337,7 +361,7 @@ public class QpidClient {
 
 	public VirtualHostAccessController getQpidAcl() {
 		ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
-		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
+		logger.debug("acl extractRules return code {}", response.getStatusCode());
 		return response.getBody();
 	}
 

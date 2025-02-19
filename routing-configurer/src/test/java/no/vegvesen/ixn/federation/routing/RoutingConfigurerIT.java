@@ -214,12 +214,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(neighbourService.getBrokerExternalName()).thenReturn("my-node");
 		when(neighbourService.getMessagePort()).thenReturn("5671");
 		routingConfigurer.setupNeighbourRouting(toreDownNeighbour, client.getQpidDelta());
-		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		assertThat(client.getNeighbourMember(toreDownNeighbour.getName())).isNotNull();
 
 		neighbourSub.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 
 		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
-		assertThat(client.getGroupMember(toreDownNeighbour.getName(),QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client.getNeighbourMember(toreDownNeighbour.getName())).isNull();
 	}
 
 	@Test
@@ -802,10 +802,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new SubscriptionRequest()
 		);
 		Queue queue = client.createQueue(queueName);
-		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addNeighbourMemberToGroup(neighbourName);
 		client.addReadAccess(neighbourName,queue.getName());
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
-		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client.getNeighbourMember(neighbourName)).isNull();
 		assertThat(client
 				.getQpidAcl()
 				.containsRule(VirtualHostAccessController
@@ -850,14 +850,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
-		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addNeighbourMemberToGroup(neighbourName);
 		client.addReadAccess(neighbourName,queue.getName());
 		client.addReadAccess(neighbourName,nonTeardownQueue.getName());
 
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
 
-		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		assertThat(client.getNeighbourMember(neighbourName)).isNotNull();
 		VirtualHostAccessController qpidAcl = client.getQpidAcl();
 		assertThat(qpidAcl
 				.containsRule(VirtualHostAccessController
@@ -897,11 +897,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new SubscriptionRequest()
 		);
 		Queue queue = client.createQueue(queueName);
-		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addNeighbourMemberToGroup(neighbourName);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
-		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
+		assertThat(client.getNeighbourMember(neighbourName)).isNull();
 		assertThat(client
 				.getQpidAcl()
 				.containsRule(VirtualHostAccessController
@@ -948,7 +948,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
-		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addNeighbourMemberToGroup(neighbourName);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addReadAccess(neighbourSPName,nonTeardownQueue.getName());
 		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
@@ -956,7 +956,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
 
-		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		assertThat(client.getNeighbourMember(neighbourName)).isNotNull();
 		VirtualHostAccessController qpidAcl = client.getQpidAcl();
 		assertThat(qpidAcl
 				.containsRule(VirtualHostAccessController
@@ -1010,7 +1010,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		Queue queue = client.createQueue(queueName);
 		Queue nonTeardownQueue = client.createQueue(nonTeardownQueueName);
-		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
+		client.addNeighbourMemberToGroup(neighbourName);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue.getName());
 		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
@@ -1019,7 +1019,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
 
-		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNotNull();
+		assertThat(client.getNeighbourMember(neighbourName)).isNotNull();
 		VirtualHostAccessController qpidAcl = client.getQpidAcl();
 		assertThat(qpidAcl
 				.containsRule(VirtualHostAccessController
