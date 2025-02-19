@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityException;
 import no.vegvesen.ixn.properties.CapabilityProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,26 +81,26 @@ public class CapabilityValidator {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
                     if(!publisherIdMatcher.matches()) {
-                        return Map.of(false, String.format("%s must be in format <country code><5 numbers>", property));
+                        throw new CapabilityException("INVALID_PUBLISHER_ID_FORMAT", String.format("%s must be in format <country code><5 numbers>", property));
                     }
                 }
                 case "originatingCountry" -> {
                     Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                     if (!countryCodeMatcher.matches()) {
-                        return Map.of(false, String.format("'%s' is not a valid country code", value));
+                        throw new CapabilityException("INVALID_COUNTRY_CODE", String.format("'%s' is not a valid country code", value));
                     }
                 }
                 case "publicationId" -> {
                     String publisherId = applicationApi.getPublisherId();
                     if (!value.startsWith(publisherId + ":")) {
-                        return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                        throw new CapabilityException("INVALID_PUBLICATION_ID_PREFIX", String.format("%s must start with '<publisherId>:'", property));
                     }
                 }
                 case "quadTree" -> {
                     String[] quadTreeTiles = value.split(",");
                     for (String quadTreeTile : quadTreeTiles) {
                         if (quadTreeTile.length() > 255) {
-                            return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                            throw new CapabilityException("INVALID_LONG_QUAD_TREE", String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
                         }
                     }
                 }
