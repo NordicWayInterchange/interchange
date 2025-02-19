@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CapabilityValidatorTest {
 
@@ -449,9 +453,13 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<Boolean, String> validator = CapabilityValidator.capabilityHasValidProperties(capability1);
-        assertThat(validator).containsKey(false);
-        assertThat(validator.get(false)).contains("<publisherId>");
+
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+        Assertions.assertEquals("INVALID_PUBLICATION_ID_PREFIX", thrown.getErrorCode());
+        Assertions.assertEquals("publicationId must start with '<publisherId>:'", thrown.getMessage());
+
     }
 
     @Test
@@ -466,29 +474,39 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<Boolean, String> validator1 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+
+        Assertions.assertEquals("INVALID_COUNTRY_CODE", thrown.getErrorCode());
+        Assertions.assertEquals("'no' is not a valid country code", thrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("No");
-        Map<Boolean, String> validator2 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        CapabilityException secondThrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+        Assertions.assertEquals("INVALID_COUNTRY_CODE", secondThrown.getErrorCode());
+        Assertions.assertEquals("'No' is not a valid country code", secondThrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("N");
-        Map<Boolean, String> validator3 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        CapabilityException thirdThrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+        Assertions.assertEquals("INVALID_COUNTRY_CODE", thirdThrown.getErrorCode());
+        Assertions.assertEquals("'N' is not a valid country code", thirdThrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("NOK");
-        Map<Boolean, String> validator4 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        CapabilityException FourthThrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+        Assertions.assertEquals("INVALID_COUNTRY_CODE", FourthThrown.getErrorCode());
+        Assertions.assertEquals("'NOK' is not a valid country code", FourthThrown.getMessage());
+
 
         capability1.getApplication().setOriginatingCountry("NO");
-        Map<Boolean, String> validator5 = CapabilityValidator.capabilityHasValidProperties(capability1);
-
-        assertThat(validator1).containsKey(false);
-        assertThat(validator1.get(false)).contains("country code");
-        assertThat(validator2).containsKey(false);
-        assertThat(validator2.get(false)).contains("country code");
-        assertThat(validator3).containsKey(false);
-        assertThat(validator3.get(false)).contains("country code");
-        assertThat(validator4).containsKey(false);
-        assertThat(validator4.get(false)).contains("country code");
-        assertThat(validator5).doesNotContainKey(false);
+        assertDoesNotThrow(() -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
     }
 
     @Test
@@ -522,7 +540,11 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(capability1);
+        });
+        Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", thrown.getErrorCode());
+        Assertions.assertEquals("publisherId must be in format <country code><5 numbers>", thrown.getMessage());
     }
 
     @Test
