@@ -219,6 +219,24 @@ public class QpidClient {
 			return Arrays.asList(response.getBody());
 	}
 
+	public RemoteServiceProviderMember getRemoteServiceProviderMember(String memberName) {
+		try {
+			String url = groupMembersURL + "/" + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + memberName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, RemoteServiceProviderMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
+	public List<RemoteServiceProviderMember> getRemoteServiceProviderGroupMembers() {
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
+		logger.debug("Getting from URL {}", url);
+		ResponseEntity<RemoteServiceProviderMember[]> response = restTemplate.getForEntity(url, RemoteServiceProviderMember[].class);
+		return Arrays.asList(response.getBody());
+
+	}
+
 	public GroupMember getGroupMember(String memberName, String groupName) {
 		try {
 			String url = groupMembersURL + groupName + "/" + memberName;
@@ -254,7 +272,6 @@ public class QpidClient {
 		restTemplate.delete(url);
 	}
 
-	//TODO complete the debug logging
 	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
 		logger.info("Adding member {} to group {}",memberName,groupName);
@@ -262,9 +279,22 @@ public class QpidClient {
 		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
 	}
 
+	public RemoteServiceProviderMember addRemoteServiceProvicerMemberToGroup(String memberName) {
+		RemoteServiceProviderMember member = new RemoteServiceProviderMember(memberName);
+		logger.info("Adding remote service provider member '{}' to group",memberName);
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
+		return restTemplate.postForEntity(url,member,RemoteServiceProviderMember.class).getBody();
+	}
+
+	public void removeRemoteServiceProviderMemberFromGroup(RemoteServiceProviderMember member) {
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.name();
+		logger.info("Removing remote service provider member '{}' from group",member.name());
+		restTemplate.delete(url);
+	}
+
 	public PrivateChannelMember addPrivateChannelMemberToGroup(String memberName) {
 		PrivateChannelMember privateChannelMember = new PrivateChannelMember(memberName);
-		logger.info("Adding private channel member to group {}",memberName);
+		logger.info("Adding private channel member '{}' to group",memberName);
 		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
 		return restTemplate.postForEntity(url,privateChannelMember,PrivateChannelMember.class).getBody();
 	}
@@ -272,7 +302,7 @@ public class QpidClient {
 	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
 		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
 		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing private channel user {}", member.name());
+		logger.info("Removing private channel member '{}' from group", member.name());
 		restTemplate.delete(url);
 	}
 

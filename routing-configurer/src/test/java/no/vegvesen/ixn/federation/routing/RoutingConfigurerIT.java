@@ -899,7 +899,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Queue queue = client.createQueue(queueName);
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
 		client.addReadAccess(neighbourSPName,queue.getName());
-		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 		assertThat(client.getGroupMember(neighbourName,QpidClient.FEDERATED_GROUP_NAME)).isNull();
 		assertThat(client
@@ -908,7 +908,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.createQueueReadAccessRule(neighbourSPName,queue.getName())
 				)
 		).isFalse();
-		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getRemoteServiceProviderMember(neighbourSPName)).isNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 	}
 
@@ -951,7 +951,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addReadAccess(neighbourSPName,nonTeardownQueue.getName());
-		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
 
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
@@ -968,7 +968,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.createQueueReadAccessRule(neighbourSPName,nonTeardownQueue.getName())
 				)
 		).isTrue();
-		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember(neighbourSPName)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
@@ -1013,8 +1013,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.addMemberToGroup(neighbourName,QpidClient.FEDERATED_GROUP_NAME);
 		client.addReadAccess(neighbourSPName,queue.getName());
 		client.addReadAccess(otherNeighbourSPName,nonTeardownQueue.getName());
-		client.addMemberToGroup(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		client.addMemberToGroup(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.addRemoteServiceProvicerMemberToGroup(neighbourSPName);
+		client.addRemoteServiceProvicerMemberToGroup(otherNeighbourSPName);
 
 		routingConfigurer.tearDownNeighbourRouting(neighbour);
 
@@ -1031,8 +1031,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.createQueueReadAccessRule(otherNeighbourSPName,nonTeardownQueue.getName())
 				)
 		).isTrue();
-		assertThat(client.getGroupMember(neighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
-		assertThat(client.getGroupMember(otherNeighbourSPName,QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember(neighbourSPName)).isNull();
+		assertThat(client.getRemoteServiceProviderMember(otherNeighbourSPName)).isNotNull();
 		assertThat(client.getQueue(queue.getName())).isNull();
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
@@ -1061,7 +1061,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		assertThat(client.getGroupMember("redirect-sp-1", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-1")).isNotNull();
 	}
 
 	@Test
@@ -1093,8 +1093,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		assertThat(client.getGroupMember("redirect-sp-2", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember("redirect-sp-3", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-2")).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-3")).isNotNull();
 	}
 
 	@Test
@@ -1121,7 +1121,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
-		assertThat(client.getGroupMember("redirect-sp-4", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-4")).isNotNull();
 	}
 
 	@Test
@@ -1144,7 +1144,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		assertThat(sub.getEndpoints()).hasSize(0);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.NO_OVERLAP);
-		assertThat(client.getGroupMember("redirect-sp-4", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-4")).isNull();
 	}
 
 	@Test
@@ -1176,8 +1176,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueuePublishingLinks(sub2.getEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(sub1.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
 		assertThat(sub2.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		assertThat(client.getGroupMember("redirect-sp-6", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
-		assertThat(client.getGroupMember("redirect-sp-7", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-6")).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-7")).isNotNull();
 	}
 
 	@Test
@@ -1210,7 +1210,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(sub.getEndpoints().stream().findFirst().get().getSource())).isTrue();
 		assertThat(client.getQueuePublishingLinks(sub.getEndpoints().stream().findFirst().get().getSource())).hasSize(4);
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(NeighbourSubscriptionStatus.CREATED);
-		assertThat(client.getGroupMember("redirect-sp-8", QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME)).isNotNull();
+		assertThat(client.getRemoteServiceProviderMember("redirect-sp-8")).isNotNull();
 	}
 
 	public Capability getDatexCapability(String publicationId, RedirectStatus redirect, String exchangeName) {

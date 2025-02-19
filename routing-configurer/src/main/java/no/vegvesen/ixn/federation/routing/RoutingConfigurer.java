@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
@@ -115,7 +114,13 @@ public class RoutingConfigurer {
 						.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
 						.collect(Collectors.toSet());
 				if (subscriptionsWithConsumerCommonName.isEmpty()) {
-					removeSubscriberFromGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, redirectedSpName);
+					RemoteServiceProviderMember groupMember = qpidClient.getRemoteServiceProviderMember(redirectedSpName);
+					if (groupMember != null) {
+						logger.debug("Remote service provider '{}' found in group. Removing...", redirectedSpName);
+						qpidClient.removeRemoteServiceProviderMemberFromGroup(groupMember);
+					} else {
+						logger.warn("Remote service provider '{}' does not exist in the group and cannot be removed.", redirectedSpName);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -193,7 +198,16 @@ public class RoutingConfigurer {
 				subscription.setEndpoints(Collections.singleton(endpoint));
 
 				createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);
-				addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+				String subscriberName = subscription.getConsumerCommonName();
+				logger.debug("Attempting to add remote service provider '{}' to group", subscriberName);
+				RemoteServiceProviderMember member = qpidClient.getRemoteServiceProviderMember(subscriberName);
+				if (member == null) {
+					logger.debug("remote service provider '{}' did not exist in group", subscriberName);
+					 qpidClient.addRemoteServiceProvicerMemberToGroup(subscriberName);
+					logger.debug("Added remote service provider '{}' to group", subscriberName);
+				} else {
+					logger.warn("Remote service provider '{}' already exists in the group", subscriberName);
+				}
 
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {

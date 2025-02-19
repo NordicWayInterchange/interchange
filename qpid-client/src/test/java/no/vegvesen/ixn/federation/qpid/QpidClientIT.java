@@ -185,10 +185,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void addRemoteServiceProviderToGroup() {
 		String newUser = "service-provider";
-		GroupMember groupMember = client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		RemoteServiceProviderMember groupMember = client.addRemoteServiceProvicerMemberToGroup(newUser);
 		assertThat(groupMember).isNotNull();
-		client.removeMemberFromGroup(groupMember,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		groupMember = client.getGroupMember(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeRemoteServiceProviderMemberFromGroup(groupMember);
+		groupMember = client.getRemoteServiceProviderMember(newUser);
 		assertThat(groupMember).isNull();
 	}
 
