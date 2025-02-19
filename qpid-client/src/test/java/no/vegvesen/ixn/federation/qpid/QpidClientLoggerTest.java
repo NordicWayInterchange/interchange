@@ -108,34 +108,6 @@ public class QpidClientLoggerTest {
     }
 
     @Test
-    public void addMemberToGroup() {
-        String memberName = "groupMember";
-        String group = "myGroup";
-        when(template.postForEntity(anyString(),any(GroupMember.class),any(Class.class)))
-                .thenReturn(new ResponseEntity<>(new GroupMember(memberName),HttpStatus.OK));
-        client.addMemberToGroup(memberName, group);
-        assertThat(infoEvents(appender.list.stream()))
-                .hasSize(1)
-                .anyMatch(formattedMessageContains(memberName))
-                .anyMatch(formattedMessageContains(group));
-        assertThat(errorEvents(appender.list.stream()))
-                .isEmpty();
-    }
-
-    @Test
-    public void removeMemberFromGroup() {
-        String memberName = "aMember";
-        String groupName = "aGroup";
-        client.removeMemberFromGroup(new GroupMember(memberName), groupName);
-        assertThat(infoEvents(appender.list.stream()))
-                .hasSize(1)
-                .anyMatch(formattedMessageContains(memberName))
-                .anyMatch(formattedMessageContains(groupName));
-        assertThat(errorEvents(appender.list.stream()))
-                .isEmpty();
-    }
-
-    @Test
     public void addBinding() {
         String selector = "a = b";
         String source = "source";

@@ -129,22 +129,16 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void testGetGroupMember() {
 		String groupMember = "test-get-group-member-member";
-		client.addMemberToGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(groupMember);
 
-		GroupMember member = client.getGroupMember(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
+		ServiceProviderMember member = client.getServiceProviderMember(groupMember);
 		assertThat(member).isNotNull();
-		assertThat(member.getName()).isEqualTo(groupMember);
+		assertThat(member.name()).isEqualTo(groupMember);
 	}
 
 	@Test
 	public void testGetGroupMemberNonExistingMember() {
-		GroupMember groupMember = client.getGroupMember("this-group-member-does-not-exist", SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(groupMember).isNull();
-	}
-
-	@Test
-	public void testGetGroupMemberNonExistingGroup() {
-		GroupMember groupMember = client.getGroupMember("this-member-does-not-exist", "this-group-does-not-exist");
+		ServiceProviderMember groupMember = client.getServiceProviderMember("this-group-member-does-not-exist");
 		assertThat(groupMember).isNull();
 	}
 
@@ -163,11 +157,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
-		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
+		ServiceProviderMember groupMember = client.addServiceProviderMemberToGroup(myUser);
+		assertThat(groupMember).isNotNull().extracting(ServiceProviderMember::name).isEqualTo(myUser);
 
-		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
-		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeServiceProviderMemberFromGroup(groupMember);
+		groupMember = client.getServiceProviderMember(myUser);
 
 		assertThat(groupMember).isNull();
 	}
@@ -192,26 +186,20 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(groupMember).isNull();
 	}
 
-	@Test
-	public void addMemberToNonExistingGroup(){
-		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
-				() -> client.addMemberToGroup("member-of-non-existing-group", "this-group-does-not-exist")
-		);
-	}
 
 	@Test
 	public void testAddMemberToGroupTwice() {
 		String user = "user-added-to-group-twice";
-		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(user);
 		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
-				() -> client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME)
+				() -> client.addServiceProviderMemberToGroup(user)
 		);
 	}
 
 	@Test
 	public void testAddAclForNonExistingQueue() {
 		String user = "user-read-non-existing-queue";
-		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(user);
 		assertThatNoException().isThrownBy(
 				() -> client.addReadAccess(user,"this-queue-does-not-exist")
 		);

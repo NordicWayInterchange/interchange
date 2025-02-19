@@ -22,8 +22,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
-
 @Component
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
@@ -66,14 +64,14 @@ public class ServiceProviderRouter {
             serviceProvider = syncSubscriptions(serviceProvider, delta);
             serviceProvider = removeUnwantedSubscriptions(serviceProvider);
 
-            GroupMember groupMember = qpidClient.getGroupMember(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
+            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
-                    qpidClient.addMemberToGroup(serviceProvider.getName(),SERVICE_PROVIDERS_GROUP_NAME);
+                    qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
                 }
             } else {
                 if (groupMember != null) {
-                    qpidClient.removeMemberFromGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
+                    qpidClient.removeServiceProviderMemberFromGroup(groupMember);
                 }
             }
 
