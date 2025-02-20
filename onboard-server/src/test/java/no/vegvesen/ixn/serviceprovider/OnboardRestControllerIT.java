@@ -217,11 +217,11 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(sp);
         for(int i = 0; i<10; i++){
             capabilities.add(new CapabilityApi(
-                    new DatexApplicationApi("pub1", "NO-pub-"+i, "NO","DATEX2:2.2",List.of("1230123"), "SituationPublication", "pubname"),
+                    new DatexApplicationApi("NO00000", "NO00000:pub-1"+i, "NO","DATEX2:2.2",List.of("1230123"), "SituationPublication", "pubname"),
                     new MetadataApi()));
         }
         capabilities.add(new CapabilityApi(
-                new DatexApplicationApi("pub1", "NO-pub-99999", "NO","DATEX2:2.2", List.of("1230123"), "SituationPublication", ""),
+                new DatexApplicationApi("NO00000", "NO00000:pub-1", "NO","DATEX2:2.2", List.of("1230123"), "SituationPublication", ""),
                 new MetadataApi()
         ));
         assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName,capabilities)));
