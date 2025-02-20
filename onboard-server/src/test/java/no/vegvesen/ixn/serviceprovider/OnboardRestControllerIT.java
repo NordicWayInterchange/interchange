@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
@@ -15,6 +16,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,13 +89,27 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddingCapabilitiesWithShardCountExceedingLimitThrowsException(){
-        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        DatexApplicationApi application = new DatexApplicationApi( "'NO00000", "NO00000:pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
         CapabilityApi datexNO = new CapabilityApi();
         datexNO.setApplication(application);
         datexNO.setMetadata(new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
 
         String serviceProviderName = "my-service-provider";
         assertThrows(CapabilityPostException.class, () -> restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(serviceProviderName, Set.of(datexNO))));
+    }
+
+    @Test
+    public void testAddingCapabilitiesWithInvalidPublisherIDWithShardCountExceedingLimitThrowsException(){
+        DatexApplicationApi application = new DatexApplicationApi("pub-1-NOOOOOOO","NO-pub-1", "NO", "1.0", List.of("12003"), "SituationPublication", "publisherName");
+        CapabilityApi datexNO = new CapabilityApi();
+        datexNO.setApplication(application);
+        datexNO.setMetadata(new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
+
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+            CapabilityValidator.capabilityHasValidProperties(datexNO);
+        });
+        Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", thrown.getErrorCode());
+        Assertions.assertEquals("publisherId must be in format <country code><5 numbers>", thrown.getMessage());
     }
 
     @Test
