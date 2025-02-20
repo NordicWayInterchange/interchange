@@ -544,7 +544,7 @@ public class CapabilityValidatorTest {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", thrown.getErrorCode());
-        Assertions.assertEquals("publisherId must be in format <country code><5 numbers>", thrown.getMessage());
+        Assertions.assertEquals("publisherId must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", thrown.getMessage());
     }
 
     @Test

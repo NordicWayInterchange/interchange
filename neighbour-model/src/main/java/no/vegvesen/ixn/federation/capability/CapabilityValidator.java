@@ -81,7 +81,7 @@ public class CapabilityValidator {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
                     if(!publisherIdMatcher.matches()) {
-                        throw new CapabilityException("INVALID_PUBLISHER_ID_FORMAT", String.format("%s must be in format <country code><5 numbers>", property));
+                        throw new CapabilityException("INVALID_PUBLISHER_ID_FORMAT", String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
                     }
                 }
                 case "originatingCountry" -> {

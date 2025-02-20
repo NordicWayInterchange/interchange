@@ -348,31 +348,31 @@ public class NapRestController {
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
         if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
-            throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
+            throw new CapabilityException("ERR_CAPABILITY_EMPTY", "Bad api object for Capability Request, object can not be null");
         }
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
+            throw new CapabilityException("ERR_ALREADY_PUBLICATION_ID_EXISTS", String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
+            throw new CapabilityException("ERR_INVALID_QUADTREE", String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
         }
 
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
+            throw new CapabilityException("ERR_CAPABILITY_MISSING_PROPERTY", String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
         Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
         if(validatedCapability.containsKey(false)){
-            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
+            throw new CapabilityException("INVALID_CAPABILITY_PROPERTIES", String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
         }
 
         if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
+            throw new CapabilityException("INVALID_CAPABILITY_SHARD_COUNT", String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
         }
 
         serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);
