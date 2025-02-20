@@ -18,6 +18,7 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -334,7 +335,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("INVALID_CAPABILITY_SHARD_COUNT", thrown.getErrorCode());
     }
 
     @Test
@@ -354,7 +356,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1'22", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test
@@ -364,7 +366,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:publicationId", "DK", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("ERR_INVALID_QUADTREE", thrown.getErrorCode());
+        Assertions.assertEquals("Bad api object. The posted capability Capability{application=DatexCapabilityApplicationApi{publicationType='test', " +
+                "publisherName='test'}CapabilityApplicationApi{messageType='DATEX2', publisherId='NO12345', publicationId='NO12345:publicationId', originatingCountry='DK', " +
+                "protocolVersion='protocolVersion', quadTree=[124]}, metadata=CapabilityMetadataApi{shardCount=null, infoUrl='null', redirectPolicy=null, maxBandwidth=null, " +
+                "maxMessageRate=null, repetitionInterval=null}} has invalid quadtree [124]", thrown.getMessage());
     }
 
     @Test
@@ -374,7 +381,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1", "NO", null, List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("ERR_CAPABILITY_MISSING_PROPERTY", thrown.getErrorCode());
+        Assertions.assertEquals("Bad api object. The posted capability Capability{application=DatexCapabilityApplicationApi{publicationType='test', " +
+                "publisherName='test'}CapabilityApplicationApi{messageType='DATEX2', publisherId='NO12345', publicationId='NO12345:1', originatingCountry='NO'," +
+                " protocolVersion='null', quadTree=[1]}, metadata=CapabilityMetadataApi{shardCount=null, infoUrl='null', redirectPolicy=null, maxBandwidth=null, " +
+                "maxMessageRate=null, repetitionInterval=null}} is missing properties [protocolVersion]", thrown.getMessage());
     }
 
     @Test
@@ -386,7 +398,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         );
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
-        assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException thrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("ERR_ALREADY_PUBLICATION_ID_EXISTS", thrown.getErrorCode());
     }
 
     @Test
@@ -396,16 +409,24 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException firstThrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", firstThrown.getErrorCode());
+
         capabilitiesRequest.getApplication().setPublisherId("DK12345");
         capabilitiesRequest.getApplication().setOriginatingCountry("NOK");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException secondThrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("INVALID_COUNTRY_CODE", secondThrown.getErrorCode());
+
         capabilitiesRequest.getApplication().setOriginatingCountry("NO");
         capabilitiesRequest.getApplication().setProtocolVersion("*!!!");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException thirdThrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("INVALID_CAPABILITY_PROPERTIES", thirdThrown.getErrorCode());
+
         capabilitiesRequest.getApplication().setProtocolVersion("protocolVersion");
         capabilitiesRequest.getApplication().setPublicationId("DK12345-publicationId");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        CapabilityException fourthThrown = assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        Assertions.assertEquals("INVALID_PUBLICATION_ID_PREFIX", fourthThrown.getErrorCode());
+
 
     }
 
@@ -450,7 +471,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         CapabilitiesRequest request = null;
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request));
+        assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, request));
     }
 
     @Test
@@ -459,8 +480,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         CapabilitiesRequest request1 = new CapabilitiesRequest(new MapemApplicationApi(), null);
         CapabilitiesRequest request2 = new CapabilitiesRequest(null, new MetadataApi());
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request1));
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request2));
+        assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, request1));
+        assertThrows(CapabilityException.class, () -> napRestController.addCapability(actorCommonName, request2));
     }
 
     @Test
