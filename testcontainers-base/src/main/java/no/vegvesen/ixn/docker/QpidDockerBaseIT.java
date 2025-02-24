@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.docker;
 
+import jakarta.jms.*;
 import no.vegvesen.ixn.keys.generator.*;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStore;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
@@ -7,11 +8,15 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +24,11 @@ import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
@@ -129,4 +138,56 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
+	public static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl, String destinationKey, String queueName) throws NamingException {
+		Hashtable<Object,Object> props = new Hashtable<>();
+		props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
+		props.put("connectionFactory." + sinkFactoryKey, amqpsUrl);
+		props.put("queue." + destinationKey, queueName);
+		return new InitialContext(props);
+	}
+
+	protected static class CountDownMessageListener implements MessageListener {
+		private final CountDownLatch latch;
+
+		public CountDownMessageListener(int count) {
+			latch = new CountDownLatch(count);
+		}
+
+		@Override
+		public void onMessage(Message message) {
+			latch.countDown();
+		}
+
+		public boolean waitFor(long timeout, TimeUnit unit) throws InterruptedException {
+			return latch.await(timeout, unit);
+		}
+	}
+
+	protected static class CountingMessageListener implements MessageListener {
+		private final AtomicInteger numMessages;
+		private final CountDownLatch latch;
+
+		public CountingMessageListener() {
+			this.numMessages = new AtomicInteger();
+			this.latch = new CountDownLatch(1);
+		}
+
+		@Override
+		public void onMessage(Message message) {
+			numMessages.incrementAndGet();
+		}
+
+		public void releaseLock() {
+			latch.countDown();
+		}
+
+		public int getCount() {
+			return numMessages.get();
+		}
+
+		public void releaseLockAfter(long timeout, TimeUnit unit) throws InterruptedException {
+			unit.sleep(timeout);
+			releaseLock();
+		}
+	}
 }

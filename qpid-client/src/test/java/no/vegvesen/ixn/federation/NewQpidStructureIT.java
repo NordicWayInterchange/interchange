@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.jms.*;
+import jakarta.jms.Connection;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -12,6 +14,7 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,11 +28,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
-import jakarta.jms.JMSException;
+import javax.naming.Context;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,23 +100,32 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
 
-        AtomicInteger numMessages = new AtomicInteger();
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
-                queueName,
-                sslContext,
-                message -> numMessages.incrementAndGet())) {
-            sink.start();
-            try (Source source = new Source(qpidContainer.getAmqpsUrl(),exchangeName,sslContext)) {
-                source.start();
-                source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
-                String messageText = "{}";
-                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-                source.sendNonPersistentMessage(createMonotchMessage(source, bytemessage));
-                source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134,"));
+        CountingMessageListener listener = new CountingMessageListener();
+        String sinkFactoryKey = "url";
+        String destinationKey = "name";
+        Context context = getSinkJmsContext(sinkFactoryKey,qpidContainer.getAmqpsUrl(), destinationKey,queueName);
+
+        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(sinkFactoryKey);
+        factory.setSslContext(sslContext);
+        try (Connection connection = factory.createConnection()) {
+            connection.start();
+            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                Destination destination = (Destination) context.lookup(destinationKey);
+                try (MessageConsumer consumer = session.createConsumer(destination)) {
+                    consumer.setMessageListener(listener);
+                    try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
+                        source.start();
+                        source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
+                        String messageText = "{}";
+                        byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                        source.sendNonPersistentMessage(createMonotchMessage(source, bytemessage));
+                        source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134,"));
+                    }
+                    listener.releaseLockAfter(200,TimeUnit.MILLISECONDS);
+                }
             }
-            Thread.sleep(200);
         }
-        assertThat(numMessages.get()).isEqualTo(1);
+        assertThat(listener.getCount()).isEqualTo(1);
     }
 
     private JmsMessage createMonotchMessage(Source source, byte[] bytemessage) throws JMSException {
@@ -202,39 +215,43 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addBinding(inQueueName, new Binding(inQueueName, exchangeName, new Filter(joinedSelector)));
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, outQueueName, new Filter(subscriptionSelector)));
 
-        AtomicInteger numMessages = new AtomicInteger();
 
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
-                outQueueName,
-                sslContext,
-                message -> numMessages.incrementAndGet())) {
-            sink.start();
-            try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
-                source.start();
-                String messageText = "This is my DENM message :) ";
-                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-                source.sendNonPersistentMessage(source.createMessageBuilder()
-                        .bytesMessage(bytemessage)
-                        .userId("kong_olav")
-                        .publisherId("NO-123")
-                        .publicationId("pub-1")
-                        .messageType(Constants.DENM)
-                        .causeCode(6)
-                        .subCauseCode(61)
-                        .originatingCountry("NO")
-                        .protocolVersion("DENM:1.2.2")
-                        .quadTreeTiles(",12004,")
-                        .shardId(1)
-                        .shardCount(1)
-                        .timestamp(System.currentTimeMillis())
-                        .build());
-                System.out.println();
+        CountDownMessageListener listener = new CountDownMessageListener(1);
+        Context context = getSinkJmsContext("url",qpidContainer.getAmqpsUrl(),"name",outQueueName);
+        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("url");
+        factory.setSslContext(sslContext);
+        try (Connection connection = factory.createConnection()) {
+            connection.start();
+            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                Destination destination = (Destination) context.lookup("name");
+                try (MessageConsumer consumer = session.createConsumer(destination)) {
+                    consumer.setMessageListener(listener);
+                    try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
+                        source.start();
+                        String messageText = "This is my DENM message :) ";
+                        byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                        source.sendNonPersistentMessage(source.createMessageBuilder()
+                                .bytesMessage(bytemessage)
+                                .userId("kong_olav")
+                                .publisherId("NO-123")
+                                .publicationId("pub-1")
+                                .messageType(Constants.DENM)
+                                .causeCode(6)
+                                .subCauseCode(61)
+                                .originatingCountry("NO")
+                                .protocolVersion("DENM:1.2.2")
+                                .quadTreeTiles(",12004,")
+                                .shardId(1)
+                                .shardCount(1)
+                                .timestamp(System.currentTimeMillis())
+                                .build());
+                    }
+                }
             }
-            System.out.println();
-            Thread.sleep(200);
+
+            assertThat(listener.waitFor(200, TimeUnit.MILLISECONDS)).isTrue();
         }
         System.out.println(qpidClient.getQpidAcl());
-        assertThat(numMessages.get()).isEqualTo(1);
     }
 
     @Test
@@ -461,4 +478,5 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         }
         assertThat(numMessages.get()).isEqualTo(2);
     }
+
 }

@@ -90,12 +90,12 @@
           }
         },
         {
-          "objectType": "QUEUE",
-          "identity": "ALL",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "bi-queue"
+          "identity" : "service-providers",
+          "operation" : "PUBLISH",
+          "outcome" : "ALLOW_LOG",
+          "objectType" : "EXCHANGE",
+          "attributes" : {
+            "ROUTING_KEY" : "bi-queue"
           }
         },
         {

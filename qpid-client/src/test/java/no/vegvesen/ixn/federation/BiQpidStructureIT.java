@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.jms.*;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -7,15 +8,17 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-
+import javax.naming.Context;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -27,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class BiQpidStructureIT extends QpidDockerBaseIT {
 
+    private static final Logger logger = LoggerFactory.getLogger(BiQpidStructureIT.class);
     public static final String HOST_NAME = getDockerHost();
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(BiQpidStructureIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
-    SSLContext sslContext;
 
     QpidClient qpidClient;
 
@@ -40,30 +43,45 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             HOST_NAME,
             HOST_NAME,
             Path.of("bi-qpid")
-            );
+            ).withLogConsumer(new Slf4jLogConsumer(logger));
+    private SSLContext jmsClientContext;
 
     @BeforeEach
     public void setUp() {
-        sslContext = sslClientContext(stores,"routing_configurer");
-        QpidClientConfig config = new QpidClientConfig(sslContext);
-        //TODO messageCollectorUser should not be there...
+        QpidClientConfig config = new QpidClientConfig(sslClientContext(stores,"routing_configurer"));
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
+        jmsClientContext = sslClientContext(stores, "king_gustaf");
     }
 
     @Test
     public void messageGoesThroughWithOkTTL() throws Exception{
         String queueName = "bi-queue";
 
-        Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
+        String amqpsUrl = qpidContainer.getAmqpsUrl();
+        Source source = new Source(amqpsUrl,queueName, jmsClientContext);
         source.start();
 
         String messageText = "{FISK}";
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
         source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
-            Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
-            assertThat(receive).isPresent();
+        String destinationKey = "name";
+        String sinkFactoryKey = "url";
+        //Set context variable
+        Context ctx = getSinkJmsContext(sinkFactoryKey, amqpsUrl, destinationKey, queueName);
+        JmsConnectionFactory factory = (JmsConnectionFactory) ctx.lookup(sinkFactoryKey);
+        factory.setSslContext(jmsClientContext);
+        try (Connection connection = factory.createConnection()) {
+            connection.start();
+            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                Destination destination = (Destination) ctx.lookup(destinationKey);
+                try (MessageConsumer consumer = session.createConsumer(destination)) {
+                    Message receive = consumer.receive(1000);
+                    assertThat(receive).isNotNull();
+                }
+            }
+
+
         }
     }
 
@@ -74,7 +92,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     public void messageInheritsTTLFromQueue() throws Exception{
         String queueName = "bi-queue";
 
-        Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
+        Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,jmsClientContext);
         source.start();
 
         String messageText = "{FISK}";
@@ -83,7 +101,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         Thread.sleep(6000);
 
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, jmsClientContext)) {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
@@ -96,7 +114,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
         String queueName = "bi-queue";
 
-        Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
+        Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,jmsClientContext);
         source.start();
 
         String messageText = "{FISK}";
@@ -105,7 +123,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         Thread.sleep(4000);
 
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext)) {
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, jmsClientContext)) {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }

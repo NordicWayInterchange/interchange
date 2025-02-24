@@ -1,5 +1,5 @@
 federated-interchanges.users=
 administrators.users=qpid-admin,routing_configurer,localhost
-service-providers.users=
+service-providers.users=king_gustaf
 remote-service-providers.users=
 clients-private-channels.users=
