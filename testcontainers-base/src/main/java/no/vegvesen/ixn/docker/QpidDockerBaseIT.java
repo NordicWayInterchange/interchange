@@ -8,6 +8,7 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.jndi.JmsInitialContextFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;

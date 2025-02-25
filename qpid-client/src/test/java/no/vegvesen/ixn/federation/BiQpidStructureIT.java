@@ -65,7 +65,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
         source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
-        String destinationKey = "name";
         String sinkFactoryKey = "url";
         //Set context variable
         Context ctx = getSinkJmsContext(sinkFactoryKey, amqpsUrl);

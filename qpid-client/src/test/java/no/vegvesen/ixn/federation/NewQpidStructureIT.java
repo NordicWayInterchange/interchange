@@ -570,13 +570,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
             source.sendNonPersistentMessage(message);
 
-            Hashtable<Object,Object> props = new Hashtable<>();
-            props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
             String url = "url";
-            props.put("connectionFactory." + url, qpidContainer.getAmqpsUrl());
-            props.put("queue." + "queue0", subscriptionQuque1);
-            props.put("queue." + "queue1", subscriptionQueue2);
-            Context context = new InitialContext(props);
+
+            Context context = getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
 
             JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(url);
             factory.setSslContext(sslContext);
