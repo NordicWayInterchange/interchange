@@ -18,7 +18,6 @@ type Props = {
     subscriptions: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
     open: boolean;
     handleMoreClose: () => void;
-    session: any;
     heading: string;
 };
 
@@ -31,7 +30,7 @@ const colorMapping: Record<string, "default" | "primary" | "secondary" | "error"
     grayLight: "default",
 };
 
-const CommonDrawer = ({subscriptions, open, handleMoreClose, session, heading}: Props) => {
+const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
     if (!subscriptions) {
         return <Typography>Loading...</Typography>;
     }

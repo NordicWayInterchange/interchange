@@ -188,7 +188,6 @@ export default function ServiceProviders() {
                                 serviceProviderRow={serviceProviderRow}
                                 handleMoreClose={handleMoreClose}
                                 handleOnRowClick={handleOnRowClick}
-                                session={session}
                                 isFlashing={isFlashing}
                             />
                         </Box>
