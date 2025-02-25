@@ -18,6 +18,7 @@ type Props = {
     subscriptions: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
     open: boolean;
     handleMoreClose: () => void;
+    session: any;
     heading: string;
 };
 
@@ -30,7 +31,7 @@ const colorMapping: Record<string, "default" | "primary" | "secondary" | "error"
     grayLight: "default",
 };
 
-const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
+const CommonDrawer = ({subscriptions, open, handleMoreClose, session, heading}: Props) => {
     if (!subscriptions) {
         return <Typography>Loading...</Typography>;
     }
@@ -121,6 +122,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
+
                                         <TextField
                                             value={subscriptions.endpoints[0].host || ""}
                                             label="Host"

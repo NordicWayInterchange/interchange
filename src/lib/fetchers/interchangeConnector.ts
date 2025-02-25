@@ -36,10 +36,15 @@ const fetchIXN: (
 
 export type basicGetParams = {
     actorCommonName: string;
-    selector?: string;
+};
+
+export type extendedGetParams = {
+    actorCommonName: string;
+    pathParam?: string;
 };
 
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
+export type extendedGetFunction = (params: extendedGetParams) => Promise<any>;
 
 
 export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
@@ -50,4 +55,11 @@ export const fetchAdminUINeighbours: basicGetFunction = async (params) => {
 export const fetchAdminUIServiceProviders: basicGetFunction = async (params) => {
     const { actorCommonName} = params;
     return await fetchIXN(actorCommonName, "/serviceproviders");
+};
+
+export const fetchAdminUIQueueValidator: extendedGetFunction = async (
+    params
+) => {
+    const { actorCommonName, pathParam } = params;
+    return await fetchIXN(actorCommonName, `/queues/${pathParam}`);
 };

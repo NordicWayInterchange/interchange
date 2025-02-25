@@ -28,6 +28,7 @@ type Props = {
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
+    session: any;
     isFlashing: boolean;
 };
 const NestedGridServiceProviders: React.FC<Props> = ({
@@ -37,6 +38,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                                                          serviceProviderRow,
                                                          handleMoreClose,
                                                          handleOnRowClick,
+                                                         session,
                                                          isFlashing
                                                      }: Props) => {
 
@@ -235,6 +237,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            session={session}
                             heading={headerContent}
                         />
                     )}
@@ -243,6 +246,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            session={session}
                             heading={headerContent}
                         />
                     )}
