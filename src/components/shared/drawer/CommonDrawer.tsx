@@ -122,7 +122,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
-                                        <QueueValidator queueName={subscriptions.endpoints[0].source || ""}/>
+                                        {subscriptions.endpoints[0].source && <QueueValidator queueName={subscriptions.endpoints[0].source}/>}
                                         <TextField
                                             value={subscriptions.endpoints[0].host || ""}
                                             label="Host"
