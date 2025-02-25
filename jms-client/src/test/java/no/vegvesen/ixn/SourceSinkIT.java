@@ -1,9 +1,11 @@
 package no.vegvesen.ixn;
 
+import jakarta.jms.*;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +15,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
-
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void invalidDatexMessageThrowsError() throws JMSException, NamingException{
+	public void invalidDatexMessageThrowsError() throws JMSException, NamingException, InterruptedException {
         try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
             JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
@@ -77,16 +78,25 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
         }
 
-		CountDownLatch latch = new CountDownLatch(1);
-		boolean success;
-        try (Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext,message -> latch.countDown())) {
-			kingHaraldTestQueueSink.start();
-			success = latch.await(1,TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        assertThat(success).isTrue();
+		String sinkFactoryKey = "url";
 
+		Context context = getSinkJmsContext(sinkFactoryKey, qpidContainer.getAmqpsUrl());
+
+		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(sinkFactoryKey);
+		factory.setSslContext(kingHaraldSSlContext);
+		CountDownMessageListener listener = new CountDownMessageListener(1);
+		boolean success;
+		try (Connection connection = factory.createConnection()) {
+			connection.start();
+			try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+				Destination destination = session.createQueue("test-queue");
+				try (MessageConsumer consumer = session.createConsumer(destination)) {
+					consumer.setMessageListener(listener);
+					success = listener.waitFor(1, TimeUnit.SECONDS);
+				}
+			}
+		}
+		assertThat(success).isTrue();
 	}
 
 	@Test

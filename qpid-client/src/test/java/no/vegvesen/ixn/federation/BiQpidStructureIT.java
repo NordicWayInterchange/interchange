@@ -68,13 +68,13 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         String destinationKey = "name";
         String sinkFactoryKey = "url";
         //Set context variable
-        Context ctx = getSinkJmsContext(sinkFactoryKey, amqpsUrl, destinationKey, queueName);
+        Context ctx = getSinkJmsContext(sinkFactoryKey, amqpsUrl);
         JmsConnectionFactory factory = (JmsConnectionFactory) ctx.lookup(sinkFactoryKey);
         factory.setSslContext(jmsClientContext);
         try (Connection connection = factory.createConnection()) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                Destination destination = (Destination) ctx.lookup(destinationKey);
+                Destination destination = session.createQueue(queueName);
                 try (MessageConsumer consumer = session.createConsumer(destination)) {
                     Message receive = consumer.receive(1000);
                     assertThat(receive).isNotNull();

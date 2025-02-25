@@ -8,7 +8,6 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
@@ -138,11 +137,10 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
-	public static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl, String destinationKey, String queueName) throws NamingException {
+	public static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl) throws NamingException {
 		Hashtable<Object,Object> props = new Hashtable<>();
 		props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
 		props.put("connectionFactory." + sinkFactoryKey, amqpsUrl);
-		props.put("queue." + destinationKey, queueName);
 		return new InitialContext(props);
 	}
 
