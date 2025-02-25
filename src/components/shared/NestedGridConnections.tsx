@@ -25,7 +25,6 @@ type Props = {
     handleOnRowClick: (arg0: any) => void;
 };
 const NestedGridConnections = ({row, field, drawerOpen, nestedConnectionData, nestedConnectionColumns, handleMoreClose, handleOnRowClick}: Props) => {
-    console.log(nestedConnectionData)
     return (
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>

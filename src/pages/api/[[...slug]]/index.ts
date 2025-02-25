@@ -43,7 +43,6 @@ export type basicGetParams = {
 export type extendedGetParams = {
     actorCommonName: string;
     pathParam?: string;
-    selector?: string;
 };
 
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
@@ -52,9 +51,9 @@ export type extendedGetFunction = (params: extendedGetParams) => Promise<any>;
 const getPaths: {
     [key: string]: basicGetFunction | extendedGetFunction;
 } = {
-    "neighbours": fetchNeighbours,
-    "serviceproviders": fetchServiceProviders,
-    "queueValidator": fetchQueueValidator,
+    neighbours: fetchNeighbours,
+    serviceproviders: fetchServiceProviders,
+    queueValidator: fetchQueueValidator,
 };
 const findHandler: (params: any) =>
     | {
@@ -81,6 +80,12 @@ const findHandler: (params: any) =>
                 return {
                     fn,
                     params: { actorCommonName, selector },
+                };
+            }
+            if (path.length > 1 && possiblePaths.includes(path[0])) {
+                return {
+                    fn: getPaths[path[0]],
+                    params: { actorCommonName, pathParam: path[1] },
                 };
             }
 

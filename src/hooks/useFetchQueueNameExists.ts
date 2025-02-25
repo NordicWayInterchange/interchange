@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchQueueNameExists: (commonName: string, queueName: string
 ) => Promise<boolean> = async (commonName: string, queueName: string) => {
-    const res = await fetch(`/api/${commonName}/queues/${queueName}`);
+    const res = await fetch(`/api/${commonName}/queueValidator/${queueName}`);
     if (res.ok) {
         const result = await res.json();
         if (typeof result === 'boolean') {
@@ -18,7 +18,7 @@ const fetchQueueNameExists: (commonName: string, queueName: string
 
 const useFetchQueueNameExists = (commonName: string, queueName: string) => {
     return useQuery({
-        queryKey: ["neighbours"],
+        queryKey: ["queues"],
         queryFn: () => fetchQueueNameExists(commonName, queueName),
     });
 };

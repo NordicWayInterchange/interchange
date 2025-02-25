@@ -13,6 +13,7 @@ import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/Chip";
 import {statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
+import QueueValidator from "@/components/serviceProviders/QueueValidator";
 
 type Props = {
     subscriptions: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
@@ -121,7 +122,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
-
+                                        <QueueValidator queueName={subscriptions.endpoints[0].source || ""}/>
                                         <TextField
                                             value={subscriptions.endpoints[0].host || ""}
                                             label="Host"
