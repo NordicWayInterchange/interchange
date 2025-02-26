@@ -14,6 +14,7 @@ import {Chip} from "@/components/shared/Chip";
 import {statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
 import QueueValidator from "@/components/serviceProviders/QueueValidator";
+import ExchangeValidator from "@/components/serviceProviders/ExchangeValidator";
 
 type Props = {
     commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
@@ -122,7 +123,10 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
-                                        {commonAttributes.endpoints[0].source && <QueueValidator queueName={commonAttributes.endpoints[0].source}/>}
+                                        {commonAttributes.endpoints[0].source &&
+                                            <QueueValidator queueName={commonAttributes.endpoints[0].source}/>}
+                                        {commonAttributes.endpoints[0].target &&
+                                            <ExchangeValidator exchangeName={commonAttributes.endpoints[0].target}/>}
                                         <TextField
                                             value={commonAttributes.endpoints[0].host || ""}
                                             label="Host"
@@ -146,7 +150,8 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={commonAttributes.endpoints[0].source}/>
+                                                                <ContentCopy
+                                                                    value={commonAttributes.endpoints[0].source}/>
                                                             </InputAdornment>
                                                         ),
                                                     },
@@ -162,7 +167,8 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={commonAttributes.endpoints[0].target}/>
+                                                                <ContentCopy
+                                                                    value={commonAttributes.endpoints[0].target}/>
                                                             </InputAdornment>
                                                         ),
                                                     },

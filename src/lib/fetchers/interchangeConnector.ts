@@ -61,3 +61,8 @@ export const fetchAdminUIQueueValidator: extendedGetFunction = async (params) =>
     const { actorCommonName, pathParam } = params;
     return await fetchIXN(actorCommonName, `/queues/${pathParam}`);
 };
+
+export const fetchAdminUIExchangeValidator: extendedGetFunction = async (params) => {
+    const { actorCommonName, pathParam } = params;
+    return await fetchIXN(actorCommonName, `/exchanges/${pathParam}`);
+};

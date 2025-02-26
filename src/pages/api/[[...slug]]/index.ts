@@ -3,6 +3,7 @@ import {NextApiRequest, NextApiResponse} from "next";
 import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
+    fetchAdminUIExchangeValidator,
     fetchAdminUINeighbours,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
@@ -36,6 +37,12 @@ const fetchQueueValidator = async (params: extendedGetParams) => {
     return [res.status, queueExists];
 };
 
+const fetchExchangeValidator = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIExchangeValidator(params);
+    const exchangeExists: boolean = await res.data;
+    return [res.status, exchangeExists];
+};
+
 export type basicGetParams = {
     actorCommonName: string;
     selector?: string;
@@ -54,6 +61,7 @@ const getPaths: {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
     queueValidator: fetchQueueValidator,
+    exchangeValidator: fetchExchangeValidator,
 };
 const findHandler: (params: any) =>
     | {
