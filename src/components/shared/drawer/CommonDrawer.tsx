@@ -16,7 +16,7 @@ import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/s
 import QueueValidator from "@/components/serviceProviders/QueueValidator";
 
 type Props = {
-    subscriptions: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
+    commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
     open: boolean;
     handleMoreClose: () => void;
     heading: string;
@@ -31,15 +31,15 @@ const colorMapping: Record<string, "default" | "primary" | "secondary" | "error"
     grayLight: "default",
 };
 
-const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) => {
-    if (!subscriptions) {
+const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props) => {
+    if (!commonAttributes) {
         return <Typography>Loading...</Typography>;
     }
-    const subscriptionStatus = (subscriptions as any)?.subscriptionStatus;
-    const consumerCommonName = (subscriptions as any)?.consumerCommonName;
-    const path = (subscriptions as any)?.path;
-    const errorMessage = (subscriptions as any)?.errorMessage;
-    const statusKey = (subscriptionStatus?.toString() || subscriptions.status.toString()) as keyof typeof statusChips;
+    const subscriptionStatus = (commonAttributes as any)?.subscriptionStatus;
+    const consumerCommonName = (commonAttributes as any)?.consumerCommonName;
+    const path = (commonAttributes as any)?.path;
+    const errorMessage = (commonAttributes as any)?.errorMessage;
+    const statusKey = (subscriptionStatus?.toString() || commonAttributes.status.toString()) as keyof typeof statusChips;
     const chipColor = colorMapping[statusChips[statusKey]] || "default";
     return (
         <>
@@ -72,12 +72,12 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                             <StyledCard variant="outlined">
                                 <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                     <Box>
-                                        <ListItemText primary={"ID"} secondary={subscriptions.id}/>
+                                        <ListItemText primary={"ID"} secondary={commonAttributes.id}/>
                                     </Box>
                                     <Box>
                                         <ListItemText
                                             primary={"Last updated"}
-                                            secondary={subscriptions.lastUpdatedTimestamp ? subscriptions.lastUpdatedTimestamp : (subscriptions as any)?.lastUpdated}
+                                            secondary={commonAttributes.lastUpdatedTimestamp ? commonAttributes.lastUpdatedTimestamp : (commonAttributes as any)?.lastUpdated}
                                         />
                                     </Box>
                                 </Box>
@@ -117,52 +117,52 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                 </FormControl>
                             </StyledCard>
                         </ListItem>
-                        {subscriptions.endpoints.length > 0 && (
+                        {commonAttributes.endpoints.length > 0 && (
                             <ListItem>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
-                                        {subscriptions.endpoints[0].source && <QueueValidator queueName={subscriptions.endpoints[0].source}/>}
+                                        {commonAttributes.endpoints[0].source && <QueueValidator queueName={commonAttributes.endpoints[0].source}/>}
                                         <TextField
-                                            value={subscriptions.endpoints[0].host || ""}
+                                            value={commonAttributes.endpoints[0].host || ""}
                                             label="Host"
                                             margin="normal"
                                             slotProps={{
                                                 input: {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <ContentCopy value={subscriptions.endpoints[0].host}/>
+                                                            <ContentCopy value={commonAttributes.endpoints[0].host}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />
-                                        {subscriptions.endpoints[0].source && (
+                                        {commonAttributes.endpoints[0].source && (
                                             <TextField
-                                                value={subscriptions.endpoints[0].source || ""}
+                                                value={commonAttributes.endpoints[0].source || ""}
                                                 label="Source"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={subscriptions.endpoints[0].source}/>
+                                                                <ContentCopy value={commonAttributes.endpoints[0].source}/>
                                                             </InputAdornment>
                                                         ),
                                                     },
                                                 }}
                                             />
                                         )}
-                                        {subscriptions.endpoints[0].target && (
+                                        {commonAttributes.endpoints[0].target && (
                                             <TextField
-                                                value={subscriptions.endpoints[0].target || ""}
+                                                value={commonAttributes.endpoints[0].target || ""}
                                                 label="Target"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={subscriptions.endpoints[0].target}/>
+                                                                <ContentCopy value={commonAttributes.endpoints[0].target}/>
                                                             </InputAdornment>
                                                         ),
                                                     },
@@ -170,7 +170,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                             />
                                         )}
                                         <TextField
-                                            value={subscriptions.endpoints[0].port || ""}
+                                            value={commonAttributes.endpoints[0].port || ""}
                                             label="Port"
                                             margin="normal"
                                             slotProps={{
@@ -178,14 +178,14 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].port.toString() || ''}/>
+                                                                value={commonAttributes.endpoints[0].port.toString() || ''}/>
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />
-                                        {subscriptions.endpoints[0].maxBandwidth && (<TextField
-                                            value={subscriptions.endpoints[0].maxBandwidth || ""}
+                                        {commonAttributes.endpoints[0].maxBandwidth && (<TextField
+                                            value={commonAttributes.endpoints[0].maxBandwidth || ""}
                                             label="Max bandwidth"
                                             margin="normal"
                                             slotProps={{
@@ -193,14 +193,14 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].maxBandwidth.toString() || ''}/>,
+                                                                value={commonAttributes.endpoints[0].maxBandwidth.toString() || ''}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
                                             }}
                                         />)}
-                                        {subscriptions.endpoints[0].maxMessageRate && (<TextField
-                                            value={subscriptions.endpoints[0].maxMessageRate || ""}
+                                        {commonAttributes.endpoints[0].maxMessageRate && (<TextField
+                                            value={commonAttributes.endpoints[0].maxMessageRate || ""}
                                             label="Max message rate"
                                             margin="normal"
                                             slotProps={{
@@ -208,7 +208,7 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <ContentCopy
-                                                                value={subscriptions.endpoints[0].maxMessageRate.toString() || ''}/>,
+                                                                value={commonAttributes.endpoints[0].maxMessageRate.toString() || ''}/>,
                                                         </InputAdornment>
                                                     ),
                                                 },
@@ -248,13 +248,13 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                     <TextField
                                         margin="normal"
                                         multiline
-                                        value={subscriptions.selector || ""}
+                                        value={commonAttributes.selector || ""}
                                         rows={4}
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={subscriptions.selector}/>
+                                                        <ContentCopy value={commonAttributes.selector}/>
                                                     </InputAdornment>
                                                 ),
                                             },

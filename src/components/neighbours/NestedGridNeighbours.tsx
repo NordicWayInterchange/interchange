@@ -187,7 +187,7 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={neighbourRow as Subscription}
+                            commonAttributes={neighbourRow as Subscription}
                             heading={heading}
                         />
                     )}

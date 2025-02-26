@@ -234,7 +234,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
                         />
                     )}
@@ -242,7 +242,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
                         />
                     )}
