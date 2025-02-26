@@ -13,8 +13,8 @@ import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/Chip";
 import {statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
-import QueueValidator from "@/components/serviceProviders/QueueValidator";
-import ExchangeValidator from "@/components/serviceProviders/ExchangeValidator";
+import QueueValidator from "@/components/shared/actions/QueueValidator";
+import ExchangeValidator from "@/components/shared/actions/ExchangeValidator";
 
 type Props = {
     commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
