@@ -269,11 +269,16 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
 			String selector = subscription.getSelector();
-			if(selector == null){
+
+			if(serviceProviderToUpdate.getSubscriptions().contains(localSubscription)){
+				throw new AlreadyExistsException(String.format("Subscriptions %s already exists", localSubscription));
+			}
+			else if(selector == null){
 				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
 				localSubscription.setErrorMessage("Bad api object for adding subscription. The selector object was null.");
 			}
@@ -291,7 +296,7 @@ public class OnboardRestController {
 			localSubscriptions.add(localSubscription);
 		}
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
+
 		serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
@@ -587,15 +592,19 @@ public class OnboardRestController {
 		if(Objects.isNull(request) || Objects.isNull(request.getDeliveries()) || request.getDeliveries().isEmpty()) {
 			throw new DeliveryPostException("Bad API object. The request has no deliveries, nothing to add");
 		}
-
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
+
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
 		for(AddDelivery delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
 
-			if (selector == null) {
+			if(serviceProviderToUpdate.getDeliveries().contains(localDelivery)){
+				throw new AlreadyExistsException(String.format("Delivery %s already exists", localDelivery));
+			}
+			else if (selector == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
 			}
@@ -608,7 +617,6 @@ public class OnboardRestController {
 			localDeliveries.add(localDelivery);
 		}
 
-		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addDeliveries(localDeliveries);
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
