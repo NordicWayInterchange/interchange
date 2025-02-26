@@ -153,6 +153,22 @@ const CommonDrawer = ({subscriptions, open, handleMoreClose, heading}: Props) =>
                                                 }}
                                             />
                                         )}
+                                        {subscriptions.endpoints[0].target && (
+                                            <TextField
+                                                value={subscriptions.endpoints[0].target || ""}
+                                                label="Target"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy value={subscriptions.endpoints[0].target}/>
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                        )}
                                         <TextField
                                             value={subscriptions.endpoints[0].port || ""}
                                             label="Port"
