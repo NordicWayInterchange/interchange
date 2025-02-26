@@ -90,12 +90,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         Set<LocalSubscription> subscriptionSet = new HashSet<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
-    @Test
-    public void testQueueExists(){
-        when(qpidService.queueExists(any())).thenReturn(true);
-        assertThat(restController.queueExists("adminUser", "queue")).isTrue();
-    }
-
         subscriptionSet.add(requestedSubscription);
         subscriptionSet.add(createdSubscription);
         ServiceProvider serviceProvider = new ServiceProvider(
