@@ -2,7 +2,11 @@ import logger from "@/lib/logger";
 import {NextApiRequest, NextApiResponse} from "next";
 import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
-import {fetchAdminUINeighbours, fetchAdminUIServiceProviders} from "@/lib/fetchers/interchangeConnector";
+import {
+    fetchAdminUINeighbours,
+    fetchAdminUIQueueValidator,
+    fetchAdminUIServiceProviders
+} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
@@ -26,6 +30,12 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     return [res.status, serviceProviders];
 };
 
+const fetchQueueValidator = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIQueueValidator(params);
+    const queueExists: boolean = await res.data;
+    return [res.status, queueExists];
+};
+
 export type basicGetParams = {
     actorCommonName: string;
     selector?: string;
@@ -33,7 +43,6 @@ export type basicGetParams = {
 export type extendedGetParams = {
     actorCommonName: string;
     pathParam?: string;
-    selector?: string;
 };
 
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
@@ -42,8 +51,9 @@ export type extendedGetFunction = (params: extendedGetParams) => Promise<any>;
 const getPaths: {
     [key: string]: basicGetFunction | extendedGetFunction;
 } = {
-    "neighbours": fetchNeighbours,
-    "serviceproviders": fetchServiceProviders,
+    neighbours: fetchNeighbours,
+    serviceproviders: fetchServiceProviders,
+    queueValidator: fetchQueueValidator,
 };
 const findHandler: (params: any) =>
     | {
@@ -70,6 +80,12 @@ const findHandler: (params: any) =>
                 return {
                     fn,
                     params: { actorCommonName, selector },
+                };
+            }
+            if (path.length > 1 && possiblePaths.includes(path[0])) {
+                return {
+                    fn: getPaths[path[0]],
+                    params: { actorCommonName, pathParam: path[1] },
                 };
             }
 
