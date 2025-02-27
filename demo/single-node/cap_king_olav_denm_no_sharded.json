@@ -5,14 +5,14 @@
     "application" : {
       "messageType" : "DENM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000:pub-1",
+      "publicationId" : "NO00000:sharded-1",
       "originatingCountry" : "NO",
       "protocolVersion" : "DENM:1.2.2",
       "quadTree" : [ "12003" ],
       "causeCode" : [ 6, 5 ]
     },
     "metadata" : {
-      "shardCount" : 1,
+      "shardCount" : 2,
       "infoUrl" : "https://king_olav.info.no",
       "redirectPolicy" : "OPTIONAL",
       "maxBandwidth" : 0,
