@@ -8,15 +8,11 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.jndi.JmsInitialContextFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,7 +20,6 @@ import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -136,13 +131,6 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 						KeystoreType.JKS
 				)
 		);
-	}
-
-	public static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl) throws NamingException {
-		Hashtable<Object,Object> props = new Hashtable<>();
-		props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-		props.put("connectionFactory." + sinkFactoryKey, amqpsUrl);
-		return new InitialContext(props);
 	}
 
 	protected static class CountDownMessageListener implements MessageListener {

@@ -1,16 +1,20 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.jms.ExceptionListener;
+import jakarta.jms.*;
+import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
+import javax.naming.Context;
 import java.io.File;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -31,7 +35,6 @@ public class Listen implements Callable<Integer> {
     @Option(names = {"-c", "--comment"})
     String description;
 
-    private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
     public Integer call() throws Exception {
@@ -77,23 +80,31 @@ public class Listen implements Callable<Integer> {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s",id)));
-        String url = "amqps://"+endpointApi.getHost();
+        String url = endpointApi.toUrl();
 
+        final CountDownLatch counter = new CountDownLatch(1);
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
-        try (Sink sink = new Sink(
-                url,
-                endpointApi.getSource(),
-                parentCommand.getParent().createSSLContext(),
-                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
-                exceptionListener)
-        ) {
-            sink.start();
-            counter.await();
+        Context context = NewSink.getSinkJmsContext("url",url);
+        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("url");
+        factory.setSslContext(parentCommand.getParent().createSSLContext());
+        try (Connection connection = factory.createConnection()) {
+            connection.setExceptionListener(exceptionListener);
+            connection.start();
+            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                Destination destination = session.createQueue(endpointApi.getSource());
+                try (MessageConsumer consumer = session.createConsumer(destination)) {
+                    consumer.setMessageListener(
+                            directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
+                    );
+                    counter.await();
+                }
+            }
         }
+
         return 0;
     }
 

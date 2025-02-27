@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import jakarta.jms.*;
 import jakarta.jms.Connection;
+import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -35,7 +36,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +112,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         CountingMessageListener listener = new CountingMessageListener();
         String sinkFactoryKey = "url";
         String destinationKey = "name";
-        Context context = getSinkJmsContext(sinkFactoryKey,qpidContainer.getAmqpsUrl());
+        Context context = NewSink.getSinkJmsContext(sinkFactoryKey,qpidContainer.getAmqpsUrl());
 
         JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(sinkFactoryKey);
         factory.setSslContext(sslContext);
@@ -226,7 +226,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
 
         CountDownMessageListener listener = new CountDownMessageListener(1);
-        Context context = getSinkJmsContext("url",qpidContainer.getAmqpsUrl());
+        Context context = NewSink.getSinkJmsContext("url",qpidContainer.getAmqpsUrl());
         JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("url");
         factory.setSslContext(sslContext);
         try (Connection connection = factory.createConnection()) {
@@ -572,7 +572,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
             String url = "url";
 
-            Context context = getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
+            Context context = NewSink.getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
 
             JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(url);
             factory.setSslContext(sslContext);

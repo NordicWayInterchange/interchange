@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation;
 
 import jakarta.jms.*;
+import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
@@ -67,7 +68,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
         String sinkFactoryKey = "url";
         //Set context variable
-        Context ctx = getSinkJmsContext(sinkFactoryKey, amqpsUrl);
+        Context ctx = NewSink.getSinkJmsContext(sinkFactoryKey, amqpsUrl);
         JmsConnectionFactory factory = (JmsConnectionFactory) ctx.lookup(sinkFactoryKey);
         factory.setSslContext(jmsClientContext);
         try (Connection connection = factory.createConnection()) {
