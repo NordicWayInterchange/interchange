@@ -1,12 +1,17 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import jakarta.jms.*;
+import no.vegvesen.ixn.MessageForwardUtil;
+import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -15,8 +20,9 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import jakarta.jms.JMSException;
+import javax.naming.Context;
 import javax.naming.NamingException;
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
@@ -68,42 +74,87 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Test
 	public void testMessagesCollected() throws NamingException, JMSException {
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		String writeExchange = "subscriptionExchange";
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), writeExchange);
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
 
+		Collector collector = new Collector();
+
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
+		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		CollectorCreator collectorCreator = new CollectorCreator(
-				sslServerContext(stores,HOST_NAME),
+				senderContext,
 				HOST_NAME,
 				localIxnFederationPort,
-				"subscriptionExchange");
+				writeExchange);
 
-		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
-		collector.runSchedule();
-		assertThat(collector.getListeners()).hasSize(1);
+		//TODO make sure we're using the correct contexts here.
+        for (ListenerEndpoint endpoint : listenerEndpointRepository.findAll()) {
+			if (! collector.containsEndpoint(endpoint)) {
+				System.out.println("Adding endpoint " + endpoint);
+				collector.submitEndpoint(endpoint, () -> {
+                    NewSink readSink;
+					try {
+						readSink = new NewSink("url", String.format("amqps://%s:%s",listenerEndpoint.getHost(),listenerEndpoint.getPort()));
+					} catch (NamingException e) {
+						throw new RuntimeException(e);
+					}
+					Context readContext = readSink.getContext();
+					JmsConnectionFactory readConnectionFactory = null;
+					try {
+						readConnectionFactory = (JmsConnectionFactory) readContext.lookup("url");
+					} catch (NamingException e) {
+						throw new RuntimeException(e);
+					}
+					readConnectionFactory.setSslContext(senderContext);
+					//TODO need to set an exception listener on the connection
+					//Broker "consumer"
+					String writeUrl = String.format("amqps://%s:%s", HOST_NAME, localIxnFederationPort);
+					try (Source writeSource = new Source(writeUrl,writeExchange, senderContext)) {
+						writeSource.start();
+						try (jakarta.jms.Connection readConnection = readConnectionFactory.createConnection()) {
+							readConnection.setExceptionListener( e -> logger.error("Cought exception", e));
+							readConnection.start();
+							logger.info("Connected to url {}",writeUrl);
+							try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+								String source = listenerEndpoint.getSource();
+								Destination destination = session.createQueue(source);
+								forwardMessages(session, destination, source, writeSource);
+							}
+                        } catch (JMSException e) {
+							throw new RuntimeException(e);
+						} finally {
+							writeSource.close();
+						}
+					} catch (NamingException | JMSException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+			}
 
-        try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
-            source.start();
+		}
+		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+			source.start();
 
 			CountDownLatch latch = new CountDownLatch(1);
 			AtomicBoolean jmsExpiration = new AtomicBoolean(true);
 			try {
 				try (Sink sink = new Sink(
-                        consumerContainer.getAmqpsUrl(),
+						consumerContainer.getAmqpsUrl(),
 						CONSUMER_SP_NAME,
 						sslClientContext(stores, CONSUMER_SP_NAME),
 						message -> {
 							latch.countDown();
-                            try {
-                                if (message.getJMSExpiration() == 0) {
-                                    jmsExpiration.set(false);
-                                }
-                            } catch (JMSException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+							try {
+								if (message.getJMSExpiration() == 0) {
+									jmsExpiration.set(false);
+								}
+							} catch (JMSException e) {
+								throw new RuntimeException(e);
+							}
+						}
 				)) {
 					sink.start();
 					source.sendNonPersistentMessage(source.createMessageBuilder()
@@ -124,13 +175,35 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 							.timestamp(System.currentTimeMillis())
 							.build(), 8000L);
 
-                    assertThat(latch.await(2, TimeUnit.SECONDS)).withFailMessage("Message did not arrive within threshold").isTrue();
+					assertThat(latch.await(2, TimeUnit.SECONDS)).withFailMessage("Message did not arrive within threshold").isTrue();
 					assertThat(jmsExpiration).withFailMessage("Routed message has no expiry specified").isTrue();
 				}
 			} catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+				throw new RuntimeException(e);
+			}
+		}
+		collector.shutdown();
+	}
+
+	private static void forwardMessages(Session session, Destination destination, String source, Source writeSource) throws JMSException {
+		try (MessageConsumer consumer = session.createConsumer(destination)) {
+			logger.info("Subscribed to destination {}", destination);
+			boolean running = true;
+			while (running) {
+				try {
+					Message message = consumer.receive();
+					if (message != null) {
+						MessageForwardUtil.send(writeSource.getProducer(), message);
+						logger.info("Message {} received from queue {}", message.getJMSMessageID(), source);
+					} else {
+						running = false;
+					}
+				} catch (JMSException e) {
+					running = false;
+				}
+			}
+			logger.info("Exiting collector thread");
+		}
 	}
 
 	@Test
@@ -155,34 +228,34 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		assertThat(collector.getListeners()).hasSize(1);
 		System.out.println(consumerContainer.getHttpUrl());
 
-        try (Source source = createSource(producerContainer.getAmqpsUrl(),
+		try (Source source = createSource(producerContainer.getAmqpsUrl(),
 				HOST_NAME,
-                stores,
-                PRODUCER_SP_NAME)) {
-            source.start();
-            JmsMessage message1 = source.createMessageBuilder()
-                    .textMessage("fishy fishy")
-                    .userId(HOST_NAME)
-                    .messageType(Constants.DATEX_2)
-                    .publisherId("Test")
-                    .publicationId("pub-1")
-                    .quadTreeTiles(",3232,")
-                    .publicationType("Obstruction")
-                    .publisherName("publishername")
-                    .protocolVersion("DATEX2;2.3")
-                    .latitude(60.352374)
-                    .longitude(13.334253)
-                    .originatingCountry("SE")
-                    .shardId(1)
-                    .shardCount(1)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
+				stores,
+				PRODUCER_SP_NAME)) {
+			source.start();
+			JmsMessage message1 = source.createMessageBuilder()
+					.textMessage("fishy fishy")
+					.userId(HOST_NAME)
+					.messageType(Constants.DATEX_2)
+					.publisherId("Test")
+					.publicationId("pub-1")
+					.quadTreeTiles(",3232,")
+					.publicationType("Obstruction")
+					.publisherName("publishername")
+					.protocolVersion("DATEX2;2.3")
+					.latitude(60.352374)
+					.longitude(13.334253)
+					.originatingCountry("SE")
+					.shardId(1)
+					.shardCount(1)
+					.timestamp(System.currentTimeMillis())
+					.build();
 
-            source.sendNonPersistentMessage(message1,1000L);
+			source.sendNonPersistentMessage(message1,1000L);
 			Thread.sleep(2000L); // wait for the message to expire with extra margin
 
 			CountDownLatch latch = new CountDownLatch(1);
-            try {
+			try {
 				String containerUrl = consumerContainer.getAmqpsUrl();
 
 				try (Sink sink = new Sink(
@@ -195,9 +268,9 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 					assertThat(latch.await(1,TimeUnit.SECONDS)).withFailMessage("Received message we expected to be expired").isFalse();
 				}
 			} catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Test
@@ -218,28 +291,28 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
-        try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
-            source.start();
-            JmsMessage senderMessage = source.createMessageBuilder()
-                    .textMessage("Should work!")
-                    .userId(HOST_NAME)
-                    .messageType(Constants.DATEX_2)
-                    .publisherId("Test")
-                    .publicationId("pub-1")
-                    .quadTreeTiles(",3232,")
-                    .publicationType("Obstruction")
-                    .publisherName("publishername")
-                    .protocolVersion("DATEX2;2.3")
-                    .latitude(60.352374)
-                    .longitude(13.334253)
-                    .originatingCountry("SE")
-                    .shardId(1)
-                    .shardCount(1)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
-            source.sendNonPersistentMessage(senderMessage);
+		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+			source.start();
+			JmsMessage senderMessage = source.createMessageBuilder()
+					.textMessage("Should work!")
+					.userId(HOST_NAME)
+					.messageType(Constants.DATEX_2)
+					.publisherId("Test")
+					.publicationId("pub-1")
+					.quadTreeTiles(",3232,")
+					.publicationType("Obstruction")
+					.publisherName("publishername")
+					.protocolVersion("DATEX2;2.3")
+					.latitude(60.352374)
+					.longitude(13.334253)
+					.originatingCountry("SE")
+					.shardId(1)
+					.shardCount(1)
+					.timestamp(System.currentTimeMillis())
+					.build();
+			source.sendNonPersistentMessage(senderMessage);
 
-            try {
+			try {
 				CountDownLatch latch = new CountDownLatch(1);
 				String containerUrl = consumerContainer.getAmqpsUrl();
 
@@ -253,9 +326,9 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
 				}
 			} catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Test
@@ -282,27 +355,27 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			String message = "Should work!";
 			byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
 			JmsMessage senderMessage = source.createMessageBuilder()
-                    .bytesMessage(bytemessage)
-                    .userId(HOST_NAME)
-                    .messageType(Constants.DENM)
-                    .publisherId("Test")
-                    .publicationId("pub-1")
-                    .quadTreeTiles(",3232,")
-                    .protocolVersion("DATEX2;2.3")
-                    .latitude(60.352374)
-                    .longitude(13.334253)
-                    .originatingCountry("SE")
-                    .causeCode(1)
-                    .subCauseCode(1)
-                    .shardId(1)
-                    .shardCount(1)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
+					.bytesMessage(bytemessage)
+					.userId(HOST_NAME)
+					.messageType(Constants.DENM)
+					.publisherId("Test")
+					.publicationId("pub-1")
+					.quadTreeTiles(",3232,")
+					.protocolVersion("DATEX2;2.3")
+					.latitude(60.352374)
+					.longitude(13.334253)
+					.originatingCountry("SE")
+					.causeCode(1)
+					.subCauseCode(1)
+					.shardId(1)
+					.shardCount(1)
+					.timestamp(System.currentTimeMillis())
+					.build();
 			try {
 
 				CountDownLatch latch = new CountDownLatch(1);
 				try (Sink sink = new Sink(
-                        consumerContainer.getAmqpsUrl(),
+						consumerContainer.getAmqpsUrl(),
 						"sp_consumer",
 						sslClientContext(stores, CONSUMER_SP_NAME),
 						message1 -> latch.countDown()
@@ -313,8 +386,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
 				}
 			} catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }
