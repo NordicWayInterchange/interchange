@@ -372,7 +372,7 @@ public class NapRestControllerTest {
     }
 
     @Test
-    public void addingCapabilityWithMissingFieldsReturnsInternalServerError() throws Exception{
+    public void addingCapabilityWithMissingFieldsReturnsStatusBadRequest() throws Exception{
         String request = """
                 {
                 "application":
@@ -399,7 +399,7 @@ public class NapRestControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request)
-        ).andExpect(status().isInternalServerError());
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
