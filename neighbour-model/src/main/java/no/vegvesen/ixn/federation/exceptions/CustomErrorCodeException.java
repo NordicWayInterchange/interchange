@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.exceptions;
 
-public class CapabilityException extends RuntimeException{
+public class CustomErrorCodeException extends RuntimeException{
     private final String errorCode;
 
-    public CapabilityException(String errorCode, String message) {
+    public CustomErrorCodeException(String errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }

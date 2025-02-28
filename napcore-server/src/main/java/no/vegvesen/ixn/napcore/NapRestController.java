@@ -129,7 +129,7 @@ public class NapRestController {
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
 
         if(serviceProvider.getSubscriptions().contains(localSubscription)){
-            throw new CapabilityException("SUBSCRIPTION_ALREADY_EXISTS", String.format("Subscription %s already exists", subscriptionRequest));
+            throw new CustomErrorCodeException("SUBSCRIPTION_ALREADY_EXISTS", String.format("Subscription %s already exists", subscriptionRequest));
         }
 
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
@@ -243,7 +243,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
         if(serviceProvider.getDeliveries().contains(localDelivery)){
-            throw new CapabilityException("DELIVERY_ALREADY_EXISTS", String.format("Delivery %s already exists", deliveryRequest));
+            throw new CustomErrorCodeException("DELIVERY_ALREADY_EXISTS", String.format("Delivery %s already exists", deliveryRequest));
         }
 
         if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
@@ -348,31 +348,31 @@ public class NapRestController {
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
         if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
-            throw new CapabilityException("ERR_CAPABILITY_EMPTY", "Bad api object for Capability Request, object can not be null");
+            throw new CustomErrorCodeException("ERR_CAPABILITY_EMPTY", "Bad api object for Capability Request, object can not be null");
         }
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new CapabilityException("ERR_ALREADY_PUBLICATION_ID_EXISTS", String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
+            throw new CustomErrorCodeException("ERR_ALREADY_PUBLICATION_ID_EXISTS", String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
-            throw new CapabilityException("ERR_INVALID_QUADTREE", String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
+            throw new CustomErrorCodeException("ERR_INVALID_QUADTREE", String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
         }
 
         Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
-            throw new CapabilityException("ERR_CAPABILITY_MISSING_PROPERTY", String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
+            throw new CustomErrorCodeException("ERR_CAPABILITY_MISSING_PROPERTY", String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
         Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
         if(validatedCapability.containsKey(false)){
-            throw new CapabilityException("INVALID_CAPABILITY_PROPERTIES", String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
+            throw new CustomErrorCodeException("INVALID_CAPABILITY_PROPERTIES", String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
         }
 
         if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
-            throw new CapabilityException("INVALID_CAPABILITY_SHARD_COUNT", String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
+            throw new CustomErrorCodeException("INVALID_CAPABILITY_SHARD_COUNT", String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
         }
 
         serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);

@@ -1,13 +1,12 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
-import no.vegvesen.ixn.federation.exceptions.CapabilityException;
+import no.vegvesen.ixn.federation.exceptions.CustomErrorCodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -454,7 +453,7 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException thrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_PUBLICATION_ID_PREFIX", thrown.getErrorCode());
@@ -474,7 +473,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException thrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
 
@@ -482,21 +481,21 @@ public class CapabilityValidatorTest {
         Assertions.assertEquals("'no' is not a valid country code", thrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("No");
-        CapabilityException secondThrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException secondThrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_COUNTRY_CODE", secondThrown.getErrorCode());
         Assertions.assertEquals("'No' is not a valid country code", secondThrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("N");
-        CapabilityException thirdThrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException thirdThrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_COUNTRY_CODE", thirdThrown.getErrorCode());
         Assertions.assertEquals("'N' is not a valid country code", thirdThrown.getMessage());
 
         capability1.getApplication().setOriginatingCountry("NOK");
-        CapabilityException FourthThrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException FourthThrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_COUNTRY_CODE", FourthThrown.getErrorCode());
@@ -540,7 +539,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException thrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(capability1);
         });
         Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", thrown.getErrorCode());

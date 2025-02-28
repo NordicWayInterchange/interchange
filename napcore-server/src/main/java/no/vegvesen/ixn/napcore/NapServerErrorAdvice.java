@@ -86,12 +86,12 @@ public class NapServerErrorAdvice {
     public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
         return error(CONFLICT, e);
     }
-    @ExceptionHandler(CapabilityException.class)
-    public ResponseEntity<ErrorDetails> handleCapabilityException(CapabilityException e) {
+    @ExceptionHandler(CustomErrorCodeException.class)
+    public ResponseEntity<ErrorDetails> handleCustomErrorCodeException(CustomErrorCodeException e) {
         return error(e.getErrorCode(), e.getMessage(), e);
     }
 
-    private ResponseEntity<ErrorDetails> error(String errorCode, String message, CapabilityException e) {
+    private ResponseEntity<ErrorDetails> error(String errorCode, String message, CustomErrorCodeException e) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errorCode, message);
 
         logger.error("Error in interchange server. ", e);

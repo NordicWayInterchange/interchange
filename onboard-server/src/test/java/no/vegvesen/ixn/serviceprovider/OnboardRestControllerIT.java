@@ -105,7 +105,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         datexNO.setApplication(application);
         datexNO.setMetadata(new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1));
 
-        CapabilityException thrown = assertThrows(CapabilityException.class, () -> {
+        CustomErrorCodeException thrown = assertThrows(CustomErrorCodeException.class, () -> {
             CapabilityValidator.capabilityHasValidProperties(datexNO);
         });
         Assertions.assertEquals("INVALID_PUBLISHER_ID_FORMAT", thrown.getErrorCode());
