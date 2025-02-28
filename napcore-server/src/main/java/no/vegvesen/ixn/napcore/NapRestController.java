@@ -129,7 +129,7 @@ public class NapRestController {
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
 
         if(serviceProvider.getSubscriptions().contains(localSubscription)){
-            throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
+            throw new CapabilityException("SUBSCRIPTION_ALREADY_EXISTS", String.format("Subscription %s already exists", subscriptionRequest));
         }
 
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
@@ -243,7 +243,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
         if(serviceProvider.getDeliveries().contains(localDelivery)){
-            throw new AlreadyExistsException(String.format("Delivery %s already exists", deliveryRequest));
+            throw new CapabilityException("DELIVERY_ALREADY_EXISTS", String.format("Delivery %s already exists", deliveryRequest));
         }
 
         if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
