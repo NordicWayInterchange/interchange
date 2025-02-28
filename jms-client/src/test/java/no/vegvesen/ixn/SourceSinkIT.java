@@ -80,9 +80,9 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 		String sinkFactoryKey = "url";
 
-		Context context = NewSink.getSinkJmsContext(sinkFactoryKey, qpidContainer.getAmqpsUrl());
+		NewSink sink = new NewSink(sinkFactoryKey,qpidContainer.getAmqpsUrl());
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(sinkFactoryKey);
+		JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup(sinkFactoryKey);
 		factory.setSslContext(kingHaraldSSlContext);
 		CountDownMessageListener listener = new CountDownMessageListener(1);
 		boolean success;

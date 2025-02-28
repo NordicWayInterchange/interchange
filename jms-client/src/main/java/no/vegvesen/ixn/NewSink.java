@@ -7,10 +7,23 @@ import java.util.Hashtable;
 
 public class NewSink {
 
-    public static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl) throws NamingException {
+
+    private final Context context;
+
+    public NewSink(String sinkFactoryKey, String url) throws NamingException {
+        context = getSinkJmsContext(sinkFactoryKey,url);
+
+    }
+
+    private static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl) throws NamingException {
         Hashtable<Object,Object> props = new Hashtable<>();
         props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
         props.put("connectionFactory." + sinkFactoryKey, amqpsUrl);
         return new InitialContext(props);
+    }
+
+
+    public Context getContext() {
+        return context;
     }
 }

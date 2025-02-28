@@ -88,8 +88,8 @@ public class Listen implements Callable<Integer> {
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
-        Context context = NewSink.getSinkJmsContext("url",url);
-        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("url");
+        NewSink sink = new NewSink("url",url);
+        JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup("url");
         factory.setSslContext(parentCommand.getParent().createSSLContext());
         try (Connection connection = factory.createConnection()) {
             connection.setExceptionListener(exceptionListener);

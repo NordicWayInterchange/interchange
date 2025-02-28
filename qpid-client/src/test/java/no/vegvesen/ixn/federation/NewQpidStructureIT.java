@@ -111,10 +111,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         CountingMessageListener listener = new CountingMessageListener();
         String sinkFactoryKey = "url";
-        String destinationKey = "name";
-        Context context = NewSink.getSinkJmsContext(sinkFactoryKey,qpidContainer.getAmqpsUrl());
+        NewSink newSink = new NewSink(sinkFactoryKey,qpidContainer.getAmqpsUrl());
 
-        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(sinkFactoryKey);
+        JmsConnectionFactory factory = (JmsConnectionFactory) newSink.getContext().lookup(sinkFactoryKey);
         factory.setSslContext(sslContext);
         try (Connection connection = factory.createConnection()) {
             connection.start();
@@ -226,8 +225,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
 
         CountDownMessageListener listener = new CountDownMessageListener(1);
-        Context context = NewSink.getSinkJmsContext("url",qpidContainer.getAmqpsUrl());
-        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("url");
+        NewSink sink = new NewSink("url",qpidContainer.getAmqpsUrl());
+        //Context context = NewSink.getSinkJmsContext("url",qpidContainer.getAmqpsUrl());
+        JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup("url");
         factory.setSslContext(sslContext);
         try (Connection connection = factory.createConnection()) {
             connection.start();
@@ -572,9 +572,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
             String url = "url";
 
-            Context context = NewSink.getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
+            NewSink sink = new NewSink(url,qpidContainer.getAmqpsUrl());
+            //Context context = NewSink.getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
 
-            JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(url);
+            JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup(url);
             factory.setSslContext(sslContext);
 
             CountingMessageListener listener1 = new CountingMessageListener();
