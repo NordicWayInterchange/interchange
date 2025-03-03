@@ -5,7 +5,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import {Chip} from "@/components/shared/Chip";
+import {Chip} from "@/components/shared/components/Chip";
 import { motion } from "framer-motion";
 
 

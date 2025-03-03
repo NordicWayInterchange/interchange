@@ -3,7 +3,7 @@ import {useState} from 'react';
 import {SessionProvider} from "next-auth/react";
 import {ThemeProvider} from "@mui/material";
 import theme from "@/theme/theme";
-import Layout from "@/components/shared/Layout";
+import Layout from "@/components/shared/components/Layout";
 import type { AppProps } from "next/app";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 

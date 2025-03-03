@@ -1,7 +1,7 @@
 import {GridColDef} from "@mui/x-data-grid";
 import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Chip} from "@/components/shared/Chip";
+import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
 import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";

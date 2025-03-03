@@ -8,7 +8,7 @@ import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import NestedGridNeighbours from "@/components/neighbours/NestedGridNeighbours";
 import Subheading from "@/components/shared/typography/Subheading";
-import {StatusCircle} from "@/components/shared/StatusCircle";
+import {StatusCircle} from "@/components/shared/components/StatusCircle";
 import {CustomEmptyOverlayNeighbours} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {ExpandedRows} from "@/types/expandedRows";

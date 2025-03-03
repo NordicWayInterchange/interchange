@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ControlConnection} from "@/types/neighbours";
 import {timeConverter} from "@/lib/timeConverter";
-import {StatusCircle} from "@/components/shared/StatusCircle";
+import {StatusCircle} from "@/components/shared/components/StatusCircle";
 
 type Props = {
     open: boolean;

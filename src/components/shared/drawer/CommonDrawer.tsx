@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
-import {Chip} from "@/components/shared/Chip";
+import {Chip} from "@/components/shared/components/Chip";
 import {statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
 import QueueValidator from "@/components/shared/actions/QueueValidator";
