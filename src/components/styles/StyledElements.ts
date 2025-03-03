@@ -51,6 +51,11 @@ export const StyledBorderlineSpan = styled("span")({
     fontWeight: "bold",
 });
 
+export const validatorStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    fontWeight: 'bold'
+}
 
 export const StyledTableHeader = {
     height: 400,
