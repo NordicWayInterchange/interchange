@@ -41,7 +41,7 @@ public class AdminRestController {
     private final QpidService qpidService;
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService){
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService) {
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
@@ -50,7 +50,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<NeighbourApi> getNeighbours(@PathVariable("adminUser") String adminUser){
+    public List<NeighbourApi> getNeighbours(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("List neighbours for admin user {}", adminUser);
         List<Neighbour> neighbourList = neighbourRepository.findAll();
@@ -58,7 +58,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser){
+    public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("List service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
@@ -82,21 +82,21 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}")
-    public Boolean exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName){
+    public Boolean exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - exchange exists - requesting user {}", adminUser);
         return qpidService.exchangeExists(exchangeName);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues/{queueName}")
-    public Boolean queueExists(@PathVariable("adminUser") String adminUser, @PathVariable("queueName") String queueName){
+    public Boolean queueExists(@PathVariable("adminUser") String adminUser, @PathVariable("queueName") String queueName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - queue exists - requesting user {}", adminUser);
         return qpidService.queueExists(queueName);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/bindings/{exchangeName}/{queueName}")
-    public Boolean bindingExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName, @PathVariable("queueName") String queueName){
+    public Boolean bindingExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName, @PathVariable("queueName") String queueName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - binding exists - requesting user {}", adminUser);
         return qpidService.bindingExists(exchangeName, queueName);

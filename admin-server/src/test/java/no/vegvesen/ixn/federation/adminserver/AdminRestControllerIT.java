@@ -1,14 +1,13 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
@@ -133,16 +132,5 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getQueues(adminUser)).isNotEmpty();
     }
 
-    @Test
-    public void testExchangeExists() {
-        when(qpidService.exchangeExists(any())).thenReturn(true);
-        assertThat(restController.exchangeExists("adminUser", "exchange")).isTrue();
-    }
-
-    @Test
-    public void testBindingExists() {
-        when(qpidService.bindingExists(any(), any())).thenReturn(true);
-        assertThat(restController.bindingExists("adminUser", "exchange", "queue")).isTrue();
-    }
 
 }

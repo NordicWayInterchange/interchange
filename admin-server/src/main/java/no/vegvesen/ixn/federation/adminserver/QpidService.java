@@ -6,8 +6,6 @@ import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.Queue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +33,7 @@ public class QpidService {
     public boolean bindingExists(String exchangeName, String queueName){
         QpidDelta delta = qpidClient.getQpidDelta();
         try{
-          boolean exists = delta.exchangeHasBindingToQueue(exchangeName, queueName);
-          return exists;
+            return delta.exchangeHasBindingToQueue(exchangeName, queueName);
         }
         catch(Exception e){
             return false;

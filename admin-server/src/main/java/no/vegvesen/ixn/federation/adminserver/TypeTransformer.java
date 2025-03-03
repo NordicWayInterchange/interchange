@@ -43,7 +43,7 @@ public class TypeTransformer {
         return neighbourApiList;
     }
 
-    public ConnectionApi connectionToConnectionApi(Connection connection){
+    public ConnectionApi connectionToConnectionApi(Connection connection) {
         return new ConnectionApi(
                 connection.getId(),
                 connection.getBackoffStart(),
@@ -53,6 +53,7 @@ public class TypeTransformer {
                 connection.getLastFailedConnectionAttempt()
         );
     }
+
     public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
@@ -238,7 +239,7 @@ public class TypeTransformer {
 
     public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {
         Set<LocalConnectionApi> localConnectionApiSet = new HashSet<>();
-        for(LocalConnection localConnection : localConnectionSet) {
+        for (LocalConnection localConnection : localConnectionSet) {
             localConnectionApiSet.add(new LocalConnectionApi(localConnection.getId(), localConnection.getSource(), localConnection.getDestination()));
         }
         return localConnectionApiSet;
