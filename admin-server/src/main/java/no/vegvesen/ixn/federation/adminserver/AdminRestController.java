@@ -68,7 +68,7 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
     public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("Log - exchange exists - requesting user {}", adminUser);
+        logger.info("List exchanges for admin user {}", adminUser);
         List<Exchange> exchangesList = qpidService.getAllExchanges();
         return typeTransformer.exchangeListToExchangeApiList(exchangesList);
     }
@@ -76,7 +76,7 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues")
     public List<QueueApi> getQueues(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("Log - queue exists - requesting user {}", adminUser);
+        logger.info("List queues for admin user {}", adminUser);
         List<Queue> queuesList = qpidService.getAllQueues();
         return typeTransformer.queueListToQueueApiList(queuesList);
     }
