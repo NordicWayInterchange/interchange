@@ -68,6 +68,32 @@ public class TypeTransformer {
         return serviceProviderApiList;
     }
 
+    public List<CapabilityApi> capabilitiesToGetMatchingCapabilitiesApiList(Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities ) {
+
+        List<CapabilityApi> matchingCapabilities = new ArrayList<>();
+        for (Capability capability : capabilities) {
+            matchingCapabilities.add(new CapabilityApi(
+                    capability.getId(),
+                    capability.getApplication().toApi(),
+                    capability.getMetadata().toApi(),
+                    capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
+                    capabilityStatusToCapabilityStatusApi(capability.getStatus()),
+                    localDateTimeToTimestamp(capability.getCreatedTimestamp())
+            ));
+        }
+        for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
+            matchingCapabilities.add(new CapabilityApi(
+                    neighbourCapability.getId(),
+                    neighbourCapability.getApplication().toApi(),
+                    neighbourCapability.getMetadata().toApi(),
+                    null,
+                    null,
+                    localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
+            ));
+        }
+        return matchingCapabilities.stream().sorted().toList();
+    }
+
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {
         List<ExchangeApi> exchangeApiList = new ArrayList<>();
         for (Exchange exchange : exchangeList) {
