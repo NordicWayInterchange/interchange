@@ -69,6 +69,18 @@ public class OnboardServerErrorAdvice {
 		return error(CONFLICT, e);
 	}
 
+	@ExceptionHandler(CustomErrorCodeException.class)
+	public ResponseEntity<ErrorDetails> handleCustomErrorCodeException(CustomErrorCodeException e) {
+		return error(e.getErrorCode(), e.getMessage(), e);
+	}
+
+	private ResponseEntity<ErrorDetails> error(String errorCode, String message, CustomErrorCodeException e) {
+		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errorCode, message);
+
+		logger.error("Error in interchange server. ", e);
+		return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+	}
+
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
 

@@ -86,6 +86,7 @@ public class NapServerErrorAdvice {
     public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
         return error(CONFLICT, e);
     }
+
     @ExceptionHandler(CustomErrorCodeException.class)
     public ResponseEntity<ErrorDetails> handleCustomErrorCodeException(CustomErrorCodeException e) {
         return error(e.getErrorCode(), e.getMessage(), e);
