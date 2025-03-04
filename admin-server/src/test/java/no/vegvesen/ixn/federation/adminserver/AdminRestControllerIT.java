@@ -170,7 +170,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
 
-        ServiceProvider serviceProvider = new ServiceProvider("serviceProvider", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider serviceProvider = new ServiceProvider("sp", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(serviceProvider);
 
