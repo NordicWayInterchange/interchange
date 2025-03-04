@@ -1,0 +1,25 @@
+{{ if .Values.admin_frontend.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-interchange-admin-ingress
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: admin.{{ .Values.external_name }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-admin-frontend
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+      - admin.{{ .Values.external_name }}
+      secretName: {{ .Release.Name }}-admin-cert
+{{- end }}
