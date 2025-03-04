@@ -64,13 +64,13 @@ const VerticalSideMenu: React.FC = () => {
                         '&:hover': {
                             backgroundColor: 'menuHoverColor',
                             border: "1px solid",
-                            borderColor: "menuHoverColor",
+                            borderColor: "menuBorderColor",
                         },
                     }}
                     disablePadding
                 >
 
-                <ListItemIcon sx={{ justifyContent: 'center', marginTop: 1}}>{page.icon}</ListItemIcon>
+                <ListItemIcon sx={{ justifyContent: 'center', marginTop: 1, color: "inherit"}}>{page.icon}</ListItemIcon>
                 <ListItemText  sx={{
                     textAlign: 'center',
                     marginTop: 1,

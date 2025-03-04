@@ -67,6 +67,7 @@ export default function Home() {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
+                                        borderBottom: "2px solid #FF9600",
                                         height: 150,
                                         boxShadow: 1
                                     }}
