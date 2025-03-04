@@ -65,7 +65,7 @@ public class TypeTransformer {
                     localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))
             );
         }
-        return serviceProviderApiList;
+        return serviceProviderApiList.stream().sorted().toList();
     }
 
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {
