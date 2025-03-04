@@ -1,11 +1,13 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.DatexApplication;
-import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -34,9 +36,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     AdminRestController restController;
-
-    @MockBean
-    QpidClient qpidClient;
 
     @MockBean
     CertService certService;
@@ -132,5 +131,51 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(restController.getQueues(adminUser)).isNotEmpty();
     }
 
+    @Test
+    public void testGetMatchingSubscriptionCapabilities() {
+        String adminUser = "adminUser";
+        String selector = "originatingCountry='NO'";
 
+       Neighbour neighbour = new Neighbour(
+                adminUser,
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
+                        Set.of(
+                                new NeighbourCapability(
+                                        new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
+                                                "situationPublication", "bouvet"),
+                                        new Metadata("https://www.bouvet.no", 1, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                )
+                        )),
+                new NeighbourSubscriptionRequest(Set.of(
+                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
+                )),
+                new SubscriptionRequest(),
+                new Connection()
+        );
+        neighbourRepository.save(neighbour);
+
+
+        List<CapabilityApi> response1 = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+        List<CapabilityApi> response2 = restController.getMatchingSubscriptionCapabilities(adminUser, "originatingCountry='SE'");
+
+        assertThat(response1).hasSize(1);
+        assertThat(response2).hasSize(0);
+
+
+        DenmApplication app = new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1));
+
+        Metadata meta =  new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0);
+
+        Capability cap = new Capability(app, meta);
+
+        LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
+
+        ServiceProvider serviceProvider = new ServiceProvider("serviceProvider", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(serviceProvider);
+
+        List<CapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+
+        assertThat(response).hasSize(2);
+    }
 }
