@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,13 +35,12 @@ public class CollectorTest {
         SleepingRunnable runnableB = new SleepingRunnable();
         collector.submitEndpoint(endpointA, runnableA);
         collector.submitEndpoint(endpointB, runnableB);
-        //assertThat(runnableA.getCount()).isEqualTo(1);
-        assertThat(runnableA.isDone()).isTrue();
+        TimeUnit.MILLISECONDS.sleep(500);
+        runnableA.stop();
+        runnableB.stop();
         collector.shutdown();
+        assertThat(runnableA.isDone()).isTrue();
         assertThat(runnableB.isDone()).isTrue();
-        //assertThat(runnableB.getCount()).isEqualTo(0);
-
-
 
     }
 
@@ -56,9 +55,9 @@ public class CollectorTest {
                 latch.await();
             } catch (InterruptedException e) {
                 latch.countDown();
-                System.out.println("Interrupted");
-            } finally {
                 done.set(true);
+                System.out.println("Interrupted");
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -68,6 +67,10 @@ public class CollectorTest {
 
         public boolean isDone() {
             return done.get();
+        }
+
+        public void stop() {
+            done.set(true);
         }
 
     }

@@ -78,15 +78,12 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
         }
 
-		String sinkFactoryKey = "url";
 
-		NewSink sink = new NewSink(sinkFactoryKey,qpidContainer.getAmqpsUrl());
+		NewSink sink = new NewSink(kingHaraldSSlContext);
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup(sinkFactoryKey);
-		factory.setSslContext(kingHaraldSSlContext);
 		CountDownMessageListener listener = new CountDownMessageListener(1);
 		boolean success;
-		try (Connection connection = factory.createConnection()) {
+		try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
 			connection.start();
 			try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
 				Destination destination = session.createQueue("test-queue");

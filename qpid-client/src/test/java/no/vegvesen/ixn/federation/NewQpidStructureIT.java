@@ -17,7 +17,6 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.model.MessageValidator;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.server.filter.Filterable;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
@@ -35,7 +34,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
@@ -110,12 +108,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(qpidContainer.getHttpUrl());
 
         CountingMessageListener listener = new CountingMessageListener();
-        String sinkFactoryKey = "url";
-        NewSink newSink = new NewSink(sinkFactoryKey,qpidContainer.getAmqpsUrl());
+        NewSink newSink = new NewSink(sslContext);
 
-        JmsConnectionFactory factory = (JmsConnectionFactory) newSink.getContext().lookup(sinkFactoryKey);
-        factory.setSslContext(sslContext);
-        try (Connection connection = factory.createConnection()) {
+
+        try (Connection connection = newSink.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(queueName);
@@ -225,11 +221,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
 
         CountDownMessageListener listener = new CountDownMessageListener(1);
-        NewSink sink = new NewSink("url",qpidContainer.getAmqpsUrl());
-        //Context context = NewSink.getSinkJmsContext("url",qpidContainer.getAmqpsUrl());
-        JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup("url");
-        factory.setSslContext(sslContext);
-        try (Connection connection = factory.createConnection()) {
+        NewSink sink = new NewSink(sslContext);
+        try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(outQueueName);
@@ -538,7 +531,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addBinding(capabilityExchange,new Binding(capabilityExchange,subscriptionQueue2,new Filter(subscriptionSelector2)));
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
-            //TODO
             source.start();
             String messageText = "This is my DENM message :) ";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
@@ -570,17 +562,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
             source.sendNonPersistentMessage(message);
 
-            String url = "url";
 
-            NewSink sink = new NewSink(url,qpidContainer.getAmqpsUrl());
-            //Context context = NewSink.getSinkJmsContext(url, qpidContainer.getAmqpsUrl());
-
-            JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup(url);
-            factory.setSslContext(sslContext);
+            NewSink sink = new NewSink(sslContext);
 
             CountingMessageListener listener1 = new CountingMessageListener();
             CountingMessageListener listener2 = new CountingMessageListener();
-            try (Connection connection = factory.createConnection()) {
+            try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
                 connection.start();
                 //Need two runnables, one for each session/consumer
 

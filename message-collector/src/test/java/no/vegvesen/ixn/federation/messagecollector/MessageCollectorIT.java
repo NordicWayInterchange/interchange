@@ -95,26 +95,14 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			if (! collector.containsEndpoint(endpoint)) {
 				System.out.println("Adding endpoint " + endpoint);
 				collector.submitEndpoint(endpoint, () -> {
-                    NewSink readSink;
-					try {
-						readSink = new NewSink("url", String.format("amqps://%s:%s",listenerEndpoint.getHost(),listenerEndpoint.getPort()));
-					} catch (NamingException e) {
-						throw new RuntimeException(e);
-					}
-					Context readContext = readSink.getContext();
-					JmsConnectionFactory readConnectionFactory = null;
-					try {
-						readConnectionFactory = (JmsConnectionFactory) readContext.lookup("url");
-					} catch (NamingException e) {
-						throw new RuntimeException(e);
-					}
-					readConnectionFactory.setSslContext(senderContext);
+                    NewSink readSink = new NewSink(senderContext);
 					//TODO need to set an exception listener on the connection
 					//Broker "consumer"
 					String writeUrl = String.format("amqps://%s:%s", HOST_NAME, localIxnFederationPort);
 					try (Source writeSource = new Source(writeUrl,writeExchange, senderContext)) {
 						writeSource.start();
-						try (jakarta.jms.Connection readConnection = readConnectionFactory.createConnection()) {
+						String url = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
+						try (jakarta.jms.Connection readConnection = readSink.createConnection(url)) {
 							readConnection.setExceptionListener( e -> logger.error("Cought exception", e));
 							readConnection.start();
 							logger.info("Connected to url {}",writeUrl);

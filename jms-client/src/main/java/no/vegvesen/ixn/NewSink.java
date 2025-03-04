@@ -1,29 +1,27 @@
 package no.vegvesen.ixn;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.util.Hashtable;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
+import org.apache.qpid.jms.JmsConnectionFactory;
 
+import javax.net.ssl.SSLContext;
+
+//TODO we might set exceptionListener on the connectionfactory or the factory
+//also, can we use the same factory for different hosts?
 public class NewSink {
 
 
-    private final Context context;
+    private final SSLContext context;
 
-    public NewSink(String sinkFactoryKey, String url) throws NamingException {
-        context = getSinkJmsContext(sinkFactoryKey,url);
-
-    }
-
-    private static Context getSinkJmsContext(String sinkFactoryKey, String amqpsUrl) throws NamingException {
-        Hashtable<Object,Object> props = new Hashtable<>();
-        props.put(Context.INITIAL_CONTEXT_FACTORY,"org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-        props.put("connectionFactory." + sinkFactoryKey, amqpsUrl);
-        return new InitialContext(props);
+    public NewSink(SSLContext context) {
+        this.context = context;
     }
 
 
-    public Context getContext() {
-        return context;
+    public Connection createConnection(String url) throws JMSException {
+        JmsConnectionFactory connectionFactory = new JmsConnectionFactory(url);
+        connectionFactory.setSslContext(context);
+        return connectionFactory.createConnection();
     }
+
 }

@@ -1,0 +1,150 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "9.0",
+  "exchanges": [
+    {
+      "id": "c5cb13f9-7fec-4b0b-9e42-61fe60204e8e",
+      "name": "incomingExchange",
+      "type": "fanout",
+      "durableBindings": [
+        {
+          "bindingKey": "incoming-out-1",
+          "arguments": {},
+          "destination": "out-1"
+        },
+        {
+          "bindingKey": "incoming-out-2",
+          "arguments": {},
+          "destination": "out-2"
+        }
+      ],
+      "lastUpdatedBy": "routing_configurer",
+      "lastUpdatedTime": 1741011847565,
+      "createdBy": "routing_configurer",
+      "createdTime": 1741011847358
+    }
+  ],
+  "queues": [
+    {
+      "id": "304cf36c-90a8-45ca-93e0-3f867b790f3a",
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "id": "a3212fc2-52f2-48bf-b6d5-7b431099bb85",
+      "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "id": "c0f57795-ecc8-4029-9f4a-f9d0fe87a256",
+      "name": "out-1",
+      "type": "standard",
+      "alternateBinding": null,
+      "maximumMessageTtl": 900000,
+      "owner": null,
+      "lastUpdatedBy": "routing_configurer",
+      "lastUpdatedTime": 1741011847450,
+      "createdBy": "routing_configurer",
+      "createdTime": 1741011847450
+    },
+    {
+      "id": "63f1e09b-b033-409b-9cc0-57df6f21ea7f",
+      "name": "out-2",
+      "type": "standard",
+      "alternateBinding": null,
+      "maximumMessageTtl": 900000,
+      "owner": null,
+      "lastUpdatedBy": "routing_configurer",
+      "lastUpdatedTime": 1741011847497,
+      "createdBy": "routing_configurer",
+      "createdTime": 1741011847497
+    }
+  ],
+  "virtualhostaccesscontrolproviders": [
+    {
+      "name": "default",
+      "type": "RuleBased",
+      "defaultResult": "DENIED",
+      "rules": [
+        {
+          "objectType": "ALL",
+          "identity": "administrators",
+          "operation": "ALL",
+          "outcome": "ALLOW_LOG",
+          "attributes": {}
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "federated-interchanges",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "clients-private-channels",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "identity": "king_gustaf",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "objectType": "EXCHANGE",
+          "attributes": {
+            "ROUTING_KEY": "incomingExchange",
+            "NAME": ""
+          }
+        },
+        {
+          "identity": "king_gustaf",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "objectType": "QUEUE",
+          "attributes": {
+            "NAME": "out-1"
+          }
+        },
+        {
+          "identity": "king_gustaf",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "objectType": "QUEUE",
+          "attributes": {
+            "NAME": "out-2"
+          }
+        },
+        {
+          "objectType": "ALL",
+          "identity": "ALL",
+          "operation": "ALL",
+          "outcome": "DENY_LOG",
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}

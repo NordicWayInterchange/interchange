@@ -29,7 +29,7 @@ public class Collector {
 
 
     public void shutdown() {
-        executorService.shutdownNow();
+        executorService.shutdown();
     }
 
     //public record ListenerState(ListenerEndpoint endpoint, Future<?> future) {}

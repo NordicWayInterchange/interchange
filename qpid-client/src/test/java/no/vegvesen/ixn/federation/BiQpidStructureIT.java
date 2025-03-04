@@ -66,12 +66,9 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
         source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
-        String sinkFactoryKey = "url";
         //Set context variable
-        NewSink sink = new  NewSink(sinkFactoryKey,qpidContainer.getAmqpsUrl());
-        JmsConnectionFactory factory = (JmsConnectionFactory) sink.getContext().lookup(sinkFactoryKey);
-        factory.setSslContext(jmsClientContext);
-        try (Connection connection = factory.createConnection()) {
+        NewSink sink = new  NewSink(jmsClientContext);
+        try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(queueName);
