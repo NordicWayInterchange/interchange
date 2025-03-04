@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 
-public class ServiceProviderApi {
+public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     private Integer id;
     private String name;
@@ -71,6 +73,22 @@ public class ServiceProviderApi {
 
     public void setDeliveries(List<LocalDeliveryApi> deliveries) {
         this.deliveries = deliveries;
+    }
+
+    @Override
+    public int compareTo(@NotNull ServiceProviderApi serviceProviderApi) {
+        if(id == null && serviceProviderApi.id == null) {
+            return 0;
+        }
+
+        if(serviceProviderApi.id == null){
+            return 1;
+        }
+
+        if(id == null) {
+            return -1;
+        }
+        return Long.compare(id, serviceProviderApi.id);
     }
 
     @Override
