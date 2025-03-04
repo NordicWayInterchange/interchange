@@ -11,6 +11,7 @@ import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/Styl
 import {ControlConnection} from "@/types/neighbours";
 import {timeConverter} from "@/lib/timeConverter";
 import {StatusCircle} from "@/components/shared/components/StatusCircle";
+import Loading from "@/components/shared/components/Loading";
 
 type Props = {
     open: boolean;
@@ -20,7 +21,7 @@ type Props = {
 
 const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Props) => {
     if (!controlConnection) {
-        return <Typography>Loading...</Typography>;
+        return <Loading text="Control connection is loading"/>;
     }
 
     const connectionStatus = controlConnection.connectionStatus;

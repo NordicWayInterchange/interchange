@@ -13,6 +13,7 @@ import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Capability} from "@/types/neighbours";
 import MapDialog from "@/components/map/MapDialog";
 import {extractMatchingCauseCodes} from "@/lib/extractMatchingCauseCodes";
+import Loading from "@/components/shared/components/Loading";
 
 type Props = {
     capabilities: Capability;
@@ -24,7 +25,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
     const [openMap, setOpenMap] = useState<boolean>(false);
     const application = capabilities.application;
     if (!capabilities || !application) {
-        return <Typography>Loading...</Typography>;
+        return <Loading text=""/>
     }
 
     const handleClose = () => {

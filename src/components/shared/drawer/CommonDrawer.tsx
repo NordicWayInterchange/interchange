@@ -15,6 +15,7 @@ import {statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
 import QueueValidator from "@/components/shared/actions/QueueValidator";
 import ExchangeValidator from "@/components/shared/actions/ExchangeValidator";
+import Loading from "@/components/shared/components/Loading";
 
 type Props = {
     commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
@@ -34,7 +35,7 @@ const colorMapping: Record<string, "default" | "primary" | "secondary" | "error"
 
 const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props) => {
     if (!commonAttributes) {
-        return <Typography>Loading...</Typography>;
+        return  <Loading text=""/>;
     }
     const subscriptionStatus = (commonAttributes as any)?.subscriptionStatus;
     const consumerCommonName = (commonAttributes as any)?.consumerCommonName;
