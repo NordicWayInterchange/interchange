@@ -119,7 +119,7 @@ public class Listen implements Callable<Integer> {
                         connections.put(endpoint.toUrl(), connection);
                     }
                     Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
-                    Destination destination = session.createQueue(endpoint.toUrl());
+                    Destination destination = session.createQueue(endpoint.getSource());
                     MessageConsumer consumer = session.createConsumer(destination);
                     consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
 
