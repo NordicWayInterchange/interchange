@@ -66,16 +66,20 @@ public class Listen implements Callable<Integer> {
             throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        List<GetSubscriptionResponse> createdSubscriptions = new ArrayList<>();
+        List<GetSubscriptionResponse> createdSubscriptions = Collections.synchronizedList(new ArrayList<>());
         try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
+            System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
 
                 executorService.submit(() -> {
-                    GetSubscriptionResponse mySubscription = client.getSubscription(subscription.getId());
+
+                    String id = subscription.getId();
+                    System.out.println("Checking subscription " + id);
+                    GetSubscriptionResponse mySubscription = client.getSubscription(id);
                     while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
                         try {
                             TimeUnit.SECONDS.sleep(2);
-                            mySubscription = client.getSubscription(subscription.getId());
+                            mySubscription = client.getSubscription(id);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw new RuntimeException(e);
@@ -96,21 +100,34 @@ public class Listen implements Callable<Integer> {
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
         //TODO this will make one connection per endpoint.
-        //We might want to use sessions instead, but make suer that we have different connections for different hosts,
+        //We might want to use sessions instead, but make sure that we have different connections for different hosts,
         //for example if one of the subscriptions is redirect
-        for (GetSubscriptionResponse subscription : createdSubscriptions) {
-            for (LocalEndpointApi  endpoint : subscription.getEndpoints()) {
-                try (Connection connection = sink.createConnection(endpoint.toUrl(),exceptionListener)) {
-                    connection.start();
-                    try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                        Destination destination = session.createQueue(endpoint.getSource());
-                        try (MessageConsumer consumer = session.createConsumer(destination)) {
-                            consumer.setMessageListener(
-                                    directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
-                            );
-                            counter.await();
+        //TODO do we need one thead per connection when we are using the listeners?
+        //This is due to the try-with-resources structure. Could also do this in a loop, and keep track of each of
+        //the created objects
+        try (ExecutorService executorService = Executors.newFixedThreadPool(createdSubscriptions.size())) {
+            for (GetSubscriptionResponse subscription : createdSubscriptions) {
+                for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
+                    executorService.submit(() -> {
+
+                        try (Connection connection = sink.createConnection(endpoint.toUrl(), exceptionListener)) {
+                            connection.start();
+                            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                                Destination destination = session.createQueue(endpoint.getSource());
+                                try (MessageConsumer consumer = session.createConsumer(destination)) {
+                                    consumer.setMessageListener(
+                                            directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
+                                    );
+                                    counter.await();
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        } catch (JMSException e) {
+                            throw new RuntimeException(e);
                         }
-                    }
+                    });
                 }
             }
         }
