@@ -105,13 +105,22 @@ public class Listen implements Callable<Integer> {
         //TODO do we need one thead per connection when we are using the listeners?
         //This is due to the try-with-resources structure. Could also do this in a loop, and keep track of each of
         //the created objects
+        ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
         try (ExecutorService executorService = Executors.newFixedThreadPool(createdSubscriptions.size())) {
             for (GetSubscriptionResponse subscription : createdSubscriptions) {
                 for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
                     executorService.submit(() -> {
 
-                        try (Connection connection = sink.createConnection(endpoint.toUrl(), exceptionListener)) {
-                            connection.start();
+                        Connection connection;
+                        try {
+                            if (connections.containsKey(endpoint.toUrl())) {
+                                connection = connections.get(endpoint.toUrl());
+
+                            } else {
+                                connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
+                                connection.start();
+                                connections.put(endpoint.toUrl(), connection);
+                            }
                             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                                 Destination destination = session.createQueue(endpoint.getSource());
                                 try (MessageConsumer consumer = session.createConsumer(destination)) {
@@ -124,6 +133,11 @@ public class Listen implements Callable<Integer> {
                                     throw new RuntimeException(e);
                                 }
                             }
+                        } catch (JMSException e) {
+                            throw new RuntimeException(e);
+                        }
+                        try {
+                            connection.close();
                         } catch (JMSException e) {
                             throw new RuntimeException(e);
                         }
