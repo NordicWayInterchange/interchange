@@ -2,12 +2,16 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -16,12 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class AdminRestController {
@@ -65,6 +68,24 @@ public class AdminRestController {
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<CapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("List capabilities matching subscription for service provider for admin user {}", adminUser);
+
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
+        Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
+        if (selector != null) {
+            if (!selector.isEmpty()) {
+                localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+                neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
+            }
+        }
+
+        return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(localCapabilities, neighbourCapabilities);
+    }
+
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
     public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -100,6 +121,31 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         logger.info("Log - binding exists - requesting user {}", adminUser);
         return qpidService.bindingExists(exchangeName, queueName);
+    }
+
+    private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
+        Set<Capability> capabilities = new HashSet<>();
+        for (ServiceProvider otherServiceProvider : serviceProviders) {
+            capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
+        }
+        return capabilities;
+    }
+
+    private Set<NeighbourCapability> getAllNeighbourCapabilities() {
+        Set<NeighbourCapability> capabilities = new HashSet<>();
+        List<Neighbour> neighbours = neighbourRepository.findAll();
+        for (Neighbour neighbour : neighbours) {
+            capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+        }
+        return capabilities;
+    }
+
+    private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
+        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+    }
+
+    private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
+        return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
     }
 
 }
