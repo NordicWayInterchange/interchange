@@ -99,59 +99,31 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        //TODO this will make one connection per endpoint.
-        //We might want to use sessions instead, but make sure that we have different connections for different hosts,
-        //for example if one of the subscriptions is redirect
-        //TODO do we need one thead per connection when we are using the listeners?
-        //This is due to the try-with-resources structure. Could also do this in a loop, and keep track of each of
-        //the created objects
-        ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
-        try (ExecutorService executorService = Executors.newFixedThreadPool(createdSubscriptions.size())) {
-            for (GetSubscriptionResponse subscription : createdSubscriptions) {
-                for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
-                    Connection connection;
-                    if (connections.containsKey(endpoint.toUrl())) {
-                        connection = connections.get(endpoint.toUrl());
+        HashMap<String, Connection> connections = new HashMap<>();
+        for (GetSubscriptionResponse subscription : createdSubscriptions) {
+            for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
+                Connection connection;
+                if (connections.containsKey(endpoint.toUrl())) {
+                    connection = connections.get(endpoint.toUrl());
 
-                    } else {
-                        connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
-                        connection.start();
-                        connections.put(endpoint.toUrl(), connection);
-                    }
-                    Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
-                    Destination destination = session.createQueue(endpoint.getSource());
-                    MessageConsumer consumer = session.createConsumer(destination);
-                    consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
-
-                    /*
-                    executorService.submit(() -> {
-                        try {
-                            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                                Destination destination = session.createQueue(endpoint.getSource());
-                                try (MessageConsumer consumer = session.createConsumer(destination)) {
-                                    consumer.setMessageListener(
-
-                                    );
-                                    counter.await();
-                                } catch (InterruptedException e) {
-                                    Thread.currentThread().interrupt();
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        } catch (JMSException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        try {
-                            connection.close();
-                        } catch (JMSException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                     */
+                } else {
+                    connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
+                    connection.start();
+                    connections.put(endpoint.toUrl(), connection);
                 }
+                Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
+                Destination destination = session.createQueue(endpoint.getSource());
+                MessageConsumer consumer = session.createConsumer(destination);
+                consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
             }
-            counter.await();
+        }
+        counter.await();
+        for (Connection connection : connections.values()) {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                System.out.println("Exception while closing connection: " + e);
+            }
         }
 
         return 0;
