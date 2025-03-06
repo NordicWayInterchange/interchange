@@ -109,18 +109,17 @@ public class Listen implements Callable<Integer> {
         try (ExecutorService executorService = Executors.newFixedThreadPool(createdSubscriptions.size())) {
             for (GetSubscriptionResponse subscription : createdSubscriptions) {
                 for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
+                    Connection connection;
+                    if (connections.containsKey(endpoint.toUrl())) {
+                        connection = connections.get(endpoint.toUrl());
+
+                    } else {
+                        connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
+                        connection.start();
+                        connections.put(endpoint.toUrl(), connection);
+                    }
                     executorService.submit(() -> {
-
-                        Connection connection;
                         try {
-                            if (connections.containsKey(endpoint.toUrl())) {
-                                connection = connections.get(endpoint.toUrl());
-
-                            } else {
-                                connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
-                                connection.start();
-                                connections.put(endpoint.toUrl(), connection);
-                            }
                             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                                 Destination destination = session.createQueue(endpoint.getSource());
                                 try (MessageConsumer consumer = session.createConsumer(destination)) {
@@ -136,6 +135,7 @@ public class Listen implements Callable<Integer> {
                         } catch (JMSException e) {
                             throw new RuntimeException(e);
                         }
+
                         try {
                             connection.close();
                         } catch (JMSException e) {
