@@ -11,7 +11,6 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -20,7 +19,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
@@ -73,43 +71,61 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testMessagesCollected() throws NamingException, JMSException {
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		String writeExchange = "subscriptionExchange";
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), writeExchange);
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll())
+				.thenReturn(
+						List.of(
+								new ListenerEndpoint(HOST_NAME,
+										HOST_NAME,
+										HOST_NAME,
+										producerContainer.getAmqpsPort(),
+										new Connection(),
+										writeExchange
+								)
+						)
+				);
 
 		Collector collector = new Collector();
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		CollectorCreator collectorCreator = new CollectorCreator(
-				senderContext,
-				HOST_NAME,
-				localIxnFederationPort,
-				writeExchange);
-
-		//TODO make sure we're using the correct contexts here.
-        for (ListenerEndpoint endpoint : listenerEndpointRepository.findAll()) {
+		NewSink readSink = new NewSink(senderContext);
+		for (ListenerEndpoint endpoint : listenerEndpointRepository.findAll()) {
 			if (! collector.containsEndpoint(endpoint)) {
 				System.out.println("Adding endpoint " + endpoint);
 				collector.submitEndpoint(endpoint, () -> {
-                    NewSink readSink = new NewSink(senderContext);
-					//TODO need to set an exception listener on the connection
 					//Broker "consumer"
 					String writeUrl = String.format("amqps://%s:%s", HOST_NAME, localIxnFederationPort);
 					try (Source writeSource = new Source(writeUrl,writeExchange, senderContext)) {
 						writeSource.start();
-						String url = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
-						try (jakarta.jms.Connection readConnection = readSink.createConnection(url)) {
-							readConnection.setExceptionListener( e -> logger.error("Cought exception", e));
+						String url = String.format("amqps://%s:%s", endpoint.getHost(), endpoint.getPort());
+						ExceptionListener exceptionListener = e -> logger.error("Cought exception", e);
+						try (jakarta.jms.Connection readConnection = readSink.createConnection(url,exceptionListener)) {
 							readConnection.start();
 							logger.info("Connected to url {}",writeUrl);
 							try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-								String source = listenerEndpoint.getSource();
+								String source = endpoint.getSource();
 								Destination destination = session.createQueue(source);
-								forwardMessages(session, destination, source, writeSource);
+								try (MessageConsumer consumer = session.createConsumer(destination)) {
+									logger.info("Subscribed to destination {}", destination);
+									boolean running = true;
+									while (running) {
+										try {
+											Message message = consumer.receive();
+											if (message != null) {
+												MessageForwardUtil.send(writeSource.getProducer(), message);
+												logger.info("Message {} received from queue {}", message.getJMSMessageID(), source);
+											} else {
+												running = false;
+											}
+										} catch (JMSException e) {
+											running = false;
+										}
+									}
+									logger.info("Exiting collector thread");
+								}
 							}
                         } catch (JMSException e) {
 							throw new RuntimeException(e);
@@ -171,27 +187,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 			}
 		}
 		collector.shutdown();
-	}
-
-	private static void forwardMessages(Session session, Destination destination, String source, Source writeSource) throws JMSException {
-		try (MessageConsumer consumer = session.createConsumer(destination)) {
-			logger.info("Subscribed to destination {}", destination);
-			boolean running = true;
-			while (running) {
-				try {
-					Message message = consumer.receive();
-					if (message != null) {
-						MessageForwardUtil.send(writeSource.getProducer(), message);
-						logger.info("Message {} received from queue {}", message.getJMSMessageID(), source);
-					} else {
-						running = false;
-					}
-				} catch (JMSException e) {
-					running = false;
-				}
-			}
-			logger.info("Exiting collector thread");
-		}
 	}
 
 	@Test

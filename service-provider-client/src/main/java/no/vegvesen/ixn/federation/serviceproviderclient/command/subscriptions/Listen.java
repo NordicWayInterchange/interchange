@@ -14,11 +14,10 @@ import picocli.CommandLine.ParentCommand;
 
 import javax.naming.Context;
 import java.io.File;
+import java.util.*;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Command(name = "listen", description = "Add subscription and receive messages")
 public class Listen implements Callable<Integer> {
@@ -40,65 +39,78 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        String id;
+        List<LocalActorSubscription> subscriptions;
         if(option.file != null){
             ObjectMapper mapper = new ObjectMapper();
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
-            id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
-                    .getId();
+            subscriptions = addSubscriptionsResponse.getSubscriptions().stream().toList();
         }
         else if(option.selector != null){
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
-            id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
-                    .getId();
+            subscriptions = addSubscriptionsResponse.getSubscriptions().stream().toList();
         } else if (option.id != null) {
-            id = option.id;
+            GetSubscriptionResponse getSubscriptionResponse = client.getSubscription(option.id);
+            subscriptions = List.of(new LocalActorSubscription(
+                    getSubscriptionResponse.getId(),
+                    getSubscriptionResponse.getPath(),
+                    getSubscriptionResponse.getSelector(),
+                    getSubscriptionResponse.getConsumerCommonName(),
+                    getSubscriptionResponse.getLastUpdatedTimestamp(),
+                    getSubscriptionResponse.getStatus(),
+                    null,
+                    getSubscriptionResponse.getDescription())
+            );
 
         } else {
             throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        GetSubscriptionResponse subscription = client.getSubscription(id);
-        while (subscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
-            subscription = client.getSubscription(subscription.getId());
-            TimeUnit.SECONDS.sleep(2);
+        List<GetSubscriptionResponse> createdSubscriptions = new ArrayList<>();
+        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
+            for (LocalActorSubscription subscription : subscriptions) {
+
+                executorService.submit(() -> {
+                    GetSubscriptionResponse mySubscription = client.getSubscription(subscription.getId());
+                    while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
+                        try {
+                            TimeUnit.SECONDS.sleep(2);
+                            mySubscription = client.getSubscription(subscription.getId());
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+                        createdSubscriptions.add(mySubscription);
+                    } else {
+                        System.out.printf("Unexpected subscription status %s for subscription %s, skipping%n", mySubscription.getStatus(), mySubscription.getId());
+                    }
+                });
+            }
         }
-
-        if (! subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",subscription.getStatus(),subscription.getId()));
-
-        }
-
-        LocalEndpointApi endpointApi = client
-                .getSubscription(subscription.getId())
-                .getEndpoints()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s",id)));
-        String url = endpointApi.toUrl();
-
         final CountDownLatch counter = new CountDownLatch(1);
-        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        try (Connection connection = sink.createConnection(url)) {
-            connection.setExceptionListener(exceptionListener);
-            connection.start();
-            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                Destination destination = session.createQueue(endpointApi.getSource());
-                try (MessageConsumer consumer = session.createConsumer(destination)) {
-                    consumer.setMessageListener(
-                            directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
-                    );
-                    counter.await();
+        //TODO this will make one connection per endpoint.
+        //We might want to use sessions instead, but make suer that we have different connections for different hosts,
+        //for example if one of the subscriptions is redirect
+        for (GetSubscriptionResponse subscription : createdSubscriptions) {
+            for (LocalEndpointApi  endpoint : subscription.getEndpoints()) {
+                try (Connection connection = sink.createConnection(endpoint.toUrl(),exceptionListener)) {
+                    connection.start();
+                    try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+                        Destination destination = session.createQueue(endpoint.getSource());
+                        try (MessageConsumer consumer = session.createConsumer(destination)) {
+                            consumer.setMessageListener(
+                                    directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
+                            );
+                            counter.await();
+                        }
+                    }
                 }
             }
         }

@@ -1,13 +1,13 @@
 package no.vegvesen.ixn;
 
 import jakarta.jms.Connection;
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.JMSException;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 import javax.net.ssl.SSLContext;
 
-//TODO we might set exceptionListener on the connectionfactory or the factory
-//also, can we use the same factory for different hosts?
+//TODO we need to have map of URL -> connection, and return the already created connection if it's already created
 public class NewSink {
 
 
@@ -24,4 +24,9 @@ public class NewSink {
         return connectionFactory.createConnection();
     }
 
+    public Connection createConnection(String url, ExceptionListener exceptionListener) throws JMSException {
+        Connection connection = createConnection(url);
+        connection.setExceptionListener(exceptionListener);
+        return connection;
+    }
 }
