@@ -399,7 +399,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
 
         CustomErrorCodeException thrown = assertThrows(CustomErrorCodeException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
-        Assertions.assertEquals("ERR_ALREADY_PUBLICATION_ID_EXISTS", thrown.getErrorCode());
+        Assertions.assertEquals("ERR_PUBLICATION_ID_ALREADY_EXISTS", thrown.getErrorCode());
     }
 
     @Test

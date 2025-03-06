@@ -354,7 +354,7 @@ public class NapRestController {
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new CustomErrorCodeException("ERR_ALREADY_PUBLICATION_ID_EXISTS", String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
+            throw new CustomErrorCodeException("ERR_PUBLICATION_ID_ALREADY_EXISTS", String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
