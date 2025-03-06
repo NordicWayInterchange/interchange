@@ -118,13 +118,19 @@ public class Listen implements Callable<Integer> {
                         connection.start();
                         connections.put(endpoint.toUrl(), connection);
                     }
+                    Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
+                    Destination destination = session.createQueue(endpoint.toUrl());
+                    MessageConsumer consumer = session.createConsumer(destination);
+                    consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
+
+                    /*
                     executorService.submit(() -> {
                         try {
                             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                                 Destination destination = session.createQueue(endpoint.getSource());
                                 try (MessageConsumer consumer = session.createConsumer(destination)) {
                                     consumer.setMessageListener(
-                                            directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener()
+
                                     );
                                     counter.await();
                                 } catch (InterruptedException e) {
@@ -142,8 +148,10 @@ public class Listen implements Callable<Integer> {
                             throw new RuntimeException(e);
                         }
                     });
+                     */
                 }
             }
+            counter.await();
         }
 
         return 0;
