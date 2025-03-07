@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,18 +80,46 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("List capabilities matching subscription for service provider for admin user {}", adminUser);
+        logger.info("List capabilities matching subscriptions for service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
-        if (selector != null) {
-            if (!selector.isEmpty()) {
-                localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
-                neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
-            }
+        if (selector != null && !selector.isEmpty()) {
+            localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+            neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
         }
 
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(localCapabilities, neighbourCapabilities);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<CapabilityApi> getMatchingDeliveriesCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        logger.info("List capabilities matching deliveries for service provider for admin user {}", adminUser);
+
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        Map<ServiceProvider, Set<Capability>> serviceProviderCapabilityMatchMap = new HashMap<>();
+
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            serviceProvider = getOrCreateServiceProvider(serviceProvider.getName());
+            Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
+            serviceProviderCapabilityMatchMap.put(serviceProvider, new HashSet<>(capabilities));
+        }
+
+        if (selector != null && !selector.isEmpty()) {
+            for (Set<Capability> capabilities : serviceProviderCapabilityMatchMap.values()) {
+                Set<Capability> filteredCapabilities = getAllMatchingLocalCapabilities(selector, capabilities);
+                capabilities.clear();
+                capabilities.addAll(filteredCapabilities);
+            }
+        }
+
+        Set<Capability> allFilteredCapabilities = new HashSet<>();
+        for (Set<Capability> capabilities : serviceProviderCapabilityMatchMap.values()) {
+            allFilteredCapabilities.addAll(capabilities);
+        }
+
+        return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allFilteredCapabilities, Collections.emptySet());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
@@ -166,6 +192,14 @@ public class AdminRestController {
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
+    }
+
+    private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        if (serviceProvider == null) {
+            serviceProvider = new ServiceProvider(serviceProviderName);
+        }
+        return serviceProvider;
     }
 
     private void validatePathVariable(String pathVariable){
