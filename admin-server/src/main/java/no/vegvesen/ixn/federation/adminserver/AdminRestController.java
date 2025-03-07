@@ -80,7 +80,7 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("List capabilities matching subscriptions for service provider for admin user {}", adminUser);
+        logger.info("List capabilities matching subscriptions for service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
@@ -95,7 +95,7 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CapabilityApi> getMatchingDeliveriesCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("List capabilities matching deliveries for service provider for admin user {}", adminUser);
+        logger.info("List capabilities matching deliveries for service providers for admin user {}", adminUser);
 
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Map<ServiceProvider, Set<Capability>> serviceProviderCapabilityMatchMap = new HashMap<>();
@@ -115,8 +115,8 @@ public class AdminRestController {
         }
 
         Set<Capability> allFilteredCapabilities = new HashSet<>();
-        for (Set<Capability> capabilities : serviceProviderCapabilityMatchMap.values()) {
-            allFilteredCapabilities.addAll(capabilities);
+        for (Set<Capability> capabilitySet : serviceProviderCapabilityMatchMap.values()) {
+            allFilteredCapabilities.addAll(capabilitySet);
         }
 
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allFilteredCapabilities, Collections.emptySet());
