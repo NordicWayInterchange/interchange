@@ -16,7 +16,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
     private String description;
 
-    private Set<Peer> peers;
+    private Set<String> peers;
 
     private String serviceProviderName;
 
@@ -29,7 +29,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
     }
 
-    public PrivateChannelApi(String id, Set<Peer> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpointApi privateChannelEndpoint,
+    public PrivateChannelApi(String id, Set<String> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpointApi privateChannelEndpoint,
                              String serviceProviderName, Long lastUpdated) {
         this.id = id;
         this.peers = peers;
@@ -40,7 +40,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.lastUpdated = lastUpdated;
     }
 
-    public PrivateChannelApi(Set<Peer> peers, PrivateChannelStatusApi status, PrivateChannelEndpointApi privateChannelEndpoint, String serviceProviderName) {
+    public PrivateChannelApi(Set<String> peers, PrivateChannelStatusApi status, PrivateChannelEndpointApi privateChannelEndpoint, String serviceProviderName) {
         this.peers = peers;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
@@ -55,11 +55,11 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.id = id;
     }
 
-    public PrivateChannelStatusApi getStatusApi() {
+    public PrivateChannelStatusApi getStatus() {
         return status;
     }
 
-    public void setStatusApi(PrivateChannelStatusApi status) {
+    public void setStatus(PrivateChannelStatusApi status) {
         this.status = status;
     }
 
@@ -71,16 +71,12 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.description = description;
     }
 
-    public Set<Peer> getPeers() {
+    public Set<String> getPeers() {
         return peers;
     }
 
-    public void setPeers(Set<Peer> peers) {
+    public void setPeers(Set<String> peers) {
         this.peers = peers;
-    }
-
-    public void addPeer(Peer peerToAdd) {
-        peers.add(peerToAdd);
     }
 
     public String getServiceProviderName() {
@@ -91,11 +87,11 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannelEndpointApi getEndpointApi() {
+    public PrivateChannelEndpointApi getEndpoint() {
         return endpoint;
     }
 
-    public void setEndpointApi(PrivateChannelEndpointApi endpoint) {
+    public void setEndpoint(PrivateChannelEndpointApi endpoint) {
         this.endpoint = endpoint;
     }
 
