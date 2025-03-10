@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
@@ -13,10 +14,12 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,8 @@ public class AdminRestController {
 
     private final AdminProperties adminProperties;
 
+    private final PrivateChannelRepository privateChannelRepository;
+
     private final Logger logger = LoggerFactory.getLogger(AdminRestController.class);
 
     private final QpidService qpidService;
@@ -48,11 +53,12 @@ public class AdminRestController {
     private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService) {
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, PrivateChannelRepository privateChannelRepository, QpidService qpidService) {
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
+        this.privateChannelRepository = privateChannelRepository;
         this.qpidService = qpidService;
     }
 
@@ -109,6 +115,18 @@ public class AdminRestController {
         }
 
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allCapabilities, Collections.emptySet());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("List private channels for service provider {} for admin user {}", actorCommonName, adminUser);
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
+        return typeTransformer.privateChannelListToPrivateChannelApiList(privateChannels);
+
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
