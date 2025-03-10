@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class AdminRestController {
@@ -43,6 +46,8 @@ public class AdminRestController {
 
     private final QpidService qpidService;
 
+    private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
+
     @Autowired
     public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService) {
         this.neighbourRepository = neighbourRepository;
@@ -55,6 +60,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<NeighbourApi> getNeighbours(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("List neighbours for admin user {}", adminUser);
         List<Neighbour> neighbourList = neighbourRepository.findAll();
         return typeTransformer.neighbourListToNeighbourApiList(neighbourList);
@@ -63,6 +70,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ServiceProviderApi> getServiceProviders(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("List service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
@@ -71,8 +80,9 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("List capabilities matching subscription for service provider for admin user {}", adminUser);
+        validatePathVariable(adminUser);
 
+        logger.info("List capabilities matching subscription for service provider for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
@@ -89,6 +99,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
     public List<ExchangeApi> getExchanges(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("List exchanges for admin user {}", adminUser);
         List<Exchange> exchangesList = qpidService.getAllExchanges();
         return typeTransformer.exchangeListToExchangeApiList(exchangesList);
@@ -97,6 +109,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues")
     public List<QueueApi> getQueues(@PathVariable("adminUser") String adminUser) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("List queues for admin user {}", adminUser);
         List<Queue> queuesList = qpidService.getAllQueues();
         return typeTransformer.queueListToQueueApiList(queuesList);
@@ -105,6 +119,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges/{exchangeName}")
     public Boolean exchangeExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("Log - exchange exists - requesting user {}", adminUser);
         return qpidService.exchangeExists(exchangeName);
     }
@@ -112,6 +128,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/queues/{queueName}")
     public Boolean queueExists(@PathVariable("adminUser") String adminUser, @PathVariable("queueName") String queueName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("Log - queue exists - requesting user {}", adminUser);
         return qpidService.queueExists(queueName);
     }
@@ -119,6 +137,8 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/bindings/{exchangeName}/{queueName}")
     public Boolean bindingExists(@PathVariable("adminUser") String adminUser, @PathVariable("exchangeName") String exchangeName, @PathVariable("queueName") String queueName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
         logger.info("Log - binding exists - requesting user {}", adminUser);
         return qpidService.bindingExists(exchangeName, queueName);
     }
@@ -146,6 +166,13 @@ public class AdminRestController {
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
+    }
+
+    private void validatePathVariable(String pathVariable){
+        Matcher matcher = pattern.matcher(pathVariable);
+        if(!matcher.matches()){
+            throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
+        }
     }
 
 }
