@@ -12,12 +12,14 @@ import no.vegvesen.ixn.federation.qpid.Filter;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -183,5 +185,45 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         List<CapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
 
         assertThat(response).hasSize(2);
+    }
+
+    @Test
+    public void testGetMatchingDeliveryCapabilities() {
+        String actorCommonName = "actor-1";
+        String actorCommonName2 = "actor-2";
+        String adminUser = "adminUser";
+        String selector = "publicationId='DK12345:publication-id'";
+
+        Capability aCap1 = new Capability(
+                new DatexApplication("DK12345","DK12345:publication-id","NO","1", List.of("1"), "type","name"),
+                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+        );
+
+        Capability aCap2 = new Capability(
+                new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1)),
+                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+        );
+
+
+        LocalDelivery aDelivery = new LocalDelivery();
+        aDelivery.setSelector(selector);
+
+        LocalDelivery bDelivery = new LocalDelivery();
+        bDelivery.setSelector("originatingCountry='SE'");
+
+        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), null));
+        aServiceProvider.addDeliveries(new HashSet<>(Arrays.asList(aDelivery)));
+        serviceProviderRepository.save(aServiceProvider);
+
+
+        List<CapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
+        List<CapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
+        List<CapabilityApi> response3 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector);
+
+         assertThat(response1).hasSize(0);
+         assertThat(response2).hasSize(1);
+         assertThat(response3).hasSize(0);
+
     }
 }

@@ -80,7 +80,7 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("List capabilities matching subscriptions for service providers for admin user {}", adminUser);
+        logger.info("List network capabilities matching subscriptions for service providers in admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
@@ -92,34 +92,20 @@ public class AdminRestController {
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(localCapabilities, neighbourCapabilities);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CapabilityApi> getMatchingDeliveriesCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<CapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
-        logger.info("List capabilities matching deliveries for service providers for admin user {}", adminUser);
+        logger.info("List local capabilities matching deliveries for service provider in admin user {}", adminUser);
 
-        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
-        Map<ServiceProvider, Set<Capability>> serviceProviderCapabilityMatchMap = new HashMap<>();
-
-        for (ServiceProvider serviceProvider : serviceProviderList) {
-            serviceProvider = getOrCreateServiceProvider(serviceProvider.getName());
-            Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
-            serviceProviderCapabilityMatchMap.put(serviceProvider, new HashSet<>(capabilities));
-        }
-
-        if (selector != null && !selector.isEmpty()) {
-            for (Set<Capability> capabilities : serviceProviderCapabilityMatchMap.values()) {
-                Set<Capability> filteredCapabilities = getAllMatchingLocalCapabilities(selector, capabilities);
-                capabilities.clear();
-                capabilities.addAll(filteredCapabilities);
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
+        if(selector != null){
+            if(!selector.isEmpty()){
+                allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
 
-        Set<Capability> allFilteredCapabilities = new HashSet<>();
-        for (Set<Capability> capabilitySet : serviceProviderCapabilityMatchMap.values()) {
-            allFilteredCapabilities.addAll(capabilitySet);
-        }
-
-        return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allFilteredCapabilities, Collections.emptySet());
+        return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allCapabilities, Collections.emptySet());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
