@@ -100,6 +100,7 @@ public class TypeTransformer {
         List<PrivateChannelApi> privateChannelApiList = new ArrayList<>();
         for (PrivateChannel privateChannel : privateChannelList) {
             privateChannelApiList.add(new PrivateChannelApi(
+                    privateChannel.getUuid(),
                     privateChannel.getPeers(),
                     privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
                     privateChannel.getDescription(),
