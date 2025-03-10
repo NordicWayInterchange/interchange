@@ -2,14 +2,14 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
+import no.vegvesen.ixn.federation.qpid.Binding;
+import no.vegvesen.ixn.federation.qpid.Exchange;
+import no.vegvesen.ixn.federation.qpid.Filter;
 import no.vegvesen.ixn.federation.qpid.Queue;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +53,11 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(neighbourRepository).isNotNull();
         assertThat(serviceProviderRepository).isNotNull();
         assertThat(restController).isNotNull();
+    }
+
+    @Test
+    public void pathVariableWithInvalidCharsThrowsException(){
+        assertThrows(PathVariableException.class, () -> restController.getNeighbours("*hal"));
     }
 
     @Test
