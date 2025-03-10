@@ -29,8 +29,9 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
     }
 
-    public PrivateChannelApi(Set<Peer> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpoint privateChannelEndpoint,
+    public PrivateChannelApi(String id, Set<Peer> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpoint privateChannelEndpoint,
                              String serviceProviderName, Long lastUpdated) {
+        this.id = id;
         this.peers = peers;
         this.status = status;
         this.description = description;
