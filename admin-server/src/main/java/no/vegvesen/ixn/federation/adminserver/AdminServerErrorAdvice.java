@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ControllerAdvice
 public class AdminServerErrorAdvice {
@@ -21,13 +21,13 @@ public class AdminServerErrorAdvice {
 
     @ExceptionHandler({JsonProcessingException.class})
     public ResponseEntity<ErrorDetails> handleJsonProcessingException(JsonProcessingException e) {
-        return error(INTERNAL_SERVER_ERROR, e);
+        return error(BAD_REQUEST, e);
     }
 
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
 
-        logger.error("Error in admin server. ", e);
+        logger.error("Error in interchange server. ", e);
         ResponseEntity<ErrorDetails> errorDetailsResponseEntity = new ResponseEntity<>(errorDetails, status);
         NeighbourMDCUtil.removeLogVariables();
         return errorDetailsResponseEntity;
