@@ -21,7 +21,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
     private String serviceProviderName;
 
 
-    private PrivateChannelEndpoint endpoint;
+    private PrivateChannelEndpointApi endpoint;
 
     private Long lastUpdated;
 
@@ -29,7 +29,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
     }
 
-    public PrivateChannelApi(String id, Set<Peer> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpoint privateChannelEndpoint,
+    public PrivateChannelApi(String id, Set<Peer> peers, PrivateChannelStatusApi status, String description, PrivateChannelEndpointApi privateChannelEndpoint,
                              String serviceProviderName, Long lastUpdated) {
         this.id = id;
         this.peers = peers;
@@ -40,7 +40,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.lastUpdated = lastUpdated;
     }
 
-    public PrivateChannelApi(Set<Peer> peers, PrivateChannelStatusApi status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
+    public PrivateChannelApi(Set<Peer> peers, PrivateChannelStatusApi status, PrivateChannelEndpointApi privateChannelEndpoint, String serviceProviderName) {
         this.peers = peers;
         this.status = status;
         this.endpoint = privateChannelEndpoint;
@@ -55,11 +55,11 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.id = id;
     }
 
-    public PrivateChannelStatusApi getStatus() {
+    public PrivateChannelStatusApi getStatusApi() {
         return status;
     }
 
-    public void setStatus(PrivateChannelStatusApi status) {
+    public void setStatusApi(PrivateChannelStatusApi status) {
         this.status = status;
     }
 
@@ -91,11 +91,11 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public PrivateChannelEndpoint getEndpoint() {
+    public PrivateChannelEndpointApi getEndpointApi() {
         return endpoint;
     }
 
-    public void setEndpoint(PrivateChannelEndpoint endpoint) {
+    public void setEndpointApi(PrivateChannelEndpointApi endpoint) {
         this.endpoint = endpoint;
     }
 

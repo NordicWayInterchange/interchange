@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelStatusApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnectionApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
@@ -104,7 +105,7 @@ public class TypeTransformer {
                     privateChannel.getPeers(),
                     privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
                     privateChannel.getDescription(),
-                    privateChannel.getEndpoint(),
+                    privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
                     privateChannel.getServiceProviderName(),
                     localDateTimeToTimestamp(privateChannel.getLastUpdated())
             ));
@@ -212,6 +213,10 @@ public class TypeTransformer {
             ));
         }
         return deliveryEndpointApiSet;
+    }
+
+    public PrivateChannelEndpointApi privateChannelEndpointToPrivateChannelEndpointApi(PrivateChannelEndpoint privateChannelEndpoint) {
+        return new PrivateChannelEndpointApi(privateChannelEndpoint.getHost(), privateChannelEndpoint.getPort(), privateChannelEndpoint.getQueueName());
     }
 
     public List<CapabilityApi> capabilitiesSetToCapabilitiesApiList(Set<Capability> capabilities) {
