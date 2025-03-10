@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class TypeTransformer {
@@ -102,7 +103,7 @@ public class TypeTransformer {
         for (PrivateChannel privateChannel : privateChannelList) {
             privateChannelApiList.add(new PrivateChannelApi(
                     privateChannel.getUuid(),
-                    privateChannel.getPeers(),
+                    privateChannel.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet()),
                     privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
                     privateChannel.getDescription(),
                     privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
