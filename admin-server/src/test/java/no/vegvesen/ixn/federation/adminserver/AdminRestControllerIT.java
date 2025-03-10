@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -213,7 +212,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
         aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), null));
-        aServiceProvider.addDeliveries(new HashSet<>(Arrays.asList(aDelivery)));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
         serviceProviderRepository.save(aServiceProvider);
 
 
