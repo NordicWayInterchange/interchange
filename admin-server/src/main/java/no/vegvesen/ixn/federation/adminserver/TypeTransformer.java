@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelStatusApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnectionApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
@@ -91,6 +94,21 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities.stream().sorted().toList();
+    }
+
+    public List<PrivateChannelApi> privateChannelListToPrivateChannelApiList(List<PrivateChannel> privateChannelList) {
+        List<PrivateChannelApi> privateChannelApiList = new ArrayList<>();
+        for (PrivateChannel privateChannel : privateChannelList) {
+            privateChannelApiList.add(new PrivateChannelApi(
+                    privateChannel.getPeers(),
+                    privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
+                    privateChannel.getDescription(),
+                    privateChannel.getEndpoint(),
+                    privateChannel.getServiceProviderName(),
+                    localDateTimeToTimestamp(privateChannel.getLastUpdated())
+            ));
+        }
+        return privateChannelApiList.stream().sorted().toList();
     }
 
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {
@@ -233,6 +251,10 @@ public class TypeTransformer {
 
     public LocalDeliveryStatusApi localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
         return LocalDeliveryStatusApi.valueOf(localDeliveryStatus.toString());
+    }
+
+    public PrivateChannelStatusApi privateChannelStatusToPrivateChannelStatusApi(PrivateChannelStatus privateChannelStatus) {
+        return PrivateChannelStatusApi.valueOf(privateChannelStatus.toString());
     }
 
     public NeighbourSubscriptionRequestApi neighbourSubscriptionRequestToNeighbourSubscriptionRequestApi(NeighbourSubscriptionRequest subscriptionRequest) {
