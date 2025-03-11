@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import no.vegvesen.ixn.federation.adminserver.exceptions.HandleJsonProcessingException;
 import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.Queue;
@@ -42,7 +41,7 @@ public class QpidService {
         try {
             return qpidClient.getAllExchanges();
         } catch (JsonProcessingException e) {
-            throw new HandleJsonProcessingException("JSON processing error: {}", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -50,7 +49,7 @@ public class QpidService {
         try {
             return qpidClient.getAllQueues();
         } catch (JsonProcessingException e) {
-            throw new HandleJsonProcessingException("JSON processing error: {}", e);
+            throw new RuntimeException(e);
         }
     }
 
