@@ -89,6 +89,7 @@ public class Listen implements Callable<Integer> {
                     if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
                         if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
                             //LocalSubscription, need to wait for the endpoints to be set
+                            System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
                             while (mySubscription.getEndpoints().isEmpty()) {
                                 try {
                                     TimeUnit.SECONDS.sleep(2);
