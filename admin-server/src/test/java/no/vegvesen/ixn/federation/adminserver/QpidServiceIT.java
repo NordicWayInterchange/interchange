@@ -108,24 +108,10 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     @Test
     public void testBindingExistsReturnsFalse(){
         String queueName = "bi-queue";
-        String exchangeName = "my-exchange";
+        String exchangeName = "my-exchange-2";
 
         client.createHeadersExchange(exchangeName);
 
-        Capability capability = new Capability(
-                new DenmApplication(
-                        "NO-123",
-                        "pub-1",
-                        "NO",
-                        "1.0",
-                        List.of("12", "13"),
-                        List.of(5, 6)
-                ),
-                new Metadata()
-        );
-        String selector = "originatingCountry='DK'";
-
-        client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isFalse();
     }
 
