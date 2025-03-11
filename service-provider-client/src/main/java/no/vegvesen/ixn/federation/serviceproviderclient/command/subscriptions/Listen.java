@@ -85,7 +85,21 @@ public class Listen implements Callable<Integer> {
                             throw new RuntimeException(e);
                         }
                     }
+
                     if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+                        if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
+                            //LocalSubscription, need to wait for the endpoints to be set
+                            while (mySubscription.getEndpoints().isEmpty()) {
+                                try {
+                                    TimeUnit.SECONDS.sleep(2);
+                                    mySubscription = client.getSubscription(id);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    throw new RuntimeException(e);
+                                }
+                            }
+
+                        }
                         createdSubscriptions.add(mySubscription);
                     } else {
                         System.out.printf("Unexpected subscription status %s for subscription %s, skipping%n", mySubscription.getStatus(), mySubscription.getId());
@@ -100,6 +114,7 @@ public class Listen implements Callable<Integer> {
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
         HashMap<String, Connection> connections = new HashMap<>();
+        Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         for (GetSubscriptionResponse subscription : createdSubscriptions) {
             for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
                 Connection connection;
@@ -114,7 +129,7 @@ public class Listen implements Callable<Integer> {
                 Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
                 Destination destination = session.createQueue(endpoint.getSource());
                 MessageConsumer consumer = session.createConsumer(destination);
-                consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
+                consumer.setMessageListener(listener);
             }
         }
         counter.await();
