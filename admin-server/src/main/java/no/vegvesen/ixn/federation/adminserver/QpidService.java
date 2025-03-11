@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.exceptions.HandleJsonProcessingException;
 import no.vegvesen.ixn.federation.qpid.Exchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,13 +30,7 @@ public class QpidService {
     }
 
     public boolean bindingExists(String exchangeName, String queueName){
-        QpidDelta delta = qpidClient.getQpidDelta();
-        try{
-            return delta.exchangeHasBindingToQueue(exchangeName, queueName);
-        }
-        catch(Exception e){
-            return false;
-        }
+        return qpidClient.getExchange(exchangeName).isBoundToQueue(queueName);
     }
 
     public List<Exchange> getAllExchanges() {
