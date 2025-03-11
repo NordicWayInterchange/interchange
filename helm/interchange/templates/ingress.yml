@@ -33,6 +33,8 @@ spec:
   tls:
     - hosts:
       - portal.{{ .Values.external_name }}
-      - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-portal-cert
+    - hosts:
+      - admin.{{ .Values.external_name }}
+      secretName: {{ .Release.Name }}-admin-cert
 {{- end }}
