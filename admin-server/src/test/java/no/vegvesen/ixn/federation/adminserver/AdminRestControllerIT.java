@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -9,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    PrivateChannelRepository privateChannelRepository;
 
     @Autowired
     AdminRestController restController;
@@ -230,5 +235,28 @@ public class AdminRestControllerIT extends PostgresContainerBase {
          assertThat(response2).hasSize(1);
          assertThat(response3).hasSize(0);
 
+    }
+
+    @Test
+    public void testGetPrivateChannels() {
+        String actorCommonName = "actor-1";
+        String actorCommonName2 = "actor-2";
+        String actorCommonName3 = "actor-3";
+        String adminUser = "adminUser";
+        privateChannelRepository.save(new PrivateChannel(new HashSet<>(Set.of(new Peer("peerOne"))), PrivateChannelStatus.CREATED, "test",
+                new PrivateChannelEndpoint("test", 1337, "test"),
+                actorCommonName));
+
+        privateChannelRepository.save(new PrivateChannel(new HashSet<>(Set.of(new Peer("peerTwo"))), PrivateChannelStatus.CREATED, "This is description",
+                new PrivateChannelEndpoint("test", 1337, "test"),
+                actorCommonName2));
+
+        List<PrivateChannelApi> response1 = restController.getPrivateChannels(adminUser, actorCommonName);
+        List<PrivateChannelApi> response2 = restController.getPrivateChannels(adminUser, actorCommonName2);
+        List<PrivateChannelApi> response3 = restController.getPrivateChannels(adminUser, actorCommonName3);
+
+        assertThat(response1).hasSize(1);
+        assertThat(response2).hasSize(1);
+        assertThat(response3).hasSize(0);
     }
 }
