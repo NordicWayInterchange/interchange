@@ -7,6 +7,8 @@ import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
+import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderNameApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -80,6 +82,16 @@ public class AdminRestController {
         logger.info("List service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/names", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProviderNameApi> getServiceProviderNames(@PathVariable("adminUser") String adminUser) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("List service provider names for admin user {}", adminUser);
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        return typeTransformer.serviceProviderNameListToServiceProviderNameApiList(serviceProviderList);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
