@@ -72,6 +72,17 @@ public class TypeTransformer {
         return serviceProviderApiList.stream().sorted().toList();
     }
 
+    public List<ServiceProviderNameApi> serviceProviderNameListToServiceProviderNameApiList(List<ServiceProvider> serviceProviderList) {
+        List<ServiceProviderNameApi> serviceProviderApiList = new ArrayList<>();
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            serviceProviderApiList.add(new ServiceProviderNameApi(
+                    serviceProvider.getId(),
+                    serviceProvider.getName())
+            );
+        }
+        return serviceProviderApiList.stream().sorted().toList();
+    }
+
     public List<CapabilityApi> capabilitiesToGetMatchingCapabilitiesApiList(Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities ) {
 
         List<CapabilityApi> matchingCapabilities = new ArrayList<>();
