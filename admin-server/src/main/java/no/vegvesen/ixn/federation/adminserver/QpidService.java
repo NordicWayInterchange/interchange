@@ -21,16 +21,21 @@ public class QpidService {
         this.qpidClient = qpidClient;
     }
 
-    public boolean exchangeExists(String exchangeName){
+    public boolean exchangeExists(String exchangeName) {
         return qpidClient.exchangeExists(exchangeName);
     }
 
-    public boolean queueExists(String queueName){
+    public boolean queueExists(String queueName) {
         return qpidClient.queueExists(queueName);
     }
 
-    public boolean bindingExists(String exchangeName, String queueName){
-        return qpidClient.getExchange(exchangeName).isBoundToQueue(queueName);
+    public boolean bindingExists(String exchangeName, String queueName) {
+        Exchange exchange = qpidClient.getExchange(exchangeName);
+        if (exchange != null) {
+            return exchange.isBoundToQueue(queueName);
+        } else {
+            return false;
+        }
     }
 
     public List<Exchange> getAllExchanges() {
