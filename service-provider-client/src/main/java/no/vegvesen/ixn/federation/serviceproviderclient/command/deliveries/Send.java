@@ -47,11 +47,11 @@ public class Send implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
             AddDeliveriesResponse response = client.addDeliveries(request);
-            deliveryId = response.getDeliveries().stream().findFirst().get().getId();
+            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
         else if(option.selector != null){
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
-            deliveryId = response.getDeliveries().stream().findFirst().get().getId();
+            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
         else{
             deliveryId = option.id;
@@ -59,17 +59,16 @@ public class Send implements Callable<Integer> {
 
         GetDeliveryResponse delivery = client.getDelivery(deliveryId);
 
-        while(!delivery.getStatus().equals(DeliveryStatus.CREATED)){
-            if(!delivery.getStatus().equals(DeliveryStatus.REQUESTED)){
-                throw new Exception("Delivery status is not valid");
-            }
+        while (delivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
+            TimeUnit.SECONDS.sleep(3);
             delivery = client.getDelivery(deliveryId);
-            TimeUnit.SECONDS.sleep(2);
         }
-        TimeUnit.SECONDS.sleep(3);
-
-        String queueName = delivery.getEndpoints().stream().findFirst().get().getTarget();
-        String url = "amqps://" + delivery.getEndpoints().stream().findFirst().get().getHost();
+        if (! delivery.getStatus().equals(DeliveryStatus.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(),delivery.getId()));
+        }
+        DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not determine delivery endpoint from response"));
+        String queueName = deliveryEndpoint.getTarget();
+        String url = "amqps://" + deliveryEndpoint.getHost();
 
         System.out.printf("Sending message from file %s%n",messageFile);
         ObjectMapper mapper = new ObjectMapper();
@@ -173,8 +172,7 @@ public class Send implements Callable<Integer> {
 
     private static byte[] convertFileToByteArray(String fileName) throws IOException {
         File file = new File(fileName);
-        byte [] bytes = Files.readAllBytes(file.toPath());
-        return bytes;
+        return Files.readAllBytes(file.toPath());
     }
 
     private void validateInput(Messages messages) throws Exception {

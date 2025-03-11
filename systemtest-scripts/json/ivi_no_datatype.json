@@ -5,8 +5,8 @@
         {
             "application": {
                 "messageType": "IVIM",
-                "publicationId": "NO-12345:1",
-                "publisherId": "NO-12345",
+                "publicationId": "NO12345:1",
+                "publisherId": "NO12345",
                 "originatingCountry": "NO",
                 "protocolVersion": "IVI:1.0",
                 "quadTree": [
