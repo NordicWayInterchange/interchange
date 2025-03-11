@@ -19,8 +19,20 @@ spec:
                 name: {{ .Release.Name }}-napcore-frontend
                 port:
                   number: 3000
+
+    - host: admin.{{ .Values.external_name }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-admin-frontend
+                port:
+                  number: 3000
   tls:
     - hosts:
       - portal.{{ .Values.external_name }}
+      - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-portal-cert
 {{- end }}
