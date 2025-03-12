@@ -2,14 +2,12 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
-import no.vegvesen.ixn.federation.qpid.Binding;
-import no.vegvesen.ixn.federation.qpid.Exchange;
-import no.vegvesen.ixn.federation.qpid.Filter;
-import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.assertj.core.util.Sets;
@@ -44,6 +42,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @MockBean
     QpidService qpidService;
+
+    @MockBean
+    QpidClient qpidClient;
 
     @Test
     public void contextLoads() {

@@ -1,0 +1,13 @@
+spring:
+  ssl:
+    bundle:
+      jks:
+        qpid:
+          keystore:
+            location: ${KEY_STORE}
+            password: ${KEY_STORE_PASSWORD}
+            type: PKCS12
+          truststore:
+            location: ${TRUST_STORE}
+            password: ${TRUST_STORE_PASSWORD}
+            type: JKS
