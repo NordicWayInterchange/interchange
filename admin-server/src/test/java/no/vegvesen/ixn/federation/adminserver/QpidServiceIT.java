@@ -7,10 +7,10 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
-import no.vegvesen.ixn.testssl.SSLContextConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -26,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         QpidClient.class,
         QpidClientConfig.class,
         RoutingConfigurerProperties.class,
-        SSLContextConfig.class,
-        TestSSLProperties.class
+        SslAutoConfiguration.class
 })
 public class QpidServiceIT extends QpidDockerBaseIT {
 
@@ -36,6 +35,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     @Autowired
     private QpidClient client;
+
 
     public static final String HOST_NAME = getDockerHost();
 
@@ -53,8 +53,10 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     static void datasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("admin_server", stores.clientStores()));
+        registry.add("KEY_STORE", () -> getClientStorePath("admin_server", stores.clientStores()));
+        registry.add("TRUST_STORE", () -> getTrustStorePath(stores));
+        registry.add("KEY_STORE_PASSWORD", () -> "password");
+        registry.add("TRUST_STORE_PASSWORD", () -> "password");
     }
 
     @BeforeAll

@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,6 +48,11 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @MockBean
     QpidClient qpidClient;
 
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("KEY_STORE_PASSWORD", () -> "password");
+        registry.add("TRUST_STORE_PASSWORD", () -> "password");
+    }
     @Test
     public void contextLoads() {
     }
