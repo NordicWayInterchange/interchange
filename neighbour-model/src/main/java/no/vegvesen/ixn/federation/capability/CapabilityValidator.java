@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +16,10 @@ public class CapabilityValidator {
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
 
     private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
+
+    private static Pattern countryCodeRegex = Pattern.compile("[A-Z]{2}");
+
+    private static Pattern publisherIdRegex = Pattern.compile("[A-Z]{2}[0-9]{5}");
 
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
@@ -35,7 +37,7 @@ public class CapabilityValidator {
         };
     }
 
-    public static boolean capabilityHasValidProperties(CapabilityApi capability){
+    public static Map<Boolean, String> capabilityHasValidProperties(CapabilityApi capability){
         ApplicationApi application = capability.getApplication();
 
         return switch (application){
@@ -62,17 +64,53 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static boolean validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        for(String property: mandatoryProperties) {
-            if(!property.equals("quadTree") && !property.equals("causeCode")) {
-                String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
-                Matcher matcher = validCharacters.matcher(value);
-                if (!matcher.matches()) {
-                    return false;
+    public static Map<Boolean, String> validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        for (String property : mandatoryProperties) {
+
+            String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
+            Matcher validCharMatcher = validCharacters.matcher(value);
+
+            if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
+                return Map.of(false, String.format("%s contains illegal characters", property));
+            }
+            if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
+                return Map.of(false, String.format("%s exceeds character limit of 255", property));
+            }
+            switch (property) {
+                case "publisherId" -> {
+                    Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
+                    if(!publisherIdMatcher.matches()) {
+                        return Map.of(false, String.format("%s must be in format <country code><5 numbers>", property));
+                    }
+                }
+                case "originatingCountry" -> {
+                    Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
+                    if (!countryCodeMatcher.matches()) {
+                        return Map.of(false, String.format("'%s' is not a valid country code", value));
+                    }
+                }
+                case "publicationId" -> {
+                    String publisherId = applicationApi.getPublisherId();
+                    if (!value.startsWith(publisherId + ":")) {
+                        return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                    }
+                }
+                case "quadTree" -> {
+                    String[] quadTreeTiles = value.split(",");
+                    for (String quadTreeTile : quadTreeTiles) {
+                        if (quadTreeTile.length() > 255) {
+                            return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                        }
+                    }
                 }
             }
         }
-        return true;
+        return Map.of(true, "");
+    }
+
+    public static boolean isShardCountValid(MetadataApi metadata){
+        Integer shardCount = metadata.getShardCount();
+        return shardCount == null || shardCount >= 1 && shardCount <= 10;
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){

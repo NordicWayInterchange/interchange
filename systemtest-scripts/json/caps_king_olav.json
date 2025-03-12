@@ -5,7 +5,7 @@
     "application" : {
       "messageType" : "DENM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-DENM",
+      "publicationId" : "NO00000:DENM",
       "originatingCountry" : "NO",
       "protocolVersion" : "DENM:1.2.2",
       "quadTree" : [ "12003" ],
@@ -23,7 +23,7 @@
     "application" : {
       "messageType" : "SSEM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-SSEM",
+      "publicationId" : "NO00000:SSEM",
       "originatingCountry" : "NO",
       "protocolVersion" : "SSEM",
       "quadTree" : [ "12003" ]
@@ -40,7 +40,7 @@
     "application" : {
       "messageType" : "SPATEM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-SPATEM",
+      "publicationId" : "NO00000:SPATEM",
       "originatingCountry" : "NO",
       "protocolVersion" : "SPATEM",
       "quadTree" : [ "12003" ]
@@ -57,7 +57,7 @@
     "application" : {
       "messageType" : "MAPEM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-MAPEM",
+      "publicationId" : "NO00000:MAPEM",
       "originatingCountry" : "NO",
       "protocolVersion" : "MAPEM",
       "quadTree" : [ "12003" ]
@@ -74,7 +74,7 @@
     "application" : {
       "messageType" : "SREM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-SREM",
+      "publicationId" : "NO00000:SREM",
       "originatingCountry" : "NO",
       "protocolVersion" : "SREM",
       "quadTree" : [ "12003" ]
@@ -91,7 +91,7 @@
     "application" : {
       "messageType" : "IVIM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-IVIM",
+      "publicationId" : "NO00000:IVIM",
       "originatingCountry" : "NO",
       "protocolVersion" : "IVI:1.2",
       "quadTree" : [ "12003" ]
@@ -108,7 +108,7 @@
     "application" : {
       "messageType" : "CAM",
       "publisherId" : "NO00000",
-      "publicationId" : "NO00000-CAM",
+      "publicationId" : "NO00000:CAM",
       "originatingCountry" : "NO",
       "protocolVersion" : "CAM",
       "quadTree" : [ "12003" ]
