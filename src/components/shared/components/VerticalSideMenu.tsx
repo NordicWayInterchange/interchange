@@ -15,6 +15,7 @@ import {IPages} from "@/interfaces/IPages";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import HouseIcon from "@mui/icons-material/House";
+import EqualizerIcon from '@mui/icons-material/Equalizer';
 
 const drawerWidth = 145;
 
@@ -33,6 +34,11 @@ const SIDE_PAGES: Array<IPages> = [
         text: "Neighbours",
         url: "/neighbours",
         icon: <Groups2Icon />
+    },
+    {
+        text: "Graph visualizer",
+        url: "/BindingExists",
+        icon: <EqualizerIcon />
     },
 ];
 
