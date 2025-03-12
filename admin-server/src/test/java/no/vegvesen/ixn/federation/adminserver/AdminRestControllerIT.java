@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(classes = TestApplication.class)
+@SpringBootTest(classes = {TestApplication.class, MockSslBundle.class})
 public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
