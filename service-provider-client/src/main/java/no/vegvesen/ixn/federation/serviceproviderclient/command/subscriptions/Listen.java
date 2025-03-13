@@ -66,13 +66,12 @@ public class Listen implements Callable<Integer> {
             throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        List<GetSubscriptionResponse> createdSubscriptions = Collections.synchronizedList(new ArrayList<>());
-        CountDownLatch latch = new CountDownLatch(subscriptions.size());
+        List<Future<GetSubscriptionResponse>> results = Collections.synchronizedList(new ArrayList<>());
         try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
             System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
 
-                executorService.submit(() -> {
+                Future<GetSubscriptionResponse> subscriptionResponse = executorService.submit(() -> {
 
                     String id = subscription.getId();
                     System.out.println("Checking subscription " + id);
@@ -83,14 +82,13 @@ public class Listen implements Callable<Integer> {
                             mySubscription = client.getSubscription(id);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-                            latch.countDown();
                             throw new RuntimeException(e);
                         }
                     }
 
                     if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
                         if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
-                            //LocalSubscription, need to wait for the endpoints to be set
+                            //redirect subscription, need to wait for the endpoints to be set
                             System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
                             while (mySubscription.getEndpoints().isEmpty()) {
                                 try {
@@ -98,21 +96,20 @@ public class Listen implements Callable<Integer> {
                                     mySubscription = client.getSubscription(id);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
-                                    latch.countDown();
                                     throw new RuntimeException(e);
                                 }
                             }
 
                         }
-                        createdSubscriptions.add(mySubscription);
                     } else {
-                        System.out.printf("Unexpected subscription status %s for subscription %s, skipping%n", mySubscription.getStatus(), mySubscription.getId());
+                        throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
                     }
-                    latch.countDown();
+                    return mySubscription;
+
                 });
+                results.add(subscriptionResponse);
             }
         }
-        latch.await();
         final CountDownLatch counter = new CountDownLatch(1);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
@@ -129,14 +126,19 @@ public class Listen implements Callable<Integer> {
             }
         });
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
-        for (GetSubscriptionResponse subscription : createdSubscriptions) {
-            for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
-                String url = endpoint.toUrl();
-                Connection connection = connectionPool.createConnection(url);
-                Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
-                Destination destination = session.createQueue(endpoint.getSource());
-                MessageConsumer consumer = session.createConsumer(destination);
-                consumer.setMessageListener(listener);
+        for (Future<GetSubscriptionResponse> subscriptionResponse : results) {
+            try {
+                GetSubscriptionResponse getSubscriptionResponse = subscriptionResponse.get();
+                for (LocalEndpointApi endpoint : getSubscriptionResponse.getEndpoints()) {
+                    String url = endpoint.toUrl();
+                    Connection connection = connectionPool.createConnection(url);
+                    Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
+                    Destination destination = session.createQueue(endpoint.getSource());
+                    MessageConsumer consumer = session.createConsumer(destination);
+                    consumer.setMessageListener(listener);
+                }
+            } catch (ExecutionException e) {
+                System.out.println(e.getCause());
             }
         }
         counter.await();
@@ -154,6 +156,8 @@ public class Listen implements Callable<Integer> {
         @Option(names = {"-i", "--id"}, description = "The subscription Id")
         String id;
     }
+
+
 
     public static class ConnectionPool {
 
