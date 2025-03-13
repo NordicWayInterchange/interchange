@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -10,20 +9,13 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -34,24 +26,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/*
-@SpringBootTest(classes = {
-        QpidService.class,
-        QpidClient.class,
-        QpidClientConfig.class,
-        RoutingConfigurerProperties.class,
-        SslAutoConfiguration.class
-})
-
- */
 @Testcontainers
 public class QpidServiceIT extends QpidDockerBaseIT {
-
-    //@Autowired
-    //private QpidService service;
-
-    //@Autowired
-
 
     public static final String HOST_NAME = getDockerHost();
 
@@ -66,48 +42,27 @@ public class QpidServiceIT extends QpidDockerBaseIT {
             Path.of("qpid")
     );
 
-    private QpidClient client;
+    private QpidAdminClient client;
+
+    private QpidService service;
 
     @BeforeEach
     public void setupClient() {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
-        client = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
+        client = new QpidAdminClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
+        service = new QpidService(client);
     }
-
-    /*
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("KEY_STORE", () -> getClientStorePath("admin_server", stores.clientStores()));
-        registry.add("TRUST_STORE", () -> getTrustStorePath(stores));
-        registry.add("KEY_STORE_PASSWORD", () -> "password");
-        registry.add("TRUST_STORE_PASSWORD", () -> "password");
-    }
-
-     */
-/*
-    @BeforeAll
-    static void setUp() {
-        qpidContainer.start();
-
-    }
-    @Test
-    public void serviceIsAutowired() {
-        assertThat(service).isNotNull();
-    }
-*/
 
     @Test
     public void testExchangeExists() {
         client.createDirectExchange("exchange-1");
-        assertThat(client.exchangeExists("exchange-1")).isTrue();
+        assertThat(service.exchangeExists("exchange-1")).isTrue();
     }
 
     @Test
     public void testQueueExists() {
         client.createQueue("queue-1");
-        assertThat(client.queueExists("queue-1")).isTrue();
+        assertThat(service.queueExists("queue-1")).isTrue();
     }
 
     @Test
@@ -131,7 +86,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
-        assertThat(client.getExchange(exchangeName).isBoundToQueue(queueName)).isTrue();
+        assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
     }
 
     @Test
@@ -141,21 +96,21 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         client.createHeadersExchange(exchangeName);
 
-        assertThat(client.getExchange(exchangeName).isBoundToQueue(queueName)).isFalse();
+        assertThat(service.bindingExists(exchangeName, queueName)).isFalse();
     }
 
     @Test
-    public void testGetExchanges() throws JsonProcessingException {
+    public void testGetExchanges() {
         Exchange exchange = client.createDirectExchange("test-exchange");
         assertThat(exchange.getName()).isEqualTo("test-exchange");
-        assertThat(client.getAllExchanges()).isNotEmpty();
+        assertThat(service.getAllExchanges()).isNotEmpty();
     }
 
     @Test
-    public void testGetQueues() throws JsonProcessingException {
+    public void testGetQueues() {
         Queue queue = client.createQueue("test-queue");
         assertThat(queue.getName()).isEqualTo("test-queue");
-        assertThat(client.getAllQueues()).isNotEmpty();
+        assertThat(service.getAllQueues()).isNotEmpty();
     }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
@@ -166,4 +121,5 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
         return new RestTemplate(new HttpComponentsClientHttpRequestFactory(client));
     }
+
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @ConfigurationPropertiesScan
-public class QpidClient {
+public class QpidAdminClient {
 
     public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 
@@ -30,7 +30,7 @@ public class QpidClient {
 
     public final static long MAX_TTL_15_MINUTES = 900_000L;
 
-    private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
+    private final Logger logger = LoggerFactory.getLogger(QpidAdminClient.class);
 
     private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
 
@@ -65,9 +65,9 @@ public class QpidClient {
     private final String connectionUrl;
     private final String queryApiUrl;
 
-    public QpidClient(String baseUrl,
-                      String vhostName,
-                      RestTemplate restTemplate) {
+    public QpidAdminClient(String baseUrl,
+                           String vhostName,
+                           RestTemplate restTemplate) {
         this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
         this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
         this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
@@ -90,14 +90,8 @@ public class QpidClient {
      */
 
     @Autowired
-    public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
+    public QpidAdminClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
         this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
-    }
-
-    int ping() {
-        ResponseEntity<String> response = restTemplate.getForEntity(pingURL, String.class);
-        logger.debug(response.getBody());
-        return response.getStatusCodeValue();
     }
 
     public boolean addBinding(String source, Binding binding) {
@@ -111,10 +105,6 @@ public class QpidClient {
 
     public Queue createQueue(String name) {
         return createQueue(new CreateQueueRequest(name, MAX_TTL_15_MINUTES));
-    }
-
-    public Queue createNonDestructiveQueue(String name) {
-        return createQueue(new CreateQueueRequest(name, MAX_TTL_15_MINUTES, true));
     }
 
     public Exchange createHeadersExchange(String name) {
@@ -180,19 +170,6 @@ public class QpidClient {
                 }).getBody();
     }
 
-    public void removeQueue(Queue queue) {
-        String url = queuesURL + "/" + queue.getName();
-        logger.debug("DELETE to URL {}", url);
-        restTemplate.delete(url);
-        logger.info("Removed queue {}", queue.getName());
-    }
-
-    public void removeExchange(Exchange exchange) {
-        String url = exchangesURL + "/" + exchange.getName();
-        logger.debug("DELETE to URL {}", url);
-        restTemplate.delete(url);
-        logger.info("Removed exchange {}", exchange.getName());
-    }
 
     public GroupMember getGroupMember(String memberName, String groupName) {
         try {
@@ -215,65 +192,10 @@ public class QpidClient {
         }
     }
 
-    public void removeMemberFromGroup(GroupMember member, String groupName) {
-        String url = groupsUrl + groupName + "/" + member.getName();
-        logger.debug("DELETE to URL {}", url);
-        logger.info("Removing user {} from group {}", member.getName(), groupName);
-        restTemplate.delete(url);
-    }
-
-    public void removeMemberFromGroup(String groupMemberName, String groupName) {
-        String url = groupsUrl + groupName + "/" + groupMemberName;
-        logger.debug("DELETE to URL {}", url);
-        logger.info("Removing user {} from group {}", groupMemberName, groupName);
-        restTemplate.delete(url);
-    }
-
-    //TODO complete the debug logging
-    public GroupMember addMemberToGroup(String memberName, String groupName) {
-        GroupMember groupMember = new GroupMember(memberName);
-        logger.info("Adding member {} to group {}", memberName, groupName);
-        String url = groupsUrl + groupName;
-        return restTemplate.postForEntity(url, groupMember, GroupMember.class).getBody();
-    }
-
-    public void addReadAccess(String subscriberName, String queue) {
-        VirtualHostAccessController provider = getQpidAcl();
-        provider.addQueueReadAccess(subscriberName, queue);
-        logger.info("Adding read access for {} to queue {}", subscriberName, queue);
-        postQpidAcl(provider);
-    }
-
-    public void addWriteAccess(String subscriberName, String queue) {
-        VirtualHostAccessController provider = getQpidAcl();
-        provider.addExchangeWriteAccess(subscriberName, queue);
-        logger.info("Adding write access for {} to queue {}", subscriberName, queue);
-        postQpidAcl(provider);
-    }
-
-    public void removeReadAccess(String subscriberName, String queue) {
-        VirtualHostAccessController provider = getQpidAcl();
-        provider.removeQueueReadAccess(subscriberName, queue);
-        logger.info("Removing read access for {} to queue {}", subscriberName, queue);
-        postQpidAcl(provider);
-    }
-
-    public void removeWriteAccess(String subscriberName, String queue) {
-        VirtualHostAccessController provider = getQpidAcl();
-        provider.removeQueueWriteAccess(subscriberName, queue);
-        logger.info("Removing write access for {} to queue {}", subscriberName, queue);
-        postQpidAcl(provider);
-    }
-
     public VirtualHostAccessController getQpidAcl() {
         ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
         logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
         return response.getBody();
-    }
-
-    public void postQpidAcl(VirtualHostAccessController provider) {
-        logger.info("Posting updated ACL");
-        restTemplate.postForEntity(aclRulesUrl, provider, String.class);
     }
 
 
@@ -300,17 +222,5 @@ public class QpidClient {
                 new ParameterizedTypeReference<>() {
                 });
         return allExchangesResponse.getBody();
-    }
-
-    public QpidDelta getQpidDelta() {
-        try {
-            List<Queue> allQueues = getAllQueues();
-            List<Exchange> allExchanges = getAllExchanges();
-            return new QpidDelta(allExchanges, allQueues);
-
-        } catch (JsonProcessingException e) {
-            logger.error("Could not parse qpid delta");
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
-import no.vegvesen.ixn.federation.adminserver.qpid.QpidClient;
+import no.vegvesen.ixn.federation.adminserver.qpid.QpidAdminClient;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,24 +12,23 @@ import java.util.List;
 @Service
 public class QpidService {
 
-    private final QpidClient qpidClient;
-
+    private final QpidAdminClient qpidAdminClient;
 
     @Autowired
-    public QpidService(QpidClient qpidClient) {
-        this.qpidClient = qpidClient;
+    public QpidService(QpidAdminClient qpidAdminClient) {
+        this.qpidAdminClient = qpidAdminClient;
     }
 
     public boolean exchangeExists(String exchangeName) {
-        return qpidClient.exchangeExists(exchangeName);
+        return qpidAdminClient.exchangeExists(exchangeName);
     }
 
     public boolean queueExists(String queueName) {
-        return qpidClient.queueExists(queueName);
+        return qpidAdminClient.queueExists(queueName);
     }
 
     public boolean bindingExists(String exchangeName, String queueName) {
-        Exchange exchange = qpidClient.getExchange(exchangeName);
+        Exchange exchange = qpidAdminClient.getExchange(exchangeName);
         if (exchange != null) {
             return exchange.isBoundToQueue(queueName);
         } else {
@@ -39,7 +38,7 @@ public class QpidService {
 
     public List<Exchange> getAllExchanges() {
         try {
-            return qpidClient.getAllExchanges();
+            return qpidAdminClient.getAllExchanges();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -47,7 +46,7 @@ public class QpidService {
 
     public List<Queue> getAllQueues() {
         try {
-            return qpidClient.getAllQueues();
+            return qpidAdminClient.getAllQueues();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

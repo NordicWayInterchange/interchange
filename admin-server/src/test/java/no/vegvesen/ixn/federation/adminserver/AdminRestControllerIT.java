@@ -45,8 +45,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @MockBean
     QpidService qpidService;
 
-    @MockBean
-    QpidClient qpidClient;
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
