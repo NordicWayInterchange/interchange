@@ -114,20 +114,20 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+        ConnectionPool connectionPool = new ConnectionPool( url -> {
+            try {
+                Connection conn = sink.createConnection(url, exceptionListener);
+                conn.start();
+                return conn;
+            } catch (JMSException e) {
+                throw new RuntimeException(e);
+            }
+        });
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         for (GetSubscriptionResponse subscription : createdSubscriptions) {
             for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
                 String url = endpoint.toUrl();
-                Connection connection =  connections.computeIfAbsent(url,s -> {
-                    try {
-                        Connection conn = sink.createConnection(s, exceptionListener);
-                        conn.start();
-                        return conn;
-                    } catch (JMSException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                Connection connection = connectionPool.createConnection(url);
                 Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
                 Destination destination = session.createQueue(endpoint.getSource());
                 MessageConsumer consumer = session.createConsumer(destination);
@@ -135,14 +135,7 @@ public class Listen implements Callable<Integer> {
             }
         }
         counter.await();
-        for (Connection connection : connections.values()) {
-            try {
-                connection.close();
-            } catch (Exception e) {
-                System.out.println("Exception while closing connection: " + e);
-            }
-        }
-
+        connectionPool.close();
         return 0;
     }
 
@@ -162,7 +155,26 @@ public class Listen implements Callable<Integer> {
     }
 
     private static class ConnectionPool {
+        private final ConnectionCreator connectionCreator;
         private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+
+        public ConnectionPool(ConnectionCreator connectionCreator) {
+            this.connectionCreator = connectionCreator;
+        }
+
+        public Connection createConnection(String url) {
+            return connections.computeIfAbsent(url, connectionCreator::createConnection);
+        }
+
+        public void close() {
+            connections.forEach( (s, c) -> {
+                try {
+                    c.close();
+                } catch (JMSException e) {
+                    System.out.println("Exception while closing connection: " + e);
+                }
+            });
+        }
 
     }
 
