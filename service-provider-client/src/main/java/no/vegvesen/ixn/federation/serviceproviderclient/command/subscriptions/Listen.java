@@ -6,18 +6,14 @@ import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-import javax.naming.Context;
 import java.io.File;
 import java.util.*;
-import java.util.Queue;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Command(name = "listen", description = "Add subscription and receive messages")
 public class Listen implements Callable<Integer> {
@@ -66,47 +62,14 @@ public class Listen implements Callable<Integer> {
             throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        List<Future<GetSubscriptionResponse>> results = Collections.synchronizedList(new ArrayList<>());
+        List<Future<GetSubscriptionResponse>> results = new ArrayList<>();
         try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
             System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
 
-                Future<GetSubscriptionResponse> subscriptionResponse = executorService.submit(() -> {
-
-                    String id = subscription.getId();
-                    System.out.println("Checking subscription " + id);
-                    GetSubscriptionResponse mySubscription = client.getSubscription(id);
-                    while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
-                        try {
-                            TimeUnit.SECONDS.sleep(2);
-                            mySubscription = client.getSubscription(id);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-                        if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
-                            //redirect subscription, need to wait for the endpoints to be set
-                            System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
-                            while (mySubscription.getEndpoints().isEmpty()) {
-                                try {
-                                    TimeUnit.SECONDS.sleep(2);
-                                    mySubscription = client.getSubscription(id);
-                                } catch (InterruptedException e) {
-                                    Thread.currentThread().interrupt();
-                                    throw new RuntimeException(e);
-                                }
-                            }
-
-                        }
-                    } else {
-                        throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
-                    }
-                    return mySubscription;
-
-                });
+                Future<GetSubscriptionResponse> subscriptionResponse = executorService.submit(
+                        new WaitForSubscription(client, subscription)
+                );
                 results.add(subscriptionResponse);
             }
         }
@@ -116,7 +79,7 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        ConnectionPool connectionPool = new ConnectionPool( url -> {
+        SinkConnectionPool connectionPool = new SinkConnectionPool(url -> {
             try {
                 Connection conn = sink.createConnection(url, exceptionListener);
                 conn.start();
@@ -159,12 +122,12 @@ public class Listen implements Callable<Integer> {
 
 
 
-    public static class ConnectionPool {
+    public static class SinkConnectionPool {
 
         private final ConnectionCreator connectionCreator;
-
         private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
-        public ConnectionPool(ConnectionCreator connectionCreator) {
+
+        public SinkConnectionPool(ConnectionCreator connectionCreator) {
             this.connectionCreator = connectionCreator;
         }
 
@@ -188,5 +151,52 @@ public class Listen implements Callable<Integer> {
 
     }
 
+    private static class WaitForSubscription implements Callable<GetSubscriptionResponse> {
+        private final LocalActorSubscription subscription;
+        private final ServiceProviderClient client;
+
+        public WaitForSubscription(ServiceProviderClient client, LocalActorSubscription subscription) {
+            this.subscription = subscription;
+            this.client = client;
+        }
+
+        @Override
+        public GetSubscriptionResponse call() {
+
+            String id = subscription.getId();
+            System.out.println("Checking subscription " + id);
+            GetSubscriptionResponse mySubscription = client.getSubscription(id);
+            while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                    mySubscription = client.getSubscription(id);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+            }
+
+            if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+                if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
+                    //redirect subscription, need to wait for the endpoints to be set
+                    System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
+                    while (mySubscription.getEndpoints().isEmpty()) {
+                        try {
+                            TimeUnit.SECONDS.sleep(2);
+                            mySubscription = client.getSubscription(id);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                }
+            } else {
+                throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
+            }
+            return mySubscription;
+
+        }
+    }
 }
 
