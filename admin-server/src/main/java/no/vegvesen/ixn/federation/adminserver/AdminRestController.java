@@ -71,7 +71,7 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("List service provider for admin user {}", adminUser);
+        logger.info("List service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }
@@ -81,7 +81,7 @@ public class AdminRestController {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("List network capabilities matching subscriptions for service providers in admin user {}", adminUser);
+        logger.info("List network capabilities matching subscription for service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
@@ -99,7 +99,7 @@ public class AdminRestController {
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("List local capabilities matching deliveries for service provider in admin user {}", adminUser);
+        logger.info("List local capabilities matching delivery for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){

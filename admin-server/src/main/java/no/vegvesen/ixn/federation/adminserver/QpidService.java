@@ -42,7 +42,7 @@ public class QpidService {
         try {
             return qpidClient.getAllExchanges();
         } catch (JsonProcessingException e) {
-            throw new HandleJsonProcessingException("JSON processing error: {}", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -50,7 +50,7 @@ public class QpidService {
         try {
             return qpidClient.getAllQueues();
         } catch (JsonProcessingException e) {
-            throw new HandleJsonProcessingException("JSON processing error: {}", e);
+            throw new RuntimeException(e);
         }
     }
 
