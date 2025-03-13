@@ -114,19 +114,20 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        HashMap<String, Connection> connections = new HashMap<>();
+        ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         for (GetSubscriptionResponse subscription : createdSubscriptions) {
             for (LocalEndpointApi endpoint : subscription.getEndpoints()) {
-                Connection connection;
-                if (connections.containsKey(endpoint.toUrl())) {
-                    connection = connections.get(endpoint.toUrl());
-
-                } else {
-                    connection = sink.createConnection(endpoint.toUrl(), exceptionListener);
-                    connection.start();
-                    connections.put(endpoint.toUrl(), connection);
-                }
+                String url = endpoint.toUrl();
+                Connection connection =  connections.computeIfAbsent(url,s -> {
+                    try {
+                        Connection conn = sink.createConnection(s, exceptionListener);
+                        conn.start();
+                        return conn;
+                    } catch (JMSException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
                 Destination destination = session.createQueue(endpoint.getSource());
                 MessageConsumer consumer = session.createConsumer(destination);
@@ -155,5 +156,15 @@ public class Listen implements Callable<Integer> {
         @Option(names = {"-i", "--id"}, description = "The subscription Id")
         String id;
     }
+
+    private interface ConnectionCreator {
+        Connection createConnection(String url);
+    }
+
+    private static class ConnectionPool {
+        private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+
+    }
+
 }
 

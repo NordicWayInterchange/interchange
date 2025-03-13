@@ -30,8 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
@@ -372,5 +371,142 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	@Test
+	public void testAddingConnectionFromEmptyState() throws NamingException, JMSException {
+		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of());
+
+		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
+		CollectorCreator collectorCreator = new CollectorCreator(
+				sslServerContext(stores,HOST_NAME),
+				HOST_NAME,
+				localIxnFederationPort,
+				"subscriptionExchange");
+
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		forwarder.runSchedule();
+		verify(listenerEndpointRepository).findAll();
+		assertThat(forwarder.getListeners()).hasSize(0);
+
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
+		forwarder.runSchedule();
+		verify(listenerEndpointRepository,times(2)).findAll();
+		assertThat(forwarder.getListeners()).hasSize(1);
+
+
+		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
+		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
+		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+			source.start();
+			String message = "Should work!";
+			byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
+			JmsMessage senderMessage = source.createMessageBuilder()
+					.bytesMessage(bytemessage)
+					.userId(HOST_NAME)
+					.messageType(Constants.DENM)
+					.publisherId("Test")
+					.publicationId("pub-1")
+					.quadTreeTiles(",3232,")
+					.protocolVersion("DATEX2;2.3")
+					.latitude(60.352374)
+					.longitude(13.334253)
+					.originatingCountry("SE")
+					.causeCode(1)
+					.subCauseCode(1)
+					.shardId(1)
+					.shardCount(1)
+					.timestamp(System.currentTimeMillis())
+					.build();
+			try {
+
+				CountDownLatch latch = new CountDownLatch(1);
+				try (Sink sink = new Sink(
+						consumerContainer.getAmqpsUrl(),
+						"sp_consumer",
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message1 -> latch.countDown()
+
+				)) {
+					sink.start();
+					source.sendNonPersistentMessage(senderMessage);
+					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	//TODO test that we have connections, and removes one
+	@Test
+	public void testRemovingConnectionFromAListOfOne() throws NamingException, JMSException {
+		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+
+		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
+
+		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
+		CollectorCreator collectorCreator = new CollectorCreator(
+				sslServerContext(stores,HOST_NAME),
+				HOST_NAME,
+				localIxnFederationPort,
+				"subscriptionExchange");
+
+		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		collector.runSchedule();
+		verify(listenerEndpointRepository).findAll();
+
+		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
+		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
+		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+			source.start();
+			String message = "Should work!";
+			byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
+			JmsMessage senderMessage = source.createMessageBuilder()
+					.bytesMessage(bytemessage)
+					.userId(HOST_NAME)
+					.messageType(Constants.DENM)
+					.publisherId("Test")
+					.publicationId("pub-1")
+					.quadTreeTiles(",3232,")
+					.protocolVersion("DATEX2;2.3")
+					.latitude(60.352374)
+					.longitude(13.334253)
+					.originatingCountry("SE")
+					.causeCode(1)
+					.subCauseCode(1)
+					.shardId(1)
+					.shardCount(1)
+					.timestamp(System.currentTimeMillis())
+					.build();
+			try {
+
+				CountDownLatch latch = new CountDownLatch(1);
+				try (Sink sink = new Sink(
+						consumerContainer.getAmqpsUrl(),
+						"sp_consumer",
+						sslClientContext(stores, CONSUMER_SP_NAME),
+						message1 -> latch.countDown()
+
+				)) {
+					sink.start();
+					source.sendNonPersistentMessage(senderMessage);
+					assertThat(latch.await(1,TimeUnit.SECONDS)).isTrue();
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of());
+		collector.runSchedule();
+		verify(listenerEndpointRepository,times(2)).findAll();
+		assertThat(collector.getListeners().size()).isEqualTo(0);
+
 	}
 }
