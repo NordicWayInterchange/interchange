@@ -67,7 +67,8 @@ public class Listen implements Callable<Integer> {
         }
 
         List<GetSubscriptionResponse> createdSubscriptions = Collections.synchronizedList(new ArrayList<>());
-        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
+        CountDownLatch latch = new CountDownLatch(subscriptions.size());
+        try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
             System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
 
@@ -82,6 +83,7 @@ public class Listen implements Callable<Integer> {
                             mySubscription = client.getSubscription(id);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
+                            latch.countDown();
                             throw new RuntimeException(e);
                         }
                     }
@@ -96,6 +98,7 @@ public class Listen implements Callable<Integer> {
                                     mySubscription = client.getSubscription(id);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
+                                    latch.countDown();
                                     throw new RuntimeException(e);
                                 }
                             }
@@ -105,9 +108,11 @@ public class Listen implements Callable<Integer> {
                     } else {
                         System.out.printf("Unexpected subscription status %s for subscription %s, skipping%n", mySubscription.getStatus(), mySubscription.getId());
                     }
+                    latch.countDown();
                 });
             }
         }
+        latch.await();
         final CountDownLatch counter = new CountDownLatch(1);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
@@ -150,14 +155,11 @@ public class Listen implements Callable<Integer> {
         String id;
     }
 
-    private interface ConnectionCreator {
-        Connection createConnection(String url);
-    }
+    public static class ConnectionPool {
 
-    private static class ConnectionPool {
         private final ConnectionCreator connectionCreator;
-        private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
+        private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
         public ConnectionPool(ConnectionCreator connectionCreator) {
             this.connectionCreator = connectionCreator;
         }
@@ -174,6 +176,10 @@ public class Listen implements Callable<Integer> {
                     System.out.println("Exception while closing connection: " + e);
                 }
             });
+        }
+
+        public interface ConnectionCreator {
+            Connection createConnection(String url);
         }
 
     }
