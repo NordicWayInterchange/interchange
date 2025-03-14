@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver.qpid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.properties.AdminQpidClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 @ConfigurationPropertiesScan
-public class QpidAdminClient {
+public class AdminQpidClient {
 
     public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 
@@ -30,7 +30,7 @@ public class QpidAdminClient {
 
     public final static long MAX_TTL_15_MINUTES = 900_000L;
 
-    private final Logger logger = LoggerFactory.getLogger(QpidAdminClient.class);
+    private final Logger logger = LoggerFactory.getLogger(AdminQpidClient.class);
 
     private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
 
@@ -65,7 +65,7 @@ public class QpidAdminClient {
     private final String connectionUrl;
     private final String queryApiUrl;
 
-    public QpidAdminClient(String baseUrl,
+    public AdminQpidClient(String baseUrl,
                            String vhostName,
                            RestTemplate restTemplate) {
         this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
@@ -82,16 +82,16 @@ public class QpidAdminClient {
     }
 
     /**
-     * NOTE: This wiring means that the restTemplate from QpidClientConfig#qpidRestTemplate() is used.
+     * NOTE: This wiring means that the restTemplate from AdminQpidClientConfig#qpidRestTemplate() is used.
      * At the time of writing, this switches off host name verification in TLS.
      *
      * @param restTemplate
-     * @param routingConfigurerProperties
+     * @param adminQpidClientProperties
      */
 
     @Autowired
-    public QpidAdminClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
-        this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
+    public AdminQpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, AdminQpidClientProperties adminQpidClientProperties) {
+        this(adminQpidClientProperties.getBaseUrl(), adminQpidClientProperties.getVhost(), restTemplate);
     }
 
     public boolean addBinding(String source, Binding binding) {
@@ -157,50 +157,6 @@ public class QpidAdminClient {
 
     public boolean exchangeExists(String exchangeName) {
         return getExchange(exchangeName) != null;
-    }
-
-    public List<Binding> getQueuePublishingLinks(String queueName) {
-        String url = queuesURL + "/" + queueName + "/getPublishingLinks";
-        logger.debug("GETting from {}", url);
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Binding>>() {
-                }).getBody();
-    }
-
-
-    public GroupMember getGroupMember(String memberName, String groupName) {
-        try {
-            String url = groupsUrl + groupName + "/" + memberName;
-            logger.debug("GETting from URL {}", url);
-            return restTemplate.getForEntity(url, GroupMember.class).getBody();
-        } catch (HttpClientErrorException.NotFound e) {
-            return null;
-        }
-    }
-
-    public List<GroupMember> getGroupMembers(String groupName) {
-        try {
-            String url = groupsUrl + groupName;
-            logger.debug("Getting from URL {}", url);
-            ResponseEntity<GroupMember[]> response = restTemplate.getForEntity(url, GroupMember[].class);
-            return Arrays.asList(response.getBody());
-        } catch (HttpClientErrorException.NotFound e) {
-            return null;
-        }
-    }
-
-    public VirtualHostAccessController getQpidAcl() {
-        ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
-        logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
-        return response.getBody();
-    }
-
-
-    public String getConnection(String port, String connectionName) {
-        return restTemplate.getForEntity(connectionUrl + "/" + port + "/" + connectionName, String.class).getBody();
     }
 
 

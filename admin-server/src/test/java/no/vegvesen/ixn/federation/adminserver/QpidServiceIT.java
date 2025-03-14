@@ -42,14 +42,14 @@ public class QpidServiceIT extends QpidDockerBaseIT {
             Path.of("qpid")
     );
 
-    private QpidAdminClient client;
+    private AdminQpidClient client;
 
     private QpidService service;
 
     @BeforeEach
     public void setupClient() {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
-        client = new QpidAdminClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
+        client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
         service = new QpidService(client);
     }
 

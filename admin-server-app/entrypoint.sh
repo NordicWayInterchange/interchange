@@ -22,8 +22,8 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dserver.ssl.bundle="controller" \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      -Dadmin.name=${ADMIN_NAME} \
-     -Drouting-configurer.baseUrl=${BASE_URL} \
-     -Drouting-configurer.vhost=${BROKER_EXTERNAL_NAME} \
+     -Dadmin.qpid.client.baseUrl=${BASE_URL} \
+     -Dadmin.qpid.client.vhost=${BROKER_EXTERNAL_NAME} \
      -Dserver.port=${SP_CHNL_PORT} \
      ${LOG_LEVELS} \
      -jar admin-server.jar

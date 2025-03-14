@@ -18,13 +18,13 @@ import org.springframework.web.client.RestTemplate;
 import javax.net.ssl.SSLContext;
 
 @Configuration
-public class QpidClientConfig {
+public class AdminQpidClientConfig {
 
 
 	private final SslBundles sslBundles;
 
 	@Autowired
-	public QpidClientConfig(SslBundles sslBundles) {
+	public AdminQpidClientConfig(SslBundles sslBundles) {
 		this.sslBundles = sslBundles;
 	}
 
