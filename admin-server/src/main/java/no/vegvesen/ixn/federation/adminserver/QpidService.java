@@ -9,6 +9,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ public class QpidService {
 
     private final OutgoingMatchRepository outgoingMatchRepository;
 
+    private final Logger logger = LoggerFactory.getLogger(QpidService.class);
     private final AdminQpidClient adminQpidClient;
 
     @Autowired
@@ -45,28 +48,26 @@ public class QpidService {
         }
     }
 
-    public boolean deliverysExchangeBindingToMatchingCapabilityExists(List<ServiceProvider> serviceProviderList) {
+    public boolean deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
         QpidDelta delta = qpidClient.getQpidDelta();
-            for (ServiceProvider serviceProvider : serviceProviderList) {
-                if (serviceProvider.hasDeliveries()) {
-                    for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                        if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                            List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
-
-                            for (OutgoingMatch match : matches) {
-                                Capability capability = match.getCapability();
-                                for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                                    for (CapabilityShard shard : capability.getShards()) {
-                                        if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
-                                            return true;
-                                        }
-                                    }
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(Integer.valueOf(deliveryId));
+                    for (OutgoingMatch match : matches) {
+                        Capability capability = match.getCapability();
+                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                            for (CapabilityShard shard : capability.getShards()) {
+                                if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
+                                    return true; //Enrich here
                                 }
                             }
                         }
                     }
                 }
+            }
         }
+
         return false;
     }
 
