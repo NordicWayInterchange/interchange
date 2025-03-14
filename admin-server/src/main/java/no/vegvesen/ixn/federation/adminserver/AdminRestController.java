@@ -197,6 +197,16 @@ public class AdminRestController {
         return qpidService.bindingExists(exchangeName, queueName);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/deliverysExchange/bindings/{exchangeName}")
+    public Boolean deliverysExchangeBindingToMatchingCapabilityExists(@PathVariable("adminUser") String adminUser) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("Log - delivery's exchange binding to matching capability exists - requesting user {}", adminUser);
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
+        return qpidService.deliverysExchangeBindingToMatchingCapabilityExists(serviceProviderList);
+    }
+
     private ServiceProvider serviceProviderExists(String actorCommonName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         if (serviceProvider == null) {
