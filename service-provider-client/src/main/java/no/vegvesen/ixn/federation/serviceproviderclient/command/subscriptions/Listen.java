@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.*;
 import java.util.Queue;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Command(name = "listen", description = "Add subscription and receive messages")
 public class Listen implements Callable<Integer> {
@@ -64,6 +65,7 @@ public class Listen implements Callable<Integer> {
         }
 
         Queue<GetSubscriptionResponse> results = new ArrayBlockingQueue<>(subscriptions.size());
+        AtomicInteger numItemsLeft = new AtomicInteger(subscriptions.size());
         try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
             System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
@@ -81,7 +83,7 @@ public class Listen implements Callable<Integer> {
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
         SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sink, exceptionListener));
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
-        while (! results.isEmpty()) {
+        while (numItemsLeft.get() > 0) {
                 GetSubscriptionResponse getSubscriptionResponse = results.poll();
                 for (LocalEndpointApi endpoint : getSubscriptionResponse.getEndpoints()) {
                     String url = endpoint.toUrl();
@@ -91,7 +93,7 @@ public class Listen implements Callable<Integer> {
                     MessageConsumer consumer = session.createConsumer(destination);
                     consumer.setMessageListener(listener);
                 }
-
+                numItemsLeft.decrementAndGet();
         }
         System.out.println("All listeners started");
         counter.await();
