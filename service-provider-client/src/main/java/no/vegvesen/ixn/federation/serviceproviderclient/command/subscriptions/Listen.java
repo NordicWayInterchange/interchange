@@ -13,6 +13,7 @@ import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
 import java.util.*;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 @Command(name = "listen", description = "Add subscription and receive messages")
@@ -62,36 +63,26 @@ public class Listen implements Callable<Integer> {
             throw  new RuntimeException("Need to specify either id, selector or file");
         }
 
-        List<Future<GetSubscriptionResponse>> results = new ArrayList<>();
+        Queue<GetSubscriptionResponse> results = new ArrayBlockingQueue<>(subscriptions.size());
         try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
             System.out.println(subscriptions.size() + " subscriptions created");
             for (LocalActorSubscription subscription : subscriptions) {
 
-                Future<GetSubscriptionResponse> subscriptionResponse = executorService.submit(
-                        new WaitForSubscription(client, subscription)
+                executorService.execute(
+                        new WaitForSubscription(client, subscription, results)
                 );
-                results.add(subscriptionResponse);
             }
         }
         final CountDownLatch counter = new CountDownLatch(1);
-        ExceptionListener exceptionListener = e -> {
+        final ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        SinkConnectionPool connectionPool = new SinkConnectionPool(url -> {
-            try {
-                Connection conn = sink.createConnection(url, exceptionListener);
-                conn.start();
-                return conn;
-            } catch (JMSException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sink, exceptionListener));
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
-        for (Future<GetSubscriptionResponse> subscriptionResponse : results) {
-            try {
-                GetSubscriptionResponse getSubscriptionResponse = subscriptionResponse.get();
+        while (! results.isEmpty()) {
+                GetSubscriptionResponse getSubscriptionResponse = results.poll();
                 for (LocalEndpointApi endpoint : getSubscriptionResponse.getEndpoints()) {
                     String url = endpoint.toUrl();
                     Connection connection = connectionPool.createConnection(url);
@@ -100,10 +91,9 @@ public class Listen implements Callable<Integer> {
                     MessageConsumer consumer = session.createConsumer(destination);
                     consumer.setMessageListener(listener);
                 }
-            } catch (ExecutionException e) {
-                System.out.println(e.getCause());
-            }
+
         }
+        System.out.println("All listeners started");
         counter.await();
         connectionPool.close();
         return 0;
@@ -151,17 +141,19 @@ public class Listen implements Callable<Integer> {
 
     }
 
-    private static class WaitForSubscription implements Callable<GetSubscriptionResponse> {
+    private static class WaitForSubscription implements Runnable {
         private final LocalActorSubscription subscription;
         private final ServiceProviderClient client;
+        private final Queue<GetSubscriptionResponse> workQueue;
 
-        public WaitForSubscription(ServiceProviderClient client, LocalActorSubscription subscription) {
+        public WaitForSubscription(ServiceProviderClient client, LocalActorSubscription subscription,Queue<GetSubscriptionResponse> workQueue) {
             this.subscription = subscription;
             this.client = client;
+            this.workQueue = workQueue;
         }
 
         @Override
-        public GetSubscriptionResponse call() {
+        public void run() {
 
             String id = subscription.getId();
             System.out.println("Checking subscription " + id);
@@ -194,8 +186,30 @@ public class Listen implements Callable<Integer> {
             } else {
                 throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
             }
-            return mySubscription;
+            //Add the subscription to the blocking queue
+            workQueue.add(mySubscription);
 
+        }
+    }
+
+    private static class ExceptionListeningConnectionCreator implements SinkConnectionPool.ConnectionCreator {
+        private final NewSink sink;
+        private final ExceptionListener exceptionListener;
+
+        public ExceptionListeningConnectionCreator(NewSink sink, ExceptionListener exceptionListener) {
+            this.sink = sink;
+            this.exceptionListener = exceptionListener;
+        }
+
+        @Override
+        public Connection createConnection(String url) {
+            try {
+                Connection conn = sink.createConnection(url, exceptionListener);
+                conn.start();
+                return conn;
+            } catch (JMSException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
