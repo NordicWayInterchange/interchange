@@ -380,23 +380,22 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(List.of());
 
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
-		CollectorCreator collectorCreator = new CollectorCreator(
+        CollectorCreator collectorCreator = new CollectorCreator(
 				sslServerContext(stores,HOST_NAME),
 				HOST_NAME,
-				localIxnFederationPort,
+                consumerContainer.getAmqpsPort().toString(),
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
-		forwarder.runSchedule();
+		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		collector.runSchedule();
 		verify(listenerEndpointRepository).findAll();
-		assertThat(forwarder.getListeners()).hasSize(0);
+		assertThat(collector.getListeners()).hasSize(0);
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
-		forwarder.runSchedule();
+		collector.runSchedule();
 		verify(listenerEndpointRepository,times(2)).findAll();
-		assertThat(forwarder.getListeners()).hasSize(1);
+		assertThat(collector.getListeners()).hasSize(1);
 
 
 		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
