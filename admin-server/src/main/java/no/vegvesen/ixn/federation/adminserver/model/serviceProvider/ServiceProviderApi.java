@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 
 
@@ -76,7 +74,7 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
     }
 
     @Override
-    public int compareTo(@NotNull ServiceProviderApi serviceProviderApi) {
+    public int compareTo(ServiceProviderApi serviceProviderApi) {
         if(id == null && serviceProviderApi.id == null) {
             return 0;
         }

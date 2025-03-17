@@ -2,71 +2,55 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
-import no.vegvesen.ixn.testssl.SSLContextConfig;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {
-        QpidService.class,
-        QpidClient.class,
-        QpidClientConfig.class,
-        RoutingConfigurerProperties.class,
-        SSLContextConfig.class,
-        TestSSLProperties.class
-})
+@Testcontainers
 public class QpidServiceIT extends QpidDockerBaseIT {
-
-    @Autowired
-    private QpidService service;
-
-    @Autowired
-    private QpidClient client;
 
     public static final String HOST_NAME = getDockerHost();
 
-    private static final ClusterKeyGenerator.CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidServiceIT.class), "my_ca", HOST_NAME, "admin_server");
+    private static final String CLIENT_USER = "admin_server";
+    private static final ClusterKeyGenerator.CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidServiceIT.class), "my_ca", HOST_NAME, CLIENT_USER);
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer(
+    public QpidContainer qpidContainer = getQpidTestContainer(
             stores,
             HOST_NAME,
             HOST_NAME,
             Path.of("qpid")
     );
 
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("admin_server", stores.clientStores()));
-    }
+    private AdminQpidClient client;
 
-    @BeforeAll
-    static void setUp() {
-        qpidContainer.start();
+    private QpidService service;
 
-    }
-
-    @Test
-    public void serviceIsAutowired() {
-        assertThat(service).isNotNull();
+    @BeforeEach
+    public void setupClient() {
+        SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
+        client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
+        service = new QpidService(client);
     }
 
     @Test
@@ -128,4 +112,14 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(queue.getName()).isEqualTo("test-queue");
         assertThat(service.getAllQueues()).isNotEmpty();
     }
+
+    private RestTemplate createRestTemplate(SSLContext sslContext) {
+        SSLConnectionSocketFactory sslConnectionSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext).build();
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
+                .create()
+                .setSSLSocketFactory(sslConnectionSocketFactory).build();
+        CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
+        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(client));
+    }
+
 }
