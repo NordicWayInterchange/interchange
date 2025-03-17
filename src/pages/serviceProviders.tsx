@@ -155,7 +155,7 @@ export default function ServiceProviders() {
                             rows={serviceProviderData || []}
                             loading={isLoading}
                             getRowId={(row) => row.id}
-                            sort={{field: "lastUpdated", sort: "desc"}}
+                            sort={{field: "id", sort: "desc"}}
                             slots={{
                                 noRowsOverlay: CustomEmptyOverlayServiceProviders
                             }}
