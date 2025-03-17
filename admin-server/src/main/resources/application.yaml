@@ -20,4 +20,31 @@ spring:
             location: ${TRUST_STORE}
             password: ${TRUST_STORE_PASSWORD}
             type: JKS
+  output:
+    ansi:
+      enabled: always
 
+  datasource:
+    url: "jdbc:postgresql://database:5432/federation"
+    username: federation
+    password: federation
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+server:
+  port: 8899
+  ssl:
+    client-auth: need
+
+#logging
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd} %d{HH:mm:ss}  [%-12.12thread]  %highlight(%-5level)  %-30.30logger{30}  %-42method  [%X{local_interchange}  %X{service_provider}]  - %msg %ex{full}%n"
+  level:
+    root: info
+    org.hibernate:
+      sql: warn
