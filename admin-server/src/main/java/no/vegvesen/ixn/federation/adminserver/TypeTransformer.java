@@ -184,7 +184,6 @@ public class TypeTransformer {
                     subscription.getConsumerCommonName(),
                     subscription.getDescription(),
                     subscription.getErrorMessage(),
-                    subscription.getConnections(),
                     localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
                     localDateTimeToTimestamp(subscription.getLastUpdated())
             ));

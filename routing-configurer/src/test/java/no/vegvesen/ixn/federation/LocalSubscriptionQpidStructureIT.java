@@ -113,7 +113,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         LocalSubscriptionStatus.REQUESTED,
                         "originatingCountry = 'NO'",
                         "my-node",
-                        Collections.emptySet(),
                         Collections.emptySet())
                 ),
                 LocalDateTime.now());

@@ -8,8 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -36,7 +34,6 @@ public class ImportTransformer {
                 LocalSubscriptionStatus.REQUESTED,
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
-                localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet())
         );
     }
@@ -70,11 +67,6 @@ public class ImportTransformer {
                 endpoint.getPort(),
                 endpoint.getMaxBandwidth(),
                 endpoint.getMaxMessageRate());
-    }
-
-    public LocalConnection transformLocalConnectionImportApiToLocalConnection(LocalConnectionImportApi localConnection) {
-        return new LocalConnection(localConnection.getSource(),
-                localConnection.getDestination());
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {

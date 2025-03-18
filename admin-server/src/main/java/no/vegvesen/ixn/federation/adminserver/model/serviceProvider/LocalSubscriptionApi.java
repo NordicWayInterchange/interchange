@@ -1,8 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import no.vegvesen.ixn.federation.model.LocalConnection;
-
-import java.util.HashSet;
 import java.util.Set;
 
 public class LocalSubscriptionApi {
@@ -19,21 +16,19 @@ public class LocalSubscriptionApi {
 
     private String consumerCommonName;
 
-    private Set<LocalConnection> connections = new HashSet<>();
-
     private String description;
 
     private String errorMessage;
 
 
     public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi status, String selector, String consumerCommonName,
-                                String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
+                                String description, String errorMessage, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.description = description;
-        this.connections.addAll(connections);
+        //this.connections.addAll(connections);
         this.errorMessage = errorMessage;
         this.endpoints = endpoints;
         this.lastUpdated = lastUpdated;
@@ -93,19 +88,6 @@ public class LocalSubscriptionApi {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-
-    public Set<LocalConnection> getConnections() {
-        return connections;
-    }
-
-    public void setConnections(Set<LocalConnection> connections) {
-        this.connections = connections;
-    }
-
-    public void addConnection(LocalConnection connection) {
-        connections.add(connection);
     }
 
     public String getErrorMessage() {

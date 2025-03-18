@@ -37,10 +37,6 @@ public class LocalSubscription {
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
     private Set<LocalEndpoint> localEndpoints = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
-    private Set<LocalConnection> connections = new HashSet<>();
-
     @Column
     private String description;
 
@@ -71,21 +67,19 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
-        this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
     }
 
-    public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+    public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
         this.uuid = uuid;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
-        this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
     }
 
@@ -135,18 +129,6 @@ public class LocalSubscription {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-    public Set<LocalConnection> getConnections() {
-        return connections;
-    }
-
-    public void setConnections(Set<LocalConnection> connections) {
-        this.connections = connections;
-    }
-
-    public void addConnection(LocalConnection connection) {
-        connections.add(connection);
     }
 
     public String getConsumerCommonName() {

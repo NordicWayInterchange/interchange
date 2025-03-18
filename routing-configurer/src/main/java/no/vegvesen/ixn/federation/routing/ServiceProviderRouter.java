@@ -144,7 +144,6 @@ public class ServiceProviderRouter {
         if (!endpointsToRemove.isEmpty()) {
             subscription.getLocalEndpoints().removeAll(endpointsToRemove);
         }
-        subscription.getConnections().clear();
     }
 
     public ServiceProvider removeUnwantedSubscriptions(ServiceProvider serviceProvider) {
@@ -512,23 +511,21 @@ public class ServiceProviderRouter {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
 
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    Set<String> existingConnections = subscription.getConnections().stream()
-                            .map(LocalConnection::getSource)
-                            .collect(Collectors.toSet());
-
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
-                            if (!existingConnections.contains(shard.getExchangeName())) {
-                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
+                            Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                            if (exchange != null) {
+                                String selector = subscription.getSelector();
+                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), selector)) {
                                     LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                    qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
-                                    delta.addBindingToExchange(shard.getExchangeName(), subscription.getSelector(), endpoint.getSource());
-                                    LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
-                                    subscription.addConnection(connection);
+                                    String exchangeName = shard.getExchangeName();
+                                    String source = endpoint.getSource();
+                                    Binding binding = new Binding(exchangeName, source, new Filter(selector));
+                                    qpidClient.addBinding(exchangeName, binding);
+                                    exchange.addBinding(binding);
                                 }
                             }
                         }
@@ -540,18 +537,4 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
-    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
-        Set<String> existingConnections = new HashSet<>();
-        for (Capability cap : capabilities) {
-            existingConnections.addAll(cap.getExchangesFromShards());
-        }
-
-        Set<LocalConnection> unwantedConnections = new HashSet<>();
-        for (LocalConnection connection : subscription.getConnections()) {
-            if (!existingConnections.contains(connection.getSource())) {
-                unwantedConnections.add(connection);
-            }
-        }
-        subscription.getConnections().removeAll(unwantedConnections);
-    }
 }

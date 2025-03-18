@@ -22,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -470,7 +469,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.ERROR,
 				"1=1",
 				HOST_NAME,
-				Collections.emptySet(),
 				Set.of()
 		));
 
@@ -479,7 +477,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.ERROR,
 				"messageType = 'DATEX2'",
 				HOST_NAME,
-				Collections.emptySet(),
 				Set.of()
 		));
 
@@ -488,7 +485,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX23'",
 				HOST_NAME,
-				Collections.emptySet(),
 				Set.of()
 		));
 		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
@@ -505,7 +501,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
 				HOST_NAME,
-				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
 								source,
 								qpidContainer.getHost(),
@@ -1089,7 +1084,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
 	@Test
@@ -1138,7 +1132,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(3);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(3);
 	}
 
 	@Test
@@ -1176,7 +1169,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(1);
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
 
@@ -1185,7 +1177,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(0);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(0);
 	}
 
 	@Test
@@ -1240,7 +1231,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(2);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(2);
 
 		denmCapability1.setStatus(CapabilityStatus.TEAR_DOWN);
 
@@ -1249,7 +1239,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
-		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
 	@Test
@@ -1571,7 +1560,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"a = b",
 				qpidContainer.getvHostName(),
-				Collections.emptySet(),
 				Collections.singleton(
 						new LocalEndpoint(
 								source,
@@ -1619,7 +1607,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"a = b",
 				qpidContainer.getvHostName(),
-				Collections.emptySet(),
 				Collections.singleton(
 						new LocalEndpoint(
 								source,
