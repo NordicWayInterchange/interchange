@@ -77,6 +77,10 @@ public class ListenerEndpoint {
         return target;
     }
 
+    public String toUrl() {
+        return String.format("amqps://%s:%s", host, port);
+    }
+
     @Override
     public String toString() {
         return "ListenerEndpoint{" +

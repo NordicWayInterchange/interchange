@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.*;
 import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.SinkConnectionPool;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine.ArgGroup;
@@ -112,36 +113,6 @@ public class Listen implements Callable<Integer> {
         String id;
     }
 
-
-
-    public static class SinkConnectionPool {
-
-        private final ConnectionCreator connectionCreator;
-        private ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
-
-        public SinkConnectionPool(ConnectionCreator connectionCreator) {
-            this.connectionCreator = connectionCreator;
-        }
-
-        public Connection createConnection(String url) {
-            return connections.computeIfAbsent(url, connectionCreator::createConnection);
-        }
-
-        public void close() {
-            connections.forEach( (s, c) -> {
-                try {
-                    c.close();
-                } catch (JMSException e) {
-                    System.out.println("Exception while closing connection: " + e);
-                }
-            });
-        }
-
-        public interface ConnectionCreator {
-            Connection createConnection(String url);
-        }
-
-    }
 
     private static class WaitForSubscription implements Runnable {
         private final LocalActorSubscription subscription;

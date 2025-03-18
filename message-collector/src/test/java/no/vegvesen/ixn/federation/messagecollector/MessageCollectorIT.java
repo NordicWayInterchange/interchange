@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import jakarta.jms.*;
-import no.vegvesen.ixn.MessageForwardUtil;
-import no.vegvesen.ixn.NewSink;
-import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.*;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -23,8 +20,11 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -86,55 +86,26 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						)
 				);
 
-		Collector collector = new Collector();
+		ExecutorService executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
+		ArrayList<ListenerEndpoint> states = new ArrayList<>();
 
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		NewSink readSink = new NewSink(senderContext);
+		ExceptionListener exceptionListener = e -> logger.error("Cought exception", e);
+		SinkConnectionPool connectionPool = new SinkConnectionPool( url -> {
+            try {
+                return readSink.createConnection(url,exceptionListener);
+            } catch (JMSException e) {
+                throw new RuntimeException(e);
+            }
+        });
 		for (ListenerEndpoint endpoint : listenerEndpointRepository.findAll()) {
-			if (! collector.containsEndpoint(endpoint)) {
+			if (! states.contains(endpoint)) {
+				String writeUrl = consumerContainer.getAmqpsUrl();
 				System.out.println("Adding endpoint " + endpoint);
-				collector.submitEndpoint(endpoint, () -> {
-					//Broker "consumer"
-					String writeUrl = String.format("amqps://%s:%s", HOST_NAME, localIxnFederationPort);
-					try (Source writeSource = new Source(writeUrl,writeExchange, senderContext)) {
-						writeSource.start();
-						String url = String.format("amqps://%s:%s", endpoint.getHost(), endpoint.getPort());
-						ExceptionListener exceptionListener = e -> logger.error("Cought exception", e);
-						try (jakarta.jms.Connection readConnection = readSink.createConnection(url,exceptionListener)) {
-							readConnection.start();
-							logger.info("Connected to url {}",writeUrl);
-							try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-								String source = endpoint.getSource();
-								Destination destination = session.createQueue(source);
-								try (MessageConsumer consumer = session.createConsumer(destination)) {
-									logger.info("Subscribed to destination {}", destination);
-									boolean running = true;
-									while (running) {
-										try {
-											Message message = consumer.receive();
-											if (message != null) {
-												MessageForwardUtil.send(writeSource.getProducer(), message);
-												logger.info("Message {} received from queue {}", message.getJMSMessageID(), source);
-											} else {
-												running = false;
-											}
-										} catch (JMSException e) {
-											running = false;
-										}
-									}
-									logger.info("Exiting collector thread");
-								}
-							}
-                        } catch (JMSException e) {
-							throw new RuntimeException(e);
-						} finally {
-							writeSource.close();
-						}
-					} catch (NamingException | JMSException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+				Runnable task = new MessageCollectorThread(writeUrl, writeExchange, senderContext, connectionPool, endpoint);
+				states.add(endpoint);
+				executorService.execute(task);
 			}
 
 		}
@@ -185,7 +156,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				throw new RuntimeException(e);
 			}
 		}
-		collector.shutdown();
+		executorService.shutdown();
+		connectionPool.close();
 	}
 
 	@Test
@@ -507,5 +479,61 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		verify(listenerEndpointRepository,times(2)).findAll();
 		assertThat(collector.getListeners().size()).isEqualTo(0);
 
+	}
+
+	private static class MessageCollectorThread implements Runnable {
+		private final String writeUrl;
+		private final String writeExchange;
+		private final SSLContext senderContext;
+		private final SinkConnectionPool connectionPool;
+		private final ListenerEndpoint endpoint;
+
+		public MessageCollectorThread(String writeUrl, String writeExchange, SSLContext senderContext, SinkConnectionPool connectionPool, ListenerEndpoint endpoint) {
+			this.writeUrl = writeUrl;
+			this.writeExchange = writeExchange;
+			this.senderContext = senderContext;
+			this.connectionPool = connectionPool;
+			this.endpoint = endpoint;
+		}
+
+		@Override
+		public void run() {
+			//Broker "consumer"
+			try (Source writeSource = new Source(writeUrl, writeExchange, senderContext)) {
+				writeSource.start();
+				try (jakarta.jms.Connection readConnection = connectionPool.createConnection(endpoint.toUrl())) {
+					readConnection.start();
+					logger.info("Connected to url {}", writeUrl);
+					try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+						String source = endpoint.getSource();
+						Destination destination = session.createQueue(source);
+						try (MessageConsumer consumer = session.createConsumer(destination)) {
+							logger.info("Subscribed to destination {}", destination);
+							boolean running = true;
+							while (running) {
+								try {
+									Message message = consumer.receive();
+									if (message != null) {
+										MessageForwardUtil.send(writeSource.getProducer(), message);
+										logger.info("Message {} received from queue {}", message.getJMSMessageID(), source);
+									} else {
+										running = false;
+									}
+								} catch (JMSException e) {
+									running = false;
+								}
+							}
+							logger.info("Exiting collector thread");
+						}
+					}
+				} catch (JMSException e) {
+					throw new RuntimeException(e);
+				} finally {
+					writeSource.close();
+				}
+			} catch (NamingException | JMSException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }
