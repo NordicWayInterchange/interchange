@@ -10,22 +10,24 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
 import jakarta.jms.JMSException;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -35,8 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-//TODO this class does things differently from all the other Qpid test classes. Should we change this to be like the rest?
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
+@Testcontainers
 public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(NewQpidStructureIT.class);
@@ -45,11 +46,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(NewQpidStructureIT.class),"my_ca", HOSTNAME, "routing_configurer", "king_gustaf");
 
-    @Qualifier("getTestSslContext")
-    @Autowired
-    SSLContext sslContext;
+    SSLContext sslContext = sslClientContext(stores,"routing_configurer");
 
-    @Autowired
     QpidClient qpidClient;
 
     @Container
@@ -60,18 +58,13 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
-    }
-
-    @BeforeAll
-    static void setup(){
-        qpidContainer.start();
+    @BeforeEach
+    public void setup() {
+        qpidClient = new QpidClient(
+                qpidContainer.getHttpsUrl(),
+                qpidContainer.getvHostName(),
+                new QpidClientConfig(sslClientContext(stores,"routing_configurer")).qpidRestTemplate()
+        );
     }
 
     @Test
@@ -461,4 +454,5 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         }
         assertThat(numMessages.get()).isEqualTo(2);
     }
+
 }
