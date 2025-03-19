@@ -2,44 +2,6 @@
 
 pushd ${QPID_WORK}
 
-extractCommonName() {
-  local subjects="${1//subject=/}" # remove the prefix 'subject=' from the subject line
-
-  local separator="," # check which separator is used
-  if [[ "$subjects" == *\/* ]]
-  then
-    separator="\/"
-  fi
-
-  IFS="$separator" read -ra SUBJS <<< "$subjects" # split each subject to elements in an array
-  for subject in "${SUBJS[@]}"; do
-    local subject_key=$(echo $subject | cut -d '=' -f1)
-    local subject_key_trim=${subject_key// /}
-
-    if [[ ${subject_key_trim} == 'CN' ]]
-    then
-      echo $(echo $subject | cut -d '=' -f2)
-    fi
-  done
-}
-
-verifyExternalName() {
-    if [[ ! -f ${KEY_STORE} ]]; then
-        echo "file does not exist ${KEY_STORE}"
-        return 2
-    fi
-    echo "verifying that vhost name and certificate CN match..."
-    local vhost_name="$(jq -r '.name' < ${VHOST_FILE})"
-    local subject_line="$(openssl pkcs12 -nodes -passin pass:"${KEY_STORE_PASSWORD}" -nokeys -in ${KEY_STORE}| openssl x509 -noout -subject )"
-    echo "Subjectline: '${subject_line}'"
-    local cert_cn=$(extractCommonName "$subject_line")
-
-    if [[ ${vhost_name} != ${cert_cn} ]]; then
-        echo "ERROR - vhost '${vhost_name}' does not match CN '${cert_cn}'"
-        return 1
-    fi
-}
-
 mkdir -p ./default/config
 
 # Copy groups and vhost file from static config directory if they do not exist in the work/default/config directory
@@ -57,7 +19,6 @@ else
     echo "vhost file already exists in ${VHOST_FILE}"
 fi
 
-#verifyExternalName
 
 echo "${VHOST_FILE} ${KEY_STORE} ${KEY_STORE_PASSWORD} ${TRUST_STORE} ${PASSWD_FILE} ${GROUPS_FILE}" > /dev/null
 

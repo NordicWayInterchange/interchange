@@ -49,13 +49,22 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
 
     @Override
     protected void configure() {
-        this.withClasspathResourceMapping(configPathFromClasspath.toString(),"/config", BindMode.READ_ONLY);
+        String workConfigInContainer = "/work/default/config/";
+        String configPathInContainer = "/config/";
+        this.withClasspathResourceMapping(configPathFromClasspath.toString(), configPathInContainer, BindMode.READ_ONLY);
+        String passwdFileName = "passwd";
+        String passwdContainerPath = configPathInContainer + passwdFileName;
         this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
         this.withEnv("KEY_STORE", "/jks/" + keyStore);
         this.withEnv("KEY_STORE_PASSWORD", keyStorePassword);
         this.withEnv("TRUST_STORE", "/jks/" + trustStore);
         this.withEnv("TRUST_STORE_PASSWORD", trustStorePassword);
+        this.withEnv("STATIC_VHOST_FILE", configPathInContainer + "vhost.json");
+        this.withEnv("VHOST_FILE", workConfigInContainer + "default.json");
         this.withEnv("VHOST_NAME",vHostName);
+        this.withEnv("STATIC_GROUPS_FILE", configPathInContainer + "groups");
+        this.withEnv("GROUPS_FILE",workConfigInContainer + "groups");
+        this.withEnv("PASSWD_FILE",passwdContainerPath);
     }
 
     @Override
