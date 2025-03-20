@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.*;
+import no.vegvesen.ixn.ExceptionListeningConnectionCreator;
 import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.SinkConnectionPool;
@@ -165,25 +166,5 @@ public class Listen implements Callable<Integer> {
         }
     }
 
-    private static class ExceptionListeningConnectionCreator implements SinkConnectionPool.ConnectionCreator {
-        private final NewSink sink;
-        private final ExceptionListener exceptionListener;
-
-        public ExceptionListeningConnectionCreator(NewSink sink, ExceptionListener exceptionListener) {
-            this.sink = sink;
-            this.exceptionListener = exceptionListener;
-        }
-
-        @Override
-        public Connection createConnection(String url) {
-            try {
-                Connection conn = sink.createConnection(url, exceptionListener);
-                conn.start();
-                return conn;
-            } catch (JMSException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 }
 

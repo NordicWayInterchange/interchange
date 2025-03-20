@@ -7,7 +7,6 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -20,10 +19,7 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
@@ -72,35 +67,28 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testMessagesCollected() throws NamingException, JMSException {
-		String writeExchange = "subscriptionExchange";
-		List<ListenerEndpoint> listenerEndpoints = List.of(
+        List<ListenerEndpoint> listenerEndpoints = List.of(
 				new ListenerEndpoint(HOST_NAME,
 						HOST_NAME,
 						HOST_NAME,
 						producerContainer.getAmqpsPort(),
 						new Connection(),
-						writeExchange
+                        "subscriptionExchange"
 				)
 		);
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		NewSink readSink = new NewSink(senderContext);
 
-		ExecutorService executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
-		Map<ListenerEndpoint,MessageForwarder> states = new HashMap<>();
-
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool( url -> {
-            try {
-				jakarta.jms.Connection connection = readSink.createConnection(url, exceptionListener);
-				connection.start();
-				return connection;
-            } catch (JMSException e) {
-                throw new RuntimeException(e);
-            }
-        });
-		updateStates(listenerEndpoints, states, senderContext, writeExchange, connectionPool, executorService);
-		//TODO need a loop through the states, and cancel any that is not in the endpoint list
+		SinkConnectionPool connectionPool = new SinkConnectionPool(
+				new ExceptionListeningConnectionCreator(
+						readSink,
+						exceptionListener
+				)
+		);
+		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
+		newMessageCollector.syncListeners(listenerEndpoints, consumerContainer.getAmqpsUrl());
 		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
 			source.start();
 
@@ -148,32 +136,24 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				throw new RuntimeException(e);
 			}
 		}
-		executorService.shutdown();
 		connectionPool.close();
 	}
 
+
 	@Test
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
-
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
+		NewSink readSink = new NewSink(senderContext);
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
-
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
-		//TODO this should use different contexts for each side of the collector, see comment in CollectorCreator constructor
-		String writeQueue = "subscriptionExchange";
-		CollectorCreator collectorCreator = new CollectorCreator(
-				sslServerContext(stores,HOST_NAME),
-				HOST_NAME,
-				localIxnFederationPort,
-				writeQueue);
-
-		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
-		collector.runSchedule();
-		assertThat(collector.getListeners()).hasSize(1);
-		System.out.println(consumerContainer.getHttpUrl());
+		NewMessageCollector collector = new NewMessageCollector(
+				senderContext,
+				new SinkConnectionPool(new ExceptionListeningConnectionCreator(
+						readSink,
+						e -> System.out.println("Caught exception: " + e)
+				))
+		);
+		collector.syncListeners(List.of(listenerEndpoint), consumerContainer.getAmqpsUrl());
 
 		try (Source source = createSource(producerContainer.getAmqpsUrl(),
 				HOST_NAME,
@@ -199,9 +179,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 					.build();
 
 			source.sendNonPersistentMessage(message1,1000L);
+			source.sendNonPersistentMessage(message1,10000L);
 			Thread.sleep(2000L); // wait for the message to expire with extra margin
 
-			CountDownLatch latch = new CountDownLatch(1);
+			CountDownLatch latch = new CountDownLatch(2);
 			try {
 				String containerUrl = consumerContainer.getAmqpsUrl();
 
@@ -213,6 +194,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				)) {
 					sink.start();
 					assertThat(latch.await(1,TimeUnit.SECONDS)).withFailMessage("Received message we expected to be expired").isFalse();
+					assertThat(latch.getCount()).isEqualTo(1);
 				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -222,21 +204,22 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testDatexMessagesWithMessageCollector() throws NamingException, JMSException {
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
-
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
-		CollectorCreator collectorCreator = new CollectorCreator(
-				sslServerContext(stores,HOST_NAME),
-				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
-
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
-		forwarder.runSchedule();
+		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
+		NewSink readSink = new NewSink(senderContext);
+		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
+		NewMessageCollector newMessageCollector = new NewMessageCollector(
+				senderContext,
+				new SinkConnectionPool(
+						new ExceptionListeningConnectionCreator(
+								readSink,
+								exceptionListener
+						)
+				)
+		);
+		String writeUrl = consumerContainer.getAmqpsUrl();
+		newMessageCollector.syncListeners(List.of(listenerEndpoint),writeUrl);
 
 		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
 			source.start();
@@ -280,21 +263,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testDenmMessagesWithMessageCollector() throws NamingException, JMSException {
-		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
+		NewSink readSink = new NewSink(senderContext);
 
-		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
-
-		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
-		CollectorCreator collectorCreator = new CollectorCreator(
-				sslServerContext(stores,HOST_NAME),
-				HOST_NAME,
-				localIxnFederationPort,
-				"subscriptionExchange");
-
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
-		forwarder.runSchedule();
+		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
+		SinkConnectionPool connectionPool = new SinkConnectionPool(
+				new ExceptionListeningConnectionCreator(
+						readSink,
+						exceptionListener
+				)
+		);
+		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
+		String writeUrl = consumerContainer.getAmqpsUrl();
+		newMessageCollector.syncListeners(List.of(listenerEndpoint),writeUrl);
+		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(1);
 		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
 		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
 		try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
@@ -354,24 +337,20 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		NewSink readSink = new NewSink(senderContext);
 
-		ExecutorService executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
-		Map<ListenerEndpoint,MessageForwarder> states = new HashMap<>();
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool( url -> {
-			try {
-				jakarta.jms.Connection connection = readSink.createConnection(url, exceptionListener);
-				connection.start();
-				return connection;
-			} catch (JMSException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		SinkConnectionPool connectionPool = new SinkConnectionPool(
+				new ExceptionListeningConnectionCreator(
+						readSink,
+						exceptionListener
+				)
+		);
 		List<ListenerEndpoint> emptyEndpoins = List.of();
-		updateStates(emptyEndpoins, states, senderContext, writeExchange, connectionPool, executorService);
-		assertThat(states.size()).isEqualTo(0);
-		updateStates(listenerEndpoints, states, senderContext, writeExchange, connectionPool, executorService);
-		assertThat(states.size()).isEqualTo(1);
+		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
+		newMessageCollector.syncListeners(emptyEndpoins, consumerContainer.getAmqpsUrl());
+		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(0);
+		newMessageCollector.syncListeners(listenerEndpoints, consumerContainer.getAmqpsUrl());
+		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(1);
 
 		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
 		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
@@ -412,39 +391,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
-			}
-		}
-	}
-
-	private void updateStates(List<ListenerEndpoint> desiredEndpoint, Map<ListenerEndpoint, MessageForwarder> states, SSLContext senderContext, String writeExchange, SinkConnectionPool connectionPool, ExecutorService executorService) {
-		for (ListenerEndpoint endpoint : desiredEndpoint) {
-			if (! states.containsKey(endpoint)) {
-				String writeUrl = consumerContainer.getAmqpsUrl();
-				String readUrl = endpoint.toUrl();
-				String readSource = endpoint.getSource();
-				System.out.println("Adding endpoint " + endpoint);
-
-				SSLContext writeContext = senderContext;
-				MessageForwarder messageForwarder = new MessageForwarder(
-						writeUrl,
-						writeExchange,
-						writeContext,
-						connectionPool,
-						readUrl,
-						readSource
-				);
-				executorService.execute(
-						messageForwarder
-				);
-				states.put(endpoint,messageForwarder);
-			}
-		}
-		Set<ListenerEndpoint> listenerEndpoints = states.keySet();
-		for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
-			if (! desiredEndpoint.contains(listenerEndpoint)) {
-				MessageForwarder messageForwarder = states.get(listenerEndpoint);
-				messageForwarder.stop();
-				states.remove(listenerEndpoint);
 			}
 		}
 	}
@@ -453,26 +399,19 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testRemovingConnectionFromAListOfOne() throws NamingException, JMSException {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
-		String writeExchange = "subscriptionExchange";
-
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		NewSink readSink = new NewSink(senderContext);
-
-		ExecutorService executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
-		Map<ListenerEndpoint,MessageForwarder> states = new HashMap<>();
-
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool( url -> {
-			try {
-				jakarta.jms.Connection connection = readSink.createConnection(url, exceptionListener);
-				connection.start();
-				return connection;
-			} catch (JMSException e) {
-				throw new RuntimeException(e);
-			}
-		});
-		updateStates(List.of(listenerEndpoint), states, senderContext, writeExchange, connectionPool, executorService);
-		assertThat(states.size()).isEqualTo(1);
+		SinkConnectionPool connectionPool = new SinkConnectionPool(
+				new ExceptionListeningConnectionCreator(
+						readSink,
+						exceptionListener
+				)
+		);
+		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
+		String writeUrl1 = consumerContainer.getAmqpsUrl();
+		newMessageCollector.syncListeners(List.of(listenerEndpoint), writeUrl1);
+		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(1);
 
 		System.out.printf("Producer URL: %s%n",producerContainer.getHttpUrl());
 		System.out.printf("Consumer URL: %s%n",consumerContainer.getHttpUrl());
@@ -515,11 +454,12 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				throw new RuntimeException(e);
 			}
 		}
-		updateStates(List.of(), states, senderContext, writeExchange, connectionPool, executorService);
-		assertThat(states.size()).isEqualTo(0);
+		String writeUrl = consumerContainer.getAmqpsUrl();
+		newMessageCollector.syncListeners(List.of(),writeUrl);
+		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(0);
 	}
 
-	private static class MessageForwarder implements Runnable {
+	public static class MessageForwarder implements Runnable {
 		private final String writeUrl;
 		private final String writeExchange;
 		private final SSLContext writeContext;
@@ -557,10 +497,9 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						Destination destination = session.createQueue(readSource);
 						try (MessageConsumer consumer = session.createConsumer(destination)) {
 							logger.info("Subscribed to destination {}", destination);
-							//boolean running = true;
 							while (running.get()) {
 								try {
-									Message message = consumer.receive(500);
+									Message message = consumer.receive(500); //Listener schedule, might be changed...
 									if (message != null) {
 										MessageForwardUtil.send(writeSource.getProducer(), message);
 										logger.info("Message {} received from queue {}", message.getJMSMessageID(), readSource);
@@ -583,5 +522,85 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		public void stop() {
 			running.set(false);
 		}
+	}
+
+    public static final class NewMessageCollector {
+        private final Map<ListenerEndpoint, MessageForwarder> states;
+        private final SSLContext senderContext;
+        private final SinkConnectionPool connectionPool;
+        private final ExecutorService executorService;
+
+		public NewMessageCollector(SSLContext senderContext, SinkConnectionPool connectionPool) {
+			this.senderContext = senderContext;
+			this.states = new HashMap<>();
+			this.connectionPool = connectionPool;
+			this.executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
+		}
+
+		public void syncListeners(List<ListenerEndpoint> endpoints, String localUrl) {
+			addToExecution(endpoints, localUrl);
+			removeSpareListeners(endpoints);
+		}
+
+		public int numberOfListeners() {
+			return states.size();
+		}
+
+		public void removeSpareListeners(List<ListenerEndpoint> desiredEndpoints) {
+			for (ListenerEndpoint listenerEndpoint : states.keySet()) {
+				if (! desiredEndpoints.contains(listenerEndpoint)) {
+					MessageForwarder messageForwarder = states.get(listenerEndpoint);
+					messageForwarder.stop();
+					states.remove(listenerEndpoint);
+				}
+			}
+		}
+
+		public void addToExecution(List<ListenerEndpoint> endpoints, String localUrl) {
+			for (ListenerEndpoint endpoint : endpoints) {
+				addToExecution(endpoint, localUrl);
+			}
+		}
+
+		public void addToExecution(ListenerEndpoint endpoint, String localUrl) {
+			if (! states.containsKey(endpoint)) {
+				MessageForwarder forwarder = new MessageForwarder(
+						localUrl,
+						endpoint.getTarget(),
+						senderContext,
+						connectionPool,
+						endpoint.toUrl(),
+						endpoint.getSource()
+				);
+				executorService.execute(forwarder);
+				states.put(endpoint, forwarder);
+			}
+		}
+
+
+		@Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (NewMessageCollector) obj;
+            return Objects.equals(this.states, that.states) &&
+                    Objects.equals(this.senderContext, that.senderContext) &&
+                    Objects.equals(this.connectionPool, that.connectionPool) &&
+                    Objects.equals(this.executorService, that.executorService);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(states, senderContext, connectionPool, executorService);
+        }
+
+        @Override
+        public String toString() {
+            return "NewMessageCollector[" +
+                    "states=" + states + ", " +
+                    "senderContext=" + senderContext + ", " +
+                    "connectionPool=" + connectionPool + ", " +
+                    "executorService=" + executorService + ']';
+        }
 	}
 }

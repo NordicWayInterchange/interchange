@@ -13,6 +13,7 @@ import java.util.HashMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+//TODO should we port this?
 public class MessageCollectorTest {
 
     @Test

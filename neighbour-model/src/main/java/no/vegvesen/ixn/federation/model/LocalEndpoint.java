@@ -84,6 +84,11 @@ public class LocalEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String toUrl() {
+        return "amqps://" + host + ":" + port;
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

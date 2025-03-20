@@ -7,7 +7,7 @@ import org.apache.qpid.jms.JmsConnectionFactory;
 
 import javax.net.ssl.SSLContext;
 
-//TODO we need to have map of URL -> connection, and return the already created connection if it's already created
+//TODO NewSink is really just a wrapped connection factory.
 public class NewSink {
 
 
