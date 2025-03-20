@@ -1,6 +1,11 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.Sink;
+import jakarta.jms.Connection;
+import jakarta.jms.Destination;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
+import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -27,13 +32,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
-import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -120,28 +124,26 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         QpidDelta delta = client.getQpidDelta();
         router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
-        LocalEndpoint actualEndpoint = null;
-        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-            for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
-                assertThat(endpoint.getSource()).isNotNull();
-                assertThat(endpoint.getHost()).isNotNull();
-                assertThat(endpoint.getPort()).isNotNull();
-                System.out.println(endpoint);
-                actualEndpoint = endpoint;
-            }
-        }
-        assertThat(actualEndpoint).isNotNull();
-        SSLContext sslContext = sslClientContext(stores,SP_NAME);
-        try (Sink sink = new Sink(
-                String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
-                actualEndpoint.getSource(),
-                sslContext,
-                System.out::println
-        ))  {
-            sink.start();
+        LocalEndpoint endpoint = serviceProvider
+                .getSubscriptions()
+                .stream()
+                .flatMap(s -> s
+                        .getLocalEndpoints()
+                        .stream())
+                        .findAny()
+                        .orElseThrow(() -> new RuntimeException("Could not find an enpoing for subscription"));
+        NewSink sink = new NewSink(sslClientContext(stores,SP_NAME));
+        assertThatNoException().isThrownBy(() -> {
+            try (Connection connection = sink.createConnection(endpoint.toUrl())) {
+                try (Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)) {
+                    Destination target = session.createQueue(endpoint.getSource());
+                    try (MessageConsumer consumer = session.createConsumer(target)) {
+                        Message message = consumer.receive(100);
+                    }
+                }
 
-        } catch (Exception e) {
-           throw new RuntimeException(e);
-        }
+            }
+
+        });
     }
 }
