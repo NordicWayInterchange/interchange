@@ -11,7 +11,8 @@ import picocli.CommandLine.*;
                 GetSubscription.class,
                 AddSubscriptions.class,
                 DeleteSubscription.class,
-                Listen.class
+                Listen.class,
+                CountMessages.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true
