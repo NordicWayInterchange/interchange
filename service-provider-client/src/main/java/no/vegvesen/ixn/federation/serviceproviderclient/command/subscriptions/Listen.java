@@ -83,7 +83,7 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sink, exceptionListener));
+        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sink.getContext(), exceptionListener));
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         while (numItemsLeft.get() > 0) {
                 GetSubscriptionResponse getSubscriptionResponse = results.poll();

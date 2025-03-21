@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.ExceptionListeningConnectionCreator;
+import no.vegvesen.ixn.NewSink;
+import no.vegvesen.ixn.SinkConnectionPool;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
@@ -34,6 +37,9 @@ public class MessageCollector {
         this.collectorCreator = collectorCreator;
         this.backoffProperties = backoffProperties;
         this.listeners = listeners;
+        //NewSink newSink = new NewSink(collectorCreator.getSslContext());
+        //SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(newSink.getContext(), ))
+        //NewMessageCollector newMessageCollector = new NewMessageCollector(collectorCreator.getSslContext(),)
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")

@@ -29,4 +29,8 @@ public class NewSink {
         connection.setExceptionListener(exceptionListener);
         return connection;
     }
+
+    public SSLContext getContext() {
+        return context;
+    }
 }

@@ -21,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -83,7 +81,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink,
+						senderContext,
 						exceptionListener
 				)
 		);
@@ -149,7 +147,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		NewMessageCollector collector = new NewMessageCollector(
 				senderContext,
 				new SinkConnectionPool(new ExceptionListeningConnectionCreator(
-						readSink,
+						senderContext,
 						e -> System.out.println("Caught exception: " + e)
 				))
 		);
@@ -213,8 +211,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				senderContext,
 				new SinkConnectionPool(
 						new ExceptionListeningConnectionCreator(
-								readSink,
-								exceptionListener
+								senderContext, exceptionListener
 						)
 				)
 		);
@@ -270,7 +267,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink,
+						senderContext,
 						exceptionListener
 				)
 		);
@@ -341,8 +338,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink,
-						exceptionListener
+						readSink.getContext(), exceptionListener
 				)
 		);
 		List<ListenerEndpoint> emptyEndpoins = List.of();
@@ -404,8 +400,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink,
-						exceptionListener
+						readSink.getContext(), exceptionListener
 				)
 		);
 		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
@@ -459,148 +454,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		assertThat(newMessageCollector.numberOfListeners()).isEqualTo(0);
 	}
 
-	public static class MessageForwarder implements Runnable {
-		private final String writeUrl;
-		private final String writeExchange;
-		private final SSLContext writeContext;
-		private final SinkConnectionPool connectionPool;
-		private final String readUrl;
-		private final String readSource;
-		private final AtomicBoolean running;
 
-		public MessageForwarder(
-				String writeUrl,
-				String writeExchange,
-				SSLContext writeContext,
-				SinkConnectionPool connectionPool,
-				String readUrl,
-				String readSource
-		) {
-			this.writeUrl = writeUrl;
-			this.writeExchange = writeExchange;
-			this.writeContext = writeContext;
-			this.connectionPool = connectionPool;
-			this.readUrl = readUrl;
-			this.readSource = readSource;
-			this.running = new AtomicBoolean(false);
-		}
+	@Test
+	public void removeConnectionFromAListOfTwo() {
 
-		@Override
-		public void run() {
-			running.set(true);
-			//Broker "consumer"
-			try (Source writeSource = new Source(writeUrl, writeExchange, writeContext)) {
-				writeSource.start();
-				try (jakarta.jms.Connection readConnection = connectionPool.createConnection(readUrl)) {
-					logger.info("Connected to url {}", writeUrl);
-					try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-						Destination destination = session.createQueue(readSource);
-						try (MessageConsumer consumer = session.createConsumer(destination)) {
-							logger.info("Subscribed to destination {}", destination);
-							while (running.get()) {
-								try {
-									Message message = consumer.receive(500); //Listener schedule, might be changed...
-									if (message != null) {
-										MessageForwardUtil.send(writeSource.getProducer(), message);
-										logger.info("Message {} received from queue {}", message.getJMSMessageID(), readSource);
-									}
-								} catch (JMSException e) {
-									running.set(false);
-								}
-							}
-							logger.info("Exiting collector thread");
-						}
-					}
-				} catch (JMSException e) {
-					throw new RuntimeException(e);
-				}
-			} catch (NamingException | JMSException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		public void stop() {
-			running.set(false);
-		}
 	}
 
-    public static final class NewMessageCollector {
-        private final Map<ListenerEndpoint, MessageForwarder> states;
-        private final SSLContext senderContext;
-        private final SinkConnectionPool connectionPool;
-        private final ExecutorService executorService;
-
-		public NewMessageCollector(SSLContext senderContext, SinkConnectionPool connectionPool) {
-			this.senderContext = senderContext;
-			this.states = new HashMap<>();
-			this.connectionPool = connectionPool;
-			this.executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
-		}
-
-		public void syncListeners(List<ListenerEndpoint> endpoints, String localUrl) {
-			addToExecution(endpoints, localUrl);
-			removeSpareListeners(endpoints);
-		}
-
-		public int numberOfListeners() {
-			return states.size();
-		}
-
-		public void removeSpareListeners(List<ListenerEndpoint> desiredEndpoints) {
-			for (ListenerEndpoint listenerEndpoint : states.keySet()) {
-				if (! desiredEndpoints.contains(listenerEndpoint)) {
-					MessageForwarder messageForwarder = states.get(listenerEndpoint);
-					messageForwarder.stop();
-					states.remove(listenerEndpoint);
-				}
-			}
-		}
-
-		public void addToExecution(List<ListenerEndpoint> endpoints, String localUrl) {
-			for (ListenerEndpoint endpoint : endpoints) {
-				addToExecution(endpoint, localUrl);
-			}
-		}
-
-		public void addToExecution(ListenerEndpoint endpoint, String localUrl) {
-			if (! states.containsKey(endpoint)) {
-				MessageForwarder forwarder = new MessageForwarder(
-						localUrl,
-						endpoint.getTarget(),
-						senderContext,
-						connectionPool,
-						endpoint.toUrl(),
-						endpoint.getSource()
-				);
-				executorService.execute(forwarder);
-				states.put(endpoint, forwarder);
-			}
-		}
-
-
-		@Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (NewMessageCollector) obj;
-            return Objects.equals(this.states, that.states) &&
-                    Objects.equals(this.senderContext, that.senderContext) &&
-                    Objects.equals(this.connectionPool, that.connectionPool) &&
-                    Objects.equals(this.executorService, that.executorService);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(states, senderContext, connectionPool, executorService);
-        }
-
-        @Override
-        public String toString() {
-            return "NewMessageCollector[" +
-                    "states=" + states + ", " +
-                    "senderContext=" + senderContext + ", " +
-                    "connectionPool=" + connectionPool + ", " +
-                    "executorService=" + executorService + ']';
-        }
-	}
 }
