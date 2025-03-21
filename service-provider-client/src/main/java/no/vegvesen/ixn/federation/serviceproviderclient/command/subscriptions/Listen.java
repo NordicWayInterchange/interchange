@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.*;
 import no.vegvesen.ixn.ExceptionListeningConnectionCreator;
-import no.vegvesen.ixn.NewSink;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.SinkConnectionPool;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
@@ -13,6 +12,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.util.*;
 import java.util.Queue;
@@ -82,8 +82,8 @@ public class Listen implements Callable<Integer> {
             System.out.println("Exception received: " + e);
             counter.countDown();
         };
-        NewSink sink = new NewSink(parentCommand.getParent().createSSLContext());
-        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sink.getContext(), exceptionListener));
+        SSLContext sslContext = parentCommand.getParent().createSSLContext();
+        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sslContext, exceptionListener));
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         while (numItemsLeft.get() > 0) {
                 GetSubscriptionResponse getSubscriptionResponse = results.poll();

@@ -76,7 +76,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		);
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
@@ -142,7 +141,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 
 		NewMessageCollector collector = new NewMessageCollector(
 				senderContext,
@@ -205,7 +203,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		NewMessageCollector newMessageCollector = new NewMessageCollector(
 				senderContext,
@@ -262,7 +259,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testDenmMessagesWithMessageCollector() throws NamingException, JMSException {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
@@ -332,15 +328,15 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		);
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink.getContext(), exceptionListener
+						senderContext, exceptionListener
 				)
 		);
+
 		List<ListenerEndpoint> emptyEndpoins = List.of();
 		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
 		newMessageCollector.syncListeners(emptyEndpoins, consumerContainer.getAmqpsUrl());
@@ -396,11 +392,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
-		NewSink readSink = new NewSink(senderContext);
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		SinkConnectionPool connectionPool = new SinkConnectionPool(
 				new ExceptionListeningConnectionCreator(
-						readSink.getContext(), exceptionListener
+						senderContext, exceptionListener
 				)
 		);
 		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);

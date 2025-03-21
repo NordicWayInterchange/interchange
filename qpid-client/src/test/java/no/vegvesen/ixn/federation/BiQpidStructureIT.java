@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.federation;
 
 import jakarta.jms.*;
-import no.vegvesen.ixn.NewSink;
-import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.*;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -66,9 +64,8 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
         byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
         source.sendNonPersistentMessage(createDenmMessage(source, bytemessage, 3000));
 
-        //Set context variable
-        NewSink sink = new  NewSink(jmsClientContext);
-        try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
+        ConnectionCreator connectionCreator = new SimpleConnectionCreator(jmsClientContext);
+        try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(queueName);

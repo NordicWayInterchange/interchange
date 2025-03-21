@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import jakarta.jms.*;
 import jakarta.jms.Connection;
-import no.vegvesen.ixn.NewSink;
-import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.*;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -108,10 +106,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(qpidContainer.getHttpUrl());
 
         CountingMessageListener listener = new CountingMessageListener();
-        NewSink newSink = new NewSink(sslContext);
+        SimpleConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
 
-
-        try (Connection connection = newSink.createConnection(qpidContainer.getAmqpsUrl())) {
+        try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(queueName);
@@ -221,8 +218,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
 
         CountDownMessageListener listener = new CountDownMessageListener(1);
-        NewSink sink = new NewSink(sslContext);
-        try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
+        ConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
+        try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
             connection.start();
             try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                 Destination destination = session.createQueue(outQueueName);
@@ -563,12 +560,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(message);
 
 
-            NewSink sink = new NewSink(sslContext);
+            ConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
 
             CountingMessageListener listener1 = new CountingMessageListener();
             CountingMessageListener listener2 = new CountingMessageListener();
-            try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
-                connection.start();
+            try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
                 //Need two runnables, one for each session/consumer
 
                 Session session1 = connection.createSession(Session.AUTO_ACKNOWLEDGE);

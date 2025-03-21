@@ -5,7 +5,8 @@ import jakarta.jms.Destination;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
-import no.vegvesen.ixn.NewSink;
+import no.vegvesen.ixn.ConnectionCreator;
+import no.vegvesen.ixn.SimpleConnectionCreator;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -131,10 +132,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         .getLocalEndpoints()
                         .stream())
                         .findAny()
-                        .orElseThrow(() -> new RuntimeException("Could not find an enpoing for subscription"));
-        NewSink sink = new NewSink(sslClientContext(stores,SP_NAME));
+                        .orElseThrow(() -> new RuntimeException("Could not find an endpoint for subscription"));
+        ConnectionCreator connectionCreator = new SimpleConnectionCreator(sslClientContext(stores,SP_NAME));
         assertThatNoException().isThrownBy(() -> {
-            try (Connection connection = sink.createConnection(endpoint.toUrl())) {
+            try (Connection connection = connectionCreator.createConnection(endpoint.toUrl())) {
                 try (Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)) {
                     Destination target = session.createQueue(endpoint.getSource());
                     try (MessageConsumer consumer = session.createConsumer(target)) {

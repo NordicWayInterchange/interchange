@@ -5,7 +5,6 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -79,11 +77,11 @@ public class SourceSinkIT extends QpidDockerBaseIT {
         }
 
 
-		NewSink sink = new NewSink(kingHaraldSSlContext);
+		ConnectionCreator connectionCreator = new SimpleConnectionCreator(kingHaraldSSlContext);
 
 		CountDownMessageListener listener = new CountDownMessageListener(1);
 		boolean success;
-		try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
+		try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
 			connection.start();
 			try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
 				Destination destination = session.createQueue("test-queue");

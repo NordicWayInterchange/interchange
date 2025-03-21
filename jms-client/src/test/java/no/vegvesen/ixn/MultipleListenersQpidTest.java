@@ -20,6 +20,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class MultipleListenersQpidTest extends QpidDockerBaseIT {
@@ -45,28 +48,27 @@ public class MultipleListenersQpidTest extends QpidDockerBaseIT {
     public void listenToMultipleQueues() throws JMSException, NamingException, InterruptedException {
         System.out.println(qpidContainer.getHttpUrl());
         SSLContext context = sslClientContext(stores, SP_NAME);
+        AtomicInteger counter = new AtomicInteger(0);
         try (Source sender = new Source(qpidContainer.getAmqpsUrl(), "incomingExchange", context)) {
             sender.start();
             TextMessage message = sender.getSession().createTextMessage("This is my message");
             sender.getProducer().send(message,DeliveryMode.NON_PERSISTENT,Message.DEFAULT_PRIORITY,Message.DEFAULT_TIME_TO_LIVE);
-            NewSink sink = new NewSink(context);
-            try (Connection connection = sink.createConnection(qpidContainer.getAmqpsUrl())) {
-                ListenerContainer container = new ListenerContainer();
-                connection.setExceptionListener( e ->
-                        {
-                            try {
-                                System.out.println("Exception handler");
-                                container.stop();
-                            } catch (InterruptedException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        }
-                );
-                connection.start();
+            ListenerContainer container = new ListenerContainer();
+            ExceptionListener exceptionListener = e ->
+            {
+                try {
+                    System.out.println("Exception handler");
+                    container.stop();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            };
+            ExceptionListeningConnectionCreator creator = new ExceptionListeningConnectionCreator(context,exceptionListener);
+            try (Connection connection = creator.createConnection(qpidContainer.getAmqpsUrl())) {
                 for (String queueName : List.of("out-1", "out-2")) {
                     Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
                     Destination destination = session.createQueue(queueName);
-                    container.run(new Listener(session,destination));
+                    container.run(new Listener(session,destination,counter));
 
                 }
                 TimeUnit.SECONDS.sleep(1);
@@ -74,6 +76,7 @@ public class MultipleListenersQpidTest extends QpidDockerBaseIT {
             }
 
         }
+        assertThat(counter.get()).isEqualTo(2);
 
     }
 
@@ -98,36 +101,32 @@ public class MultipleListenersQpidTest extends QpidDockerBaseIT {
         private final Session session;
         private final Destination destination;
         private final AtomicBoolean running = new AtomicBoolean(true);
+        private final AtomicInteger counter;
 
-        public Listener(Session session, Destination destination) {
+        public Listener(Session session, Destination destination, AtomicInteger counter) {
             this.session = session;
             this.destination = destination;
+            this.counter = counter;
+
         }
 
         @Override
         public void run() {
-            System.out.println("Starting listener");
             try (MessageConsumer consumer = session.createConsumer(destination)) {
-                System.out.println("Consumer created");
                 while (running.get()) {
                     try {
-                        System.out.println("Waiting for message");
                         Message received = consumer.receive();
                         if (received == null) {
                             running.set(false);
-                            System.out.println("Received null message");
                         } else {
-                            System.out.println(received.getBody(String.class));
+                            counter.incrementAndGet();
                         }
                     } catch (JMSException e) {
-                        System.out.println("Exception caught");
                         running.set(false);
                     }
                 }
-                System.out.println("Done");
 
             } catch (JMSException e) {
-                System.out.println("Could not create consumer");
                 e.printStackTrace();
             }
         }

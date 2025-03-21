@@ -28,8 +28,4 @@ public class SinkConnectionPool {
         });
     }
 
-    public interface ConnectionCreator {
-        Connection createConnection(String url);
-    }
-
 }
