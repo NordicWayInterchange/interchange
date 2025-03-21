@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.*;
 import no.vegvesen.ixn.ExceptionListeningConnectionCreator;
 import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.SinkConnectionPool;
+import no.vegvesen.ixn.PoolingConnectionCreator;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine.ArgGroup;
@@ -83,7 +83,7 @@ public class Listen implements Callable<Integer> {
             counter.countDown();
         };
         SSLContext sslContext = parentCommand.getParent().createSSLContext();
-        SinkConnectionPool connectionPool = new SinkConnectionPool(new ExceptionListeningConnectionCreator(sslContext, exceptionListener));
+        PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(new ExceptionListeningConnectionCreator(sslContext, exceptionListener));
         Sink.DefaultMessageListener listener = directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener();
         while (numItemsLeft.get() > 0) {
                 GetSubscriptionResponse getSubscriptionResponse = results.poll();

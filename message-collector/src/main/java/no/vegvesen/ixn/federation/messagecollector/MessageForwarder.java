@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import jakarta.jms.*;
+import no.vegvesen.ixn.ConnectionCreator;
 import no.vegvesen.ixn.MessageForwardUtil;
-import no.vegvesen.ixn.SinkConnectionPool;
 import no.vegvesen.ixn.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ public class MessageForwarder implements Runnable {
     private final String writeUrl;
     private final String writeExchange;
     private final SSLContext writeContext;
-    private final SinkConnectionPool connectionPool;
+    private final ConnectionCreator connectionCreator;
     private final String readUrl;
     private final String readSource;
     private final AtomicBoolean running;
@@ -27,14 +27,14 @@ public class MessageForwarder implements Runnable {
             String writeUrl,
             String writeExchange,
             SSLContext writeContext,
-            SinkConnectionPool connectionPool,
+            ConnectionCreator connectionCreator,
             String readUrl,
             String readSource
     ) {
         this.writeUrl = writeUrl;
         this.writeExchange = writeExchange;
         this.writeContext = writeContext;
-        this.connectionPool = connectionPool;
+        this.connectionCreator = connectionCreator;
         this.readUrl = readUrl;
         this.readSource = readSource;
         this.running = new AtomicBoolean(false);
@@ -47,7 +47,7 @@ public class MessageForwarder implements Runnable {
         try (Source writeSource = new Source(writeUrl, writeExchange, writeContext)) {
             writeSource.start();
             logger.debug("Connected to write to destination {}, url {},", writeExchange, writeUrl);
-            try (jakarta.jms.Connection readConnection = connectionPool.createConnection(readUrl)) {
+            try (jakarta.jms.Connection readConnection = connectionCreator.createConnection(readUrl)) {
                 try (Session session = readConnection.createSession(Session.AUTO_ACKNOWLEDGE)) {
                     Destination readDestination = session.createQueue(readSource);
                     try (MessageConsumer consumer = session.createConsumer(readDestination)) {

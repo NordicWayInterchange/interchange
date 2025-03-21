@@ -5,17 +5,17 @@ import jakarta.jms.JMSException;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SinkConnectionPool {
+public class PoolingConnectionCreator implements ConnectionCreator {
 
-    private final ConnectionCreator connectionCreator;
+    private final ConnectionCreator connectionCreatorDelegate;
     private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public SinkConnectionPool(ConnectionCreator connectionCreator) {
-        this.connectionCreator = connectionCreator;
+    public PoolingConnectionCreator(ConnectionCreator connectionCreatorDelegate) {
+        this.connectionCreatorDelegate = connectionCreatorDelegate;
     }
 
     public Connection createConnection(String url) {
-        return connections.computeIfAbsent(url, connectionCreator::createConnection);
+        return connections.computeIfAbsent(url, connectionCreatorDelegate::createConnection);
     }
 
     public void close() {

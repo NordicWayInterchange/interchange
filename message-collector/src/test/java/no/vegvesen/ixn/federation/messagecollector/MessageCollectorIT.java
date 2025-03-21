@@ -77,11 +77,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 
-		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool(
+        PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(
 				new ExceptionListeningConnectionCreator(
 						senderContext,
-						exceptionListener
+                        e1 -> logger.error("Caught exception", e1)
 				)
 		);
 		NewMessageCollector newMessageCollector = new NewMessageCollector(senderContext, connectionPool);
@@ -144,7 +143,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		NewMessageCollector collector = new NewMessageCollector(
 				senderContext,
-				new SinkConnectionPool(new ExceptionListeningConnectionCreator(
+				new PoolingConnectionCreator(new ExceptionListeningConnectionCreator(
 						senderContext,
 						e -> System.out.println("Caught exception: " + e)
 				))
@@ -206,7 +205,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
 		NewMessageCollector newMessageCollector = new NewMessageCollector(
 				senderContext,
-				new SinkConnectionPool(
+				new PoolingConnectionCreator(
 						new ExceptionListeningConnectionCreator(
 								senderContext, exceptionListener
 						)
@@ -261,7 +260,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool(
+		PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(
 				new ExceptionListeningConnectionCreator(
 						senderContext,
 						exceptionListener
@@ -331,7 +330,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool(
+		PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(
 				new ExceptionListeningConnectionCreator(
 						senderContext, exceptionListener
 				)
@@ -393,7 +392,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		SSLContext senderContext = sslServerContext(stores, HOST_NAME);
 		ExceptionListener exceptionListener = e -> logger.error("Caught exception", e);
-		SinkConnectionPool connectionPool = new SinkConnectionPool(
+		PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(
 				new ExceptionListeningConnectionCreator(
 						senderContext, exceptionListener
 				)
