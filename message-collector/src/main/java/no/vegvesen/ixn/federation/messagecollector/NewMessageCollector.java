@@ -13,17 +13,19 @@ import java.util.concurrent.Executors;
 public final class NewMessageCollector {
     private final Map<ListenerEndpoint, MessageForwarder> states;
     private final SSLContext senderContext;
+    private final String localUrl;
     private final ConnectionCreator connectionCreator;
     private final ExecutorService executorService;
 
-    public NewMessageCollector(SSLContext senderContext, ConnectionCreator connectionCreator) {
+    public NewMessageCollector(SSLContext senderContext, ConnectionCreator connectionCreator, String localUrl) {
         this.senderContext = senderContext;
+        this.localUrl = localUrl;
         this.states = new HashMap<>();
         this.connectionCreator = connectionCreator;
         this.executorService = Executors.newThreadPerTaskExecutor(Executors.defaultThreadFactory());
     }
 
-    public void syncListeners(List<ListenerEndpoint> endpoints, String localUrl) {
+    public void syncListeners(List<ListenerEndpoint> endpoints) {
         addToExecution(endpoints, localUrl);
         removeSpareListeners(endpoints);
     }

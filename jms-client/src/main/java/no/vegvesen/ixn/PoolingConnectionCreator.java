@@ -2,11 +2,14 @@ package no.vegvesen.ixn;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PoolingConnectionCreator implements ConnectionCreator {
 
+    private static final Logger logger = LoggerFactory.getLogger(PoolingConnectionCreator.class);
     private final ConnectionCreator connectionCreatorDelegate;
     private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
@@ -19,11 +22,11 @@ public class PoolingConnectionCreator implements ConnectionCreator {
     }
 
     public void close() {
-        connections.forEach((s, c) -> {
+        connections.forEach((url, connection) -> {
             try {
-                c.close();
+                connection.close();
             } catch (JMSException e) {
-                System.out.println("Exception while closing connection: " + e);
+                logger.debug("Exception while closing connection to url {}",url,e);
             }
         });
     }

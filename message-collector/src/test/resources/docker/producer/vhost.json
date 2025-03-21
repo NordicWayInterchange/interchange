@@ -11,6 +11,13 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "localhost1",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -54,13 +61,32 @@
             "NAME": ""
           }
         },
-         {
+        {
+          "objectType": "EXCHANGE",
+          "identity": "sp_producer",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "localhost1",
+            "NAME": ""
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "localhost",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "localhost",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost1"
           }
         },
         {
