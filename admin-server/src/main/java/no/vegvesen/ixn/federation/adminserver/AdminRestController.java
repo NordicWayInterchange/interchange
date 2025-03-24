@@ -162,7 +162,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/deliverysExchange/bindings/{serviceProviderName}/{deliveryId}")
-    public Boolean deliverysExchangeBindingToMatchingCapabilityExists(@PathVariable("adminUser") String adminUser, @PathVariable("deliveryId") String deliveryId, @PathVariable("serviceProviderName") String serviceProviderName) {
+    public Boolean deliverysExchangeBindingToMatchingCapabilityExists(@PathVariable("adminUser") String adminUser, @PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
