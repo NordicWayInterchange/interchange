@@ -33,14 +33,16 @@ public class CountMessages implements Callable<Integer> {
         ));
 
         String id;
-        if(option.subscriptionId != null){
+        if (option.subscriptionId != null) {
             id = option.subscriptionId;
-        }
-        else{
+
+        } else if (option.selector != null) {
             AddSubscriptionsRequest request = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector)));
             id = client.addSubscription(request).getSubscriptions().stream().filter(sub -> sub.getSelector().equals(option.selector)).findFirst().orElseThrow(
-                    () -> new RuntimeException("Server indicated subscription was added, but could not find it in response")
-            ).getId();
+                    () -> new RuntimeException("Server indicated subscription was added, but could not find it in response")).getId();
+
+        } else {
+            throw new RuntimeException("Need to specify either id or selector");
         }
 
         GetSubscriptionResponse subscription = client.getSubscription(id);
@@ -49,18 +51,13 @@ public class CountMessages implements Callable<Integer> {
             TimeUnit.SECONDS.sleep(2);
         }
 
-        if (! subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",subscription.getStatus(),subscription.getId()));
+        if (!subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s", subscription.getStatus(), subscription.getId()));
 
         }
 
-        LocalEndpointApi endpointApi = client
-                .getSubscription(subscription.getId())
-                .getEndpoints()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s",id)));
-        String url = "amqps://"+endpointApi.getHost();
+        LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s", id)));
+        String url = "amqps://" + endpointApi.getHost();
 
         CountDownLatch latch = new CountDownLatch(1);
         try (Sink sink = new Sink(url, endpointApi.getSource(), parentCommand.getParent().createSSLContext(), message -> counter.incrementAndGet())) {
@@ -69,7 +66,8 @@ public class CountMessages implements Callable<Integer> {
         }
         return 0;
     }
-    private static class SubscriptionsOption{
+
+    private static class SubscriptionsOption {
         @Option(names = {"-i", "--id"})
         String subscriptionId;
 
