@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.qpid.AdminQpidDelta;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.AdminQpidClient;
-import no.vegvesen.ixn.federation.adminserver.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -49,7 +49,7 @@ public class QpidService {
     }
 
     public boolean deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
-        QpidDelta delta = qpidClient.getQpidDelta();
+        AdminQpidDelta delta = adminQpidClient.getQpidDelta();
         Integer intDeliveryId = null;
         try {
             intDeliveryId = Integer.valueOf(deliveryId);
@@ -60,7 +60,7 @@ public class QpidService {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
 
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(intDeliveryId);
+                   List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(intDeliveryId);
                     for (OutgoingMatch match : matches) {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {

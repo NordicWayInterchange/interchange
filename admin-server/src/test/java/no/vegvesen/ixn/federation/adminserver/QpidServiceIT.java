@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -15,6 +16,7 @@ import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
@@ -46,11 +48,14 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     private QpidService service;
 
+    @Mock
+    private OutgoingMatchRepository outgoingMatchRepository;
+
     @BeforeEach
     public void setupClient() {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
         client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
-        service = new QpidService(client);
+        service = new QpidService(client, outgoingMatchRepository);
     }
 
     @Test
