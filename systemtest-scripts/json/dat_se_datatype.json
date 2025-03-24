@@ -4,7 +4,7 @@
     "application" : {
       "messageType" : "DATEX2",
       "publisherId" : "SE12345",
-      "publicationId" : "SE12345-pub-1",
+      "publicationId" : "SE12345:pub-1",
       "originatingCountry" : "SE",
       "protocolVersion" : "DATEX2:1.2.2",
       "quadTree" : [

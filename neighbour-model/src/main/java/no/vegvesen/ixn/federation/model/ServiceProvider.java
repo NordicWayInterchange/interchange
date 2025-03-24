@@ -19,6 +19,7 @@ public class ServiceProvider {
 	@Column(name = "id")
 	private Integer id;
 
+	@Column(length = 320)
 	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
