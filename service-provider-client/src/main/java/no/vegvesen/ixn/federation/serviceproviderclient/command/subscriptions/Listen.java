@@ -43,6 +43,7 @@ public class Listen implements Callable<Integer> {
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
             id = addSubscriptionsResponse.getSubscriptions().stream()
+                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
