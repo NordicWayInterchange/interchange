@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,18 +44,18 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		.withLogConsumer(new Slf4jLogConsumer(logger));
 
 
-	private String Url;
+	private String url;
 	private SSLContext kingHaraldSSlContext;
 
 	@BeforeEach
 	public void setUp() {
-		Url = qpidContainer.getAmqpsUrl();
+		url = qpidContainer.getAmqpsUrl();
 		kingHaraldSSlContext = sslClientContext(stores, SP_NAME);
 	}
 
 	@Test
-	public void invalidDatexMessageThrowsError() throws JMSException, NamingException, InterruptedException {
-        try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+	public void messageReceived() throws JMSException, NamingException, InterruptedException {
+        try (Source kingHaraldTestQueueSource = new Source(url, "test-queue", kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
             JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
                     .textMessage("fisk")
@@ -76,27 +77,15 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
         }
 
+		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+		boolean messageReceived = waitForMessage.await(qpidContainer.getAmqpsUrl(), "test-queue", 1, TimeUnit.SECONDS);
 
-		ConnectionCreator connectionCreator = new SimpleConnectionCreator(kingHaraldSSlContext);
-
-		CountDownMessageListener listener = new CountDownMessageListener(1);
-		boolean success;
-		try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
-			connection.start();
-			try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-				Destination destination = session.createQueue("test-queue");
-				try (MessageConsumer consumer = session.createConsumer(destination)) {
-					consumer.setMessageListener(listener);
-					success = listener.waitFor(1, TimeUnit.SECONDS);
-				}
-			}
-		}
-		assertThat(success).isTrue();
+		assertThat(messageReceived).isTrue();
 	}
 
 	@Test
-	public void explicitExpiryIsReceived() throws JMSException, NamingException {
-        try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+	public void invalidDatexMessageThrowsError() throws JMSException, NamingException {
+        try (Source kingHaraldTestQueueSource = new Source(url, "test-queue", kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
             assertThrows(IllegalMessageException.class, () -> kingHaraldTestQueueSource.createMessageBuilder()
                     .textMessage("fisk")
@@ -120,10 +109,12 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void expiredMessageIsNotDelivered() throws JMSException, NamingException, InterruptedException {
-        try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+		String queueName = "test-queue";
+		try (Source kingHaraldTestQueueSource = new Source(url, queueName, kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
-            JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
-                    .textMessage("fisk")
+			String fisk1 = "fisk";
+			JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()
+                    .textMessage(fisk1)
                     .userId("localhost")
                     .messageType(Constants.DATEX_2)
                     .publisherId("king_harald")
@@ -142,22 +133,17 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 200);
         }
 
+		//Wait for message to expire by a good margin
         Thread.sleep(1000);
 
-		CountDownLatch latch = new CountDownLatch(1);
-		boolean success;
-		try (Sink kingHaraldTestQueueSink = new Sink(Url, "test-queue", kingHaraldSSlContext, message -> latch.countDown())) {
-			kingHaraldTestQueueSink.start();
-            success = latch.await(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-		assertThat(success).isFalse();
+        WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+		boolean messageReceived = waitForMessage.await(url,queueName, 1, TimeUnit.SECONDS);
+		assertThat(messageReceived).isFalse();
 	}
 
 	@Test
 	public void queueMaxTtlIsRespected() throws JMSException, NamingException, InterruptedException {
-        try (Source kingHaraldTestQueueSource = new Source(Url, "expiry-queue", kingHaraldSSlContext)) {
+        try (Source kingHaraldTestQueueSource = new Source(url, "expiry-queue", kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
             JmsMessage message = kingHaraldTestQueueSource.createMessageBuilder()
                     .textMessage("fisk")
@@ -181,20 +167,14 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
         Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
-		CountDownLatch latch = new CountDownLatch(1);
-		boolean success;
-        try (Sink kingHaraldTestQueueSink = new Sink(Url, "expiry-queue", kingHaraldSSlContext, m -> latch.countDown())) {
-			kingHaraldTestQueueSink.start();
-			success = latch.await(1,TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-		assertThat(success).isFalse();
+		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+		boolean messageReceived = waitForMessage.await(url,"expiry-queue", 1, TimeUnit.SECONDS);
+		assertThat(messageReceived).isFalse();
 	}
 
 	@Test
 	public void sourceCloseIsClosed() throws JMSException, NamingException {
-		Source source = new Source(Url, "test-queue", kingHaraldSSlContext);
+		Source source = new Source(url, "test-queue", kingHaraldSSlContext);
 		source.start();
 		assertThat(source.isConnected()).isTrue();
 		source.close();
@@ -202,8 +182,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void sendNonPersistentDenmByteMessage() throws JMSException, NamingException {
-        try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+	public void sendNonPersistentDenmByteMessage() throws NamingException, JMSException, InterruptedException {
+        try (Source source = new Source(url, "test-queue", kingHaraldSSlContext)) {
             source.start();
             byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
             source.sendNonPersistentMessage(source.createMessageBuilder()
@@ -222,20 +202,14 @@ public class SourceSinkIT extends QpidDockerBaseIT {
                     .build());
         }
 
-		CountDownLatch latch = new CountDownLatch(1);
-		boolean hasCountedDown;
-        try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext, m -> latch.countDown())) {
-			sink.start();
-			hasCountedDown = latch.await(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        assertThat(hasCountedDown).isTrue();
+
+		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+        assertThat(waitForMessage.await(url,"test-queue",1, TimeUnit.SECONDS)).isTrue();
 	}
 
 	@Test
-	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException {
-        try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException, InterruptedException {
+        try (Source source = new Source(url, "test-queue", kingHaraldSSlContext)) {
             source.start();
 
             byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
@@ -257,33 +231,51 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(message);
         }
 
-		CountDownLatch latch = new CountDownLatch(1);
-		boolean await;
-		try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext,m -> latch.countDown())) {
-			sink.start();
-            await = latch.await(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		assertThat(await).isTrue();
+		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+		waitForMessage.await(url,"test-queue",1,TimeUnit.SECONDS);
 	}
 
 
 	@Test
-	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
-        try (ImageSource source = new ImageSource(Url, "test-queue", kingHaraldSSlContext)) {
+	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException, InterruptedException {
+        try (ImageSource source = new ImageSource(url, "test-queue", kingHaraldSSlContext)) {
             source.start();
             source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
         }
 
-        CountDownLatch latch = new CountDownLatch(1);
-		boolean await;
-		try (Sink sink = new Sink(Url, "test-queue", kingHaraldSSlContext, m -> latch.countDown())) {
-			sink.start();
-            await = latch.await(1, TimeUnit.SECONDS);
-		} catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        assertThat(await).isTrue();
+		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
+        assertThat(waitForMessage.await(url,"test-queue",1,TimeUnit.SECONDS)).isTrue();
 	}
+
+	private static class WaitForMessage {
+
+		private final CountDownLatch latch;
+        private final SSLContext sslContext;
+        private final MessageListener messageListener;
+
+		WaitForMessage(int count, SSLContext sslContext) {
+			this.sslContext = sslContext;
+			latch = new CountDownLatch(count);
+            messageListener = message -> latch.countDown();
+		}
+
+		public boolean await(String url, String queueName, int timeOut, TimeUnit timeUnit) throws InterruptedException, JMSException {
+			boolean success;
+			JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(url);
+			jmsConnectionFactory.setSslContext(sslContext);
+			try (Connection connection = jmsConnectionFactory.createConnection()) {
+				connection.start();
+				try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+					Destination destination = session.createQueue(queueName);
+					try (MessageConsumer consumer = session.createConsumer(destination)) {
+						consumer.setMessageListener(messageListener);
+						success = latch.await(timeOut, timeUnit);
+					}
+				}
+			}
+			return success;
+		}
+
+	}
+
 }
