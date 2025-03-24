@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine.*;
 
+import java.io.File;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -33,15 +35,28 @@ public class CountMessages implements Callable<Integer> {
         ));
 
         String id;
-        if (option.subscriptionId != null) {
+        if (option.file != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
+            id = addSubscriptionsResponse.getSubscriptions().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
+                    .getId();
+        }
+        else if (option.subscriptionId != null) {
             id = option.subscriptionId;
 
-        } else if (option.selector != null) {
+        }
+        else if (option.selector != null) {
             AddSubscriptionsRequest request = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector)));
-            id = client.addSubscription(request).getSubscriptions().stream().filter(sub -> sub.getSelector().equals(option.selector)).findFirst().orElseThrow(
-                    () -> new RuntimeException("Server indicated subscription was added, but could not find it in response")).getId();
+            id = client.addSubscription(request).getSubscriptions().stream().filter(sub -> sub.getSelector().equals(option.selector))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
+                    .getId();
 
-        } else {
+        }
+        else {
             throw new RuntimeException("Need to specify either id or selector");
         }
 
@@ -68,6 +83,10 @@ public class CountMessages implements Callable<Integer> {
     }
 
     private static class SubscriptionsOption {
+
+        @Option(names = {"-f", "--filename"}, description = "The subscription json file")
+        File file;
+
         @Option(names = {"-i", "--id"})
         String subscriptionId;
 
