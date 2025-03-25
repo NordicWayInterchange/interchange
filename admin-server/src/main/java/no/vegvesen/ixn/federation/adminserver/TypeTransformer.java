@@ -67,30 +67,22 @@ public class TypeTransformer {
         return serviceProviderApiList.stream().sorted().toList();
     }
 
-    public List<CapabilityApi> capabilitiesToGetMatchingCapabilitiesApiList(Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities ) {
+    public List<MatchingCapabilityApi> capabilitiesToGetMatchingCapabilitiesApiList(Set<Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities ) {
 
-        List<CapabilityApi> matchingCapabilities = new ArrayList<>();
+        List<MatchingCapabilityApi> matchingCapabilities = new ArrayList<>();
         for (Capability capability : capabilities) {
-            matchingCapabilities.add(new CapabilityApi(
-                    capability.getId(),
+            matchingCapabilities.add(new MatchingCapabilityApi(
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
-                    capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
-                    capabilityStatusToCapabilityStatusApi(capability.getStatus()),
-                    localDateTimeToTimestamp(capability.getCreatedTimestamp())
+                    capability.getMetadata().toApi()
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
-            matchingCapabilities.add(new CapabilityApi(
-                    neighbourCapability.getId(),
+            matchingCapabilities.add(new MatchingCapabilityApi(
                     neighbourCapability.getApplication().toApi(),
-                    neighbourCapability.getMetadata().toApi(),
-                    null,
-                    null,
-                    localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
+                    neighbourCapability.getMetadata().toApi()
             ));
         }
-        return matchingCapabilities.stream().sorted().toList();
+        return matchingCapabilities;
     }
 
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {
@@ -199,7 +191,7 @@ public class TypeTransformer {
         List<CapabilityApi> capabilityApiList = new ArrayList<>();
         for (Capability capability : capabilities) {
             capabilityApiList.add(new CapabilityApi(
-                    capability.getId(),
+                    capability.getUuid(),
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
@@ -248,7 +240,7 @@ public class TypeTransformer {
         List<LocalSubscriptionApi> subscriptionApiList = new ArrayList<>();
         for (LocalSubscription subscription : subscriptionSet) {
             subscriptionApiList.add(new LocalSubscriptionApi(
-                    subscription.getId().toString(),
+                    subscription.getUuid(),
                     localSubscriptionStatusToSubscriptionStatusApi(subscription.getStatus()),
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
@@ -274,7 +266,7 @@ public class TypeTransformer {
         List<LocalDeliveryApi> deliveriesApiList = new ArrayList<>();
         for (LocalDelivery delivery : deliveriesSet) {
             deliveriesApiList.add(new LocalDeliveryApi(
-                    delivery.getId().toString(),
+                    delivery.getUuid(),
                     delivery.getSelector(),
                     localDeliveryStatusToDeliveryStatusApi(delivery.getStatus()),
                     localDeliveryEndpointSetToEndpointApiSet(delivery.getEndpoints()),

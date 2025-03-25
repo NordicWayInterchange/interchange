@@ -4,7 +4,7 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
@@ -24,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,7 +80,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+    public List<MatchingCapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
@@ -94,7 +97,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
+    public List<MatchingCapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
