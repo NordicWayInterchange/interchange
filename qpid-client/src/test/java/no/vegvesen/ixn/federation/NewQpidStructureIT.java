@@ -105,28 +105,21 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
 
-        CountingMessageListener listener = new CountingMessageListener();
-        SimpleConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
-
-        try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
-            connection.start();
-            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                Destination destination = session.createQueue(queueName);
-                try (MessageConsumer consumer = session.createConsumer(destination)) {
-                    consumer.setMessageListener(listener);
-                    try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
-                        source.start();
-                        source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
-                        String messageText = "{}";
-                        byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-                        source.sendNonPersistentMessage(createMonotchMessage(source, bytemessage));
-                        source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134,"));
-                    }
-                    listener.releaseLockAfter(200,TimeUnit.MILLISECONDS);
-                }
-            }
+        //Expecting 1 message to get through
+        WaitForTimeFrameAndCountMessages listener = new WaitForTimeFrameAndCountMessages(1);
+        WaitForMessage waitForMessage = new WaitForMessage(sslContext,qpidContainer.getAmqpsUrl(),queueName,listener);
+        try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
+            source.start();
+            //This message will not match
+            source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
+            String messageText = "{}";
+            byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+            //This message will match
+            source.sendNonPersistentMessage(createMonotchMessage(source,bytemessage));
+            //This message will not match
+            source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134,"));
+            assertThat(waitForMessage.await(200, TimeUnit.MILLISECONDS)).isTrue();
         }
-        assertThat(listener.getCount()).isEqualTo(1);
     }
 
     private JmsMessage createMonotchMessage(Source source, byte[] bytemessage) throws JMSException {
@@ -217,40 +210,28 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, outQueueName, new Filter(subscriptionSelector)));
 
 
-        CountDownMessageListener listener = new CountDownMessageListener(1);
-        ConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
-        try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
-            connection.start();
-            try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-                Destination destination = session.createQueue(outQueueName);
-                try (MessageConsumer consumer = session.createConsumer(destination)) {
-                    consumer.setMessageListener(listener);
-                    try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
-                        source.start();
-                        String messageText = "This is my DENM message :) ";
-                        byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-                        source.sendNonPersistentMessage(source.createMessageBuilder()
-                                .bytesMessage(bytemessage)
-                                .userId("kong_olav")
-                                .publisherId("NO-123")
-                                .publicationId("pub-1")
-                                .messageType(Constants.DENM)
-                                .causeCode(6)
-                                .subCauseCode(61)
-                                .originatingCountry("NO")
-                                .protocolVersion("DENM:1.2.2")
-                                .quadTreeTiles(",12004,")
-                                .shardId(1)
-                                .shardCount(1)
-                                .timestamp(System.currentTimeMillis())
-                                .build());
-                    }
-                }
-            }
-
-            assertThat(listener.waitFor(200, TimeUnit.MILLISECONDS)).isTrue();
+        WaitForMessage waitForMessage = new WaitForMessage(sslContext,qpidContainer.getAmqpsUrl(),outQueueName,1);
+        try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
+            source.start();
+            String messageText = "This is my DENM message :) ";
+            byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+            source.sendNonPersistentMessage(source.createMessageBuilder()
+                    .bytesMessage(bytemessage)
+                    .userId("kong_olav")
+                    .publisherId("NO-123")
+                    .publicationId("pub-1")
+                    .messageType(Constants.DENM)
+                    .causeCode(6)
+                    .subCauseCode(61)
+                    .originatingCountry("NO")
+                    .protocolVersion("DENM:1.2.2")
+                    .quadTreeTiles(",12004,")
+                    .shardId(1)
+                    .shardCount(1)
+                    .timestamp(System.currentTimeMillis())
+                    .build());
         }
-        System.out.println(qpidClient.getQpidAcl());
+        assertThat(waitForMessage.await(2000,TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -562,8 +543,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
             ConnectionCreator connectionCreator = new SimpleConnectionCreator(sslContext);
 
-            CountingMessageListener listener1 = new CountingMessageListener();
-            CountingMessageListener listener2 = new CountingMessageListener();
+            WaitForTimeFrameAndCountMessages listener1 = new WaitForTimeFrameAndCountMessages(1);
+            WaitForTimeFrameAndCountMessages listener2 = new WaitForTimeFrameAndCountMessages(1);
             try (Connection connection = connectionCreator.createConnection(qpidContainer.getAmqpsUrl())) {
                 //Need two runnables, one for each session/consumer
 
@@ -581,8 +562,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 listener1.releaseLock();
                 listener2.releaseLock();
             }
-            assertThat(listener1.getCount()).isEqualTo(1);
-            assertThat(listener2.getCount()).isEqualTo(1);
+            assertThat(listener1.success()).isTrue();
+            assertThat(listener2.success()).isTrue();
 
 
 

@@ -5,7 +5,6 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
@@ -77,8 +75,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
         }
 
-		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-		boolean messageReceived = waitForMessage.await(qpidContainer.getAmqpsUrl(), "test-queue", 1, TimeUnit.SECONDS);
+        WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext, qpidContainer.getAmqpsUrl(),"test-queue",1);
+		boolean messageReceived = waitForMessage.await(1, TimeUnit.SECONDS);
 
 		assertThat(messageReceived).isTrue();
 	}
@@ -136,8 +134,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		//Wait for message to expire by a good margin
         Thread.sleep(1000);
 
-        WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-		boolean messageReceived = waitForMessage.await(url,queueName, 1, TimeUnit.SECONDS);
+		WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext, url, queueName, 1);
+		boolean messageReceived = waitForMessage.await(1, TimeUnit.SECONDS);
 		assertThat(messageReceived).isFalse();
 	}
 
@@ -167,8 +165,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
         Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
-		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-		boolean messageReceived = waitForMessage.await(url,"expiry-queue", 1, TimeUnit.SECONDS);
+		WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext,url,"expiry-queue",1);
+		boolean messageReceived = waitForMessage.await(1, TimeUnit.SECONDS);
 		assertThat(messageReceived).isFalse();
 	}
 
@@ -203,8 +201,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
         }
 
 
-		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-        assertThat(waitForMessage.await(url,"test-queue",1, TimeUnit.SECONDS)).isTrue();
+		WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext,url,"test-queue",1);
+        assertThat(waitForMessage.await(1, TimeUnit.SECONDS)).isTrue();
 	}
 
 	@Test
@@ -231,8 +229,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(message);
         }
 
-		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-		waitForMessage.await(url,"test-queue",1,TimeUnit.SECONDS);
+		WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext,url,"test-queue",1);
+		waitForMessage.await(1,TimeUnit.SECONDS);
 	}
 
 
@@ -243,39 +241,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
         }
 
-		WaitForMessage waitForMessage = new WaitForMessage(1,kingHaraldSSlContext);
-        assertThat(waitForMessage.await(url,"test-queue",1,TimeUnit.SECONDS)).isTrue();
-	}
-
-	private static class WaitForMessage {
-
-		private final CountDownLatch latch;
-        private final SSLContext sslContext;
-        private final MessageListener messageListener;
-
-		WaitForMessage(int count, SSLContext sslContext) {
-			this.sslContext = sslContext;
-			latch = new CountDownLatch(count);
-            messageListener = message -> latch.countDown();
-		}
-
-		public boolean await(String url, String queueName, int timeOut, TimeUnit timeUnit) throws InterruptedException, JMSException {
-			boolean success;
-			JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(url);
-			jmsConnectionFactory.setSslContext(sslContext);
-			try (Connection connection = jmsConnectionFactory.createConnection()) {
-				connection.start();
-				try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
-					Destination destination = session.createQueue(queueName);
-					try (MessageConsumer consumer = session.createConsumer(destination)) {
-						consumer.setMessageListener(messageListener);
-						success = latch.await(timeOut, timeUnit);
-					}
-				}
-			}
-			return success;
-		}
-
+		WaitForMessage waitForMessage = new WaitForMessage(kingHaraldSSlContext,url,"test-queue",1);
+        assertThat(waitForMessage.await(1,TimeUnit.SECONDS)).isTrue();
 	}
 
 }

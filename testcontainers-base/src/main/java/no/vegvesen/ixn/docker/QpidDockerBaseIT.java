@@ -8,6 +8,7 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.JmsConnectionFactory;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
@@ -133,10 +134,14 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
-	protected static class CountDownMessageListener implements MessageListener {
+	/**
+	 * A message listener that waits for n messages within a specified amount of time,
+	 * and returns as soon as n is received
+	 */
+	protected static class CountNumberOfMessagesInTimeframe implements WaitingMessageListener {
 		private final CountDownLatch latch;
 
-		public CountDownMessageListener(int count) {
+		public CountNumberOfMessagesInTimeframe(int count) {
 			latch = new CountDownLatch(count);
 		}
 
@@ -145,17 +150,24 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			latch.countDown();
 		}
 
+		@Override
 		public boolean waitFor(long timeout, TimeUnit unit) throws InterruptedException {
 			return latch.await(timeout, unit);
 		}
 	}
 
-	protected static class CountingMessageListener implements MessageListener {
+	/**
+	 * A message Listener that waits for a certain amount of time, and registers the number of messages
+	 * received in that time.
+	 */
+	protected static class WaitForTimeFrameAndCountMessages implements WaitingMessageListener {
 		private final AtomicInteger numMessages;
 		private final CountDownLatch latch;
+        private final int expectedCount;
 
-		public CountingMessageListener() {
-			this.numMessages = new AtomicInteger();
+        public WaitForTimeFrameAndCountMessages(int expectedCount) {
+            this.expectedCount = expectedCount;
+            this.numMessages = new AtomicInteger();
 			this.latch = new CountDownLatch(1);
 		}
 
@@ -176,5 +188,67 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			unit.sleep(timeout);
 			releaseLock();
 		}
+
+		public boolean success() {
+			return numMessages.get() == expectedCount;
+		}
+
+		@Override
+		public boolean waitFor(long timeOut, TimeUnit timeUnit) throws InterruptedException {
+			releaseLockAfter(timeOut, timeUnit);
+			return success();
+		}
+	}
+
+	public static class WaitForMessage {
+
+        private final SSLContext sslContext;
+		private final String url;
+        private final String queueName;
+        private final WaitingMessageListener listener;
+
+
+		public WaitForMessage(SSLContext sslContext, String url, String queueName, int count) {
+			this.sslContext = sslContext;
+			this.url = url;
+            this.queueName = queueName;
+            listener = new CountNumberOfMessagesInTimeframe(count);
+        }
+
+		public WaitForMessage(SSLContext sslContext, String url, String queueName, WaitingMessageListener listener) {
+			this.sslContext = sslContext;
+			this.url = url;
+			this.queueName = queueName;
+            this.listener = listener;
+		}
+
+		public boolean await(int timeOut, TimeUnit timeUnit) throws InterruptedException, JMSException {
+			boolean success;
+			JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(this.url);
+			jmsConnectionFactory.setSslContext(sslContext);
+			try (Connection connection = jmsConnectionFactory.createConnection()) {
+				connection.start();
+				try (Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE)) {
+					Destination destination = session.createQueue(this.queueName);
+					try (MessageConsumer consumer = session.createConsumer(destination)) {
+						consumer.setMessageListener(listener);
+						success = listener.waitFor(timeOut, timeUnit);
+					}
+				}
+			}
+			return success;
+		}
+
+	}
+
+	public interface WaitingMessageListener extends MessageListener {
+		/**
+		 * A messageListener that can report success after/within a certain amount of time
+		 * @param timeOut
+		 * @param timeUnit
+		 * @return true if the condition is held, false otherwise
+		 * @throws InterruptedException
+		 */
+		boolean waitFor(long timeOut, TimeUnit timeUnit) throws InterruptedException;
 	}
 }
