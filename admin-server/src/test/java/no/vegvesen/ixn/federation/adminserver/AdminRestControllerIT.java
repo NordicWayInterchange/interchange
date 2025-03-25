@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.Binding;
+import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
+import no.vegvesen.ixn.federation.adminserver.qpid.Filter;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
-import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
@@ -168,8 +170,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         neighbourRepository.save(neighbour);
 
 
-        List<CapabilityApi> response1 = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
-        List<CapabilityApi> response2 = restController.getMatchingSubscriptionCapabilities(adminUser, "originatingCountry='SE'");
+        List<MatchingCapabilityApi> response1 = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+        List<MatchingCapabilityApi> response2 = restController.getMatchingSubscriptionCapabilities(adminUser, "originatingCountry='SE'");
 
         assertThat(response1).hasSize(1);
         assertThat(response2).hasSize(0);
@@ -187,7 +189,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         serviceProviderRepository.save(serviceProvider);
 
-        List<CapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+        List<MatchingCapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
 
         assertThat(response).hasSize(2);
     }
@@ -222,9 +224,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(aServiceProvider);
 
 
-        List<CapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
-        List<CapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
-        List<CapabilityApi> response3 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector);
+        List<MatchingCapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
+        List<MatchingCapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
+        List<MatchingCapabilityApi> response3 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector);
 
          assertThat(response1).hasSize(0);
          assertThat(response2).hasSize(1);
