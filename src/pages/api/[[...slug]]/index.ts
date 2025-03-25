@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIExchangeValidator,
-    fetchAdminUINeighbours,
+    fetchAdminUINeighbours, fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
 } from "@/lib/fetchers/interchangeConnector";
@@ -29,6 +29,12 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     const res = await fetchAdminUIServiceProviders(params);
     const serviceProviders: Array<Neighbours> = await res.data;
     return [res.status, serviceProviders];
+};
+
+const fetchPrivateChannels = async (params: basicGetParams) => {
+    const res = await fetchAdminUIPrivateChannels(params);
+    const privateChannels: Array<Neighbours> = await res.data;
+    return [res.status, privateChannels];
 };
 
 const fetchQueueValidator = async (params: extendedGetParams) => {
@@ -60,6 +66,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
+    privateChannels: fetchPrivateChannels,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };

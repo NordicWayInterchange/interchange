@@ -18,7 +18,7 @@ import {
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
-import {useFetchPrivateChannels} from "@/hooks/useFetchServiceProviderPrivateChannels";
+import {useFetchPrivateChannels} from "@/hooks/useFetchPrivateChannels";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
@@ -28,10 +28,11 @@ export default function ServiceProviders() {
     const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
     );
-    console.log('serviceProviderData', serviceProviderData)
     const {data: serviceProviderPrivateChannels, isPrivateChannelLoading} = useFetchPrivateChannels(
         session?.user.commonName as string
     );
+
+    console.log('serviceProviderPrivateChannels', serviceProviderPrivateChannels)
 
     const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{

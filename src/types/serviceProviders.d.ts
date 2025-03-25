@@ -105,3 +105,7 @@ export type EndPoint = {
     port: number;
     queueName: string;
 };
+
+export type ExtendedServiceProviders = ServiceProviders & {
+    privateChannels: ServiceProviderPrivateChannels;
+};
