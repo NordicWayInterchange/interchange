@@ -1,10 +1,4 @@
 package no.vegvesen.ixn.federation.adminserver.model.privateChannel;
-
-import no.vegvesen.ixn.federation.model.Peer;
-import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
-import org.jetbrains.annotations.NotNull;
-
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
@@ -105,7 +99,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
 
     @Override
-    public int compareTo(@NotNull PrivateChannelApi privateChannelApi) {
+    public int compareTo(PrivateChannelApi privateChannelApi) {
         if(lastUpdated == null && privateChannelApi.lastUpdated == null) {
             return 0;
         }
