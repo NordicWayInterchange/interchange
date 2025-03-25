@@ -31,7 +31,7 @@ import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 
 public class QpidDockerBaseIT extends DockerBaseIT {
 
-	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
 	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
 		Path imageLocation = getFolderPath("qpid-test");
@@ -180,10 +180,6 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 			latch.countDown();
 		}
 
-		public int getCount() {
-			return numMessages.get();
-		}
-
 		public void releaseLockAfter(long timeout, TimeUnit unit) throws InterruptedException {
 			unit.sleep(timeout);
 			releaseLock();
@@ -244,10 +240,10 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	public interface WaitingMessageListener extends MessageListener {
 		/**
 		 * A messageListener that can report success after/within a certain amount of time
-		 * @param timeOut
-		 * @param timeUnit
+		 * @param timeOut number of timeunits for timeout
+		 * @param timeUnit timeunits for timeout
 		 * @return true if the condition is held, false otherwise
-		 * @throws InterruptedException
+		 * @throws InterruptedException on interruptions
 		 */
 		boolean waitFor(long timeOut, TimeUnit timeUnit) throws InterruptedException;
 	}
