@@ -12,12 +12,13 @@ import {useSession} from "next-auth/react";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries,
+    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
+import {useFetchPrivateChannels} from "@/hooks/useFetchServiceProviderPrivateChannels";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
@@ -27,8 +28,12 @@ export default function ServiceProviders() {
     const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
     );
+    console.log('serviceProviderData', serviceProviderData)
+    const {data: serviceProviderPrivateChannels, isPrivateChannelLoading} = useFetchPrivateChannels(
+        session?.user.commonName as string
+    );
 
-    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null>(null);
+    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -132,6 +137,29 @@ export default function ServiceProviders() {
                     >
                         {Array.isArray(serviceProviderDeliveries) ?
                             <StyledBorderlineSpan> {serviceProviderDeliveries.length}  </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
+                    </Box>
+                );
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "privateChannels",
+            headerName: "Private channels",
+            headerClassName: 'custom-header',
+            renderCell: (params) => {
+                const serviceProviderPrivateChannels = params.row.privateChannels;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => {
+                            const rowId = params.row.id;
+                            setServiceProviderRow(null);
+                            handleCellClick(params.row.privateChannels, "privateChannels", rowId)
+                        }}
+                    >
+                        {Array.isArray(serviceProviderPrivateChannels) ?
+                            <StyledBorderlineSpan> {serviceProviderPrivateChannels.length}  </StyledBorderlineSpan> :
                             <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
                     </Box>
                 );
