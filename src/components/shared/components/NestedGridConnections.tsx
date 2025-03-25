@@ -1,16 +1,8 @@
-import {GridColDef} from "@mui/x-data-grid";
-import {timeConverter} from "@/lib/timeConverter";
-import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Chip} from "@/components/shared/components/Chip";
-import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider} from "@mui/material";
+import {Box, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 
-import React, {useState} from "react";
-import {
-    Connection,
-} from "@/types/serviceProviders";
+import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 
@@ -24,7 +16,7 @@ type Props = {
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
 };
-const NestedGridConnections = ({row, field, drawerOpen, nestedConnectionData, nestedConnectionColumns, handleMoreClose, handleOnRowClick}: Props) => {
+const NestedGridConnections = ({nestedConnectionData, nestedConnectionColumns, handleOnRowClick}: Props) => {
     return (
         <Box flex={1}>
             <Mainheading>Connections</Mainheading>
