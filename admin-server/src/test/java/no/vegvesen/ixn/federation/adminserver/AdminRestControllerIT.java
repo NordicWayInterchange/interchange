@@ -3,9 +3,11 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.Binding;
+import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
+import no.vegvesen.ixn.federation.adminserver.qpid.Filter;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
-import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
@@ -24,7 +26,6 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -177,8 +178,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         neighbourRepository.save(neighbour);
 
 
-        List<CapabilityApi> response1 = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
-        List<CapabilityApi> response2 = restController.getMatchingSubscriptionCapabilities(adminUser, "originatingCountry='SE'");
+        List<MatchingCapabilityApi> response1 = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+        List<MatchingCapabilityApi> response2 = restController.getMatchingSubscriptionCapabilities(adminUser, "originatingCountry='SE'");
 
         assertThat(response1).hasSize(1);
         assertThat(response2).hasSize(0);
@@ -196,7 +197,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         serviceProviderRepository.save(serviceProvider);
 
-        List<CapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
+        List<MatchingCapabilityApi> response = restController.getMatchingSubscriptionCapabilities(adminUser, selector);
 
         assertThat(response).hasSize(2);
     }
@@ -231,10 +232,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(aServiceProvider);
 
 
-        List<CapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
-        List<CapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
+        List<MatchingCapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
+        List<MatchingCapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
         assertThatThrownBy(() -> restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector)).isInstanceOf(NotFoundException.class);
-
 
         assertThat(response1).hasSize(0);
         assertThat(response2).hasSize(1);
