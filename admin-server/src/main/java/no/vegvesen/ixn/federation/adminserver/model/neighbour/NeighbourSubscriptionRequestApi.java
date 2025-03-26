@@ -1,19 +1,19 @@
 package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
-import java.util.Set;
+import java.util.List;
 
 public class NeighbourSubscriptionRequestApi {
 
     private Integer id;
 
-    private Set<NeighbourSubscriptionApi> subscriptions;
+    private List<NeighbourSubscriptionApi> subscriptions;
 
     private Long successfulRequest;
 
     public NeighbourSubscriptionRequestApi() {
     }
 
-    public NeighbourSubscriptionRequestApi(Integer id, Set<NeighbourSubscriptionApi> subscriptions, Long successfulRequest) {
+    public NeighbourSubscriptionRequestApi(Integer id, List<NeighbourSubscriptionApi> subscriptions, Long successfulRequest) {
         this.id = id;
         this.subscriptions = subscriptions;
         this.successfulRequest = successfulRequest;
@@ -27,11 +27,11 @@ public class NeighbourSubscriptionRequestApi {
         this.id = id;
     }
 
-    public Set<NeighbourSubscriptionApi> getSubscriptions() {
+    public List<NeighbourSubscriptionApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<NeighbourSubscriptionApi> subscriptions) {
+    public void setSubscriptions(List<NeighbourSubscriptionApi> subscriptions) {
         this.subscriptions = subscriptions;
     }
 

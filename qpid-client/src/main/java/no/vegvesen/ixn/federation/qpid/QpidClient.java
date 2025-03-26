@@ -87,6 +87,7 @@ public class QpidClient {
 	 * @param restTemplate
 	 * @param routingConfigurerProperties
 	 */
+
 	@Autowired
 	public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
 		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);

@@ -1,11 +1,9 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import no.vegvesen.ixn.federation.model.LocalConnection;
-
 import java.util.HashSet;
 import java.util.Set;
 
-public class LocalSubscriptionApi {
+public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
 
     private String id;
 
@@ -19,7 +17,7 @@ public class LocalSubscriptionApi {
 
     private String consumerCommonName;
 
-    private Set<LocalConnection> connections = new HashSet<>();
+    private Set<LocalConnectionApi> connections = new HashSet<>();
 
     private String description;
 
@@ -27,7 +25,7 @@ public class LocalSubscriptionApi {
 
 
     public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi status, String selector, String consumerCommonName,
-                                String description, String errorMessage, Set<LocalConnection> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
+                                String description, String errorMessage, Set<LocalConnectionApi> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
         this.id = id;
         this.status = status;
         this.selector = selector;
@@ -96,15 +94,15 @@ public class LocalSubscriptionApi {
     }
 
 
-    public Set<LocalConnection> getConnections() {
+    public Set<LocalConnectionApi> getConnections() {
         return connections;
     }
 
-    public void setConnections(Set<LocalConnection> connections) {
+    public void setConnections(Set<LocalConnectionApi> connections) {
         this.connections = connections;
     }
 
-    public void addConnection(LocalConnection connection) {
+    public void addConnection(LocalConnectionApi connection) {
         connections.add(connection);
     }
 
@@ -114,6 +112,20 @@ public class LocalSubscriptionApi {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public int compareTo(LocalSubscriptionApi o) {
+        if(o.lastUpdated == null && lastUpdated == null) {
+            return 0;
+        }
+        if(lastUpdated == null) {
+            return -1;
+        }
+        if(o.lastUpdated == null){
+            return 1;
+        }
+        return Long.compare(lastUpdated, o.lastUpdated);
     }
 
     @Override
