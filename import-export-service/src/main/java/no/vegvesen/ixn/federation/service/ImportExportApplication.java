@@ -52,5 +52,12 @@ public class ImportExportApplication implements CommandLineRunner {
             );
             exportApplication.run();
         }
+        /*ImportApplication importApplication = new ImportApplication(
+                neighbourRepository,
+                serviceProviderRepository,
+                privateChannelRepository
+        );
+        importApplication.run(Paths.get("dump.json"));
+    }*/
     }
 }
