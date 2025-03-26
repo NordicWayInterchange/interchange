@@ -157,13 +157,13 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"},
         ];
     } else if (field === "deliveries") {
-        nestedData = row.deliveries.map((subscription: any) => ({
-            id: subscription.id,
-            status: subscription.status,
-            selector: subscription.selector,
-            description: subscription.description,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
+        nestedData = row.deliveries.map((delivery: any) => ({
+            id: delivery.id,
+            status: delivery.status,
+            selector: delivery.selector,
+            description: delivery.description,
+            endpoints: delivery.endpoints,
+            lastUpdatedTimestamp: timeConverter(delivery.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [
