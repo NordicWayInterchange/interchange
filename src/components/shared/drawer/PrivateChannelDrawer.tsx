@@ -1,0 +1,226 @@
+import {
+    Box, Divider,
+    Drawer, FormControl, IconButton, InputAdornment,
+    List,
+    ListItem, ListItemText, TextField,
+    Toolbar, Typography
+} from "@mui/material";
+import React, {useState} from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {ContentCopy} from "@/components/shared/actions/ContentCopy";
+import Loading from "@/components/shared/components/Loading";
+import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+
+type Props = {
+    privateChannel: ServiceProviderPrivateChannels;
+    open: boolean;
+    handleMoreClose: () => void;
+};
+
+const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) => {
+    const [openMap, setOpenMap] = useState<boolean>(false);
+    if (!privateChannel) {
+        return <Loading text=""/>
+    }
+
+    const handleClose = () => {
+        setOpenMap(false);
+    };
+
+
+    return (
+        <>
+            <Drawer
+                sx={drawerStyle}
+                PaperProps={{sx: {backgroundColor: "#F9F9F9"}}}
+                variant="temporary"
+                anchor="right"
+                open={open}
+                onClose={handleMoreClose}
+            >
+                <Toolbar/>
+                <Box sx={{padding: 1}}>
+                    <List>
+                        <ListItem sx={{justifyContent: "flex-end"}}>
+                            <IconButton onClick={handleMoreClose}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </ListItem>
+                        <ListItem>
+                            <StyledHeaderBox>
+                                <Typography>PrivateChannel details</Typography>
+                            </StyledHeaderBox>
+                        </ListItem>
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                                    <Box>
+                                        <ListItemText primary={"ID"} secondary={privateChannel.id}/>
+                                    </Box>
+                                    <Box>
+                                        <ListItemText
+                                            primary={"Created"}
+                                            secondary={privateChannel.lastUpdated}
+                                        />
+                                    </Box>
+                                </Box>
+                            </StyledCard>
+                        </ListItem>
+
+                        {privateChannel.peers && (
+                            <ListItem>
+                                <StyledCard variant={"outlined"}>
+                                    <Typography  sx={{ marginBottom: 2 }}>Peers</Typography>
+                                    <Box sx={peerListStyle} />
+                                    {privateChannel.peers.length > 0 ? privateChannel.peers.map((item, index) => (
+                                        <React.Fragment key={index}>
+                                            <ListItem>
+                                                <ListItemText
+                                                    primary={<Typography component="div" sx={primaryTextStyle}>{item}</Typography>}
+                                                    secondary={
+                                                        <Box sx={secondaryContainerStyle}>
+                                                            <ContentCopy value={item} />
+                                                        </Box>
+                                                    }
+                                                />
+                                                <Box>
+                                                </Box>
+                                            </ListItem>
+                                            {index < privateChannel.peers.length - 1 && <Divider
+                                                sx={{ borderStyle: "dashed", borderWidth: 1, marginX: 2, position: "relative", marginBottom: "-8px", top: "-20px" }} />}
+                                        </React.Fragment>
+                                    )) : <Box sx={warningStyle}>
+                                        <WarningAmberIcon sx={{ mr: "6px", mt: "-7px" }} />
+                                        <Typography variant="body2" sx={{ fontWeight: "500" }}>There is no peer for this private channel</Typography>
+                                    </Box>}
+                                </StyledCard>
+                            </ListItem>
+                        )}
+
+                        {privateChannel.endpoint && (
+                            <ListItem>
+                                <StyledCard variant={"outlined"}>
+                                    <Typography>Endpoint</Typography>
+                                    <FormControl fullWidth>
+                                        <TextField
+                                            value={privateChannel.endpoint.host}
+                                            label={"Host"}
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={privateChannel.endpoint.host} />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                        <TextField
+                                            value={privateChannel.endpoint.port}
+                                            label="Port"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={privateChannel.endpoint.port.toString()} />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                        <TextField
+                                            value={privateChannel.endpoint.queueName}
+                                            label="Queue name"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={privateChannel.endpoint.queueName} />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    </FormControl>
+                                </StyledCard>
+                            </ListItem>
+                        )}
+                        <ListItem>
+                            <StyledCard variant={"outlined"}>
+                                <Typography>Description</Typography>
+                                <div>
+                                    <FormControl fullWidth>
+                                        <TextField
+                                            margin="normal"
+                                            multiline
+                                            value={privateChannel.description || ""}
+                                            rows={4}
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={privateChannel.description} />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    </FormControl>
+                                </div>
+                            </StyledCard>
+                        </ListItem>
+                    </List>
+                </Box>
+            </Drawer>
+        </>
+    );
+};
+
+
+const peerListStyle = {
+    height: "1.5px",
+    flexGrow: 1,
+    backgroundColor: "#E67600",
+    marginX: 2,
+    position: "relative",
+    top: "-15px"
+};
+
+const warningStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#E67600",
+    padding: "4px 12px",
+    borderRadius: "6px",
+    boxShadow: 1,
+    height: "40px",
+    backgroundColor: "#FFF7E6",
+    position: "relative", top: "-20px"
+};
+
+const primaryTextStyle = {
+    maxWidth: "calc(100% - 32px)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    position: "relative",
+    top: "-22px",
+    marginBottom: "-40px"
+};
+
+const secondaryContainerStyle = {
+    display: "flex",
+    justifyContent: "flex-end",
+    width: "100%",
+    ml: "9px",
+    position: "relative",
+    top: "-9px"
+};
+
+export default PrivateChannelDrawer;
