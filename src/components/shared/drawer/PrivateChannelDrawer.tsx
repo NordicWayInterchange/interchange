@@ -20,14 +20,9 @@ type Props = {
 };
 
 const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) => {
-    const [openMap, setOpenMap] = useState<boolean>(false);
     if (!privateChannel) {
         return <Loading text=""/>
     }
-
-    const handleClose = () => {
-        setOpenMap(false);
-    };
 
 
     return (
