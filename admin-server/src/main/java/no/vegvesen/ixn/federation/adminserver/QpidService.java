@@ -66,7 +66,7 @@ public class QpidService {
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
                                 if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
-                                    return true; //Enrich here
+                                    return true; //Enrich here: host, port,target?
                                 }
                             }
                         }
