@@ -1,25 +1,26 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
-import java.util.Set;
+import java.util.List;
 
-public class ServiceProviderApi {
+
+public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     private Integer id;
     private String name;
 
-    private Set<LocalSubscriptionApi> subscriptions;
+    private List<LocalSubscriptionApi> subscriptions;
 
-    private Set<CapabilityApi> capabilities;
+    private List<CapabilityApi> capabilities;
 
-    private Set<LocalDeliveryApi> deliveries;
+    private List<LocalDeliveryApi> deliveries;
 
 
     public ServiceProviderApi(
             Integer id,
             String name,
-            Set<LocalSubscriptionApi> subscriptions,
-            Set<CapabilityApi> capabilities,
-            Set<LocalDeliveryApi> deliveries) {
+            List<LocalSubscriptionApi> subscriptions,
+            List<CapabilityApi> capabilities,
+            List<LocalDeliveryApi> deliveries) {
         this.id = id;
         this.name = name;
         this.subscriptions = subscriptions;
@@ -48,28 +49,44 @@ public class ServiceProviderApi {
         this.name = name;
     }
 
-    public Set<LocalSubscriptionApi> getSubscriptions() {
+    public List<LocalSubscriptionApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<LocalSubscriptionApi> subscriptions) {
+    public void setSubscriptions(List<LocalSubscriptionApi> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
-    public Set<CapabilityApi> getCapabilities() {
+    public List<CapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<CapabilityApi> capabilities) {
+    public void setCapabilities(List<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 
-    public Set<LocalDeliveryApi> getDeliveries() {
+    public List<LocalDeliveryApi> getDeliveries() {
         return deliveries;
     }
 
-    public void setDeliveries(Set<LocalDeliveryApi> deliveries) {
+    public void setDeliveries(List<LocalDeliveryApi> deliveries) {
         this.deliveries = deliveries;
+    }
+
+    @Override
+    public int compareTo(ServiceProviderApi serviceProviderApi) {
+        if(id == null && serviceProviderApi.id == null) {
+            return 0;
+        }
+
+        if(serviceProviderApi.id == null){
+            return 1;
+        }
+
+        if(id == null) {
+            return -1;
+        }
+        return Long.compare(id, serviceProviderApi.id);
     }
 
     @Override

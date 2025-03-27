@@ -64,6 +64,11 @@ public class OnboardServerErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
+	@ExceptionHandler({AlreadyExistsException.class})
+	public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
+		return error(CONFLICT, e);
+	}
+
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
 

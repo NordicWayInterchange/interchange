@@ -90,7 +90,7 @@ public class OnboardRestController {
 		Set<String> allPublicationIds = allPublicationIds();
 		for (CapabilityApi capability : capabilityApi.getCapabilities()) {
 			if (allPublicationIds.contains(capability.getApplication().getPublicationId())) {
-				throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique.", capability));
+				throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists.", capability));
 			}
 
 			Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capability);
@@ -98,12 +98,17 @@ public class OnboardRestController {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s object is missing properties %s.", capability, capabilityProperties));
 			}
 
-			if(!CapabilityValidator.capabilityHasValidProperties(capability)){
-				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capability));
+			Map<Boolean, String> validatedCapabilities = CapabilityValidator.capabilityHasValidProperties(capability);
+			if(validatedCapabilities.containsKey(false)){
+				throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapabilities.get(false), capability));
 			}
 
 			if(!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
+			}
+
+			if(!CapabilityValidator.isShardCountValid(capability.getMetadata())){
+				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capability));
 			}
 		}
 
@@ -267,7 +272,12 @@ public class OnboardRestController {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
-			if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
+			String selector = subscription.getSelector();
+			if(selector == null){
+				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
+				localSubscription.setErrorMessage("Bad api object for adding subscription. The selector object was null.");
+			}
+			else if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
 				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
 					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
 				} else {
@@ -584,10 +594,12 @@ public class OnboardRestController {
 		for(AddDelivery delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
-			if (delivery.getSelector() == null) {
+
+			if (selector == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
-			} else if (! JMSSelectorFilterFactory.isValidSelector(selector)) {
+			}
+			else if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
 			} else {
