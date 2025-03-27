@@ -197,8 +197,8 @@ public class AdminRestController {
         return qpidService.bindingExists(exchangeName, queueName);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/deliverysExchange/bindings/{serviceProviderName}/{deliveryId}")
-    public Boolean deliverysExchangeBindingToMatchingCapabilityExists(@PathVariable("adminUser") String adminUser, @PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{serviceProviderName}/deliveries/{deliveryId}/matches")
+    public Boolean GetDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
