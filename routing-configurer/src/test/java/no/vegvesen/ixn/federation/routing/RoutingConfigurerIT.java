@@ -10,8 +10,8 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -39,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
@@ -49,7 +48,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public static final String HOST_NAME = getDockerHost();
 	public static CaStores stores = generateStores(getTargetFolderPathForTestClass(RoutingConfigurerIT.class),"my_ca", HOST_NAME,"routing_configurer","king_gustaf","nordea");
 
-    @Qualifier("getTestSslContext")
     @Autowired
 	SSLContext sslContext;
 

@@ -6,8 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class CapabilityApi {
-
+public class CapabilityApi implements Comparable<CapabilityApi> {
 
     private Integer id;
 
@@ -83,6 +82,22 @@ public class CapabilityApi {
 
     public void setStatus(CapabilityStatusApi status) {
         this.status = status;
+    }
+
+    @Override
+    public int compareTo(CapabilityApi o) {
+        if(createdTimestamp == null && o.createdTimestamp == null) {
+            return 0;
+        }
+
+        if(o.createdTimestamp == null){
+            return 1;
+        }
+
+        if(createdTimestamp == null) {
+            return -1;
+        }
+        return Long.compare(createdTimestamp, o.createdTimestamp);
     }
 
     public String toString() {
