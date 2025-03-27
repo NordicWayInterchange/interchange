@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.keys.PortalStores;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -24,7 +25,8 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                MessagesCommand.class
+                MessagesCommand.class,
+                PortalStores.class
         },
         mixinStandardHelpOptions = true,
         version = "1.0")

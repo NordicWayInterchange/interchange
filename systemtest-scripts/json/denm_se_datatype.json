@@ -1,15 +1,19 @@
 {
-  "messageType": "DENM",
-  "publisherId": "SE-12345",
-  "publisherName": "Some Swedish publisher",
-  "originatingCountry": "SE",
-  "protocolVersion": "DENM:1.2.2",
-  "contentType": "application/octet-stream",
-  "quadTree": [
-    "01230122",
-    "01230123"
-  ],
-  "serviceType": "some-denm-service-type?",
-  "causeCode": "3",
-  "subCauseCode": "6"
+  "capabilities": [{
+    "application": {
+      "messageType": "DENM",
+      "publisherId": "SE12345",
+      "publicationId": "SE12345:pub-4",
+      "publisherName": "Pub",
+      "originatingCountry": "SE",
+      "protocolVersion": "DENM:1.2.2",
+      "quadTree": [
+        "01230122"
+      ],
+      "serviceType": "some-denm-service-type",
+      "causeCode": [3]
+    },
+    "metadata":  {
+
+    }}]
 }
