@@ -110,4 +110,4 @@ letsencrypt:
   key_secret_ref: my-key-secret
 ingress:
   name: my-ingress
-  external_portal_ip: 2.3.4.5
+  external_frontend_ip: 2.3.4.5

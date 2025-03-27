@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
 import java.util.Set;
 
-public class NeighbourSubscriptionApi {
+public class NeighbourSubscriptionApi implements Comparable<NeighbourSubscriptionApi>{
 
     private Integer subreq_id;
 
@@ -90,6 +90,20 @@ public class NeighbourSubscriptionApi {
     }
 
     @Override
+    public int compareTo(NeighbourSubscriptionApi o) {
+        if(lastUpdatedTimestamp == null && o.lastUpdatedTimestamp == null){
+            return 0;
+        }
+        if(o.lastUpdatedTimestamp == null){
+            return 1;
+        }
+        if(lastUpdatedTimestamp == null){
+            return -1;
+        }
+        return Long.compare(lastUpdatedTimestamp, o.lastUpdatedTimestamp);
+    }
+
+    @Override
     public String toString() {
         return "NeighbourSubscriptionApi{" +
                 "id=" + subreq_id +
@@ -101,4 +115,6 @@ public class NeighbourSubscriptionApi {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
+
+
 }

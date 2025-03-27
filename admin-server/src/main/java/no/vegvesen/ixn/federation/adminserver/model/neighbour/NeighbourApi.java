@@ -16,6 +16,10 @@ public class NeighbourApi {
 
     private Long lastFailedConnectionAttempt;
 
+    private ConnectionApi controlConnection;
+
+    private String controlChannelPort;
+
     private Long lastUpdated;
 
     private Boolean ignore;
@@ -23,7 +27,7 @@ public class NeighbourApi {
     public NeighbourApi() {
     }
 
-    public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, Long lastFailedConnectionAttempt, Long lastUpdated, Boolean ignore) {
+    public NeighbourApi(Integer neighbour_id, String name, NeighbourCapabilitiesApi capabilities, NeighbourSubscriptionRequestApi neighbourRequestedSubscriptions, SubscriptionRequestApi ourRequestedSubscriptions, ConnectionStatusApi connectionStatus, Long lastFailedConnectionAttempt, Long lastUpdated, Boolean ignore, ConnectionApi controlConnection, String controlChannelPort) {
         this.neighbour_id = neighbour_id;
         this.name = name;
         this.capabilities = capabilities;
@@ -33,6 +37,8 @@ public class NeighbourApi {
         this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
         this.lastUpdated = lastUpdated;
         this.ignore = ignore;
+        this.controlConnection = controlConnection;
+        this.controlChannelPort = controlChannelPort;
     }
 
     public Integer getNeighbour_id() {
@@ -105,6 +111,14 @@ public class NeighbourApi {
 
     public void setIgnore(Boolean ignore) {
         this.ignore = ignore;
+    }
+
+    public ConnectionApi getControlConnection() {
+        return controlConnection;
+    }
+
+    public void setControlConnection(ConnectionApi controlConnection) {
+        this.controlConnection = controlConnection;
     }
 
     @Override
