@@ -11,6 +11,7 @@ import {
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
+import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
 
 interface CustomSession extends Session {
     user: {
@@ -31,9 +32,10 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     return [res.status, serviceProviders];
 };
 
-const fetchPrivateChannels = async (params: basicGetParams) => {
+const fetchPrivateChannels = async (params: extendedGetParams) => {
+    console.log('PETER', params);
     const res = await fetchAdminUIPrivateChannels(params);
-    const privateChannels: Array<Neighbours> = await res.data;
+    const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
     return [res.status, privateChannels];
 };
 
@@ -51,7 +53,7 @@ const fetchExchangeValidator = async (params: extendedGetParams) => {
 
 export type basicGetParams = {
     actorCommonName: string;
-    selector?: string;
+    pathParam?: string;
 };
 export type extendedGetParams = {
     actorCommonName: string;
@@ -66,7 +68,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
-    privateChannels: fetchPrivateChannels,
+    privatechannels: fetchPrivateChannels,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };

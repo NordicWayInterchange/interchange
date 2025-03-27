@@ -18,7 +18,6 @@ import {
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
-import {useFetchPrivateChannels} from "@/hooks/useFetchPrivateChannels";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
@@ -28,12 +27,8 @@ export default function ServiceProviders() {
     const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
     );
-    const {data: serviceProviderPrivateChannels, isPrivateChannelLoading} = useFetchPrivateChannels(
-        session?.user.commonName as string
-    );
 
-    console.log('serviceProviderPrivateChannels', serviceProviderPrivateChannels)
-
+    console.log("serviceProviderData", serviceProviderData);
     const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
@@ -149,14 +144,14 @@ export default function ServiceProviders() {
             headerName: "Private channels",
             headerClassName: 'custom-header',
             renderCell: (params) => {
-                const serviceProviderPrivateChannels = params.row.privateChannels;
+                const serviceProviderPrivateChannels = params.row.privatechannels;
                 return (
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.privateChannels, "privateChannels", rowId)
+                            handleCellClick(params.row.privatechannels, "privateChannels", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderPrivateChannels) ?

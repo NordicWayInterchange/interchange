@@ -183,8 +183,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"}
         ];
-    } else if (field === "privateChannels" && row.privateChannels) {
-        nestedData = row.privateChannels.map((privateChannel: any) => ({
+    } else if (field === "privateChannels" && row.privatechannels) {
+        nestedData = row.privatechannels.map((privateChannel: any) => ({
             id: privateChannel.id,
             status: privateChannel.status,
             selector: privateChannel.peers,
