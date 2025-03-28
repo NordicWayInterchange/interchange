@@ -282,7 +282,7 @@ public class TypeTransformer {
         List<NeighbourSubscriptionApi> neighbourSubscriptionApiList = new ArrayList<>();
         for (NeighbourSubscription neighbourSubscription : neighbourSubscriptions) {
             neighbourSubscriptionApiList.add(new NeighbourSubscriptionApi(
-                    neighbourSubscription.getId(),
+                    neighbourSubscription.getUuid(),
                     NeighbourSubscriptionStatusApi.CREATED,
                     neighbourSubscription.getSelector(),
                     neighbourSubscription.getPath(),
