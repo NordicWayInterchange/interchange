@@ -302,12 +302,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testGettingMatchingDeliveryCapabilitiesExcludesTeardownCapabilities(){
         String actor = "actor-1";
         CapabilitiesRequest request = new CapabilitiesRequest(
-                new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+                new DatexApplicationApi("NO00000","NO00000:1","NO","1", List.of("1"), "type","name"),
                 new MetadataApi()
         );
         napRestController.addCapability(actor, request);
         String capabilityId = napRestController.getCapabilities(actor).getFirst().getId();
-        String selector = "publicationId='publication-id'";
+        String selector = "publicationId='NO00000:1'";
         assertThat(napRestController.getMatchingDeliveryCapabilities(actor, selector)).hasSize(1);
         napRestController.deleteCapability(actor, capabilityId);
         assertThat(napRestController.getMatchingDeliveryCapabilities(actor, selector)).hasSize(0);
@@ -494,12 +494,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testGettingMatchingSubscriptionCapabilitiesExcludesTeardownCapabilities(){
         String actor = "actor-1";
         CapabilitiesRequest request = new CapabilitiesRequest(
-                new DatexApplicationApi("pub-id","publication-id","NO","1", List.of("1"), "type","name"),
+                new DatexApplicationApi("NO00000","NO00000:1","NO","1", List.of("1"), "type","name"),
                 new MetadataApi()
         );
         napRestController.addCapability(actor, request);
         String capabilityId = napRestController.getCapabilities(actor).getFirst().getId();
-        String selector = "publicationId='publication-id'";
+        String selector = "publicationId='NO00000:1'";
         assertThat(napRestController.getMatchingSubscriptionCapabilities(actor, selector)).hasSize(1);
         napRestController.deleteCapability(actor, capabilityId);
         assertThat(napRestController.getMatchingSubscriptionCapabilities(actor, selector)).hasSize(0);
