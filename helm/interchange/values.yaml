@@ -75,6 +75,9 @@ napcore_server:
 
 napcore_frontend:
   enabled: false
+
+admin_frontend:
+  enabled: false
 #letsencrypt:
 #  server: https://letsencrypt-server
 #  email: my-email@mycompany.com

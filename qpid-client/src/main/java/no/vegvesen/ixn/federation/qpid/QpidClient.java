@@ -89,6 +89,7 @@ public class QpidClient {
 	 * @param restTemplate the restTemplate used to contact the broker
 	 * @param routingConfigurerProperties properties for the client to use (baseUrl, vhost)
 	 */
+
 	@Autowired
 	public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
 		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
