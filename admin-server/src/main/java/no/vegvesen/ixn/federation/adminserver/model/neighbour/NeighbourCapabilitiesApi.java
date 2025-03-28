@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
-import java.util.Set;
+import java.util.List;
 
 public class NeighbourCapabilitiesApi {
 
@@ -8,7 +8,7 @@ public class NeighbourCapabilitiesApi {
 
     private CapabilitiesStatusApi status;
 
-    private Set<NeighbourCapabilityApi> capabilities;
+    private List<NeighbourCapabilityApi> capabilities;
 
     private Long lastUpdated;
 
@@ -17,7 +17,7 @@ public class NeighbourCapabilitiesApi {
     public NeighbourCapabilitiesApi() {
     }
 
-    public NeighbourCapabilitiesApi(Integer id, CapabilitiesStatusApi status, Set<NeighbourCapabilityApi> capabilities, Long lastUpdated, Long lastCapabilityExchange) {
+    public NeighbourCapabilitiesApi(Integer id, CapabilitiesStatusApi status, List<NeighbourCapabilityApi> capabilities, Long lastUpdated, Long lastCapabilityExchange) {
         this.id = id;
         this.status = status;
         this.capabilities = capabilities;
@@ -42,11 +42,11 @@ public class NeighbourCapabilitiesApi {
         this.status = status;
     }
 
-    public Set<NeighbourCapabilityApi> getCapabilities() {
+    public List<NeighbourCapabilityApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<NeighbourCapabilityApi> capabilities) {
+    public void setCapabilities(List<NeighbourCapabilityApi> capabilities) {
         this.capabilities = capabilities;
     }
 
