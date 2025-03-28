@@ -12,11 +12,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.PathVariableException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.*;
@@ -129,15 +125,20 @@ public class NapRestController {
         if (Objects.isNull(subscriptionRequest) || Objects.isNull(subscriptionRequest.getSelector())) {
             throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription is missing selector.");
         }
-
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
+
+        if(serviceProvider.getSubscriptions().contains(localSubscription)){
+            throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
+        }
+
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
             localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
         } else {
             localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
         }
 
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+
         serviceProvider.addLocalSubscription(localSubscription);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
@@ -182,7 +183,7 @@ public class NapRestController {
                 .stream()
                 .filter(s -> s.getUuid().equals(subscriptionId))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,actorCommonName)));
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s", subscriptionId, actorCommonName)));
 
         return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
@@ -237,7 +238,13 @@ public class NapRestController {
         if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
         }
+
         LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+
+        if(serviceProvider.getDeliveries().contains(localDelivery)){
+            throw new AlreadyExistsException(String.format("Delivery %s already exists", deliveryRequest));
+        }
 
         if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
             localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
@@ -246,7 +253,6 @@ public class NapRestController {
             localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
         }
 
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         serviceProvider.addDelivery(localDelivery);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
@@ -348,7 +354,7 @@ public class NapRestController {
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new CapabilityPostException(String.format("Bad api object. The publicationId for capability %s must be unique", capabilitiesRequest));
+            throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
@@ -360,8 +366,13 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        if(!CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()))){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s contains properties with illegal characters.", capabilityToAdd));
+        Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        if(validatedCapability.containsKey(false)){
+            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
+        }
+
+        if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
+            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
         }
 
         serviceProviderToUpdate.getCapabilities().addCapability(capabilityToAdd);

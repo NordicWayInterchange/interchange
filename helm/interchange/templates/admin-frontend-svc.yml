@@ -1,0 +1,22 @@
+{{ if .Values.admin_frontend.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-admin-frontend
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: admin-frontend
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Chart.Name }}
+    component: admin-frontend
+    release: {{ .Release.Name }}
+  ports:
+    - name: admin-frontend
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+{{- end}}

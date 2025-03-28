@@ -257,16 +257,15 @@ public class NapRestControllerTest {
         String request = """
                 {
                 "selector": "originatingCountry='NO'",
-                "description": "NO delivery" 
+                "description": "NO delivery"
                 }
                 """;
         String serviceProviderName = "actor";
-        LocalDelivery localDelivery = new LocalDelivery(1, Set.of(), "originatingCountry='NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(),
                 Set.of(),
-                Set.of(localDelivery),
+                Set.of(),
                 null
         );
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -334,8 +333,8 @@ public class NapRestControllerTest {
                 "application":
                 {
                 "messageType": "DATEX2",
-                "publisherId": "publisherId",
-                "publicationId": "publicationId",
+                "publisherId": "NO12345",
+                "publicationId": "NO12345:publicationId",
                 "protocolVersion": "protocolVersion",
                 "quadTree": ["123"],
                 "publicationType": "Hello",
@@ -345,10 +344,11 @@ public class NapRestControllerTest {
                 "metadata": {}
                 }
                 """;
+
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         Capability capability = new Capability(
-                new DatexApplication("publisherId", "publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new DatexApplication("NO12345", "NO12345:publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
                 new Metadata()
         );
         capability.setId(1);
@@ -360,7 +360,7 @@ public class NapRestControllerTest {
                 null
         ));
         when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
-                new DatexApplicationApi("publisherId", "publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
+                new DatexApplicationApi("NO12345", "NO12345:publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
                 new MetadataApi()
         ));
         mockMvc.perform(
@@ -379,7 +379,7 @@ public class NapRestControllerTest {
                 {
                 "messageType": "DATEX2",
                 "publisherId": "publisherId",
-                "publicationId": "publicationId",
+                "publicationId": "publisherId:publicationId",
                 "quadTree": ["123"],
                 "publicationType": "Hello",
                 "publisherName": "hello",
@@ -391,7 +391,7 @@ public class NapRestControllerTest {
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
-                new DatexApplicationApi("publisherId", "publicationId","NO", null, List.of("123"), "Hello", "hello"),
+                new DatexApplicationApi("NO12345", "NO12345:publicationId","NO", null, List.of("123"), "Hello", "hello"),
                 new MetadataApi()
         ));
         mockMvc.perform(

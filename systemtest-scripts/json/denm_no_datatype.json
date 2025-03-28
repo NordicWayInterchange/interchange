@@ -1,14 +1,20 @@
 {
-  "messageType": "DENM",
-  "publisherId": "NO-12345",
-  "publisherName": "Some Norwegian publisher",
-  "originatingCountry": "NO",
-  "protocolVersion": "DENM:1.2.2",
-  "contentType": "application/octet-stream",
-  "quadTree": [
-    "01230122"
-  ],
-  "serviceType": "some-denm-service-type",
-  "causeCode": "3",
-  "subCauseCode": "6"
-}
+"capabilities": [{
+  "application": {
+    "messageType": "DENM",
+    "publisherId": "NO12345",
+    "publicationId": "NO12345:pub-4",
+    "publisherName": "Pub",
+    "originatingCountry": "NO",
+    "protocolVersion": "DENM:1.2.2",
+    "contentType": "application/octet-stream",
+    "quadTree": [
+      "01230122"
+    ],
+    "serviceType": "some-denm-service-type",
+    "causeCode": [3]
+  },
+  "metadata":  {
+
+  }}]
+  }
