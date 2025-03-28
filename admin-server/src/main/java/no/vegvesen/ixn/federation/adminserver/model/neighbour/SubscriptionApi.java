@@ -2,7 +2,8 @@ package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
 import java.util.Set;
 
-public class SubscriptionApi {
+public class SubscriptionApi implements Comparable<SubscriptionApi> {
+
 
     private Integer id;
 
@@ -98,6 +99,22 @@ public class SubscriptionApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    @Override
+    public int compareTo(SubscriptionApi o) {
+        if(lastUpdatedTimestamp == null && o.getLastUpdatedTimestamp() == null) {
+            return 0;
+        }
+
+        if(o.lastUpdatedTimestamp == null){
+            return 1;
+        }
+
+        if(lastUpdatedTimestamp == null) {
+            return -1;
+        }
+
+        return Long.compare(lastUpdatedTimestamp, o.lastUpdatedTimestamp);
+    }
     @Override
     public String toString() {
         return "SubscriptionApi{" +

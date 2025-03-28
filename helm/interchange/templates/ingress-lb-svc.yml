@@ -1,4 +1,4 @@
-{{ if .Values.napcore_frontend.enabled }}
+{{ if or .Values.napcore_frontend.enabled .Values.admin_frontend.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,7 +10,7 @@ metadata:
 spec:
   externalTrafficPolicy: Local
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.ingress.external_portal_ip }}
+  loadBalancerIP: {{ .Values.ingress.external_frontend_ip }}
   ports:
     - port: 80
       name: http
