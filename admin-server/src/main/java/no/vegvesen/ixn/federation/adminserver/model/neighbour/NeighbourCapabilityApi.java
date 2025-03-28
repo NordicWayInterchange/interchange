@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 
-public class NeighbourCapabilityApi {
+public class NeighbourCapabilityApi implements Comparable<NeighbourCapabilityApi> {
+
 
     private Integer id;
 
@@ -53,6 +54,20 @@ public class NeighbourCapabilityApi {
 
     public void setCreatedTimestamp(Long createdTimestamp) {
         this.createdTimestamp = createdTimestamp;
+    }
+
+    @Override
+    public int compareTo(NeighbourCapabilityApi o) {
+        if(this.createdTimestamp == null && o.createdTimestamp == null) {
+            return 0;
+        }
+        if(o.createdTimestamp == null){
+            return 1;
+        }
+        if(this.createdTimestamp == null){
+            return -1;
+        }
+        return Long.compare(this.createdTimestamp, o.createdTimestamp);
     }
 
     @Override
