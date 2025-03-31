@@ -21,9 +21,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
-
 @Component
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class RoutingConfigurer {
@@ -104,7 +101,13 @@ public class RoutingConfigurer {
 			neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
 			neighbourService.saveNeighbour(neighbour);
 			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
+				NeighbourMember groupMember = qpidClient.getNeighbourMember(name);
+				if (groupMember != null) {
+					logger.debug("Neighbour member '{}' found in the group", name);
+					qpidClient.removeNeighbourMemberFromGroup(groupMember);
+				} else {
+					logger.warn("Neighbour member '{}' does not exist in the group.", name);
+				}
 				logger.info("Removed routing for neighbour {}", name);
 			}
 			for (String redirectedSpName : redirectedServiceProviders) {
@@ -115,7 +118,13 @@ public class RoutingConfigurer {
 						.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
 						.collect(Collectors.toSet());
 				if (subscriptionsWithConsumerCommonName.isEmpty()) {
-					removeSubscriberFromGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, redirectedSpName);
+					RemoteServiceProviderMember groupMember = qpidClient.getRemoteServiceProviderMember(redirectedSpName);
+					if (groupMember != null) {
+						logger.debug("Remote service provider '{}' found in group. Removing...", redirectedSpName);
+						qpidClient.removeRemoteServiceProviderMemberFromGroup(groupMember);
+					} else {
+						logger.warn("Remote service provider '{}' does not exist in the group and cannot be removed.", redirectedSpName);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -160,7 +169,15 @@ public class RoutingConfigurer {
 				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
 				subscription.setEndpoints(Collections.singleton(endpoint));
 
-				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
+				logger.debug("Attempting to add neighbour member {} to the group", neighbourName);
+				NeighbourMember groupMember = qpidClient.getNeighbourMember(neighbourName);
+				if (groupMember == null) {
+					logger.debug("Neighbour '{}' did not exist in the group.", neighbourName);
+					qpidClient.addNeighbourMemberToGroup(neighbourName);
+					logger.info("Added neighbour member '{}' to group", neighbourName);
+				} else {
+					logger.warn("Neighbour member '{}' already exists in the group", neighbourName);
+				}
 				createQueue(endpoint.getSource(), neighbourName, delta);
 
 				for (Capability capability : matchingCaps) {
@@ -193,7 +210,16 @@ public class RoutingConfigurer {
 				subscription.setEndpoints(Collections.singleton(endpoint));
 
 				createQueue(endpoint.getSource(), subscription.getConsumerCommonName(), delta);
-				addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+				String subscriberName = subscription.getConsumerCommonName();
+				logger.debug("Attempting to add remote service provider '{}' to group", subscriberName);
+				RemoteServiceProviderMember member = qpidClient.getRemoteServiceProviderMember(subscriberName);
+				if (member == null) {
+					logger.debug("remote service provider '{}' did not exist in group", subscriberName);
+					 qpidClient.addRemoteServiceProvicerMemberToGroup(subscriberName);
+					logger.debug("Added remote service provider '{}' to group", subscriberName);
+				} else {
+					logger.warn("Remote service provider '{}' already exists in the group", subscriberName);
+				}
 
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {
@@ -311,32 +337,11 @@ public class RoutingConfigurer {
 	}
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
-		if (!delta.queueExists(queueName)) {
-			Queue queue = qpidClient.createQueue(queueName);
+		Queue queue = delta.findByQueueName(queueName);
+		if (queue == null) {
+			queue = qpidClient.createQueue(queueName);
 			qpidClient.addReadAccess(subscriberName, queueName);
 			delta.addQueue(queue);
-		}
-	}
-
-	private void addSubscriberToGroup(String groupName, String subscriberName) {
-		logger.debug("Attempting to add subscriber {} to the group {}", subscriberName, groupName);
-		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
-		if (groupMember == null) {
-			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriberName, groupName);
-			qpidClient.addMemberToGroup(subscriberName,groupName);
-			logger.info("Added subscriber {} to Qpid group {}", subscriberName, groupName);
-		} else {
-			logger.warn("Subscriber {} already exists in the group {}", subscriberName, groupName);
-		}
-	}
-
-	private void removeSubscriberFromGroup(String groupName, String subscriberName) {
-		GroupMember groupMember = qpidClient.getGroupMember(subscriberName,groupName);
-		if (groupMember != null) {
-			logger.debug("Subscriber {} found in the groups {} Removing...", subscriberName, groupName);
-			qpidClient.removeMemberFromGroup(groupMember, groupName);
-		} else {
-			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriberName, groupName);
 		}
 	}
 

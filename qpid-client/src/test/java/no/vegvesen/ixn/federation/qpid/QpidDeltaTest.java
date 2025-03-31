@@ -3,8 +3,10 @@ package no.vegvesen.ixn.federation.qpid;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class QpidDeltaTest {
 
@@ -30,4 +32,19 @@ public class QpidDeltaTest {
         assertThat(delta.findByExchangeName("3")).isNull();
 
     }
+
+    @Test
+    public void testAddingBindingToExchange() {
+        QpidDelta delta = new QpidDelta(
+                List.of(new Exchange("E1")),
+                List.of(new Queue("Q1"))
+        );
+        Exchange e1 = delta.findByExchangeName("E1");
+        assertThat(e1.isBoundTo("Q1")).isFalse();
+
+        Binding binding = new Binding("b1","Q1",new Filter("test"));
+        e1.addBinding(binding);
+        assertThat(e1.isBoundTo("Q1")).isTrue();
+    }
+
 }
