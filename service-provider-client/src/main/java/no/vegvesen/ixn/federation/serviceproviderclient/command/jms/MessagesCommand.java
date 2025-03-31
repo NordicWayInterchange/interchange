@@ -13,7 +13,6 @@ import java.nio.file.Path;
                 DrainMessages.class,
                 ReceiveMessages.class,
                 SendMessage.class,
-                SendPredefinedMessage.class,
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
