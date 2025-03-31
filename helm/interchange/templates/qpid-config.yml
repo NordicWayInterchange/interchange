@@ -11,17 +11,12 @@ data:
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.admin_password }}
   groups: |
-    service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
     remote-service-providers.users=
     bi-consumers.users=
     clients-private-channels.users=
   default.json: |
-    {{- $userlen := len .Values.qpid.users }}
-    {{- $additionallen := len .Values.qpid.additional_queues }}
-    {{- $additionallen_i := sub $additionallen 1 }}
-    {{- $totallen := add $userlen $additionallen }}
     {
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
@@ -116,28 +111,6 @@ data:
                 "NAME": "bi-queue"
               }
             },
-            {{- range $i, $ex := .Values.qpid.users }}
-            {
-              "objectType": "QUEUE",
-              "identity": "{{ $ex.name }}",
-              "operation": "CONSUME",
-              "outcome": "ALLOW_LOG",
-              "attributes": {
-                "NAME": "{{ $ex.name }}"
-              }
-            }{{ if gt $totallen $i }},{{ end}}
-            {{- end }}
-            {{- range .Values.qpid.additional_queues }}
-            {
-              "objectType": "QUEUE",
-              "identity": "{{ .user }}",
-              "operation": "CONSUME",
-              "outcome": "ALLOW_LOG",
-              "attributes": {
-                "NAME": "{{ .name }}"
-              }
-            },
-            {{- end }}
             {
               "objectType": "ALL",
               "identity": "ALL",
