@@ -18,3 +18,12 @@ export const messageTypeChips = {
     SSEM: "orangeLight",
     CAM: "purpleLight",
 };
+
+export const colorMapping: Record<string, "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"> = {
+    greenDark: "success",
+    depricatedLight: "error",
+    yellowLight: "warning",
+    blueLight: "info",
+    pinkLight: "error",
+    grayLight: "default",
+};

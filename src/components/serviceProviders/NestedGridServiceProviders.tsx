@@ -186,9 +186,10 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         nestedData = row.privatechannels.map((privateChannel: any) => ({
             id: privateChannel.id,
             status: privateChannel.status,
-            selector: privateChannel.peers,
+            peers: privateChannel.peers,
             description: privateChannel.description,
-            lastUpdatedTimestamp: timeConverter(privateChannel.lastUpdated)
+            endpoint: privateChannel.endpoint,
+            lastUpdated: timeConverter(privateChannel.lastUpdated)
         }));
 
         nestedColumns = [

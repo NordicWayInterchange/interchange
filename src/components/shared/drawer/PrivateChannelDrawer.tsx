@@ -12,6 +12,8 @@ import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import Loading from "@/components/shared/components/Loading";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import {Chip} from "@/components/shared/components/Chip";
+import {colorMapping, statusChips} from "@/lib/statusChips";
 
 type Props = {
     privateChannel: ServiceProviderPrivateChannels;
@@ -24,7 +26,8 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
         return <Loading text=""/>
     }
 
-
+    const statusKey = privateChannel.status.toString() as keyof typeof statusChips;
+    const chipColor = colorMapping[statusChips[statusKey]] || "default";
     return (
         <>
             <Drawer
@@ -46,6 +49,10 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
                         <ListItem>
                             <StyledHeaderBox>
                                 <Typography>PrivateChannel details</Typography>
+                                <Chip
+                                    color={chipColor}
+                                    label={statusKey}
+                                />
                             </StyledHeaderBox>
                         </ListItem>
                         <ListItem>
@@ -56,7 +63,7 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
                                     </Box>
                                     <Box>
                                         <ListItemText
-                                            primary={"Created"}
+                                            primary={"Last updated"}
                                             secondary={privateChannel.lastUpdated}
                                         />
                                     </Box>
@@ -67,7 +74,7 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
                         {privateChannel.peers && (
                             <ListItem>
                                 <StyledCard variant={"outlined"}>
-                                    <Typography  sx={{ marginBottom: 2 }}>Peers</Typography>
+                                    <Typography  sx={{ marginBottom: 4 }}>Peers</Typography>
                                     <Box sx={peerListStyle} />
                                     {privateChannel.peers.length > 0 ? privateChannel.peers.map((item, index) => (
                                         <React.Fragment key={index}>
@@ -87,7 +94,7 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
                                                 sx={{ borderStyle: "dashed", borderWidth: 1, marginX: 2, position: "relative", marginBottom: "-8px", top: "-20px" }} />}
                                         </React.Fragment>
                                     )) : <Box sx={warningStyle}>
-                                        <WarningAmberIcon sx={{ mr: "6px", mt: "-7px" }} />
+                                        <WarningAmberIcon sx={{ mr: "16px", mt: "-7px" }} />
                                         <Typography variant="body2" sx={{ fontWeight: "500" }}>There is no peer for this private channel</Typography>
                                     </Box>}
                                 </StyledCard>
