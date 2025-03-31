@@ -11,7 +11,7 @@ services:
     hostname: mock-dns-server
     networks:
       singletest:
-        ipv4_address: 172.28.1.1
+        ipv4_address: 172.29.1.1
         aliases:
           - dns.lookupdomain.com
 
@@ -178,5 +178,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.28.0.0/16
+        - subnet: 172.29.0.0/16
 
