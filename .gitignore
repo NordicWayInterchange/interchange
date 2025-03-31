@@ -14,3 +14,4 @@ napcore-rest-client/napcoreclient_completion
 systemtest-scripts/napcoresettings
 jms-client-app/jmsclient_completion
 demo/keys
+/service-provider-client/serviceproviderclient_completion
