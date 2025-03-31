@@ -304,6 +304,9 @@ public class RoutingConfigurer {
 							endpointsToRemove.add(endpoint);
 						}
 						subscription.getEndpoints().removeAll(endpointsToRemove);
+					} else {
+						//NOTE also have to remove the endpoints for redirect subscriptions here
+						subscription.getEndpoints().clear();
 					}
 				}
 				Set<Subscription> ourFailedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.FAILED);

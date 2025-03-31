@@ -696,6 +696,40 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists("exchange2")).isFalse();
 	}
 
+
+	@Test
+	public void redirectSubscriptionHasItsEndpointRemovedWhenItIsTearDown() {
+		String selector = "originatingCountry = 'NO'";
+		Subscription subscription = new Subscription(
+				SubscriptionStatus.TEAR_DOWN,
+				selector,
+				"/path",
+				"sp1",
+				Set.of(
+						new Endpoint(
+								"source",
+								"otherhost",
+								5671
+						)
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighbour1",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+					Set.of(
+							subscription
+					)
+				)
+		);
+		when(neighbourService.findAllNeighbours()).thenReturn(List.of(neighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		routingConfigurer.tearDownSubscriptionExchanges();
+		assertThat(subscription.getEndpoints()).isEmpty();
+
+	}
+
 	@Test
 	public void subscriptionExchangeAndSubscriptionShardIsRemovedWhenSubscriptionHasStatusFailed() {
 		String exchangeName = "failed-exchange";
@@ -1220,7 +1254,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"1.0",
 						Arrays.asList("01230122", "01230123"),
 						"RoadBlock",
-                        "publisherName"
+						"publisherName"
 				),
 				new Metadata(redirect)
 		);
@@ -1243,7 +1277,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"1.0",
 						Arrays.asList("01230122", "01230123"),
 						"RoadBlock",
-                        "publisherName"
+						"publisherName"
 				),
 				metadata
 		);
