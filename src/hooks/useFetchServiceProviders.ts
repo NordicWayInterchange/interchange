@@ -25,20 +25,20 @@ const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
     const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         const serviceProviders: ServiceProviders[] = await res.json();
-        const seasonedServiceProviders = serviceProviders.map(async (sp) => {
+        const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
             const fetchServiceProviderPrivateChannels = await fetch(
-                `/api/${commonName}/${sp.name}/privatechannels`
+                `/api/${commonName}/${serviceProvider.name}/privatechannels`
             );
             if (fetchServiceProviderPrivateChannels.ok) {
                 const data = await fetchServiceProviderPrivateChannels.json();
-                return { ...sp, privatechannels: data };
+                return { ...serviceProvider, privatechannels: data };
             } else {
                 console.error(
-                    `error when fetching ${sp.name} - ${fetchServiceProviderPrivateChannels.status} - ${fetchServiceProviderPrivateChannels.statusText}`
+                    `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannels.status} - ${fetchServiceProviderPrivateChannels.statusText}`
                 );
-                return {...sp, privatechannels: 0 };
+                return {...serviceProvider, privatechannels: 0 };
             }
-        });
+        }));
         return Promise.all(seasonedServiceProviders);
     } else {
         const errorObj = await res.json();

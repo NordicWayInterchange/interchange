@@ -40,6 +40,7 @@ export type basicGetParams = {
 
 export type extendedGetParams = {
     actorCommonName: string;
+    serviceProviderName? : string;
     pathParam?: string;
 };
 
@@ -58,10 +59,8 @@ export const fetchAdminUIServiceProviders: basicGetFunction = async (params) => 
 };
 
 export const fetchAdminUIPrivateChannels: extendedGetFunction = async (params) => {
-    debugger;
-    const { actorCommonName, pathParam} = params;
-    console.log('MARYAM', params);
-    return await fetchIXN(actorCommonName, `/${pathParam}/privatechannels`);
+    const { actorCommonName, serviceProviderName} = params;
+    return await fetchIXN(actorCommonName, `/${serviceProviderName}/privatechannels`);
 };
 
 export const fetchAdminUIQueueValidator: extendedGetFunction = async (params) => {

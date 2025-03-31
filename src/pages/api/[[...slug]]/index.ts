@@ -33,7 +33,6 @@ const fetchServiceProviders = async (params: basicGetParams) => {
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
-    console.log('PETER', params);
     const res = await fetchAdminUIPrivateChannels(params);
     const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
     return [res.status, privateChannels];
@@ -68,7 +67,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
-    privatechannels: fetchPrivateChannels,
+    "/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
@@ -86,13 +85,14 @@ const findHandler: (params: any) =>
         path = [],
         method,
         actorCommonName,
-        selector = "",
+        selector = ""
     } = params;
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
             const lastSegment = path[path.length - 1];
             const fn = getPaths[lastSegment];
+
             if (possiblePaths.includes(lastSegment)) {
                 return {
                     fn,
@@ -103,6 +103,20 @@ const findHandler: (params: any) =>
                 return {
                     fn: getPaths[path[0]],
                     params: { actorCommonName, pathParam: path[1] },
+                };
+            }
+            const serviceProviderName = params.path[0];
+            const matchedPath = possiblePaths.find(
+                (p) => p.endsWith(lastSegment) || (path.length > 1 && p.startsWith(path[0]))
+            );
+
+            if (matchedPath) {
+                return {
+                    fn: getPaths[matchedPath],
+                    params: {
+                        actorCommonName,
+                        ...(serviceProviderName && {serviceProviderName})
+                    },
                 };
             }
 

@@ -62,7 +62,6 @@ const NestedGridServiceProviders: React.FC<Props> = ({
     let nestedColumns: GridColDef[] = [];
     let nestedConnectionColumns: GridColDef[] = [];
 
-    console.log('Field', field);
     if (field === "capabilities") {
         nestedData = row.capabilities.map((capability: any) => ({
             id: capability.id,
