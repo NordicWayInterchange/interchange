@@ -37,7 +37,7 @@ public class CapabilityValidator {
         };
     }
 
-    public static Map<Boolean, String> capabilityHasValidProperties(CapabilityApi capability){
+    public static Set<String> capabilityHasValidProperties(CapabilityApi capability){
         ApplicationApi application = capability.getApplication();
 
         return switch (application){
@@ -64,48 +64,48 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static Map<Boolean, String> validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+    public static Set<String> validateProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        Set<String> errorList = new HashSet<>();
         for (String property : mandatoryProperties) {
-
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher validCharMatcher = validCharacters.matcher(value);
 
             if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
-                return Map.of(false, String.format("%s contains illegal characters", property));
+                errorList.add(String.format("%s contains illegal characters", property));
             }
             if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
-                return Map.of(false, String.format("%s exceeds character limit of 255", property));
+                errorList.add(String.format("%s exceeds character limit of 255", property));
             }
             switch (property) {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
                     if(!publisherIdMatcher.matches()) {
-                        return Map.of(false, String.format("%s must be in format <country code><5 numbers>", property));
+                        errorList.add(String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
                     }
                 }
                 case "originatingCountry" -> {
                     Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                     if (!countryCodeMatcher.matches()) {
-                        return Map.of(false, String.format("'%s' is not a valid country code", value));
+                        errorList.add(String.format("'%s' is not a valid country code", value));
                     }
                 }
                 case "publicationId" -> {
                     String publisherId = applicationApi.getPublisherId();
                     if (!value.startsWith(publisherId + ":")) {
-                        return Map.of(false, String.format("%s must start with '<publisherId>:'", property));
+                        errorList.add(String.format("%s must start with '<publisherId>:'", property));
                     }
                 }
                 case "quadTree" -> {
                     String[] quadTreeTiles = value.split(",");
                     for (String quadTreeTile : quadTreeTiles) {
                         if (quadTreeTile.length() > 255) {
-                            return Map.of(false, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                            errorList.add(String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
                         }
                     }
                 }
             }
         }
-        return Map.of(true, "");
+        return errorList;
     }
 
     public static boolean isShardCountValid(MetadataApi metadata){
