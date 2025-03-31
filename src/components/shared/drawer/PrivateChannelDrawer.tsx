@@ -188,7 +188,6 @@ const peerListStyle = {
     height: "1.5px",
     flexGrow: 1,
     backgroundColor: "#E67600",
-    marginX: 2,
     position: "relative",
     top: "-15px"
 };

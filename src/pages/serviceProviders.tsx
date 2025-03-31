@@ -188,7 +188,7 @@ export default function ServiceProviders() {
                             }}
                             getCellClassName={(params) =>
                                 (params.field === 'subscriptions' || params.field === 'capabilities'
-                                    || params.field === 'deliveries') &&
+                                    || params.field === 'deliveries' || params.field === 'privateChannels' ) &&
                                 highlightedCell.id === params.id && highlightedCell.field === params.field
                                     ? "highlighted-cell"
                                     : ""
