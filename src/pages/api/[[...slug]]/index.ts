@@ -67,7 +67,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
-    "/[serviceProviderName]/privatechannels": fetchPrivateChannels,
+    "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
@@ -93,6 +93,26 @@ const findHandler: (params: any) =>
             const lastSegment = path[path.length - 1];
             const fn = getPaths[lastSegment];
 
+            const matchedPath = possiblePaths.find((p) => {
+                const patternSegments = p.split("/").filter(Boolean);
+                if (patternSegments.length !== path.length) {
+                    return false;
+                }
+                return path.every((segment: any, index: number) => {
+                    return patternSegments[index] === "[serviceProviderName]" || patternSegments[index] === segment;
+                });
+            });
+
+            if (matchedPath) {
+                return {
+                    fn: getPaths[matchedPath],
+                    params: {
+                        actorCommonName,
+                        serviceProviderName: path[1]
+                    },
+                };
+            }
+
             if (possiblePaths.includes(lastSegment)) {
                 return {
                     fn,
@@ -103,20 +123,6 @@ const findHandler: (params: any) =>
                 return {
                     fn: getPaths[path[0]],
                     params: { actorCommonName, pathParam: path[1] },
-                };
-            }
-            const serviceProviderName = params.path[0];
-            const matchedPath = possiblePaths.find(
-                (p) => p.endsWith(lastSegment) || (path.length > 1 && p.startsWith(path[0]))
-            );
-
-            if (matchedPath) {
-                return {
-                    fn: getPaths[matchedPath],
-                    params: {
-                        actorCommonName,
-                        ...(serviceProviderName && {serviceProviderName})
-                    },
                 };
             }
 
