@@ -208,13 +208,14 @@ public class QpidClient {
 		ServiceProviderMember member = new ServiceProviderMember(memberName);
 		logger.info("Adding service provider member '{}' to group", memberName);
 		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME;
+		logger.debug("POSTin to {}", url);
 		return restTemplate.postForEntity(url, member, ServiceProviderMember.class).getBody();
 	}
 
 	public void removeServiceProviderMemberFromGroup(ServiceProviderMember member) {
-		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME + "/" + member.name();
+		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME + "/" + member.getName();
 		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing service provider member '{}' from group", member.name());
+		logger.info("Removing service provider member '{}' from group", member.getName());
 		restTemplate.delete(url);
 	}
 
@@ -267,8 +268,8 @@ public class QpidClient {
 	}
 
 	public void removeRemoteServiceProviderMemberFromGroup(RemoteServiceProviderMember member) {
-		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.name();
-		logger.info("Removing remote service provider member '{}' from group",member.name());
+		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.getName();
+		logger.info("Removing remote service provider member '{}' from group",member.getName());
 		restTemplate.delete(url);
 	}
 

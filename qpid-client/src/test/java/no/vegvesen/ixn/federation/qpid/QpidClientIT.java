@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
@@ -133,7 +132,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		ServiceProviderMember member = client.getServiceProviderMember(groupMember);
 		assertThat(member).isNotNull();
-		assertThat(member.name()).isEqualTo(groupMember);
+		assertThat(member.getName()).isEqualTo(groupMember);
 	}
 
 	@Test
@@ -158,7 +157,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
 		ServiceProviderMember groupMember = client.addServiceProviderMemberToGroup(myUser);
-		assertThat(groupMember).isNotNull().extracting(ServiceProviderMember::name).isEqualTo(myUser);
+		assertThat(groupMember).isNotNull().extracting(ServiceProviderMember::getName).isEqualTo(myUser);
 
 		client.removeServiceProviderMemberFromGroup(groupMember);
 		groupMember = client.getServiceProviderMember(myUser);
