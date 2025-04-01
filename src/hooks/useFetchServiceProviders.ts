@@ -27,7 +27,7 @@ const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
         const serviceProviders: ServiceProviders[] = await res.json();
         const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
             const fetchServiceProviderPrivateChannels = await fetch(
-                `/api/${commonName}/${serviceProvider.name}/privatechannels`
+                `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
             );
             if (fetchServiceProviderPrivateChannels.ok) {
                 const data = await fetchServiceProviderPrivateChannels.json();
