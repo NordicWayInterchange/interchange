@@ -6,6 +6,7 @@ export type ServiceProviders = {
     subscriptions: Array<ServiceProviderSubscriptions>;
     capabilities: Array<ServiceProviderCapabilities>;
     deliveries: Array<ServiceProviderDeliveries>;
+    privateChannels: Array<ServiceProviderPrivateChannels>;
 };
 
 export type ServiceProviderSubscriptions = {
@@ -82,4 +83,29 @@ export type Connection = {
     id: number;
     source: string;
     destination: string;
+};
+
+export type ServiceProviderPrivateChannels = {
+    id: string;
+    peers: Array<string>;
+    status: PrivateChannelStatus;
+    description: string;
+    endpoint: EndPoint;
+    lastUpdated: number;
+};
+
+export enum PrivateChannelStatus {
+    REQUESTED = "requested",
+    CREATED = "created",
+    TEAR_DOWN = "tear_down"
+}
+
+export type EndPoint = {
+    host: string;
+    port: number;
+    queueName: string;
+};
+
+export type ExtendedServiceProviders = ServiceProviders & {
+    privateChannels: ServiceProviderPrivateChannels;
 };

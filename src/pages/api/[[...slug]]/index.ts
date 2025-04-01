@@ -4,13 +4,14 @@ import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIExchangeValidator,
-    fetchAdminUINeighbours,
+    fetchAdminUINeighbours, fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
+import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
 
 interface CustomSession extends Session {
     user: {
@@ -31,6 +32,12 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     return [res.status, serviceProviders];
 };
 
+const fetchPrivateChannels = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIPrivateChannels(params);
+    const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
+    return [res.status, privateChannels];
+};
+
 const fetchQueueValidator = async (params: extendedGetParams) => {
     const res = await fetchAdminUIQueueValidator(params);
     const queueExists: boolean = await res.data;
@@ -45,7 +52,7 @@ const fetchExchangeValidator = async (params: extendedGetParams) => {
 
 export type basicGetParams = {
     actorCommonName: string;
-    selector?: string;
+    pathParam?: string;
 };
 export type extendedGetParams = {
     actorCommonName: string;
@@ -60,6 +67,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
+    "/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
@@ -77,13 +85,14 @@ const findHandler: (params: any) =>
         path = [],
         method,
         actorCommonName,
-        selector = "",
+        selector = ""
     } = params;
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
             const lastSegment = path[path.length - 1];
             const fn = getPaths[lastSegment];
+
             if (possiblePaths.includes(lastSegment)) {
                 return {
                     fn,
@@ -94,6 +103,20 @@ const findHandler: (params: any) =>
                 return {
                     fn: getPaths[path[0]],
                     params: { actorCommonName, pathParam: path[1] },
+                };
+            }
+            const serviceProviderName = params.path[0];
+            const matchedPath = possiblePaths.find(
+                (p) => p.endsWith(lastSegment) || (path.length > 1 && p.startsWith(path[0]))
+            );
+
+            if (matchedPath) {
+                return {
+                    fn: getPaths[matchedPath],
+                    params: {
+                        actorCommonName,
+                        ...(serviceProviderName && {serviceProviderName})
+                    },
                 };
             }
 

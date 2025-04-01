@@ -12,7 +12,7 @@ import {useSession} from "next-auth/react";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries,
+    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import {ExpandedRows} from "@/types/expandedRows";
@@ -28,7 +28,7 @@ export default function ServiceProviders() {
         session?.user.commonName as string
     );
 
-    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null>(null);
+    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -40,7 +40,7 @@ export default function ServiceProviders() {
         setDrawerOpen(false);
     };
 
-    const handleCellClick = (row: any, field: any, rowId: number) => {
+    const handleCellClick = (field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
             ...prev,
@@ -81,7 +81,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.subscriptions, "subscriptions", rowId)
+                            handleCellClick("subscriptions", rowId)
                         }}
                     >
                         {Array.isArray(serviceSubscriptions) ?
@@ -104,7 +104,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.capabilities, "capabilities", rowId)
+                            handleCellClick("capabilities", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderCapabilities) ?
@@ -127,11 +127,34 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.deliveries, "deliveries", rowId)
+                            handleCellClick("deliveries", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderDeliveries) ?
                             <StyledBorderlineSpan> {serviceProviderDeliveries.length}  </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
+                    </Box>
+                );
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "privateChannels",
+            headerName: "Private channels",
+            headerClassName: 'custom-header',
+            renderCell: (params) => {
+                const serviceProviderPrivateChannels = params.row.privatechannels;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => {
+                            const rowId = params.row.id;
+                            setServiceProviderRow(null);
+                            handleCellClick("privateChannels", rowId)
+                        }}
+                    >
+                        {Array.isArray(serviceProviderPrivateChannels) ?
+                            <StyledBorderlineSpan> {serviceProviderPrivateChannels.length}  </StyledBorderlineSpan> :
                             <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
                     </Box>
                 );
@@ -165,7 +188,7 @@ export default function ServiceProviders() {
                             }}
                             getCellClassName={(params) =>
                                 (params.field === 'subscriptions' || params.field === 'capabilities'
-                                    || params.field === 'deliveries') &&
+                                    || params.field === 'deliveries' || params.field === 'privateChannels' ) &&
                                 highlightedCell.id === params.id && highlightedCell.field === params.field
                                     ? "highlighted-cell"
                                     : ""

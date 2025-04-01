@@ -11,7 +11,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries,
+    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -20,11 +20,12 @@ import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/Style
 import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
 import { motion } from "framer-motion";
+import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
 
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
@@ -181,6 +182,42 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"}
         ];
+    } else if (field === "privateChannels" && row.privatechannels) {
+        nestedData = row.privatechannels.map((privateChannel: any) => ({
+            id: privateChannel.id,
+            status: privateChannel.status,
+            peers: privateChannel.peers,
+            description: privateChannel.description,
+            endpoint: privateChannel.endpoint,
+            lastUpdated: timeConverter(privateChannel.lastUpdated)
+        }));
+
+        nestedColumns = [
+            {
+                ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
+                    const value = params.row.id;
+                    return value ? value.substring(0, 8) : '';
+                }
+            },
+            {
+                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
+                    return (
+                        <Chip
+                            color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
+                            label={cell.value}
+                        />
+                    );
+                }
+            },
+            {
+                ...dataGridTemplate, field: "peers", headerName: "Number of peers", renderCell: (params) => {
+                    const value = params.row.peers;
+                    return Array.isArray(value) ? value.length : 0;
+                },
+            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
+        ];
     }
 
     const getHeader = () => {
@@ -223,29 +260,36 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     />
                 </motion.div>
             </Box>
-                    {serviceProviderRow && field === 'capabilities' && (
-                        <CapabilityDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
-                            capabilities={serviceProviderRow as ServiceProviderCapabilities}
-                        />
-                    )}
-                    {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
-                        <CommonDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
-                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                            heading={headerContent}
-                        />
-                    )}
-                    {serviceProviderRow && field === 'deliveries' && (
-                        <CommonDrawer
-                            handleMoreClose={handleMoreClose}
-                            open={drawerOpen}
-                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                            heading={headerContent}
-                        />
-                    )}
+                {serviceProviderRow && field === 'capabilities' && (
+                    <CapabilityDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        capabilities={serviceProviderRow as ServiceProviderCapabilities}
+                    />
+                )}
+                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
+                    <CommonDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                        heading={headerContent}
+                    />
+                )}
+                {serviceProviderRow && field === 'deliveries' && (
+                    <CommonDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                        heading={headerContent}
+                    />
+                )}
+                {serviceProviderRow && field === 'privateChannels' && (
+                    <PrivateChannelDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
+                    />
+                )}
             </Box>
             {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
                 const filteredConnections = nestedConnectionData.filter(

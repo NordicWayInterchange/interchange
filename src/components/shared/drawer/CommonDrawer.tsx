@@ -11,7 +11,7 @@ import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/Styl
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Subscription} from "@/types/neighbours";
 import {Chip} from "@/components/shared/components/Chip";
-import {statusChips} from "@/lib/statusChips";
+import {colorMapping, statusChips} from "@/lib/statusChips";
 import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/serviceProviders";
 import QueueValidator from "@/components/shared/actions/QueueValidator";
 import ExchangeValidator from "@/components/shared/actions/ExchangeValidator";
@@ -22,15 +22,6 @@ type Props = {
     open: boolean;
     handleMoreClose: () => void;
     heading: string;
-};
-
-const colorMapping: Record<string, "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"> = {
-    greenDark: "success",
-    depricatedLight: "error",
-    yellowLight: "warning",
-    blueLight: "info",
-    pinkLight: "error",
-    grayLight: "default",
 };
 
 const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props) => {
