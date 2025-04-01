@@ -53,7 +53,8 @@ public class AdminRestController {
     private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, PrivateChannelRepository privateChannelRepository, QpidService qpidService) {
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository,
+                               CertService certService, AdminProperties adminProperties, PrivateChannelRepository privateChannelRepository, QpidService qpidService) {
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
@@ -126,7 +127,6 @@ public class AdminRestController {
         logger.info("List private channels for service provider {} for admin user {}", actorCommonName, adminUser);
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
         return typeTransformer.privateChannelListToPrivateChannelApiList(privateChannels);
-
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
