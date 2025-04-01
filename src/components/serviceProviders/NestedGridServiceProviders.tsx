@@ -193,7 +193,12 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         }));
 
         nestedColumns = [
-            {...dataGridTemplate, field: "id", headerName: "ID"},
+            {
+                ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
+                    const value = params.row.id;
+                    return value ? value.substring(0, 8) : '';
+                }
+            },
             {
                 ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
                     return (

@@ -5,7 +5,7 @@ import {
     ListItem, ListItemText, TextField,
     Toolbar, Typography
 } from "@mui/material";
-import React, {useState} from "react";
+import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
