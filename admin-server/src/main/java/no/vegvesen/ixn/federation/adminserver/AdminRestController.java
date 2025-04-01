@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateCh
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
@@ -197,13 +198,13 @@ public class AdminRestController {
         return qpidService.bindingExists(exchangeName, queueName);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{serviceProviderName}/deliveries/{deliveryId}/matches")
-    public Boolean GetDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
+    public CapabilityApi GetDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("Log - delivery's exchange binding to matching capability exists - requesting user {}", adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        logger.info("Log - delivery's exchange binding to matching capability for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         return qpidService.deliverysExchangeBindingToMatchingCapabilityExists(serviceProvider, deliveryId);
     }
 
