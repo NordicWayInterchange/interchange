@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.AdminQpidDelta;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.AdminQpidClient;
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -48,7 +51,7 @@ public class QpidService {
         }
     }
 
-    public boolean deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
+    public CapabilityApi deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
         AdminQpidDelta delta = adminQpidClient.getQpidDelta();
         Integer intDeliveryId = null;
         try {
@@ -59,14 +62,13 @@ public class QpidService {
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-
                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(intDeliveryId);
                     for (OutgoingMatch match : matches) {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
                                 if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
-                                    return true; //Enrich here: host, port,target?
+                                    return capabilityToCapabilitiesApiList(capability);
                                 }
                             }
                         }
@@ -74,8 +76,24 @@ public class QpidService {
                 }
             }
         }
+        return null;
+    }
 
-        return false;
+    public CapabilityApi capabilityToCapabilitiesApiList(Capability capability) {
+        return new CapabilityApi(
+                capability.getUuid(),
+                capability.getApplication().toApi(),
+                capability.getMetadata().toApi(),
+                localDateTimeToTimestamp(capability.getCreatedTimestamp())
+        );
+    }
+
+    private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {
+        Long epochSecond = null;
+        if (lastUpdated != null) {
+            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        return epochSecond;
     }
 
     public List<Exchange> getAllExchanges() {
