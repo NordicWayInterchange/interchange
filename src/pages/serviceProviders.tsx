@@ -40,7 +40,7 @@ export default function ServiceProviders() {
         setDrawerOpen(false);
     };
 
-    const handleCellClick = (row: any, field: any, rowId: number) => {
+    const handleCellClick = (field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
             ...prev,
@@ -81,7 +81,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.subscriptions, "subscriptions", rowId)
+                            handleCellClick("subscriptions", rowId)
                         }}
                     >
                         {Array.isArray(serviceSubscriptions) ?
@@ -104,7 +104,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.capabilities, "capabilities", rowId)
+                            handleCellClick("capabilities", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderCapabilities) ?
@@ -127,7 +127,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.deliveries, "deliveries", rowId)
+                            handleCellClick("deliveries", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderDeliveries) ?
@@ -150,7 +150,7 @@ export default function ServiceProviders() {
                         onClick={() => {
                             const rowId = params.row.id;
                             setServiceProviderRow(null);
-                            handleCellClick(params.row.privatechannels, "privateChannels", rowId)
+                            handleCellClick("privateChannels", rowId)
                         }}
                     >
                         {Array.isArray(serviceProviderPrivateChannels) ?
