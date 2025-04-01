@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import java.util.HashSet;
 import java.util.Set;
 
-
 public class CapabilityApi implements Comparable<CapabilityApi> {
 
     private String id;
@@ -29,6 +28,13 @@ public class CapabilityApi implements Comparable<CapabilityApi> {
         this.metadata = metadata;
         this.shards = shards;
         this.status = status;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public CapabilityApi(String id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.id = id;
         this.createdTimestamp = createdTimestamp;
     }
 
