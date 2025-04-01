@@ -100,7 +100,7 @@ public class AdminRestController {
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(localCapabilities, neighbourCapabilities);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
@@ -118,7 +118,7 @@ public class AdminRestController {
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allCapabilities, Collections.emptySet());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
