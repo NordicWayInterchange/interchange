@@ -60,7 +60,7 @@ export const fetchAdminUIServiceProviders: basicGetFunction = async (params) => 
 
 export const fetchAdminUIPrivateChannels: extendedGetFunction = async (params) => {
     const { actorCommonName, serviceProviderName} = params;
-    return await fetchIXN(actorCommonName, `/${serviceProviderName}/privatechannels`);
+    return await fetchIXN(actorCommonName, `/serviceproviders/${serviceProviderName}/privatechannels`);
 };
 
 export const fetchAdminUIQueueValidator: extendedGetFunction = async (params) => {
