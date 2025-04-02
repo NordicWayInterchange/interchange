@@ -53,16 +53,11 @@ public class QpidService {
 
     public CapabilityApi deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
         AdminQpidDelta delta = adminQpidClient.getQpidDelta();
-        Integer intDeliveryId = null;
-        try {
-            intDeliveryId = Integer.valueOf(deliveryId);
-        } catch (NumberFormatException e) {
-            logger.error("Invalid deliver id: The ID must be a valid integer. Provided DeliveryId: {}", deliveryId, e);
-        }
+
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                   List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Id(intDeliveryId);
+                   List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
                     for (OutgoingMatch match : matches) {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
