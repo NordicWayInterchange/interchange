@@ -51,7 +51,7 @@ public class QpidService {
         }
     }
 
-    public CapabilityApi deliverysExchangeBindingToMatchingCapabilityExists(ServiceProvider serviceProvider, String deliveryId) {
+    public CapabilityApi deliverysExchangeBindingToMatchingCapability(ServiceProvider serviceProvider, String deliveryId) {
         AdminQpidDelta delta = adminQpidClient.getQpidDelta();
 
         if (serviceProvider.hasDeliveries()) {
