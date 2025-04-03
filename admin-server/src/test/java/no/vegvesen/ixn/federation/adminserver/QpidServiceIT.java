@@ -4,14 +4,15 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.LocalDelivery;
-import no.vegvesen.ixn.federation.model.LocalDeliveryEndpoint;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -19,10 +20,10 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
@@ -30,10 +31,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class QpidServiceIT extends QpidDockerBaseIT {
@@ -53,15 +55,22 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     private AdminQpidClient client;
 
+    private AdminQpidDelta delta;
+
     private QpidService service;
 
-    @Mock
     private OutgoingMatchRepository outgoingMatchRepository;
+
+    private ServiceProviderRepository serviceProviderRepository;
+
 
     @BeforeEach
     public void setupClient() {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
+        outgoingMatchRepository = mock(OutgoingMatchRepository.class);
+        serviceProviderRepository = mock(ServiceProviderRepository.class);
         client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
+        delta = mock(AdminQpidDelta.class);
         service = new QpidService(client, outgoingMatchRepository);
     }
 
@@ -96,23 +105,8 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 new Metadata()
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
-
-        System.out.println(selector);
-
-        LocalDelivery aDelivery = new LocalDelivery();
-        aDelivery.setSelector(selector);
-        aDelivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, "my-exchange"));
-        String deliveryUui = aDelivery.getUuid();
-
-
-        ServiceProvider aServiceProvider = new ServiceProvider("actorCommonName");
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
-        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
-
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
-
-        assertThat(service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, deliveryUui)).isNotNull();
     }
 
     @Test
@@ -140,37 +134,50 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     }
 
     @Test
-    public void testDeliverysExchangeBindingToMatchingCapability() {
-        String exchangeName = "my-exchange";
-        String selector = "originatingCountry='NO'";
-        client.createHeadersExchange(exchangeName);
-
-        String actorCommonName = "actor-1";
+    void TestGetDeliverysExchangeBindingToMatchingCapability() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "originatingCountry = 'NO'";
 
         Capability capability = new Capability(
                 new DenmApplication(
-                        "NO-123",
+                        "NO12345",
                         "pub-1",
                         "NO",
-                        "1.0",
-                        List.of("12", "13"),
-                        List.of(5, 6)
+                        "1.2.2",
+                        List.of("0123"),
+                        List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
+        CapabilityShard shard = new CapabilityShard(1, "exchange", "publicationId = 'pub-1'");
+        capability.setShards(Collections.singletonList(shard));
+        client.createHeadersExchange("exchange");
 
-        LocalDelivery aDelivery = new LocalDelivery();
-        aDelivery.setSelector(selector);
-        String deliveryUui = aDelivery.getUuid();
+        assertThat(CapabilityMatcher.matchCapabilitiesToSelector(Collections.singleton(capability), selector)).hasSize(1);
 
-        System.out.println(deliveryUui);
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
+        LocalDelivery delivery = new LocalDelivery(
+                1,
+                new HashSet<>(Collections.singletonList(endpoint)),
+                selector,
+                LocalDeliveryStatus.CREATED);
 
-        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
+        ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
         aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
-        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
+        aServiceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        serviceProviderRepository.save(aServiceProvider);
 
-        CapabilityApi response1 = service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, deliveryUui);
+        List<OutgoingMatch> mockMatches = new ArrayList<>();
+        mockMatches.add(new OutgoingMatch(delivery, capability, serviceProviderName));
 
+        when(outgoingMatchRepository.findAllByLocalDelivery_Uuid(delivery.getUuid())).thenReturn(mockMatches);
+        when(delta.exchangeHasBindingToQueue("exchange", "queue")).thenReturn(true);
+        for (CapabilityShard capabilityShard : capability.getShards()) {
+            System.out.println(capabilityShard.getExchangeName());
+            AssertionsForClassTypes.assertThat(client.exchangeExists(capabilityShard.getExchangeName())).isTrue();
+        }
+
+        CapabilityApi response1 = service.deliverysExchangeBindingToMatchingCapability( aServiceProvider, delivery.getUuid());
         assertThat(response1).isNotNull();
     }
 
