@@ -2,7 +2,12 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
+import no.vegvesen.ixn.federation.model.LocalDeliveryEndpoint;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -14,6 +19,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -24,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,8 +97,22 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 
+        System.out.println(selector);
+
+        LocalDelivery aDelivery = new LocalDelivery();
+        aDelivery.setSelector(selector);
+        aDelivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, "my-exchange"));
+        String deliveryUui = aDelivery.getUuid();
+
+
+        ServiceProvider aServiceProvider = new ServiceProvider("actorCommonName");
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
+
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
+
+        assertThat(service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, deliveryUui)).isNotNull();
     }
 
     @Test
@@ -116,6 +137,41 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         Queue queue = client.createQueue("test-queue");
         assertThat(queue.getName()).isEqualTo("test-queue");
         assertThat(service.getAllQueues()).isNotEmpty();
+    }
+
+    @Test
+    public void testDeliverysExchangeBindingToMatchingCapability() {
+        String exchangeName = "my-exchange";
+        String selector = "originatingCountry='NO'";
+        client.createHeadersExchange(exchangeName);
+
+        String actorCommonName = "actor-1";
+
+        Capability capability = new Capability(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("12", "13"),
+                        List.of(5, 6)
+                ),
+                new Metadata()
+        );
+
+        LocalDelivery aDelivery = new LocalDelivery();
+        aDelivery.setSelector(selector);
+        String deliveryUui = aDelivery.getUuid();
+
+        System.out.println(deliveryUui);
+
+        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
+
+        CapabilityApi response1 = service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, deliveryUui);
+
+        assertThat(response1).isNotNull();
     }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
