@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApp
 import picocli.CommandLine.*;
 
 @Command(name = "capabilities",
-        description="List, add or delete capabilities for the current Service Provider",
+        description="list, add or delete capabilities for the current service provider",
         subcommands = {
                 GetServiceProviderCapabilities.class,
                 AddServiceProviderCapability.class,
@@ -13,7 +13,8 @@ import picocli.CommandLine.*;
                 FetchMatchingCapabilities.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class CapabilitiesCommand {
 
