@@ -7,9 +7,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityAp
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
@@ -27,17 +25,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -63,14 +59,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     QpidService qpidService;
 
     @MockBean
-    OutgoingMatchRepository outgoingMatchRepository;
-
-    @MockBean
     AdminQpidClient adminQpidClient;
-
-    @MockBean
-    AdminQpidDelta adminQpidDelta;
-
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
