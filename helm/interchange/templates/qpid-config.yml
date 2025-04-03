@@ -11,6 +11,7 @@ data:
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.admin_password }}
   groups: |
+    service-providers.users=
     federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
     remote-service-providers.users=
