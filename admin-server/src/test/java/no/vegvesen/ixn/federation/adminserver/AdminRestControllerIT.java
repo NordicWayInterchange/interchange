@@ -1,17 +1,21 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.qpid.Binding;
-import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
-import no.vegvesen.ixn.federation.adminserver.qpid.Filter;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +24,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -46,6 +53,15 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @MockBean
     QpidService qpidService;
+
+    @MockBean
+    OutgoingMatchRepository outgoingMatchRepository;
+
+    @MockBean
+    AdminQpidClient adminQpidClient;
+
+    @MockBean
+    AdminQpidDelta adminQpidDelta;
 
 
     @DynamicPropertySource
@@ -231,6 +247,113 @@ public class AdminRestControllerIT extends PostgresContainerBase {
          assertThat(response1).hasSize(0);
          assertThat(response2).hasSize(1);
          assertThat(response3).hasSize(0);
+
+    }
+
+
+    @Test void TestGetDeliverysExchangeBindingToMatchingCapability() {
+
+       /* String serviceProviderName = "my-service-provider";
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+
+        String selector = "originatingCountry='NO'";
+
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        metadata.setShardCount(3);
+        Capability capability = new Capability(
+                new DenmApplication(
+                        "NO00000",
+                        "NO00000-quad-tree-testing",
+                        "NO",
+                        "DENM:2.3.2",
+                        Collections.singletonList("12003"),
+                        Collections.singletonList(6)
+                ),
+                metadata
+        );
+
+        String deliveryExchangeName = "my-exchange11";
+
+        CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
+        adminQpidClient.createHeadersExchange(deliveryExchangeName);
+
+        CapabilityShard shard2 = new CapabilityShard(2, "cap-ex13", "publicationId = 'pub-1'");
+        adminQpidClient.createHeadersExchange(deliveryExchangeName);
+
+        CapabilityShard shard3 = new CapabilityShard(3, "cap-ex14", "publicationId = 'pub-1'");
+        adminQpidClient.createHeadersExchange("cap-ex14");
+
+        capability.setShards(Arrays.asList(shard1, shard2, shard3));
+
+        assertThat(CapabilityMatcher.matchCapabilitiesToSelector(Collections.singleton(capability), selector)).hasSize(1);
+
+
+        LocalDelivery bDelivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "Delivery");
+        bDelivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
+        bDelivery.setStatus(LocalDeliveryStatus.CREATED);
+
+
+        ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(bDelivery)));
+        serviceProviderRepository.save(aServiceProvider);
+
+        System.out.println(aServiceProvider.getCapabilities());
+        System.out.println(aServiceProvider.getDeliveries());
+
+        CapabilityApi response1 = restController.getDeliverysExchangeBindingToMatchingCapability("adminUser", serviceProviderName, bDelivery.getUuid());
+        assertThat(response1).isNotNull();*/
+
+        String exchangeName = "intermediate-exchange";
+        String inQueueName = "delivery-exchange";
+        String outQueueName = "king_gustaf";
+
+        Subscription subscription = new Subscription(
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
+                SubscriptionStatus.CREATED
+        );
+
+        Capability capability = new Capability(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        List.of("12004"),
+                        List.of(6)
+                ),
+                new Metadata()
+        );
+
+        LocalDelivery delivery = new LocalDelivery(
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
+                LocalDeliveryStatus.CREATED,
+                "DENM delivery"
+        );
+
+        adminQpidClient.createDirectExchange(inQueueName);
+
+        adminQpidClient.createQueue(outQueueName);
+
+        adminQpidClient.createHeadersExchange(exchangeName);
+
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        System.out.println(capabilitySelector);
+
+        String deliverySelector = delivery.getSelector();
+
+        String subscriptionSelector = subscription.getSelector();
+
+        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
+        System.out.println(joinedSelector);
+
+        adminQpidClient.addBinding(inQueueName, new Binding(inQueueName, exchangeName, new Filter(joinedSelector)));
+        adminQpidClient.addBinding(exchangeName, new Binding(exchangeName, outQueueName, new Filter(subscriptionSelector)));
+
+        AtomicInteger numMessages = new AtomicInteger();
+
+        assertThat(numMessages.get()).isEqualTo(1);
+
 
     }
 }

@@ -163,13 +163,13 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
-    public CapabilityApi GetDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+    public CapabilityApi getDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
         logger.info("Log - delivery's exchange binding to matching capability for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        return qpidService.deliverysExchangeBindingToMatchingCapabilityExists(serviceProvider, deliveryId);
+        return qpidService.deliverysExchangeBindingToMatchingCapability(serviceProvider, deliveryId);
     }
 
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
