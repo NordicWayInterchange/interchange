@@ -137,7 +137,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     void TestGetDeliverysExchangeBindingToMatchingCapability() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-
+        String queueName = "bi-queue";
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
@@ -149,7 +149,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 ),
                 new Metadata(RedirectStatus.OPTIONAL)
         );
-        CapabilityShard shard = new CapabilityShard(1, "exchange", "publicationId = 'pub-1'");
+        CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
         capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange("exchange");
 
@@ -172,18 +172,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Uuid(delivery.getUuid())).thenReturn(mockMatches);
 
-        AdminQpidDelta delta = mock(AdminQpidDelta.class);
-
-        ArrayList<Object> matchingCapabilities = new ArrayList<>();
-        for (CapabilityShard capabilityShard : capability.getShards()) {
-            AssertionsForClassTypes.assertThat(client.exchangeExists(capabilityShard.getExchangeName())).isTrue();
-            when(delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())).thenReturn(true);
-            if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
-                matchingCapabilities.add(capability);
-                break;
-            }
-        }
-        assertTrue(matchingCapabilities.contains(capability));
+        client.addBinding("exchange", new Binding("exchange", queueName, new Filter(selector)));
 
         List<CapabilityApi> response1 = service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, delivery.getUuid());
         assertThat(response1).isNotEmpty();
