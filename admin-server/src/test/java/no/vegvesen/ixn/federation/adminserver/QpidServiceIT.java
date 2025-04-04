@@ -24,6 +24,9 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
@@ -34,8 +37,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class QpidServiceIT extends QpidDockerBaseIT {
@@ -55,8 +58,6 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     private AdminQpidClient client;
 
-    private AdminQpidDelta delta;
-
     private QpidService service;
 
     private OutgoingMatchRepository outgoingMatchRepository;
@@ -70,7 +71,6 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         outgoingMatchRepository = mock(OutgoingMatchRepository.class);
         serviceProviderRepository = mock(ServiceProviderRepository.class);
         client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
-        delta = mock(AdminQpidDelta.class);
         service = new QpidService(client, outgoingMatchRepository);
     }
 
@@ -171,14 +171,22 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         mockMatches.add(new OutgoingMatch(delivery, capability, serviceProviderName));
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Uuid(delivery.getUuid())).thenReturn(mockMatches);
-        when(delta.exchangeHasBindingToQueue("exchange", "queue")).thenReturn(true);
-        for (CapabilityShard capabilityShard : capability.getShards()) {
-            System.out.println(capabilityShard.getExchangeName());
-            AssertionsForClassTypes.assertThat(client.exchangeExists(capabilityShard.getExchangeName())).isTrue();
-        }
 
-        CapabilityApi response1 = service.deliverysExchangeBindingToMatchingCapability( aServiceProvider, delivery.getUuid());
-        assertThat(response1).isNotNull();
+        AdminQpidDelta delta = mock(AdminQpidDelta.class);
+
+        ArrayList<Object> matchingCapabilities = new ArrayList<>();
+        for (CapabilityShard capabilityShard : capability.getShards()) {
+            AssertionsForClassTypes.assertThat(client.exchangeExists(capabilityShard.getExchangeName())).isTrue();
+            when(delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())).thenReturn(true);
+            if (delta.exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
+                matchingCapabilities.add(capability);
+                break;
+            }
+        }
+        assertTrue(matchingCapabilities.contains(capability));
+
+        List<CapabilityApi> response1 = service.deliverysExchangeBindingToMatchingCapability(aServiceProvider, delivery.getUuid());
+        assertThat(response1).isNotEmpty();
     }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
