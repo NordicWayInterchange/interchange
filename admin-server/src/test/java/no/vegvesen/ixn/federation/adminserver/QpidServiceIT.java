@@ -134,7 +134,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     }
 
     @Test
-    void TestGetDeliverysExchangeBindingToMatchingCapability() {
+    void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
