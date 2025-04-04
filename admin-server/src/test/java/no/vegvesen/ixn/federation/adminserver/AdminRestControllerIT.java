@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -229,5 +230,37 @@ public class AdminRestControllerIT extends PostgresContainerBase {
          assertThat(response2).hasSize(1);
          assertThat(response3).hasSize(0);
 
+    }
+
+    @Test
+    public void testGetDeliveriesForEachServiceProvider() {
+        String actorCommonName = "actor-1";
+        String actorCommonName2 = "actor-2";
+        String adminUser = "adminUser";
+        String selector = "publicationId='DK12345:publication-id'";
+
+        Capability aCap1 = new Capability(
+                new DatexApplication("DK12345","DK12345:publication-id","FI","1", List.of("1"), "type","name"),
+                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+        );
+
+        LocalDelivery aDelivery = new LocalDelivery();
+        aDelivery.setSelector(selector);
+
+        LocalDelivery bDelivery = new LocalDelivery();
+        bDelivery.setSelector("originatingCountry='SE'");
+
+
+        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
+        serviceProviderRepository.save(aServiceProvider);
+
+
+        List<LocalDeliveryApi> response1 = restController.getDeliveriesForEachServiceProvider(adminUser, actorCommonName);
+        List<LocalDeliveryApi> response2 = restController.getDeliveriesForEachServiceProvider(adminUser, actorCommonName2);
+
+        assertThat(response1).hasSize(2);
+        assertThat(response2).hasSize(0);
     }
 }

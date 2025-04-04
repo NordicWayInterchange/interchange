@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
@@ -161,6 +162,17 @@ public class AdminRestController {
         logger.info("Log - binding exists - requesting user {}", adminUser);
         return qpidService.bindingExists(exchangeName, queueName);
     }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries")
+    public List<LocalDeliveryApi> getDeliveriesForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("Log - List deliveries for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        return typeTransformer.localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries());
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
     public List<CapabilityApi> getDeliverysExchangeBindingToMatchingCapability(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
