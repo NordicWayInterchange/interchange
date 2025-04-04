@@ -23,7 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -1395,8 +1394,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		Match match = new Match(
 				subscription,
-				new Subscription("",SubscriptionStatus.TEAR_DOWN),
-				"sp-1"
+				new Subscription("",SubscriptionStatus.TEAR_DOWN)
 		);
 
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
@@ -1446,7 +1444,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
@@ -1485,8 +1483,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint2 = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName2));
 		subscription2.setEndpoints(Collections.singleton(endpoint2));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
-		Match match2 = new Match(localSubscription, subscription2, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
+		Match match2 = new Match(localSubscription, subscription2);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
@@ -1519,7 +1517,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
 
 		//Mocking that binding already exists and isn't created again
 		client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
@@ -1554,7 +1552,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
@@ -1586,7 +1584,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
@@ -1732,7 +1730,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Endpoint endpoint2 = new Endpoint("source2", "host", 5671, new SubscriptionShard(exchangeName2));
 		subscription.setEndpoints(new HashSet<>(Arrays.asList(endpoint1, endpoint2)));
 
-		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match = new Match(localSubscription, subscription);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
