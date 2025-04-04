@@ -234,13 +234,13 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGetDeliveriesForEachServiceProvider() {
-        String actorCommonName = "actor-1";
-        String actorCommonName2 = "actor-2";
+        String actorCommonName = "sp-1";
+        String actorCommonName2 = "sp-2";
         String adminUser = "adminUser";
-        String selector = "publicationId='DK12345:publication-id'";
+        String selector = "publicationId='DK12345'";
 
         Capability aCap1 = new Capability(
-                new DatexApplication("DK12345","DK12345:publication-id","FI","1", List.of("1"), "type","name"),
+                new DatexApplication("DK12345","DK12345","FI","1", List.of("1"), "type","name"),
                 new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
         );
 
@@ -251,10 +251,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         bDelivery.setSelector("originatingCountry='SE'");
 
 
-        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
-        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
-        serviceProviderRepository.save(aServiceProvider);
+        ServiceProvider bServiceProvider = new ServiceProvider(actorCommonName);
+        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
+        bServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
+        serviceProviderRepository.save(bServiceProvider);
 
 
         List<LocalDeliveryApi> response1 = restController.getDeliveriesForEachServiceProvider(adminUser, actorCommonName);
