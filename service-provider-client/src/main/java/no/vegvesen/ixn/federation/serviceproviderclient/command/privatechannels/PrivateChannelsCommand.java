@@ -6,7 +6,7 @@ import picocli.CommandLine.*;
 
 @Command(
         name = "privatechannels",
-        description = "Manage private channels for a Service Provider",
+        description = "manage private channels for a service provider",
         subcommands = {
                 GetPrivateChannels.class,
                 GetPrivateChannel.class,
@@ -15,7 +15,8 @@ import picocli.CommandLine.*;
                 PeersCommand.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class PrivateChannelsCommand {
 

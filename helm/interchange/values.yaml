@@ -35,19 +35,6 @@ qpid:
   ## admin credentials
   admin_user: qpid-admin
 
-  ## each user specified here will receive access to the onramp queue as well as their own queue/binding
-  users: []
-  # - name: king_harald
-  #   binding: "originatingCountry='NO'"
-  # - name: king_gustaf
-  #   binding: "originatingCountry='SE'"
-
-  ## if a user requires additional queues, they can be specified here
-  additional_queues: []
-  # - name: odin
-  #   binding: "originatingCountry='valhalla'"
-  #   user: king_harald
-
 admin_server:
   replicas: 1
   enabled: false
@@ -74,6 +61,9 @@ napcore_server:
   enabled: false
 
 napcore_frontend:
+  enabled: false
+
+admin_frontend:
   enabled: false
 #letsencrypt:
 #  server: https://letsencrypt-server

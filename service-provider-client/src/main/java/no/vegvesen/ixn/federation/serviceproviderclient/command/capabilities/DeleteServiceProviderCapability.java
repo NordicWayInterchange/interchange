@@ -3,7 +3,10 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 import picocli.CommandLine.*;
 import java.util.concurrent.Callable;
 
-@Command(name = "delete", description = "Delete a service provider capability")
+@Command(name = "delete", description = "Delete a service provider capability",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class DeleteServiceProviderCapability implements Callable<Integer> {
 
     @ParentCommand

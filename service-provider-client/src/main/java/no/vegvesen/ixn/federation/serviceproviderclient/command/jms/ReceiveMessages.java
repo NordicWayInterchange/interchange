@@ -8,7 +8,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Command(name = "receive", description = "Receive messages and print them to stdout")
+@Command(name = "receive", description = "Receive messages and print them to stdout",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class ReceiveMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")

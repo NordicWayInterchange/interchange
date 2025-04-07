@@ -13,6 +13,7 @@ public class Peer {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "peer_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     private String name;
