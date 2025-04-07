@@ -181,7 +181,7 @@ public class AdminRestController {
 
         logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        return qpidService.deliverysExchangeBindingToMatchingCapability(serviceProvider, deliveryId);
+        return qpidService.getCapabilitiesLinkedDelivery(serviceProvider, deliveryId);
     }
 
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
