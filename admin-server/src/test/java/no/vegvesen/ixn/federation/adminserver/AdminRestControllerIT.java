@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -262,5 +263,30 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         assertThat(response1).hasSize(2);
         assertThat(response2).hasSize(0);
+    }
+
+    @Test
+    public void testGetDeliverysExchangeBindingToMatchingCapabilities() {
+        String serviceProviderName = "my-service-provider";
+        String adminUser = "adminUser";
+        Capability aCap1 = new Capability(
+                new DatexApplication("DK12345","DK12345:publication-id","NO","1", List.of("1"), "type","name"),
+                new Metadata()
+        );
+
+        LocalDelivery aDelivery = new LocalDelivery();
+
+        ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(aServiceProvider);
+
+        List<CapabilityApi> capabilityApiList = new ArrayList<>();
+        capabilityApiList.add(new CapabilityApi(
+                aCap1.getUuid(),
+                aCap1.getApplication().toApi(),
+                aCap1.getMetadata().toApi(),
+                null
+        ));
+        when(qpidService.getCapabilitiesLinkedDelivery(aServiceProvider, aDelivery.getUuid())).thenReturn(capabilityApiList);
+        assertThat(restController.getDeliverysExchangeBindingToMatchingCapabilities(adminUser, serviceProviderName, aDelivery.getUuid())).isNotEmpty();
     }
 }

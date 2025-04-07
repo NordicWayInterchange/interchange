@@ -51,7 +51,7 @@ public class QpidService {
         }
     }
 
-    public List<CapabilityApi> deliverysExchangeBindingToMatchingCapability(ServiceProvider serviceProvider, String deliveryId) {
+    public List<CapabilityApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
         List<Capability> matchingCapabilities = new ArrayList<>();
 
         if (serviceProvider.hasDeliveries()) {
