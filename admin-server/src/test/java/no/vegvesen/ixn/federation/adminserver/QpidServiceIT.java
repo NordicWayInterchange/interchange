@@ -20,13 +20,9 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.junit.jupiter.Container;
@@ -37,7 +33,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
@@ -62,14 +57,11 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     private OutgoingMatchRepository outgoingMatchRepository;
 
-    private ServiceProviderRepository serviceProviderRepository;
-
 
     @BeforeEach
     public void setupClient() {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
         outgoingMatchRepository = mock(OutgoingMatchRepository.class);
-        serviceProviderRepository = mock(ServiceProviderRepository.class);
         client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
         service = new QpidService(client, outgoingMatchRepository);
     }
@@ -165,6 +157,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
         aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
         aServiceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
         serviceProviderRepository.save(aServiceProvider);
 
         List<OutgoingMatch> mockMatches = new ArrayList<>();
