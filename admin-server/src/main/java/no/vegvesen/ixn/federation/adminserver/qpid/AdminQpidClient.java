@@ -179,16 +179,4 @@ public class AdminQpidClient {
                 });
         return allExchangesResponse.getBody();
     }
-
-    public AdminQpidDelta getQpidDelta() {
-        try {
-            List<Queue> allQueues = getAllQueues();
-            List<Exchange> allExchanges = getAllExchanges();
-            return new AdminQpidDelta(allExchanges,allQueues);
-
-        } catch (JsonProcessingException e) {
-            logger.error("Could not parse qpid delta");
-            throw new RuntimeException(e);
-        }
-    }
 }
