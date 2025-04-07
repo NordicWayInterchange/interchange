@@ -62,7 +62,7 @@ public class QpidService {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
-                                if (adminQpidClient.getQpidDelta().exchangeHasBindingToQueue(endpoint.getTarget(), shard.getExchangeName())) {
+                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
                                     matchingCapabilities.add(capability);
                                     break;
                                 }
