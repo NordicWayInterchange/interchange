@@ -88,13 +88,13 @@
         <spring-boot-dependencies.version>3.4.4</spring-boot-dependencies.version>
         <picocli-version>4.7.6</picocli-version>
         <qpid-jms-client.version>2.5.0</qpid-jms-client.version>
-        <testcontainers.version>1.20.0</testcontainers.version>
-        <dnsjava.version>3.6.0</dnsjava.version>
-        <qpid-broker.version>9.2.0</qpid-broker.version>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
-        <postgresql.version>42.7.3</postgresql.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
+        <qpid-broker.version>9.2.1</qpid-broker.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <postgresql.version>42.7.5</postgresql.version>
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
-        <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.29</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
