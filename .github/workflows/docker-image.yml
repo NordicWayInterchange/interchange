@@ -25,9 +25,12 @@ jobs:
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
-      - name: Login to Artifact Registry
-        run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
-
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
       - name: Create tag
         run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
