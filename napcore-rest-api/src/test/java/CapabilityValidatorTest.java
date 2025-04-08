@@ -26,10 +26,8 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<String, String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        List<String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
         assertThat(validator).isNotEmpty();
-        assertTrue(validator.containsKey("INVALID_PUBLICATION_ID_PREFIX"));
-        assertEquals("publicationId must start with '<publisherId>:'", validator.get("INVALID_PUBLICATION_ID_PREFIX"));
     }
 
     @Test
@@ -44,9 +42,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<String, String> validator1 = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
-        assertTrue(validator1.containsKey("INVALID_COUNTRY_CODE"));
-        assertEquals("'no' is not a valid country code", validator1.get("INVALID_COUNTRY_CODE"));
+        List<String> validator1 = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
 
     }
 

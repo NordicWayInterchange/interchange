@@ -37,7 +37,7 @@ public class CapabilityValidator {
         };
     }
 
-    public static Map<String, String> napcoreCapabilityHasValidProperties(CapabilityApi capability){
+    public static List<String> napcoreCapabilityHasValidProperties(CapabilityApi capability){
         ApplicationApi application = capability.getApplication();
 
         return switch (application){
@@ -64,48 +64,48 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static Map<String, String> validateNapcoreProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        Map<String, String> errorMap = new HashMap<>();
+    public static List<String> validateNapcoreProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        List<String> errorList = new ArrayList<>();
         for (String property : mandatoryProperties) {
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher validCharMatcher = validCharacters.matcher(value);
 
             if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
-                errorMap.put("ILLEGAL_CHARACTERS", String.format("%s contains illegal characters", property));
+                addErrorMessage(errorList, "ILLEGAL_CHARACTERS", String.format("%s contains illegal characters", property));
             }
             if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
-                errorMap.put("EXCEEDS_CHARACTER_LIMIT", String.format("%s exceeds character limit of 255", property));
+                addErrorMessage(errorList, "EXCEEDS_CHARACTER_LIMIT", String.format("%s exceeds character limit of 255", property));
             }
             switch (property) {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
                     if(!publisherIdMatcher.matches()) {
-                        errorMap.put("INVALID_PUBLISHER_ID_FORMAT", String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
+                        addErrorMessage(errorList, "INVALID_PUBLISHER_ID_FORMAT", String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
                     }
                 }
                 case "originatingCountry" -> {
                     Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                     if (!countryCodeMatcher.matches()) {
-                        errorMap.put("INVALID_COUNTRY_CODE", String.format("'%s' is not a valid country code", value));
+                        addErrorMessage(errorList, "INVALID_COUNTRY_CODE",  String.format("'%s' is not a valid country code", value));
                     }
                 }
                 case "publicationId" -> {
                     String publisherId = applicationApi.getPublisherId();
                     if (!value.startsWith(publisherId + ":")) {
-                        errorMap.put("INVALID_PUBLICATION_ID_PREFIX", String.format("%s must start with '<publisherId>:'", property));
+                        addErrorMessage(errorList,"INVALID_PUBLICATION_ID_PREFIX", String.format("%s must start with '<publisherId>:'", property));
                     }
                 }
                 case "quadTree" -> {
                     String[] quadTreeTiles = value.split(",");
                     for (String quadTreeTile : quadTreeTiles) {
                         if (quadTreeTile.length() > 255) {
-                            errorMap.put("INVALID_LONG_QUAD_TREE", String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                            addErrorMessage(errorList, "INVALID_LONG_QUAD_TREE", String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
                         }
                     }
                 }
             }
         }
-        return errorMap;
+        return errorList;
     }
 
     public static boolean isShardCountValid(MetadataApi metadata){
@@ -122,5 +122,10 @@ public class CapabilityValidator {
             }
         }
         return true;
+    }
+
+    private static void addErrorMessage(List<String> errorList, String reason, String message) {
+        String errorMessage = "Reason: " + reason + ", Message: " + message;
+        errorList.add(errorMessage);
     }
 }
