@@ -31,6 +31,7 @@ jobs:
           registry: ghcr.io
           username: "Github Actions"
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
+
       - name: Create tag
         run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
