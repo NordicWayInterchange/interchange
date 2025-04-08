@@ -75,7 +75,7 @@ public class Listen implements Callable<Integer> {
             System.out.println(subscriptions.size() + " subscriptions created");
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (LocalActorSubscription subscription : subscriptions) {
-
+                System.out.println("Wait for subscription " + subscription.getId());
                 CompletableFuture<Void> future = CompletableFuture.supplyAsync( () -> {
                     String id = subscription.getId();
                     System.out.println("Checking subscription " + id);
@@ -113,6 +113,7 @@ public class Listen implements Callable<Integer> {
                     return mySubscription;
 
                 }, executorService).thenApply( response -> {
+                    System.out.println("Listening for subscription " + subscription.getId());
                     for (LocalEndpointApi endpoint : response.getEndpoints()) {
                         String url = endpoint.toUrl();
                         try(Connection connection = connectionPool.createConnection(url)) {
