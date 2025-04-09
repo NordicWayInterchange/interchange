@@ -1,21 +1,14 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
-import no.vegvesen.ixn.federation.adminserver.qpid.AdminQpidClient;
-import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +18,6 @@ public class QpidService {
 
     private final OutgoingMatchRepository outgoingMatchRepository;
 
-    private final Logger logger = LoggerFactory.getLogger(QpidService.class);
     private final AdminQpidClient adminQpidClient;
 
     @Autowired
@@ -51,9 +43,14 @@ public class QpidService {
         }
     }
 
-    public List<CapabilityApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
-        List<Capability> matchingCapabilities = new ArrayList<>();
+    private List<Binding> getBindings(String exchangeName) {
+        return  adminQpidClient.getExchange(exchangeName).getBindings();
+    }
 
+    public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
+        List<Capability> matchingCapabilities = new ArrayList<>();
+        Integer shardId = null;
+        List<Binding> bindings = new ArrayList<>();
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
@@ -64,6 +61,8 @@ public class QpidService {
                             for (CapabilityShard shard : capability.getShards()) {
                                 if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
                                     matchingCapabilities.add(capability);
+                                    shardId = shard.getShardId();
+                                    bindings = getBindings(endpoint.getTarget());
                                     break;
                                 }
                             }
@@ -72,28 +71,22 @@ public class QpidService {
                 }
             }
         }
-        return capabilityToCapabilitiesApiList(matchingCapabilities);
+        return toCapabilitiesLinkedDeliveryApi(matchingCapabilities, shardId, bindings, deliveryId);
     }
 
-    public List<CapabilityApi> capabilityToCapabilitiesApiList(List<Capability> capabilities) {
-        List<CapabilityApi> capabilityApiList = new ArrayList<>();
+    public List<CapabilitiesLinkedDeliveryApi> toCapabilitiesLinkedDeliveryApi(List<Capability> capabilities, Integer shardId, List<Binding> bindings, String deliveryId) {
+        List<CapabilitiesLinkedDeliveryApi> capabilitiesLinkedDeliveryApiList = new ArrayList<>();
         for (Capability capability : capabilities) {
-            capabilityApiList.add(new CapabilityApi(
+            CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
                     capability.getUuid(),
-                    capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
-                    localDateTimeToTimestamp(capability.getCreatedTimestamp())
-            ));
+                    shardId,
+                    bindings
+            );
+            CapabilitiesLinkedDeliveryApi capabilitiesLinkedDeliveryApi = new CapabilitiesLinkedDeliveryApi(deliveryId, capabilityMatchApi);
+            capabilitiesLinkedDeliveryApiList.add(capabilitiesLinkedDeliveryApi);
         }
-        return capabilityApiList.stream().sorted().toList();
-    }
 
-    private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {
-        Long epochSecond = null;
-        if (lastUpdated != null) {
-            epochSecond = lastUpdated.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        }
-        return epochSecond;
+        return capabilitiesLinkedDeliveryApiList;
     }
 
     public List<Exchange> getAllExchanges() {
