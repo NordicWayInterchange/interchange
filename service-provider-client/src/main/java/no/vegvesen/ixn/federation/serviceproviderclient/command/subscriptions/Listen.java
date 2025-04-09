@@ -71,70 +71,70 @@ public class Listen implements Callable<Integer> {
         };
         SSLContext sslContext = parentCommand.getParent().createSSLContext();
         PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(new ExceptionListeningConnectionCreator(sslContext, exceptionListener));
-        try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
-            System.out.println(subscriptions.size() + " subscriptions created");
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            for (LocalActorSubscription subscription : subscriptions) {
-                System.out.println("Wait for subscription " + subscription.getId());
-                CompletableFuture<Void> future = CompletableFuture.supplyAsync( () -> {
-                    String id = subscription.getId();
-                    System.out.println("Checking subscription " + id);
-                    GetSubscriptionResponse mySubscription = client.getSubscription(id);
-                    while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
-                        try {
-                            TimeUnit.SECONDS.sleep(2);
-                            mySubscription = client.getSubscription(id);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException(e);
-                        }
+        //TODO need to handle errors!!!!
+        //TODO Use a different executor, we are testing with 3 subscriptions, for example. Try default thread pool.
+        System.out.println(subscriptions.size() + " subscriptions created");
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (LocalActorSubscription subscription : subscriptions) {
+            System.out.println("Wait for subscription " + subscription.getId());
+            CompletableFuture<Void> future = CompletableFuture.supplyAsync( () -> {
+                String id = subscription.getId();
+                System.out.println("Checking subscription " + id);
+                GetSubscriptionResponse mySubscription = client.getSubscription(id);
+                while (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.REQUESTED)) {
+                    try {
+                        TimeUnit.SECONDS.sleep(2);
+                        mySubscription = client.getSubscription(id);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
                     }
+                }
 
-                    if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-                        if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
-                            //redirect subscription, need to wait for the endpoints to be set
-                            System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
-                            while (mySubscription.getEndpoints().isEmpty()) {
-                                try {
-                                    TimeUnit.SECONDS.sleep(2);
-                                    mySubscription = client.getSubscription(id);
-                                } catch (InterruptedException e) {
-                                    Thread.currentThread().interrupt();
-                                    throw new RuntimeException(e);
-                                }
+                if (mySubscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
+                    if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
+                        //redirect subscription, need to wait for the endpoints to be set
+                        System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
+                        while (mySubscription.getEndpoints().isEmpty()) {
+                            try {
+                                TimeUnit.SECONDS.sleep(2);
+                                mySubscription = client.getSubscription(id);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                throw new RuntimeException(e);
                             }
-
                         }
-                    } else {
-                        throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
-                    }
-                    //Add the subscription to the blocking queue
-                    //workQueue.add(mySubscription);
-                    return mySubscription;
 
-                }, executorService).thenApply( response -> {
-                    System.out.println("Listening for subscription " + subscription.getId());
-                    for (LocalEndpointApi endpoint : response.getEndpoints()) {
-                        String url = endpoint.toUrl();
-                        try(Connection connection = connectionPool.createConnection(url)) {
-                            Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
-                            Destination destination = session.createQueue(endpoint.getSource());
-                            MessageConsumer consumer = session.createConsumer(destination);
-                            consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
-                            counter.await();
-                        } catch (JMSException e) {
-                            throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException(e);
-                        }
                     }
-                    return null;
-                });
-                futures.add(future);
-            }
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                } else {
+                    throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s, skipping", mySubscription.getStatus(), mySubscription.getId()));
+                }
+                //Add the subscription to the blocking queue
+                //workQueue.add(mySubscription);
+                return mySubscription;
+
+            }).thenApply( response -> {
+                System.out.println("Listening for subscription " + subscription.getId());
+                for (LocalEndpointApi endpoint : response.getEndpoints()) {
+                    String url = endpoint.toUrl();
+                    try(Connection connection = connectionPool.createConnection(url)) {
+                        Session session = connection.createSession(Session.AUTO_ACKNOWLEDGE);
+                        Destination destination = session.createQueue(endpoint.getSource());
+                        MessageConsumer consumer = session.createConsumer(destination);
+                        consumer.setMessageListener(directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener());
+                        counter.await();
+                    } catch (JMSException e) {
+                        throw new RuntimeException(e);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                }
+                return null;
+            });
+            futures.add(future);
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         connectionPool.close();
         return 0;
     }
