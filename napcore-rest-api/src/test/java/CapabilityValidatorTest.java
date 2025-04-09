@@ -5,12 +5,7 @@ import no.vegvesen.ixn.napcore.model.CapabilityValidator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CapabilityValidatorTest {
 
@@ -27,7 +22,10 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
         List<String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
-        assertThat(validator).isNotEmpty();
+        assertEquals(1, validator.size());
+
+        String content = validator.getFirst();
+        assertEquals("Reason: INVALID_PUBLICATION_ID_PREFIX, Message: publicationId must start with '<publisherId>:'", content);
     }
 
     @Test
@@ -35,15 +33,20 @@ public class CapabilityValidatorTest {
         CapabilityApi capability1 = new CapabilityApi(
                 new IvimApplicationApi(
                         "NO00000",
-                        "NO00000:pub-1",
+                        "NO:pub-1",
                         "no",
                         "IVIM",
                         List.of("1")
                 ),
                 new MetadataApi()
         );
-        List<String> validator1 = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        List<String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        assertEquals(2, validator.size());
 
+        String first = validator.getFirst();
+        String second = validator.get(1);
+        assertEquals("Reason: INVALID_COUNTRY_CODE, Message: 'no' is not a valid country code", first);
+        assertEquals("Reason: INVALID_PUBLICATION_ID_PREFIX, Message: publicationId must start with '<publisherId>:'", second);
     }
 
 }
