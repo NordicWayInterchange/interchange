@@ -65,16 +65,18 @@ public class CapabilityValidator {
     }
 
     public static List<String> validateNapcoreProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        List<String> errorList = new ArrayList<>();
+        List<CapabilityErrorMessage> errorList = new ArrayList<>();
         for (String property : mandatoryProperties) {
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher validCharMatcher = validCharacters.matcher(value);
 
             if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
-                addErrorMessage(errorList, "ILLEGAL_CHARACTERS", String.format("%s contains illegal characters", property));
+                errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.ILLEGAL_CHARACTERS,String.format("%s contains illegal characters", property)));
+                //addErrorMessage(errorList, "ILLEGAL_CHARACTERS", String.format("%s contains illegal characters", property));
             }
             if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
-                addErrorMessage(errorList, "EXCEEDS_CHARACTER_LIMIT", String.format("%s exceeds character limit of 255", property));
+                errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.EXCEEDS_CHARACTER_LIMIT,String.format("%s exceeds character limit of 255", property)));
+                //addErrorMessage(errorList, "EXCEEDS_CHARACTER_LIMIT", String.format("%s exceeds character limit of 255", property));
             }
             switch (property) {
                 case "publisherId" -> {
