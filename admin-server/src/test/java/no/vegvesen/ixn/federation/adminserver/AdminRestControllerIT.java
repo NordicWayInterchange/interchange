@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -274,21 +273,24 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 new Metadata()
         );
 
-        CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
-        aCap1.setShards(Collections.singletonList(shard2));
+        CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
+        aCap1.setShards(Collections.singletonList(shard));
 
         LocalDelivery aDelivery = new LocalDelivery();
 
         ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
         serviceProviderRepository.save(aServiceProvider);
 
-       /* List<CapabilityMatchApi> capabilityApiList = new ArrayList<>();
-        capabilityApiList.add(new CapabilityMatchApi(
+        List<CapabilitiesLinkedDeliveryApi> capabilitiesLinkedDeliveryApiList = new ArrayList<>();
+
+        CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
                 aCap1.getUuid(),
                 1,
                 Collections.emptyList()
-        ));
-        when(qpidService.getCapabilitiesLinkedDelivery(aServiceProvider, aDelivery.getUuid())).thenReturn(capabilityApiList);
-        assertThat(restController.getDeliverysExchangeBindingToMatchingCapabilities(adminUser, serviceProviderName, aDelivery.getUuid())).isNotEmpty();*/
+        );
+
+        capabilitiesLinkedDeliveryApiList.add(new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), capabilityMatchApi));
+        when(qpidService.getCapabilitiesLinkedDelivery(aServiceProvider, aDelivery.getUuid())).thenReturn(capabilitiesLinkedDeliveryApiList);
+        assertThat(restController.getDeliverysExchangeBindingToMatchingCapabilities(adminUser, serviceProviderName, aDelivery.getUuid())).isNotEmpty();
     }
 }
