@@ -167,7 +167,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         client.addBinding("exchange", new Binding("exchange", queueName, new Filter(selector)));
 
-        List<CapabilityApi> response1 = service.getCapabilitiesLinkedDelivery(aServiceProvider, delivery.getUuid());
+        List<CapabilitiesLinkedDeliveryApi> response1 = service.getCapabilitiesLinkedDelivery(aServiceProvider, delivery.getUuid());
         assertThat(response1).isNotEmpty();
     }
 
