@@ -72,7 +72,6 @@ public class Listen implements Callable<Integer> {
         SSLContext sslContext = parentCommand.getParent().createSSLContext();
         PoolingConnectionCreator connectionPool = new PoolingConnectionCreator(new ExceptionListeningConnectionCreator(sslContext, exceptionListener));
         //TODO need to handle errors!!!!
-        //TODO Use a different executor, we are testing with 3 subscriptions, for example. Try default thread pool.
         System.out.println(subscriptions.size() + " subscriptions created");
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (LocalActorSubscription subscription : subscriptions) {
@@ -95,8 +94,13 @@ public class Listen implements Callable<Integer> {
                     if (mySubscription.getConsumerCommonName().equals(client.getUser())) {
                         //redirect subscription, need to wait for the endpoints to be set
                         System.out.println("Redirect subscription " + mySubscription.getId() + " created, waiting for endpoints");
+                        int numtries = 0;
                         while (mySubscription.getEndpoints().isEmpty()) {
                             try {
+                                if (numtries == 5) {
+                                    throw new RuntimeException(String.format("Could not get subscription %s in %d tries",subscription.getId(), numtries));
+                                }
+                                numtries++;
                                 TimeUnit.SECONDS.sleep(2);
                                 mySubscription = client.getSubscription(id);
                             } catch (InterruptedException e) {
