@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class QpidService {
@@ -45,6 +47,20 @@ public class QpidService {
 
     public String joinTwoSelectors(String firstSelector, String secondSelector) {
         return String.format("(%s) AND (%s)", firstSelector, secondSelector);
+    }
+
+    public List<LocalDeliveryEndpointApi> localDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
+        Set<LocalDeliveryEndpointApi> endpointApiSet = new HashSet<>();
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDeliveryEndpoint endpoint : serviceProvider.getDelivery(deliveryId).getEndpoints()) {
+                endpointApiSet.add(new LocalDeliveryEndpointApi(
+                        endpoint.getHost(),
+                        endpoint.getPort(),
+                        endpoint.getTarget()
+                ));
+            }
+        }
+        return new ArrayList<>(endpointApiSet);
     }
 
     public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
