@@ -37,7 +37,7 @@ public class CapabilityValidator {
         };
     }
 
-    public static List<String> napcoreCapabilityHasValidProperties(CapabilityApi capability){
+    public static List<CapabilityErrorMessage> napcoreCapabilityHasValidProperties(CapabilityApi capability){
         ApplicationApi application = capability.getApplication();
 
         return switch (application){
@@ -64,42 +64,42 @@ public class CapabilityValidator {
         return notSetProperties;
     }
 
-    public static List<String> validateNapcoreProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
-        List<String> errorList = new ArrayList<>();
+    public static List<CapabilityErrorMessage> validateNapcoreProperties(ApplicationApi applicationApi, Set<String> mandatoryProperties) {
+        List<CapabilityErrorMessage> errorList = new ArrayList<>();
         for (String property : mandatoryProperties) {
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
             Matcher validCharMatcher = validCharacters.matcher(value);
 
             if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
-                addErrorMessage(errorList, "ILLEGAL_CHARACTERS", String.format("%s contains illegal characters", property));
+                errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.ILLEGAL_CHARACTERS, String.format("%s contains illegal characters", property)));
             }
             if (value.length() > 255 && !property.equals("quadTree") && !property.equals("causeCode")) {
-                addErrorMessage(errorList, "EXCEEDS_CHARACTER_LIMIT", String.format("%s exceeds character limit of 255", property));
+                errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.EXCEEDS_CHARACTER_LIMIT, String.format("%s exceeds character limit of 255", property)));
             }
             switch (property) {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
                     if(!publisherIdMatcher.matches()) {
-                        addErrorMessage(errorList, "INVALID_PUBLISHER_ID_FORMAT", String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
+                        errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.INVALID_PUBLISHER_ID_FORMAT, String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property)));
                     }
                 }
                 case "originatingCountry" -> {
                     Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
                     if (!countryCodeMatcher.matches()) {
-                        addErrorMessage(errorList, "INVALID_COUNTRY_CODE",  String.format("'%s' is not a valid country code", value));
+                        errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.INVALID_COUNTRY_CODE, String.format("'%s' is not a valid country code", value)));
                     }
                 }
                 case "publicationId" -> {
                     String publisherId = applicationApi.getPublisherId();
                     if (!value.startsWith(publisherId + ":")) {
-                        addErrorMessage(errorList,"INVALID_PUBLICATION_ID_PREFIX", String.format("%s must start with '<publisherId>:'", property));
+                        errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.INVALID_PUBLICATION_ID_PREFIX, String.format("%s must start with '<publisherId>:'", property)));
                     }
                 }
                 case "quadTree" -> {
                     String[] quadTreeTiles = value.split(",");
                     for (String quadTreeTile : quadTreeTiles) {
                         if (quadTreeTile.length() > 255) {
-                            addErrorMessage(errorList, "INVALID_LONG_QUAD_TREE", String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile));
+                            errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.INVALID_LONG_QUAD_TREE, String.format("quadTreeTile '%s' exceeds character limit of 255", quadTreeTile)));
                         }
                     }
                 }
@@ -122,10 +122,5 @@ public class CapabilityValidator {
             }
         }
         return true;
-    }
-
-    private static void addErrorMessage(List<String> errorList, String reason, String message) {
-        String errorMessage = "Reason: " + reason + ", Message: " + message;
-        errorList.add(errorMessage);
     }
 }

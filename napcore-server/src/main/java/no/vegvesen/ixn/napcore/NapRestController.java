@@ -366,7 +366,7 @@ public class NapRestController {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        List<String> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        List<CapabilityErrorMessage> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
         if(!validatedCapability.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability, capabilityToAdd));
         }

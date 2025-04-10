@@ -1,6 +1,8 @@
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.IvimApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.napcore.model.CapabilityErrorCode;
+import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 import no.vegvesen.ixn.napcore.model.CapabilityValidator;
 import org.junit.jupiter.api.Test;
 
@@ -21,11 +23,13 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        List<String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        List<CapabilityErrorMessage> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
         assertEquals(1, validator.size());
-
-        String content = validator.getFirst();
-        assertEquals("Reason: INVALID_PUBLICATION_ID_PREFIX, Message: publicationId must start with '<publisherId>:'", content);
+        CapabilityErrorCode code = validator.getFirst().getCode();
+        CapabilityErrorCode expectedEnum = CapabilityErrorCode.INVALID_PUBLICATION_ID_PREFIX;
+        String message = validator.getFirst().getMessage();
+        assertEquals(expectedEnum, code);
+        assertEquals("publicationId must start with '<publisherId>:'", message);
     }
 
     @Test
@@ -40,13 +44,21 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        List<String> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        List<CapabilityErrorMessage> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
         assertEquals(2, validator.size());
+        CapabilityErrorCode firstCode = validator.getFirst().getCode();
+        CapabilityErrorCode firstExpectedEnum = CapabilityErrorCode.INVALID_COUNTRY_CODE;
+        String firstMessage = validator.getFirst().getMessage();
 
-        String first = validator.getFirst();
-        String second = validator.get(1);
-        assertEquals("Reason: INVALID_COUNTRY_CODE, Message: 'no' is not a valid country code", first);
-        assertEquals("Reason: INVALID_PUBLICATION_ID_PREFIX, Message: publicationId must start with '<publisherId>:'", second);
+
+        CapabilityErrorCode secondCode = validator.getLast().getCode();
+        CapabilityErrorCode secondExpectedEnum = CapabilityErrorCode.INVALID_PUBLICATION_ID_PREFIX;
+        String secondMessage = validator.getLast().getMessage();
+
+        assertEquals(firstCode, firstExpectedEnum);
+        assertEquals(secondCode, secondExpectedEnum);
+        assertEquals("'no' is not a valid country code", firstMessage);
+        assertEquals("publicationId must start with '<publisherId>:'", secondMessage);
     }
 
 }
