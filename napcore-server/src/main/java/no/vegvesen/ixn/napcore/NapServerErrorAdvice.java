@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.napcore;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
@@ -55,6 +57,19 @@ public class NapServerErrorAdvice {
     @ExceptionHandler({CapabilityPostException.class})
     public ResponseEntity<ErrorDetails> handleCapabilityPostException(CapabilityPostException e){
         return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({NapcoreCapabilityPostException.class})
+    public ResponseEntity<ObjectNode> handleNapcoreCapabilityPostException(NapcoreCapabilityPostException e) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode response = mapper.createObjectNode();
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("errorCode", HttpStatus.BAD_REQUEST.toString());
+        response.put("message", e.getMessage());
+        response.set("errors", mapper.valueToTree(e.getErrors()));
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({NotFoundException.class})

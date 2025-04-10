@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore.model;
 
 public class CapabilityErrorMessage {
+
     private final CapabilityErrorCode code;
     private final String message;
 

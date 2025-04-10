@@ -368,7 +368,7 @@ public class NapRestController {
 
         List<CapabilityErrorMessage> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
         if(!validatedCapability.isEmpty()){
-            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability, capabilityToAdd));
+            throw new NapcoreCapabilityPostException(String.format("Bad api object. Capability: %s", capabilityToAdd), validatedCapability);
         }
 
         if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
