@@ -4,11 +4,11 @@ import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 
 import java.util.List;
 
-public class NapcoreCapabilityPostException extends RuntimeException{
+public class CapabilityNotValidException extends RuntimeException{
 
     private final List<CapabilityErrorMessage> errors;
 
-    public NapcoreCapabilityPostException(String message, List<CapabilityErrorMessage> errors) {
+    public CapabilityNotValidException(String message, List<CapabilityErrorMessage> errors) {
         super(message);
         this.errors = errors;
     }

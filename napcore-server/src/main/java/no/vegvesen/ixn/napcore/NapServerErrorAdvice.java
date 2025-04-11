@@ -6,6 +6,7 @@ import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +60,8 @@ public class NapServerErrorAdvice {
         return error(BAD_REQUEST, e);
     }
 
-    @ExceptionHandler({NapcoreCapabilityPostException.class})
-    public ResponseEntity<ObjectNode> handleNapcoreCapabilityPostException(NapcoreCapabilityPostException e) {
+    @ExceptionHandler({CapabilityNotValidException.class})
+    public ResponseEntity<ObjectNode> handleCapabilityNotValidException(CapabilityNotValidException e) {
         ObjectMapper mapper = new ObjectMapper();
 
         ObjectNode response = mapper.createObjectNode();
