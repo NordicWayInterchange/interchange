@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -48,7 +49,7 @@ public class QpidService {
     }
 
     public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
-        List<Capability> matchingCapabilities = new ArrayList<>();
+        LinkedHashSet<Capability> matchingCapabilities = new LinkedHashSet<>();
         Integer shardId = null;
         List<Binding> bindings = new ArrayList<>();
         if (serviceProvider.hasDeliveries()) {
@@ -74,7 +75,7 @@ public class QpidService {
         return toCapabilitiesLinkedDeliveryApi(matchingCapabilities, shardId, bindings, deliveryId);
     }
 
-    public List<CapabilitiesLinkedDeliveryApi> toCapabilitiesLinkedDeliveryApi(List<Capability> capabilities, Integer shardId, List<Binding> bindings, String deliveryId) {
+    public List<CapabilitiesLinkedDeliveryApi> toCapabilitiesLinkedDeliveryApi(LinkedHashSet<Capability> capabilities, Integer shardId, List<Binding> bindings, String deliveryId) {
         List<CapabilitiesLinkedDeliveryApi> capabilitiesLinkedDeliveryApiList = new ArrayList<>();
         for (Capability capability : capabilities) {
             CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
