@@ -18,9 +18,8 @@ const BindingExists: React.FC = () => {
 
         const svg = d3.select(svgRef.current).attr('width', 500).attr('height', 500);
         const rectangles: Rectangle[] = [
-            { x: 50, y: 50, width: 100, height: 60, text: 'Rectangle 1', color: '#E8F3E9' },
-            { x: 200, y: 50, width: 100, height: 60, text: 'Rectangle 2', color: '#ffbf7d' },
-            { x: 350, y: 50, width: 100, height: 60, text: 'Rectangle 3', color: '#D4F7FF' },
+            { x: 50, y: 50, width: 100, height: 60, text: 'Delivery', color: '#E8F3E9' },
+            { x: 350, y: 50, width: 100, height: 60, text: 'Capability', color: '#D4F7FF' },
         ];
 
         svg.selectAll('*').remove();
@@ -59,7 +58,7 @@ const BindingExists: React.FC = () => {
             .attr('x2', (d, i) => rectangles[i + 1].x)
             .attr('y2', (d, i) => rectangles[i + 1].y + rectangles[i + 1].height / 2)
             .attr('stroke', 'black')
-            .attr('stroke-width', 2);
+            .attr('stroke-width', 1);
     }, []);
 
     return <svg ref={svgRef}></svg>;
