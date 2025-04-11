@@ -13,19 +13,15 @@ public class CapabilityMatchApi {
 
     private Integer shardId;
 
-
-    List<Binding> bindings;
+    Binding binding;
 
     public CapabilityMatchApi() {
     }
 
-    private Set<CapabilityShardApi> shards = new HashSet<>();
-
-    public CapabilityMatchApi(String capabilityId, Integer shardId, List<Binding> bindings) {
+    public CapabilityMatchApi(String capabilityId, Integer shardId, Binding binding) {
         this.capabilityId = capabilityId;
         this.shardId = shardId;
-        this.bindings = new ArrayList<>();
-        this.bindings.addAll(bindings);
+        this.binding = binding;
     }
 
     public void setCapabilityId(String id) {
@@ -44,20 +40,19 @@ public class CapabilityMatchApi {
         this.shardId = shardId;
     }
 
-    public List<Binding> getBindings() {
-        return bindings;
+    public Binding getBindings() {
+        return binding;
     }
 
     public void addBinding(Binding binding) {
-        this.bindings.add(binding);
+        this.binding = binding;
     }
-
 
     public String toString() {
         return "CapabilityMatch{" +
                 "capabilityId=" + capabilityId +
                 "shardId=" + shardId +
-                ", bindings=" + bindings +
+                ", binding=" + binding +
                 '}';
     }
 }
