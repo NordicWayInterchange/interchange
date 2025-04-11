@@ -459,7 +459,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
                 aCap1.getUuid(),
                 1,
-                Collections.emptyList()
+                new Binding("exchange", "queueName", new Filter("publicationId = 'pub-1'"))
         );
 
         capabilitiesLinkedDeliveryApiList.add(new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), capabilityMatchApi));
