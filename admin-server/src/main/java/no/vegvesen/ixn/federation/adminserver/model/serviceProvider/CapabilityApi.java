@@ -45,6 +45,10 @@ public class CapabilityApi implements Comparable<CapabilityApi> {
         this.shards = shards;
     }
 
+    public CapabilityApi(Set<CapabilityShardApi> shards) {
+        this.shards = shards;
+    }
+
     public void setId(String id) {
         this.id = id;
     }

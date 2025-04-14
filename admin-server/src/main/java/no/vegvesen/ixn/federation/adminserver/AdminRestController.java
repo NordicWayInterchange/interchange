@@ -207,6 +207,18 @@ public class AdminRestController {
         return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(serviceProvider, deliveryId, capabilityId);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
+    public List<CapabilityApi> getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                                 @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId and shardId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(serviceProvider, deliveryId, capabilityId, shardId);
+    }
+
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
         Set<Capability> capabilities = new HashSet<>();
         for (ServiceProvider otherServiceProvider : serviceProviders) {
