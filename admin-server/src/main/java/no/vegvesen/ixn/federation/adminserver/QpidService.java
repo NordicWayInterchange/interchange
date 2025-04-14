@@ -50,17 +50,31 @@ public class QpidService {
     }
 
     public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
-        Set<LocalDeliveryEndpointApi> endpointApiSet = new HashSet<>();
+        List<LocalDeliveryEndpointApi> endpointApiList = new ArrayList<>();
+
         if (serviceProvider.hasDeliveries()) {
-            for (LocalDeliveryEndpoint endpoint : serviceProvider.getDelivery(deliveryId).getEndpoints()) {
-                endpointApiSet.add(new LocalDeliveryEndpointApi(
-                        endpoint.getHost(),
-                        endpoint.getPort(),
-                        endpoint.getTarget()
-                ));
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
+                    for (OutgoingMatch match : matches) {
+                        Capability capability = match.getCapability();
+                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                            for (CapabilityShard shard : capability.getShards()) {
+                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
+                                    LocalDeliveryEndpointApi localDeliveryEndpointApi = new LocalDeliveryEndpointApi(
+                                            endpoint.getHost(),
+                                            endpoint.getPort(),
+                                            endpoint.getTarget()
+                                    );
+                                    endpointApiList.add(localDeliveryEndpointApi);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        return new ArrayList<>(endpointApiSet);
+        return endpointApiList;
     }
 
     public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
@@ -138,7 +152,6 @@ public class QpidService {
                 }
             }
         }
-
         return null;
     }
 
