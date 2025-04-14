@@ -139,6 +139,12 @@ public class Capability {
         }
     }
 
+    public Optional<CapabilityShard> getShard(Integer id) {
+        return shards.stream()
+                .filter(shard -> shard.getShardId().equals(id))
+                .findFirst();
+    }
+
     public void addShards(List<CapabilityShard> shards){
         this.shards.addAll(shards);
     }

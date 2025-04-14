@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
@@ -11,10 +12,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class QpidService {
@@ -108,6 +106,20 @@ public class QpidService {
         return capabilityApiList.stream().sorted().toList();
     }
 
+
+    public List<CapabilityApi> capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
+        Capability capability = serviceProvider.getCapability(capabilityId);
+
+        List<CapabilityApi> capabilityApiList = new ArrayList<>();
+        capabilityApiList.add(new CapabilityApi(
+                capability.getApplication().toApi(),
+                capability.getMetadata().toApi(),
+                toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId)))
+        ));
+
+        return capabilityApiList.stream().sorted().toList();
+    }
+
     public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
         Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
         for (CapabilityShard capabilityShard : capabilityShards) {
@@ -116,11 +128,28 @@ public class QpidService {
         return capabilityShardApiSet;
     }
 
+    public Set<CapabilityShardApi> toCapabilityShardSetApi(Optional<CapabilityShard> capabilityShard) {
+        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+
+        capabilityShardApiSet.add(optionalCapabilityShardToCapabilityShardApi(capabilityShard));
+
+        return capabilityShardApiSet;
+    }
+
     public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
         return new CapabilityShardApi(
                 capabilityShard.getShardId(),
                 capabilityShard.getExchangeName(),
                 capabilityShard.getSelector()
+        );
+    }
+
+    public CapabilityShardApi optionalCapabilityShardToCapabilityShardApi(Optional<CapabilityShard> capabilityShard) {
+        CapabilityShard shard = capabilityShard.orElseThrow(() -> new IllegalArgumentException("CapabilityShard is not present"));
+        return new CapabilityShardApi(
+                shard.getShardId(),
+                shard.getExchangeName(),
+                shard.getSelector()
         );
     }
 
