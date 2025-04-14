@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
@@ -181,7 +182,7 @@ public class AdminRestController {
 
         logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        return qpidService.localDeliveryEndpointApiList(serviceProvider, deliveryId);
+        return qpidService.getLocalDeliveryEndpointApiList(serviceProvider, deliveryId);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
@@ -192,6 +193,18 @@ public class AdminRestController {
         logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         return qpidService.getCapabilitiesLinkedDelivery(serviceProvider, deliveryId);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
+    public List<CapabilityApi> getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                 @PathVariable("capabilityId") String capabilityId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(serviceProvider, deliveryId, capabilityId);
     }
 
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
