@@ -11,10 +11,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliver
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
-import no.vegvesen.ixn.federation.adminserver.qpid.CapabilitiesLinkedDeliveryApi;
-import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
-import no.vegvesen.ixn.federation.adminserver.qpid.LocalDeliveryEndpointApi;
-import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
@@ -245,8 +242,8 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
-    public List<CapabilityApi> getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
-                                                                                 @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
+    public List<AdminQpidCapabilityApi> getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                                     @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
