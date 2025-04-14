@@ -43,8 +43,8 @@ public class QpidService {
         }
     }
 
-    private List<Binding> getBindings(String exchangeName) {
-        return  adminQpidClient.getExchange(exchangeName).getBindings();
+    public String joinTwoSelectors(String firstSelector, String secondSelector) {
+        return String.format("(%s) AND (%s)", firstSelector, secondSelector);
     }
 
     public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
@@ -59,8 +59,8 @@ public class QpidService {
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
                                 if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
-                                    List<Binding> bindings = getBindings(endpoint.getTarget()); //List of bindings?
-                                    Binding binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(shard.getSelector())); // Or binding should be done this way?
+                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                    Binding binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
                                     CapabilityMatchApi matchApi = new CapabilityMatchApi(
                                             capability.getUuid(),
                                             shard.getShardId(),
