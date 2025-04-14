@@ -5,15 +5,15 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilitySh
 import java.util.HashSet;
 import java.util.Set;
 
-public class AdminQpidCapabilityApi {
+public class CapabilityShardIdApi {
 
 
-    public AdminQpidCapabilityApi() {
+    public CapabilityShardIdApi() {
     }
 
     private Set<CapabilityShardApi> shards = new HashSet<>();
 
-    public AdminQpidCapabilityApi(Set<CapabilityShardApi> shards) {
+    public CapabilityShardIdApi(Set<CapabilityShardApi> shards) {
         this.shards = shards;
     }
 
