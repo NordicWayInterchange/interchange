@@ -113,7 +113,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Set<Subscription> requestedSubscriptions = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions();
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
-        Set<LocalSubscription> localSubscriptions = savedServiceProvider.getSubscriptions();
+        List<LocalSubscription> localSubscriptions = savedServiceProvider.getSubscriptions();
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(0);
