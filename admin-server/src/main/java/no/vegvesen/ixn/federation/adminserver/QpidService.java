@@ -94,18 +94,52 @@ public class QpidService {
     }
 
     public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
-        Capability capability = serviceProvider.getCapability(capabilityId);
-        return new CapabilityApi(
-                    capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
-                    capabilityShardSetToCapabilityShardSetApi(capability.getShards())
-            );
+
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
+                    for (OutgoingMatch match : matches) {
+                        Capability capability = match.getCapability();
+                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                            for (CapabilityShard shard : capability.getShards()) {
+                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
+                                    return new CapabilityApi(
+                                            capability.getApplication().toApi(),
+                                            capability.getMetadata().toApi(),
+                                            capabilityShardSetToCapabilityShardSetApi(capability.getShards())
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public CapabilityShardIdApi capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
-        Capability capability = serviceProvider.getCapability(capabilityId);
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
+                    for (OutgoingMatch match : matches) {
+                        Capability capability = match.getCapability();
+                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                            for (CapabilityShard shard : capability.getShards()) {
+                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
+                                    return new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId))));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        return new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId))));
+        return null;
     }
 
     public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
