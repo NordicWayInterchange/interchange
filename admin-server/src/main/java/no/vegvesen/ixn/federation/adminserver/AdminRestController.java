@@ -4,15 +4,14 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.adminserver.qpid.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -163,13 +162,26 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries")
-    public List<LocalDeliveryApi> getDeliveriesForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+    public List<LocalDeliveryIdApi> getDeliveryIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        logger.info("Log - List delivery ids for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        return typeTransformer.getDeliveryIds(serviceProvider.getDeliveries());
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}")
+    public LocalDeliveryApi getDeliveriesForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
         logger.info("Log - List deliveries for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        return typeTransformer.localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries());
+        LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
+
+        return typeTransformer.localDeliveryToDeliveriesApi(localDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/endpoints")

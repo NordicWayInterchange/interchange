@@ -262,6 +262,17 @@ public class TypeTransformer {
         return localConnectionApiSet;
     }
 
+
+    public List<LocalDeliveryIdApi> getDeliveryIds(Set<LocalDelivery> deliveriesSet) {
+        List<LocalDeliveryIdApi> deliveriesApiList = new ArrayList<>();
+        for (LocalDelivery delivery : deliveriesSet) {
+            deliveriesApiList.add(new LocalDeliveryIdApi(
+                    delivery.getUuid()
+            ));
+        }
+        return deliveriesApiList.stream().sorted().toList();
+    }
+
     public List<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiList(Set<LocalDelivery> deliveriesSet) {
         List<LocalDeliveryApi> deliveriesApiList = new ArrayList<>();
         for (LocalDelivery delivery : deliveriesSet) {
@@ -277,6 +288,16 @@ public class TypeTransformer {
         return deliveriesApiList.stream().sorted().toList();
     }
 
+    public  LocalDeliveryApi localDeliveryToDeliveriesApi(LocalDelivery localDelivery) {
+            return new LocalDeliveryApi(
+                    localDelivery.getUuid(),
+                    localDelivery.getSelector(),
+                    localDeliveryStatusToDeliveryStatusApi(localDelivery.getStatus()),
+                    localDeliveryEndpointSetToEndpointApiSet(localDelivery.getEndpoints()),
+                    localDelivery.getDescription(),
+                    localDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp())
+            );
+    }
 
     public List<NeighbourSubscriptionApi> neighbourSubscriptionSetToNeighbourSubscriptionApiList(Set<NeighbourSubscription> neighbourSubscriptions) {
         List<NeighbourSubscriptionApi> neighbourSubscriptionApiList = new ArrayList<>();
