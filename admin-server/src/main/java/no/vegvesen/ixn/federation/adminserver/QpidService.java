@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -49,7 +51,7 @@ public class QpidService {
         return String.format("(%s) AND (%s)", firstSelector, secondSelector);
     }
 
-    public List<LocalDeliveryEndpointApi> localDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
+    public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
         Set<LocalDeliveryEndpointApi> endpointApiSet = new HashSet<>();
         if (serviceProvider.hasDeliveries()) {
             for (LocalDeliveryEndpoint endpoint : serviceProvider.getDelivery(deliveryId).getEndpoints()) {
@@ -91,6 +93,35 @@ public class QpidService {
             }
         }
         return toCapabilitiesLinkedDeliveryApi(capabilityMatches, deliveryId);
+    }
+
+    public List<CapabilityApi> capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
+        Capability capability = serviceProvider.getCapability(capabilityId);
+
+        List<CapabilityApi> capabilityApiList = new ArrayList<>();
+            capabilityApiList.add(new CapabilityApi(
+                    capability.getApplication().toApi(),
+                    capability.getMetadata().toApi(),
+                    capabilityShardSetToCapabilityShardSetApi(capability.getShards())
+            ));
+
+        return capabilityApiList.stream().sorted().toList();
+    }
+
+    public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
+        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+        for (CapabilityShard capabilityShard : capabilityShards) {
+            capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
+        }
+        return capabilityShardApiSet;
+    }
+
+    public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
+        return new CapabilityShardApi(
+                capabilityShard.getShardId(),
+                capabilityShard.getExchangeName(),
+                capabilityShard.getSelector()
+        );
     }
 
     public List<CapabilitiesLinkedDeliveryApi> toCapabilitiesLinkedDeliveryApi(List<CapabilityMatchApi> matches, String deliveryId) {
