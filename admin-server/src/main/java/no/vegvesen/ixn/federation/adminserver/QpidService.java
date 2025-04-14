@@ -107,13 +107,11 @@ public class QpidService {
     }
 
 
-    public List<CapabilityApi> capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
+    public List<AdminQpidCapabilityApi> capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
         Capability capability = serviceProvider.getCapability(capabilityId);
 
-        List<CapabilityApi> capabilityApiList = new ArrayList<>();
-        capabilityApiList.add(new CapabilityApi(
-                capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
+        List<AdminQpidCapabilityApi> capabilityApiList = new ArrayList<>();
+        capabilityApiList.add(new AdminQpidCapabilityApi(
                 toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId)))
         ));
 
