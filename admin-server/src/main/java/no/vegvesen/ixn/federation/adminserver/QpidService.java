@@ -93,29 +93,19 @@ public class QpidService {
         return toCapabilitiesLinkedDeliveryApi(capabilityMatches, deliveryId);
     }
 
-    public List<CapabilityApi> capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
+    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
         Capability capability = serviceProvider.getCapability(capabilityId);
-
-        List<CapabilityApi> capabilityApiList = new ArrayList<>();
-            capabilityApiList.add(new CapabilityApi(
+        return new CapabilityApi(
                     capability.getApplication().toApi(),
                     capability.getMetadata().toApi(),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards())
-            ));
-
-        return capabilityApiList.stream().sorted().toList();
+            );
     }
 
-
-    public List<AdminQpidCapabilityApi> capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
+    public CapabilityShardIdApi capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
         Capability capability = serviceProvider.getCapability(capabilityId);
 
-        List<AdminQpidCapabilityApi> capabilityApiList = new ArrayList<>();
-        capabilityApiList.add(new AdminQpidCapabilityApi(
-                toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId)))
-        ));
-
-        return capabilityApiList.stream().sorted().toList();
+        return new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId))));
     }
 
     public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
