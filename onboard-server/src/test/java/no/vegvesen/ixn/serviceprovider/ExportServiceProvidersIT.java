@@ -63,7 +63,7 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
                         )
                 )
         );
-        serviceProvider.setSubscriptions(Collections.singleton(
+        serviceProvider.setSubscriptions(List.of(
                 new LocalSubscription(
                         LocalSubscriptionStatus.CREATED,
                         "originatingCountry = 'NO' and messageType = 'DENM'",
