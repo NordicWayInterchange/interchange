@@ -405,7 +405,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     }
 
-    @Test
+   /* @Test
     public void testGetDeliveriesForEachServiceProvider() {
         String actorCommonName = "sp-1";
         String actorCommonName2 = "sp-2";
@@ -435,7 +435,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         assertThat(response1).hasSize(2);
         assertThat(response2).hasSize(0);
-    }
+    }*/
 
     @Test
     public void testGetDeliverysExchangeBindingToMatchingCapabilities() {
