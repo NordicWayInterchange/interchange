@@ -1,12 +1,10 @@
 package no.vegvesen.ixn.napcore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
+import no.vegvesen.ixn.federation.api.v1_0.ValidationErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,16 +59,8 @@ public class NapServerErrorAdvice {
     }
 
     @ExceptionHandler({CapabilityNotValidException.class})
-    public ResponseEntity<ObjectNode> handleCapabilityNotValidException(CapabilityNotValidException e) {
-        ObjectMapper mapper = new ObjectMapper();
-
-        ObjectNode response = mapper.createObjectNode();
-        response.put("timestamp", LocalDateTime.now().toString());
-        response.put("errorCode", HttpStatus.BAD_REQUEST.toString());
-        response.put("message", e.getMessage());
-        response.set("errors", mapper.valueToTree(e.getErrors()));
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorDetails> handleNotValidException(CapabilityNotValidException e) {
+        return notValidCapabilityError(e, e.getErrors());
     }
 
     @ExceptionHandler({NotFoundException.class})
@@ -110,4 +100,14 @@ public class NapServerErrorAdvice {
         return new ResponseEntity<>(errorDetails, status);
     }
 
+    private ResponseEntity<ErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
+        ValidationErrorDetails errorDetails = new ValidationErrorDetails(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.toString(),
+                e.getMessage(),
+                validationErrors
+        );
+        logger.error("Error in interchange server. ", e);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
 }
