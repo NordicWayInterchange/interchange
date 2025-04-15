@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;

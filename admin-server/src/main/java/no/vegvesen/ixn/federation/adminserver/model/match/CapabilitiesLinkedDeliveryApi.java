@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.qpid;
+package no.vegvesen.ixn.federation.adminserver.model.match;
 
 public class CapabilitiesLinkedDeliveryApi {
 
