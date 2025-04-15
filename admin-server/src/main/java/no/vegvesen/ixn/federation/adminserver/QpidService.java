@@ -47,6 +47,10 @@ public class QpidService {
         }
     }
 
+    public String joinTwoSelectors(String firstSelector, String secondSelector) {
+        return String.format("(%s) AND (%s)", firstSelector, secondSelector);
+    }
+
     public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
         List<LocalDeliveryEndpointApi> endpointApiList = new ArrayList<>();
 
@@ -95,7 +99,9 @@ public class QpidService {
                                     binding = exchange.getBindingTo(queueName);
                                     exists = binding != null;
                                 } else {
-                                    binding = null;
+
+                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                    binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
                                     exists = false;
                                 }
                                 CapabilityMatchApi matchApi = new CapabilityMatchApi(
