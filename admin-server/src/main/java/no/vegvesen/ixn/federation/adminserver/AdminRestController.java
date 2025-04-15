@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeli
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
+import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -297,14 +298,27 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
-    public CapabilityShardIdApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
-                                                                             @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
+    public CapabilityShardAdminApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                                @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
         logger.info("Log - List capabilities that a delivery is connected to based on capabilityId and shardId. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(serviceProvider, deliveryId, capabilityId, shardId);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        if (delivery == null) {
+            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
+        OutgoingMatch matchedByCapabilityUuid = outgoingMatchRepository.findAllByCapability_Uuid(capabilityId);
+
+        if (matchedByCapabilityUuid == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId);
+        }
+
+        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityUuid, shardId);
     }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
