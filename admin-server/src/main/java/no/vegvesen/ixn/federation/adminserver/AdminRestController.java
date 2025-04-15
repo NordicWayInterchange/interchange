@@ -255,13 +255,17 @@ public class AdminRestController {
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
         }
-        OutgoingMatch matchedByCapabilityUuid = outgoingMatchRepository.findAllByCapability_Uuid(capabilityId);
+        Capability capability = serviceProvider.getCapability(capabilityId);
+        if (capability == null) {
+            throw new NotFoundException("Capability with id " + capabilityId + " not found");
+        }
+        OutgoingMatch matchedByCapabilityAndDelivery = outgoingMatchRepository.findByCapability_UuidAndLocalDelivery_Uuid(capabilityId, deliveryId);
 
-        if (matchedByCapabilityUuid == null) {
-            throw new NotFoundException("No match found for capability with" + capabilityId);
+        if (matchedByCapabilityAndDelivery == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityUuid);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(delivery, matchedByCapabilityAndDelivery);
     }
 
 
@@ -280,13 +284,13 @@ public class AdminRestController {
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
         }
-        OutgoingMatch matchedByCapabilityUuid = outgoingMatchRepository.findAllByCapability_Uuid(capabilityId);
+        OutgoingMatch matchedByCapabilityAndDelivery = outgoingMatchRepository.findByCapability_UuidAndLocalDelivery_Uuid(capabilityId, deliveryId);
 
-        if (matchedByCapabilityUuid == null) {
-            throw new NotFoundException("No match found for capability with" + capabilityId);
+        if (matchedByCapabilityAndDelivery == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityUuid, shardId);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityAndDelivery, shardId);
     }
 
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {

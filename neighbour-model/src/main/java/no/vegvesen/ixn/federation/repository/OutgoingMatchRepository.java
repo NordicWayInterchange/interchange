@@ -24,4 +24,6 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
     OutgoingMatch findByCapability_Id(Integer id);
 
     OutgoingMatch findByCapability_IdAndLocalDelivery_Id(Integer capabilityId, Integer localDeliveryId);
+
+    OutgoingMatch findByCapability_UuidAndLocalDelivery_Uuid(String capabilityUuid, String localDeliveryUuid);
 }
