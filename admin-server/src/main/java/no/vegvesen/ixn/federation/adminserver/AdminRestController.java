@@ -178,10 +178,8 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List delivery ids for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         return typeTransformer.getDeliveryIds(serviceProvider.getDeliveries());
     }
 
@@ -192,10 +190,8 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List deliveries for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider with name " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
 
         return typeTransformer.localDeliveryToDeliveriesApi(localDelivery);
@@ -207,15 +203,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
-        if (delivery == null) {
-            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
-        }
+        deliveryExists(deliveryId, delivery);
         return qpidService.getLocalDeliveryEndpointApiList(delivery);
     }
 
@@ -225,16 +216,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
-        if (delivery == null) {
-            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
-        }
+        deliveryExists(deliveryId, delivery);
         List<OutgoingMatch> allByLocalDeliveryUuid = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
         return qpidService.getCapabilitiesLinkedDelivery(delivery, allByLocalDeliveryUuid);
     }
@@ -247,14 +232,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List capabilities that a delivery is connected to based on capabilityId. For service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
-        if (delivery == null) {
-            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
-        }
+        deliveryExists(deliveryId, delivery);
         Capability capability = serviceProvider.getCapability(capabilityId);
         if (capability == null) {
             throw new NotFoundException("Capability with id " + capabilityId + " not found");
@@ -268,7 +249,6 @@ public class AdminRestController {
         return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(delivery, matchedByCapabilityAndDelivery);
     }
 
-
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
     public CapabilityShardAdminApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
                                                                                 @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
@@ -276,14 +256,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List capabilities that a delivery is connected to based on capabilityId and shardId. For service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
-        if (delivery == null) {
-            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
-        }
+        deliveryExists(deliveryId, delivery);
         OutgoingMatch matchedByCapabilityAndDelivery = outgoingMatchRepository.findByCapability_UuidAndLocalDelivery_Uuid(capabilityId, deliveryId);
 
         if (matchedByCapabilityAndDelivery == null) {
@@ -291,6 +267,20 @@ public class AdminRestController {
         }
 
         return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityAndDelivery, shardId);
+    }
+
+    private ServiceProvider serviceProviderExists(String actorCommonName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+        return serviceProvider;
+    }
+
+    private static void deliveryExists(String deliveryId, LocalDelivery delivery) {
+        if (delivery == null) {
+            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
     }
 
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
