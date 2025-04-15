@@ -105,7 +105,7 @@ public class QpidService {
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
 
-    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
+    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(LocalDelivery delivery, OutgoingMatch match) {
         Capability capability = match.getCapability();
         return new CapabilityApi(
                 capability.getApplication().toApi(),
