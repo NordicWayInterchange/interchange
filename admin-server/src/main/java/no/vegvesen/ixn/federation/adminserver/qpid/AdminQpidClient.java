@@ -55,30 +55,24 @@ public class AdminQpidClient {
 
     private final String exchangesURL;
     private final String queuesURL;
-    private final String pingURL;
     private final String groupsUrl;
     private final RestTemplate restTemplate;
     private final String aclRulesUrl;
     private final String allQueuesUrl;
     private final String allExchangesUrl;
-    private final String queryEngineApiUrl;
     private final String connectionUrl;
-    private final String queryApiUrl;
 
     public AdminQpidClient(String baseUrl,
                            String vhostName,
                            RestTemplate restTemplate) {
         this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
         this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
-        this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
         this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
         this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
         this.restTemplate = restTemplate;
         this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
         this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
-        this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN, baseUrl);
         this.connectionUrl = String.format(CONNECTION_URL_PATTERN, baseUrl);
-        this.queryApiUrl = String.format(QUERY_API_PATTERN, baseUrl);
     }
 
     /**
