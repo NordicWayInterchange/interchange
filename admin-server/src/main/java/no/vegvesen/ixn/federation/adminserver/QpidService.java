@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -88,16 +90,16 @@ public class QpidService {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
-                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
-                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
-                                    Binding binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
-                                    CapabilityMatchApi matchApi = new CapabilityMatchApi(
-                                            capability.getUuid(),
-                                            shard.getShardId(),
-                                            binding
-                                    );
-                                    capabilityMatches.add(matchApi);
-                                }
+                                boolean exists = bindingExists(endpoint.getTarget(), shard.getExchangeName());
+                                String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                                Binding binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
+                                CapabilityMatchApi matchApi = new CapabilityMatchApi(
+                                        capability.getUuid(),
+                                        shard.getShardId(),
+                                        binding,
+                                        exists
+                                );
+                                capabilityMatches.add(matchApi);
                             }
                         }
                     }

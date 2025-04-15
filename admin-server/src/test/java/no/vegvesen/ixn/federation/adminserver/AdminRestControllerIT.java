@@ -5,7 +5,8 @@ import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateCh
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -459,7 +460,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
                 aCap1.getUuid(),
                 1,
-                new Binding("exchange", "queueName", new Filter("publicationId = 'pub-1'"))
+                new Binding("exchange", "queueName", new Filter("publicationId = 'pub-1'")),
+                true
         );
 
         capabilitiesLinkedDeliveryApiList.add(new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), capabilityMatchApi));
