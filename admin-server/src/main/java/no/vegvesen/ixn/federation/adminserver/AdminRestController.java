@@ -16,6 +16,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.LocalDelivery;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.OutgoingMatch;
 import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -208,7 +209,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List delivery ids for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
         return typeTransformer.getDeliveryIds(serviceProvider.getDeliveries());
     }
 
@@ -219,7 +223,10 @@ public class AdminRestController {
         validatePathVariable(adminUser);
 
         logger.info("Log - List deliveries for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider with name " + actorCommonName + " not found");
+        }
         LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
 
         return typeTransformer.localDeliveryToDeliveriesApi(localDelivery);
@@ -232,6 +239,7 @@ public class AdminRestController {
 
         logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        //TODO the serviceprovider might not be found
         return qpidService.getLocalDeliveryEndpointApiList(serviceProvider, deliveryId);
     }
 
@@ -242,11 +250,13 @@ public class AdminRestController {
 
         logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        //TODO the serviceprovider might not be found
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
         }
-        return qpidService.getCapabilitiesLinkedDelivery(delivery, outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId));
+        List<OutgoingMatch> allByLocalDeliveryUuid = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
+        return qpidService.getCapabilitiesLinkedDelivery(delivery, allByLocalDeliveryUuid);
     }
 
 
