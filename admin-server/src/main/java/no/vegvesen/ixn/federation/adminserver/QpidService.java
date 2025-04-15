@@ -79,45 +79,38 @@ public class QpidService {
         return endpointApiList;
     }
 
-    public List<CapabilitiesLinkedDeliveryApi> getCapabilitiesLinkedDelivery(ServiceProvider serviceProvider, String deliveryId) {
+    public CapabilitiesLinkedDeliveryApi getCapabilitiesLinkedDelivery(LocalDelivery delivery, List<OutgoingMatch> matches) {
+        String uuid = delivery.getUuid();
         List<CapabilityMatchApi> capabilityMatches = new ArrayList<>();
+        for (OutgoingMatch match : matches) {
+            Capability capability = match.getCapability();
+            for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                for (CapabilityShard shard : capability.getShards()) {
+                    boolean exists;
+                    String exchangeName = endpoint.getTarget();
+                    String queueName = shard.getExchangeName();
+                    Exchange exchange = adminQpidClient.getExchange(exchangeName);
+                    Binding binding;
+                    if (exchange != null) {
+                        binding = exchange.getBindingTo(queueName);
+                        exists = binding != null;
+                    } else {
 
-        if (serviceProvider.hasDeliveries()) {
-            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                   List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
-                    for (OutgoingMatch match : matches) {
-                        Capability capability = match.getCapability();
-                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                            for (CapabilityShard shard : capability.getShards()) {
-                                boolean exists;
-                                String exchangeName = endpoint.getTarget();
-                                String queueName = shard.getExchangeName();
-                                Exchange exchange = adminQpidClient.getExchange(exchangeName);
-                                Binding binding;
-                                if (exchange != null) {
-                                    binding = exchange.getBindingTo(queueName);
-                                    exists = binding != null;
-                                } else {
-
-                                    String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
-                                    binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
-                                    exists = false;
-                                }
-                                CapabilityMatchApi matchApi = new CapabilityMatchApi(
-                                        capability.getUuid(),
-                                        shard.getShardId(),
-                                        binding,
-                                        exists
-                                );
-                                capabilityMatches.add(matchApi);
-                            }
-                        }
+                        String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
+                        binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
+                        exists = false;
                     }
+                    CapabilityMatchApi matchApi = new CapabilityMatchApi(
+                            capability.getUuid(),
+                            shard.getShardId(),
+                            binding,
+                            exists
+                    );
+                    capabilityMatches.add(matchApi);
                 }
             }
         }
-        return toCapabilitiesLinkedDeliveryApi(capabilityMatches, deliveryId);
+        return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
 
     public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
@@ -201,15 +194,6 @@ public class QpidService {
         );
     }
 
-    public List<CapabilitiesLinkedDeliveryApi> toCapabilitiesLinkedDeliveryApi(List<CapabilityMatchApi> matches, String deliveryId) {
-        List<CapabilitiesLinkedDeliveryApi> result = new ArrayList<>();
-
-        for (CapabilityMatchApi match : matches) {
-            CapabilitiesLinkedDeliveryApi api = new CapabilitiesLinkedDeliveryApi(deliveryId, match);
-            result.add(api);
-        }
-        return result;
-    }
 
     public List<Exchange> getAllExchanges() {
         try {
