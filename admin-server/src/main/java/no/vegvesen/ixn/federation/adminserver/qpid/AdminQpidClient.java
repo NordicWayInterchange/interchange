@@ -20,14 +20,6 @@ import java.util.List;
 @ConfigurationPropertiesScan
 public class AdminQpidClient {
 
-    public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
-
-    public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
-
-    public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
-
-    public static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
-
     public final static long MAX_TTL_15_MINUTES = 900_000L;
 
     private final Logger logger = LoggerFactory.getLogger(AdminQpidClient.class);
@@ -40,39 +32,20 @@ public class AdminQpidClient {
 
     public static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 
-    private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
-
-    private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
-
-    private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
-
-    private static final String CONNECTION_URL_PATTERN = "%s/api/latest/connection";
-
-    private static final String QUERY_ENGINE_API_PATTERN = "%s/api/latest/querybroker/broker";
-
-    //TODO this might be more configurable, since the 'connection' part is a configured object
-    private static final String QUERY_API_PATTERN = "%s/api/latest/querybroker";
-
     private final String exchangesURL;
     private final String queuesURL;
-    private final String groupsUrl;
     private final RestTemplate restTemplate;
-    private final String aclRulesUrl;
     private final String allQueuesUrl;
     private final String allExchangesUrl;
-    private final String connectionUrl;
 
     public AdminQpidClient(String baseUrl,
                            String vhostName,
                            RestTemplate restTemplate) {
         this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
         this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
-        this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
-        this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
         this.restTemplate = restTemplate;
-        this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
-        this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
-        this.connectionUrl = String.format(CONNECTION_URL_PATTERN, baseUrl);
+        this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl);
+        this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl);
     }
 
     /**
