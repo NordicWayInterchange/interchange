@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeli
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
+import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -113,23 +114,11 @@ public class QpidService {
         );
     }
 
-    public CapabilityShardIdApi capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
-        if (serviceProvider.hasDeliveries()) {
-            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
-                    for (OutgoingMatch match : matches) {
-                        Capability capability = match.getCapability();
-                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                            for (CapabilityShard shard : capability.getShards()) {
-                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
-                                    return new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId))));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    public CapabilityShardAdminApi capabilitiesMatchedDeliveryBasedOnShardId(LocalDelivery delivery, OutgoingMatch match, String shardId) {
+        Capability capability = match.getCapability();
+        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+            String exchangeName = endpoint.getTarget();
+            return new CapabilityShardAdminApi(new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId)))), exchangeName != null);
         }
         return null;
     }
