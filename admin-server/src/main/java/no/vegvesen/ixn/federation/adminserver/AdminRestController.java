@@ -11,7 +11,6 @@ import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
-import no.vegvesen.ixn.federation.adminserver.qpid.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
@@ -240,7 +239,10 @@ public class AdminRestController {
 
         logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        //TODO the serviceprovider might not be found
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
@@ -255,7 +257,11 @@ public class AdminRestController {
 
         logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        //TODO the serviceprovider might not be found
+
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
@@ -273,7 +279,20 @@ public class AdminRestController {
 
         logger.info("Log - List capabilities that a delivery is connected to based on capabilityId. For service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(serviceProvider, deliveryId, capabilityId);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        if (delivery == null) {
+            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
+        OutgoingMatch matchedByCapabilityUuid = outgoingMatchRepository.findAllByCapability_Uuid(capabilityId);
+
+        if (matchedByCapabilityUuid == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId);
+        }
+
+        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityUuid);
     }
 
 

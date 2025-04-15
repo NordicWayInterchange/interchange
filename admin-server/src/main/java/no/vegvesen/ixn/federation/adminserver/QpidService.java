@@ -104,31 +104,13 @@ public class QpidService {
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
 
-    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(ServiceProvider serviceProvider, String deliveryId, String capabilityId) {
-
-        if (serviceProvider.hasDeliveries()) {
-            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
-                    for (OutgoingMatch match : matches) {
-                        Capability capability = match.getCapability();
-                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                            for (CapabilityShard shard : capability.getShards()) {
-                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
-                                    return new CapabilityApi(
-                                            capability.getApplication().toApi(),
-                                            capability.getMetadata().toApi(),
-                                            capabilityShardSetToCapabilityShardSetApi(capability.getShards())
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
+    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
+        Capability capability = match.getCapability();
+        return new CapabilityApi(
+                capability.getApplication().toApi(),
+                capability.getMetadata().toApi(),
+                capabilityShardSetToCapabilityShardSetApi(capability.getShards())
+        );
     }
 
     public CapabilityShardIdApi capabilitiesMatchedDeliveryBasedOnShardId(ServiceProvider serviceProvider, String deliveryId, String capabilityId, String shardId) {
