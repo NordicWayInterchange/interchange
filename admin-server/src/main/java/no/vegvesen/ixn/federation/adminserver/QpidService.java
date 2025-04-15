@@ -47,10 +47,6 @@ public class QpidService {
         }
     }
 
-    public String joinTwoSelectors(String firstSelector, String secondSelector) {
-        return String.format("(%s) AND (%s)", firstSelector, secondSelector);
-    }
-
     public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
         List<LocalDeliveryEndpointApi> endpointApiList = new ArrayList<>();
 
@@ -90,9 +86,18 @@ public class QpidService {
                         Capability capability = match.getCapability();
                         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                             for (CapabilityShard shard : capability.getShards()) {
-                                boolean exists = bindingExists(endpoint.getTarget(), shard.getExchangeName());
-                                String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
-                                Binding binding = new Binding(shard.getExchangeName(), endpoint.getTarget(), new Filter(joinedSelector));
+                                boolean exists;
+                                String exchangeName = endpoint.getTarget();
+                                String queueName = shard.getExchangeName();
+                                Exchange exchange = adminQpidClient.getExchange(exchangeName);
+                                Binding binding;
+                                if (exchange != null) {
+                                    binding = exchange.getBindingTo(queueName);
+                                    exists = binding != null;
+                                } else {
+                                    binding = null;
+                                    exists = false;
+                                }
                                 CapabilityMatchApi matchApi = new CapabilityMatchApi(
                                         capability.getUuid(),
                                         shard.getShardId(),
