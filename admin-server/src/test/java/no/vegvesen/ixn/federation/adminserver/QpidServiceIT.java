@@ -167,8 +167,8 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         client.addBinding("exchange", new Binding("exchange", queueName, new Filter(selector)));
 
-        List<CapabilitiesLinkedDeliveryApi> response1 = service.getCapabilitiesLinkedDelivery(aServiceProvider, delivery.getUuid());
-        assertThat(response1).isNotEmpty();
+        CapabilitiesLinkedDeliveryApi response1 = service.getCapabilitiesLinkedDelivery(delivery, mockMatches);
+        assertThat(response1.capabilityMatchApi()).isNotEmpty();
     }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {

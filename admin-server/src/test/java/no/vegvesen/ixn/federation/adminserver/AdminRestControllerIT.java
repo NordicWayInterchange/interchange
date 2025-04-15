@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @Autowired
     AdminRestController restController;
@@ -266,23 +270,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }*/
 
     @Test
-    public void testGetDeliverysExchangeBindingToMatchingCapabilities() {
+    public void testGetDeliveriesExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String adminUser = "adminUser";
+        CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
         Capability aCap1 = new Capability(
+                "uuid",
                 new DatexApplication("DK12345","DK12345:publication-id","NO","1", List.of("1"), "type","name"),
-                new Metadata()
+                new Metadata(),
+                List.of(shard)
         );
 
-        CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
-        aCap1.setShards(Collections.singletonList(shard));
-
-        LocalDelivery aDelivery = new LocalDelivery();
-
-        ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
-        serviceProviderRepository.save(aServiceProvider);
-
-        List<CapabilitiesLinkedDeliveryApi> capabilitiesLinkedDeliveryApiList = new ArrayList<>();
 
         CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
                 aCap1.getUuid(),
@@ -290,9 +288,30 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 new Binding("exchange", "queueName", new Filter("publicationId = 'pub-1'")),
                 true
         );
+        LocalDelivery aDelivery = new LocalDelivery();
 
-        capabilitiesLinkedDeliveryApiList.add(new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), capabilityMatchApi));
-        when(qpidService.getCapabilitiesLinkedDelivery(aServiceProvider, aDelivery.getUuid())).thenReturn(capabilitiesLinkedDeliveryApiList);
-        assertThat(restController.getDeliverysExchangeBindingToMatchingCapabilities(adminUser, serviceProviderName, aDelivery.getUuid())).isNotEmpty();
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(Set.of(aCap1)),
+                Set.of(),
+                Set.of(aDelivery),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(aServiceProvider);
+        OutgoingMatch match = new OutgoingMatch(aDelivery,aCap1,serviceProviderName);
+        outgoingMatchRepository.save(match);
+
+        CapabilitiesLinkedDeliveryApi result = new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), List.of(capabilityMatchApi));
+        when(qpidService.getCapabilitiesLinkedDelivery(aDelivery, List.of(match))).thenReturn(result);
+        assertThat(
+                restController
+                        .getDeliveriesExchangeBindingToMatchingCapabilities(
+                                adminUser,
+                                serviceProviderName,
+                                aDelivery.getUuid()
+                        )
+                        .capabilityMatchApi()
+        )
+                .isNotEmpty();
     }
 }
