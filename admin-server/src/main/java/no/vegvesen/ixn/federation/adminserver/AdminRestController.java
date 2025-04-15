@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
@@ -201,14 +202,18 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/endpoints")
-    public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+    public List<LocalDeliveryEndpointAdminApi> getLocalDeliveryEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
         logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         //TODO the serviceprovider might not be found
-        return qpidService.getLocalDeliveryEndpointApiList(serviceProvider, deliveryId);
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        if (delivery == null) {
+            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
+        return qpidService.getLocalDeliveryEndpointApiList(delivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")

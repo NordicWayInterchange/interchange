@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -229,11 +231,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         List<MatchingCapabilityApi> response1 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, "originatingCountry='SE'");
         List<MatchingCapabilityApi> response2 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName, selector);
-        List<MatchingCapabilityApi> response3 = restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector);
+        assertThatThrownBy(() -> restController.getMatchingDeliveryCapabilities(adminUser, actorCommonName2, selector)).isInstanceOf(NotFoundException.class);
 
          assertThat(response1).hasSize(0);
          assertThat(response2).hasSize(1);
-         assertThat(response3).hasSize(0);
 
     }
 
