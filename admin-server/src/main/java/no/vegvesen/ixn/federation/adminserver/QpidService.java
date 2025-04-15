@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
@@ -51,32 +52,22 @@ public class QpidService {
         return String.format("(%s) AND (%s)", firstSelector, secondSelector);
     }
 
-    public List<LocalDeliveryEndpointApi> getLocalDeliveryEndpointApiList(ServiceProvider serviceProvider, String deliveryId) {
-        List<LocalDeliveryEndpointApi> endpointApiList = new ArrayList<>();
+    public List<LocalDeliveryEndpointAdminApi> getLocalDeliveryEndpointApiList(LocalDelivery delivery) {
+        List<LocalDeliveryEndpointAdminApi> result = new ArrayList<>();
+        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+            Exchange exchange = adminQpidClient.getExchange(endpoint.getTarget());
+            result.add(new LocalDeliveryEndpointAdminApi(
+                    new LocalDeliveryEndpointApi(
+                            endpoint.getHost(),
+                            endpoint.getPort(),
+                            endpoint.getTarget()
+                    ),
+                    exchange != null
+                    )
+            );
 
-        if (serviceProvider.hasDeliveries()) {
-            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
-                    for (OutgoingMatch match : matches) {
-                        Capability capability = match.getCapability();
-                        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                            for (CapabilityShard shard : capability.getShards()) {
-                                if (bindingExists(endpoint.getTarget(), shard.getExchangeName())) {
-                                    LocalDeliveryEndpointApi localDeliveryEndpointApi = new LocalDeliveryEndpointApi(
-                                            endpoint.getHost(),
-                                            endpoint.getPort(),
-                                            endpoint.getTarget()
-                                    );
-                                    endpointApiList.add(localDeliveryEndpointApi);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
-        return endpointApiList;
+        return result;
     }
 
     public CapabilitiesLinkedDeliveryApi getCapabilitiesLinkedDelivery(LocalDelivery delivery, List<OutgoingMatch> matches) {
