@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
@@ -111,10 +112,8 @@ public class AdminRestController {
         validatePathVariable(actorCommonName);
 
         logger.info("List local capabilities matching delivery for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
-        if (serviceProvider == null) {
-            throw new NotFoundException("Service provider with name " + actorCommonName + " not found");
-        }
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){
             if(!selector.isEmpty()){
@@ -227,7 +226,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
     public CapabilityApi getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
-                                                                 @PathVariable("capabilityId") String capabilityId) {
+                                                                           @PathVariable("capabilityId") String capabilityId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
@@ -246,7 +245,7 @@ public class AdminRestController {
             throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(delivery, matchedByCapabilityAndDelivery);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityAndDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
