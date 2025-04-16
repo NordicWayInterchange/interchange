@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static no.vegvesen.ixn.federation.adminserver.QpidServiceIT.HOST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -444,8 +446,37 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(response1).hasSize(2);
     }
 
+    @Test void testGetLocalDeliveryEndpoints() {
+        String adminUser = "adminUser";
+        String serviceProviderName = "service-provider";
+
+        LocalDelivery aDelivery = new LocalDelivery();
+
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(Set.of()),
+                Set.of(),
+                Set.of(aDelivery),
+                LocalDateTime.now()
+        );
+
+        serviceProviderRepository.save(aServiceProvider);
+
+        LocalDeliveryEndpointApi localDeliveryEndpointApi = new LocalDeliveryEndpointApi(HOST_NAME, 5671, "exchange");
+        List<LocalDeliveryEndpointAdminApi> result = Collections.singletonList(new LocalDeliveryEndpointAdminApi(localDeliveryEndpointApi, true));
+        when(qpidService.getLocalDeliveryEndpointApiList(aDelivery)).thenReturn(result);
+
+        assertThat(
+                restController
+                        .getLocalDeliveryEndpoints(
+                                adminUser,
+                                serviceProviderName,
+                                aDelivery.getUuid()
+                        )).isNotEmpty();
+    }
+
     @Test
-    public void testGetDeliveriessExchangeBindingToMatchingCapabilities() {
+    public void testGetDeliveriesExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String adminUser = "adminUser";
         CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
