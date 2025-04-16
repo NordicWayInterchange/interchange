@@ -218,11 +218,11 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}")
-    public LocalDeliveryApi getDeliveriesForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+    public LocalDeliveryApi getDeliveryForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
-        logger.info("Log - List deliveries for service provider {} for admin user {}", actorCommonName, adminUser);
+        logger.info("Log - Delivery for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
