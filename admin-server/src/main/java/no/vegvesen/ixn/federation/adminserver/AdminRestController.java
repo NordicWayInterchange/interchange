@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
@@ -259,7 +260,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
     public CapabilityApi getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
-                                                                 @PathVariable("capabilityId") String capabilityId) {
+                                                                           @PathVariable("capabilityId") String capabilityId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
@@ -278,7 +279,7 @@ public class AdminRestController {
             throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(delivery, matchedByCapabilityAndDelivery);
+        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityAndDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")

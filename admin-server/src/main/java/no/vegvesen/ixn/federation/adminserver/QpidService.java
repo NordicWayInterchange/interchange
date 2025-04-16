@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -12,7 +11,6 @@ import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +19,11 @@ import java.util.*;
 @Service
 public class QpidService {
 
-
-    private final OutgoingMatchRepository outgoingMatchRepository;
-
     private final AdminQpidClient adminQpidClient;
 
     @Autowired
-    public QpidService(AdminQpidClient adminQpidClient, OutgoingMatchRepository outgoingMatchRepository) {
+    public QpidService(AdminQpidClient adminQpidClient) {
         this.adminQpidClient = adminQpidClient;
-        this.outgoingMatchRepository = outgoingMatchRepository;
     }
 
     public boolean exchangeExists(String exchangeName) {
@@ -105,7 +99,7 @@ public class QpidService {
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
 
-    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(LocalDelivery delivery, OutgoingMatch match) {
+    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
         Capability capability = match.getCapability();
         return new CapabilityApi(
                 capability.getApplication().toApi(),
@@ -134,7 +128,7 @@ public class QpidService {
     public Set<CapabilityShardApi> toCapabilityShardSetApi(Optional<CapabilityShard> capabilityShard) {
         Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
 
-        capabilityShardApiSet.add(optionalCapabilityShardToCapabilityShardApi(capabilityShard));
+        capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
 
         return capabilityShardApiSet;
     }
@@ -147,7 +141,7 @@ public class QpidService {
         );
     }
 
-    public CapabilityShardApi optionalCapabilityShardToCapabilityShardApi(Optional<CapabilityShard> capabilityShard) {
+    public CapabilityShardApi capabilityShardToCapabilityShardApi(Optional<CapabilityShard> capabilityShard) {
         CapabilityShard shard = capabilityShard.orElseThrow(() -> new IllegalArgumentException("CapabilityShard is not present"));
         return new CapabilityShardApi(
                 shard.getShardId(),
