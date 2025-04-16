@@ -9,7 +9,7 @@ See instructions to retrieve all the third party licences [here](#third-party-li
 ### Introduction
 
 The Norwegian National Interchange Node is a node implementing the C-ROADS C-ITS IP based Profile, Improved Interface 
-2.1.o spec by [C-ROADS](https://www.c-roads.eu/)
+2.1.0 spec by [C-ROADS](https://www.c-roads.eu/)
 
 The Node contains a broker (Qpid Broker-J) and several other components to negotiate data exchange with other nodes 
 (interchanges) in the same network over the AMQP(S) 1.0 protocol.
