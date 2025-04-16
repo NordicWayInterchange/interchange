@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.adminserver;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryIdApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -238,8 +240,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     }
 
-   /* @Test
-    public void testGetDeliveriesForEachServiceProvider() {
+    @Test
+    public void testGetDeliveryIdsForEachServiceProvider() {
         String actorCommonName = "sp-1";
         String actorCommonName2 = "sp-2";
         String adminUser = "adminUser";
@@ -257,18 +259,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         bDelivery.setSelector("originatingCountry='SE'");
 
 
-        ServiceProvider bServiceProvider = new ServiceProvider(actorCommonName);
-        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
-        bServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
-        serviceProviderRepository.save(bServiceProvider);
+        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
+        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
+        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
+        serviceProviderRepository.save(aServiceProvider);
 
 
-        List<LocalDeliveryApi> response1 = restController.getDeliveriesForEachServiceProvider(adminUser, actorCommonName);
-        List<LocalDeliveryApi> response2 = restController.getDeliveriesForEachServiceProvider(adminUser, actorCommonName2);
+        List<LocalDeliveryIdApi> response1 = restController.getDeliveryIdsForEachServiceProvider(adminUser, actorCommonName);
+        assertThatThrownBy(() -> restController.getDeliveryIdsForEachServiceProvider(adminUser, actorCommonName2)).isInstanceOf(NotFoundException.class);
 
         assertThat(response1).hasSize(2);
-        assertThat(response2).hasSize(0);
-    }*/
+    }
 
     @Test
     public void testGetDeliveriesExchangeBindingToMatchingCapabilities() {

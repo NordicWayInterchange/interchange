@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -126,7 +127,24 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     }
 
     @Test
-    void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
+    public void testGetLocalDeliveryEndpointApiList() {
+        String selector = "originatingCountry = 'NO'";
+
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
+        LocalDelivery delivery = new LocalDelivery(
+                1,
+                new HashSet<>(Collections.singletonList(endpoint)),
+                selector,
+                LocalDeliveryStatus.CREATED);
+
+        List<LocalDeliveryEndpointAdminApi> response1 = service.getLocalDeliveryEndpointApiList(delivery);
+        System.out.println(response1);
+        assertThat(response1).isNotEmpty();
+
+    }
+
+    @Test
+    public void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
