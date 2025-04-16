@@ -138,9 +138,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 LocalDeliveryStatus.CREATED);
 
         List<LocalDeliveryEndpointAdminApi> response1 = service.getLocalDeliveryEndpointApiList(delivery);
-        System.out.println(response1);
         assertThat(response1).isNotEmpty();
-
     }
 
     @Test

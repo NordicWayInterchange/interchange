@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityAp
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryIdApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
@@ -182,7 +181,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 new NeighbourCapability(
                                         new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
                                                 "situationPublication", "bouvet"),
-                                        new Metadata("https://www.bouvet.no", 1, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
@@ -446,7 +445,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetDeliveriesExchangeBindingToMatchingCapabilities() {
+    public void testGetDeliveriessExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String adminUser = "adminUser";
         CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
