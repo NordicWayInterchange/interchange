@@ -63,7 +63,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         SSLContext sslContext = sslClientContext(stores, CLIENT_USER);
         outgoingMatchRepository = mock(OutgoingMatchRepository.class);
         client = new AdminQpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),createRestTemplate(sslContext));
-        service = new QpidService(client, outgoingMatchRepository);
+        service = new QpidService(client);
     }
 
     @Test
