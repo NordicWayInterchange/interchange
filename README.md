@@ -56,36 +56,8 @@ Messages are typically sent by a Local Actor over AMQPS 1.0 to a broker endpoint
 received by interested parties on either the same or a different broker. Messages are exchanged between brokers by the 
 system.
 
-with a Capability and a matching Delivery over an AMQP endoint. The broker
-has the responsibility to route messages to any subscribing party, either another Actor on the same broker/node, or to 
-other brokers/nodes that has matching subscriptions.
-Messages are typically consumed by a Local Actor with a Subscription matching a Capability either on the same 
-broker/node, or on other brokers/nodes that has a subscription that matches the Capability.
-
-
-Nodes announce the data they can supply in the form of Capabilities, and the data the wish to receive in the form of 
-Subscriptions. When a subscription from one node is found to match a capability of another node, a data channel is 
-established, and the subscribing node can read messages from this channel.
-
-
-
-
-
-
-
-An Interchange network consists of one or more interchanges, registered in the DNS (domain name server).
-Each Interchange has a matching SRV record, which points to the Interchanges' control channel host name and port.
-
-All interchanges must present the message types they produce - capabilities - in this discovery process.
-
-Interchanges also has a set of message types they are interested in - subscriptions. 
-If a neighbour interchange produces a message type we are interested in, we issue a subscription request to the 
-neighbour.
-
-Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the 
-Message collector.
-
-Additional information about the Nordic Way Interchange Node can be found [here](https://www.nordicway.net/).
+Norwegian National Interchange Node was initially developed as a part of the 
+[Nordic Way project](https://www.nordicway.net/).
 
 ### Contact
 For any questions please contact
