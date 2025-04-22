@@ -59,7 +59,7 @@ public class NapServerErrorAdvice {
     }
 
     @ExceptionHandler({CapabilityNotValidException.class})
-    public ResponseEntity<ErrorDetails> handleNotValidException(CapabilityNotValidException e) {
+    public ResponseEntity<ValidationErrorDetails> handleNotValidException(CapabilityNotValidException e) {
         return notValidCapabilityError(e, e.getErrors());
     }
 
@@ -100,10 +100,9 @@ public class NapServerErrorAdvice {
         return new ResponseEntity<>(errorDetails, status);
     }
 
-    private ResponseEntity<ErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
+    private ResponseEntity<ValidationErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
         ValidationErrorDetails errorDetails = new ValidationErrorDetails(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.toString(),
                 e.getMessage(),
                 validationErrors
         );
