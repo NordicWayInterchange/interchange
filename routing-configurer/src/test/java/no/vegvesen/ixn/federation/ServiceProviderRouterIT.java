@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
@@ -684,7 +683,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void exchangeIsSetupForCreatedCapabilityWithoutExchange() throws JsonProcessingException {
+	public void exchangeIsSetupForCreatedCapabilityWithoutExchange(){
 		ServiceProvider sp = new ServiceProvider("serviceProvider");
 		Capability cap = new Capability(
 				new DatexApplication("NO-1234", "NO-pub1","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
@@ -693,8 +692,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		cap.setStatus(CapabilityStatus.CREATED);
 		sp.getCapabilities().addCapability(cap);
 		router.setUpCapabilityExchanges(sp, client.getQpidDelta());
-		assertThat(client.getAllExchanges()).hasSize(2);
+		for(int i = 0; i < cap.getMetadata().getShardCount(); i++){
+			assertThat(client.getExchange("cap-"+cap.getUuid()+ "-" + i+1)).isNotNull();
+		}
 	}
+
 	@Test
 	public void doSetUpQueueWhenSubscriptionHasConsumerCommonNameSameAsIxnNameAndServiceProviderName() {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
