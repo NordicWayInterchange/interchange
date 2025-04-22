@@ -9,6 +9,8 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnect
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
+import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -19,6 +21,7 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -417,6 +420,53 @@ public class TypeTransformer {
 
     public CapabilitiesStatusApi capabilitiesStatusToCapabilitiesStatusApi(CapabilitiesStatus capabilitiesStatus) {
         return CapabilitiesStatusApi.valueOf(capabilitiesStatus.toString());
+    }
+
+    public no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
+        Capability capability = match.getCapability();
+        return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
+                capability.getApplication().toApi(),
+                capability.getMetadata().toApi(),
+                capabilityShardSetToCapabilityShardSetApi(capability.getShards())
+        );
+    }
+
+    public CapabilityShardAdminApi capabilitiesMatchedDeliveryBasedOnShardId(LocalDelivery delivery, OutgoingMatch match, String shardId) {
+        Capability capability = match.getCapability();
+        CapabilityShard shard = capability.getShard(Integer.valueOf(shardId)).orElse(null);
+
+        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+            String exchangeName = endpoint.getTarget();
+            return new CapabilityShardAdminApi(
+                    new CapabilityShardIdApi(toCapabilityShardSetApi(shard)),
+                    exchangeName != null
+            );
+        }
+
+        return null;
+    }
+
+    public Set<CapabilityShardApi> toCapabilityShardSetApi(CapabilityShard capabilityShard) {
+        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+
+        if (capabilityShard != null) {
+            capabilityShardApiSet.add(transferCapabilityShardToCapabilityShardApi(capabilityShard));
+        }
+
+        return capabilityShardApiSet;
+    }
+
+
+    public CapabilityShardApi transferCapabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
+        if (capabilityShard == null) {
+            throw new IllegalArgumentException("CapabilityShard is not present");
+        }
+
+        return new CapabilityShardApi(
+                capabilityShard.getShardId(),
+                capabilityShard.getExchangeName(),
+                capabilityShard.getSelector()
+        );
     }
 
     private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {

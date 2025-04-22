@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
-import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -98,58 +96,6 @@ public class QpidService {
         }
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
-
-    public CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
-        Capability capability = match.getCapability();
-        return new CapabilityApi(
-                capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
-                capabilityShardSetToCapabilityShardSetApi(capability.getShards())
-        );
-    }
-
-    public CapabilityShardAdminApi capabilitiesMatchedDeliveryBasedOnShardId(LocalDelivery delivery, OutgoingMatch match, String shardId) {
-        Capability capability = match.getCapability();
-        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-            String exchangeName = endpoint.getTarget();
-            return new CapabilityShardAdminApi(new CapabilityShardIdApi(toCapabilityShardSetApi(capability.getShard(Integer.valueOf(shardId)))), exchangeName != null);
-        }
-        return null;
-    }
-
-    public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
-        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
-        for (CapabilityShard capabilityShard : capabilityShards) {
-            capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
-        }
-        return capabilityShardApiSet;
-    }
-
-    public Set<CapabilityShardApi> toCapabilityShardSetApi(Optional<CapabilityShard> capabilityShard) {
-        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
-
-        capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
-
-        return capabilityShardApiSet;
-    }
-
-    public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
-        return new CapabilityShardApi(
-                capabilityShard.getShardId(),
-                capabilityShard.getExchangeName(),
-                capabilityShard.getSelector()
-        );
-    }
-
-    public CapabilityShardApi capabilityShardToCapabilityShardApi(Optional<CapabilityShard> capabilityShard) {
-        CapabilityShard shard = capabilityShard.orElseThrow(() -> new IllegalArgumentException("CapabilityShard is not present"));
-        return new CapabilityShardApi(
-                shard.getShardId(),
-                shard.getExchangeName(),
-                shard.getSelector()
-        );
-    }
-
 
     public List<Exchange> getAllExchanges() {
         try {
