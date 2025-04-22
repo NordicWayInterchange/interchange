@@ -692,8 +692,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		cap.setStatus(CapabilityStatus.CREATED);
 		sp.getCapabilities().addCapability(cap);
 		router.setUpCapabilityExchanges(sp, client.getQpidDelta());
-		for(int i = 0; i < cap.getMetadata().getShardCount(); i++){
-			assertThat(client.getExchange("cap-"+cap.getUuid()+ "-" + i+1)).isNotNull();
+		for(int i = 1; i <= cap.getMetadata().getShardCount(); i++){
+			assertThat(client.getExchange("cap-"+cap.getUuid()+ "-" + i)).isNotNull();
 		}
 	}
 

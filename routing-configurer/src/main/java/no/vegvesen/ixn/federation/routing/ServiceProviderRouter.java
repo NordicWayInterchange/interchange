@@ -335,8 +335,8 @@ public class ServiceProviderRouter {
             if (!capability.hasShards()) {
                 List<CapabilityShard> newShards = new ArrayList<>();
                 int numberOfShards = capability.getMetadata().getShardCount();
-                for (int i = 0; i<numberOfShards; i++) {
-                    String exchangeName = "cap-" + capability.getUuid() + "-" + i+1;
+                for (int i = 1; i<=numberOfShards; i++) {
+                    String exchangeName = "cap-" + capability.getUuid() + "-" + i;
                     Exchange exchange = qpidClient.getExchange(exchangeName);
                     if(exchange == null) {
                         exchange = qpidClient.createHeadersExchange(exchangeName);
@@ -345,7 +345,7 @@ public class ServiceProviderRouter {
 
                         String capabilitySelector;
                         if (capability.isSharded()) {
-                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i + 1);
+                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i);
                         } else {
                             capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                         }
