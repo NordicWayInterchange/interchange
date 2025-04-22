@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
-import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -347,16 +347,16 @@ public class TypeTransformer {
         return neighbourCapabilityApiList.stream().sorted().toList();
     }
 
-    public Set<CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
-        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
+    public Set<no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi> capabilityShardSetToCapabilityShardSetApi(List<CapabilityShard> capabilityShards) {
+        Set<no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
         for (CapabilityShard capabilityShard : capabilityShards) {
             capabilityShardApiSet.add(capabilityShardToCapabilityShardApi(capabilityShard));
         }
         return capabilityShardApiSet;
     }
 
-    public CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
-        return new CapabilityShardApi(
+    public no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
+        return new no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi(
                 capabilityShard.getShardId(),
                 capabilityShard.getExchangeName(),
                 capabilityShard.getSelector()
@@ -391,36 +391,15 @@ public class TypeTransformer {
 
         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
             String exchangeName = endpoint.getTarget();
-            return new CapabilityShardAdminApi(
-                    new CapabilityShardIdApi(toCapabilityShardSetApi(shard)),
-                    exchangeName != null
-            );
+            if (shard != null) {
+                return new CapabilityShardAdminApi(
+                        new CapabilityShardApi(shard.getShardId(), shard.getExchangeName(), shard.getSelector()),
+                        exchangeName != null
+                );
+            }
         }
 
         return null;
-    }
-
-    public Set<CapabilityShardApi> toCapabilityShardSetApi(CapabilityShard capabilityShard) {
-        Set<CapabilityShardApi> capabilityShardApiSet = new HashSet<>();
-
-        if (capabilityShard != null) {
-            capabilityShardApiSet.add(transferCapabilityShardToCapabilityShardApi(capabilityShard));
-        }
-
-        return capabilityShardApiSet;
-    }
-
-
-    public CapabilityShardApi transferCapabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
-        if (capabilityShard == null) {
-            throw new IllegalArgumentException("CapabilityShard is not present");
-        }
-
-        return new CapabilityShardApi(
-                capabilityShard.getShardId(),
-                capabilityShard.getExchangeName(),
-                capabilityShard.getSelector()
-        );
     }
 
     private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {
