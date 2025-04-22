@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.model.shard;
 
-import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardApi;
 
-public record CapabilityShardAdminApi(CapabilityShardIdApi capabilityShardIdApi, boolean exchangeNameExists) {
+public record CapabilityShardAdminApi(CapabilityShardApi capabilityShardIdApi, boolean exchangeNameExists) {
 }
