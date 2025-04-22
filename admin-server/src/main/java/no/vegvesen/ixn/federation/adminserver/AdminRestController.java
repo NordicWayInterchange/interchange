@@ -245,7 +245,7 @@ public class AdminRestController {
             throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityAndDelivery);
+        return typeTransformer.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityAndDelivery);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
@@ -265,7 +265,7 @@ public class AdminRestController {
             throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return qpidService.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityAndDelivery, shardId);
+        return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityAndDelivery, shardId);
     }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
