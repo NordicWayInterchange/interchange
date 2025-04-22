@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
@@ -8,8 +9,8 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -23,7 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -683,6 +683,18 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(cap.getShards().stream().findFirst().get().getSelector().contains("shardId")).isFalse();
 	}
 
+	@Test
+	public void exchangeIsSetupForCreatedCapabilityWithoutExchange() throws JsonProcessingException {
+		ServiceProvider sp = new ServiceProvider("serviceProvider");
+		Capability cap = new Capability(
+				new DatexApplication("NO-1234", "NO-pub1","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
+				new Metadata("infoUrl", 2, RedirectStatus.OPTIONAL, 1, 1, 1)
+		);
+		cap.setStatus(CapabilityStatus.CREATED);
+		sp.getCapabilities().addCapability(cap);
+		router.setUpCapabilityExchanges(sp, client.getQpidDelta());
+		assertThat(client.getAllExchanges()).hasSize(2);
+	}
 	@Test
 	public void doSetUpQueueWhenSubscriptionHasConsumerCommonNameSameAsIxnNameAndServiceProviderName() {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,

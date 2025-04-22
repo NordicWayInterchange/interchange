@@ -330,27 +330,30 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
-        Set<Capability> requestedCaps = serviceProvider.getCapabilities().getCapabilitiesByStatus(CapabilityStatus.REQUESTED);
+        Set<Capability> requestedCaps = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN);
         for (Capability capability : requestedCaps) {
             if (!capability.hasShards()) {
                 List<CapabilityShard> newShards = new ArrayList<>();
                 int numberOfShards = capability.getMetadata().getShardCount();
                 for (int i = 0; i<numberOfShards; i++) {
-                    String exchangeName = "cap-" + UUID.randomUUID();
-                    Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
-                    logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
-                    delta.addExchange(exchange);
+                    String exchangeName = "cap-" + capability.getUuid() + "-" + i+1;
+                    Exchange exchange = qpidClient.getExchange(exchangeName);
+                    if(exchange == null) {
+                        exchange = qpidClient.createHeadersExchange(exchangeName);
+                        logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+                        delta.addExchange(exchange);
 
-                    String capabilitySelector;
-                    if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
-                    } else {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+                        String capabilitySelector;
+                        if (capability.isSharded()) {
+                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i + 1);
+                        } else {
+                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+                        }
+                        CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
+                        newShards.add(newShard);
                     }
-                    CapabilityShard newShard = new CapabilityShard(i+1, exchangeName, capabilitySelector);
-                    newShards.add(newShard);
                 }
-                capability.setShards(newShards);
+                capability.addShards(newShards);
                 capability.setStatus(CapabilityStatus.CREATED);
             } else {
                 for (CapabilityShard shard : capability.getShards()) {
