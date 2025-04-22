@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
 import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -355,11 +356,26 @@ public class TypeTransformer {
         return capabilityShardApiSet;
     }
 
+    public Set<CapabilityShardIdApi> capabilityShardSetToCapabilityShardIdSetApi(List<CapabilityShard> capabilityShards) {
+        Set<CapabilityShardIdApi> capabilityShardApiSet = new HashSet<>();
+        for (CapabilityShard capabilityShard : capabilityShards) {
+            capabilityShardApiSet.add(capabilityShardToCapabilityShardIdApi(capabilityShard));
+        }
+        return capabilityShardApiSet;
+    }
+
+
     public no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
         return new no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi(
                 capabilityShard.getShardId(),
                 capabilityShard.getExchangeName(),
                 capabilityShard.getSelector()
+        );
+    }
+
+    public CapabilityShardIdApi capabilityShardToCapabilityShardIdApi(CapabilityShard capabilityShard) {
+        return new CapabilityShardIdApi(
+                capabilityShard.getShardId()
         );
     }
 
@@ -381,7 +397,7 @@ public class TypeTransformer {
         return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
                 capability.getApplication().toApi(),
                 capability.getMetadata().toApi(),
-                capabilityShardSetToCapabilityShardSetApi(capability.getShards())
+                capabilityShardSetToCapabilityShardIdSetApi(capability.getShards())
         );
     }
 

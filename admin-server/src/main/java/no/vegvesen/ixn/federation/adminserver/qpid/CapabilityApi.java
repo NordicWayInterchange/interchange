@@ -19,9 +19,9 @@ public class CapabilityApi {
     private MetadataApi metadata;
 
 
-    private Set<CapabilityShardApi> shards = new HashSet<>();
+    private Set<CapabilityShardIdApi> shards = new HashSet<>();
 
-    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards) {
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardIdApi> shards) {
         this.application = application;
         this.metadata = metadata;
         this.shards = shards;
@@ -44,11 +44,11 @@ public class CapabilityApi {
     }
 
 
-    public Set<CapabilityShardApi> getShards() {
+    public Set<CapabilityShardIdApi> getShards() {
         return shards;
     }
 
-    public void setShards(Set<CapabilityShardApi> shards) {
+    public void setShards(Set<CapabilityShardIdApi> shards) {
         this.shards.clear();
         if (shards != null) {
             this.shards.addAll(shards);
