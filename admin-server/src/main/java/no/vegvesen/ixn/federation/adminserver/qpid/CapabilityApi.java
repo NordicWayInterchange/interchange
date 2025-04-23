@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver.qpid;
 
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityStatusApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 
@@ -18,13 +16,12 @@ public class CapabilityApi {
 
     private MetadataApi metadata;
 
+    private Set<Integer> shardId = new HashSet<>();
 
-    private Set<CapabilityShardIdApi> shards = new HashSet<>();
-
-    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardIdApi> shards) {
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<Integer> shardId) {
         this.application = application;
         this.metadata = metadata;
-        this.shards = shards;
+        this.shardId = shardId;
     }
 
     public ApplicationApi getApplication() {
@@ -44,23 +41,22 @@ public class CapabilityApi {
     }
 
 
-    public Set<CapabilityShardIdApi> getShards() {
-        return shards;
+    public Set<Integer> getShardId() {
+        return shardId;
     }
 
-    public void setShards(Set<CapabilityShardIdApi> shards) {
-        this.shards.clear();
-        if (shards != null) {
-            this.shards.addAll(shards);
+    public void setShardId(Set<Integer> shardId) {
+        this.shardId.clear();
+        if (shardId != null) {
+            this.shardId.addAll(shardId);
         }
     }
-
 
     public String toString() {
         return "QpidCapabilityApi{" +
                 "application=" + application +
                 ", metadata=" + metadata +
-                ", shards=" + shards +
+                ", shardId=" + shardId +
                 '}';
     }
 }
