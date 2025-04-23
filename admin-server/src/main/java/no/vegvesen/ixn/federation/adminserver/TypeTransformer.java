@@ -18,6 +18,7 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class TypeTransformer {
@@ -352,14 +353,12 @@ public class TypeTransformer {
         return capabilityShardApiSet;
     }
 
-    public Set<CapabilityShardIdApi> capabilityShardSetToCapabilityShardIdSetApi(List<CapabilityShard> capabilityShards) {
-        Set<CapabilityShardIdApi> capabilityShardApiSet = new HashSet<>();
-        for (CapabilityShard capabilityShard : capabilityShards) {
-            capabilityShardApiSet.add(capabilityShardToCapabilityShardIdApi(capabilityShard));
-        }
-        return capabilityShardApiSet;
-    }
+    public Set<Integer> capabilityShardSetToCapabilityShardIdSetApi(List<CapabilityShard> capabilityShards) {
+        return capabilityShards.stream()
+                .map(capabilityShard -> capabilityShardToCapabilityShardIdApi(capabilityShard).getShardId())
+                .collect(Collectors.toSet());
 
+    }
 
     public no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi capabilityShardToCapabilityShardApi(CapabilityShard capabilityShard) {
         return new no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityShardApi(
