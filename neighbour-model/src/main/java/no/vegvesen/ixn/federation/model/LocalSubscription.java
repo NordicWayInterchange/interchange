@@ -203,12 +203,12 @@ public class LocalSubscription {
         LocalSubscription that = (LocalSubscription) o;
         return Objects.equals(selector, that.selector) &&
                 Objects.equals(consumerCommonName, that.consumerCommonName) &&
-                Objects.equals(description, that.description);
+                Objects.equals(uuid, that.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, consumerCommonName, description);
+        return Objects.hash(selector, consumerCommonName, uuid);
     }
 
     @Override
