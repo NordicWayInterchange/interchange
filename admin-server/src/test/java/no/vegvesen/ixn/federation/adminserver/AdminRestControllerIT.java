@@ -4,7 +4,6 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryIdApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -266,7 +265,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(aServiceProvider);
 
 
-        List<LocalDeliveryIdApi> response1 = restController.getDeliveryIdsForEachServiceProvider(adminUser, actorCommonName);
+        List<String> response1 = restController.getDeliveryIdsForEachServiceProvider(adminUser, actorCommonName);
         assertThatThrownBy(() -> restController.getDeliveryIdsForEachServiceProvider(adminUser, actorCommonName2)).isInstanceOf(NotFoundException.class);
 
         assertThat(response1).hasSize(2);

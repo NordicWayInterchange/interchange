@@ -262,15 +262,11 @@ public class TypeTransformer {
         return localConnectionApiSet;
     }
 
-
-    public List<LocalDeliveryIdApi> getDeliveryIds(Set<LocalDelivery> deliveriesSet) {
-        List<LocalDeliveryIdApi> deliveriesApiList = new ArrayList<>();
-        for (LocalDelivery delivery : deliveriesSet) {
-            deliveriesApiList.add(new LocalDeliveryIdApi(
-                    delivery.getUuid()
-            ));
-        }
-        return deliveriesApiList.stream().sorted().toList();
+    public List<String> getDeliveryIds(Set<LocalDelivery> deliveriesSet) {
+        return deliveriesSet.stream()
+                .map(LocalDelivery::getUuid)
+                .sorted()
+                .toList();
     }
 
     public List<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiList(Set<LocalDelivery> deliveriesSet) {
