@@ -141,7 +141,8 @@ public class AdminRestController {
         logger.info("List private channels with actorCommonName as peer for service provider {} for admin user {} where peer name is {}", actorCommonName, adminUser, actorCommonName);
 
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
-        return typeTransformer.PrivateChannelListToPeerPrivateChannelApiList(privateChannels);
+
+        return privateChannels.stream().map(typeTransformer::PrivateChannelListToPeerPrivateChannelApiList).sorted().collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
