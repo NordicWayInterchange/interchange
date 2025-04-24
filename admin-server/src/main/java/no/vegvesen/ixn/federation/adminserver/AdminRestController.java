@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RestController
 public class AdminRestController {
@@ -127,6 +129,19 @@ public class AdminRestController {
         logger.info("List private channels for service provider {} for admin user {}", actorCommonName, adminUser);
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
         return typeTransformer.privateChannelListToPrivateChannelApiList(privateChannels);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels/peer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PeerPrivateChannelApi> getPeerPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("List private channels with actorCommonName as peer for service provider {} for admin user {} where peer name is {}", actorCommonName, adminUser, actorCommonName);
+
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
+        return typeTransformer.PrivateChannelListToPeerPrivateChannelApiList(privateChannels);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")

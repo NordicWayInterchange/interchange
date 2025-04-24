@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelStatusApi;
@@ -112,6 +113,22 @@ public class TypeTransformer {
             ));
         }
         return privateChannelApiList.stream().sorted().toList();
+    }
+
+
+    public List<PeerPrivateChannelApi> PrivateChannelListToPeerPrivateChannelApiList(List<PrivateChannel> privateChannelList) {
+        List<PeerPrivateChannelApi> peerPrivateChannelApiList = new ArrayList<>();
+        for (PrivateChannel privateChannel : privateChannelList) {
+            peerPrivateChannelApiList.add(new PeerPrivateChannelApi(
+                    privateChannel.getUuid(),
+                    privateChannel.getServiceProviderName(),
+                    privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
+                    privateChannel.getDescription(),
+                    privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
+                    localDateTimeToTimestamp(privateChannel.getLastUpdated())
+            ));
+        }
+        return peerPrivateChannelApiList.stream().sorted().toList();
     }
 
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {
