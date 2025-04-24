@@ -5,9 +5,9 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -23,23 +23,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
-import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
+import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -129,7 +126,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -171,7 +168,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 

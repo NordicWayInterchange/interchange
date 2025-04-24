@@ -68,7 +68,7 @@ public class SubscriptionCalculatorTest {
         ServiceProvider aServiceProvider = new ServiceProvider(null,
                 null,
                 new Capabilities(),
-                Collections.emptySet(),
+                List.of(),
                 aprilNano1);
 
 
@@ -76,7 +76,7 @@ public class SubscriptionCalculatorTest {
         ServiceProvider bServiceProvider = new ServiceProvider(null,
                 null,
                 new Capabilities(),
-                Collections.emptySet(),
+                List.of(),
                 aprilNano2);
 
         List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());

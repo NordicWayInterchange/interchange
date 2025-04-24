@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +59,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
                 "my-sp",
                 new Capabilities(
                         Collections.singleton(cap)),
-                new HashSet<>(),
+                new ArrayList<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
         );
@@ -97,7 +94,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
                 "my-sp",
                 new Capabilities(
                         Collections.singleton(cap)),
-                new HashSet<>(),
+                new ArrayList<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
         );
@@ -136,7 +133,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
                 "my-sp",
                 new Capabilities(
                         Collections.singleton(cap)),
-                new HashSet<>(),
+                new ArrayList<>(),
                 new HashSet<>(),
                 LocalDateTime.now()
         );

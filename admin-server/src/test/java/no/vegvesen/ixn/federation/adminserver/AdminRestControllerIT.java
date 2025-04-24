@@ -98,15 +98,15 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGetServiceProviders() {
         String adminUser = "adminUser";
-        Set<LocalSubscription> subscriptionSet = new HashSet<>();
+        List<LocalSubscription> subscriptionList = new ArrayList<>();
         LocalSubscription requestedSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry='NO", "second-node");
-        subscriptionSet.add(requestedSubscription);
-        subscriptionSet.add(createdSubscription);
+        subscriptionList.add(requestedSubscription);
+        subscriptionList.add(createdSubscription);
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(),
-                subscriptionSet,
+                subscriptionList,
                 Collections.emptySet(),
                 LocalDateTime.now()
         );
@@ -183,7 +183,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
 
-        ServiceProvider serviceProvider = new ServiceProvider("sp", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider serviceProvider = new ServiceProvider("sp", new Capabilities(Collections.singleton(cap)), List.of(createdSubscription), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(serviceProvider);
 
