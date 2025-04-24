@@ -116,19 +116,15 @@ public class TypeTransformer {
     }
 
 
-    public List<PeerPrivateChannelApi> PrivateChannelListToPeerPrivateChannelApiList(List<PrivateChannel> privateChannelList) {
-        List<PeerPrivateChannelApi> peerPrivateChannelApiList = new ArrayList<>();
-        for (PrivateChannel privateChannel : privateChannelList) {
-            peerPrivateChannelApiList.add(new PeerPrivateChannelApi(
-                    privateChannel.getUuid(),
-                    privateChannel.getServiceProviderName(),
-                    privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
-                    privateChannel.getDescription(),
-                    privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
-                    localDateTimeToTimestamp(privateChannel.getLastUpdated())
-            ));
-        }
-        return peerPrivateChannelApiList.stream().sorted().toList();
+    public PeerPrivateChannelApi PrivateChannelListToPeerPrivateChannelApiList(PrivateChannel privateChannel) {
+        return new PeerPrivateChannelApi(
+                privateChannel.getUuid(),
+                privateChannel.getServiceProviderName(),
+                privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
+                privateChannel.getDescription(),
+                privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
+                localDateTimeToTimestamp(privateChannel.getLastUpdated())
+        );
     }
 
     public List<ExchangeApi> exchangeListToExchangeApiList(List<Exchange> exchangeList) {

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -22,6 +23,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -258,5 +260,33 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(response1).hasSize(1);
         assertThat(response2).hasSize(1);
         assertThat(response3).hasSize(0);
+    }
+
+
+    @Test
+    public void testGetPrivateChannelsForPeer() {
+        String actorCommonName = "actor-1";
+        String actorCommonName2 = "actor-2";
+        String adminUser = "adminUser";
+
+        PrivateChannel privateChannel1 = new PrivateChannel(new HashSet<>(Set.of(new Peer("PeerOne"))), PrivateChannelStatus.CREATED, "test",
+                new PrivateChannelEndpoint("test", 1337, "test"),
+                actorCommonName);
+        privateChannel1.setLastUpdated(LocalDateTime.now());
+        privateChannelRepository.save(privateChannel1);
+
+
+        PrivateChannel privateChannel2 = new PrivateChannel(new HashSet<>(Set.of(new Peer("PeerTwo"))), PrivateChannelStatus.CREATED, "This is description",
+                new PrivateChannelEndpoint("test", 1337, "test"),
+                actorCommonName2);
+
+        privateChannel2.setLastUpdated(LocalDateTime.now());
+        privateChannelRepository.save(privateChannel2);
+
+        List<PeerPrivateChannelApi> response1 = restController.getPeerPrivateChannels(adminUser, "PeerOne");
+        List<PeerPrivateChannelApi> response2 = restController.getPeerPrivateChannels(adminUser, "PeerTwo");
+
+        assertThat(response1).hasSize(1);
+        assertThat(response2).hasSize(1);
     }
 }
