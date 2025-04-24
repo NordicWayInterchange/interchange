@@ -93,7 +93,7 @@ public class NapRestControllerTest {
                 1,
                 serviceProviderName,
                 new Capabilities(),
-                Collections.singleton(
+                List.of(
                         new LocalSubscription(
                                 1,
                                 LocalSubscriptionStatus.REQUESTED,
@@ -173,7 +173,7 @@ public class NapRestControllerTest {
                 1,
                 serviceProviderName,
                 new Capabilities(),
-                Collections.singleton(
+                List.of(
                     localSubscription
                 ),
                 null
@@ -199,7 +199,7 @@ public class NapRestControllerTest {
                 1,
                 serviceProviderName,
                 new Capabilities(),
-                Collections.emptySet(),
+                List.of(),
                 null
         );
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
@@ -239,7 +239,7 @@ public class NapRestControllerTest {
                 1,
                 serviceProviderName,
                 new Capabilities(),
-                Collections.emptySet(),
+                List.of(),
                 null
         );
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
@@ -264,7 +264,7 @@ public class NapRestControllerTest {
         ServiceProvider serviceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(),
-                Set.of(),
+                List.of(),
                 Set.of(),
                 null
         );
@@ -356,7 +356,7 @@ public class NapRestControllerTest {
                 1,
                 actorCommonName,
                 new Capabilities(Set.of(capability)),
-                Set.of(),
+                List.of(),
                 null
         ));
         when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(

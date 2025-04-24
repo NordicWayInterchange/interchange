@@ -588,7 +588,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider(
 				serviceProviderName,
-				Collections.singleton(localSubscription)
+				List.of(localSubscription)
 		);
 
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
@@ -1094,7 +1094,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"no-change-for-requested-delivery-sp",
 				new Capabilities(),
-				Collections.emptySet(),
+				List.of(),
 				Collections.singleton(
 						localDelivery
 				),
@@ -1315,7 +1315,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"serviceProvider",
 				new Capabilities(),
-				Collections.singleton(
+				List.of(
 						localSubscription
 				),
 				Collections.emptySet(),
@@ -1338,7 +1338,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
@@ -1355,7 +1355,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
@@ -1372,7 +1372,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(new ArrayList<>());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -1390,7 +1390,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 		Match match = new Match(
 				subscription,
@@ -1414,7 +1414,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 
 		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
@@ -1605,7 +1605,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				List.of(subscription)
 		);
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -1634,7 +1634,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				name,
-				Collections.singleton(
+				List.of(
 						localSubscription
 				)
 		);
@@ -1682,7 +1682,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				name,
-				Collections.singleton(
+				List.of(
 						localSubscription
 				)
 		);
@@ -1781,7 +1781,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 								)
 						)
 				),
-				Set.of(),
+				List.of(),
 				Set.of(),
 				null
 		);

@@ -113,7 +113,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -134,7 +134,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -156,7 +156,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -179,7 +179,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -200,7 +200,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -222,7 +222,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -249,7 +249,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -277,7 +277,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -304,7 +304,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider1 = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -323,7 +323,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider2 = new ServiceProvider(
                 "my-service-provider-2",
                 new Capabilities(),
-                Collections.singleton(subscription),
+                List.of(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -350,7 +350,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
@@ -389,7 +389,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
                 new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
+                List.of(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
