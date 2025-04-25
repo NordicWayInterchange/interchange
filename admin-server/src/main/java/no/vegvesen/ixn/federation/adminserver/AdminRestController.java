@@ -22,6 +22,7 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +110,8 @@ public class AdminRestController {
         validatePathVariable(actorCommonName);
 
         logger.info("List local capabilities matching delivery for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){
             if(!selector.isEmpty()){
@@ -192,6 +194,14 @@ public class AdminRestController {
         return qpidService.bindingExists(exchangeName, queueName);
     }
 
+    private ServiceProvider serviceProviderExists(String actorCommonName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+        return serviceProvider;
+    }
+
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
         Set<Capability> capabilities = new HashSet<>();
         for (ServiceProvider otherServiceProvider : serviceProviders) {
@@ -215,14 +225,6 @@ public class AdminRestController {
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
-    }
-
-    private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        if (serviceProvider == null) {
-            serviceProvider = new ServiceProvider(serviceProviderName);
-        }
-        return serviceProvider;
     }
 
     private void validatePathVariable(String pathVariable){
