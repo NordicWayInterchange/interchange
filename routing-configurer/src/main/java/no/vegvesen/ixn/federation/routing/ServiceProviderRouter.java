@@ -336,7 +336,7 @@ public class ServiceProviderRouter {
                 List<CapabilityShard> newShards = new ArrayList<>();
                 int numberOfShards = capability.getMetadata().getShardCount();
                 for (int i = 1; i<=numberOfShards; i++) {
-                    String exchangeName = "cap-" + capability.getUuid() + "-" + i;
+                    String exchangeName = "cap-" +UUID.randomUUID();
                     Exchange exchange = qpidClient.getExchange(exchangeName);
                     if(exchange == null) {
                         exchange = qpidClient.createHeadersExchange(exchangeName);

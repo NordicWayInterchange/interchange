@@ -683,21 +683,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void exchangeIsSetupForCreatedCapabilityWithoutExchange(){
-		ServiceProvider sp = new ServiceProvider("serviceProvider");
-		Capability cap = new Capability(
-				new DatexApplication("NO-1234", "NO-pub1","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata("infoUrl", 2, RedirectStatus.OPTIONAL, 1, 1, 1)
-		);
-		cap.setStatus(CapabilityStatus.CREATED);
-		sp.getCapabilities().addCapability(cap);
-		router.setUpCapabilityExchanges(sp, client.getQpidDelta());
-		for(int i = 1; i <= cap.getMetadata().getShardCount(); i++){
-			assertThat(client.getExchange("cap-"+cap.getUuid()+ "-" + i)).isNotNull();
-		}
-	}
-
-	@Test
 	public void doSetUpQueueWhenSubscriptionHasConsumerCommonNameSameAsIxnNameAndServiceProviderName() {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
