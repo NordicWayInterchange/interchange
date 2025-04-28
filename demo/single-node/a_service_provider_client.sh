@@ -19,4 +19,4 @@ docker run \
   -v $PWD:/work \
   --link a_onboard_server:a.interchangedomain.com \
   --link a_qpid:a.qpid.interchangedomain.com \
-  europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/service-provider-client:$(<version) -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.interchangedomain.com.jks -w password $URL -u ${SERVICE_PROVIDER} "$@"
+  ghcr.io/nordicwayinterchange/service-provider-client:$(<version) -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.interchangedomain.com.jks -w password $URL -u ${SERVICE_PROVIDER} "$@"

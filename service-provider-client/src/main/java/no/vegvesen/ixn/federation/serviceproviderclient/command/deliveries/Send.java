@@ -20,7 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
-@Command(name="send", description = "Add delivery and send message")
+@Command(name="send",
+        description = "Add delivery and send message",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class Send implements Callable<Integer> {
 
     @ParentCommand

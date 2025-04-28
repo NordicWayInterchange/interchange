@@ -4,18 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import picocli.CommandLine.*;
-
 @Command(
         name = "add",
         description = "Add service provider capability from file",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class AddServiceProviderCapability implements Callable<Integer> {
 

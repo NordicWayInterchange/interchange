@@ -9,6 +9,7 @@ metadata:
     component: admin-frontend
     release: {{ .Release.Name }}
 spec:
+  replicas: {{ .Values.admin_server.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}

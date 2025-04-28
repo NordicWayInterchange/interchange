@@ -12,7 +12,8 @@ import java.util.concurrent.Callable;
         name = "list",
         description = "List the service provider capabilities",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class GetServiceProviderCapabilities implements Callable<Integer> {
 

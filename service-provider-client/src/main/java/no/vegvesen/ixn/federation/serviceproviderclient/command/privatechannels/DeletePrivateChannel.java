@@ -5,7 +5,10 @@ import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "delete", description = "Delete a service provider private channel to a client")
+@Command(name = "delete", description = "Delete a service provider private channel to a client",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class DeletePrivateChannel implements Callable<Integer> {
 
     @ParentCommand

@@ -28,7 +28,8 @@ import static picocli.CommandLine.*;
                 MessagesCommand.class,
                 PortalStores.class
         },
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class ServiceProviderClientApplication{
 
     @Parameters(index = "0", paramLabel = "SERVER", description = "URL to connect to")
