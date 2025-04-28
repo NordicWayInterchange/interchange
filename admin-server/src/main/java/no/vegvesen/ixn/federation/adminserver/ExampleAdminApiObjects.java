@@ -164,6 +164,38 @@ public class ExampleAdminApiObjects {
               }
             } ]
             """;
+    static final String GETEXCHANGES = """
+            [
+                {
+                    "id": "8cc9fc08-0517-4d94-8416-0abbc1d1cf25",
+                    "name": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
+                    "durable": true,
+                    "type": "headers",
+                    "bindings": [
+                        {
+                            "bindingKey": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
+                            "destination": "bi-queue",
+                            "arguments": {
+                                "x-filter-jms-selector": "(quadTree like '%,1203%') AND (causeCode = 5) AND (publicationId = 'NO00002:test') AND (messageType = 'DENM') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'SE')"
+                            }
+                        },
+                        {
+                            "bindingKey": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
+                            "destination": "loc-c5dd72c1-7845-4e49-90a1-57b036d89724",
+                            "arguments": {
+                                "x-filter-jms-selector": "originatingCountry = 'SE'"
+                            }
+                        },
+                        {
+                            "bindingKey": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
+                            "destination": "loc-67d73466-1974-420b-8e33-6e1d3612d54b",
+                            "arguments": {
+                                "x-filter-jms-selector": "originatingCountry = 'SE'"
+                            }
+                        }
+                    ]
+                }]
+            """;
     static final String GETQUEUES =  """
             [
             {
