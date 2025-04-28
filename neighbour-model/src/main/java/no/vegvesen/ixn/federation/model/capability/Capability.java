@@ -139,6 +139,10 @@ public class Capability {
         }
     }
 
+    public void addShards(List<CapabilityShard> shards){
+        this.shards.addAll(shards);
+    }
+
     public boolean hasShards() {
         return !shards.isEmpty();
     }
