@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 public class ExampleAdminApiObjects {
-    public static final String LISTNEIGHBOURS = """
+    public static final String LISTNEIGHBOURSRESPONSE = """
             [
                    {
                        "neighbour_id": 1,
@@ -39,7 +39,7 @@ public class ExampleAdminApiObjects {
                ]
             """;
 
-    public static final String LISTSERVICEPROVIDERS = """
+    public static final String LISTSERVICEPROVIDERSRESPONSE = """
             [
                    {
                        "id": 1,
@@ -122,6 +122,7 @@ public class ExampleAdminApiObjects {
                    }
                ]
             """;
+
     static final String GETSUBSCRIPTIONCAPABILITYRESPONSE = """
             [ {
               "application" : {
@@ -143,6 +144,7 @@ public class ExampleAdminApiObjects {
               }
             } ]
             """;
+
     static final String GETDELIVERYCAPABILITYRESPONSE = """
             [ {
               "application" : {
@@ -164,7 +166,8 @@ public class ExampleAdminApiObjects {
               }
             } ]
             """;
-    static final String GETEXCHANGES = """
+
+    static final String GETEXCHANGESRESPONSE = """
             [
                 {
                     "id": "8cc9fc08-0517-4d94-8416-0abbc1d1cf25",
@@ -178,25 +181,12 @@ public class ExampleAdminApiObjects {
                             "arguments": {
                                 "x-filter-jms-selector": "(quadTree like '%,1203%') AND (causeCode = 5) AND (publicationId = 'NO00002:test') AND (messageType = 'DENM') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'SE')"
                             }
-                        },
-                        {
-                            "bindingKey": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
-                            "destination": "loc-c5dd72c1-7845-4e49-90a1-57b036d89724",
-                            "arguments": {
-                                "x-filter-jms-selector": "originatingCountry = 'SE'"
-                            }
-                        },
-                        {
-                            "bindingKey": "cap-2ba65f1c-6999-428a-869b-89aea7c1bd6a",
-                            "destination": "loc-67d73466-1974-420b-8e33-6e1d3612d54b",
-                            "arguments": {
-                                "x-filter-jms-selector": "originatingCountry = 'SE'"
-                            }
                         }
                     ]
                 }]
             """;
-    static final String GETQUEUES =  """
+
+    static final String GETQUEUESRESPONSE =  """
             [
             {
                 "id": "575fa3d2-69f7-4126-9a1e-264a8ebab2b4",
@@ -207,4 +197,59 @@ public class ExampleAdminApiObjects {
             }
             ]
             """;
+
+    static final String GETDELIVERYIDSRESPONSE =  """
+            [
+                "63993467-de1d-448b-8de5-425eab6ce3e4"
+            ]
+            """;
+
+    static final String GETDELIVERIESRESPONSE = """
+            [ {
+              "id" : "63993467-de1d-448b-8de5-425eab6ce3e4",
+              "status" : "CREATED",
+              "selector" : "originatingCountry='NO'",
+              "endpoints" : [ {
+                "host" : "a.bouvetinterchange.eu",
+                "port" : 5671,
+                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
+              } ],
+              "lastUpdatedTimestamp" : 1726567679,
+              "description": "Deliver messages from Norway"
+            } ]
+            """;
+
+    static final String GETENDPOINTSRESPONSE = """
+            [
+                   {
+                       "localDeliveryEndpointApi": {
+                           "host": "a.qpid.bouvetinterchange.eu",
+                           "port": 5671,
+                           "target": "del-1b39c7b9-f27d-4149-9422-54360333be33"
+                       },
+                       "exists": true
+                   }
+               ]
+            """;
+
+    static final String GETCAPABILITYMATCHRESPONSE = """
+            {
+                     "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
+                     "capabilityMatchApi": [
+                         {
+                             "capabilityId": "e49df956-bfb9-4849-bc07-903f30e9c4ec",
+                             "shardId": 2,
+                             "binding": {
+                                 "bindingKey": "del-1b39c7b9-f27d-4149-9422-54360333be33",
+                                 "destination": "cap-53bf21ce-0034-46c8-a0e5-60ad5716b6ba",
+                                 "arguments": {
+                                     "x-filter-jms-selector": "((quadTree like '%,1203%') AND (causeCode = 5) AND (messageType = 'DENM') AND (publicationId = 'NO00002:testqaw') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO')"
+                                 }
+                             },
+                             "exists": true
+                         }
+                     ]
+                 }
+            """;
+
 }
