@@ -18,6 +18,7 @@ public class Capability {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -65,6 +66,14 @@ public class Capability {
         this.application = application;
         this.metadata = metadata;
         this.createdTimestamp = createdTimestamp;
+    }
+
+    public Capability(String uuid, Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
     }
 
     public void setId(Integer id) {

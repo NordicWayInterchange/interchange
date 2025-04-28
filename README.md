@@ -63,7 +63,7 @@ There's a short tutorial [here](demo/single-node/README.md)
 
 ## Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/
-is automatically built by GitHub and published to the container registry europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/ on
+is automatically built by GitHub and published to the container registry ghcr.io/nordicwayinterchange/ on
 each commit. Each component in the system has its own registry.
 
 All the images are tagged with the 7-character start of the git commit hash. Branch "federation-master" is considered to be the stable branch.

@@ -23,13 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
- * the actual hostname would normally end up as something like "localhost".
- */
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 public class QpidClientIT extends QpidDockerBaseIT {
 
@@ -133,47 +128,39 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void testGetGroupMember() {
 		String groupMember = "test-get-group-member-member";
-		client.addMemberToGroup(groupMember,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(groupMember);
 
-		GroupMember member = client.getGroupMember(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
+		ServiceProviderMember member = client.getServiceProviderMember(groupMember);
 		assertThat(member).isNotNull();
 		assertThat(member.getName()).isEqualTo(groupMember);
 	}
 
 	@Test
 	public void testGetGroupMemberNonExistingMember() {
-		GroupMember groupMember = client.getGroupMember("this-group-member-does-not-exist", SERVICE_PROVIDERS_GROUP_NAME);
+		ServiceProviderMember groupMember = client.getServiceProviderMember("this-group-member-does-not-exist");
 		assertThat(groupMember).isNull();
 	}
 
 	@Test
-	public void testGetGroupMemberNonExistingGroup() {
-		GroupMember groupMember = client.getGroupMember("this-member-does-not-exist", "this-group-does-not-exist");
-		assertThat(groupMember).isNull();
-	}
+	public void testGetPrivateChannelGroupMembersList() {
+		String groupMember1 = "test-private-channel-group-member-member-1";
+		String groupMember2 = "test-private-channel-group-member-member-2";
+		PrivateChannelMember member1 = client.addPrivateChannelMemberToGroup(groupMember1);
+		PrivateChannelMember member2 = client.addPrivateChannelMemberToGroup(groupMember2);
 
-	@Test
-	public void testGetGroupMembersList() {
-		String groupMember1 = "test-group-member-member-1";
-		String groupMember2 = "test-group-member-member-2";
-		client.addMemberToGroup(groupMember1, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-		client.addMemberToGroup(groupMember2, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-
-		List<GroupMember> groupMembers = client.getGroupMembers(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+		List<PrivateChannelMember> groupMembers = client.getPrivateChannelGroupMembers();
 		assertThat(groupMembers).hasSize(2);
-		List<String> groupMemberNames = groupMembers.stream().map(GroupMember::getName).toList();
-		assertThat(groupMemberNames).contains(groupMember1);
-		assertThat(groupMemberNames).contains(groupMember2);
+		assertThat(groupMembers).contains(member1,member2);
 	}
 
 	@Test
 	public void createAndDeleteServiceProviderFromGroup() {
 		String myUser = "my-service-provider";
-		GroupMember groupMember = client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(groupMember).isNotNull().extracting(GroupMember::getName).isEqualTo(myUser);
+		ServiceProviderMember groupMember = client.addServiceProviderMemberToGroup(myUser);
+		assertThat(groupMember).isNotNull().extracting(ServiceProviderMember::getName).isEqualTo(myUser);
 
-		client.removeMemberFromGroup(groupMember, SERVICE_PROVIDERS_GROUP_NAME);
-		groupMember = client.getGroupMember(myUser,SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeServiceProviderMemberFromGroup(groupMember);
+		groupMember = client.getServiceProviderMember(myUser);
 
 		assertThat(groupMember).isNull();
 	}
@@ -181,43 +168,37 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void createAndDeleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
-		GroupMember groupMember = client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
-		client.removeMemberFromGroup(groupMember,FEDERATED_GROUP_NAME);
+		NeighbourMember groupMember = client.addNeighbourMemberToGroup(deleteUser);
+		client.removeNeighbourMemberFromGroup(groupMember);
 		assertThatExceptionOfType(HttpClientErrorException.NotFound.class).isThrownBy(
-				() -> client.removeMemberFromGroup(groupMember, FEDERATED_GROUP_NAME)
+				() -> client.removeNeighbourMemberFromGroup(groupMember)
 		);
 	}
 
 	@Test
 	public void addRemoteServiceProviderToGroup() {
 		String newUser = "service-provider";
-		GroupMember groupMember = client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		RemoteServiceProviderMember groupMember = client.addRemoteServiceProvicerMemberToGroup(newUser);
 		assertThat(groupMember).isNotNull();
-		client.removeMemberFromGroup(groupMember,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		groupMember = client.getGroupMember(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		client.removeRemoteServiceProviderMemberFromGroup(groupMember);
+		groupMember = client.getRemoteServiceProviderMember(newUser);
 		assertThat(groupMember).isNull();
 	}
 
-	@Test
-	public void addMemberToNonExistingGroup(){
-		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
-				() -> client.addMemberToGroup("member-of-non-existing-group", "this-group-does-not-exist")
-		);
-	}
 
 	@Test
 	public void testAddMemberToGroupTwice() {
 		String user = "user-added-to-group-twice";
-		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(user);
 		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
-				() -> client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME)
+				() -> client.addServiceProviderMemberToGroup(user)
 		);
 	}
 
 	@Test
 	public void testAddAclForNonExistingQueue() {
 		String user = "user-read-non-existing-queue";
-		client.addMemberToGroup(user,SERVICE_PROVIDERS_GROUP_NAME);
+		client.addServiceProviderMemberToGroup(user);
 		assertThatNoException().isThrownBy(
 				() -> client.addReadAccess(user,"this-queue-does-not-exist")
 		);
@@ -400,8 +381,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addBinding(exchange, new Binding(exchange, queue, new Filter(selector)));
 
 		QpidDelta delta = client.getQpidDelta();
-
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch( b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -418,7 +400,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -435,7 +419,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		Exchange qpidExchange = delta.findByExchangeName(exchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(queue)).isTrue();
 		assertThat(client.getQueuePublishingLinks(queue)).anyMatch(b -> b.getBindingKey().equals(exchange));
 	}
 
@@ -452,7 +438,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidDelta delta = client.getQpidDelta();
 
-		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
+		Exchange qpidExchange = delta.findByExchangeName(deliveryExchange);
+		assertThat(qpidExchange).isNotNull();
+		assertThat(qpidExchange.isBoundTo(capabilityExchange)).isTrue();
 	}
 
 
