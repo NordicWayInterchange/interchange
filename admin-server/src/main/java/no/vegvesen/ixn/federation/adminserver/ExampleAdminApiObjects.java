@@ -232,7 +232,7 @@ public class ExampleAdminApiObjects {
                ]
             """;
 
-    static final String GETCAPABILITYMATCHRESPONSE = """
+    static final String GETCAPABILITIESMATCHRESPONSE = """
             {
                      "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
                      "capabilityMatchApi": [
@@ -250,6 +250,46 @@ public class ExampleAdminApiObjects {
                          }
                      ]
                  }
+            """;
+
+    static final String GETCAPABILITYMATCHRESPONSE = """
+            {
+                "application": {
+                    "messageType": "DENM",
+                    "publisherId": "NO00002",
+                    "publicationId": "NO00002:test",
+                    "originatingCountry": "NO",
+                    "protocolVersion": "DENM:1.2.2",
+                    "quadTree": [
+                        "1203"
+                    ],
+                    "causeCode": [
+                        5
+                    ]
+                },
+                "metadata": {
+                    "shardCount": 1,
+                    "infoUrl": "https://victoria@blomst.stminterchange.com.info.no",
+                    "redirectPolicy": "OPTIONAL",
+                    "maxBandwidth": 0,
+                    "maxMessageRate": 0,
+                    "repetitionInterval": 0
+                },
+                "shardId": [
+                    2
+                ]
+            }
+            """;
+
+    static final String GETCAPABILITYSHARDMATCHRESPONSE = """
+            {
+                  "capabilityShardApi": {
+                      "shardId": 2,
+                      "exchangeName": "cap-53bf21ce-0034-46c8-a0e5-60ad5716b6ba",
+                      "selector": "(quadTree like '%,1203%') AND (causeCode = 5) AND (messageType = 'DENM') AND (publicationId = 'NO00002:test') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')"
+                  },
+                  "exchangeNameExists": true
+              }
             """;
 
 }

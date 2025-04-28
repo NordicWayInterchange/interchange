@@ -272,7 +272,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/endpoints")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get delivery's endpoints based on provided delivery id for each service provider")
+    @Operation(summary = "Get delivery's endpoints based on provided delivery id for service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETENDPOINTSRESPONSE)))})
     public List<LocalDeliveryEndpointAdminApi> getLocalDeliveryEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -289,14 +289,14 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get capabilities match a delivery based on provided delivery id for each service provider")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITYMATCHRESPONSE)))})
+    @Operation(summary = "Get capabilities match a delivery based on provided delivery id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHRESPONSE)))})
     public CapabilitiesLinkedDeliveryApi getDeliveriesExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List capabilities match a delivery for service provider {} for admin user {}", actorCommonName, adminUser);
+        logger.info("Log - List capabilities match a delivery with id {} for service provider {} for admin user {}", deliveryId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
@@ -307,13 +307,16 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
+    @Tag(name = "Deliveries")
+    @Operation(summary = "Get capability matches a delivery based on provided delivery id and capability id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITYMATCHRESPONSE)))})
     public CapabilityApi getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
                                                                            @PathVariable("capabilityId") String capabilityId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        logger.info("Log - List the capability with id {} matches a delivery with id {} for service provider {} for admin user {}", capabilityId, deliveryId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
@@ -332,13 +335,16 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
+    @Tag(name = "Deliveries")
+    @Operation(summary = "Get capability shard matches a delivery based on provided shard id, delivery id and capability id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITYSHARDMATCHRESPONSE)))})
     public CapabilityShardAdminApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
                                                                                 @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId and shardId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        logger.info("Log - List capability shard with id {} matches a delivery with id {} for service provider {} for admin user {}", shardId, deliveryId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
