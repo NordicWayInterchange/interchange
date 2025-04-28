@@ -54,14 +54,6 @@ public class CapabilityMatchApi {
         this.shardId = shardId;
     }
 
-    public Binding getBindings() {
-        return binding;
-    }
-
-    public void addBinding(Binding binding) {
-        this.binding = binding;
-    }
-
     @Override
     public String toString() {
         return "CapabilityMatchApi{" +
