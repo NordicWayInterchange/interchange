@@ -261,6 +261,13 @@ public class RoutingConfigurer {
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
 								}
+								else{
+									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
+									if(exchange == null){
+										qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
+										logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+									}
+								}
 							}
 						}
 					}
