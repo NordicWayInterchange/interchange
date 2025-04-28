@@ -13,7 +13,8 @@ import java.util.concurrent.Callable;
         name = "add",
         description = "Add private channel peers from file",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0"
 )
 public class AddPeersToPrivateChannel implements Callable<Integer> {
 

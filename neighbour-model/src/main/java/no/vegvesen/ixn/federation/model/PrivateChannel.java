@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -15,7 +16,7 @@ public class PrivateChannel {
     @Column(name="id")
     private Integer id;
 
-    @Column
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)

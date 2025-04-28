@@ -7,7 +7,10 @@ import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "match", description = "Fetch all capabilities in the network matching a selector")
+@Command(name = "match", description = "Fetch all capabilities in the network matching a selector",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0")
 public class FetchMatchingCapabilities implements Callable<Integer> {
 
     @ParentCommand

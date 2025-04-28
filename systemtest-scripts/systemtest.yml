@@ -41,11 +41,15 @@ services:
     container_name: a_admin
     depends_on:
       - a_db
+    links:
+      - "a_qpid:a.bouvetinterchange.eu"
     ports:
       - 32665:8899
     volumes:
       - "../tmp:/jks"
     environment:
+      - BASE_URL=https://a.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
@@ -264,11 +268,15 @@ services:
     container_name: b_admin
     depends_on:
       - b_db
+    links:
+      - "b_qpid:b.bouvetinterchange.eu"
     ports:
       - 32667:8899
     volumes:
       - "../tmp:/jks"
     environment:
+      - BASE_URL=https://b.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
