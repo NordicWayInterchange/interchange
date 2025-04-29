@@ -151,6 +151,9 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get private channels for the specified service provider")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETPRIVATECHANNELSRESPONSE)))})
     public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
@@ -163,6 +166,9 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels/peer", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Private channels")
+    @Operation(summary = "Get private channels with actorCommonName as peer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETPEERPRIVATECHANNELS)))})
     public List<PeerPrivateChannelApi> getPeerPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
@@ -239,7 +245,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get delivery ids for each service provider")
+    @Operation(summary = "Get delivery ids for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETDELIVERYIDSRESPONSE)))})
     public List<String> getDeliveryIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -255,7 +261,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get delivery based on provided delivery id for each service provider")
+    @Operation(summary = "Get delivery based on provided delivery id for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETDELIVERIESRESPONSE)))})
     public LocalDeliveryApi getDeliveryBasedOnDeliveryId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -272,7 +278,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/endpoints")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get delivery's endpoints based on provided delivery id for service provider")
+    @Operation(summary = "Get delivery's endpoints based on provided delivery id for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETENDPOINTSRESPONSE)))})
     public List<LocalDeliveryEndpointAdminApi> getLocalDeliveryEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -289,7 +295,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get capabilities match a delivery based on provided delivery id")
+    @Operation(summary = "Get capabilities match a delivery for the specified service provider and delivery id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHRESPONSE)))})
     public CapabilitiesLinkedDeliveryApi getDeliveriesExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
@@ -308,7 +314,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get capability matches a delivery based on provided delivery id and capability id")
+    @Operation(summary = "Get capability matches a delivery for the specified service provider, delivery id and capability id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITYMATCHRESPONSE)))})
     public CapabilityApi getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
                                                                            @PathVariable("capabilityId") String capabilityId) {
@@ -336,7 +342,7 @@ public class AdminRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
     @Tag(name = "Deliveries")
-    @Operation(summary = "Get capability shard matches a delivery based on provided shard id, delivery id and capability id")
+    @Operation(summary = "Get capability shard matches a delivery for the specified service provider, shard id, delivery id and capability id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITYSHARDMATCHRESPONSE)))})
     public CapabilityShardAdminApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
                                                                                 @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {

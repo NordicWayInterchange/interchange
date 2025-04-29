@@ -167,6 +167,43 @@ public class ExampleAdminApiObjects {
             } ]
             """;
 
+    static final String GETPRIVATECHANNELSRESPONSE = """
+              [
+                  {
+                      "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                      "peers": [
+                        "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
+                        "pilotinterchange.eu.bouvet.pilotinterchange.eu.bippe@stankelbein.no"
+                      ],
+                      "status": "CREATED",
+                      "description": "Private channel for bouvet and friends",
+                      "endpoint": {
+                          "host": "bouvet.itsinterchange.eu",
+                          "port": 1337,
+                          "queueName": "priv-c807bc78-36ee-4cb2-b8aa-8c133644fe4a"
+                      },
+                      "lastUpdated": 1729840858
+                  }
+              ]
+            """;
+
+    static final String GETPEERPRIVATECHANNELS = """
+            [
+                {
+                    "id": "e598a3d7-c3fe-4585-ae56-f44826520ddd",
+                    "owner": "king_olav.bouvetinterchange.eu",
+                    "status": "CREATED",
+                    "endpoint": {
+                        "host": "bouvet.itsinterchange.eu",
+                        "port": 1337,
+                        "queueName": "priv-86651278-add2-4286-bcdf-bcdb69dc72a1"
+                    },
+                    "lastUpdated": 1729840858,
+                    "description": "private channel between king olav and king gustaf"
+                }
+            ]
+            """;
+
     static final String GETEXCHANGESRESPONSE = """
             [
                 {
@@ -210,7 +247,7 @@ public class ExampleAdminApiObjects {
               "status" : "CREATED",
               "selector" : "originatingCountry='NO'",
               "endpoints" : [ {
-                "host" : "a.bouvetinterchange.eu",
+                "host" : "bouvet.itsinterchange.eu",
                 "port" : 5671,
                 "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
               } ],
@@ -269,7 +306,7 @@ public class ExampleAdminApiObjects {
                 },
                 "metadata": {
                     "shardCount": 1,
-                    "infoUrl": "https://victoria@blomst.stminterchange.com.info.no",
+                    "infoUrl": "",
                     "redirectPolicy": "OPTIONAL",
                     "maxBandwidth": 0,
                     "maxMessageRate": 0,
