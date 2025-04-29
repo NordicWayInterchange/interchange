@@ -24,42 +24,85 @@ const BindingExists:  React.FC = () => {
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
-        svg.selectAll('*').remove(); // clear previous render
+        svg.selectAll('*').remove(); // Clear previous render
 
         const width = 1000;
 
         const deliveryIdX = width / 2 - 60;
         const deliveryIdY = 50;
+        const rectWidth = 120;
+        const rectHeight = 50;
+
+        // Delivery section
+        svg.append('text')
+            .attr('x', deliveryIdX + rectWidth / 2)
+            .attr('y', deliveryIdY - 10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#555')
+            .attr('font-size', 12)
+            .text('DeliveryId');
 
         svg.append('rect')
             .attr('x', deliveryIdX)
             .attr('y', deliveryIdY)
-            .attr('width', 120)
-            .attr('height', 50)
+            .attr('width', rectWidth)
+            .attr('height', rectHeight)
             .attr('fill', '#88c');
 
         svg.append('text')
-            .attr('x', deliveryIdX + 60)
+            .attr('x', deliveryIdX + rectWidth / 2)
             .attr('y', deliveryIdY + 30)
             .attr('text-anchor', 'middle')
             .attr('fill', '#000')
+            .attr('font-size', 14)
             .text(data.deliveryId);
 
         const isSingle = data.capabilityMatchApi.length === 1;
-
-        const capabilityIdY = 300;
-        const totalWidth = 200 * (data.capabilityMatchApi.length - 1);
-        const startX = isSingle ? width / 2 - 60 : width / 2 - totalWidth / 2;
+        const capabilityIdY = 400;
+        const bindingY = (deliveryIdY + rectHeight + capabilityIdY) / 2;
+        const spacing = 200;
+        const totalWidth = spacing * (data.capabilityMatchApi.length - 1);
+        const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
 
         data.capabilityMatchApi.forEach((entry, i) => {
-            const rectWidth = 120;
-            const rectHeight = 50;
-
             const capabilityIdX = isSingle
                 ? startX
-                : startX + i * 200;
+                : startX + i * spacing;
 
-            // Draw capabilityIdId rectangle
+            if (entry.exists) {
+                svg.append('line')
+                    .attr('x1', deliveryIdX + rectWidth / 2)
+                    .attr('y1', deliveryIdY + rectHeight)
+                    .attr('x2', capabilityIdX + rectWidth / 2)
+                    .attr('y2', bindingY)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 2);
+
+                svg.append('rect')
+                    .attr('x', capabilityIdX)
+                    .attr('y', bindingY)
+                    .attr('width', rectWidth)
+                    .attr('height', rectHeight)
+                    .attr('fill', '#f9c74f');
+
+                svg.append('text')
+                    .attr('x', capabilityIdX + rectWidth / 2)
+                    .attr('y', bindingY + 30)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#000')
+                    .attr('font-size', 14)
+                    .text(entry.binding.bindingKey);
+
+                // 3. Line: binding.key to capabilityIdId
+                svg.append('line')
+                    .attr('x1', capabilityIdX + rectWidth / 2)
+                    .attr('y1', bindingY + rectHeight)
+                    .attr('x2', capabilityIdX + rectWidth / 2)
+                    .attr('y2', capabilityIdY)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 2);
+            }
+
             svg.append('rect')
                 .attr('x', capabilityIdX)
                 .attr('y', capabilityIdY)
@@ -72,20 +115,11 @@ const BindingExists:  React.FC = () => {
                 .attr('y', capabilityIdY + 30)
                 .attr('text-anchor', 'middle')
                 .attr('fill', '#000')
+                .attr('font-size', 14)
                 .text(entry.capabilityId);
-
-            if (entry.exists) {
-                svg.append('line')
-                    .attr('x1', deliveryIdX + rectWidth / 2)
-                    .attr('y1', deliveryIdY + rectHeight)
-                    .attr('x2', capabilityIdX + rectWidth / 2)
-                    .attr('y2', capabilityIdY)
-                    .attr('stroke', '#000')
-                    .attr('stroke-width', 2);
-            }
         });
     }, []);
-
+    
     return (
         <svg ref={svgRef} width={1000} height={500} />
     );
