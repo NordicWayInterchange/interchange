@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
+import {ContentCopy} from "@/components/shared/actions/ContentCopy";
+import {Box} from "@mui/system";
 
 const BindingExists:  React.FC = () => {
 
@@ -22,6 +24,11 @@ const BindingExists:  React.FC = () => {
     }
     const svgRef = useRef<SVGSVGElement | null>(null);
 
+    const [copyTargets, setCopyTargets] = useState<
+        { id: string; fullId: string; x: number; y: number }[]
+    >([]);
+
+
     useEffect(() => {
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous render
@@ -37,6 +44,12 @@ const BindingExists:  React.FC = () => {
         const trimId = (id: string) => {
             const parts = id.split("-");
             return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
+        };
+
+        const targets: { id: string; fullId: string; x: number; y: number }[] = [];
+
+        const addCopyTarget = (id: string, fullId: string, x: number, y: number) => {
+            targets.push({ id, fullId, x, y });
         };
 
         // Delivery section
@@ -62,6 +75,10 @@ const BindingExists:  React.FC = () => {
             .attr('fill', '#000')
             .attr('font-size', 14)
             .text(trimId(data.deliveryId));
+
+        addCopyTarget('deliveryId', data.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
+        setCopyTargets(targets);
+
 
         const isSingle = data.capabilityMatchApi.length === 1;
         const capabilityIdY = 400;
@@ -108,6 +125,10 @@ const BindingExists:  React.FC = () => {
                     .attr('font-size', 14)
                     .text(trimId(entry.binding.bindingKey));
 
+                addCopyTarget(`binding-key-${i}`, entry.binding.bindingKey, capabilityIdX + rectWidth / 2, bindingY + rectHeight / 2);
+
+                setCopyTargets(targets);
+
                 // 3. Line: binding.key to capabilityId
                 svg.append('line')
                     .attr('x1', capabilityIdX + rectWidth / 2)
@@ -141,11 +162,38 @@ const BindingExists:  React.FC = () => {
                 .attr('fill', '#000')
                 .attr('font-size', 14)
                 .text(trimId(entry.capabilityId));
+
+
+            addCopyTarget('capabilityId', entry.capabilityId, capabilityIdX + rectWidth / 2, capabilityIdY + rectHeight / 2);
+            setCopyTargets(targets);
         });
     }, []);
-    
+    console.log(copyTargets)
     return (
-        <svg ref={svgRef} width={1000} height={500} />
+        <div style={{ position: 'relative' }}>
+            <svg ref={svgRef} width={1000} height={650} />
+
+            {copyTargets.map((target, index) => (
+                <Box
+                    key={index}
+                    sx={{
+                        position: 'absolute',
+                        left: target.x + 15,
+                        top: target.y ,
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        paddingLeft: '10px',
+                        fontSize: '16px',
+
+                    }}
+                >
+                <ContentCopy
+                    value={target.fullId}
+                />
+                </Box>
+            ))}
+        </div>
+
     );
 };
 
