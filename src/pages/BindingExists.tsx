@@ -26,12 +26,18 @@ const BindingExists:  React.FC = () => {
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous render
 
-        const width = 1000;
 
-        const deliveryIdX = width / 2 - 60;
-        const deliveryIdY = 50;
+        const width = 1000;
         const rectWidth = 120;
         const rectHeight = 50;
+
+        const deliveryIdX = width / 2 - rectWidth / 2;
+        const deliveryIdY = 50;
+
+        const trimId = (id: string) => {
+            const parts = id.split("-");
+            return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
+        };
 
         // Delivery section
         svg.append('text')
@@ -55,7 +61,7 @@ const BindingExists:  React.FC = () => {
             .attr('text-anchor', 'middle')
             .attr('fill', '#000')
             .attr('font-size', 14)
-            .text(data.deliveryId);
+            .text(trimId(data.deliveryId));
 
         const isSingle = data.capabilityMatchApi.length === 1;
         const capabilityIdY = 400;
@@ -100,7 +106,7 @@ const BindingExists:  React.FC = () => {
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
-                    .text(entry.binding.bindingKey);
+                    .text(trimId(entry.binding.bindingKey));
 
                 // 3. Line: binding.key to capabilityId
                 svg.append('line')
@@ -134,7 +140,7 @@ const BindingExists:  React.FC = () => {
                 .attr('text-anchor', 'middle')
                 .attr('fill', '#000')
                 .attr('font-size', 14)
-                .text(entry.capabilityId);
+                .text(trimId(entry.capabilityId));
         });
     }, []);
     
