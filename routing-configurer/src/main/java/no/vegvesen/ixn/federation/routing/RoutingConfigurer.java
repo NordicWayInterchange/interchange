@@ -145,12 +145,11 @@ public class RoutingConfigurer {
 		logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 		Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatusIn(NeighbourSubscriptionStatus.ACCEPTED, NeighbourSubscriptionStatus.CREATED));
 		Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
 		setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
 		allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
-
 		if(!allAcceptedSubscriptions.isEmpty()){
 			setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 		}
@@ -164,11 +163,13 @@ public class RoutingConfigurer {
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
-				String queueName = "sub-" + UUID.randomUUID();
-				logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
-				subscription.setEndpoints(Collections.singleton(endpoint));
-
+				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
+				if(endpoint == null) {
+					String queueName = "sub-" + UUID.randomUUID();
+					logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
+					endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
+					subscription.setEndpoints(Collections.singleton(endpoint));
+				}
 				logger.debug("Attempting to add neighbour member {} to the group", neighbourName);
 				NeighbourMember groupMember = qpidClient.getNeighbourMember(neighbourName);
 				if (groupMember == null) {
