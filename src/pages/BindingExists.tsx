@@ -69,6 +69,7 @@ const BindingExists:  React.FC = () => {
                 ? startX
                 : startX + i * spacing;
 
+            //Binding section
             if (entry.exists) {
                 svg.append('line')
                     .attr('x1', deliveryIdX + rectWidth / 2)
@@ -77,6 +78,14 @@ const BindingExists:  React.FC = () => {
                     .attr('y2', bindingY)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
+
+                svg.append('text')
+                    .attr('x', capabilityIdX + rectWidth / 2)
+                    .attr('y', bindingY - 10)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#555')
+                    .attr('font-size', 12)
+                    .text('Binding');
 
                 svg.append('rect')
                     .attr('x', capabilityIdX)
@@ -93,7 +102,7 @@ const BindingExists:  React.FC = () => {
                     .attr('font-size', 14)
                     .text(entry.binding.bindingKey);
 
-                // 3. Line: binding.key to capabilityIdId
+                // 3. Line: binding.key to capabilityId
                 svg.append('line')
                     .attr('x1', capabilityIdX + rectWidth / 2)
                     .attr('y1', bindingY + rectHeight)
@@ -102,6 +111,15 @@ const BindingExists:  React.FC = () => {
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
             }
+
+            //Capability section
+            svg.append('text')
+                .attr('x', capabilityIdX + rectWidth / 2)
+                .attr('y', capabilityIdY - 10)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#555')
+                .attr('font-size', 12)
+                .text('capabilityId');
 
             svg.append('rect')
                 .attr('x', capabilityIdX)
