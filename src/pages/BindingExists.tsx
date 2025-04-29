@@ -1,67 +1,94 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-interface Rectangle {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    text: string;
-    color: string;
-}
+const BindingExists:  React.FC = () => {
 
-const BindingExists: React.FC = () => {
+    const data = {
+        "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
+        "capabilityMatchApi": [
+            {
+                "capabilityId": "e49df956-bfb9-4849-bc07-903f30e9c4ec",
+                "shardId": 2,
+                "binding": {
+                    "bindingKey": "del-1b39c7b9-f27d-4149-9422-54360333be33",
+                    "destination": "cap-53bf21ce-0034-46c8-a0e5-60ad5716b6ba",
+                    "arguments": {
+                        "x-filter-jms-selector": "((quadTree like '%,1203%') AND (causeCode = 5) AND (messageType = 'DENM') AND (publicationId = 'NO00002:testqaw') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO')"
+                    }
+                },
+                "exists": true
+            }
+        ]
+    }
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     useEffect(() => {
-        if (!svgRef.current) return;
+        const svg = d3.select(svgRef.current);
+        svg.selectAll('*').remove(); // clear previous render
 
-        const svg = d3.select(svgRef.current).attr('width', 500).attr('height', 500);
-        const rectangles: Rectangle[] = [
-            { x: 50, y: 50, width: 100, height: 60, text: 'Delivery', color: '#E8F3E9' },
-            { x: 350, y: 50, width: 100, height: 60, text: 'Capability', color: '#D4F7FF' },
-        ];
+        const width = 1000;
 
-        svg.selectAll('*').remove();
+        const deliveryIdX = width / 2 - 60;
+        const deliveryIdY = 50;
 
-        svg
-            .selectAll('rect')
-            .data(rectangles)
-            .enter()
-            .append('rect')
-            .attr('x', (d) => d.x)
-            .attr('y', (d) => d.y)
-            .attr('width', (d) => d.width)
-            .attr('height', (d) => d.height)
-            .attr('fill', (d) => d.color)
-            .attr('stroke', 'black');
+        svg.append('rect')
+            .attr('x', deliveryIdX)
+            .attr('y', deliveryIdY)
+            .attr('width', 120)
+            .attr('height', 50)
+            .attr('fill', '#88c');
 
-        svg
-            .selectAll('text')
-            .data(rectangles)
-            .enter()
-            .append('text')
-            .attr('x', (d) => d.x + d.width / 2)
-            .attr('y', (d) => d.y + d.height / 2)
-            .attr('dy', '.35em')
+        svg.append('text')
+            .attr('x', deliveryIdX + 60)
+            .attr('y', deliveryIdY + 30)
             .attr('text-anchor', 'middle')
-            .text((d) => d.text);
+            .attr('fill', '#000')
+            .text(data.deliveryId);
 
+        const isSingle = data.capabilityMatchApi.length === 1;
 
-        svg
-            .selectAll('line')
-            .data(rectangles.slice(0, rectangles.length - 1))
-            .enter()
-            .append('line')
-            .attr('x1', (d) => d.x + d.width)
-            .attr('y1', (d) => d.y + d.height / 2)
-            .attr('x2', (d, i) => rectangles[i + 1].x)
-            .attr('y2', (d, i) => rectangles[i + 1].y + rectangles[i + 1].height / 2)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1);
+        const capabilityIdY = 300;
+        const totalWidth = 200 * (data.capabilityMatchApi.length - 1);
+        const startX = isSingle ? width / 2 - 60 : width / 2 - totalWidth / 2;
+
+        data.capabilityMatchApi.forEach((entry, i) => {
+            const rectWidth = 120;
+            const rectHeight = 50;
+
+            const capabilityIdX = isSingle
+                ? startX
+                : startX + i * 200;
+
+            // Draw capabilityIdId rectangle
+            svg.append('rect')
+                .attr('x', capabilityIdX)
+                .attr('y', capabilityIdY)
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
+                .attr('fill', '#8c8');
+
+            svg.append('text')
+                .attr('x', capabilityIdX + rectWidth / 2)
+                .attr('y', capabilityIdY + 30)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#000')
+                .text(entry.capabilityId);
+
+            if (entry.exists) {
+                svg.append('line')
+                    .attr('x1', deliveryIdX + rectWidth / 2)
+                    .attr('y1', deliveryIdY + rectHeight)
+                    .attr('x2', capabilityIdX + rectWidth / 2)
+                    .attr('y2', capabilityIdY)
+                    .attr('stroke', '#000')
+                    .attr('stroke-width', 2);
+            }
+        });
     }, []);
 
-    return <svg ref={svgRef}></svg>;
+    return (
+        <svg ref={svgRef} width={1000} height={500} />
+    );
 };
 
 export default BindingExists;
