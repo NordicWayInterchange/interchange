@@ -223,6 +223,10 @@ public class ExampleAdminApiObjects {
                 }]
             """;
 
+    static final String GETEXCHANGEEXISTSSRESPONSE = """
+           true
+           \s""";
+
     static final String GETQUEUESRESPONSE =  """
             [
             {
@@ -234,6 +238,14 @@ public class ExampleAdminApiObjects {
             }
             ]
             """;
+
+    static final String GETQUEUEEXISTSRESPONSE = """
+           true
+           \s""";
+
+    static final String GETBINDINGEXISTSRESPONSE = """
+           true
+           \s""";
 
     static final String GETDELIVERYIDSRESPONSE =  """
             [
