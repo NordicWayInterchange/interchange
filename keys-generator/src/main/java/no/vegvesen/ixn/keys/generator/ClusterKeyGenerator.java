@@ -88,6 +88,19 @@ public class ClusterKeyGenerator {
         return new CaResponse(intermediateCa, caRequest.name(), hostResponses, clientResponses,responses);
     }
 
+    public static void storePems(CaResponse response, Path basePath) throws IOException {
+        saveKeyPair(response.details().keyPair(), Files.newBufferedWriter(basePath.resolve(response.name() + ".pem")));
+        for (HostResponse hostResponse : response.hostResponses()) {
+           saveKeyPair(hostResponse.keyDetails().keyPair(), Files.newBufferedWriter(basePath.resolve(hostResponse.host() + ".pem")));
+        }
+        for (ClientResponse clientResponse : response.clientResponses()) {
+            saveKeyPair(clientResponse.clientDetails().keyPair(), Files.newBufferedWriter(basePath.resolve(clientResponse.name() + ".pem")));
+        }
+        for (CaResponse caResponse : response.caResponses()) {
+            storePems(caResponse, basePath);
+        }
+    }
+
     /* Makes a truststore for the top CA, and keystores for each host and client in the chain */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
