@@ -16,7 +16,6 @@ const fetchMatchingCapability: (commonName: string) => Promise<Awaited<{
             );
             if (fetchServiceProviderDeliveries.ok) {
                 const deliveryIds: { id: string}[] = await fetchServiceProviderDeliveries.json();
-               // return { serviceProviderName: serviceProvider.name, deliveryIds: data };
                 const matches = await Promise.all(
                     deliveryIds.map(async (deliveryId) => {
                         const matchRes = await fetch(`${commonName}/serviceproviders/${serviceProvider.name}/deliveries/${deliveryId}/matches`);
@@ -50,7 +49,7 @@ const fetchMatchingCapability: (commonName: string) => Promise<Awaited<{
 
 const useFetchMatchingCapability = (commonName: string) => {
     return useQuery({
-        queryKey: ["deliveryIds"],
+        queryKey: ["matchingCapabilities"],
         queryFn: () => fetchMatchingCapability(commonName),
     });
 };
