@@ -3,8 +3,16 @@ import * as d3 from 'd3';
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Box} from "@mui/system";
 
-const BindingExists:  React.FC = () => {
+import {useSession} from "next-auth/react";
+import {useFetchDeliveryIdsPerServiceProvider} from "@/hooks/useFetchDeliveryIdsPerServiceProvider";
 
+const BindingExists:  React.FC = () => {
+    const {data: session} = useSession();
+    const {data: serviceProvidersWithDeliveryIds} = useFetchDeliveryIdsPerServiceProvider(
+        session?.user.commonName as string
+    );
+
+    console.log('useFetchMatchingCapabilities', serviceProvidersWithDeliveryIds);
     const data = {
         "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
         "capabilityMatchApi": [
@@ -168,7 +176,7 @@ const BindingExists:  React.FC = () => {
             setCopyTargets(targets);
         });
     }, []);
-    console.log(copyTargets)
+
     return (
         <div style={{ position: 'relative' }}>
             <svg ref={svgRef} width={1000} height={650} />
