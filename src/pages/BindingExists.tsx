@@ -4,15 +4,15 @@ import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Box} from "@mui/system";
 
 import {useSession} from "next-auth/react";
-import {useFetchDeliveryIdsPerServiceProvider} from "@/hooks/useFetchDeliveryIdsPerServiceProvider";
+import {useFetchMatchingCapability} from "@/hooks/useFetchMatchingCapability";
 
 const BindingExists:  React.FC = () => {
     const {data: session} = useSession();
-    const {data: serviceProvidersWithDeliveryIds} = useFetchDeliveryIdsPerServiceProvider(
+    const {data: matchingCapabilities} = useFetchMatchingCapability(
         session?.user.commonName as string
     );
 
-    console.log('useFetchMatchingCapabilities', serviceProvidersWithDeliveryIds);
+    console.log('useFetchMatchingCapabilities', matchingCapabilities);
     const data = {
         "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
         "capabilityMatchApi": [
