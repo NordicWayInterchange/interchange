@@ -47,6 +47,11 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>csr-generator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
