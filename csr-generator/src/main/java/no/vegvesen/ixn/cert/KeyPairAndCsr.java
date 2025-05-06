@@ -12,8 +12,8 @@ public record KeyPairAndCsr(KeyPair keyPair, PKCS10CertificationRequest csr) {
     public String csrToPem() throws IOException {
         StringWriter writer = new StringWriter();
         JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
-        pemWriter.close();
         pemWriter.writeObject(csr);
+        pemWriter.close();
         return writer.toString();
 
     }
@@ -22,6 +22,7 @@ public record KeyPairAndCsr(KeyPair keyPair, PKCS10CertificationRequest csr) {
         StringWriter writer = new StringWriter();
         JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
         pemWriter.writeObject(keyPair.getPrivate());
+        pemWriter.close();
         return writer.toString();
     }
 }
