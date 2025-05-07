@@ -63,18 +63,26 @@ import java.util.stream.Stream;
 public class ClusterKeyGenerator {
 
 
+    /**
+     * Traverses the certificate tree, generating certificates and keys for all the entities in the tree.
+     * Useful for generating keys and certs for tests involving several nodes or interchanges.
+     * @param caRequest The top CA, with sub CA's with associated host and client certs
+     * @return
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     * @throws OperatorCreationException
+     * @throws InvalidKeyException
+     * @throws NoSuchProviderException
+     * @throws CertIOException
+     */
     public static CaResponse generate(CARequest caRequest) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
         SecureRandom random = new SecureRandom();
         CertificateCertificateChainAndKeys topCa = generateTopCa(caRequest.name(), caRequest.country(), random);
         List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(), topCa, random);
         List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), topCa);
 
-        List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : caRequest.subCaRequests()) {
-            CaResponse response = generate(request, topCa, random);
-            responses.add(response);
-        }
-        return new CaResponse(topCa, caRequest.name(), hostResponses, clientResponses,responses);
+        return generateSubCaResponses(caRequest, random, topCa, hostResponses, clientResponses);
 
     }
 
@@ -82,12 +90,16 @@ public class ClusterKeyGenerator {
         CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.name(), caRequest.country(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
         List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), intermediateCa);
         List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(),intermediateCa,random);
+        return generateSubCaResponses(caRequest, random, intermediateCa, hostResponses, clientResponses);
+    }
+
+    private static CaResponse generateSubCaResponses(CARequest caRequest, SecureRandom random, CertificateCertificateChainAndKeys ca, List<HostResponse> hostResponses, List<ClientResponse> clientResponses) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
         List<CaResponse> responses = new ArrayList<>();
         for (CARequest request : caRequest.subCaRequests()) {
-            CaResponse response = generate(request, intermediateCa, random);
+            CaResponse response = generate(request, ca, random);
             responses.add(response);
         }
-        return new CaResponse(intermediateCa, caRequest.name(), hostResponses, clientResponses,responses);
+        return new CaResponse(ca, caRequest.name(), hostResponses, clientResponses,responses);
     }
 
     public static void storePems(CaResponse response, Path basePath) throws IOException {
@@ -106,7 +118,8 @@ public class ClusterKeyGenerator {
     /**
      * Makes a keystore and truststore for the CA (truststore containing the CA cert),
      * and keystores for each host and client in the chain
-     * */
+     *
+     */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
         List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
@@ -121,7 +134,7 @@ public class ClusterKeyGenerator {
 
     private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         String truststorePassword = passwordGenerator.generatePassword();
-        Files.writeString(basePath.resolve(response.name() + "_trust.txt"),truststorePassword);
+        Files.writeString(basePath.resolve(response.name() + ".jks.txt"),truststorePassword);
         Path truststorePath = basePath.resolve(response.name() + ".jks");
         try (OutputStream outputStream = Files.newOutputStream(truststorePath)) {
             makeTrustStore(
@@ -131,7 +144,7 @@ public class ClusterKeyGenerator {
                     "myKey");
         }
         String keystorePassword = passwordGenerator.generatePassword();
-        Files.writeString(basePath.resolve(response.name() + "_keystore.txt"),keystorePassword);
+        Files.writeString(basePath.resolve(response.name() + ".p12.txt"),keystorePassword);
         Path keystorePath = basePath.resolve(response.name() + ".p12");
         try (OutputStream outputStream = Files.newOutputStream(keystorePath)) {
             makeKeystore(
