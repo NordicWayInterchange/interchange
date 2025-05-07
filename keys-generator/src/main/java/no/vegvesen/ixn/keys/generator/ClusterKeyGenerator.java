@@ -103,7 +103,10 @@ public class ClusterKeyGenerator {
         }
     }
 
-    /* Makes a truststore for the top CA, and keystores for each host and client in the chain */
+    /**
+     * Makes a keystore and truststore for the CA (truststore containing the CA cert),
+     * and keystores for each host and client in the chain
+     * */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
         List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
@@ -117,13 +120,30 @@ public class ClusterKeyGenerator {
     }
 
     private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        String password = passwordGenerator.generatePassword();
-        Files.writeString(basePath.resolve(response.name() + ".txt"),password);
-        Path path = basePath.resolve(response.name() + ".jks");
-        try (OutputStream outputStream = Files.newOutputStream(path)) {
-            makeTrustStore(password,outputStream, response.details().certificate(), "myKey");
+        String truststorePassword = passwordGenerator.generatePassword();
+        Files.writeString(basePath.resolve(response.name() + "_trust.txt"),truststorePassword);
+        Path truststorePath = basePath.resolve(response.name() + ".jks");
+        try (OutputStream outputStream = Files.newOutputStream(truststorePath)) {
+            makeTrustStore(
+                    truststorePassword,
+                    outputStream,
+                    response.details().certificate(),
+                    "myKey");
         }
-        return new CaStore(response.name(), path, password);
+        String keystorePassword = passwordGenerator.generatePassword();
+        Files.writeString(basePath.resolve(response.name() + "_keystore.txt"),keystorePassword);
+        Path keystorePath = basePath.resolve(response.name() + ".p12");
+        try (OutputStream outputStream = Files.newOutputStream(keystorePath)) {
+            makeKeystore(
+                    response.name(),
+                    keystorePassword,
+                    outputStream,
+                    response.details().certificateChain(),
+                    response.details().keyPair.getPrivate()
+            );
+
+        }
+        return new CaStore(response.name(), truststorePath, truststorePassword,keystorePath,keystorePassword);
     }
 
     private static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
@@ -165,8 +185,12 @@ public class ClusterKeyGenerator {
     public record CaStores(String name, CaStore trustStore, List<HostStore> hostStores, List<ClientStore> clientStores, List<CaStores> subCaStores) {}
 
 
-    //A CaResponse gives a truststore,
-    public record CaStore(String name, Path path, String password) {}
+    /**
+     * A CaResponse gives
+     *  <li>a truststore, containing the certificate of the CA</li>
+     *  <li>a keystore containing the keys, and a cert containing the entire cert chain</li>
+     */
+    public record CaStore(String name, Path truststoreName, String truststorePassword, Path keystoreName, String keystorePassword) {}
 
     //a HostResponse or a ClientResponse gives a keystore
     public record HostStore(String hostname, Path path, String password) {}

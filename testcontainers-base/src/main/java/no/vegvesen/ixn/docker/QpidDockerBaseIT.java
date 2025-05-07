@@ -37,12 +37,12 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		CaStore caStore = stores.trustStore();
 		String keystoreName = hostStore.path().getFileName().toString();
 		String keystorePassword = hostStore.password();
-		String truststoreName = caStore.path().getFileName().toString();
-		String truststorePassword = caStore.password();
+		String truststoreName = caStore.truststoreName().getFileName().toString();
+		String truststorePassword = caStore.truststorePassword();
 		return new QpidContainer("qpid-it-memory",
 				imageLocation,
 				configPath,
-				caStore.path().getParent(),
+				caStore.truststoreName().getParent(),
 				keystoreName,
 				keystorePassword,
 				truststoreName,
@@ -96,15 +96,15 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(
-						caStore.path().toString(),
-						caStore.password(),
+						caStore.truststoreName().toString(),
+						caStore.truststorePassword(),
 						KeystoreType.JKS
 				)
 		);
 	}
 
 	public static String getTrustStorePath(CaStores stores) {
-		return stores.trustStore().path().toString();
+		return stores.trustStore().truststoreName().toString();
 	}
 
 	public static String getClientStorePath(String clientName, List<ClientStore> clientStores) {
@@ -122,8 +122,8 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(
-						trustStore.path().toString(),
-						trustStore.password(),
+						trustStore.truststoreName().toString(),
+						trustStore.truststorePassword(),
 						KeystoreType.JKS
 				)
 		);

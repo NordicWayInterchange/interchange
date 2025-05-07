@@ -319,6 +319,7 @@ public class ClusterKeyGeneratorTest {
         Reader responseReader = new StringReader(responseJson);
         List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);
         assertThat(result).hasSize(CA_REQUESTS.size());
+        System.out.println(responseJson);
     }
 
 
