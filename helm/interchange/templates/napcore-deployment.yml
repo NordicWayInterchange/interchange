@@ -46,6 +46,10 @@ spec:
               value: "{{ .Values.self.secret_mount_path }}key_store.p12"
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
+            - name: SIGN_STORE
+              value: "{{ .Values.napcore_server.mount_path }}sign_keystore.p12"
+            - name: SIGN_STORE_PASSWORD
+              value: {{ .Values.napcore_server_sign_store_password }}
             - name: LOG_LEVELS
               value: "{{- range .Values.napcore_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
@@ -53,6 +57,8 @@ spec:
           volumeMounts:
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}
+            - name: signer
+              mountPath: {{ .Values.napcore_server.mount_path | quote }}
           ports:
             - name: napcore
               containerPort: {{ .Values.self.nap_provider_port }}
@@ -60,4 +66,7 @@ spec:
         - name: secure
           secret:
             secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+        - name: signer
+          secret:
+            secretName: napcore-signer-secret
 {{- end }}
