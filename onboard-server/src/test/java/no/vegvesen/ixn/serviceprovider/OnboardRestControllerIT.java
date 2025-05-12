@@ -618,7 +618,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String selector = "";
 
         AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "illegal sub");
-        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
         LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
@@ -648,7 +648,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testAddSubscrptionsEmptySubscriptionsSet() {
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest("serviceProvider", List.of());
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("serviceProvider", Collections.emptySet());
         assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(
                 () -> restController.addSubscriptions("serviceProvider", request)
         );
@@ -659,7 +659,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         String serviceProvider = "serviceprovider";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, List.of(new AddSubscription(selector, nodeProperties.getName(), "DATEX sub")));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, Collections.singleton(new AddSubscription(selector, nodeProperties.getName(), "DATEX sub")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
@@ -673,7 +673,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 
-        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
@@ -687,12 +687,36 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscription addSubscription = new AddSubscription(selector, "anna", "DATEX sub");
 
-        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddingSubscriptionWhenAnIdenticalWithDifferentStatusAlreadyExists() {
+        String selector = "messageType = 'DATEX2' and originatingCountry = 'NO'";
+        String serviceproviderName = "serviceprovider";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceproviderName,
+                new Capabilities(Collections.emptySet()),
+                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, nodeProperties.getName())),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                serviceproviderName,
+                Collections.singleton(new AddSubscription(selector, "DATEX SUB"))
+        );
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName, request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceproviderName);
     }
 
     @Test
@@ -716,7 +740,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.save(serviceProvider);
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 serviceProviderName,
-                List.of(new AddSubscription(selector, "Invalid sub"))
+                Collections.singleton(new AddSubscription(selector, "Invalid sub"))
         );
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
@@ -731,13 +755,13 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, List.of((new AddSubscription(selector, serviceProviderName, "DATEX sub")))));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX sub"))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
-        List<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
+        Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
 
@@ -753,7 +777,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, List.of(new AddSubscription(selector, serviceProviderName, "DATEX SUB"))));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(new AddSubscription(selector, serviceProviderName, "DATEX SUB"))));
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
     }
@@ -761,7 +785,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     void testAddingSubscriptionWithoutDescription(){
         String serviceProviderName = "service-provider-sub-add";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, List.of(
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(
                 new AddSubscription("originatingCountry='NO'", "description"),
                 new AddSubscription("originatingCountry='SE'")
         ));
@@ -777,7 +801,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName, "DATEX SUB");
 
-        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
@@ -816,7 +840,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
                 serviceProviderName,
-                List.of((new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node", "DATEX sub"))));
+                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node", "DATEX sub"))
+        );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
@@ -853,7 +878,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGettingSingleSubscription() {
-        List<AddSubscription> addSubscriptions = new ArrayList<>();
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu", "DENM SUB"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
@@ -1318,7 +1343,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void SubscriptionEndpointsReturnsUUID(){
         String serviceProviderName = "serviceProvider_uuid_2";
-        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, List.of(new AddSubscription("originatingCountry='NO'", "SUB")));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, Set.of(new AddSubscription("originatingCountry='NO'", "SUB")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
         assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
         assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));

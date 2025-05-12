@@ -26,7 +26,7 @@ public class MatchDiscoveryService {
 
     public void syncLocalSubscriptionAndSubscriptionsToCreateMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
         for (ServiceProvider serviceProvider : serviceProviders) {
-            List<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
+            Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
                 for (Neighbour neighbour : neighbours) {

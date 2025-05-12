@@ -52,11 +52,11 @@ public class TypeTransformer {
         }
     }
 
-    public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, List<LocalSubscription> subscriptions) {
+    public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));
     }
 
-    private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, List<LocalSubscription> subscriptions) {
+    private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
             String sub_id = subscription.getUuid() == null ? null : subscription.getUuid();
@@ -125,7 +125,7 @@ public class TypeTransformer {
         );
     }
 
-    public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, List<LocalSubscription> localSubscriptions) {
+    public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
                 transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
                         serviceProviderName,
@@ -133,8 +133,8 @@ public class TypeTransformer {
         );
     }
 
-    public List<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, List<LocalSubscription> localSubscriptions) {
-        List<LocalActorSubscription> result = new ArrayList<>();
+    public Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+        Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
             String subscriptionId = subscription.getUuid();
             result.add(new LocalActorSubscription(

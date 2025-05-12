@@ -8,7 +8,7 @@ import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
 import picocli.CommandLine.*;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 @Command(
@@ -40,7 +40,7 @@ public class AddSubscriptions implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description)));
+            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

@@ -1,19 +1,15 @@
 package no.vegvesen.ixn.federation.repository;
 
-import jakarta.transaction.Transactional;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import jakarta.transaction.Transactional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,7 +109,7 @@ public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 		assertThat(spListRequested).hasSize(1).contains(fiat);
 
 		fiat = spListRequested.get(0);
-		List<LocalSubscription> subscriptions = fiat.getSubscriptions();
+		Set<LocalSubscription> subscriptions = fiat.getSubscriptions();
 		assertThat(subscriptions).hasSize(1);
 		LocalSubscription subscription = subscriptions.stream().findFirst().orElseThrow(() -> new NotFoundException("already asserted subscription not present"));
 		subscription.setStatus(LocalSubscriptionStatus.CREATED);
@@ -141,17 +137,17 @@ public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 		ServiceProvider serviceProvider = new ServiceProvider(name);
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", myName);
 		LocalSubscription denmSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN,"messageType = 'DENM'", myName);
-		serviceProvider.updateSubscriptions(new ArrayList<>(Arrays.asList(datexSubscription,denmSubscription)));
+		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription,denmSubscription)));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);
 		assertThat(serviceProvider.getSubscriptions()).hasSize(2);
 
 		//Now, filter out the TEAR_DOWN subscription, and see if it is removed from the database
-		List<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions()
+		Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions()
 				.stream()
 				.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 		serviceProvider.updateSubscriptions(localSubscriptions);
 		serviceProvider = repository.save(serviceProvider);
 
@@ -160,11 +156,11 @@ public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED));
 
 		//Update the REQUESTED to CREATED
-		List<LocalSubscription> updated = serviceProvider.getSubscriptions()
+		Set<LocalSubscription> updated = serviceProvider.getSubscriptions()
 				.stream()
 				.filter(localSubscription -> localSubscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED))
 				.map(localSubscription -> localSubscription.withStatus(LocalSubscriptionStatus.CREATED))
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 
 		serviceProvider.updateSubscriptions(updated);
 		serviceProvider = repository.save(serviceProvider);
@@ -179,7 +175,7 @@ public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 		String name = "serviceProvider";
 		ServiceProvider serviceProvider = new ServiceProvider(name);
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", myName);
-		serviceProvider.updateSubscriptions(new ArrayList<>(Arrays.asList(datexSubscription)));
+		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription)));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);

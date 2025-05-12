@@ -8,8 +8,8 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -23,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.junit.jupiter.api.Test;
 
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
@@ -609,7 +610,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		toreDownServiceProvider.setSubscriptions(
 				toreDownServiceProvider.getSubscriptions().stream()
 						.map(localSubscription1 -> localSubscription1.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
-						.collect(Collectors.toList()));
+						.collect(Collectors.toSet()));
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());

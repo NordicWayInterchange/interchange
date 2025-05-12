@@ -12,7 +12,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +53,7 @@ public class Listen implements Callable<Integer> {
                     .getId();
         }
         else if(option.selector != null){
-            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description))));
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
             id = addSubscriptionsResponse.getSubscriptions().stream()
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))

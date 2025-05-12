@@ -28,7 +28,7 @@ public class ServiceProvider {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
-	private List<LocalSubscription> subscriptions = new ArrayList<>();
+	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
@@ -115,7 +115,7 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 	}
 
-	public List<LocalSubscription> getSubscriptions() {
+	public Set<LocalSubscription> getSubscriptions() {
 		return subscriptions;
 	}
 
@@ -124,12 +124,12 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void addLocalSubscriptions(List<LocalSubscription> subscriptions) {
+	public void addLocalSubscriptions(Set<LocalSubscription> subscriptions) {
 		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void setSubscriptions(List<LocalSubscription> subscriptions) {
+	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
 	}
 
@@ -161,7 +161,7 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptions(List<LocalSubscription> newSubscriptions) {
+	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
 		this.setSubscriptions(newSubscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
@@ -242,11 +242,11 @@ public class ServiceProvider {
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
-	public List<LocalSubscription> getSavedSubscriptions(List<LocalSubscription> allSubscriptions){
+	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
 		return this.getSubscriptions()
 				.stream()
 				.filter(allSubscriptions::contains)
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 	}
 
 	public LocalSubscription getSubscription(String subscriptionId){

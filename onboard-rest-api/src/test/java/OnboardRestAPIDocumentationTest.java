@@ -13,7 +13,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
-        List<AddSubscription> addSubscriptions = new ArrayList<>();
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "kyrre", "DENM Sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
@@ -25,7 +25,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
-        List<AddSubscription> addSubscriptions = new ArrayList<>();
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'", "DENM sub"));
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
@@ -39,7 +39,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionForSystemTest() throws JsonProcessingException {
         //TODO for local
-        List<AddSubscription> addSubscriptions = new ArrayList<>();
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
@@ -52,7 +52,7 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
-        List<LocalActorSubscription> subscriptions = new ArrayList<>();
+        Set<LocalActorSubscription> subscriptions = new HashSet<>();
         subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",

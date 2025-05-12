@@ -4,13 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import picocli.CommandLine.ArgGroup;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.*;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +50,7 @@ public class CountMessages implements Callable<Integer> {
 
         }
         else if (option.selector != null) {
-            AddSubscriptionsRequest request = new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector)));
+            AddSubscriptionsRequest request = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector)));
             id = client.addSubscription(request).getSubscriptions().stream().filter(sub -> sub.getSelector().equals(option.selector))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))

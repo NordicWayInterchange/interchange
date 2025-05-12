@@ -1,17 +1,17 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class AddSubscriptionsRequest {
     private String name;
     private String version = "1.0";
-    private List<AddSubscription> subscriptions;
+    private Set<AddSubscription> subscriptions;
 
     public AddSubscriptionsRequest() {
     }
 
-    public AddSubscriptionsRequest(String name, List<AddSubscription> subscriptions) {
+    public AddSubscriptionsRequest(String name, Set<AddSubscription> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
     }
@@ -24,7 +24,7 @@ public class AddSubscriptionsRequest {
         return version;
     }
 
-    public List<AddSubscription> getSubscriptions() {
+    public Set<AddSubscription> getSubscriptions() {
         return subscriptions;
     }
 
@@ -36,7 +36,7 @@ public class AddSubscriptionsRequest {
         this.version = version;
     }
 
-    public void setSubscriptions(List<AddSubscription> subscriptions) {
+    public void setSubscriptions(Set<AddSubscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
