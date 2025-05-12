@@ -336,7 +336,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         ServiceProvider aServiceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(Set.of()),
-                Set.of(),
+                List.of(),
                 Set.of(aDelivery),
                 LocalDateTime.now()
         );
@@ -380,7 +380,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         ServiceProvider aServiceProvider = new ServiceProvider(
                 serviceProviderName,
                 new Capabilities(Set.of(aCap1)),
-                Set.of(),
+                List.of(),
                 Set.of(aDelivery),
                 LocalDateTime.now()
         );
