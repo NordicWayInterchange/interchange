@@ -31,7 +31,6 @@ import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,7 +108,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 1,
                 SP_NAME,
                 new Capabilities(),
-                List.of(new LocalSubscription(
+                Collections.singleton(new LocalSubscription(
                         1,
                         LocalSubscriptionStatus.REQUESTED,
                         "originatingCountry = 'NO'",

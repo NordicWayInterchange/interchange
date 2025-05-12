@@ -123,7 +123,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void tryAddingTwoMatchesWithSameLocalSubscription() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -152,7 +152,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void tryAddingMatchWithLocalSubscriptionFromBase() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
@@ -174,7 +174,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void findMatchByOneSubscriptionStatus() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
         Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
@@ -197,7 +197,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void findMatchByTwoSubscriptionStatuses() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -230,7 +230,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void localSubscriptionIsNotRemovedWhenMatchIsRemoved() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -261,7 +261,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void subscriptionIsNotRemovedWhenMatchIsRemoved() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -292,7 +292,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void matchIsNotRemovedWhenLocalSubscriptionIsRemoved() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -326,7 +326,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void matchIsNotRemovedWhenSubscriptionIsRemoved() {
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), List.of(locSub), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
 
@@ -367,12 +367,12 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         String consumerCommonName = "consumer";
         LocalSubscription locSub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, consumerCommonName);
-        ServiceProvider sp1 = new ServiceProvider(serviceProviderName1, new Capabilities(), List.of(locSub1), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp1 = new ServiceProvider(serviceProviderName1, new Capabilities(), Collections.singleton(locSub1), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp1);
 
         LocalSubscription locSub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector,consumerCommonName);
-        ServiceProvider sp2 = new ServiceProvider(serviceProviderName2, new Capabilities(), List.of(locSub2), Collections.emptySet(), LocalDateTime.now());
+        ServiceProvider sp2 = new ServiceProvider(serviceProviderName2, new Capabilities(), Collections.singleton(locSub2), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp2);
 

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -60,7 +59,7 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(new ServiceProvider(
                         "SP",
                         new Capabilities(),
-                        List.of(
+                        Collections.singleton(
                                 new LocalSubscription(
                                         LocalSubscriptionStatus.CREATED,
                                         "originatingCountry = 'NO'",
@@ -95,7 +94,7 @@ public class MatchDiscoveryServiceTest {
        ServiceProvider sp = new ServiceProvider(
                "SP",
                new Capabilities(),
-               List.of(
+               Collections.singleton(
                        new LocalSubscription(
                                LocalSubscriptionStatus.CREATED,
                                "originatingCountry = 'NO'",
@@ -147,7 +146,7 @@ public class MatchDiscoveryServiceTest {
         ServiceProvider sp = new ServiceProvider(
                 "SP",
                 new Capabilities(),
-                List.of(
+                Collections.singleton(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.CREATED,
                                 "originatingCountry = 'NO'",
@@ -186,7 +185,7 @@ public class MatchDiscoveryServiceTest {
         ServiceProvider sp = new ServiceProvider(
                 "SP",
                 new Capabilities(),
-                List.of(
+                Collections.singleton(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.CREATED,
                                 "originatingCountry = 'NO'",

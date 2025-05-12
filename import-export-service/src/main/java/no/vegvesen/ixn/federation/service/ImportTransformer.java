@@ -8,6 +8,8 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -22,7 +24,7 @@ public class ImportTransformer {
     public ServiceProvider transformServiceProviderImportApiToServiceProvider(ServiceProviderImportApi serviceProvider) {
         return new ServiceProvider(serviceProvider.getName(),
                 new Capabilities(serviceProvider.getCapabilities().stream().map(this::transformCapabilityImportApiToCapability).collect(Collectors.toSet())),
-                serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionImportApiToLocalSubscription).collect(Collectors.toList()),
+                serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionImportApiToLocalSubscription).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryImportApiToLocalDelivery).collect(Collectors.toSet()),
                 convertLongToLocalDateTime(serviceProvider.getSubscriptionsUpdated())
         );

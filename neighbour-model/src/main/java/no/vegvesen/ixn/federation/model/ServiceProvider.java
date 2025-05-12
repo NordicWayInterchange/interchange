@@ -45,7 +45,7 @@ public class ServiceProvider {
 	}
 
 	public ServiceProvider(String name,
-						   List<LocalSubscription> subscriptions) {
+						   Set<LocalSubscription> subscriptions) {
 		this.name = name;
 		this.subscriptions.addAll(subscriptions);
 	}
@@ -53,7 +53,7 @@ public class ServiceProvider {
 	public ServiceProvider(Integer id,
 						   String name,
 						   Capabilities capabilities,
-						   List<LocalSubscription> subscriptions,
+						   Set<LocalSubscription> subscriptions,
 						   LocalDateTime subscriptionUpdated) {
 
 		this.id = id;
@@ -65,7 +65,7 @@ public class ServiceProvider {
 
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
-						   List<LocalSubscription> subscriptions,
+						   Set<LocalSubscription> subscriptions,
 						   LocalDateTime subscriptionUpdated) {
 		this.name = name;
 		this.capabilities = capabilities;
@@ -81,7 +81,7 @@ public class ServiceProvider {
 
 	public ServiceProvider(String name,
 						   Capabilities capabilities,
-						   List<LocalSubscription> localSubscriptions,
+						   Set<LocalSubscription> localSubscriptions,
 						   Set<LocalDelivery> localDeliveries,
 						   LocalDateTime subscriptionUpdated) {
 		this.name = name;

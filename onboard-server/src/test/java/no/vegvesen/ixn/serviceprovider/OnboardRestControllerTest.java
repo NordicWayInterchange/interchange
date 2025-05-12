@@ -428,7 +428,7 @@ public class OnboardRestControllerTest {
 				1,
 				firstServiceProvider,
 				new Capabilities(),
-				List.of(),
+				Collections.emptySet(),
 				LocalDateTime.now()
 		);
 		when(serviceProviderRepository.findByName(firstServiceProvider))
@@ -451,7 +451,7 @@ public class OnboardRestControllerTest {
 				1,
 				firstServiceProvider,
 				new Capabilities(),
-				List.of(),
+				Collections.emptySet(),
 				LocalDateTime.now()
 		);
 		LocalDelivery localDelivery = new LocalDelivery(
@@ -484,7 +484,7 @@ public class OnboardRestControllerTest {
 				1,
 				firstServiceProvider,
 				new Capabilities(),
-				List.of(),
+				Collections.emptySet(),
 				LocalDateTime.now()
 		);
 		serviceProvider.addDeliveries(Collections.singleton(

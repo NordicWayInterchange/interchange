@@ -36,7 +36,7 @@ public class ServiceProviderImport {
         Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
         Capabilities capabilities = new Capabilities(capabilitySet);
         capabilities.setLastUpdated(LocalDateTime.now());
-        List<LocalSubscription> subscriptions = new ArrayList<>();
+        Set<LocalSubscription> subscriptions = new HashSet<>();
         for (OldLocalActorSubscription subscriptionApi : serviceProviderApi.getSubscriptions()) {
             //TODO should we not import ILLEGAL local subscriptions?
             String selector = subscriptionApi.getSelector();
