@@ -175,6 +175,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                         paddingLeft: '10px',
                         fontSize: '16px',
                     }}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <ContentCopy value={target.fullId} />
                 </Box>
