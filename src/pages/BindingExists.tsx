@@ -203,10 +203,26 @@ const BindingExists: React.FC = () => {
                         <Collapse in={expandedMap[index]} timeout="auto" unmountOnExit>
                             <List>
                                 <Box sx={serviceProviderStyle} />
-                                <GraphSection
-                                    serviceProviderName={sp.serviceProviderName}
-                                    matches={sp.matches}
-                                />
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 4,
+                                        justifyContent: 'flex-start'
+                                    }}
+                                >
+                                    {sp.matches
+                                        .filter(match => match.capabilityMatchApi.some((cap: { exists: any; }) => cap.exists))
+                                        .map((match, matchIndex) => (
+                                            <Box key={matchIndex} sx={{ flex: '1 1 48%', minWidth: '450px' }}>
+                                                <GraphSection
+                                                    serviceProviderName={sp.serviceProviderName}
+                                                    matches={[match]}
+                                                />
+                                            </Box>
+                                        ))}
+                                </Box>
+
                             </List>
                         </Collapse>
                     </Card>
