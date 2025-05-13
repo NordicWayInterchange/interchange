@@ -15,7 +15,12 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous drawing
 
-        const width = 1000;
+        const svgEl = svgRef.current;
+        if (!svgEl) return;
+
+        const boundingBox = svgEl.getBoundingClientRect();
+        const width = boundingBox.width;
+
         const rectWidth = 120;
         const rectHeight = 50;
         const verticalSpacing = 150;
@@ -35,15 +40,14 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         };
 
         matches.forEach((match, matchIndex) => {
-            // Filter capabilities that exist
             const existingCapabilities = match.capabilityMatchApi.filter((cap: { exists: any; }) => cap.exists) || [];
             if (existingCapabilities.length === 0) return;
             renderedCount++;
 
             const deliveryIdX = width / 2 - rectWidth / 2;
+            const capabilityX = width * 3 / 4 - rectWidth / 2;
             const deliveryIdY = yOffset;
 
-            // Draw Delivery ID
             svg.append('text')
                 .attr('x', deliveryIdX + rectWidth / 2)
                 .attr('y', deliveryIdY - 10)
@@ -74,7 +78,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
 
             existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
-                const x = startX + i * horizontalSpacing;
+                const capabilityX = startX + i * horizontalSpacing;
                 const bindingY = deliveryIdY + rectHeight + 40;
                 const capabilityY = bindingY + verticalSpacing;
 
@@ -82,14 +86,14 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 svg.append('line')
                     .attr('x1', deliveryIdX + rectWidth / 2)
                     .attr('y1', deliveryIdY + rectHeight)
-                    .attr('x2', x + rectWidth / 2)
+                    .attr('x2', capabilityX + rectWidth / 2)
                     .attr('y2', bindingY)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
                 // Draw Binding
                 svg.append('text')
-                    .attr('x', x + rectWidth / 2)
+                    .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
@@ -97,34 +101,34 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .text('Binding');
 
                 svg.append('rect')
-                    .attr('x', x)
+                    .attr('x', capabilityX)
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#f9c74f');
 
                 svg.append('text')
-                    .attr('x', x + rectWidth / 2)
+                    .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.binding.bindingKey));
 
-                addCopyTarget(`binding-${matchIndex}-${i}`, capability.binding.bindingKey, x + rectWidth / 2, bindingY + rectHeight / 2);
+                addCopyTarget(`binding-${matchIndex}-${i}`, capability.binding.bindingKey, capabilityX + rectWidth / 2, bindingY + rectHeight / 2);
 
                 // Line: Binding ➝ Capability
                 svg.append('line')
-                    .attr('x1', x + rectWidth / 2)
+                    .attr('x1', capabilityX + rectWidth / 2)
                     .attr('y1', bindingY + rectHeight)
-                    .attr('x2', x + rectWidth / 2)
+                    .attr('x2', capabilityX + rectWidth / 2)
                     .attr('y2', capabilityY)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
                 // Draw Capability
                 svg.append('text')
-                    .attr('x', x + rectWidth / 2)
+                    .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', capabilityY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
@@ -132,34 +136,33 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .text('CapabilityId');
 
                 svg.append('rect')
-                    .attr('x', x)
+                    .attr('x', capabilityX)
                     .attr('y', capabilityY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#8c8');
 
                 svg.append('text')
-                    .attr('x', x + rectWidth / 2)
+                    .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', capabilityY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.capabilityId));
 
-                addCopyTarget(`capability-${matchIndex}-${i}`, capability.capabilityId, x + rectWidth / 2, capabilityY + rectHeight / 2);
+                addCopyTarget(`capability-${matchIndex}-${i}`, capability.capabilityId, capabilityX + rectWidth / 2, capabilityY + rectHeight / 2);
             });
 
             yOffset += 300;
         });
 
-        // Set height based on number of drawn blocks
         setHeight(renderedCount * 300 + 100);
         setCopyTargets(targets);
     }, [matches, serviceProviderName]);
 
     return (
         <div style={{ position: 'relative' }}>
-            <svg ref={svgRef} width={1000} height={height} />
+            <svg ref={svgRef} width="100%" height={height} />
             {copyTargets.map((target, index) => (
                 <Box
                     key={index}
