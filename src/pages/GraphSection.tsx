@@ -61,7 +61,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 .attr('y', deliveryIdY)
                 .attr('width', rectWidth)
                 .attr('height', rectHeight)
-                .attr('fill', '#88c');
+                .attr('fill', '#ffbf7d');
 
             svg.append('text')
                 .attr('x', deliveryIdX + rectWidth / 2)
@@ -105,7 +105,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('fill', '#f9c74f');
+                    .attr('fill', '#FFF5C8');
 
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
@@ -140,7 +140,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr('y', capabilityY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('fill', '#8c8');
+                    .attr('fill', '#E8F3E9');
 
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
