@@ -14,10 +14,14 @@ const BindingExists: React.FC = () => {
     const {data: matchingCapabilities} = useFetchMatchingCapability(
         session?.user.commonName as string
     );
-    const [expanded, setExpanded] = useState<boolean>(true);
+    const [expandedMap, setExpandedMap] = useState<{ [index: number]: boolean }>({});
+    const [height, setHeight] = useState<number>(600); // default
 
-    const handleExpandClick = () => {
-        setExpanded((prev) => !prev);
+    const handleExpandClick = (index: number) => {
+        setExpandedMap(prev => ({
+            ...prev,
+            [index]: !prev[index],
+        }));
     };
 
     const svgRef = useRef<SVGSVGElement | null>(null);
@@ -183,19 +187,20 @@ const BindingExists: React.FC = () => {
                             }}
                         >
                             <Typography variant="h6">{sp.serviceProviderName}</Typography>
-                            <IconButton onClick={handleExpandClick} size="small">
+                            <IconButton onClick={() => handleExpandClick(index)} size="small">
                                 <Box sx={expandMoreStyle}>
                                     <ExpandMoreIcon
                                         fontSize="small"
                                         sx={{
-                                            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                                            transform: expandedMap[index] ? "rotate(180deg)" : "rotate(0deg)",
                                             transition: "transform 0.3s",
                                         }}
                                     />
                                 </Box>
                             </IconButton>
                         </CardContent>
-                        <Collapse in={expanded} timeout="auto" unmountOnExit>
+
+                        <Collapse in={expandedMap[index]} timeout="auto" unmountOnExit>
                             <List>
                                 <Box sx={serviceProviderStyle} />
                                 <GraphSection
@@ -206,7 +211,6 @@ const BindingExists: React.FC = () => {
                         </Collapse>
                     </Card>
                 ))}
-
 
             </>}
 

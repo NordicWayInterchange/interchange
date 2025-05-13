@@ -9,6 +9,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
 
     const svgRef = useRef<SVGSVGElement | null>(null);
     const [copyTargets, setCopyTargets] = useState<CopyTarget[]>([]);
+    const [height, setHeight] = useState<number>(600); // default
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -27,12 +28,18 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         };
 
         const targets: CopyTarget[] = [];
+        let renderedCount = 0;
 
         const addCopyTarget = (id: string, fullId: string, x: number, y: number) => {
             targets.push({ id, fullId, x, y });
         };
 
         matches.forEach((match, matchIndex) => {
+            // Filter capabilities that exist
+            const existingCapabilities = match.capabilityMatchApi.filter((cap: { exists: any; }) => cap.exists) || [];
+            if (existingCapabilities.length === 0) return;
+            renderedCount++;
+
             const deliveryIdX = width / 2 - rectWidth / 2;
             const deliveryIdY = yOffset;
 
@@ -62,8 +69,6 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
 
             addCopyTarget(`deliveryId-${matchIndex}`, match.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
 
-            // Filter capabilities that exist
-            const existingCapabilities = match.capabilityMatchApi.filter((cap: { exists: any; }) => cap.exists);
             const isSingle = existingCapabilities.length === 1;
             const totalWidth = horizontalSpacing * (existingCapabilities.length - 1);
             const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
@@ -147,12 +152,14 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             yOffset += 300;
         });
 
+        // Set height based on number of drawn blocks
+        setHeight(renderedCount * 300 + 100);
         setCopyTargets(targets);
     }, [matches, serviceProviderName]);
 
     return (
         <div style={{ position: 'relative' }}>
-            <svg ref={svgRef} width={1000} height={2000} />
+            <svg ref={svgRef} width={1000} height={height} />
             {copyTargets.map((target, index) => (
                 <Box
                     key={index}
