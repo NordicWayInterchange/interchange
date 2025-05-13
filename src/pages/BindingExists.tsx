@@ -7,7 +7,7 @@ import {useFetchMatchingCapability} from "@/hooks/useFetchMatchingCapability";
 import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
-import {GraphSection} from "@/pages/GraphSection";
+import GraphSection from "@/pages/GraphSection";
 
 const BindingExists: React.FC = () => {
     const {data: session} = useSession();
@@ -20,23 +20,6 @@ const BindingExists: React.FC = () => {
         setExpanded((prev) => !prev);
     };
 
-    const data = {
-        "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
-        "capabilityMatchApi": [
-            {
-                "capabilityId": "e49df956-bfb9-4849-bc07-903f30e9c4ec",
-                "shardId": 2,
-                "binding": {
-                    "bindingKey": "del-1b39c7b9-f27d-4149-9422-54360333be33",
-                    "destination": "cap-53bf21ce-0034-46c8-a0e5-60ad5716b6ba",
-                    "arguments": {
-                        "x-filter-jms-selector": "((quadTree like '%,1203%') AND (causeCode = 5) AND (messageType = 'DENM') AND (publicationId = 'NO00002:testqaw') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO')"
-                    }
-                },
-                "exists": true
-            }
-        ]
-    }
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     const [copyTargets, setCopyTargets] = useState<
@@ -188,7 +171,7 @@ const BindingExists: React.FC = () => {
     return (
         <>
             {(matchingCapabilities === undefined || matchingCapabilities === null) ? (
-                <Loading text="Matchin capabilities"/>
+                <Loading text="Matching capabilities graph"/>
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
                     <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
@@ -199,9 +182,7 @@ const BindingExists: React.FC = () => {
                                 justifyContent: "space-between",
                             }}
                         >
-                            <Box display="flex">
-                                <Typography variant="h6">{sp.serviceProviderName}</Typography>
-                            </Box>
+                            <Typography variant="h6">{sp.serviceProviderName}</Typography>
                             <IconButton onClick={handleExpandClick} size="small">
                                 <Box sx={expandMoreStyle}>
                                     <ExpandMoreIcon
@@ -225,6 +206,7 @@ const BindingExists: React.FC = () => {
                         </Collapse>
                     </Card>
                 ))}
+
 
             </>}
 

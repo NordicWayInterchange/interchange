@@ -2,19 +2,17 @@ import {useEffect, useRef, useState} from "react";
 import {Box} from "@mui/system";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import * as d3 from 'd3';
+import {CopyTarget, GraphSectionProps} from "@/types/GraphSection";
 
-export const GraphSection = ({ serviceProviderName, matches }: {
-    serviceProviderName: string;
-    matches: any[];
-}) => {
+
+const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matches }) => {
+
     const svgRef = useRef<SVGSVGElement | null>(null);
-    const [copyTargets, setCopyTargets] = useState<
-        { id: string; fullId: string; x: number; y: number }[]
-    >([]);
+    const [copyTargets, setCopyTargets] = useState<CopyTarget[]>([]);
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
-        svg.selectAll('*').remove();
+        svg.selectAll('*').remove(); // Clear previous drawing
 
         const width = 1000;
         const rectWidth = 120;
@@ -24,11 +22,11 @@ export const GraphSection = ({ serviceProviderName, matches }: {
         let yOffset = 50;
 
         const trimId = (id: string) => {
-            const parts = id.split("-");
+            const parts = id.split('-');
             return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
         };
 
-        const targets: { id: string; fullId: string; x: number; y: number }[] = [];
+        const targets: CopyTarget[] = [];
 
         const addCopyTarget = (id: string, fullId: string, x: number, y: number) => {
             targets.push({ id, fullId, x, y });
@@ -38,6 +36,7 @@ export const GraphSection = ({ serviceProviderName, matches }: {
             const deliveryIdX = width / 2 - rectWidth / 2;
             const deliveryIdY = yOffset;
 
+            // Draw Delivery ID
             svg.append('text')
                 .attr('x', deliveryIdX + rectWidth / 2)
                 .attr('y', deliveryIdY - 10)
@@ -61,28 +60,31 @@ export const GraphSection = ({ serviceProviderName, matches }: {
                 .attr('font-size', 14)
                 .text(trimId(match.deliveryId));
 
-            addCopyTarget(`deliveryId-${serviceProviderName}-${matchIndex}`, match.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
+            addCopyTarget(`deliveryId-${matchIndex}`, match.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
 
-            const capabilityMatchList = match.capabilityMatchApi.filter((c: { exists: any; }) => c.exists);
-            const isSingle = capabilityMatchList.length === 1;
-            const totalWidth = horizontalSpacing * (capabilityMatchList.length - 1);
+            // Filter capabilities that exist
+            const existingCapabilities = match.capabilityMatchApi.filter((cap: { exists: any; }) => cap.exists);
+            const isSingle = existingCapabilities.length === 1;
+            const totalWidth = horizontalSpacing * (existingCapabilities.length - 1);
             const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
 
-            capabilityMatchList.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
-                const capabilityIdX = startX + i * horizontalSpacing;
+            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
+                const x = startX + i * horizontalSpacing;
                 const bindingY = deliveryIdY + rectHeight + 40;
-                const capabilityIdY = bindingY + verticalSpacing;
+                const capabilityY = bindingY + verticalSpacing;
 
+                // Line: Delivery ➝ Binding
                 svg.append('line')
                     .attr('x1', deliveryIdX + rectWidth / 2)
                     .attr('y1', deliveryIdY + rectHeight)
-                    .attr('x2', capabilityIdX + rectWidth / 2)
+                    .attr('x2', x + rectWidth / 2)
                     .attr('y2', bindingY)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
+                // Draw Binding
                 svg.append('text')
-                    .attr('x', capabilityIdX + rectWidth / 2)
+                    .attr('x', x + rectWidth / 2)
                     .attr('y', bindingY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
@@ -90,54 +92,56 @@ export const GraphSection = ({ serviceProviderName, matches }: {
                     .text('Binding');
 
                 svg.append('rect')
-                    .attr('x', capabilityIdX)
+                    .attr('x', x)
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#f9c74f');
 
                 svg.append('text')
-                    .attr('x', capabilityIdX + rectWidth / 2)
+                    .attr('x', x + rectWidth / 2)
                     .attr('y', bindingY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.binding.bindingKey));
 
-                addCopyTarget(`bindingKey-${serviceProviderName}-${matchIndex}-${i}`, capability.binding.bindingKey, capabilityIdX + rectWidth / 2, bindingY + rectHeight / 2);
+                addCopyTarget(`binding-${matchIndex}-${i}`, capability.binding.bindingKey, x + rectWidth / 2, bindingY + rectHeight / 2);
 
+                // Line: Binding ➝ Capability
                 svg.append('line')
-                    .attr('x1', capabilityIdX + rectWidth / 2)
+                    .attr('x1', x + rectWidth / 2)
                     .attr('y1', bindingY + rectHeight)
-                    .attr('x2', capabilityIdX + rectWidth / 2)
-                    .attr('y2', capabilityIdY)
+                    .attr('x2', x + rectWidth / 2)
+                    .attr('y2', capabilityY)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
+                // Draw Capability
                 svg.append('text')
-                    .attr('x', capabilityIdX + rectWidth / 2)
-                    .attr('y', capabilityIdY - 10)
+                    .attr('x', x + rectWidth / 2)
+                    .attr('y', capabilityY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
                     .attr('font-size', 12)
                     .text('CapabilityId');
 
                 svg.append('rect')
-                    .attr('x', capabilityIdX)
-                    .attr('y', capabilityIdY)
+                    .attr('x', x)
+                    .attr('y', capabilityY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#8c8');
 
                 svg.append('text')
-                    .attr('x', capabilityIdX + rectWidth / 2)
-                    .attr('y', capabilityIdY + 30)
+                    .attr('x', x + rectWidth / 2)
+                    .attr('y', capabilityY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.capabilityId));
 
-                addCopyTarget(`capabilityId-${serviceProviderName}-${matchIndex}-${i}`, capability.capabilityId, capabilityIdX + rectWidth / 2, capabilityIdY + rectHeight / 2);
+                addCopyTarget(`capability-${matchIndex}-${i}`, capability.capabilityId, x + rectWidth / 2, capabilityY + rectHeight / 2);
             });
 
             yOffset += 300;
@@ -168,3 +172,5 @@ export const GraphSection = ({ serviceProviderName, matches }: {
         </div>
     );
 };
+
+export default GraphSection;
