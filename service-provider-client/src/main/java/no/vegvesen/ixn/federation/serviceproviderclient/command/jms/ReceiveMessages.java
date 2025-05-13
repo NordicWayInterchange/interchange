@@ -11,7 +11,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Command(name = "receive", description = "Receive messages and print them to stdout",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Examples:\n
+                        serviceproviderclient messages receive loc-60644a9f-ba59-480c-ade9-cfecda3784d6 \n
+                        serviceproviderclient messages receive -d loc-60644a9f-ba59-480c-ade9-cfecda3784d6
+                        """
+        })
 public class ReceiveMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")

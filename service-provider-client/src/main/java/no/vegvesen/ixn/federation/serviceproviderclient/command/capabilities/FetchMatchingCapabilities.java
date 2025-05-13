@@ -10,7 +10,14 @@ import java.util.concurrent.Callable;
 @Command(name = "match", description = "Fetch all capabilities in the network matching a selector",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+        """
+                Examples: \n
+                serviceproviderclient capabilities match "originatingCountry='NO'" | returns all capabilities matching originatingCountry NO \n
+                serviceproviderclient capabilities match | returns all capabilities
+                """
+})
 public class FetchMatchingCapabilities implements Callable<Integer> {
 
     @ParentCommand
