@@ -9,7 +9,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
 import GraphSection from "@/pages/GraphSection";
 
-const BindingExists: React.FC = () => {
+const MatchingCapabilitiesGraph: React.FC = () => {
     const {data: session} = useSession();
     const {data: matchingCapabilities} = useFetchMatchingCapability(
         session?.user.commonName as string
@@ -271,4 +271,4 @@ const serviceProviderStyle = {
     top: "-15px"
 };
 
-export default BindingExists;
+export default MatchingCapabilitiesGraph;
