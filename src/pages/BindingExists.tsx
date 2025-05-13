@@ -48,13 +48,11 @@ const BindingExists: React.FC = () => {
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous render
 
-
         const width = 1000;
         const rectWidth = 120;
         const rectHeight = 50;
-
-        const deliveryIdX = width / 2 - rectWidth / 2;
-        const deliveryIdY = 50;
+        const verticalSpacing = 150;
+        const horizontalSpacing = 200;
 
         const trimId = (id: string) => {
             const parts = id.split("-");
@@ -64,107 +62,101 @@ const BindingExists: React.FC = () => {
         const targets: { id: string; fullId: string; x: number; y: number }[] = [];
 
         const addCopyTarget = (id: string, fullId: string, x: number, y: number) => {
-            targets.push({id, fullId, x, y});
+            targets.push({ id, fullId, x, y });
         };
 
-        // Delivery section
-        svg.append('text')
-            .attr('x', deliveryIdX + rectWidth / 2)
-            .attr('y', deliveryIdY - 10)
-            .attr('text-anchor', 'middle')
-            .attr('fill', '#555')
-            .attr('font-size', 12)
-            .text('DeliveryId');
+        let yOffset = 50;
 
-        svg.append('rect')
-            .attr('x', deliveryIdX)
-            .attr('y', deliveryIdY)
-            .attr('width', rectWidth)
-            .attr('height', rectHeight)
-            .attr('fill', '#88c');
+        matchingCapabilities?.forEach((entry, providerIndex) => {
+            const { serviceProviderName, matches } = entry;
 
-        svg.append('text')
-            .attr('x', deliveryIdX + rectWidth / 2)
-            .attr('y', deliveryIdY + 30)
-            .attr('text-anchor', 'middle')
-            .attr('fill', '#000')
-            .attr('font-size', 14)
-            .text(trimId(data.deliveryId));
+            matches.forEach((match, matchIndex) => {
+                const deliveryIdX = width / 2 - rectWidth / 2;
+                const deliveryIdY = yOffset;
 
-        addCopyTarget('deliveryId', data.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
-        setCopyTargets(targets);
+                svg.append('text')
+                    .attr('x', deliveryIdX + rectWidth / 2)
+                    .attr('y', deliveryIdY - 10)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#555')
+                    .attr('font-size', 12)
+                    .text('DeliveryId');
 
+                svg.append('rect')
+                    .attr('x', deliveryIdX)
+                    .attr('y', deliveryIdY)
+                    .attr('width', rectWidth)
+                    .attr('height', rectHeight)
+                    .attr('fill', '#88c');
 
-        const isSingle = data.capabilityMatchApi.length === 1;
-        const capabilityIdY = 400;
-        const bindingY = (deliveryIdY + rectHeight + capabilityIdY) / 2;
-        const spacing = 200;
-        const totalWidth = spacing * (data.capabilityMatchApi.length - 1);
-        const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
+                svg.append('text')
+                    .attr('x', deliveryIdX + rectWidth / 2)
+                    .attr('y', deliveryIdY + 30)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#000')
+                    .attr('font-size', 14)
+                    .text(trimId(match.deliveryId));
 
-        console.log('useFetchMatchingCapabilities', matchingCapabilities);
+                addCopyTarget(`deliveryId-${serviceProviderName}-${matchIndex}`, match.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
 
-        matchingCapabilities?.forEach((entry,i) => {
-            const capabilityIdX = isSingle
-                ? startX
-                : startX + i * spacing;
-            const { serviceProviderName, matches } = entry
-            matches.forEach(match => {
-                match.capabilityMatchApi.forEach((capability: { exists: any; binding: { bindingKey: string; }; capabilityId: string; }) => {
-                    if (capability.exists) {
-                        svg.append('line')
-                            .attr('x1', deliveryIdX + rectWidth / 2)
-                            .attr('y1', deliveryIdY + rectHeight)
-                            .attr('x2', capabilityIdX + rectWidth / 2)
-                            .attr('y2', bindingY)
-                            .attr('stroke', '#333')
-                            .attr('stroke-width', 2);
+                const capabilityMatchList = match.capabilityMatchApi.filter((c: { exists: any; }) => c.exists);
+                const isSingle = capabilityMatchList.length === 1;
+                const totalWidth = horizontalSpacing * (capabilityMatchList.length - 1);
+                const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
 
-                        svg.append('text')
-                            .attr('x', capabilityIdX + rectWidth / 2)
-                            .attr('y', bindingY - 10)
-                            .attr('text-anchor', 'middle')
-                            .attr('fill', '#555')
-                            .attr('font-size', 12)
-                            .text('Binding');
+                capabilityMatchList.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
+                    const capabilityIdX = startX + i * horizontalSpacing;
+                    const bindingY = deliveryIdY + rectHeight + 40;
+                    const capabilityIdY = bindingY + verticalSpacing;
 
-                        svg.append('rect')
-                            .attr('x', capabilityIdX)
-                            .attr('y', bindingY)
-                            .attr('width', rectWidth)
-                            .attr('height', rectHeight)
-                            .attr('fill', '#f9c74f');
+                    svg.append('line')
+                        .attr('x1', deliveryIdX + rectWidth / 2)
+                        .attr('y1', deliveryIdY + rectHeight)
+                        .attr('x2', capabilityIdX + rectWidth / 2)
+                        .attr('y2', bindingY)
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2);
 
-                        svg.append('text')
-                            .attr('x', capabilityIdX + rectWidth / 2)
-                            .attr('y', bindingY + 30)
-                            .attr('text-anchor', 'middle')
-                            .attr('fill', '#000')
-                            .attr('font-size', 14)
-                            .text(trimId(capability.binding.bindingKey));
+                    svg.append('text')
+                        .attr('x', capabilityIdX + rectWidth / 2)
+                        .attr('y', bindingY - 10)
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#555')
+                        .attr('font-size', 12)
+                        .text('Binding');
 
-                        addCopyTarget(`binding-key-${serviceProviderName}`, capability.binding.bindingKey, capabilityIdX + rectWidth / 2, bindingY + rectHeight / 2);
+                    svg.append('rect')
+                        .attr('x', capabilityIdX)
+                        .attr('y', bindingY)
+                        .attr('width', rectWidth)
+                        .attr('height', rectHeight)
+                        .attr('fill', '#f9c74f');
 
-                        setCopyTargets(targets);
+                    svg.append('text')
+                        .attr('x', capabilityIdX + rectWidth / 2)
+                        .attr('y', bindingY + 30)
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#000')
+                        .attr('font-size', 14)
+                        .text(trimId(capability.binding.bindingKey));
 
-                        // 3. Line: binding.key to capabilityId
-                        svg.append('line')
-                            .attr('x1', capabilityIdX + rectWidth / 2)
-                            .attr('y1', bindingY + rectHeight)
-                            .attr('x2', capabilityIdX + rectWidth / 2)
-                            .attr('y2', capabilityIdY)
-                            .attr('stroke', '#333')
-                            .attr('stroke-width', 2);
-                    }
+                    addCopyTarget(`bindingKey-${serviceProviderName}-${matchIndex}-${i}`, capability.binding.bindingKey, capabilityIdX + rectWidth / 2, bindingY + rectHeight / 2);
 
-                        //Capability section
+                    svg.append('line')
+                        .attr('x1', capabilityIdX + rectWidth / 2)
+                        .attr('y1', bindingY + rectHeight)
+                        .attr('x2', capabilityIdX + rectWidth / 2)
+                        .attr('y2', capabilityIdY)
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2);
+
                     svg.append('text')
                         .attr('x', capabilityIdX + rectWidth / 2)
                         .attr('y', capabilityIdY - 10)
                         .attr('text-anchor', 'middle')
                         .attr('fill', '#555')
                         .attr('font-size', 12)
-                        .text('capabilityId');
+                        .text('CapabilityId');
 
                     svg.append('rect')
                         .attr('x', capabilityIdX)
@@ -181,14 +173,14 @@ const BindingExists: React.FC = () => {
                         .attr('font-size', 14)
                         .text(trimId(capability.capabilityId));
 
-
-                    addCopyTarget(`capabilityId-${serviceProviderName}`, capability.capabilityId, capabilityIdX + rectWidth / 2, capabilityIdY + rectHeight / 2);
-                    console.log('targets', targets)
-                    setCopyTargets(targets);
-
+                    addCopyTarget(`capabilityId-${serviceProviderName}-${matchIndex}-${i}`, capability.capabilityId, capabilityIdX + rectWidth / 2, capabilityIdY + rectHeight / 2);
                 });
+
+                yOffset += 350;
             });
         });
+
+        setCopyTargets(targets);
 
     }, [matchingCapabilities]);
 
