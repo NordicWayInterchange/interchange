@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
-import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import {Box} from "@mui/system";
 
 import {useSession} from "next-auth/react";
@@ -8,6 +7,7 @@ import {useFetchMatchingCapability} from "@/hooks/useFetchMatchingCapability";
 import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
+import {GraphSection} from "@/pages/GraphSection";
 
 const BindingExists: React.FC = () => {
     const {data: session} = useSession();
@@ -191,8 +191,14 @@ const BindingExists: React.FC = () => {
                 <Loading text="Matchin capabilities"/>
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
-                    <Card key={index} variant="outlined" sx={{marginBottom: 2}}>
-                        <CardContent sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
+                        <CardContent
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <Box display="flex">
                                 <Typography variant="h6">{sp.serviceProviderName}</Typography>
                             </Box>
@@ -202,43 +208,24 @@ const BindingExists: React.FC = () => {
                                         fontSize="small"
                                         sx={{
                                             transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                                            transition: "transform 0.3s"
+                                            transition: "transform 0.3s",
                                         }}
                                     />
                                 </Box>
                             </IconButton>
-
                         </CardContent>
                         <Collapse in={expanded} timeout="auto" unmountOnExit>
                             <List>
-                                <Box sx={serviceProviderStyle}/>
-                                <div style={{position: 'relative'}}>
-                                    <svg ref={svgRef} width={1000} height={650}/>
-                                    {copyTargets.map((target, index) => (
-                                        <Box
-                                            key={index}
-                                            sx={{
-                                                position: 'absolute',
-                                                left: target.x + 15,
-                                                top: target.y,
-                                                cursor: 'pointer',
-                                                borderRadius: '4px',
-                                                paddingLeft: '10px',
-                                                fontSize: '16px',
-
-                                            }}
-                                        >
-                                            <ContentCopy
-                                                value={target.fullId}
-                                            />
-                                        </Box>
-                                    ))}
-                                </div>
+                                <Box sx={serviceProviderStyle} />
+                                <GraphSection
+                                    serviceProviderName={sp.serviceProviderName}
+                                    matches={sp.matches}
+                                />
                             </List>
                         </Collapse>
-
                     </Card>
                 ))}
+
             </>}
 
         </>
