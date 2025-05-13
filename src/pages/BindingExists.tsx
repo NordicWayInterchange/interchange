@@ -15,7 +15,6 @@ const BindingExists: React.FC = () => {
         session?.user.commonName as string
     );
     const [expandedMap, setExpandedMap] = useState<{ [index: number]: boolean }>({});
-    const [height, setHeight] = useState<number>(600); // default
 
     const handleExpandClick = (index: number) => {
         setExpandedMap(prev => ({
@@ -178,16 +177,20 @@ const BindingExists: React.FC = () => {
                 <Loading text="Matching capabilities graph"/>
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
-                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
+                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }} onClick={() => handleExpandClick(index)}>
                         <CardContent
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-between",
+                                cursor: 'pointer'
                             }}
                         >
                             <Typography variant="h6">{sp.serviceProviderName}</Typography>
-                            <IconButton onClick={() => handleExpandClick(index)} size="small">
+                            <IconButton onClick={(e) => {
+                                e.stopPropagation();
+                                handleExpandClick(index);
+                            }} size="small">
                                 <Box sx={expandMoreStyle}>
                                     <ExpandMoreIcon
                                         fontSize="small"
