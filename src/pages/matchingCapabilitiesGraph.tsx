@@ -40,7 +40,9 @@ const MatchingCapabilitiesGraph: React.FC = () => {
         const verticalSpacing = 150;
         const horizontalSpacing = 200;
 
-        const trimId = (id: string) => {
+        const trimId = (id: string | undefined | null): string => {
+            if (!id || typeof id !== "string") return "";
+
             const parts = id.split("-");
             return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
         };
