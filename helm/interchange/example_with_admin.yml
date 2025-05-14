@@ -1,7 +1,6 @@
 # Secrets:
 key_store_password: password                                      # Key store password
 trust_store_password: password                                    # Trust store password
-interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
 admin_password: not-a-secure-password                             # Password for a Qpid administrative user
 postgres_user: federation                                         # Database user
 postgres_password: federation                                     # Database password
