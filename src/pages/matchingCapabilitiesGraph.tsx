@@ -53,7 +53,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
 
         let yOffset = 50;
 
-        matchingCapabilities?.forEach((entry, providerIndex) => {
+        matchingCapabilities?.forEach((entry) => {
             const { serviceProviderName, matches } = entry;
 
             matches.forEach((match, matchIndex) => {

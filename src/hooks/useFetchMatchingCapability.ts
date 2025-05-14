@@ -7,7 +7,7 @@ const fetchMatchingCapability: (commonName: string) => Promise<Awaited<{
     serviceProviderName: string;
     matches: Awaited<any>[]
 } | { serviceProviderName: string; matches: any[] }>[]> = async (commonName: string) => {
-    const res = await fetch(`${commonName}/serviceproviders`);
+    const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         const serviceProviders: ServiceProviders[] = await res.json();
         const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
