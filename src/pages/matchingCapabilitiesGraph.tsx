@@ -7,7 +7,7 @@ import {useFetchMatchingCapability} from "@/hooks/useFetchMatchingCapability";
 import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
-import GraphSection from "@/pages/GraphSection";
+import GraphSection from "@/components/graphs/GraphSection";
 
 const MatchingCapabilitiesGraph: React.FC = () => {
     const {data: session} = useSession();

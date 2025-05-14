@@ -45,7 +45,6 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             renderedCount++;
 
             const deliveryIdX = width / 2 - rectWidth / 2;
-            const capabilityX = width * 3 / 4 - rectWidth / 2;
             const deliveryIdY = yOffset;
 
             svg.append('text')
