@@ -37,7 +37,7 @@ const SIDE_PAGES: Array<IPages> = [
     },
     {
         text: "Graph visualizer",
-        url: "/MatchingCapabilitiesGraph",
+        url: "/matchingCapabilitiesGraph",
         icon: <EqualizerIcon />
     },
 ];
