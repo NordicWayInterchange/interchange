@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
                         serviceproviderclient subscriptions listen -f sub.json \n
                         serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory \n
                         serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory -c "NO subscription" \n
-                        | -d and -c is optional
+                        # -d and -c is optional
                         """
         })
 public class Listen implements Callable<Integer> {

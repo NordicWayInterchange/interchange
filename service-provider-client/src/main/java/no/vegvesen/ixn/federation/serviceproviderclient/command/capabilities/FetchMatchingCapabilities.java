@@ -14,8 +14,8 @@ import java.util.concurrent.Callable;
         customSynopsis = {
         """
                 Examples: \n
-                serviceproviderclient capabilities match "originatingCountry='NO'" | returns all capabilities matching originatingCountry NO \n
-                serviceproviderclient capabilities match | returns all capabilities
+                serviceproviderclient capabilities match "originatingCountry='NO'" # returns all capabilities matching originatingCountry NO \n
+                serviceproviderclient capabilities match # returns all capabilities
                 """
 })
 public class FetchMatchingCapabilities implements Callable<Integer> {
