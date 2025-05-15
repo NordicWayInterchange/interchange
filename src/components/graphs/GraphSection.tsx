@@ -40,7 +40,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         };
 
         matches.forEach((match, matchIndex) => {
-            const existingCapabilities = match.capabilityMatchApi.filter((cap: { exists: any; }) => cap.exists) || [];
+            const existingCapabilities = match.capabilityMatchApi?.filter((cap: { exists: any; }) => cap.exists) || [];
             if (existingCapabilities.length === 0) return;
             renderedCount++;
 
