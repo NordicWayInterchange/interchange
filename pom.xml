@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.15-SNAPSHOT</version>
+    <version>1.0.17-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -260,5 +260,6 @@
         <module>service-provider-client</module>
         <module>admin-server-app</module>
         <module>import-export-service</module>
+        <module>csr-generator</module>
     </modules>
 </project>

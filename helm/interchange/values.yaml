@@ -59,6 +59,7 @@ routing_configurer:
 napcore_server:
   replicas: 1
   enabled: false
+  mount_path: /jks/signer/
 
 napcore_frontend:
   enabled: false
