@@ -335,25 +335,22 @@ public class ServiceProviderRouter {
             if (!capability.hasShards()) {
                 List<CapabilityShard> newShards = new ArrayList<>();
                 int numberOfShards = capability.getMetadata().getShardCount();
-                for (int i = 1; i<=numberOfShards; i++) {
-                    String exchangeName = "cap-" +UUID.randomUUID();
-                    Exchange exchange = qpidClient.getExchange(exchangeName);
-                    if(exchange == null) {
-                        exchange = qpidClient.createHeadersExchange(exchangeName);
-                        logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
-                        delta.addExchange(exchange);
+                for (int i = 0; i < numberOfShards; i++) {
+                    String exchangeName = "cap-" + UUID.randomUUID();
+                    Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
+                    logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+                    delta.addExchange(exchange);
 
-                        String capabilitySelector;
-                        if (capability.isSharded()) {
-                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i);
-                        } else {
-                            capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
-                        }
-                        CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
-                        newShards.add(newShard);
+                    String capabilitySelector;
+                    if (capability.isSharded()) {
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
+                    } else {
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                     }
+                    CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
+                    newShards.add(newShard);
                 }
-                capability.addShards(newShards);
+                capability.setShards(newShards);
                 capability.setStatus(CapabilityStatus.CREATED);
             } else {
                 for (CapabilityShard shard : capability.getShards()) {
