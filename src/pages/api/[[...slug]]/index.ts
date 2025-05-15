@@ -3,7 +3,8 @@ import {NextApiRequest, NextApiResponse} from "next";
 import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
-    fetchAdminUIExchangeValidator,
+    fetchAdminUIDeliveryIds,
+    fetchAdminUIExchangeValidator, fetchAdminUIMatchingCapabilities,
     fetchAdminUINeighbours, fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
@@ -12,6 +13,7 @@ import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {GraphSectionProps} from "@/types/GraphSection";
 
 interface CustomSession extends Session {
     user: {
@@ -36,6 +38,19 @@ const fetchPrivateChannels = async (params: extendedGetParams) => {
     const res = await fetchAdminUIPrivateChannels(params);
     const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
     return [res.status, privateChannels];
+};
+
+const fetchDeliveryIds = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIDeliveryIds(params);
+    const deliveryIds: Array<string> = await res.data;
+    return [res.status, deliveryIds];
+};
+
+const fetchMatchingCapabilitiesForDeliveries = async (params: extendedGetParams) => {
+    console.log('Nikki')
+    const res = await fetchAdminUIMatchingCapabilities(params);
+    const matchingCapabilities: Array<GraphSectionProps> = await res.data;
+    return [res.status, matchingCapabilities];
 };
 
 const fetchQueueValidator = async (params: extendedGetParams) => {
@@ -68,6 +83,8 @@ const getPaths: {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
+    "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
@@ -91,41 +108,50 @@ const findHandler: (params: any) =>
         case "GET":
             const possiblePaths = Object.keys(getPaths);
             const lastSegment = path[path.length - 1];
-            const fn = getPaths[lastSegment];
+
+            const normalizedPath = path.join('/').replace(/^\/api\//, '');
 
             const matchedPath = possiblePaths.find((p) => {
                 const patternSegments = p.split("/").filter(Boolean);
-                if (patternSegments.length !== path.length) {
+                const normalizedSegments = normalizedPath.split("/").filter(Boolean);
+
+                if (patternSegments.length !== normalizedSegments.length) {
                     return false;
                 }
-                return path.every((segment: any, index: number) => {
-                    return patternSegments[index] === "[serviceProviderName]" || patternSegments[index] === segment;
+
+                return normalizedSegments.every((segment: any, index: number) => {
+                    return patternSegments[index] === "[serviceProviderName]" ||
+                        patternSegments[index] === "[deliveryId]" ||
+                        patternSegments[index] === segment;
                 });
             });
 
+            // If we find a matching path pattern
             if (matchedPath) {
                 return {
                     fn: getPaths[matchedPath],
                     params: {
                         actorCommonName,
-                        serviceProviderName: path[1]
+                        serviceProviderName: path[1],
+                        deliveryId: path[3],
                     },
                 };
             }
 
             if (possiblePaths.includes(lastSegment)) {
                 return {
-                    fn,
+                    fn: getPaths[lastSegment],
                     params: { actorCommonName, selector },
                 };
             }
+
             if (path.length > 1 && possiblePaths.includes(path[0])) {
                 return {
                     fn: getPaths[path[0]],
                     params: { actorCommonName, pathParam: path[1] },
                 };
             }
-
+            throw new Error("No matching path found");
         default:
             return {};
     }
