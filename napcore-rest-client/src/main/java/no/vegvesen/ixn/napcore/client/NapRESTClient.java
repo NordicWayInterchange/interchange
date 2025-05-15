@@ -1,28 +1,21 @@
 package no.vegvesen.ixn.napcore.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import no.vegvesen.ixn.cert.CsrGenerator;
+import no.vegvesen.ixn.cert.KeyPairAndCsr;
 import no.vegvesen.ixn.napcore.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -208,55 +201,20 @@ public class NapRESTClient {
         restTemplate.delete(url);
     }
 
-    public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
+    public KeyPairAndCsr generateKeyAndCSR(String serviceProviderName, String country) {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            X500Principal x500Principal = new X500Principal(
+            X500Name x500Name = new X500Name(
                     String.format(
-                            "emailAddress=test@test.com, CN=%s, O=Nordic Way, C=%s",
+                            "emailAddress=%s, CN=%s, O=Nordic Way, C=%s",
+                            serviceProviderName + "@test.com",
                             serviceProviderName,
                             country
                     )
             );
-            JcaPKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(x500Principal, keyPair.getPublic());
-            JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder("SHA256withRSA");
-            ContentSigner signer = signBuilder.build(keyPair.getPrivate());
-            PKCS10CertificationRequest csr = builder.build(signer);
-            StringWriter csrWriter = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(csrWriter);
-            pemWriter.writeObject(csr);
-            pemWriter.close();
-            String csrString = csrWriter.toString();
-            StringWriter keyWriter = new StringWriter();
-            pemWriter = new JcaPEMWriter(keyWriter);
-            pemWriter.writeObject(keyPair);
-            pemWriter.close();
-            String keyString = keyWriter.toString();
-            return new KeyAndCSR(keyString,csrString);
-
-        } catch (NoSuchAlgorithmException | OperatorCreationException | IOException e) {
+            return new CsrGenerator("RSA",2048,"SHA512withRSA").generateKeyPairAndCsr(x500Name);
+        } catch (NoSuchAlgorithmException | OperatorCreationException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static class KeyAndCSR {
-        private String key;
-
-        private String csr;
-
-        public KeyAndCSR(String key, String csr) {
-            this.key = key;
-            this.csr = csr;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getCsr() {
-            return csr;
-        }
-    }
 }
