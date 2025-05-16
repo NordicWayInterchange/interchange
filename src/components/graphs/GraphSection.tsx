@@ -19,13 +19,12 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         if (!svgEl) return;
 
         const boundingBox = svgEl.getBoundingClientRect();
-        const width = boundingBox.width;
-
+        const svgHeight = 600;
         const rectWidth = 120;
         const rectHeight = 50;
         const verticalSpacing = 150;
-        const horizontalSpacing = 200;
-        let yOffset = 50;
+        const horizontalSpacing = 300;
+        let xOffset = 50;
 
         const trimId = (id: string) => {
             const parts = id.split('-');
@@ -33,19 +32,13 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         };
 
         const targets: CopyTarget[] = [];
-        let renderedCount = 0;
-
-        const addCopyTarget = (id: string, fullId: string, x: number, y: number) => {
-            targets.push({ id, fullId, x, y });
-        };
 
         matches.forEach((match, matchIndex) => {
             const existingCapabilities = match.capabilityMatchApi?.filter((cap: { exists: any; }) => cap.exists) || [];
             if (existingCapabilities.length === 0) return;
-            renderedCount++;
 
-            const deliveryIdX = width / 2 - rectWidth / 2;
-            const deliveryIdY = yOffset;
+            const deliveryIdX = xOffset;
+            const deliveryIdY = svgHeight / 2 - rectHeight - verticalSpacing;
 
             svg.append('text')
                 .attr('x', deliveryIdX + rectWidth / 2)
@@ -70,29 +63,35 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 .attr('font-size', 14)
                 .text(trimId(match.deliveryId));
 
-            addCopyTarget(`deliveryId-${matchIndex}`, match.deliveryId, deliveryIdX + rectWidth / 2, deliveryIdY + rectHeight / 2);
+            targets.push({
+                id: `deliveryId-${matchIndex}`,
+                fullId: match.deliveryId,
+                x: deliveryIdX + rectWidth / 2,
+                y: deliveryIdY + rectHeight / 2
+            });
 
             const isSingle = existingCapabilities.length === 1;
-            const totalWidth = horizontalSpacing * (existingCapabilities.length - 1);
-            const startX = isSingle ? width / 2 - rectWidth / 2 : width / 2 - totalWidth / 2;
+            const startY = svgHeight / 2 - rectHeight / 2; // center line
+
 
             existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
-                const capabilityX = startX + i * horizontalSpacing;
-                const bindingY = deliveryIdY + rectHeight + 40;
-                const capabilityY = bindingY + verticalSpacing;
+                const bindingX = deliveryIdX + rectWidth + 40;
+                const capabilityX = bindingX + rectWidth + 40;
+                const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
+                const bindingY = startY + offset;
 
                 // Line: Delivery ➝ Binding
                 svg.append('line')
-                    .attr('x1', deliveryIdX + rectWidth / 2)
-                    .attr('y1', deliveryIdY + rectHeight)
-                    .attr('x2', capabilityX + rectWidth / 2)
-                    .attr('y2', bindingY)
+                    .attr('x1', deliveryIdX + rectWidth)
+                    .attr('y1', deliveryIdY + rectHeight / 2)
+                    .attr('x2', bindingX)
+                    .attr('y2', bindingY + rectHeight / 2)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                // Draw Binding
+                // Binding box
                 svg.append('text')
-                    .attr('x', capabilityX + rectWidth / 2)
+                    .attr('x', bindingX + rectWidth / 2)
                     .attr('y', bindingY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
@@ -100,35 +99,40 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .text('Binding');
 
                 svg.append('rect')
-                    .attr('x', capabilityX)
+                    .attr('x', bindingX)
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#FFF5C8');
 
                 svg.append('text')
-                    .attr('x', capabilityX + rectWidth / 2)
+                    .attr('x', bindingX + rectWidth / 2)
                     .attr('y', bindingY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.binding.bindingKey));
 
-                addCopyTarget(`binding-${matchIndex}-${i}`, capability.binding.bindingKey, capabilityX + rectWidth / 2, bindingY + rectHeight / 2);
+                targets.push({
+                    id: `binding-${matchIndex}-${i}`,
+                    fullId: capability.binding.bindingKey,
+                    x: bindingX + rectWidth / 2,
+                    y: bindingY + rectHeight / 2
+                });
 
                 // Line: Binding ➝ Capability
                 svg.append('line')
-                    .attr('x1', capabilityX + rectWidth / 2)
-                    .attr('y1', bindingY + rectHeight)
-                    .attr('x2', capabilityX + rectWidth / 2)
-                    .attr('y2', capabilityY)
+                    .attr('x1', bindingX + rectWidth)
+                    .attr('y1', bindingY + rectHeight / 2)
+                    .attr('x2', capabilityX)
+                    .attr('y2', bindingY + rectHeight / 2)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                // Draw Capability
+                // Capability box
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
-                    .attr('y', capabilityY - 10)
+                    .attr('y', bindingY - 10)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
                     .attr('font-size', 12)
@@ -136,26 +140,31 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
 
                 svg.append('rect')
                     .attr('x', capabilityX)
-                    .attr('y', capabilityY)
+                    .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#E8F3E9');
 
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
-                    .attr('y', capabilityY + 30)
+                    .attr('y', bindingY + 30)
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .text(trimId(capability.capabilityId));
 
-                addCopyTarget(`capability-${matchIndex}-${i}`, capability.capabilityId, capabilityX + rectWidth / 2, capabilityY + rectHeight / 2);
+                targets.push({
+                    id: `capability-${matchIndex}-${i}`,
+                    fullId: capability.capabilityId,
+                    x: capabilityX + rectWidth / 2,
+                    y: bindingY + rectHeight / 2
+                });
             });
 
-            yOffset += 300;
+            xOffset += horizontalSpacing + 300;
         });
 
-        setHeight(renderedCount * 300 + 100);
+        setHeight(svgHeight);
         setCopyTargets(targets);
     }, [matches, serviceProviderName]);
 
