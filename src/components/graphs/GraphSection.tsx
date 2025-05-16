@@ -7,7 +7,7 @@ import { CopyTarget, GraphSectionProps } from "@/types/GraphSection";
 const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matches }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const [copyTargets, setCopyTargets] = useState<CopyTarget[]>([]);
-    const [height, setHeight] = useState<number>(600); // default height
+    const [height, setHeight] = useState<number>(600);
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -16,9 +16,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         const svgEl = svgRef.current;
         if (!svgEl) return;
 
-        const boundingBox = svgEl.getBoundingClientRect();
         const baseHeight = 600;
-        const width = boundingBox.width;
 
         const rectWidth = 120;
         const rectHeight = 50;
@@ -181,7 +179,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             xOffset += horizontalSpacing + 300;
         });
 
-        setHeight(Math.max(baseHeight, maxY + 100)); // Add buffer at bottom
+        setHeight(Math.max(baseHeight, maxY + 100));
         setCopyTargets(targets);
     }, [matches, serviceProviderName]);
 
@@ -193,7 +191,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 height={height}
                 style={{
                     minHeight: 600,
-                    border: "1px solid red", // Optional: helpful for debugging overflow
+                    border: "1px solid red",
                 }}
             />
             {copyTargets.map((target, index) => (
