@@ -53,7 +53,7 @@ const fetchCapabilitiesDetails = async (commonName: string): Promise<ProviderMat
                     const matchData = await matchResponse.json();
                     const matchList = matchData.capabilityMatchApi ?? [];
 
-                    const matchDetails = await Promise.all(
+                    const capabilityDetails = await Promise.all(
                         matchList.map(async (match: { capabilityId: string }) => {
                             if (!match?.capabilityId) return null;
                             const detailResp = await fetch(
@@ -70,7 +70,7 @@ const fetchCapabilitiesDetails = async (commonName: string): Promise<ProviderMat
                     return {
                         deliveryId: matchData.deliveryId,
                         capabilityMatchApi: matchList,
-                        matchDetails: matchDetails.filter(Boolean) // remove nulls
+                        capabilityDetails: capabilityDetails.filter(Boolean) // remove nulls
                     };
                 })
             );

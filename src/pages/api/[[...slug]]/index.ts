@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIDeliveryIds,
-    fetchAdminUIExchangeValidator, fetchAdminUIMatchingCapabilities,
+    fetchAdminUIExchangeValidator, fetchAdminUIMatchingCapabilities, fetchAdminUIMatchingCapabilityDetails,
     fetchAdminUINeighbours, fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
@@ -52,6 +52,12 @@ const fetchMatchingCapabilitiesForDeliveries = async (params: extendedGetParams)
     return [res.status, matchingCapabilities];
 };
 
+const fetchMatchingCapabilityDetailsForDeliveries = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIMatchingCapabilityDetails(params);
+    const matchingCapabilityDetails: Array<GraphSectionProps> = await res.data;
+    return [res.status, matchingCapabilityDetails];
+};
+
 const fetchQueueValidator = async (params: extendedGetParams) => {
     const res = await fetchAdminUIQueueValidator(params);
     const queueExists: boolean = await res.data;
@@ -84,6 +90,7 @@ const getPaths: {
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[deliveryId]": fetchMatchingCapabilityDetailsForDeliveries,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
