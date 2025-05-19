@@ -11,7 +11,7 @@ type ProviderMatches = {
     matches: MatchResult[];
 };
 
-const fetchMatchingCapability = async (commonName: string): Promise<ProviderMatches[]> => {
+const fetchMatchingCapabilities = async (commonName: string): Promise<ProviderMatches[]> => {
     const serviceProvidersResponse = await fetch(`/api/${commonName}/serviceproviders`);
 
     if (!serviceProvidersResponse.ok) {
@@ -38,7 +38,6 @@ const fetchMatchingCapability = async (commonName: string): Promise<ProviderMatc
             }
 
             const deliveryIds: string[] = await deliveriesResponse.json();
-            console.log('deliveryIds', deliveryIds);
 
             const matches: MatchResult[] = await Promise.all(
                 deliveryIds.map(async (deliveryId) => {
@@ -69,11 +68,11 @@ const fetchMatchingCapability = async (commonName: string): Promise<ProviderMatc
     return results;
 };
 
-const useFetchMatchingCapability = (commonName: string) => {
+const useFetchMatchingCapabilities = (commonName: string) => {
     return useQuery({
         queryKey: ["matchingCapabilities"],
-        queryFn: () => fetchMatchingCapability(commonName),
+        queryFn: () => fetchMatchingCapabilities(commonName),
     });
 };
 
-export { useFetchMatchingCapability };
+export { useFetchMatchingCapabilities };

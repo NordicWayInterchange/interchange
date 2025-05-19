@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import {Box} from "@mui/system";
 
 import {useSession} from "next-auth/react";
-import {useFetchMatchingCapability} from "@/hooks/useFetchMatchingCapability";
+import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
 import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
@@ -11,7 +11,7 @@ import GraphSection from "@/components/graphs/GraphSection";
 
 const MatchingCapabilitiesGraph: React.FC = () => {
     const {data: session} = useSession();
-    const {data: matchingCapabilities} = useFetchMatchingCapability(
+    const {data: matchingCapabilities} = useFetchMatchingCapabilities(
         session?.user.commonName as string
     );
     const [expandedMap, setExpandedMap] = useState<{ [index: number]: boolean }>({});

@@ -47,7 +47,6 @@ const fetchDeliveryIds = async (params: extendedGetParams) => {
 };
 
 const fetchMatchingCapabilitiesForDeliveries = async (params: extendedGetParams) => {
-    console.log('Nikki')
     const res = await fetchAdminUIMatchingCapabilities(params);
     const matchingCapabilities: Array<GraphSectionProps> = await res.data;
     return [res.status, matchingCapabilities];

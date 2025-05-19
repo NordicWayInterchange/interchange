@@ -71,7 +71,6 @@ export const fetchAdminUIDeliveryIds: extendedGetFunction = async (params) => {
 
 export const fetchAdminUIMatchingCapabilities: extendedGetFunction = async (params) => {
     const { actorCommonName, serviceProviderName, deliveryId} = params;
-    console.log('paramssss', params);
     return await fetchIXN(actorCommonName, `/serviceproviders/${serviceProviderName}/deliveries/${deliveryId}/matches`);
 };
 
