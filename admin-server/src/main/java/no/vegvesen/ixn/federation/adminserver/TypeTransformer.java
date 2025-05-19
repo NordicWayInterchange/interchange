@@ -101,7 +101,7 @@ public class TypeTransformer {
         for (PrivateChannel privateChannel : privateChannelList) {
             privateChannelApiList.add(new PrivateChannelApi(
                     privateChannel.getUuid(),
-                    privateChannel.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN)).map(Peer::getName).collect(Collectors.toSet()),
+                    privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet()),
                     privateChannelStatusToPrivateChannelStatusApi(privateChannel.getStatus()),
                     privateChannel.getDescription(),
                     privateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
