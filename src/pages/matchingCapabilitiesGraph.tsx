@@ -239,8 +239,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                             >
                                                 <GraphSection
                                                     serviceProviderName={sp.serviceProviderName}
-                                                    matches={[match]}
-                                                />
+                                                    matches={[match]} capabilityDetails={[]}                                                />
                                             </Box>
                                         ))}
                                 </Box>
