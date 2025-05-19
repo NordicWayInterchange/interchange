@@ -8,12 +8,18 @@ import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/ma
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
 import GraphSection from "@/components/graphs/GraphSection";
+import {useFetchCapabilitiesDetailsDetails} from "@/hooks/useFetchCapabilitiesDetails";
 
 const MatchingCapabilitiesGraph: React.FC = () => {
     const {data: session} = useSession();
     const {data: matchingCapabilities} = useFetchMatchingCapabilities(
         session?.user.commonName as string
     );
+
+    const {data: capabilityDetails} = useFetchCapabilitiesDetailsDetails(
+        session?.user.commonName as string
+    );
+    console.log('capabilityDetails', capabilityDetails);
     const [expandedMap, setExpandedMap] = useState<{ [index: number]: boolean }>({});
 
     const handleExpandClick = (index: number) => {
