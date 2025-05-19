@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { ServiceProviders } from "@/types/serviceProviders";
+import {useQuery} from "@tanstack/react-query";
+import {ServiceProviders} from "@/types/serviceProviders";
 
 type MatchResult = {
     deliveryId: string;
@@ -21,20 +21,20 @@ const fetchMatchingCapabilities = async (commonName: string): Promise<ProviderMa
 
     const serviceProviders: ServiceProviders[] = await serviceProvidersResponse.json();
 
-    const results = await Promise.all(
+    return await Promise.all(
         serviceProviders.map(async (provider) => {
             const providerName = provider?.name;
 
             if (!providerName) {
                 console.warn("Service provider name is missing", provider);
-                return { serviceProviderName: "unknown", matches: [] };
+                return {serviceProviderName: "unknown", matches: []};
             }
 
             const deliveriesResponse = await fetch(`/api/${commonName}/serviceproviders/${providerName}/deliveries`);
 
             if (!deliveriesResponse.ok) {
                 console.error(`Couldn't fetch deliveries for ${providerName}`);
-                return { serviceProviderName: providerName, matches: [] };
+                return {serviceProviderName: providerName, matches: []};
             }
 
             const deliveryIds: string[] = await deliveriesResponse.json();
@@ -47,7 +47,7 @@ const fetchMatchingCapabilities = async (commonName: string): Promise<ProviderMa
 
                     if (!matchResponse.ok) {
                         console.error(`Couldn't fetch matches for delivery ${deliveryId} of ${providerName}`);
-                        return { deliveryId, capabilityMatchApi: [] };
+                        return {deliveryId, capabilityMatchApi: []};
                     }
 
                     const matchData = await matchResponse.json();
@@ -64,8 +64,6 @@ const fetchMatchingCapabilities = async (commonName: string): Promise<ProviderMa
             };
         })
     );
-
-    return results;
 };
 
 const useFetchMatchingCapabilities = (commonName: string) => {
