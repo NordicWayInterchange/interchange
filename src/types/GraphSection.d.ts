@@ -1,3 +1,5 @@
+import {Capability} from "@/types/neighbours";
+
 export type CopyTarget = {
     id: string;
     fullId: string;
@@ -8,4 +10,5 @@ export type CopyTarget = {
 export type GraphSectionProps = {
     serviceProviderName: string;
     matches: Match[];
+    capabilityDetails: Capability[];
 };

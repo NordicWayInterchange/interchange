@@ -4,6 +4,8 @@ import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import * as d3 from "d3";
 import { CopyTarget, GraphSectionProps } from "@/types/GraphSection";
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
+import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
+import {Capability} from "@/types/neighbours";
 
 const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matches }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
@@ -82,7 +84,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             const startY = deliveryIdY;
 
             existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
-                const bindingX = deliveryIdX + rectWidth + 40;
+                const bindingX = deliveryIdX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const bindingY = startY + offset;
@@ -221,11 +223,10 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     </div>
                 </div>
             </div>
-            {/*<CommonDrawer*/}
+            {/*<CapabilityDrawer*/}
             {/*    handleMoreClose={handleMoreClose}*/}
             {/*    open={drawerOpen}*/}
-            {/*    commonAttributes={null}*/}
-            {/*    heading="Capability"*/}
+            {/*    capabilities={capabilityDetails as Capability}*/}
             {/*/>*/}
         </>
     );
