@@ -179,15 +179,16 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                 <Loading text="Matching capabilities graph"/>
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
-                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }} onClick={() => handleExpandClick(index)}>
-                        <CardContent
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                cursor: 'pointer'
-                            }}
-                        >
+                        <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
+                            <CardContent
+                                onClick={() => handleExpandClick(index)}
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    cursor: 'pointer'
+                                }}
+                            >
                             <Typography variant="h6">{sp.serviceProviderName}</Typography>
                             <IconButton onClick={(e) => {
                                 e.stopPropagation();
