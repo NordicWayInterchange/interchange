@@ -22,12 +22,10 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 
@@ -442,21 +440,11 @@ public class TypeTransformer {
         );
     }
 
-    public CapabilityShardAdminApi capabilitiesMatchedDeliveryBasedOnShardId(LocalDelivery delivery, OutgoingMatch match, String shardId) {
-        Capability capability = match.getCapability();
-        CapabilityShard shard = capability.getShard(Integer.valueOf(shardId)).orElse(null);
-
-        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-            String exchangeName = endpoint.getTarget();
-            if (shard != null) {
-                return new CapabilityShardAdminApi(
-                        new CapabilityShardApi(shard.getShardId(), shard.getExchangeName(), shard.getSelector()),
-                        exchangeName != null
-                );
-            }
-        }
-
-        return null;
+    public CapabilityShardAdminApi capabilityShardAdminApibilitiesMatchedDeliveryBasedOnShardId(CapabilityShard shard, boolean exists) {
+        return new CapabilityShardAdminApi(
+                new CapabilityShardApi(shard.getShardId(), shard.getExchangeName(), shard.getSelector()),
+                exists
+        );
     }
 
     private Long localDateTimeToTimestamp(LocalDateTime lastUpdated) {

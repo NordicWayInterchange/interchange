@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminAp
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi;
+import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
@@ -22,6 +23,7 @@ import no.vegvesen.ixn.federation.model.OutgoingMatch;
 import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -34,10 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -305,7 +304,18 @@ public class AdminRestController {
             throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
         }
 
-        return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(delivery, matchedByCapabilityAndDelivery, shardId);
+        Optional<CapabilityShard> shard = matchedByCapabilityAndDelivery.getCapability().getShard(Integer.valueOf(shardId));
+        boolean exchangeExists = false;
+        if (shard.isPresent()) {
+            CapabilityShard capabilityShard = shard.get();
+            String exchangeName = capabilityShard.getExchangeName();
+            exchangeExists = qpidService.exchangeExists(exchangeName);
+            return typeTransformer.capabilityShardAdminApibilitiesMatchedDeliveryBasedOnShardId(capabilityShard,exchangeExists);
+        } else {
+            logger.info("Shard {} for capability {} is not found",shardId,capabilityId);
+            throw new NotFoundException(String.format("Shard %s for capability %s is not found",shardId,capabilityId));
+        }
+
     }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
