@@ -36,7 +36,7 @@ const SIDE_PAGES: Array<IPages> = [
         icon: <Groups2Icon />
     },
     {
-        text: "Graph visualizer",
+        text: "Graph Dashboard",
         url: "/matchingCapabilitiesGraph",
         icon: <EqualizerIcon />
     },
