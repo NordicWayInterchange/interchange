@@ -440,7 +440,7 @@ public class TypeTransformer {
         );
     }
 
-    public CapabilityShardAdminApi capabilityShardAdminApibilitiesMatchedDeliveryBasedOnShardId(CapabilityShard shard, boolean exists) {
+    public CapabilityShardAdminApi capabilitiesMatchedDeliveryBasedOnShardId(CapabilityShard shard, boolean exists) {
         return new CapabilityShardAdminApi(
                 new CapabilityShardApi(shard.getShardId(), shard.getExchangeName(), shard.getSelector()),
                 exists

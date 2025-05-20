@@ -401,4 +401,52 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         )
                 .isNotEmpty();
     }
+
+    @Test
+    public void getCapabilitiesMatchedDeliveryBasedOnShardId() {
+        String serviceProviderName = "my-service-provider";
+        String adminUser = "adminUser";
+        String exchangeName = "exchangeName";
+
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
+        Capability aCap1 = new Capability(
+                "uuid",
+                new DatexApplication("DK12345","DK12345:publication-id","NO","1", List.of("1"), "type","name"),
+                new Metadata(),
+                List.of(shard)
+        );
+
+        CapabilityMatchApi capabilityMatchApi = new CapabilityMatchApi(
+                aCap1.getUuid(),
+                1,
+                new Binding("exchange", "queueName", new Filter("publicationId = 'pub-1'")),
+                true
+        );
+        LocalDelivery aDelivery = new LocalDelivery();
+
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(Set.of(aCap1)),
+                Set.of(),
+                Set.of(aDelivery),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(aServiceProvider);
+        OutgoingMatch match = new OutgoingMatch(aDelivery,aCap1,serviceProviderName);
+        outgoingMatchRepository.save(match);
+
+        CapabilitiesLinkedDeliveryApi result = new CapabilitiesLinkedDeliveryApi(aDelivery.getUuid(), List.of(capabilityMatchApi));
+        when(qpidService.exchangeExists(exchangeName)).thenReturn(true);
+        when(qpidService.getCapabilitiesLinkedDelivery(aDelivery, List.of(match))).thenReturn(result);
+
+        assertThat(restController
+                .getCapabilitiesMatchedDeliveryBasedOnShardId(
+                        adminUser,
+                        serviceProviderName,
+                        aDelivery.getUuid(),
+                        aCap1.getUuid(),
+                        shard.getShardId().toString()
+                )).isNotNull();
+
+    }
 }

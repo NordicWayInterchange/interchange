@@ -310,7 +310,7 @@ public class AdminRestController {
             CapabilityShard capabilityShard = shard.get();
             String exchangeName = capabilityShard.getExchangeName();
             exchangeExists = qpidService.exchangeExists(exchangeName);
-            return typeTransformer.capabilityShardAdminApibilitiesMatchedDeliveryBasedOnShardId(capabilityShard,exchangeExists);
+            return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(capabilityShard,exchangeExists);
         } else {
             logger.info("Shard {} for capability {} is not found",shardId,capabilityId);
             throw new NotFoundException(String.format("Shard %s for capability %s is not found",shardId,capabilityId));
