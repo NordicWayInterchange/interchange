@@ -19,6 +19,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -66,6 +67,15 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         registry.add("KEY_STORE_PASSWORD", () -> "password");
         registry.add("TRUST_STORE_PASSWORD", () -> "password");
     }
+
+    @BeforeEach
+    public void beforeEach(){
+        privateChannelRepository.deleteAll();
+        outgoingMatchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
     @Test
     public void contextLoads() {
     }
@@ -329,7 +339,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Test void testGetLocalDeliveryEndpoints() {
         String adminUser = "adminUser";
-        String serviceProviderName = "service-provider";
+        String serviceProviderName = "sp1";
 
         LocalDelivery aDelivery = new LocalDelivery();
 
@@ -358,7 +368,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGetDeliveriesExchangeBindingToMatchingCapabilities() {
-        String serviceProviderName = "my-service-provider";
+        String serviceProviderName = "service-provider";
         String adminUser = "adminUser";
         CapabilityShard shard = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
         Capability aCap1 = new Capability(
