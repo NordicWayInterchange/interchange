@@ -44,8 +44,12 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         const targets: CopyTarget[] = [];
 
         matches.forEach((match, matchIndex) => {
-            const existingCapabilities = match.capabilityMatchApi?.filter((cap: { exists: any }) => cap.exists) || [];
+            const existingCapabilities = match.capabilityMatchApi || [];
             if (existingCapabilities.length === 0) return;
+            const allExist = match.capabilityMatchApi?.every(
+                (cap: { exists: boolean }) => cap.exists === true
+            ) || false;
+
 
             const deliveryIdX = xOffset;
             const deliveryIdY = topMargin + 300;
@@ -58,12 +62,21 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 .attr("font-size", 12)
                 .text("DeliveryId");
 
-            svg.append("rect")
-                .attr("x", deliveryIdX)
-                .attr("y", deliveryIdY)
-                .attr("width", rectWidth)
-                .attr("height", rectHeight)
-                .attr("fill", "#ffbf7d");
+            if (allExist) {
+                svg.append("rect")
+                    .attr("x", deliveryIdX)
+                    .attr("y", deliveryIdY)
+                    .attr("width", rectWidth)
+                    .attr("height", rectHeight)
+                    .attr("fill", "#E8F3E9");
+            } else {
+                svg.append("rect")
+                    .attr("x", deliveryIdX)
+                    .attr("y", deliveryIdY)
+                    .attr("width", rectWidth)
+                    .attr("height", rectHeight)
+                    .attr("fill", "#B63434");
+            }
 
             svg.append("text")
                 .attr("x", deliveryIdX + rectWidth / 2)
@@ -83,7 +96,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryIdY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
+            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; exists: boolean; }, i: number) => {
                 const bindingX = deliveryIdX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
@@ -105,12 +118,21 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr("font-size", 12)
                     .text("Binding");
 
-                svg.append("rect")
-                    .attr("x", bindingX)
-                    .attr("y", bindingY)
-                    .attr("width", rectWidth)
-                    .attr("height", rectHeight)
-                    .attr("fill", "#FFF5C8");
+                if (capability.exists) {
+                    svg.append("rect")
+                        .attr("x", bindingX)
+                        .attr("y", bindingY)
+                        .attr("width", rectWidth)
+                        .attr("height", rectHeight)
+                        .attr("fill", "#FFF5C8");
+                } else {
+                    svg.append("rect")
+                        .attr("x", bindingX)
+                        .attr("y", bindingY)
+                        .attr("width", rectWidth)
+                        .attr("height", rectHeight)
+                        .attr("fill", "#B63434");
+                }
 
                 svg.append("text")
                     .attr("x", bindingX + rectWidth / 2)
@@ -148,7 +170,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr("y", bindingY)
                     .attr("width", rectWidth)
                     .attr("height", rectHeight)
-                    .attr("fill", "#E8F3E9");
+                    .attr("fill", "#ffbf7d");
 
                 svg.append("text")
                     .attr("x", capabilityX + rectWidth / 2)
