@@ -3,9 +3,9 @@ import { Box } from "@mui/system";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import * as d3 from "d3";
 import { CopyTarget, GraphSectionProps } from "@/types/GraphSection";
-import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
-import {Capability} from "@/types/neighbours";
+import { useSession } from "next-auth/react";
+import { useFetchCapabilityDetails } from "@/hooks/useFetchCapabilityDetails";
 
 const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matches }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
@@ -14,10 +14,23 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
     const [graphHeight, setGraphHeight] = useState<number>(600);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedCapabilityId, setSelectedCapabilityId] = useState<string | null>(null);
+    const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
+
+    const { data: session } = useSession();
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
     };
+
+
+    const { data: capabilityDetails } = useFetchCapabilityDetails(
+        session?.user.commonName as string,
+        serviceProviderName,
+        selectedDeliveryId,
+        selectedCapabilityId
+    );
+
+    console.log(capabilityDetails)
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -46,10 +59,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
         matches.forEach((match, matchIndex) => {
             const existingCapabilities = match.capabilityMatchApi || [];
             if (existingCapabilities.length === 0) return;
-            const allExist = match.capabilityMatchApi?.every(
-                (cap: { exists: boolean }) => cap.exists === true
-            ) || false;
-
+            const allExist = existingCapabilities.every((cap: { exists: boolean; }) => cap.exists === true);
 
             const deliveryIdX = xOffset;
             const deliveryIdY = topMargin + 300;
@@ -62,21 +72,12 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                 .attr("font-size", 12)
                 .text("DeliveryId");
 
-            if (allExist) {
-                svg.append("rect")
-                    .attr("x", deliveryIdX)
-                    .attr("y", deliveryIdY)
-                    .attr("width", rectWidth)
-                    .attr("height", rectHeight)
-                    .attr("fill", "#E8F3E9");
-            } else {
-                svg.append("rect")
-                    .attr("x", deliveryIdX)
-                    .attr("y", deliveryIdY)
-                    .attr("width", rectWidth)
-                    .attr("height", rectHeight)
-                    .attr("fill", "#B63434");
-            }
+            svg.append("rect")
+                .attr("x", deliveryIdX)
+                .attr("y", deliveryIdY)
+                .attr("width", rectWidth)
+                .attr("height", rectHeight)
+                .attr("fill", allExist ? "#E8F3E9" : "#B63434");
 
             svg.append("text")
                 .attr("x", deliveryIdX + rectWidth / 2)
@@ -96,7 +97,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryIdY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; exists: boolean; }, i: number) => {
+            existingCapabilities.forEach((capability: { exists: any; binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
                 const bindingX = deliveryIdX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
@@ -118,21 +119,12 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr("font-size", 12)
                     .text("Binding");
 
-                if (capability.exists) {
-                    svg.append("rect")
-                        .attr("x", bindingX)
-                        .attr("y", bindingY)
-                        .attr("width", rectWidth)
-                        .attr("height", rectHeight)
-                        .attr("fill", "#FFF5C8");
-                } else {
-                    svg.append("rect")
-                        .attr("x", bindingX)
-                        .attr("y", bindingY)
-                        .attr("width", rectWidth)
-                        .attr("height", rectHeight)
-                        .attr("fill", "#B63434");
-                }
+                svg.append("rect")
+                    .attr("x", bindingX)
+                    .attr("y", bindingY)
+                    .attr("width", rectWidth)
+                    .attr("height", rectHeight)
+                    .attr("fill", capability.exists ? "#FFF5C8" : "#B63434");
 
                 svg.append("text")
                     .attr("x", bindingX + rectWidth / 2)
@@ -180,11 +172,9 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                     .attr("font-size", 14)
                     .text(trimId(capability.capabilityId));
 
-                const capabilityId = capability.capabilityId;
-
                 targets.push({
                     id: `capability-${matchIndex}-${i}`,
-                    fullId: capabilityId,
+                    fullId: capability.capabilityId,
                     x: capabilityX + rectWidth / 2,
                     y: bindingY + rectHeight / 2,
                 });
@@ -234,7 +224,15 @@ const GraphSection: React.FC<GraphSectionProps> = ({ serviceProviderName, matche
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     if (target.id.startsWith("capability")) {
-                                        setSelectedCapabilityId(target.fullId);
+                                        const [, matchIndexStr, capIndexStr] = target.id.split("-");
+                                        const matchIndex = parseInt(matchIndexStr, 10);
+                                        const capIndex = parseInt(capIndexStr, 10);
+
+                                        const match = matches[matchIndex];
+                                        const capability = match.capabilityMatchApi[capIndex];
+
+                                        setSelectedDeliveryId(match.deliveryId);
+                                        setSelectedCapabilityId(capability.capabilityId);
                                         setDrawerOpen(true);
                                     }
                                 }}

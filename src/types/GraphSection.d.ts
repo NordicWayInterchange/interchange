@@ -10,5 +10,4 @@ export type CopyTarget = {
 export type GraphSectionProps = {
     serviceProviderName: string;
     matches: Match[];
-    capabilityDetails: Capability[];
 };
