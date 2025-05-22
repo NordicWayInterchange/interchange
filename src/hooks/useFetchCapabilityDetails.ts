@@ -20,15 +20,16 @@ const fetchCapabilityDetails = async (
 const useFetchCapabilityDetails = (
     commonName: string,
     serviceProviderName: string,
-    deliveryId?: string | null,
-    capabilityId?: string | null
+    deliveryId: string | null,
+    capabilityId: string | null
 ) => {
     return useQuery({
-        queryKey: ["capabilityDetails", commonName, serviceProviderName, deliveryId, capabilityId],
+        queryKey: ["capabilitiesDetails", commonName, serviceProviderName, deliveryId, capabilityId],
         queryFn: () =>
             fetchCapabilityDetails(commonName, serviceProviderName, deliveryId!, capabilityId!),
-        enabled: !!commonName && !!serviceProviderName && !!deliveryId && !!capabilityId,
+        enabled: !!commonName && !!serviceProviderName && !!deliveryId && !!capabilityId, // prevents firing query on nulls
     });
 };
+
 
 export { useFetchCapabilityDetails };

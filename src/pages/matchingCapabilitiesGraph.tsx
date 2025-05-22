@@ -1,22 +1,23 @@
-import React, {useEffect, useRef, useState} from 'react';
-import * as d3 from 'd3';
-import {Box} from "@mui/system";
-
-import {useSession} from "next-auth/react";
-import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
-import {Card, CardContent, Collapse, IconButton, List, Typography} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
+import { Box } from "@mui/system";
+import { useSession } from "next-auth/react";
+import { useFetchMatchingCapabilities } from "@/hooks/useFetchMatchingCapabilities";
+import { Card, CardContent, Collapse, IconButton, List, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
 import GraphSection from "@/components/graphs/GraphSection";
 
 const MatchingCapabilitiesGraph: React.FC = () => {
-    const {data: session} = useSession();
-    const {data: matchingCapabilities} = useFetchMatchingCapabilities(
+    const { data: session } = useSession();
+    const { data: matchingCapabilities } = useFetchMatchingCapabilities(
         session?.user.commonName as string
     );
 
-
     const [expandedMap, setExpandedMap] = useState<{ [index: number]: boolean }>({});
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [selectedCapabilityId, setSelectedCapabilityId] = useState<string | null>(null);
+    const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
 
     const handleExpandClick = (index: number) => {
         setExpandedMap(prev => ({
@@ -25,12 +26,21 @@ const MatchingCapabilitiesGraph: React.FC = () => {
         }));
     };
 
+    const handleCapabilityClick = (capabilityId: string, deliveryId: string) => {
+        setSelectedCapabilityId(capabilityId);
+        setSelectedDeliveryId(deliveryId);
+        setDrawerOpen(true);
+    };
+
+    const handleMoreClose = () => {
+        setDrawerOpen(false);
+    };
+
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     const [copyTargets, setCopyTargets] = useState<
         { id: string; fullId: string; x: number; y: number }[]
     >([]);
-
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -174,23 +184,22 @@ const MatchingCapabilitiesGraph: React.FC = () => {
 
     }, [matchingCapabilities]);
 
-
     return (
         <>
             {(matchingCapabilities === undefined || matchingCapabilities === null) ? (
-                <Loading text="Matching capabilities graph"/>
+                <Loading text="Matching capabilities graph" />
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
-                        <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
-                            <CardContent
-                                onClick={() => handleExpandClick(index)}
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    cursor: 'pointer'
-                                }}
-                            >
+                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
+                        <CardContent
+                            onClick={() => handleExpandClick(index)}
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                cursor: 'pointer'
+                            }}
+                        >
                             <Typography variant="h6">{sp.serviceProviderName}</Typography>
                             <IconButton onClick={(e) => {
                                 e.stopPropagation();
@@ -235,23 +244,21 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                             >
                                                 <GraphSection
                                                     serviceProviderName={sp.serviceProviderName}
-                                                    matches={[match]}                                           />
+                                                    matches={[match]}
+                                                    handleCapabilityClick={handleCapabilityClick}
+                                                />
                                             </Box>
                                         ))}
                                 </Box>
-
                             </List>
                         </Collapse>
                     </Card>
                 ))}
-
             </>}
 
         </>
-
     );
 };
-
 
 const expandMoreStyle = {
     display: "flex",
@@ -272,7 +279,7 @@ const serviceProviderStyle = {
     backgroundColor: "#E67600",
     marginX: 2,
     position: "relative",
-    top: "-15px"
+    top: 4,
 };
 
 export default MatchingCapabilitiesGraph;
