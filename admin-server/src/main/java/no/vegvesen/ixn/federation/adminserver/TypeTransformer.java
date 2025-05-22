@@ -434,9 +434,11 @@ public class TypeTransformer {
     public no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
         Capability capability = match.getCapability();
         return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
+                capability.getUuid(),
                 capability.getApplication().toApi(),
                 capability.getMetadata().toApi(),
-                capabilityShardSetToCapabilityShardIdSetApi(capability.getShards())
+                capabilityShardSetToCapabilityShardIdSetApi(capability.getShards()),
+                localDateTimeToTimestamp(capability.getCreatedTimestamp())
         );
     }
 

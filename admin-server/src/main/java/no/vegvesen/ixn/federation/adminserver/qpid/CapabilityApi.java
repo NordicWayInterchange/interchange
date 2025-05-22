@@ -12,16 +12,30 @@ public class CapabilityApi {
     public CapabilityApi() {
     }
 
+    private String id;
+
     private ApplicationApi application;
 
     private MetadataApi metadata;
 
     private Set<Integer> shardId = new HashSet<>();
 
-    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<Integer> shardId) {
+    private Long createdTimestamp;
+
+    public CapabilityApi(String id, ApplicationApi application, MetadataApi metadata, Set<Integer> shardId, Long createdTimestamp) {
+        this.id = id;
         this.application = application;
         this.metadata = metadata;
         this.shardId = shardId;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public ApplicationApi getApplication() {
@@ -52,11 +66,21 @@ public class CapabilityApi {
         }
     }
 
+    public Long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(Long createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
+    }
+
     public String toString() {
         return "QpidCapabilityApi{" +
+                "id=" + id +
                 "application=" + application +
                 ", metadata=" + metadata +
                 ", shardId=" + shardId +
+                ", createdTimestamp=" + createdTimestamp +
                 '}';
     }
 }
