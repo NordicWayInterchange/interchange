@@ -24,6 +24,18 @@ export const CustomEmptyOverlayServiceProviders = () => {
     );
 };
 
+export const CustomEmptyOverlayExchanges = () => {
+    return (
+        <StyledGridOverlay>
+            <StyledBox>
+                <SentimentNeutralIcon fontSize="medium" color="disabled" sx={{ mt: -0.5 }} />
+                Could not find any exchanges in the network!
+            </StyledBox>
+        </StyledGridOverlay>
+    );
+};
+
+
 export const CustomEmptyOverlay = () => {
     return (
         <StyledGridOverlay>
