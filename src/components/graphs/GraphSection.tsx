@@ -68,7 +68,7 @@ const GraphSection: React.FC<{
         matches.forEach((match, matchIndex) => {
             const existingCapabilities = match.capabilityMatchApi || [];
             if (existingCapabilities.length === 0) return;
-            const allExist = existingCapabilities.every((cap: { exists: any; }) => cap.exists);
+            const anyExist = existingCapabilities.some((cap: { exists: any; }) => cap.exists);
 
             const deliveryIdX = xOffset;
             const deliveryIdY = topMargin + 300;
@@ -86,7 +86,7 @@ const GraphSection: React.FC<{
                 .attr("y", deliveryIdY)
                 .attr("width", rectWidth)
                 .attr("height", rectHeight)
-                .attr("fill", allExist ? "#E8F3E9" : "#B63434");
+                .attr("fill", anyExist ? "#E8F3E9" : "#B63434");
 
             svg.append("text")
                 .attr("x", deliveryIdX + rectWidth / 2)

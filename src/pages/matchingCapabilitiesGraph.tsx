@@ -190,7 +190,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                 <Loading text="Matching capabilities graph" />
             ) : <>
                 {matchingCapabilities.map((sp, index) => (
-                    <Card key={index} variant="outlined" sx={{ marginBottom: 2 }}>
+                    <Card key={index} variant="outlined" sx={{ marginBottom: 2, backgroundColor: '#F5F5F5' }}>
                         <CardContent
                             onClick={() => handleExpandClick(index)}
                             sx={{
