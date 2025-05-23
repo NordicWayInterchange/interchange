@@ -137,7 +137,7 @@ const GraphSection: React.FC<{
                     .attr("y", bindingY)
                     .attr("width", rectWidth)
                     .attr("height", rectHeight)
-                    .attr("fill", capability.exists ? "#FFF5C8" : "#B63434");
+                    .attr("fill", "#FFF5C8");
 
                 svg.append("text")
                     .attr("x", bindingX + rectWidth / 2)
