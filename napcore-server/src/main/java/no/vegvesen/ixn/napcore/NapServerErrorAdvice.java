@@ -2,7 +2,6 @@ package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.api.v1_0.ValidationErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
