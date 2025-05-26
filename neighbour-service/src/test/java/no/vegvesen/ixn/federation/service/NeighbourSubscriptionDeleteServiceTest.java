@@ -47,16 +47,12 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @Test
     public void deleteSubscriptionWhenItHasSubscriptionStatusTear_Down () {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour");
-
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
         Subscription subscription2 = new Subscription(2, SubscriptionStatus.TEAR_DOWN, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "");
 
-        SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
+        SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
-        neighbour.setOurRequestedSubscriptions(existingSubscriptions);
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), existingSubscriptions);
 
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
@@ -66,15 +62,12 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @Test
     public void subscriptionRequestGetStatusEmptyWhenAllSubscriptionsAreDeleted () {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour");
+
 
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.TEAR_DOWN, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
 
-        SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
-
-        neighbour.setOurRequestedSubscriptions(existingSubscriptions);
+        SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(List.of(subscription1)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), existingSubscriptions);
 
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
@@ -84,15 +77,10 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @Test
     public void deleteReturns404FromNeighbour() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour");
-
         Subscription subscription1 = new Subscription(1, SubscriptionStatus.TEAR_DOWN, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
 
-        SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-        existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
-
-        neighbour.setOurRequestedSubscriptions(existingSubscriptions);
+        SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(List.of(subscription1)));
+        Neighbour neighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), existingSubscriptions);
 
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);

@@ -156,7 +156,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void deliveryReceivesExchangeNameWhenItDoesNotExist(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.REQUESTED);
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         // Will only receive Exchange Name if outgoing match(es) exist
@@ -174,8 +173,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExist(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.CREATED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description");
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         repository.save(serviceProvider);
 
@@ -189,7 +187,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.REQUESTED);
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         repository.save(serviceProvider);
@@ -244,10 +241,10 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void capabilityIsNotRemovedWhenThereAreOutgoingMatches(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        Capabilities capabilities = new Capabilities();
         Capability capability = new Capability();
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
+        Capabilities capabilities = new Capabilities(new HashSet<>(Arrays.asList(capability)));
+
 
         OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, serviceProvider.getName());
         outgoingMatchRepository.save(outgoingMatch);
@@ -263,22 +260,19 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void multipleCapabilitiesAreRemoved(){
         ServiceProvider sp = new ServiceProvider("sp");
-        Capabilities capabilities = new Capabilities();
-        capabilities.setCapabilities(
-                Set.of(
-                        new Capability(
-                            new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
-                            new Metadata()
+        Capabilities capabilities = new Capabilities( Set.of(
+                new Capability(
+                        new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
+                        new Metadata()
                 ),
-                        new Capability(
-                                new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
-                                new Metadata()
-                        ),
-                        new Capability(
-                                new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
-                                new Metadata()
-                        ))
-        );
+                new Capability(
+                        new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
+                        new Metadata()
+                ),
+                new Capability(
+                        new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
+                        new Metadata()
+                )));
 
         for(Capability i : capabilities.getCapabilities()){
             i.setStatus(CapabilityStatus.TEAR_DOWN);
@@ -293,10 +287,9 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        Capabilities capabilities = new Capabilities();
         Capability capability = new Capability(null, new Metadata());
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
+        Capabilities capabilities = new Capabilities(new HashSet<>(List.of(capability)));
 
         serviceProvider.setCapabilities(capabilities);
         repository.save(serviceProvider);
@@ -310,12 +303,11 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void capabilityIsNotRemovedIfThereAreNoOutgoingMatchesButHasShards(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        Capabilities capabilities = new Capabilities();
+
         Capability capability = new Capability();
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-
+        Capabilities capabilities = new Capabilities(new HashSet<>(Set.of(capability)));
         capability.setShards(List.of(new CapabilityShard()));
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
 
         serviceProvider.setCapabilities(capabilities);
         repository.save(serviceProvider);
@@ -329,8 +321,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void deliveryWithErrorGetsRemovedFromServiceProvider(){
         String serviceProviderName = "my-service-provider";
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.ERROR);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description");
         serviceProvider.addDeliveries(Set.of(delivery));
 
         repository.save(serviceProvider);

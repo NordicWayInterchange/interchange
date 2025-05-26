@@ -110,7 +110,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 Collections.emptySet(),
                 LocalDateTime.now()
         );
-
         serviceProviderRepository.save(serviceProvider);
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
@@ -210,11 +209,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         );
 
 
-        LocalDelivery aDelivery = new LocalDelivery();
-        aDelivery.setSelector(selector);
-
-        LocalDelivery bDelivery = new LocalDelivery();
-        bDelivery.setSelector("originatingCountry='SE'");
+        LocalDelivery aDelivery = new LocalDelivery(selector, "description");
 
         ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
         aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), null));

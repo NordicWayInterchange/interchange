@@ -39,8 +39,7 @@ public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitial
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
-            Capabilities capabilities1 = new Capabilities();
-            capabilities1.setCapabilities(capabilities);
+            Capabilities capabilities1 = new Capabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {

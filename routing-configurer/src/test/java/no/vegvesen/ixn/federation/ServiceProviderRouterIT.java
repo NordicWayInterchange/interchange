@@ -734,13 +734,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-node");
-		localSubscription.setLocalEndpoints(Collections.singleton(
-				new LocalEndpoint(queueName,
-						nodeProperties.getName(),
-						Integer.parseInt(nodeProperties.getMessageChannelPort())
-				)
-		));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.TEAR_DOWN, selector, "my-node", new HashSet<>(),
+				Collections.singleton(
+						new LocalEndpoint(queueName,
+								nodeProperties.getName(),
+								Integer.parseInt(nodeProperties.getMessageChannelPort())
+						)));
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
@@ -1068,7 +1067,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String deliveryExchangeName = "my-exchange11";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery");
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
-		delivery.setStatus(LocalDeliveryStatus.CREATED);
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -1437,8 +1435,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
@@ -1471,8 +1468,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
@@ -1510,8 +1506,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
@@ -1545,8 +1540,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
@@ -1577,8 +1571,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(
+				UUID.randomUUID().toString(),
+				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
+				new HashSet<>(),
+				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
@@ -1722,8 +1720,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(),
+				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
+				new HashSet<>(),
+				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		serviceProvider.addLocalSubscription(localSubscription);
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);

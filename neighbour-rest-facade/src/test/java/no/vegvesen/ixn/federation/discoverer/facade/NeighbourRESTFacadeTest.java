@@ -52,9 +52,7 @@ public class NeighbourRESTFacadeTest {
 
 	@BeforeEach
 	public void setUp() {
-		ericsson = new Neighbour();
-		ericsson.setName("ericsson.itsinterchange.eu");
-		ericsson.setControlChannelPort("8080");
+		ericsson = new Neighbour("ericsson.itsinterchange.eu", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "8080");
 		this.server = MockRestServiceServer.createServer(restTemplate);
 	}
 

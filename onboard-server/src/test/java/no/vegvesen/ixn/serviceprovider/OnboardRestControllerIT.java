@@ -299,19 +299,19 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
-        Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new NeighbourCapabilities(
-                CapabilitiesStatus.KNOWN,
-                Collections.singleton(new NeighbourCapability(
-                        new DenmApplication(
-                                "DPRA",
-                                "pub-3",
-                                "DK",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        Neighbour neighbour = new Neighbour("Neighbour",
+                new NeighbourCapabilities(
+                        CapabilitiesStatus.KNOWN,
+                        Collections.singleton(new NeighbourCapability(
+                                new DenmApplication(
+                                        "DPRA",
+                                        "pub-3",
+                                        "DK",
+                                        "1.0",
+                                        List.of("1234"),
+                                        List.of(6)),
+                                new Metadata(RedirectStatus.OPTIONAL)
+                        ))), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
@@ -407,8 +407,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
-        Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new NeighbourCapabilities(
+        Neighbour neighbour = new Neighbour("Neighbour", new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
                 Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
@@ -419,7 +418,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 List.of("1234"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+                ))), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
@@ -448,8 +448,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
-        Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new NeighbourCapabilities(
+        Neighbour neighbour = new Neighbour("neighbour_1",new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
                 Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
@@ -460,7 +459,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 List.of("1234"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+                ))),
+                new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
@@ -500,8 +500,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
-        Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new NeighbourCapabilities(
+        Neighbour neighbour = new Neighbour("neighbour",  new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
                 Collections.singleton(new NeighbourCapability(
                         new DenmApplication(
@@ -512,7 +511,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 List.of("1234"),
                                 List.of(6)),
                         new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+                ))),
+                new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);

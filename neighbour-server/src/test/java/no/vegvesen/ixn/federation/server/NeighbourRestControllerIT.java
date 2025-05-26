@@ -5,10 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.NeighbourSubscription;
-import no.vegvesen.ixn.federation.model.NeighbourSubscriptionRequest;
-import no.vegvesen.ixn.federation.model.NeighbourSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -56,8 +53,7 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void requestSubscriptionsDoesNotIncludeTimeStamp(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour1");
+        Neighbour neighbour = new Neighbour("neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
         SubscriptionRequestApi request = new SubscriptionRequestApi(neighbour.getName(), Set.of(new RequestedSubscriptionApi(
                 "originatingCountry='NO'",
@@ -69,10 +65,9 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void pollSubscriptionIncludesTimestamp(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour2");
+
         NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED, "neighbour2")));
-        neighbour.setNeighbourRequestedSubscriptions(request);
+        Neighbour neighbour = new Neighbour("neighbour2", new NeighbourCapabilities(), request, new SubscriptionRequest());
         neighbour = neighbourRepository.save(neighbour);
 
         assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getUuid()).toString().toLowerCase()).contains("lastupdatedtimestamp");
@@ -80,10 +75,8 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void listSubscriptionsDoesNotIncludeTimestamp(){
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("neighbour3");
         NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("originatingCountry='NO'", NeighbourSubscriptionStatus.CREATED, "neighbour3")));
-        neighbour.setNeighbourRequestedSubscriptions(request);
+        Neighbour neighbour = new Neighbour("neighbour3", new NeighbourCapabilities(), request, new SubscriptionRequest());
         neighbour = neighbourRepository.save(neighbour);
 
         assertThat(neighbourRestController.listSubscriptions(neighbour.getName()).toString().toLowerCase()).doesNotContain("lastupdatedtimestamp");

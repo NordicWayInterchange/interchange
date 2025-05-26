@@ -579,8 +579,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
 		subscription.setConsumerCommonName("my-node");
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -598,8 +597,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subscription.setConsumerCommonName("my-node");
 		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671)));
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("neighbour", new NeighbourCapabilities(),new NeighbourSubscriptionRequest() ,new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -622,8 +620,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		subscription.setEndpoints(new HashSet<>(Arrays.asList(end1, end2)));
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("Neighbour", new NeighbourCapabilities(),new NeighbourSubscriptionRequest(),new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -648,8 +645,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createHeadersExchange(exchangeName);
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("neighbour",new NeighbourCapabilities(),new NeighbourSubscriptionRequest(),new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -684,8 +680,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("exchange1");
 		client.createHeadersExchange("exchange2");
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("Neighbour",new NeighbourCapabilities(),new NeighbourSubscriptionRequest(),new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -740,8 +735,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createHeadersExchange(exchangeName);
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("neighbour", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -763,9 +757,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createHeadersExchange(exchangeName);
 
-		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setName("my-neighbour");
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
+		Neighbour myNeighbour = new Neighbour("my-neighbour",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(List.of(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
