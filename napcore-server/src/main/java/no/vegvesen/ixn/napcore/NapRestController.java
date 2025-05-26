@@ -357,10 +357,6 @@ public class NapRestController {
             throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
-        if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
-        }
-
         Set<String> capabilityProperties = CapabilityValidator.napcoreCapabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));

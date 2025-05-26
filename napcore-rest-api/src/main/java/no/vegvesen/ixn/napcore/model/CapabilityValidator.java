@@ -96,6 +96,9 @@ public class CapabilityValidator {
                     }
                 }
                 case "quadTree" -> {
+                    if (!CapabilityValidator.isQuadTreeValid(applicationApi.getQuadTree())) {
+                        errorList.add(new CapabilityErrorMessage(CapabilityErrorCode.INVALID_QUAD_TREE, String.format("quadTreeTile '%s' is not valid", value)));
+                    }
                     String[] quadTreeTiles = value.split(",");
                     for (String quadTreeTile : quadTreeTiles) {
                         if (quadTreeTile.length() > 255) {
