@@ -1,23 +1,35 @@
 package no.vegvesen.ixn.federation.adminserver;
 
 
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
+import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.NeighbourApi;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.ServiceProviderApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
+import no.vegvesen.ixn.federation.adminserver.model.shard.CapabilityShardAdminApi;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminProperties;
-import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
+import no.vegvesen.ixn.federation.adminserver.qpid.*;
+import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.OutgoingMatch;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RestController
 public class AdminRestController {
@@ -37,9 +50,13 @@ public class AdminRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;
 
+    private final OutgoingMatchRepository outgoingMatchRepository;
+
     private final CertService certService;
 
     private final AdminProperties adminProperties;
+
+    private final PrivateChannelRepository privateChannelRepository;
 
     private final Logger logger = LoggerFactory.getLogger(AdminRestController.class);
 
@@ -48,12 +65,15 @@ public class AdminRestController {
     private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
 
     @Autowired
-    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, CertService certService, AdminProperties adminProperties, QpidService qpidService) {
+    public AdminRestController(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository,
+                               CertService certService, AdminProperties adminProperties, PrivateChannelRepository privateChannelRepository, QpidService qpidService, OutgoingMatchRepository outgoingMatchRepository) {
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.certService = certService;
         this.adminProperties = adminProperties;
+        this.privateChannelRepository = privateChannelRepository;
         this.qpidService = qpidService;
+        this.outgoingMatchRepository = outgoingMatchRepository;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/neighbours", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,7 +97,7 @@ public class AdminRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+    public List<MatchingCapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
@@ -93,14 +113,15 @@ public class AdminRestController {
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(localCapabilities, neighbourCapabilities);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/{actorCommonName}/serviceproviders/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<MatchingCapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
         logger.info("List local capabilities matching delivery for service provider {} for admin user {}", actorCommonName, adminUser);
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){
             if(!selector.isEmpty()){
@@ -109,6 +130,31 @@ public class AdminRestController {
         }
 
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allCapabilities, Collections.emptySet());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("List private channels for service provider {} for admin user {}", actorCommonName, adminUser);
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
+        return typeTransformer.privateChannelListToPrivateChannelApiList(privateChannels);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/privatechannels/peer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PeerPrivateChannelApi> getPeerPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("List private channels with actorCommonName as peer for service provider {} for admin user {} where peer name is {}", actorCommonName, adminUser, actorCommonName);
+
+        List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
+
+        return privateChannels.stream().map(typeTransformer::PrivateChannelListToPeerPrivateChannelApiList).sorted().collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/exchanges")
@@ -158,6 +204,134 @@ public class AdminRestController {
         return qpidService.bindingExists(exchangeName, queueName);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries")
+    public List<String> getDeliveryIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List delivery ids for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        return typeTransformer.getDeliveryIds(serviceProvider.getDeliveries());
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}")
+    public LocalDeliveryApi getDeliveryBasedOnDeliveryId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - Delivery with deliveryId {} for service provider {} for admin user {}", deliveryId, actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalDelivery localDelivery = serviceProvider.getDelivery(deliveryId);
+
+        return typeTransformer.localDeliveryToDeliveriesApi(localDelivery);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/endpoints")
+    public List<LocalDeliveryEndpointAdminApi> getLocalDeliveryEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List delivery's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        deliveryExists(deliveryId, delivery);
+        return qpidService.getLocalDeliveryEndpointApiList(delivery);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
+    public CapabilitiesLinkedDeliveryApi getDeliveriesExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List capabilities that a delivery is connected to. For service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        deliveryExists(deliveryId, delivery);
+        List<OutgoingMatch> allByLocalDeliveryUuid = outgoingMatchRepository.findAllByLocalDelivery_Uuid(deliveryId);
+        return qpidService.getCapabilitiesLinkedDelivery(delivery, allByLocalDeliveryUuid);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}")
+    public CapabilityApi getCapabilitiesMatchedDeliveryBasedOnCapabilityId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                           @PathVariable("capabilityId") String capabilityId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        deliveryExists(deliveryId, delivery);
+        Capability capability = serviceProvider.getCapability(capabilityId);
+        if (capability == null) {
+            throw new NotFoundException("Capability with id " + capabilityId + " not found");
+        }
+        OutgoingMatch matchedByCapabilityAndDelivery = outgoingMatchRepository.findByCapability_UuidAndLocalDelivery_Uuid(capabilityId, deliveryId);
+
+        if (matchedByCapabilityAndDelivery == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
+        }
+
+        return typeTransformer.capabilitiesMatchedDeliveryBasedOnCapabilityId(matchedByCapabilityAndDelivery);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches/{capabilityId}/{shardId}")
+    public CapabilityShardAdminApi getCapabilitiesMatchedDeliveryBasedOnShardId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                                                                @PathVariable("capabilityId") String capabilityId, @PathVariable("shardId") String shardId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List capabilities that a delivery is connected to based on capabilityId and shardId. For service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
+        deliveryExists(deliveryId, delivery);
+        OutgoingMatch matchedByCapabilityAndDelivery = outgoingMatchRepository.findByCapability_UuidAndLocalDelivery_Uuid(capabilityId, deliveryId);
+
+        if (matchedByCapabilityAndDelivery == null) {
+            throw new NotFoundException("No match found for capability with" + capabilityId + " and delivery with id " + deliveryId);
+        }
+
+        Optional<CapabilityShard> shard = matchedByCapabilityAndDelivery.getCapability().getShard(Integer.valueOf(shardId));
+        boolean exchangeExists = false;
+        if (shard.isPresent()) {
+            CapabilityShard capabilityShard = shard.get();
+            String exchangeName = capabilityShard.getExchangeName();
+            exchangeExists = qpidService.exchangeExists(exchangeName);
+            return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(capabilityShard,exchangeExists);
+        } else {
+            logger.info("Shard {} for capability {} is not found",shardId,capabilityId);
+            throw new NotFoundException(String.format("Shard %s for capability %s is not found",shardId,capabilityId));
+        }
+
+    }
+
+    private ServiceProvider serviceProviderExists(String actorCommonName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
+        if (serviceProvider == null) {
+            throw new NotFoundException("Service provider " + actorCommonName + " not found");
+        }
+        return serviceProvider;
+    }
+
+    private static void deliveryExists(String deliveryId, LocalDelivery delivery) {
+        if (delivery == null) {
+            throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
+    }
+
     private Set<Capability> getAllLocalCapabilities(List<ServiceProvider> serviceProviders) {
         Set<Capability> capabilities = new HashSet<>();
         for (ServiceProvider otherServiceProvider : serviceProviders) {
@@ -181,14 +355,6 @@ public class AdminRestController {
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
-    }
-
-    private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        if (serviceProvider == null) {
-            serviceProvider = new ServiceProvider(serviceProviderName);
-        }
-        return serviceProvider;
     }
 
     private void validatePathVariable(String pathVariable){

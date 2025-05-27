@@ -1,8 +1,7 @@
-package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
-
-import java.util.Objects;
+package no.vegvesen.ixn.federation.adminserver.qpid;
 
 public class CapabilityShardApi {
+
 
     private Integer shardId;
 
@@ -15,15 +14,11 @@ public class CapabilityShardApi {
     }
 
     public CapabilityShardApi(Integer shardId,
-                                    String exchangeName,
-                                    String selector) {
+                              String exchangeName,
+                              String selector) {
         this.shardId = shardId;
         this.exchangeName = exchangeName;
         this.selector = selector;
-    }
-
-    public CapabilityShardApi(Integer shardId) {
-        this.shardId = shardId;
     }
 
     public Integer getShardId() {
@@ -48,11 +43,6 @@ public class CapabilityShardApi {
 
     public void setSelector(String selector) {
         this.selector = selector;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(shardId, exchangeName, selector);
     }
 
     @Override
