@@ -16,7 +16,14 @@ import java.util.concurrent.Callable;
 @Command(name = "add", description = "Adding name for client to set up private channel",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Examples:\n
+                        serviceproviderclient privatechannels add -f privatechannels.json -d "Private channel between king_olav and us"
+                        serviceproviderclient privatechannels add -s "king_olav","king_gustaf"
+                        """
+        })
 public class AddPrivateChannel implements Callable<Integer> {
 
     @ParentCommand
@@ -50,7 +57,7 @@ public class AddPrivateChannel implements Callable<Integer> {
         @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 
-        @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers")
+        @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers", split=",")
         Set<String> peers;
 
 
