@@ -364,7 +364,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:publicationId", "DK", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test
