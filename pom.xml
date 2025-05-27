@@ -85,25 +85,26 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
-        <spring-boot-dependencies.version>3.3.1</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.4.4</spring-boot-dependencies.version>
         <picocli-version>4.7.6</picocli-version>
-        <qpid-jms-client.version>2.5.0</qpid-jms-client.version>
-        <testcontainers.version>1.20.0</testcontainers.version>
-        <dnsjava.version>3.6.0</dnsjava.version>
-        <qpid-broker.version>9.2.0</qpid-broker.version>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
-        <postgresql.version>42.7.3</postgresql.version>
+        <qpid-jms-client.version>2.7.0</qpid-jms-client.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
+        <qpid-broker.version>9.2.1</qpid-broker.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <postgresql.version>42.7.5</postgresql.version>
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
-        <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
-        <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
+        <swagger-annotations-jakarta.version>2.2.29</swagger-annotations-jakarta.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-        <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
-        <javacc.version>7.0.10</javacc.version>
-        <springdoc-openapi-starter-webmvc-api.version>2.2.0</springdoc-openapi-starter-webmvc-api.version>
+        <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
+        <javacc-maven-plugin.version>3.1.1</javacc-maven-plugin.version>
+        <javacc.version>7.0.13</javacc.version>
+        <springdoc-openapi-starter-webmvc-api.version>2.7.0</springdoc-openapi-starter-webmvc-api.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
