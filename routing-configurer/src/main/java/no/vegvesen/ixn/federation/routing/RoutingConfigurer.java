@@ -175,23 +175,34 @@ public class RoutingConfigurer {
 				if (groupMember == null) {
 					logger.debug("Neighbour '{}' did not exist in the group.", neighbourName);
 					qpidClient.addNeighbourMemberToGroup(neighbourName);
-					logger.info("Added neighbour member '{}' to group", neighbourName);
+					logger.debug("Added neighbour member '{}' to group", neighbourName);
 				} else {
-					logger.warn("Neighbour member '{}' already exists in the group", neighbourName);
+					logger.debug("Neighbour member '{}' already exists in the group", neighbourName);
 				}
 				createQueue(endpoint.getSource(), neighbourName, delta);
 
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {
 						if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
-							qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+							Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+							if (exchange != null) {
+								if (! exchange.isBoundTo(endpoint.getSource())) {
+									Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
+									exchange.addBinding(binding);
+									qpidClient.addBinding(shard.getExchangeName(), binding);
+								} else {
+									logger.debug("Exchange '{}' already bound to '{}'", shard.getExchangeName(), endpoint.getSource());
+								}
+							} else {
+								logger.debug("Exchange '{}' does not exist", shard.getExchangeName());
+							}
 						}
 					}
 				}
 
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
-				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
+				logger.debug("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
