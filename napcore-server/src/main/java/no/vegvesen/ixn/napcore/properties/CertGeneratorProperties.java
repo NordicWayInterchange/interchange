@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.napcore.properties;
 
 import no.vegvesen.ixn.cert.CertSigner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -12,41 +14,21 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 @Component
+@ConfigurationProperties(prefix = "napcore.cert-signer")
 public class CertGeneratorProperties {
 
-    @Value("#{systemProperties['server.ssl.key-store']}")
     private String keystoreLocation;
 
-    @Value("#{systemProperties['server.ssl.key-store-password']}")
     private String keyStorePassword;
 
-    @Value("#{systemProperties['server.ssl.key-alias']}")
     private String keyAlias;
 
-    @Value("#{systemProperties['server.ssl.trust-store']}")
-    private String truststoreLocation;
+    public CertGeneratorProperties() { }
 
-    @Value("#{systemProperties['server.ssl.trust-store-password']}")
-    private String truststorePassword;
-
-    public String getKeystoreLocation() {
-        return keystoreLocation;
-    }
-
-    public String getKeyStorePassword() {
-        return keyStorePassword;
-    }
-
-    public String getKeyAlias() {
-        return keyAlias;
-    }
-
-    public String getTruststoreLocation() {
-        return truststoreLocation;
-    }
-
-    public String getTruststorePassword() {
-        return truststorePassword;
+    public CertGeneratorProperties(String keystoreLocation, String keyStorePassword, String keyAlias) {
+        this.keystoreLocation = keystoreLocation;
+        this.keyStorePassword = keyStorePassword;
+        this.keyAlias = keyAlias;
     }
 
 
@@ -65,4 +47,27 @@ public class CertGeneratorProperties {
 
     }
 
+    public String getKeystoreLocation() {
+        return keystoreLocation;
+    }
+
+    public void setKeystoreLocation(String keystoreLocation) {
+        this.keystoreLocation = keystoreLocation;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
+    }
+
+    public String getKeyAlias() {
+        return keyAlias;
+    }
+
+    public void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
+    }
 }
