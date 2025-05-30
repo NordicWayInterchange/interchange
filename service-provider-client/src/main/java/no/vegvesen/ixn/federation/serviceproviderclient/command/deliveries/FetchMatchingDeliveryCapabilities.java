@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
         """
                 Examples: \n
                 serviceproviderclient deliveries match "originatingCountry='NO'" # returns all local capabilities matching originatingCountry NO \n
-                serviceproviderclient deliveries match # returns all local capabilities
+                serviceproviderclient deliveries match "" # returns all local capabilities
                 """
 })
 public class FetchMatchingDeliveryCapabilities implements Callable<Integer> {
