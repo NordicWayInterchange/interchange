@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
                 """
                         Examples:\n
                         serviceproviderclient privatechannels add -f privatechannels.json -d "Private channel between king_olav and us"
-                        serviceproviderclient privatechannels add -s "king_olav","king_gustaf"
+                        serviceproviderclient privatechannels add -p "king_olav","king_gustaf"
                         """
         })
 public class AddPrivateChannel implements Callable<Integer> {
