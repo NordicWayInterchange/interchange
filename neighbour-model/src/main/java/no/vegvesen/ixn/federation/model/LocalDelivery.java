@@ -15,7 +15,7 @@ public class LocalDelivery {
     @Column(name="id")
     private Integer id;
 
-    @Column
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

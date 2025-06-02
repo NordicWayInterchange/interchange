@@ -15,7 +15,16 @@ import java.util.concurrent.Callable;
         name = "add",
         description = "Add a subscription for the service provider",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Examples:\n
+                        serviceproviderclient subscriptions add -s "originatingCountry='NO'" \n
+                        serviceproviderclient subscriptions add -f denm_sub.json -d "denm subscription" \n
+                        | description is optional
+                        """
+        }
 )
 public class AddSubscriptions implements Callable<Integer> {
 

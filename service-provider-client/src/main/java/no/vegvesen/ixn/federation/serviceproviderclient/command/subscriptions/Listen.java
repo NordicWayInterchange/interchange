@@ -5,6 +5,7 @@ import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -16,7 +17,21 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@Command(name = "listen", description = "Add subscription and receive messages")
+@Command(name = "listen", description = "Add subscription and receive messages",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """ 
+                        Examples:\n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" \n
+                        serviceproviderclient subscriptions listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
+                        serviceproviderclient subscriptions listen -f sub.json \n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory \n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory -c "NO subscription" \n
+                        # -d and -c is optional
+                        """
+        })
 public class Listen implements Callable<Integer> {
 
     @ParentCommand
@@ -43,6 +58,7 @@ public class Listen implements Callable<Integer> {
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
             id = addSubscriptionsResponse.getSubscriptions().stream()
+                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();

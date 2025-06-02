@@ -2,9 +2,9 @@ package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
 import java.util.Set;
 
-public class NeighbourSubscriptionApi {
+public class NeighbourSubscriptionApi implements Comparable<NeighbourSubscriptionApi> {
 
-    private Integer subreq_id;
+    private String id;
 
     private NeighbourSubscriptionStatusApi subscriptionStatus;
 
@@ -21,8 +21,8 @@ public class NeighbourSubscriptionApi {
     public NeighbourSubscriptionApi() {
     }
 
-    public NeighbourSubscriptionApi(Integer subreq_id, NeighbourSubscriptionStatusApi subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpointApi> endpoints, Long lastUpdatedTimestamp) {
-        this.subreq_id = subreq_id;
+    public NeighbourSubscriptionApi(String id, NeighbourSubscriptionStatusApi subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpointApi> endpoints, Long lastUpdatedTimestamp) {
+        this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
@@ -31,13 +31,12 @@ public class NeighbourSubscriptionApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-
-    public Integer getSubreq_id() {
-        return subreq_id;
+    public String getId() {
+        return id;
     }
 
-    public void setSubreq_id(Integer subreq_id) {
-        this.subreq_id = subreq_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
 
@@ -90,9 +89,23 @@ public class NeighbourSubscriptionApi {
     }
 
     @Override
+    public int compareTo(NeighbourSubscriptionApi o) {
+        if (lastUpdatedTimestamp == null && o.lastUpdatedTimestamp == null) {
+            return 0;
+        }
+        if (o.lastUpdatedTimestamp == null) {
+            return 1;
+        }
+        if (lastUpdatedTimestamp == null) {
+            return -1;
+        }
+        return Long.compare(lastUpdatedTimestamp, o.lastUpdatedTimestamp);
+    }
+
+    @Override
     public String toString() {
         return "NeighbourSubscriptionApi{" +
-                "id=" + subreq_id +
+                "id=" + id +
                 ", subscriptionStatus=" + subscriptionStatus +
                 ", selector='" + selector + '\'' +
                 ", path='" + path + '\'' +
@@ -101,4 +114,6 @@ public class NeighbourSubscriptionApi {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
+
+
 }

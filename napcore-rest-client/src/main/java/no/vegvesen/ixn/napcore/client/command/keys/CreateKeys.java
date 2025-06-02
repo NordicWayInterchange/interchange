@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore.client.command.keys;
 
+import no.vegvesen.ixn.cert.KeyPairAndCsr;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
 import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
@@ -30,9 +31,10 @@ public class CreateKeys implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        NapRESTClient.KeyAndCSR keyAndCSR = client.generateKeyAndCSR(spName, countryCode);
-        CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(keyAndCSR.getCsr().getBytes())));
-        System.out.println(keyAndCSR.getKey());
+        KeyPairAndCsr csr = client.generateKeyAndCSR(spName, countryCode);
+        String csrAsPem = csr.csrToPem();
+        CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(csrAsPem.getBytes())));
+        System.out.println(csr.privateKeyToPem());
         List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
         System.out.println(String.join("",decodedChain));
         return 0;

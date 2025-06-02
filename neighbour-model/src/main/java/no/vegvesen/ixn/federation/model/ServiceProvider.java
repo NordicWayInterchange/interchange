@@ -227,6 +227,14 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
+	public LocalDelivery findDeliveryByUuid(String deliveryUuid) {
+		return deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryUuid))
+				.findFirst()
+				.orElse(null);
+	}
+
 	public Capability getCapability(String capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()

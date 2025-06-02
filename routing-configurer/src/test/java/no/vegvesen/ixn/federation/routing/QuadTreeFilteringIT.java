@@ -46,7 +46,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
 		registry.add("routing-configurer.vhost", () -> "localhost");
 		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.keystore-password", () -> stores.trustStore().password());
+		registry.add("test.ssl.keystore-password", () -> stores.trustStore().truststorePassword());
 		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
 	}
 
