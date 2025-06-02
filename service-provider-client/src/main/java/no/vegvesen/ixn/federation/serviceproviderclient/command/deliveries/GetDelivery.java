@@ -12,7 +12,13 @@ import java.util.concurrent.Callable;
         description = "Get a single delivery",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0"
+        version = "1.0",
+        customSynopsis = {
+        """
+                Example: \n
+                serviceproviderclient deliveries get a4154ea0-77aa-4f04-9e3f-c325430fd2be
+                """
+}
 )
 public class GetDelivery implements Callable<Integer> {
 

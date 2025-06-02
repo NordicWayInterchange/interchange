@@ -65,6 +65,10 @@ public class Exchange {
                 .anyMatch(q -> q.getDestination().equals(queueName));
     }
 
+    public Binding getBindingTo(String targetName) {
+        return bindings.stream().filter(b -> b.getDestination().equals(targetName)).findFirst().orElse(null);
+    }
+
 
     public boolean isDurable() {
         return durable;

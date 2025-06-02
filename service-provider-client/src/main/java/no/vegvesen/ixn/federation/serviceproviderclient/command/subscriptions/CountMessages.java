@@ -13,7 +13,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Command(name = "count", description = "Count number of messages until client is killed by Ctrl+C")
+@Command(name = "count", description = "Count number of messages until client is killed by Ctrl+C",
+        customSynopsis = {
+                """ 
+                        Examples:\n
+                        serviceproviderclient subscriptions count -f sub.json \n
+                        serviceproviderclient subscriptions count -s "originatingCountry='NO'" \n
+                        serviceproviderclient subscriptions count -i 75c47bbb-af97-4751-9fca-6328325c9a2d
+                        """
+        })
 public class CountMessages implements Callable<Integer> {
 
     @ParentCommand

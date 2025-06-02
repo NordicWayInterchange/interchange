@@ -35,7 +35,7 @@ public class MatchDiscoveryService {
                             if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
                                     Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                 if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
-                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName);
+                                    Match newMatch = new Match(localSubscription, subscription);
                                     matchRepository.save(newMatch);
                                     logger.info("Saved new Match {}", newMatch);
                                 }

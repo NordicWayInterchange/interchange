@@ -8,7 +8,13 @@ import java.util.concurrent.Callable;
 @Command(name = "delete", description = "Delete a service provider private channel to a client",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels delete 43f9ffe7-e8ed-4165-a61c-21f6f2e55a57
+                        """
+        })
 public class DeletePrivateChannel implements Callable<Integer> {
 
     @ParentCommand
