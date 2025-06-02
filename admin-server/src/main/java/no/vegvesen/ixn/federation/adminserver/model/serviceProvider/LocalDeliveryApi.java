@@ -2,7 +2,8 @@ package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
 import java.util.*;
 
-public class LocalDeliveryApi {
+public class LocalDeliveryApi implements Comparable<LocalDeliveryApi> {
+
     private String id;
 
     private LocalDeliveryStatusApi status;
@@ -77,6 +78,22 @@ public class LocalDeliveryApi {
 
     public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    @Override
+    public int compareTo(LocalDeliveryApi o) {
+        if(lastUpdatedTimestamp == null && o.lastUpdatedTimestamp == null){
+            return 0;
+        }
+
+        if(o.lastUpdatedTimestamp == null){
+            return -1;
+        }
+
+        if(lastUpdatedTimestamp == null){
+            return 1;
+        }
+        return Long.compare(lastUpdatedTimestamp, o.lastUpdatedTimestamp);
     }
 
     @Override

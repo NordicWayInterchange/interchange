@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -394,9 +394,9 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
 
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).containsKey(false);
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isNotEmpty();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability2)).isNotEmpty();
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability3)).isNotEmpty();
     }
 
     @Test
@@ -415,7 +415,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isNotEmpty();
     }
 
     @Test
@@ -434,7 +434,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).doesNotContainKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isEmpty();
     }
 
     @Test
@@ -449,9 +449,8 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<Boolean, String> validator = CapabilityValidator.capabilityHasValidProperties(capability1);
-        assertThat(validator).containsKey(false);
-        assertThat(validator.get(false)).contains("<publisherId>");
+        Set<String> validator = CapabilityValidator.capabilityHasValidProperties(capability1);
+        assertThat(validator).isNotEmpty();
     }
 
     @Test
@@ -466,29 +465,25 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        Map<Boolean, String> validator1 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        Set<String> validator1 = CapabilityValidator.capabilityHasValidProperties(capability1);
 
         capability1.getApplication().setOriginatingCountry("No");
-        Map<Boolean, String> validator2 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        Set<String> validator2 = CapabilityValidator.capabilityHasValidProperties(capability1);
 
         capability1.getApplication().setOriginatingCountry("N");
-        Map<Boolean, String> validator3 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        Set<String> validator3 = CapabilityValidator.capabilityHasValidProperties(capability1);
 
         capability1.getApplication().setOriginatingCountry("NOK");
-        Map<Boolean, String> validator4 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        Set<String> validator4 = CapabilityValidator.capabilityHasValidProperties(capability1);
 
         capability1.getApplication().setOriginatingCountry("NO");
-        Map<Boolean, String> validator5 = CapabilityValidator.capabilityHasValidProperties(capability1);
+        Set<String> validator5 = CapabilityValidator.capabilityHasValidProperties(capability1);
 
-        assertThat(validator1).containsKey(false);
-        assertThat(validator1.get(false)).contains("country code");
-        assertThat(validator2).containsKey(false);
-        assertThat(validator2.get(false)).contains("country code");
-        assertThat(validator3).containsKey(false);
-        assertThat(validator3.get(false)).contains("country code");
-        assertThat(validator4).containsKey(false);
-        assertThat(validator4.get(false)).contains("country code");
-        assertThat(validator5).doesNotContainKey(false);
+        assertThat(validator1).isNotEmpty();
+        assertThat(validator2).isNotEmpty();
+        assertThat(validator3).isNotEmpty();
+        assertThat(validator4).isNotEmpty();
+        assertThat(validator5).isEmpty();
     }
 
     @Test
@@ -507,7 +502,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isNotEmpty();
     }
 
     @Test
@@ -522,7 +517,7 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).containsKey(false);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability1)).isNotEmpty();
     }
 
     @Test
@@ -560,6 +555,6 @@ public class CapabilityValidatorTest {
                             1
                 )
         );
-        assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).containsKey(true);
+        assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).isEmpty();
     }
 }
