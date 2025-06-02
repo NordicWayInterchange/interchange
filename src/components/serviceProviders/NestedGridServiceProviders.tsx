@@ -21,6 +21,8 @@ import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
 import { motion } from "framer-motion";
 import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
+import {useSession} from "next-auth/react";
+import {useFetchDeliveryEndpoints} from "@/hooks/useFetchDeliveryEndpoints";
 
 type Props = {
     row: any;
@@ -46,6 +48,13 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
+
+    const shouldLoud = field === "deliveries";
+    console.log('field', field);
+    console.log('shouldLoud', shouldLoud);
+    const {data: session} = useSession();
+    const { data: deliveryEndpoints } = useFetchDeliveryEndpoints(session?.user.commonName as string, shouldLoud);
+    console.log('serviceProviderRow', serviceProviderRow)
     const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
