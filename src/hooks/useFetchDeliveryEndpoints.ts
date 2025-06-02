@@ -1,16 +1,10 @@
 import {useQuery} from "@tanstack/react-query";
 import {ServiceProviders} from "@/types/serviceProviders";
 
-const fetchDeliveryEndpoints = async (commonName: string): Promise<Awaited<{
+const fetchDeliveryEndpoints = async (commonName: string, deliveryId: string): Promise<Awaited<{
     serviceProviderName: string;
     matches: any[]
-} | { serviceProviderName: string; matches: any[] } | {
-    serviceProviderName: string;
-    endpoints: Awaited<{ deliveryId: string; capabilityMatchApi: any[] } | {
-        deliveryId: any;
-        localDeliveryEndpointApi: any
-    }>[]
-}>[]> => {
+} | { serviceProviderName: string; endpoints: any[] } | string[]>[]> => {
     const serviceProvidersResponse = await fetch(`/api/${commonName}/serviceproviders`);
 
     if (!serviceProvidersResponse.ok) {
@@ -26,49 +20,26 @@ const fetchDeliveryEndpoints = async (commonName: string): Promise<Awaited<{
 
             if (!providerName) {
                 console.warn("Service provider name is missing", provider);
-                return {serviceProviderName: "unknown", matches: []};
+                return {serviceProviderName: "unknown", endpoints: []};
             }
 
-            const deliveriesResponse = await fetch(`/api/${commonName}/serviceproviders/${providerName}/deliveries`);
+            const deliveriesResponse = await fetch(`/api/${commonName}/serviceproviders/${providerName}/deliveries/${deliveryId}/endpoints`);
 
             if (!deliveriesResponse.ok) {
                 console.error(`Couldn't fetch deliveries for ${providerName}`);
-                return {serviceProviderName: providerName, matches: []};
+                return {serviceProviderName: providerName, endpoints: []};
             }
 
-            const deliveryIds: string[] = await deliveriesResponse.json();
-
-            const endpoints: Awaited<{ deliveryId: string; capabilityMatchApi: any[] } | {
-                deliveryId: any;
-                localDeliveryEndpointApi: any
-            }>[] = await Promise.all(
-                deliveryIds.map(async (deliveryId) => {
-                    const response = await fetch(
-                        `/api/${commonName}/serviceproviders/${providerName}/deliveries/${deliveryId}/endpoints`
-                    );
-
-                    if (!response.ok) {
-                        console.error(`Couldn't fetch endpoints for delivery ${deliveryId} of ${providerName}`);
-                        return {deliveryId, capabilityMatchApi: []};
-                    }
-
-                    const deliveryEndpoint = await response.json();
-                    console.log(deliveryEndpoint)
-                    return deliveryEndpoint
-                })
-            );
-            return {
-                serviceProviderName: providerName,
-                endpoints
-            };
+            const deliveryEndpoints: string[] = await deliveriesResponse.json();
+            return deliveryEndpoints;
         })
     );
 };
 
-const useFetchDeliveryEndpoints = (commonName: string, enabled: boolean) => {
+const useFetchDeliveryEndpoints = (commonName: string, deliveryId: string, enabled: boolean) => {
     return useQuery({
         queryKey: ["deliveryEndpoints"],
-        queryFn: () => fetchDeliveryEndpoints(commonName),
+        queryFn: () => fetchDeliveryEndpoints(commonName, deliveryId),
         enabled: enabled
     });
 };

@@ -111,7 +111,6 @@ const GraphSection: React.FC<{
                 const capabilityX = bindingX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const bindingY = startY + offset;
-                console.log('binding', capability.binding);
                 svg.append('line')
                     .attr('x1', deliveryX + rectWidth)
                     .attr('y1', deliveryY + rectHeight / 2)
