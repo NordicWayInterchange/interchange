@@ -11,3 +11,10 @@ export type GraphSectionProps = {
     serviceProviderName: string;
     matches: Match[];
 };
+
+export type Binding = {
+    [key: string]: any;
+    bindingKey: string;
+    destination: string;
+
+};
