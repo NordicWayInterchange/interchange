@@ -58,7 +58,8 @@ const GraphSection: React.FC<{
         let maxY = 0;
 
         const trimId = (id: string) => {
-            const parts = id.split('-');
+            if (typeof id !== 'string') return id;
+            const parts = id.includes('-') ? id.split('-') : id;
             return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
         };
 
@@ -106,9 +107,11 @@ const GraphSection: React.FC<{
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; }, i: number) => {
+            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; shardId: string; }, i: number) => {
+                console.log('shardId', capability.shardId)
                 const bindingX = deliveryX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
+                const shardX = capabilityX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const bindingY = startY + offset;
                 svg.append('line')
@@ -216,6 +219,48 @@ const GraphSection: React.FC<{
                     x: capabilityX + rectWidth / 2,
                     y: bindingY + rectHeight / 2,
                 });
+
+                // Line from capability to shard
+                svg.append('line')
+                    .attr('x1', capabilityX + rectWidth)
+                    .attr('y1', bindingY + rectHeight / 2)
+                    .attr('x2', shardX)
+                    .attr('y2', bindingY + rectHeight / 2)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 2);
+
+                // Shard box
+                svg.append('text')
+                    .attr('x', shardX + rectWidth / 2)
+                    .attr('y', bindingY - 10)
+                    .text('ShardId')
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#555')
+                    .attr('font-size', 12);
+
+                svg.append('rect')
+                    .attr('x', shardX)
+                    .attr('y', bindingY)
+                    .attr('width', rectWidth)
+                    .attr('height', rectHeight)
+                    .attr('fill', '#d3d3ff');
+
+                svg.append('text')
+                    .attr('x', shardX + rectWidth / 2)
+                    .attr('y', bindingY + 30)
+                    .text(trimId(capability.shardId as string))  // assuming shardId is a string
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#000')
+                    .attr('font-size', 14);
+
+                targets.push({
+                    id: `shard-${matchIndex}-${i}`,
+                    fullId: capability.shardId,
+                    x: shardX + rectWidth / 2,
+                    y: bindingY + rectHeight / 2,
+                });
+
+                maxX = Math.max(maxX, shardX + rectWidth);
 
                 maxX = Math.max(maxX, capabilityX + rectWidth);
                 maxY = Math.max(maxY, bindingY + rectHeight);
