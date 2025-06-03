@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateCh
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
