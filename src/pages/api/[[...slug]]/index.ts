@@ -5,8 +5,12 @@ import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIDeliveryEndpoints,
     fetchAdminUIDeliveryIds,
-    fetchAdminUIExchangeValidator, fetchAdminUIMatchingCapabilities, fetchAdminUIMatchingCapabilityDetails,
-    fetchAdminUINeighbours, fetchAdminUIPrivateChannels,
+    fetchAdminUIExchangeValidator,
+    fetchAdminUIMatchingCapabilities,
+    fetchAdminUIMatchingCapabilityDetails,
+    fetchAdminUIMatchingCapabilityShardDetails,
+    fetchAdminUINeighbours,
+    fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
     fetchAdminUIServiceProviders
 } from "@/lib/fetchers/interchangeConnector";
@@ -14,7 +18,7 @@ import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
-import {GraphSectionProps} from "@/types/GraphSection";
+import {GraphSectionProps, Shard} from "@/types/GraphSection";
 
 interface CustomSession extends Session {
     user: {
@@ -65,6 +69,13 @@ const fetchMatchingCapabilityDetailsForDeliveries = async (params: extendedGetPa
     return [res.status, matchingCapabilityDetails];
 };
 
+
+const fetchMatchingCapabilityShardDetails = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIMatchingCapabilityShardDetails(params);
+    const capabilityShards: Array<Shard> = await res.data;
+    return [res.status, capabilityShards];
+};
+
 const fetchQueueValidator = async (params: extendedGetParams) => {
     const res = await fetchAdminUIQueueValidator(params);
     const queueExists: boolean = await res.data;
@@ -99,6 +110,7 @@ const getPaths: {
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/endpoints": fetchMatchingDeliveryEndpoints,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]": fetchMatchingCapabilityDetailsForDeliveries,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]/[shardId]": fetchMatchingCapabilityShardDetails,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
 };
