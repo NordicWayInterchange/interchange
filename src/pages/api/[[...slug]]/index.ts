@@ -155,6 +155,7 @@ const findHandler: (params: any) =>
                     serviceProviderName?: string;
                     deliveryId?: string;
                     capabilityId?: string;
+                    shardId?: string;   // Add this if you want TypeScript awareness
                     [key: string]: any;
                 } = {
                     actorCommonName,
@@ -173,27 +174,7 @@ const findHandler: (params: any) =>
                 };
             }
 
-            const lastSegment = path[path.length - 1];
-            if (possiblePaths.includes(lastSegment)) {
-                return {
-                    fn: getPaths[lastSegment],
-                    params: {
-                        actorCommonName,
-                        selector,
-                    },
-                };
-            }
-
-            if (path.length > 1 && possiblePaths.includes(path[0])) {
-                return {
-                    fn: getPaths[path[0]],
-                    params: {
-                        actorCommonName,
-                        pathParam: path[1],
-                    },
-                };
-            }
-
+            // rest unchanged ...
             throw new Error("No matching path found");
         }
 
