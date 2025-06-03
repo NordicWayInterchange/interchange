@@ -54,11 +54,11 @@ public class TypeTransformer {
     public ConnectionApi connectionToConnectionApi(Connection connection) {
         return new ConnectionApi(
                 connection.getId(),
-                connection.getBackoffStart(),
+                localDateTimeToTimestamp(connection.getBackoffStart()),
                 connection.getBackoffAttempts(),
                 connectionStatusToConnectionStatusApi(connection.getConnectionStatus()),
-                connection.getUnreachableTime(),
-                connection.getLastFailedConnectionAttempt()
+                localDateTimeToTimestamp(connection.getUnreachableTime()),
+                localDateTimeToTimestamp(connection.getLastFailedConnectionAttempt())
         );
     }
 
