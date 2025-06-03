@@ -609,7 +609,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		toreDownServiceProvider.setSubscriptions(
 				toreDownServiceProvider.getSubscriptions().stream()
 						.map(localSubscription1 -> localSubscription1.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
-						.collect(Collectors.toSet()));
+						.collect(Collectors.toList()));
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());

@@ -281,7 +281,7 @@ public class TypeTransformer {
     }
 
 
-    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiList(Set<LocalSubscription> subscriptionSet) {
+    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiList(List<LocalSubscription> subscriptionSet) {
         List<LocalSubscriptionApi> subscriptionApiList = new ArrayList<>();
         for (LocalSubscription subscription : subscriptionSet) {
             subscriptionApiList.add(new LocalSubscriptionApi(

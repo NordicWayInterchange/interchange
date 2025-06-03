@@ -177,7 +177,7 @@ public class OnboardRestControllerTest {
 		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider, "DATEX sub");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(subscription1)
+				List.of(subscription1)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
@@ -210,9 +210,8 @@ public class OnboardRestControllerTest {
 
 		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(new AddSubscription(
-						"originatingCountry = 'NO'", "NO SUB"
-				))
+				List.of(new AddSubscription(
+						"originatingCountry = 'NO'", "NO SUB"))
 		);
 
 		String validJson = objectMapper.writeValueAsString(request);
@@ -256,7 +255,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
+		firstServiceProvider.updateSubscriptions(new ArrayList<>(Arrays.asList(seSubs,fiSubs)));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -334,7 +333,7 @@ public class OnboardRestControllerTest {
 		AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
-				Collections.singleton(addSubscription)
+				List.of(addSubscription)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
