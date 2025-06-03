@@ -7,11 +7,15 @@ import { useSession } from 'next-auth/react';
 import { useFetchCapabilityDetails } from '@/hooks/useFetchCapabilityDetails';
 import CapabilityDrawer from '@/components/shared/drawer/CapabilityDrawer';
 import BindingDrawer from '@/components/shared/drawer/BindingDrawer';
+import {useFetchShardDetails} from "@/hooks/useFetchShardDetails";
+import ShardDrawer from "@/components/shared/drawer/ShardDrawer";
+import {Shard} from "@/types/GraphSection";
 
 const GraphSection: React.FC<{
-    serviceProviderName: string;
-    matches: any[];
-}> = ({ serviceProviderName, matches }) => {
+    serviceProviderName: string,
+    matches: any[],
+    handleCapabilityClick?: (capabilityId: string, deliveryId: string) => void
+}> = ({serviceProviderName, matches, handleCapabilityClick}) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const [copyTargets, setCopyTargets] = useState<{ id: string; fullId: string; x: number; y: number }[]>([]);
     const [graphWidth, setGraphWidth] = useState(1000);
@@ -21,6 +25,7 @@ const GraphSection: React.FC<{
     const [selectedCapabilityId, setSelectedCapabilityId] = useState<string | null>(null);
     const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
     const [selectedBinding, setSelectedBinding] = useState<any | null>(null);
+    const [selectedShardId, setSelectedShardId] = useState<any | null>(null);
 
     const { data: session } = useSession();
 
@@ -31,18 +36,31 @@ const GraphSection: React.FC<{
         selectedCapabilityId
     );
 
+
+    const { data: shardDetails, refetch: refetchShardDetails } = useFetchShardDetails(
+        session?.user.commonName as string,
+        serviceProviderName,
+        selectedDeliveryId,
+        selectedCapabilityId,
+        selectedShardId
+    );
+
     const handleMoreClose = () => {
         setDrawerOpen(false);
         setSelectedCapabilityId(null);
         setSelectedDeliveryId(null);
         setSelectedBinding(null);
+        setSelectedShardId(null);
     };
 
     useEffect(() => {
         if (selectedCapabilityId && selectedDeliveryId) {
             refetch();
         }
-    }, [selectedCapabilityId, selectedDeliveryId, refetch]);
+        if (selectedCapabilityId && selectedDeliveryId && selectedShardId) {
+            refetchShardDetails();
+        }
+    }, [selectedCapabilityId, selectedDeliveryId, refetch, refetchShardDetails, selectedShardId]);
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -108,7 +126,6 @@ const GraphSection: React.FC<{
             const startY = deliveryY;
 
             existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; shardId: string; }, i: number) => {
-                console.log('shardId', capability.shardId)
                 const bindingX = deliveryX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
                 const shardX = capabilityX + rectWidth + 40;
@@ -243,15 +260,31 @@ const GraphSection: React.FC<{
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('fill', '#d3d3ff');
+                    .attr('fill', '#d3d3ff')
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        setSelectedCapabilityId(capability.capabilityId);
+                        setSelectedDeliveryId(match.deliveryId);
+                        setSelectedShardId(match.shardId);
+                        setSelectedBinding(null);
+                        setDrawerOpen(true);
+                    });
 
                 svg.append('text')
                     .attr('x', shardX + rectWidth / 2)
                     .attr('y', bindingY + 30)
-                    .text(trimId(capability.shardId as string))  // assuming shardId is a string
+                    .text(trimId(capability.shardId as string))
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
-                    .attr('font-size', 14);
+                    .attr('font-size', 14)
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        setSelectedCapabilityId(capability.capabilityId);
+                        setSelectedDeliveryId(match.deliveryId);
+                        setSelectedShardId(match.shardId);
+                        setSelectedBinding(null);
+                        setDrawerOpen(true);
+                    });
 
                 targets.push({
                     id: `shard-${matchIndex}-${i}`,
@@ -300,6 +333,14 @@ const GraphSection: React.FC<{
                 </div>
             </div>
 
+            {drawerOpen && selectedBinding && (
+                <BindingDrawer
+                    open={drawerOpen}
+                    handleMoreClose={handleMoreClose}
+                    binding={selectedBinding}
+                />
+            )}
+
             {drawerOpen && selectedCapabilityId && capabilityDetails && (
                 <CapabilityDrawer
                     open={drawerOpen}
@@ -308,11 +349,11 @@ const GraphSection: React.FC<{
                 />
             )}
 
-            {drawerOpen && selectedBinding && (
-                <BindingDrawer
+            {drawerOpen && selectedShardId && shardDetails (
+                <ShardDrawer
                     open={drawerOpen}
                     handleMoreClose={handleMoreClose}
-                    binding={selectedBinding}
+                    shard={shardDetails as Shard}
                 />
             )}
         </>

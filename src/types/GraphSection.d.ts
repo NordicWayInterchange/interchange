@@ -18,3 +18,14 @@ export type Binding = {
     destination: string;
 
 };
+
+export type Shard = {
+    capabilityShard: CapabilityShard;
+    exchangeNameExists: boolean;
+}
+
+export type CapabilityShard = {
+    shardId: string;
+    exchangeName: string;
+    selector: string;
+};
