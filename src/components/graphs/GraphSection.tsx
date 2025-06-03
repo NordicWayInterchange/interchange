@@ -7,15 +7,15 @@ import { useSession } from 'next-auth/react';
 import { useFetchCapabilityDetails } from '@/hooks/useFetchCapabilityDetails';
 import CapabilityDrawer from '@/components/shared/drawer/CapabilityDrawer';
 import BindingDrawer from '@/components/shared/drawer/BindingDrawer';
-import {useFetchShardDetails} from "@/hooks/useFetchShardDetails";
-import ShardDrawer from "@/components/shared/drawer/ShardDrawer";
-import {Shard} from "@/types/GraphSection";
+import { useFetchShardDetails } from '@/hooks/useFetchShardDetails';
+import ShardDrawer from '@/components/shared/drawer/ShardDrawer';
+import { Shard } from '@/types/GraphSection';
 
 const GraphSection: React.FC<{
-    serviceProviderName: string,
-    matches: any[],
-    handleCapabilityClick?: (capabilityId: string, deliveryId: string) => void
-}> = ({serviceProviderName, matches, handleCapabilityClick}) => {
+    serviceProviderName: string;
+    matches: any[];
+    handleCapabilityClick?: (capabilityId: string, deliveryId: string) => void;
+}> = ({ serviceProviderName, matches, handleCapabilityClick }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const [copyTargets, setCopyTargets] = useState<{ id: string; fullId: string; x: number; y: number }[]>([]);
     const [graphWidth, setGraphWidth] = useState(1000);
@@ -36,7 +36,6 @@ const GraphSection: React.FC<{
         selectedCapabilityId
     );
 
-
     const { data: shardDetails, refetch: refetchShardDetails } = useFetchShardDetails(
         session?.user.commonName as string,
         serviceProviderName,
@@ -44,6 +43,9 @@ const GraphSection: React.FC<{
         selectedCapabilityId,
         selectedShardId
     );
+
+
+    console.log(shardDetails)
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
@@ -54,13 +56,15 @@ const GraphSection: React.FC<{
     };
 
     useEffect(() => {
-        if (selectedCapabilityId && selectedDeliveryId) {
+        if (selectedCapabilityId && selectedDeliveryId && !selectedShardId) {
             refetch();
         }
-        if (selectedCapabilityId && selectedDeliveryId && selectedShardId) {
+
+        if (selectedShardId && selectedCapabilityId && selectedDeliveryId) {
             refetchShardDetails();
         }
-    }, [selectedCapabilityId, selectedDeliveryId, refetch, refetchShardDetails, selectedShardId]);
+    }, [selectedCapabilityId, selectedDeliveryId, selectedShardId, refetch, refetchShardDetails]);
+
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -131,6 +135,8 @@ const GraphSection: React.FC<{
                 const shardX = capabilityX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const bindingY = startY + offset;
+
+                // Delivery to Binding line
                 svg.append('line')
                     .attr('x1', deliveryX + rectWidth)
                     .attr('y1', deliveryY + rectHeight / 2)
@@ -139,6 +145,7 @@ const GraphSection: React.FC<{
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
+                // Binding Box
                 svg.append('text')
                     .attr('x', bindingX + rectWidth / 2)
                     .attr('y', bindingY - 10)
@@ -157,6 +164,7 @@ const GraphSection: React.FC<{
                     .on('click', () => {
                         setSelectedBinding(capability.binding);
                         setSelectedCapabilityId(null);
+                        setSelectedShardId(null);
                         setSelectedDeliveryId(null);
                         setDrawerOpen(true);
                     });
@@ -172,6 +180,7 @@ const GraphSection: React.FC<{
                     .on('click', () => {
                         setSelectedBinding(capability.binding);
                         setSelectedCapabilityId(null);
+                        setSelectedShardId(null);
                         setSelectedDeliveryId(null);
                         setDrawerOpen(true);
                     });
@@ -183,7 +192,7 @@ const GraphSection: React.FC<{
                     y: bindingY + rectHeight / 2,
                 });
 
-                // Line from binding to capability
+                // Binding to Capability
                 svg.append('line')
                     .attr('x1', bindingX + rectWidth)
                     .attr('y1', bindingY + rectHeight / 2)
@@ -192,7 +201,6 @@ const GraphSection: React.FC<{
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                // Capability box
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY - 10)
@@ -212,6 +220,7 @@ const GraphSection: React.FC<{
                         setSelectedCapabilityId(capability.capabilityId);
                         setSelectedDeliveryId(match.deliveryId);
                         setSelectedBinding(null);
+                        setSelectedShardId(null);
                         setDrawerOpen(true);
                     });
 
@@ -227,6 +236,7 @@ const GraphSection: React.FC<{
                         setSelectedCapabilityId(capability.capabilityId);
                         setSelectedDeliveryId(match.deliveryId);
                         setSelectedBinding(null);
+                        setSelectedShardId(null);
                         setDrawerOpen(true);
                     });
 
@@ -237,7 +247,7 @@ const GraphSection: React.FC<{
                     y: bindingY + rectHeight / 2,
                 });
 
-                // Line from capability to shard
+                // Capability to Shard
                 svg.append('line')
                     .attr('x1', capabilityX + rectWidth)
                     .attr('y1', bindingY + rectHeight / 2)
@@ -246,7 +256,6 @@ const GraphSection: React.FC<{
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                // Shard box
                 svg.append('text')
                     .attr('x', shardX + rectWidth / 2)
                     .attr('y', bindingY - 10)
@@ -263,9 +272,9 @@ const GraphSection: React.FC<{
                     .attr('fill', '#d3d3ff')
                     .style('cursor', 'pointer')
                     .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
+                        setSelectedCapabilityId(null);
                         setSelectedDeliveryId(match.deliveryId);
-                        setSelectedShardId(match.shardId);
+                        setSelectedShardId(capability.shardId);
                         setSelectedBinding(null);
                         setDrawerOpen(true);
                     });
@@ -273,18 +282,20 @@ const GraphSection: React.FC<{
                 svg.append('text')
                     .attr('x', shardX + rectWidth / 2)
                     .attr('y', bindingY + 30)
-                    .text(trimId(capability.shardId as string))
+                    .text(trimId(capability.shardId))
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
                     .attr('font-size', 14)
                     .style('cursor', 'pointer')
                     .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
+                        setSelectedCapabilityId(null);
                         setSelectedDeliveryId(match.deliveryId);
-                        setSelectedShardId(match.shardId);
+                        setSelectedShardId(capability.shardId);
                         setSelectedBinding(null);
                         setDrawerOpen(true);
                     });
+
+
 
                 targets.push({
                     id: `shard-${matchIndex}-${i}`,
@@ -294,8 +305,6 @@ const GraphSection: React.FC<{
                 });
 
                 maxX = Math.max(maxX, shardX + rectWidth);
-
-                maxX = Math.max(maxX, capabilityX + rectWidth);
                 maxY = Math.max(maxY, bindingY + rectHeight);
             });
 
@@ -333,29 +342,26 @@ const GraphSection: React.FC<{
                 </div>
             </div>
 
-            {drawerOpen && selectedBinding && (
-                <BindingDrawer
-                    open={drawerOpen}
-                    handleMoreClose={handleMoreClose}
-                    binding={selectedBinding}
-                />
-            )}
-
-            {drawerOpen && selectedCapabilityId && capabilityDetails && (
-                <CapabilityDrawer
-                    open={drawerOpen}
-                    handleMoreClose={handleMoreClose}
-                    capabilities={capabilityDetails as Capability}
-                />
-            )}
-
-            {drawerOpen && selectedShardId && shardDetails (
+            {drawerOpen && selectedShardId && shardDetails ? (
                 <ShardDrawer
                     open={drawerOpen}
                     handleMoreClose={handleMoreClose}
                     shard={shardDetails as Shard}
                 />
-            )}
+            ) : drawerOpen && selectedCapabilityId && capabilityDetails ? (
+                <CapabilityDrawer
+                    open={drawerOpen}
+                    handleMoreClose={handleMoreClose}
+                    capabilities={capabilityDetails as Capability}
+                />
+            ) : drawerOpen && selectedBinding ? (
+                <BindingDrawer
+                    open={drawerOpen}
+                    handleMoreClose={handleMoreClose}
+                    binding={selectedBinding}
+                />
+            ) : null}
+
         </>
     );
 };
