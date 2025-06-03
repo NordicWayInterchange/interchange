@@ -19,8 +19,7 @@ type Props = {
 };
 
 const BindingDrawer = ({binding, open, handleMoreClose}: Props) => {
-    const application = binding;
-    if (!binding || !application) {
+    if (!binding) {
         return <Loading text=""/>
     }
 
@@ -51,7 +50,7 @@ const BindingDrawer = ({binding, open, handleMoreClose}: Props) => {
                             <StyledCard variant="outlined">
                                 <FormControl fullWidth>
                                     <TextField
-                                        value={application.bindingKey}
+                                        value={binding.bindingKey}
                                         label="Binding key"
                                         margin="normal"
                                         slotProps={{
