@@ -155,7 +155,7 @@ const findHandler: (params: any) =>
                     serviceProviderName?: string;
                     deliveryId?: string;
                     capabilityId?: string;
-                    shardId?: string;   // Add this if you want TypeScript awareness
+                    shardId?: string;
                     [key: string]: any;
                 } = {
                     actorCommonName,
@@ -174,7 +174,6 @@ const findHandler: (params: any) =>
                 };
             }
 
-            // rest unchanged ...
             throw new Error("No matching path found");
         }
 

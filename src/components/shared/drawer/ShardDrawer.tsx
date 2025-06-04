@@ -23,8 +23,6 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
         return <Loading text=""/>
     }
 
-    console.log('shard', shard.capabilityShardApi);
-
     return (
         <>
             <Drawer

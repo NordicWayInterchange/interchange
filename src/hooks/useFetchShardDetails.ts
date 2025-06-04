@@ -25,12 +25,14 @@ const useFetchShardDetails = (
     capabilityId: string | null,
     shardId: string | null
 ) => {
+    const shouldFetch = !!(commonName && serviceProviderName && deliveryId && capabilityId && shardId); //Avodis hitting the API with null parameters
+
     return useQuery({
         queryKey: ["capabilitiesDetails", commonName, serviceProviderName, deliveryId, capabilityId, shardId],
         queryFn: () =>
             fetchFetchShardDetails(commonName, serviceProviderName, deliveryId!, capabilityId!, shardId!),
+        enabled: shouldFetch,
     });
 };
-
 
 export { useFetchShardDetails };

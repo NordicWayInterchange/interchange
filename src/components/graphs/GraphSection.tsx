@@ -36,7 +36,6 @@ const GraphSection: React.FC<{
         selectedCapabilityId
     );
 
-    console.log('selectedCapabilityId', selectedCapabilityId)
     const { data: shardDetails, refetch: refetchShardDetails } = useFetchShardDetails(
         session?.user.commonName as string,
         serviceProviderName,
@@ -44,9 +43,6 @@ const GraphSection: React.FC<{
         selectedCapabilityId,
         selectedShardId
     );
-
-
-    console.log('shardDetails', shardDetails)
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
