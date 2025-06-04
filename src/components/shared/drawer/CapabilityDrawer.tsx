@@ -14,6 +14,7 @@ import {Capability} from "@/types/neighbours";
 import MapDialog from "@/components/map/MapDialog";
 import {extractMatchingCauseCodes} from "@/lib/extractMatchingCauseCodes";
 import Loading from "@/components/shared/components/Loading";
+import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
     capabilities: Capability;
@@ -67,7 +68,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                     <Box>
                                         <ListItemText
                                             primary={"Created"}
-                                            secondary={capabilities.createdTimestamp}
+                                            secondary={timeConverter(capabilities.createdTimestamp)}
                                         />
                                     </Box>
                                 </Box>
