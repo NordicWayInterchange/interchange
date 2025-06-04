@@ -131,40 +131,26 @@ const findHandler: (params: any) =>
         selector = ""
     } = params;
     switch (method) {
-        case "GET": {
+        case "GET":
             const possiblePaths = Object.keys(getPaths);
-            const normalizedPath = path.join("/").replace(/^\/?api\/?/, "");
 
-            const matchedPath = possiblePaths.find((template) => {
-                const templateSegments = template.split("/").filter(Boolean);
-                const pathSegments = normalizedPath.split("/").filter(Boolean);
+            const matchedPath = possiblePaths.find((pattern) => {
+                const patternSegments = pattern.split("/").filter(Boolean);
+                if (patternSegments.length !== path.length) return false;
 
-                if (templateSegments.length !== pathSegments.length) return false;
-
-                return templateSegments.every((seg, idx) =>
-                    seg.startsWith("[") && seg.endsWith("]") ? true : seg === pathSegments[idx]
-                );
+                return patternSegments.every((segment, idx) => {
+                    return segment.startsWith("[") && segment.endsWith("]") || segment === path[idx];
+                });
             });
 
             if (matchedPath) {
-                const templateSegments = matchedPath.split("/").filter(Boolean);
-                const pathSegments = normalizedPath.split("/").filter(Boolean);
+                const patternSegments = matchedPath.split("/").filter(Boolean);
 
-                const params: {
-                    actorCommonName: string;
-                    serviceProviderName?: string;
-                    deliveryId?: string;
-                    capabilityId?: string;
-                    shardId?: string;
-                    [key: string]: any;
-                } = {
-                    actorCommonName,
-                };
-
-                templateSegments.forEach((seg, idx) => {
-                    if (seg.startsWith("[") && seg.endsWith("]")) {
-                        const paramName = seg.slice(1, -1);
-                        params[paramName] = pathSegments[idx];
+                const params: Record<string, string> = { actorCommonName };
+                patternSegments.forEach((segment, idx) => {
+                    if (segment.startsWith("[") && segment.endsWith("]")) {
+                        const paramName = segment.slice(1, -1);
+                        params[paramName] = path[idx];
                     }
                 });
 
@@ -174,13 +160,24 @@ const findHandler: (params: any) =>
                 };
             }
 
-            throw new Error("No matching path found");
-        }
+            const lastSegment = path[path.length - 1];
+            if (possiblePaths.includes(lastSegment)) {
+                return {
+                    fn: getPaths[lastSegment],
+                    params: { actorCommonName, selector },
+                };
+            }
+            if (path.length > 1 && possiblePaths.includes(path[0])) {
+                return {
+                    fn: getPaths[path[0]],
+                    params: { actorCommonName, pathParam: path[1] },
+                };
+            }
 
+            return {};
         default:
             return {};
     }
-
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
