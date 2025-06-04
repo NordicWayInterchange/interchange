@@ -62,7 +62,6 @@ const GraphSection: React.FC<{
         }
     }, [selectedCapabilityId, selectedDeliveryId, selectedShardId, refetch, refetchShardDetails]);
 
-
     useEffect(() => {
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove();
@@ -78,7 +77,7 @@ const GraphSection: React.FC<{
 
         const trimId = (id: string) => {
             if (typeof id !== 'string') return id;
-            const parts = id.includes('-') ? id.split('-') : id;
+            const parts = id.includes('-') ? id.split('-') : [id];
             return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : id;
         };
 
@@ -93,6 +92,7 @@ const GraphSection: React.FC<{
             const deliveryX = xOffset;
             const deliveryY = topMargin + 300;
 
+            // Delivery label and box
             svg.append('text')
                 .attr('x', deliveryX + rectWidth / 2)
                 .attr('y', deliveryY - 10)
@@ -126,14 +126,13 @@ const GraphSection: React.FC<{
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; shardId: string; }, i: number) => {
+            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; shardId: string | string[]; }, i: number) => {
                 const bindingX = deliveryX + rectWidth + 100;
                 const capabilityX = bindingX + rectWidth + 40;
                 const shardX = capabilityX + rectWidth + 40;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const bindingY = startY + offset;
 
-                // Delivery to Binding line
                 svg.append('line')
                     .attr('x1', deliveryX + rectWidth)
                     .attr('y1', deliveryY + rectHeight / 2)
@@ -142,8 +141,17 @@ const GraphSection: React.FC<{
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                // Binding Box
-                svg.append('text')
+                const bindingGroup = svg.append('g')
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        setSelectedBinding(capability.binding);
+                        setSelectedCapabilityId(null);
+                        setSelectedShardId(null);
+                        setSelectedDeliveryId(null);
+                        setDrawerOpen(true);
+                    });
+
+                bindingGroup.append('text')
                     .attr('x', bindingX + rectWidth / 2)
                     .attr('y', bindingY - 10)
                     .text('Binding')
@@ -151,36 +159,20 @@ const GraphSection: React.FC<{
                     .attr('fill', '#555')
                     .attr('font-size', 12);
 
-                svg.append('rect')
+                bindingGroup.append('rect')
                     .attr('x', bindingX)
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('fill', '#FFF5C8')
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedBinding(capability.binding);
-                        setSelectedCapabilityId(null);
-                        setSelectedShardId(null);
-                        setSelectedDeliveryId(null);
-                        setDrawerOpen(true);
-                    });
+                    .attr('fill', '#FFF5C8');
 
-                svg.append('text')
+                bindingGroup.append('text')
                     .attr('x', bindingX + rectWidth / 2)
                     .attr('y', bindingY + 30)
                     .text(trimId(capability.binding.bindingKey))
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
-                    .attr('font-size', 14)
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedBinding(capability.binding);
-                        setSelectedCapabilityId(null);
-                        setSelectedShardId(null);
-                        setSelectedDeliveryId(null);
-                        setDrawerOpen(true);
-                    });
+                    .attr('font-size', 14);
 
                 targets.push({
                     id: `binding-${matchIndex}-${i}`,
@@ -189,7 +181,6 @@ const GraphSection: React.FC<{
                     y: bindingY + rectHeight / 2,
                 });
 
-                // Binding to Capability
                 svg.append('line')
                     .attr('x1', bindingX + rectWidth)
                     .attr('y1', bindingY + rectHeight / 2)
@@ -198,7 +189,17 @@ const GraphSection: React.FC<{
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
-                svg.append('text')
+                const capabilityGroup = svg.append('g')
+                    .style('cursor', 'pointer')
+                    .on('click', () => {
+                        setSelectedCapabilityId(capability.capabilityId);
+                        setSelectedDeliveryId(match.deliveryId);
+                        setSelectedBinding(null);
+                        setSelectedShardId(null);
+                        setDrawerOpen(true);
+                    });
+
+                capabilityGroup.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY - 10)
                     .text('Capability')
@@ -206,36 +207,20 @@ const GraphSection: React.FC<{
                     .attr('fill', '#555')
                     .attr('font-size', 12);
 
-                svg.append('rect')
+                capabilityGroup.append('rect')
                     .attr('x', capabilityX)
                     .attr('y', bindingY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('fill', '#ffbf7d')
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
-                        setSelectedDeliveryId(match.deliveryId);
-                        setSelectedBinding(null);
-                        setSelectedShardId(null);
-                        setDrawerOpen(true);
-                    });
+                    .attr('fill', '#ffbf7d');
 
-                svg.append('text')
+                capabilityGroup.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY + 30)
                     .text(trimId(capability.capabilityId))
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
-                    .attr('font-size', 14)
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
-                        setSelectedDeliveryId(match.deliveryId);
-                        setSelectedBinding(null);
-                        setSelectedShardId(null);
-                        setDrawerOpen(true);
-                    });
+                    .attr('font-size', 14);
 
                 targets.push({
                     id: `capability-${matchIndex}-${i}`,
@@ -244,61 +229,60 @@ const GraphSection: React.FC<{
                     y: bindingY + rectHeight / 2,
                 });
 
-                // Capability to Shard
-                svg.append('line')
-                    .attr('x1', capabilityX + rectWidth)
-                    .attr('y1', bindingY + rectHeight / 2)
-                    .attr('x2', shardX)
-                    .attr('y2', bindingY + rectHeight / 2)
-                    .attr('stroke', '#333')
-                    .attr('stroke-width', 2);
+                const shards = Array.isArray(capability.shardId) ? capability.shardId : [capability.shardId];
+                shards.forEach((shardId, shardIndex) => {
+                    const shardYOffset = offset + (shardIndex - (shards.length - 1) / 2) * verticalSpacing;
+                    const shardY = startY + shardYOffset;
 
-                svg.append('text')
-                    .attr('x', shardX + rectWidth / 2)
-                    .attr('y', bindingY - 10)
-                    .text('Shard')
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', '#555')
-                    .attr('font-size', 12);
+                    svg.append('line')
+                        .attr('x1', capabilityX + rectWidth)
+                        .attr('y1', bindingY + rectHeight / 2)
+                        .attr('x2', shardX)
+                        .attr('y2', shardY + rectHeight / 2)
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2);
 
-                svg.append('rect')
-                    .attr('x', shardX)
-                    .attr('y', bindingY)
-                    .attr('width', rectWidth)
-                    .attr('height', rectHeight)
-                    .attr('fill', '#d3d3ff')
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
-                        setSelectedDeliveryId(match.deliveryId);
-                        setSelectedShardId(capability.shardId);
-                        setSelectedBinding(null);
-                        setDrawerOpen(true);
+                    const shardGroup = svg.append('g')
+                        .style('cursor', 'pointer')
+                        .on('click', () => {
+                            setSelectedCapabilityId(capability.capabilityId);
+                            setSelectedDeliveryId(match.deliveryId);
+                            setSelectedShardId(shardId);
+                            setSelectedBinding(null);
+                            setDrawerOpen(true);
+                        });
+
+                    shardGroup.append('text')
+                        .attr('x', shardX + rectWidth / 2)
+                        .attr('y', shardY - 10)
+                        .text('Shard')
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#555')
+                        .attr('font-size', 12);
+
+                    shardGroup.append('rect')
+                        .attr('x', shardX)
+                        .attr('y', shardY)
+                        .attr('width', rectWidth)
+                        .attr('height', rectHeight)
+                        .attr('fill', '#d3d3ff');
+
+                    shardGroup.append('text')
+                        .attr('x', shardX + rectWidth / 2)
+                        .attr('y', shardY + 30)
+                        .text(trimId(shardId))
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#000')
+                        .attr('font-size', 14);
+
+                    targets.push({
+                        id: `shard-${matchIndex}-${i}-${shardIndex}`,
+                        fullId: shardId,
+                        x: shardX + rectWidth / 2,
+                        y: shardY + rectHeight / 2,
                     });
 
-                svg.append('text')
-                    .attr('x', shardX + rectWidth / 2)
-                    .attr('y', bindingY + 30)
-                    .text(trimId(capability.shardId))
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', '#000')
-                    .attr('font-size', 14)
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedCapabilityId(capability.capabilityId);
-                        setSelectedDeliveryId(match.deliveryId);
-                        setSelectedShardId(capability.shardId);
-                        setSelectedBinding(null);
-                        setDrawerOpen(true);
-                    });
-
-
-
-                targets.push({
-                    id: `shard-${matchIndex}-${i}`,
-                    fullId: capability.shardId,
-                    x: shardX + rectWidth / 2,
-                    y: bindingY + rectHeight / 2,
+                    maxY = Math.max(maxY, shardY + rectHeight);
                 });
 
                 maxX = Math.max(maxX, shardX + rectWidth);
@@ -358,7 +342,6 @@ const GraphSection: React.FC<{
                     binding={selectedBinding}
                 />
             ) : null}
-
         </>
     );
 };

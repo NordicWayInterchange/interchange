@@ -1,5 +1,3 @@
-import {Capability} from "@/types/neighbours";
-
 export type CopyTarget = {
     id: string;
     fullId: string;
