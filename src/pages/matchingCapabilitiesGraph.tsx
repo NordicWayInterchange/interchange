@@ -3,10 +3,12 @@ import * as d3 from "d3";
 import { Box } from "@mui/system";
 import { useSession } from "next-auth/react";
 import { useFetchMatchingCapabilities } from "@/hooks/useFetchMatchingCapabilities";
-import { Card, CardContent, Collapse, IconButton, List, Typography } from "@mui/material";
+import {Card, CardContent, Collapse, Divider, IconButton, List, Typography} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Loading from "@/components/shared/components/Loading";
 import GraphSection from "@/components/graphs/GraphSection";
+import Mainheading from "@/components/shared/typography/Mainheading";
+import Subheading from "@/components/shared/typography/Subheading";
 
 const MatchingCapabilitiesGraph: React.FC = () => {
     const { data: session } = useSession();
@@ -185,7 +187,13 @@ const MatchingCapabilitiesGraph: React.FC = () => {
     }, [matchingCapabilities]);
 
     return (
-        <>
+        <Box flex={1}>
+            <Mainheading>Graphs</Mainheading>
+            <Subheading>
+                You can click on each service providers to see matching capabilities for each delivery. You can also
+                click on each box, to view more information.
+            </Subheading>
+            <Divider sx={{marginY: 3}}/>
             {(matchingCapabilities === undefined || matchingCapabilities === null) ? (
                 <Loading text="Matching capabilities graph" />
             ) : <>
@@ -256,7 +264,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                 ))}
             </>}
 
-        </>
+        </Box>
     );
 };
 
