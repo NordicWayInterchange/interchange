@@ -20,7 +20,7 @@ export type Binding = {
 };
 
 export type Shard = {
-    capabilityShard: CapabilityShard;
+    capabilityShardApi: CapabilityShard;
     exchangeNameExists: boolean;
 }
 

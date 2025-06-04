@@ -36,6 +36,7 @@ const GraphSection: React.FC<{
         selectedCapabilityId
     );
 
+    console.log('selectedCapabilityId', selectedCapabilityId)
     const { data: shardDetails, refetch: refetchShardDetails } = useFetchShardDetails(
         session?.user.commonName as string,
         serviceProviderName,
@@ -45,7 +46,7 @@ const GraphSection: React.FC<{
     );
 
 
-    console.log(shardDetails)
+    console.log('shardDetails', shardDetails)
 
     const handleMoreClose = () => {
         setDrawerOpen(false);
@@ -99,7 +100,7 @@ const GraphSection: React.FC<{
             svg.append('text')
                 .attr('x', deliveryX + rectWidth / 2)
                 .attr('y', deliveryY - 10)
-                .text('DeliveryId')
+                .text('Delivery')
                 .attr('text-anchor', 'middle')
                 .attr('fill', '#555')
                 .attr('font-size', 12);
@@ -204,7 +205,7 @@ const GraphSection: React.FC<{
                 svg.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
                     .attr('y', bindingY - 10)
-                    .text('CapabilityId')
+                    .text('Capability')
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
                     .attr('font-size', 12);
@@ -259,7 +260,7 @@ const GraphSection: React.FC<{
                 svg.append('text')
                     .attr('x', shardX + rectWidth / 2)
                     .attr('y', bindingY - 10)
-                    .text('ShardId')
+                    .text('Shard')
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
                     .attr('font-size', 12);
@@ -272,7 +273,7 @@ const GraphSection: React.FC<{
                     .attr('fill', '#d3d3ff')
                     .style('cursor', 'pointer')
                     .on('click', () => {
-                        setSelectedCapabilityId(null);
+                        setSelectedCapabilityId(capability.capabilityId);
                         setSelectedDeliveryId(match.deliveryId);
                         setSelectedShardId(capability.shardId);
                         setSelectedBinding(null);
@@ -288,7 +289,7 @@ const GraphSection: React.FC<{
                     .attr('font-size', 14)
                     .style('cursor', 'pointer')
                     .on('click', () => {
-                        setSelectedCapabilityId(null);
+                        setSelectedCapabilityId(capability.capabilityId);
                         setSelectedDeliveryId(match.deliveryId);
                         setSelectedShardId(capability.shardId);
                         setSelectedBinding(null);

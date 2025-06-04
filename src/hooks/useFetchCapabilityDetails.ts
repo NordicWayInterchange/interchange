@@ -10,6 +10,7 @@ const fetchCapabilityDetails = async (
         `/api/${commonName}/serviceproviders/${serviceProviderName}/deliveries/${deliveryId}/matches/${capabilityId}`
     );
     if (res.ok) {
+        console.log('response', res);
         return res.json();
     } else {
         const errorObj = await res.json();

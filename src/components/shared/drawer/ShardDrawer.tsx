@@ -23,6 +23,8 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
         return <Loading text=""/>
     }
 
+    console.log('shard', shard.capabilityShardApi);
+
     return (
         <>
             <Drawer
@@ -50,28 +52,28 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
                             <StyledCard variant="outlined">
                                 <FormControl fullWidth>
                                     <TextField
-                                        value={shard.capabilityShard.shardId}
+                                        value={shard.capabilityShardApi.shardId}
                                         label="Binding key"
                                         margin="normal"
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={shard.capabilityShard.shardId}/>
+                                                        <ContentCopy value={shard.capabilityShardApi.shardId}/>
                                                     </InputAdornment>
                                                 ),
                                             },
                                         }}
                                     />
                                     <TextField
-                                        value={shard.capabilityShard.exchangeName}
+                                        value={shard.capabilityShardApi.exchangeName}
                                         label="Destination"
                                         margin="normal"
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={shard.capabilityShard.exchangeName}/>
+                                                        <ContentCopy value={shard.capabilityShardApi.exchangeName}/>
                                                     </InputAdornment>
                                                 ),
                                             },
@@ -81,14 +83,15 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
                                 <FormControl fullWidth>
                                     <TextField
                                         margin="normal"
+                                        label="Selector"
                                         multiline
-                                        value={shard.capabilityShard.selector}
+                                        value={shard.capabilityShardApi.selector}
                                         rows={4}
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <ContentCopy value={shard.capabilityShard.selector}/>
+                                                        <ContentCopy value={shard.capabilityShardApi.selector}/>
                                                     </InputAdornment>
                                                 ),
                                             },

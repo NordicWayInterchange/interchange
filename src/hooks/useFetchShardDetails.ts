@@ -29,7 +29,6 @@ const useFetchShardDetails = (
         queryKey: ["capabilitiesDetails", commonName, serviceProviderName, deliveryId, capabilityId, shardId],
         queryFn: () =>
             fetchFetchShardDetails(commonName, serviceProviderName, deliveryId!, capabilityId!, shardId!),
-        enabled: !!commonName && !!serviceProviderName && !!deliveryId && !!capabilityId && !!shardId
     });
 };
 

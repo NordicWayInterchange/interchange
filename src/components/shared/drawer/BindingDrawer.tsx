@@ -81,6 +81,7 @@ const BindingDrawer = ({binding, open, handleMoreClose}: Props) => {
                                 <FormControl fullWidth>
                                     <TextField
                                         margin="normal"
+                                        label="Selector"
                                         multiline
                                         value={binding.arguments["x-filter-jms-selector"] || ""}
                                         rows={4}
