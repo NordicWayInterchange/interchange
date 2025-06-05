@@ -56,6 +56,9 @@ public class CertSigner {
                       List<X509Certificate> certChain) {
         this.secureRandom = new SecureRandom();
         this.privateKey = issuerPrivateKey;
+        if (issuerCertificate.getBasicConstraints() == -1) {
+            throw new IllegalArgumentException("Issuer certificate is not a CA certificate");
+        }
         this.issuerCertificate = issuerCertificate;
         this.issuerSubject = JcaX500NameUtil.getSubject(issuerCertificate);
         this.certificateChain = certChain;

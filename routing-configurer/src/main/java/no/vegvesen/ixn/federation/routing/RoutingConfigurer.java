@@ -145,12 +145,11 @@ public class RoutingConfigurer {
 		logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 		Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
+		Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatusIn(NeighbourSubscriptionStatus.ACCEPTED, NeighbourSubscriptionStatus.CREATED));
 		Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
 		setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
 		allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
-
 		if(!allAcceptedSubscriptions.isEmpty()){
 			setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 		}
@@ -164,33 +163,46 @@ public class RoutingConfigurer {
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
-				String queueName = "sub-" + UUID.randomUUID();
-				logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
-				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
-				subscription.setEndpoints(Collections.singleton(endpoint));
-
+				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
+				if(endpoint == null) {
+					String queueName = "sub-" + UUID.randomUUID();
+					logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
+					endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
+					subscription.setEndpoints(Collections.singleton(endpoint));
+				}
 				logger.debug("Attempting to add neighbour member {} to the group", neighbourName);
 				NeighbourMember groupMember = qpidClient.getNeighbourMember(neighbourName);
 				if (groupMember == null) {
 					logger.debug("Neighbour '{}' did not exist in the group.", neighbourName);
 					qpidClient.addNeighbourMemberToGroup(neighbourName);
-					logger.info("Added neighbour member '{}' to group", neighbourName);
+					logger.debug("Added neighbour member '{}' to group", neighbourName);
 				} else {
-					logger.warn("Neighbour member '{}' already exists in the group", neighbourName);
+					logger.debug("Neighbour member '{}' already exists in the group", neighbourName);
 				}
 				createQueue(endpoint.getSource(), neighbourName, delta);
 
 				for (Capability capability : matchingCaps) {
 					for (CapabilityShard shard : capability.getShards()) {
 						if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
-							qpidClient.addBinding(shard.getExchangeName(), new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector())));
+							Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+							if (exchange != null) {
+								if (! exchange.isBoundTo(endpoint.getSource())) {
+									Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
+									exchange.addBinding(binding);
+									qpidClient.addBinding(shard.getExchangeName(), binding);
+								} else {
+									logger.debug("Exchange '{}' already bound to '{}'", shard.getExchangeName(), endpoint.getSource());
+								}
+							} else {
+								logger.debug("Exchange '{}' does not exist", shard.getExchangeName());
+							}
 						}
 					}
 				}
 
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
-				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
+				logger.debug("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
@@ -260,6 +272,13 @@ public class RoutingConfigurer {
 									qpidClient.createHeadersExchange(exchangeName);
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
+								}
+								else{
+									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
+									if(exchange == null){
+										qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
+										logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+									}
 								}
 							}
 						}

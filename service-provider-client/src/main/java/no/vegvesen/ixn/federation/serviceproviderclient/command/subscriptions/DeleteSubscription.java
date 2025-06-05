@@ -10,7 +10,13 @@ import java.util.concurrent.Callable;
         description = "Delete a service provider subscription",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0"
+        version = "1.0",
+        customSynopsis = {
+                """ 
+                        Example:\n
+                        serviceproviderclient subscriptions delete 75c47bbb-af97-4751-9fca-6328325c9a2d
+                        """
+        }
 )
 public class DeleteSubscription implements Callable<Integer> {
 

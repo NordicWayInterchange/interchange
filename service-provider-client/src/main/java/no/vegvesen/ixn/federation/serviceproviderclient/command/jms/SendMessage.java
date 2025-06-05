@@ -19,7 +19,15 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 @Command(name = "send", description = "Sending a message from JSON",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Examples:\n
+                        serviceproviderclient messages send -f message.json del-2cae3067-ddc9-42e9-a496-f6671e901807 \n
+                        serviceproviderclient messages send -f -b message.json del-2cae3067-ddc9-42e9-a496-f6671e901807 \n
+                        serviceproviderclient messages send -f -d directory message.json del-2cae3067-ddc9-42e9-a496-f6671e901807
+                        """
+        })
 public class SendMessage implements Callable<Integer> {
 
     @Parameters(paramLabel = "QUEUE", description = "The queueName to connect to")

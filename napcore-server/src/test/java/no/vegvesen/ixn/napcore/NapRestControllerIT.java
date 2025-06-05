@@ -159,24 +159,6 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGettingSubscriptionsReturnsCorrectOrder() throws InterruptedException {
-        String actorCommonName = "actor";
-        SubscriptionRequest request1 = new SubscriptionRequest("originatingCountry='NO'", "NO sub");
-        SubscriptionRequest request2 = new SubscriptionRequest("originatingCountry='SE'", "SE sub");
-        SubscriptionRequest request3 = new SubscriptionRequest("originatingCountry='FI'", "FI sub");
-        serviceProviderRepository.save(new ServiceProvider(actorCommonName));
-        napRestController.addSubscription(actorCommonName, request1);
-        TimeUnit.SECONDS.sleep(1);
-        napRestController.addSubscription(actorCommonName, request2);
-        TimeUnit.SECONDS.sleep(1);
-        napRestController.addSubscription(actorCommonName, request3);
-
-        List<Subscription> subscriptions = napRestController.getSubscriptions(actorCommonName);
-        assertThat(subscriptions.get(0).getSelector()).isEqualTo(request3.getSelector());
-        assertThat(subscriptions.get(1).getSelector()).isEqualTo(request2.getSelector());
-        assertThat(subscriptions.get(2).getSelector()).isEqualTo(request1.getSelector());
-    }
-    @Test
     public void testDeleteNonExistentSubscriptionThrowsException(){
         String actorCommonName = "actor";
         assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, "1"));

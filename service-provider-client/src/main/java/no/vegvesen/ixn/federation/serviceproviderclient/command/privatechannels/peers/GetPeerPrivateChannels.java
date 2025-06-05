@@ -12,7 +12,13 @@ import java.util.concurrent.Callable;
 @Command(name = "get", description = "Get all private channels with service provider as peer",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels peers get
+                        """
+        })
 public class GetPeerPrivateChannels implements Callable<Integer> {
 
     @ParentCommand

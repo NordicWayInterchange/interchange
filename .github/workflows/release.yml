@@ -94,7 +94,7 @@ jobs:
         run: |
           mvn -B release:perform
 
-      - name: Create release
+      - name: Create release in Github
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.CURRENT_VERSION }}

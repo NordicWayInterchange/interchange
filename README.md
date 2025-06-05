@@ -1,4 +1,4 @@
-Interchange node under the Nordic Way project
+Norwegian National Interchange Node
 ====
 
 ### License
@@ -7,29 +7,57 @@ See full MIT license text [here](license.md).
 See instructions to retrieve all the third party licences [here](#third-party-licenses)
 
 ### Introduction
-The Nordic Way Interchange Node (NWIXN) is a clustered message broker that 
-enables location-based exchange of traffic data. Clients, known as Service Providers send traffic information
-to the broker in the form of AMQP messages. These messages are distributed to subscribing partners, either on the same interchange,
-or on other interchanges in the cluster.
 
-Messages are produced and exchanged over AMQP 1.0. Message content is not examined, but all messages must provide 
-header attributes as specified in the client specification. 
+The Norwegian National Interchange Node is a node implementing the C-ROADS C-ITS IP based Profile, Improved Interface 
+2.1.0 spec by [C-ROADS](https://www.c-roads.eu/)
 
-Traffic message formats supported are DATEX2, DENM, IVI, SPATEM, MAPEM, SREM, SSEM, and CAM.  
+The Node contains a broker (Qpid Broker-J) and several other components to negotiate data exchange with other nodes 
+(interchanges) in the same network over the AMQP(S) 1.0 protocol.
+The node support the DENM, IVI, SPATEM, MAPEM, SREM, SSEM, and CAM message formats, as specified in the C-ROADS spec, 
+as well as DATEX2.
 
+The interchange is designed to run as a member of an interchange cluster, which runs across organization boundaries, 
+typically traffic OEMs and national road authorities.  A top-level administrating organization will control the members
+of the cluster using DNS.
+
+
+## Overall Architecture
 ![Interchange architecture](/diagrams/updated_federated_node.png)
 
-An Interchange network consists of one or more interchanges, registered in the DNS (domain name server).
-Each Interchange has a matching SRV record, which points to the Interchanges' control channel host name and port.
+### Discovery 
 
-All interchanges must present the message types they produce - capabilities - in this discovery process.
+Membership in the network is determined by an Owning Domain, which is a domain listed in DNS. A node looks up the 
+well-known Owning Domain in DNS, and finds all the participating nodes are listed in that domain as SRV records. It is 
+up to each Node to communicate with all the other nodes in the network, and to exclude any other node that is not listed
+in the DNS.
 
-Interchanges also has a set of message types they are interested in - subscriptions. 
-If a neighbour interchange produces a message type we are interested in, we issue a subscription request to the neighbour.
+### Control Plane
 
-Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the Message collector.
+The nodes communicate over HTTPS, using client certificates stemming from a well-known root CA to ensure two-way trust.
+The Improved Interface protocol, as it is called, is described in the [specification](https://www.c-roads.eu/).
+We also maintain a swagger of our implementation of the protocol (which we call Neighbour API) 
+[here](https://nordicwayinterchange.github.io/interchange-swagger-docs/swagger-neighbour/)
 
-Additional information about the Nordic Way Interchange Node can be found [here](https://www.nordicway.net/).
+
+### Local Actor Plane
+
+Local Actors (ie the users of the system), can request to add Capabilities and Subscriptions to the system, and to 
+deliver data over a Delivery.
+A Local Actor API is provided for the actors to be able to negotiate subscriptions, capabilities and deliveries, and 
+to find the AMQP endpoints to read from or write to.
+The local actor plane is not a part of the C-ROADS spec, and is continuously evolving depending on the needs of local 
+actors.
+We maintain a swagger of the implementation (which we call Onboard API) 
+[here](https://nordicwayinterchange.github.io/interchange-swagger-docs/swagger-onboard/)
+
+### Message Plane
+
+Messages are typically sent by a Local Actor over AMQPS 1.0 to a broker endpoint provided by the system, and are 
+received by interested parties on either the same or a different broker. Messages are exchanged between brokers by the 
+system.
+
+Norwegian National Interchange Node was initially developed as a part of the 
+[Nordic Way project](https://www.nordicway.net/).
 
 ### Contact
 For any questions please contact
