@@ -43,7 +43,7 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
                         </ListItem>
                         <ListItem>
                             <StyledHeaderBox>
-                                <Typography>Capability shard details</Typography>
+                                <Typography>Shard details</Typography>
                             </StyledHeaderBox>
                         </ListItem>
                         <ListItem>
@@ -51,7 +51,7 @@ const ShardDrawer = ({shard, open, handleMoreClose}: Props) => {
                                 <FormControl fullWidth>
                                     <TextField
                                         value={shard.capabilityShardApi.shardId}
-                                        label="Binding key"
+                                        label="Shard Id"
                                         margin="normal"
                                         slotProps={{
                                             input: {
