@@ -10,7 +10,13 @@ import java.util.concurrent.Callable;
         description = "Delete peer from private channel",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0"
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels peers delete 43f9ffe7-e8ed-4165-a61c-21f6f2e55a57 king_olav
+                        """
+        }
 )
 public class DeletePeerFromPrivateChannel implements Callable<Integer> {
 

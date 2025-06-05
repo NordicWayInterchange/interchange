@@ -14,7 +14,13 @@ import java.util.concurrent.Callable;
 @Command(
         name = "portalstore",
         description = "Create keystore based on keys and certs from the portal",
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient portalstore king_olav.bouvetinterchange.eu inputfolder outputfolder
+                        """
+        }
 )
 public class PortalStores implements Callable<Integer> {
 

@@ -22,6 +22,10 @@ public class CapabilityShardApi {
         this.selector = selector;
     }
 
+    public CapabilityShardApi(Integer shardId) {
+        this.shardId = shardId;
+    }
+
     public Integer getShardId() {
         return shardId;
     }

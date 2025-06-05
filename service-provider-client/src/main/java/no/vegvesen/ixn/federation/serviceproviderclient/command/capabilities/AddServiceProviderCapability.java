@@ -18,7 +18,13 @@ import java.util.concurrent.Callable;
         description = "Add service provider capability from file",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0"
+        version = "1.0",
+        customSynopsis = {
+        """
+                Example:\n
+                serviceproviderclient capabilities add -f denm_capability.json
+                """
+}
 )
 public class AddServiceProviderCapability implements Callable<Integer> {
 

@@ -1,43 +1,47 @@
-[
-  {
-    "name": "ca.bouvetinterchange.eu",
-    "country": "NO",
-    "subCaRequests": [],
-    "hostRequests": [
-      {
-        "name": "a.bouvetinterchange.eu"
-      },
-      {
-        "name": "a.qpid.bouvetinterchange.eu"
-      },
-      {
-        "name": "b.bouvetinterchange.eu"
-      },
-      {
-        "name": "b.qpid.bouvetinterchange.eu"
-      }
-    ],
-    "clientRequests": [
-      {
-        "name": "king_gustaf.bouvetinterchange.eu",
-        "country": "SE",
-        "email": "kungen@slottet.se"
-      },
-      {
-        "name": "king_olav.bouvetinterchange.eu",
-        "country": "NO",
-        "email": "kongen@slottet.no"
-      },
-      {
-        "name": "nap.bouvetinterchange.eu",
-        "country": "NO",
-        "email": "nap@bouvetinterchange.eu"
-      },
-      {
-        "name": "admin.bouvetinterchange.eu",
-        "country": "NO",
-        "email": "admin@bouvetinterchange.eu"
-      }
-    ]
-  }
-]
+[{
+  "name" : "ca.bouvetinterchange.eu",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.bouvetinterchange.eu",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.bouvetinterchange.eu"
+    }, {
+      "name" : "a.qpid.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_olav.a.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "kongen@slottet.no"
+    }, {
+      "name" : "nap.a.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "nap@a.bouvetinterchange.eu"
+    }, {
+      "name" : "admin.a.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "admin@a.bouvetinterchange.eu"
+    } ]
+  }, {
+    "name" : "ca.b.bouvetinterchange.eu",
+    "country" : "SE",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "b.bouvetinterchange.eu"
+    }, {
+      "name" : "b.qpid.bouvetinterchange.eu"
+    } ],
+    "clientRequests" : [ {
+      "name" : "king_gustaf.b.bouvetinterchange.eu",
+      "country" : "SE",
+      "email" : "kungen@slottet.se"
+    }, {
+      "name" : "admin.b.bouvetinterchange.eu",
+      "country" : "SE",
+      "email" : "admin@b.bouvetinterchange.eu"
+    } ]
+  } ],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+}]

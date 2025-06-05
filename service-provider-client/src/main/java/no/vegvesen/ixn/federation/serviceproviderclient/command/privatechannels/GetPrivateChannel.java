@@ -10,7 +10,13 @@ import java.util.concurrent.Callable;
 @Command(name = "get", description = "Get private channel by id",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0")
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels get dd8f7606-475c-4d99-91c1-91b869d175c8
+                        """
+        })
 public class GetPrivateChannel implements Callable<Integer> {
 
     @ParentCommand

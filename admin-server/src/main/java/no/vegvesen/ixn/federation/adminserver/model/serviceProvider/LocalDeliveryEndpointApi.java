@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LocalDeliveryEndpointApi {
 
     private String host;
@@ -19,6 +22,12 @@ public class LocalDeliveryEndpointApi {
         this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+    }
+
+    public LocalDeliveryEndpointApi(String host, Integer port, String target) {
+        this.host = host;
+        this.port = port;
+        this.target = target;
     }
 
     public String getHost() {

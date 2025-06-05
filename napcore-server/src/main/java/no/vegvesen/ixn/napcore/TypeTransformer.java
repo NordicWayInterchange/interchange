@@ -105,7 +105,7 @@ public class TypeTransformer {
         return subscription;
     }
 
-    public List<Subscription> transformLocalSubscriptionsToNapSubscriptions(Set<LocalSubscription> localSubscriptions) {
+    public List<Subscription> transformLocalSubscriptionsToNapSubscriptions(List<LocalSubscription> localSubscriptions) {
         List<Subscription> subscriptions = new ArrayList<>();
         for (LocalSubscription localSubscription : localSubscriptions) {
             subscriptions.add(transformLocalSubscriptionToNapSubscription(localSubscription));
