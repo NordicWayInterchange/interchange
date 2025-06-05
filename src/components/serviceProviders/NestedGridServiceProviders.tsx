@@ -3,12 +3,12 @@ import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider} from "@mui/material";
+import {Box, ChipProps, Divider, Typography} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
     ServiceProviderDeliveries, ServiceProviderPrivateChannels,
@@ -21,8 +21,9 @@ import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
 import { motion } from "framer-motion";
 import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
+import {fetchExchangeNameExists} from "@/hooks/useFetchExchangeNameExists";
 import {useSession} from "next-auth/react";
-import {useFetchDeliveryEndpoints} from "@/hooks/useFetchDeliveryEndpoints";
+
 
 type Props = {
     row: any;
@@ -48,6 +49,43 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
+    const [invalidDeliveryIds, setInvalidDeliveryIds] = useState<Set<string>>(new Set());
+    const {data: session} = useSession();
+
+    useEffect(() => {
+        const validateAllDeliveries = async () => {
+            const invalidIds = new Set<string>();
+            for (const delivery of row.deliveries) {
+                let exists = true;
+                for (const endpoint of delivery.endpoints || []) {
+                    const exchangeName  = endpoint.target;
+                    if (!exchangeName) {
+                        exists = false;
+                        break;
+                    }
+                    try {
+                        const result = await fetchExchangeNameExists(session?.user.commonName as string, exchangeName);
+                        if (!result) {
+                            exists = false;
+                            break;
+                        }
+                    } catch (error) {
+                        exists = false;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    invalidIds.add(delivery.id);
+                }
+            }
+
+            setInvalidDeliveryIds(invalidIds);
+        };
+
+        validateAllDeliveries();
+    }, [row.deliveries]);
+
+
     const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
@@ -170,19 +208,32 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         }));
 
         nestedColumns = [
-            {...dataGridTemplate, field: "id", headerName: "ID"},
             {
-                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
+                ...dataGridTemplate,
+                field: "id",
+                headerName: "ID",
+                renderCell: (params) => {
+                    const isInvalid = invalidDeliveryIds.has(params.value);
                     return (
-                        <Chip
-                            color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
-                            label={cell.value}
-                        />
+                        <Box style={{ color: isInvalid ? "red" : "inherit" }}>
+                            {params.value}
+                        </Box>
                     );
                 }
             },
-            {...dataGridTemplate, field: "description", headerName: "Description"},
-            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"}
+            {
+                ...dataGridTemplate,
+                field: "status",
+                headerName: "Status",
+                renderCell: (cell) => (
+                    <Chip
+                        color={statusChips[cell.value as keyof typeof statusChips] as ChipProps["color"]}
+                        label={cell.value}
+                    />
+                ),
+            },
+            { ...dataGridTemplate, field: "description", headerName: "Description" },
+            { ...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated" },
         ];
     } else if (field === "privateChannels" && row.privatechannels) {
         nestedData = row.privatechannels.map((privateChannel: any) => ({
