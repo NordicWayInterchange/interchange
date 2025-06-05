@@ -17,7 +17,6 @@ import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.net.ssl.SSLContext;
 import jakarta.transaction.Transactional;
@@ -29,19 +28,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @Transactional
 public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 	private final LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
-	@MockBean
+	@MockitoBean
 	SSLContext mockedSSL;
 
-	@MockBean
+	@MockitoBean
 	DNSFacade mockDnsFacade;
 
-	@MockBean
+	@MockitoBean
 	NeighbourFacade mockNeighbourFacade;
 
 	@Autowired

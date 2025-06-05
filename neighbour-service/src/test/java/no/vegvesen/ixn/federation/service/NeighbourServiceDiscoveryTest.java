@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,17 +36,17 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = {NeighbourService.class, NeigbourDiscoveryService.class, InterchangeNodeProperties.class})
 public class NeighbourServiceDiscoveryTest {
 
-	@MockBean
+	@MockitoBean
 	private NeighbourRepository neighbourRepository;
-	@MockBean
+	@MockitoBean
 	private ListenerEndpointRepository listenerEndpointRepository;
-	@MockBean
+	@MockitoBean
 	private DNSFacade dnsFacade;
-	@MockBean
+	@MockitoBean
 	private NeighbourFacade neighbourFacade;
-	@MockBean
+	@MockitoBean
 	private NeighbourDiscovererProperties discovererProperties;
-	@MockBean
+	@MockitoBean
 	private GracefulBackoffProperties backoffProperties;
 	@Autowired
 	InterchangeNodeProperties interchangeNodeProperties;

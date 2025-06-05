@@ -20,11 +20,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -49,27 +49,27 @@ public class NapRestControllerTest {
 
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     ServiceProviderRepository serviceProviderRepository;
 
-    @MockBean
+    @MockitoBean
     private NeighbourRepository neighbourRepository;
 
-    @MockBean
+    @MockitoBean
     private PrivateChannelRepository privateChannelRepository;
 
     private NapCoreProperties napCoreProperties;
 
-    @MockBean
+    @MockitoBean
     private CertSigner certSigner;
 
-    @MockBean
+    @MockitoBean
     private CertService certService;
 
     @Autowired
     private NapRestController restController;
 
-    @MockBean
+    @MockitoBean
     private CapabilityToCapabilityApiTransformer transformer;
 
     @Autowired

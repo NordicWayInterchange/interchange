@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
@@ -77,28 +77,28 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
 
-    @MockBean
+    @MockitoBean
     NeighbourService neighbourService;
 
     @Autowired
     ServiceProviderRouter serviceProviderRouter;
 
-    @MockBean
+    @MockitoBean
     ServiceProviderRepository serviceProviderRepository;
 
-    @MockBean
+    @MockitoBean
     MatchRepository matchRepository;
 
-    @MockBean
+    @MockitoBean
     OutgoingMatchRepository outgoingMatchRepository;
 
-    @MockBean
+    @MockitoBean
     PrivateChannelRepository privateChannelRepository;
 
     @Autowired
     QpidClient client;
 
-    @MockBean
+    @MockitoBean
     InterchangeNodeProperties properties;
 
     @Test
