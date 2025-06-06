@@ -38,6 +38,17 @@ public class CapabilityApi implements Comparable<CapabilityApi> {
         this.createdTimestamp = createdTimestamp;
     }
 
+
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.shards = shards;
+    }
+
+    public CapabilityApi(Set<CapabilityShardApi> shards) {
+        this.shards = shards;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
