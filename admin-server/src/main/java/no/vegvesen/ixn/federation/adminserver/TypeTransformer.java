@@ -54,11 +54,11 @@ public class TypeTransformer {
     public ConnectionApi connectionToConnectionApi(Connection connection) {
         return new ConnectionApi(
                 connection.getId(),
-                connection.getBackoffStart(),
+                localDateTimeToTimestamp(connection.getBackoffStart()),
                 connection.getBackoffAttempts(),
                 connectionStatusToConnectionStatusApi(connection.getConnectionStatus()),
-                connection.getUnreachableTime(),
-                connection.getLastFailedConnectionAttempt()
+                localDateTimeToTimestamp(connection.getUnreachableTime()),
+                localDateTimeToTimestamp(connection.getLastFailedConnectionAttempt())
         );
     }
 
@@ -281,7 +281,7 @@ public class TypeTransformer {
     }
 
 
-    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiList(Set<LocalSubscription> subscriptionSet) {
+    public List<LocalSubscriptionApi> localSubscriptionSetToSubscriptionApiList(List<LocalSubscription> subscriptionSet) {
         List<LocalSubscriptionApi> subscriptionApiList = new ArrayList<>();
         for (LocalSubscription subscription : subscriptionSet) {
             subscriptionApiList.add(new LocalSubscriptionApi(

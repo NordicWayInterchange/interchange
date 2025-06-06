@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;

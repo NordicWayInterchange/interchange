@@ -269,7 +269,7 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		List<LocalSubscription> localSubscriptions = new ArrayList<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
 			String selector = subscription.getSelector();
@@ -296,10 +296,10 @@ public class OnboardRestController {
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-		Set<LocalSubscription> savedSubscriptions = saved.getSavedSubscriptions(localSubscriptions);
+
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
+		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,localSubscriptions);
 	}
 
 	private boolean checkConsumerCommonName(String consumerCommonName, String serviceProviderName) {
