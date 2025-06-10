@@ -253,7 +253,6 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                                 <GraphSection
                                                     serviceProviderName={sp.serviceProviderName}
                                                     matches={[match]}
-                                                    handleCapabilityClick={handleCapabilityClick}
                                                 />
                                             </Box>
                                         ))}

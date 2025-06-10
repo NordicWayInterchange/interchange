@@ -14,8 +14,7 @@ import { Shard } from '@/types/GraphSection';
 const GraphSection: React.FC<{
     serviceProviderName: string;
     matches: any[];
-    handleCapabilityClick?: (capabilityId: string, deliveryId: string) => void;
-}> = ({ serviceProviderName, matches, handleCapabilityClick }) => {
+}> = ({ serviceProviderName, matches }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const [copyTargets, setCopyTargets] = useState<{ id: string; fullId: string; x: number; y: number }[]>([]);
     const [graphWidth, setGraphWidth] = useState(1000);
@@ -126,66 +125,17 @@ const GraphSection: React.FC<{
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string; }; capabilityId: string; shardId: string | string[]; }, i: number) => {
-                const bindingX = deliveryX + rectWidth + 100;
-                const capabilityX = bindingX + rectWidth + 40;
-                const shardX = capabilityX + rectWidth + 40;
+            existingCapabilities.forEach((capability: { binding: { bindingKey: string }; capabilityId: string; shardId: string | string[] }, i: number) => {
+
+                const capabilityX = deliveryX + rectWidth + 100;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
-                const bindingY = startY + offset;
+                const capabilityY = startY + offset;
 
                 svg.append('line')
                     .attr('x1', deliveryX + rectWidth)
                     .attr('y1', deliveryY + rectHeight / 2)
-                    .attr('x2', bindingX)
-                    .attr('y2', bindingY + rectHeight / 2)
-                    .attr('stroke', '#333')
-                    .attr('stroke-width', 2);
-
-                const bindingGroup = svg.append('g')
-                    .style('cursor', 'pointer')
-                    .on('click', () => {
-                        setSelectedBinding(capability.binding);
-                        setSelectedCapabilityId(null);
-                        setSelectedShardId(null);
-                        setSelectedDeliveryId(null);
-                        setDrawerOpen(true);
-                    });
-
-                bindingGroup.append('text')
-                    .attr('x', bindingX + rectWidth / 2)
-                    .attr('y', bindingY - 10)
-                    .text('Binding')
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', '#555')
-                    .attr('font-size', 12);
-
-                bindingGroup.append('rect')
-                    .attr('x', bindingX)
-                    .attr('y', bindingY)
-                    .attr('width', rectWidth)
-                    .attr('height', rectHeight)
-                    .attr('fill', '#FFF5C8');
-
-                bindingGroup.append('text')
-                    .attr('x', bindingX + rectWidth / 2)
-                    .attr('y', bindingY + 30)
-                    .text(trimId(capability.binding.bindingKey))
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', '#000')
-                    .attr('font-size', 14);
-
-                targets.push({
-                    id: `binding-${matchIndex}-${i}`,
-                    fullId: capability.binding.bindingKey,
-                    x: bindingX + rectWidth / 2,
-                    y: bindingY + rectHeight / 2,
-                });
-
-                svg.append('line')
-                    .attr('x1', bindingX + rectWidth)
-                    .attr('y1', bindingY + rectHeight / 2)
                     .attr('x2', capabilityX)
-                    .attr('y2', bindingY + rectHeight / 2)
+                    .attr('y2', capabilityY + rectHeight / 2)
                     .attr('stroke', '#333')
                     .attr('stroke-width', 2);
 
@@ -201,7 +151,7 @@ const GraphSection: React.FC<{
 
                 capabilityGroup.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
-                    .attr('y', bindingY - 10)
+                    .attr('y', capabilityY - 10)
                     .text('Capability')
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#555')
@@ -209,14 +159,14 @@ const GraphSection: React.FC<{
 
                 capabilityGroup.append('rect')
                     .attr('x', capabilityX)
-                    .attr('y', bindingY)
+                    .attr('y', capabilityY)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
                     .attr('fill', '#ffbf7d');
 
                 capabilityGroup.append('text')
                     .attr('x', capabilityX + rectWidth / 2)
-                    .attr('y', bindingY + 30)
+                    .attr('y', capabilityY + 30)
                     .text(trimId(capability.capabilityId))
                     .attr('text-anchor', 'middle')
                     .attr('fill', '#000')
@@ -226,17 +176,19 @@ const GraphSection: React.FC<{
                     id: `capability-${matchIndex}-${i}`,
                     fullId: capability.capabilityId,
                     x: capabilityX + rectWidth / 2,
-                    y: bindingY + rectHeight / 2,
+                    y: capabilityY + rectHeight / 2,
                 });
 
                 const shards = Array.isArray(capability.shardId) ? capability.shardId : [capability.shardId];
+                const shardX = capabilityX + rectWidth + 40;
+
                 shards.forEach((shardId, shardIndex) => {
                     const shardYOffset = offset + (shardIndex - (shards.length - 1) / 2) * verticalSpacing;
                     const shardY = startY + shardYOffset;
 
                     svg.append('line')
                         .attr('x1', capabilityX + rectWidth)
-                        .attr('y1', bindingY + rectHeight / 2)
+                        .attr('y1', capabilityY + rectHeight / 2)
                         .attr('x2', shardX)
                         .attr('y2', shardY + rectHeight / 2)
                         .attr('stroke', '#333')
@@ -286,7 +238,7 @@ const GraphSection: React.FC<{
                 });
 
                 maxX = Math.max(maxX, shardX + rectWidth);
-                maxY = Math.max(maxY, bindingY + rectHeight);
+                maxY = Math.max(maxY, capabilityY + rectHeight);
             });
 
             xOffset = maxX + 150;
