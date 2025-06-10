@@ -27,3 +27,12 @@ export type CapabilityShard = {
     exchangeName: string;
     selector: string;
 };
+
+export type Delivery = {
+    id: string;
+    status: DeliveryStatus;
+    selector: string;
+    endpoints: Array<Endpoint>;
+    lastUpdatedTimestamp: number;
+    destination: string;
+}

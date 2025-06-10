@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/system';
 import * as d3 from 'd3';
 import { ContentCopy } from '@/components/shared/actions/ContentCopy';
-import { Capability } from '@/types/neighbours';
 import { useSession } from 'next-auth/react';
 import { useFetchCapabilityDetails } from '@/hooks/useFetchCapabilityDetails';
-import CapabilityDrawer from '@/components/shared/drawer/CapabilityDrawer';
-import BindingDrawer from '@/components/shared/drawer/BindingDrawer';
 import { useFetchShardDetails } from '@/hooks/useFetchShardDetails';
+import { useFetchDeliveryDetails } from '@/hooks/useFetchDeliveryDetails';
+import CapabilityDrawer from '@/components/shared/drawer/CapabilityDrawer';
 import ShardDrawer from '@/components/shared/drawer/ShardDrawer';
-import { Shard } from '@/types/GraphSection';
+import { Capability } from '@/types/neighbours';
+import {Delivery, Shard} from '@/types/GraphSection';
+import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 
 const GraphSection: React.FC<{
     serviceProviderName: string;
@@ -23,43 +24,55 @@ const GraphSection: React.FC<{
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedCapabilityId, setSelectedCapabilityId] = useState<string | null>(null);
     const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
-    const [selectedBinding, setSelectedBinding] = useState<any | null>(null);
-    const [selectedShardId, setSelectedShardId] = useState<any | null>(null);
+    const [selectedShardId, setSelectedShardId] = useState<string | null>(null);
 
     const { data: session } = useSession();
+    const commonName = session?.user.commonName as string;
 
     const { data: capabilityDetails, refetch } = useFetchCapabilityDetails(
-        session?.user.commonName as string,
+        commonName,
         serviceProviderName,
         selectedDeliveryId,
         selectedCapabilityId
     );
 
     const { data: shardDetails, refetch: refetchShardDetails } = useFetchShardDetails(
-        session?.user.commonName as string,
+        commonName,
         serviceProviderName,
         selectedDeliveryId,
         selectedCapabilityId,
         selectedShardId
     );
 
+    const shouldFetchDeliveryDetails =
+        drawerOpen && selectedDeliveryId !== null &&
+        selectedCapabilityId === null &&
+        selectedShardId === null;
+
+    const { data: deliveryDetails, refetch: refetchDeliveryDetails } = useFetchDeliveryDetails(
+        commonName,
+        serviceProviderName,
+        selectedDeliveryId,
+        shouldFetchDeliveryDetails
+    );
+
+
     const handleMoreClose = () => {
         setDrawerOpen(false);
         setSelectedCapabilityId(null);
         setSelectedDeliveryId(null);
-        setSelectedBinding(null);
         setSelectedShardId(null);
     };
 
     useEffect(() => {
         if (selectedCapabilityId && selectedDeliveryId && !selectedShardId) {
             refetch();
-        }
-
-        if (selectedShardId && selectedCapabilityId && selectedDeliveryId) {
+        } else if (selectedCapabilityId && selectedDeliveryId && selectedShardId) {
             refetchShardDetails();
+        } else if (selectedDeliveryId && !selectedCapabilityId && !selectedShardId) {
+            refetchDeliveryDetails();
         }
-    }, [selectedCapabilityId, selectedDeliveryId, selectedShardId, refetch, refetchShardDetails]);
+    }, [selectedCapabilityId, selectedDeliveryId, selectedShardId]);
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
@@ -91,8 +104,16 @@ const GraphSection: React.FC<{
             const deliveryX = xOffset;
             const deliveryY = topMargin + 300;
 
-            // Delivery label and box
-            svg.append('text')
+            const deliveryGroup = svg.append('g')
+                .style('cursor', 'pointer')
+                .on('click', () => {
+                    setSelectedDeliveryId(match.deliveryId);
+                    setSelectedCapabilityId(null);
+                    setSelectedShardId(null);
+                    setDrawerOpen(true);
+                });
+
+            deliveryGroup.append('text')
                 .attr('x', deliveryX + rectWidth / 2)
                 .attr('y', deliveryY - 10)
                 .text('Delivery')
@@ -100,14 +121,14 @@ const GraphSection: React.FC<{
                 .attr('fill', '#555')
                 .attr('font-size', 12);
 
-            svg.append('rect')
+            deliveryGroup.append('rect')
                 .attr('x', deliveryX)
                 .attr('y', deliveryY)
                 .attr('width', rectWidth)
                 .attr('height', rectHeight)
                 .attr('fill', anyExist ? '#E8F3E9' : '#B63434');
 
-            svg.append('text')
+            deliveryGroup.append('text')
                 .attr('x', deliveryX + rectWidth / 2)
                 .attr('y', deliveryY + 30)
                 .text(trimId(match.deliveryId))
@@ -125,8 +146,7 @@ const GraphSection: React.FC<{
             const isSingle = existingCapabilities.length === 1;
             const startY = deliveryY;
 
-            existingCapabilities.forEach((capability: { binding: { bindingKey: string }; capabilityId: string; shardId: string | string[] }, i: number) => {
-
+            existingCapabilities.forEach((capability: any, i: number) => {
                 const capabilityX = deliveryX + rectWidth + 100;
                 const offset = isSingle ? 0 : (i - (existingCapabilities.length - 1) / 2) * verticalSpacing;
                 const capabilityY = startY + offset;
@@ -144,7 +164,6 @@ const GraphSection: React.FC<{
                     .on('click', () => {
                         setSelectedCapabilityId(capability.capabilityId);
                         setSelectedDeliveryId(match.deliveryId);
-                        setSelectedBinding(null);
                         setSelectedShardId(null);
                         setDrawerOpen(true);
                     });
@@ -182,7 +201,7 @@ const GraphSection: React.FC<{
                 const shards = Array.isArray(capability.shardId) ? capability.shardId : [capability.shardId];
                 const shardX = capabilityX + rectWidth + 40;
 
-                shards.forEach((shardId, shardIndex) => {
+                shards.forEach((shardId: string, shardIndex: number) => {
                     const shardYOffset = offset + (shardIndex - (shards.length - 1) / 2) * verticalSpacing;
                     const shardY = startY + shardYOffset;
 
@@ -200,7 +219,6 @@ const GraphSection: React.FC<{
                             setSelectedCapabilityId(capability.capabilityId);
                             setSelectedDeliveryId(match.deliveryId);
                             setSelectedShardId(shardId);
-                            setSelectedBinding(null);
                             setDrawerOpen(true);
                         });
 
@@ -276,24 +294,16 @@ const GraphSection: React.FC<{
             </div>
 
             {drawerOpen && selectedShardId && shardDetails ? (
-                <ShardDrawer
-                    open={drawerOpen}
-                    handleMoreClose={handleMoreClose}
-                    shard={shardDetails as Shard}
-                />
+                <ShardDrawer open={drawerOpen} handleMoreClose={handleMoreClose} shard={shardDetails as Shard} />
             ) : drawerOpen && selectedCapabilityId && capabilityDetails ? (
-                <CapabilityDrawer
-                    open={drawerOpen}
+                <CapabilityDrawer open={drawerOpen} handleMoreClose={handleMoreClose} capabilities={capabilityDetails as Capability} />
+            ) : drawerOpen && selectedDeliveryId && deliveryDetails ? (
+                <CommonDrawer
                     handleMoreClose={handleMoreClose}
-                    capabilities={capabilityDetails as Capability}
-                />
-            ) : drawerOpen && selectedBinding ? (
-                <BindingDrawer
                     open={drawerOpen}
-                    handleMoreClose={handleMoreClose}
-                    binding={selectedBinding}
-                />
-            ) : null}
+                    commonAttributes={deliveryDetails as Delivery}
+                    heading="Delivery"
+                /> ) : null}
         </>
     );
 };
