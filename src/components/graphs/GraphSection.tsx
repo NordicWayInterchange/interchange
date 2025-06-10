@@ -293,17 +293,29 @@ const GraphSection: React.FC<{
                 </div>
             </div>
 
-            {drawerOpen && selectedShardId && shardDetails ? (
-                <ShardDrawer open={drawerOpen} handleMoreClose={handleMoreClose} shard={shardDetails as Shard} />
-            ) : drawerOpen && selectedCapabilityId && capabilityDetails ? (
-                <CapabilityDrawer open={drawerOpen} handleMoreClose={handleMoreClose} capabilities={capabilityDetails as Capability} />
-            ) : drawerOpen && selectedDeliveryId && deliveryDetails ? (
-                <CommonDrawer
-                    handleMoreClose={handleMoreClose}
-                    open={drawerOpen}
-                    commonAttributes={deliveryDetails as Delivery}
-                    heading="Delivery"
-                /> ) : null}
+            {drawerOpen ? (
+                selectedShardId && shardDetails ? (
+                    <ShardDrawer
+                        open={drawerOpen}
+                        handleMoreClose={handleMoreClose}
+                        shard={shardDetails}
+                    />
+                ) : selectedCapabilityId && !selectedShardId && capabilityDetails ? (
+                    <CapabilityDrawer
+                        open={drawerOpen}
+                        handleMoreClose={handleMoreClose}
+                        capabilities={capabilityDetails}
+                    />
+                ) : selectedDeliveryId && !selectedCapabilityId && deliveryDetails ? (
+                    <CommonDrawer
+                        handleMoreClose={handleMoreClose}
+                        open={drawerOpen}
+                        commonAttributes={deliveryDetails as Delivery}
+                        heading="Delivery"
+                    />
+                ) : null
+            ) : null}
+
         </>
     );
 };
