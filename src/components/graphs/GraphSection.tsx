@@ -102,7 +102,7 @@ const GraphSection: React.FC<{
             const anyExist = existingCapabilities.some((cap: { exists: boolean }) => cap.exists);
 
             const deliveryX = xOffset;
-            const deliveryY = topMargin + 300;
+            const deliveryY = topMargin + 250;
 
             const deliveryGroup = svg.append('g')
                 .style('cursor', 'pointer')
