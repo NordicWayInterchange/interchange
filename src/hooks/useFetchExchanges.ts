@@ -15,7 +15,7 @@ const fetchExchanges: (
 
 const useFetchExchanges = (commonName: string) => {
     return useQuery({
-        queryKey: ["fetchExchanges"],
+        queryKey: ["exchanges"],
         queryFn: () => fetchExchanges(commonName),
     });
 };

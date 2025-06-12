@@ -22,6 +22,8 @@ const Exchanges = () => {
     const {data: exchangesData, isLoading} = useFetchExchanges(
         session?.user.commonName as string
     );
+
+    console.log("exchangesData", exchangesData);
     const [firstTableRow, setFirstTableRow] = useState<IFirstNeighbourTable | null>(null);
     const [firstTableFieldName, setFirstTableFieldName] = useState('');
     const [secondTableRow, setSecondTableRow] = useState(null);
@@ -44,7 +46,7 @@ const Exchanges = () => {
 
     const handleCellClick = (row: any, field: any) => {
         setExpandedRows({});
-        const rowId = row.id ? row.id : row.subreq_id;
+        const rowId = row.id;
         setExpandedRows((prev) => ({
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
@@ -88,8 +90,9 @@ const Exchanges = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
+                            console.log(params.row)
                             setSecondTableRow(null);
-                            handleCellClick(params.row.capabilities, "capabilities")
+                            handleCellClick(params.row.bindings, "bindings")
                         }}
                     >
                         {Array.isArray(bindings) ?
@@ -112,8 +115,7 @@ const Exchanges = () => {
             flex: 1
         }
     ];
-    const displayControlConnectionDrawer = firstTableRow && firstTableRow?.controlConnection && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
-        || firstTableFieldName === 'neighbourRequestedSubscriptions');
+
     return (
         <Box flex={1}>
             <Mainheading>Exchanges</Mainheading>
@@ -127,8 +129,8 @@ const Exchanges = () => {
                         columns={tableHeaders}
                         rows={exchangesData || []}
                         loading={isLoading}
-                        getRowId={(row) => row.neighbour_id}
-                        sort={{field: "lastUpdated", sort: "desc"}}
+                        getRowId={(row) => row.id}
+                        sort={{field: "id", sort: "desc"}}
                         slots={{
                             noRowsOverlay: CustomEmptyOverlayExchanges
                         }}
@@ -136,20 +138,8 @@ const Exchanges = () => {
                             setHighlightedCell({ id: params.id as number, field: params.field });
                             setFirstTableFieldName(params.field);
                         }}
-                        getCellClassName={(params) =>
-                            (params.field === 'capabilities' || params.field === 'ourRequestedSubscriptions'
-                                || params.field === 'neighbourRequestedSubscriptions') &&
-                            highlightedCell.id === params.id && highlightedCell.field === params.field
-                                ? "highlighted-cell"
-                                : ""
-                        }
                         onRowClick={handleOnFirstTableRowClick}/>
-                    {displayControlConnectionDrawer && (<ControlConnectionDrawer
-                            handleMoreClose={handleFirstDrawerClose}
-                            open={firstDrawerOpen}
-                            controlConnection={firstTableRow?.controlConnection ?? ({} as ControlConnection)}/>
 
-                    )}
                 </Box>
             </Box>
 
