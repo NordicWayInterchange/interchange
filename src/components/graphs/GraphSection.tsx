@@ -80,8 +80,8 @@ const GraphSection: React.FC<{
 
         const rectWidth = 120;
         const rectHeight = 50;
-        const verticalSpacing = 60;
-        const topMargin = 50;
+        const verticalSpacing = 55;
+        const topMargin = 30;
 
         let xOffset = 50;
         let maxX = 0;
