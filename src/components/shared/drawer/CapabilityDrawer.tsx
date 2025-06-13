@@ -14,6 +14,7 @@ import {Capability} from "@/types/neighbours";
 import MapDialog from "@/components/map/MapDialog";
 import {extractMatchingCauseCodes} from "@/lib/extractMatchingCauseCodes";
 import Loading from "@/components/shared/components/Loading";
+import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
     capabilities: Capability;
@@ -24,7 +25,8 @@ type Props = {
 const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
     const [openMap, setOpenMap] = useState<boolean>(false);
     const application = capabilities.application;
-    if (!capabilities || !application) {
+    const metaData = capabilities.metadata;
+    if (!capabilities || !application || !metaData) {
         return <Loading text=""/>
     }
 
@@ -66,7 +68,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                     <Box>
                                         <ListItemText
                                             primary={"Created"}
-                                            secondary={capabilities.createdTimestamp}
+                                            secondary={timeConverter(capabilities.createdTimestamp)}
                                         />
                                     </Box>
                                 </Box>
@@ -245,6 +247,107 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                     >
                                         Show map
                                     </StyledButton>
+                                </FormControl>
+                            </StyledCard>
+                        </ListItem>
+                        <ListItem>
+                            <StyledCard variant="outlined">
+                                <Typography>Meta data</Typography>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        value={metaData.shardCount}
+                                        label="Shard count"
+                                        margin="normal"
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <ContentCopy value={metaData.shardCount.toString()}/>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                    {metaData.infoUrl && (
+                                        <TextField
+                                            value={metaData.infoUrl}
+                                            label="Info url"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={metaData.infoUrl}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {metaData.redirectPolicy && (
+                                        <TextField
+                                            value={metaData.redirectPolicy}
+                                            label="Redirect Policy"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={metaData.redirectPolicy}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {metaData.maxBandwidth && (
+                                        <TextField
+                                            value={metaData.maxBandwidth}
+                                            label="Max Bandwidth"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={metaData.maxBandwidth.toString()}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {metaData.maxMessageRate && (
+                                        <TextField
+                                            value={metaData.maxMessageRate}
+                                            label="Max MessageRate"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={metaData.maxMessageRate.toString()}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    {metaData.repetitionInterval && (
+                                        <TextField
+                                            value={metaData.repetitionInterval}
+                                            label="Repetition Interval"
+                                            margin="normal"
+                                            slotProps={{
+                                                input: {
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <ContentCopy value={metaData.repetitionInterval.toString()}/>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 </FormControl>
                             </StyledCard>
                         </ListItem>

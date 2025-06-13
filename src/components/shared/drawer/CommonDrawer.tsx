@@ -16,9 +16,11 @@ import {ServiceProviderDeliveries, ServiceProviderSubscriptions} from "@/types/s
 import QueueValidator from "@/components/shared/actions/QueueValidator";
 import ExchangeValidator from "@/components/shared/actions/ExchangeValidator";
 import Loading from "@/components/shared/components/Loading";
+import {Delivery} from "@/types/GraphSection";
+import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
-    commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries;
+    commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries | Delivery;
     open: boolean;
     handleMoreClose: () => void;
     heading: string;
@@ -70,7 +72,7 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                     <Box>
                                         <ListItemText
                                             primary={"Last updated"}
-                                            secondary={commonAttributes.lastUpdatedTimestamp ? commonAttributes.lastUpdatedTimestamp : (commonAttributes as any)?.lastUpdated}
+                                            secondary={commonAttributes.lastUpdatedTimestamp ? timeConverter(commonAttributes.lastUpdatedTimestamp) : (commonAttributes as any)?.lastUpdated}
                                         />
                                     </Box>
                                 </Box>

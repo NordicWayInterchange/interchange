@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const fetchExchangeNameExists: (commonName: string, exchangeName: string
+export const fetchExchangeNameExists: (commonName: string, exchangeName: string
 ) => Promise<boolean> = async (commonName: string, exchangeName: string) => {
     const res = await fetch(`/api/${commonName}/exchangeValidator/${exchangeName}`);
     if (res.ok) {
