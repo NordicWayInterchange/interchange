@@ -3,7 +3,7 @@ import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider, Typography} from "@mui/material";
+import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
@@ -19,7 +19,7 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
 import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
 import {fetchExchangeNameExists} from "@/hooks/useFetchExchangeNameExists";
 import {useSession} from "next-auth/react";
@@ -58,7 +58,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             for (const delivery of row.deliveries) {
                 let exists = true;
                 for (const endpoint of delivery.endpoints || []) {
-                    const exchangeName  = endpoint.target;
+                    const exchangeName = endpoint.target;
                     if (!exchangeName) {
                         exists = false;
                         break;
@@ -215,7 +215,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 renderCell: (params) => {
                     const isInvalid = invalidDeliveryIds.has(params.value);
                     return (
-                        <Box style={{ color: isInvalid ? "red" : "inherit" }}>
+                        <Box style={{color: isInvalid ? "red" : "inherit"}}>
                             {params.value}
                         </Box>
                     );
@@ -232,8 +232,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     />
                 ),
             },
-            { ...dataGridTemplate, field: "description", headerName: "Description" },
-            { ...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated" },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"},
         ];
     } else if (field === "privateChannels" && row.privatechannels) {
         nestedData = row.privatechannels.map((privateChannel: any) => ({
@@ -280,89 +280,90 @@ const NestedGridServiceProviders: React.FC<Props> = ({
 
     return (
         <Box flex={1}>
-            <Mainheading>{headerContent}</Mainheading>
-            <Subheading>
-                These are all of {field}. You can click a row to view more information.
-            </Subheading>
-            <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 450, width: "100%"}}>
-            <Box sx={StyledTableHeader}>
-                <motion.div
-                    animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
-                    transition={{duration: 0.3, ease: "easeInOut"}}
-                    style={{padding: "5px", borderRadius: "8px"}}
-                >
-                    <DataGrid
-                        rows={nestedData}
-                        columns={nestedColumns}
-                        getRowId={(row) => row.id}
-                        onRowClick={handleOnRowClick}
-                        sort={{field: "createdTimestamp", sort: "desc"}}
-                        slots={{
-                            noRowsOverlay: CustomEmptyOverlay
-                        }}
-                        onCellClick={(params) => {
-                            setHighlightedCell({id: params.id as number, field: params.field});
-                        }}
-                        getCellClassName={(params) =>
-                            params.field === 'connections' &&
-                            highlightedCell.id === params.id && highlightedCell.field === params.field
-                                ? "highlighted-cell"
-                                : ""
-                        }
-                    />
-                </motion.div>
-            </Box>
-                {serviceProviderRow && field === 'capabilities' && (
-                    <CapabilityDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        capabilities={serviceProviderRow as ServiceProviderCapabilities}
-                    />
-                )}
-                {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={headerContent}
-                    />
-                )}
-                {serviceProviderRow && field === 'deliveries' && (
-                    <CommonDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
-                        heading={headerContent}
-                    />
-                )}
-                {serviceProviderRow && field === 'privateChannels' && (
-                    <PrivateChannelDrawer
-                        handleMoreClose={handleMoreClose}
-                        open={drawerOpen}
-                        privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
-                    />
-                )}
-            </Box>
-            {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
-                const filteredConnections = nestedConnectionData.filter(
-                    (connection: any) => connection.subscriptionId === serviceProviderRow?.id
-                );
-                if (!row || !serviceProviderRow) {
-                    return null;
-                }
+            <motion.div
+                animate={{backgroundColor: isFlashing ? "#ffdbb0" : "#f0f1f1"}}
+                transition={{duration: 0.3, ease: "easeInOut"}}
+                style={{padding: "5px", borderRadius: "8px"}}
+            >
+                <Mainheading>{headerContent}</Mainheading>
+                <Subheading>
+                    These are all of {field}. You can click a row to view more information.
+                </Subheading>
+                <Divider sx={{marginY: 3}}/>
+                <Box sx={{height: 450, width: "100%"}}>
+                    <Box sx={StyledTableHeader}>
 
-                return (
-                    <Box key={rowId} sx={{height: 100, width: "100%"}}>
-                        <NestedGridConnections
-                            row={serviceProviderRow}
-                            nestedConnectionData={filteredConnections}
-                            nestedConnectionColumns={nestedConnectionColumns}
-                            isFlashing={isFlashing}
+                        <DataGrid
+                            rows={nestedData}
+                            columns={nestedColumns}
+                            getRowId={(row) => row.id}
+                            onRowClick={handleOnRowClick}
+                            sort={{field: "createdTimestamp", sort: "desc"}}
+                            slots={{
+                                noRowsOverlay: CustomEmptyOverlay
+                            }}
+                            onCellClick={(params) => {
+                                setHighlightedCell({id: params.id as number, field: params.field});
+                            }}
+                            getCellClassName={(params) =>
+                                params.field === 'connections' &&
+                                highlightedCell.id === params.id && highlightedCell.field === params.field
+                                    ? "highlighted-cell"
+                                    : ""
+                            }
                         />
                     </Box>
-                );
-            }) : null}
+                    {serviceProviderRow && field === 'capabilities' && (
+                        <CapabilityDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            capabilities={serviceProviderRow as ServiceProviderCapabilities}
+                        />
+                    )}
+                    {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
+                        <CommonDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            heading={headerContent}
+                        />
+                    )}
+                    {serviceProviderRow && field === 'deliveries' && (
+                        <CommonDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            heading={headerContent}
+                        />
+                    )}
+                    {serviceProviderRow && field === 'privateChannels' && (
+                        <PrivateChannelDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
+                        />
+                    )}
+                </Box>
+                {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
+                    const filteredConnections = nestedConnectionData.filter(
+                        (connection: any) => connection.subscriptionId === serviceProviderRow?.id
+                    );
+                    if (!row || !serviceProviderRow) {
+                        return null;
+                    }
+
+                    return (
+                        <Box key={rowId} sx={{height: 100, width: "100%"}}>
+                            <NestedGridConnections
+                                row={serviceProviderRow}
+                                nestedConnectionData={filteredConnections}
+                                nestedConnectionColumns={nestedConnectionColumns}
+                                isFlashing={isFlashing}
+                            />
+                        </Box>
+                    );
+                }) : null}
+            </motion.div>
         </Box>
     );
 }

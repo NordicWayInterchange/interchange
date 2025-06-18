@@ -5,6 +5,7 @@ import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIDeliveryEndpoints,
     fetchAdminUIDeliveryIds, fetchAdminUIDeliveryInfo,
+    fetchAdminUIAllExchanges,
     fetchAdminUIExchangeValidator,
     fetchAdminUIMatchingCapabilities,
     fetchAdminUIMatchingCapabilityDetails,
@@ -18,6 +19,7 @@ import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {ExchangesType} from "@/types/exchangesType";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 
 interface CustomSession extends Session {
@@ -37,6 +39,12 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     const res = await fetchAdminUIServiceProviders(params);
     const serviceProviders: Array<Neighbours> = await res.data;
     return [res.status, serviceProviders];
+};
+
+const fetchAllExchanges = async (params: basicGetParams) => {
+    const res = await fetchAdminUIAllExchanges(params);
+    const exchanges: Array<ExchangesType> = await res.data;
+    return [res.status, exchanges];
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
@@ -111,6 +119,7 @@ const getPaths: {
 } = {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
+    exchanges: fetchAllExchanges,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,
