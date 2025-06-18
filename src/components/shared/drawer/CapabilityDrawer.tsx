@@ -300,7 +300,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             }}
                                         />
                                     )}
-                                    {metaData.maxBandwidth && (
+                                    {metaData.maxBandwidth !== undefined && metaData.maxBandwidth !== null && (
                                         <TextField
                                             value={metaData.maxBandwidth}
                                             label="Max Bandwidth"
@@ -316,7 +316,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             }}
                                         />
                                     )}
-                                    {metaData.maxMessageRate && (
+                                    {metaData.maxMessageRate !== undefined  && metaData.maxMessageRate !== null && (
                                         <TextField
                                             value={metaData.maxMessageRate}
                                             label="Max MessageRate"
@@ -332,7 +332,7 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                             }}
                                         />
                                     )}
-                                    {metaData.repetitionInterval && (
+                                    {metaData.repetitionInterval !== undefined  && metaData.repetitionInterval !== null &&(
                                         <TextField
                                             value={metaData.repetitionInterval}
                                             label="Repetition Interval"
