@@ -33,7 +33,7 @@ const NestedGridExchanges: React.FC<Props> = ({
         bindingKey: binding.bindingKey,
         destination: binding.destination,
         "x-filter-jms-selector": binding.arguments["x-filter-jms-selector"],
-        uniqueId: `${ binding.bindingKey}-${index}`
+        uniqueId: `${binding.bindingKey}-${index}`
     }));
 
     console.log('nestedData', nestedData);
@@ -46,11 +46,11 @@ const NestedGridExchanges: React.FC<Props> = ({
         },
         {
             ...dataGridTemplate, field: "destination", headerName: "Destination", renderCell: (params) => {
-                 return params.row.destination;
+                return params.row.destination;
             },
         },
         {
-            ...dataGridTemplate, field: "argmennts", headerName: "Jms selector",  flex: 2.7, minWidth: 400,
+            ...dataGridTemplate, field: "argmennts", headerName: "Jms selector", flex: 2.7, minWidth: 400,
             renderCell: (params) => (
                 <div
                     style={{
@@ -70,22 +70,23 @@ const NestedGridExchanges: React.FC<Props> = ({
 
     return (
         <Box flex={1}>
-            <Mainheading>Bindings</Mainheading>
-            <Subheading>
-                These are all of bindings for exchange with id:
-                <Chip
-                    label={field}
-                    sx={{ backgroundColor: "#ffbf7d", color: "black" }}
-                />
-            </Subheading>
-            <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 450, width: "100%"}}>
-                <Box sx={StyledTableHeader}>
-                    <motion.div
-                        animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
-                        transition={{duration: 0.3, ease: "easeInOut"}}
-                        style={{padding: "5px", borderRadius: "8px"}}
-                    >
+            <motion.div
+                animate={{backgroundColor: isFlashing ? "#ffdbb0" : "#f0f1f1"}}
+                transition={{duration: 0.3, ease: "easeInOut"}}
+                style={{padding: "5px", borderRadius: "8px"}}
+            >
+                <Mainheading>Bindings</Mainheading>
+                <Subheading>
+                    These are all of bindings for exchange with id:
+                    <Chip
+                        label={field}
+                        sx={{backgroundColor: "#ffbf7d", color: "black"}}
+                    />
+                </Subheading>
+                <Divider sx={{marginY: 3}}/>
+                <Box sx={{height: 450, width: "100%"}}>
+                    <Box sx={StyledTableHeader}>
+
                         <DataGrid
                             rows={nestedData}
                             columns={nestedColumns}
@@ -95,9 +96,9 @@ const NestedGridExchanges: React.FC<Props> = ({
                                 noRowsOverlay: CustomEmptyOverlay
                             }}
                         />
-                    </motion.div>
+                    </Box>
                 </Box>
-            </Box>
+            </motion.div>
         </Box>
     );
 }
