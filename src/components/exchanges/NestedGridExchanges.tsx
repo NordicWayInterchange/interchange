@@ -8,6 +8,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React from "react";
 import {StyledTableHeader} from "@/components/styles/StyledElements";
 import {motion} from "framer-motion";
+import {Chip} from "@/components/shared/components/Chip";
 
 
 type Props = {
@@ -71,7 +72,11 @@ const NestedGridExchanges: React.FC<Props> = ({
         <Box flex={1}>
             <Mainheading>Bindings</Mainheading>
             <Subheading>
-                These are all of bindings for selected exchange.
+                These are all of bindings for exchange with id:
+                <Chip
+                    label={field}
+                    sx={{ backgroundColor: "#ffbf7d", color: "black" }}
+                />
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             <Box sx={{height: 450, width: "100%"}}>
