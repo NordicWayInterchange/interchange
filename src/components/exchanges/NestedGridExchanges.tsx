@@ -36,8 +36,6 @@ const NestedGridExchanges: React.FC<Props> = ({
         uniqueId: `${binding.bindingKey}-${index}`
     }));
 
-    console.log('nestedData', nestedData);
-
     nestedColumns = [
         {
             ...dataGridTemplate, field: "bindingKey", headerName: "bindingKey", renderCell: (params) => {
