@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {GridColDef, GridRowParams} from "@mui/x-data-grid";
+import {GridColDef} from "@mui/x-data-grid";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box, Divider} from "@mui/material";
@@ -11,10 +11,8 @@ import {
 } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
-import {IFirstNeighbourTable} from "@/interfaces/IFirstNeighbourTable";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import NestedGridExchanges from "@/components/exchanges/NestedGridExchanges";
-import {ExchangesType} from "@/types/exchangesType";
 
 
 const Exchanges = () => {
@@ -24,13 +22,7 @@ const Exchanges = () => {
         session?.user.commonName as string
     );
 
-    const [firstTableRow, setFirstTableRow] = useState<IFirstNeighbourTable | null>(null);
-    const [firstTableFieldName, setFirstTableFieldName] = useState('');
-    const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
-    const [firstDrawerOpen, setFirstDrawerOpen] = useState<boolean>(false);
-    const [secondDrawerOpen, setSecondDrawerOpen] = useState<boolean>(false);
-    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
@@ -38,24 +30,9 @@ const Exchanges = () => {
     }>({id: null, field: null});
     const [isFlashing, setIsFlashing] = useState(false);
 
-    const [exchangeRow, setExchangeRow] = useState<ExchangesType | null>(null);
-
-    const handleFirstDrawerClose = () => {
-        setFirstDrawerOpen(false);
-    };
-
-    const handleSecondTableClose = () => {
-        setSecondDrawerOpen(false);
-    };
-
-    const handleMoreClose = () => {
-        setDrawerOpen(false);
-    };
-
     const handleCellClick = (row: any, field: any) => {
         setExpandedRows({});
         const rowId = row.id;
-        console.log("firstrowId", rowId);
         setExpandedRows((prev) => ({
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
@@ -64,23 +41,6 @@ const Exchanges = () => {
         setTimeout(() => setIsFlashing(false), 300);
     };
 
-    const handleOnSecondTableRowClick = (params: GridRowParams) => {
-        setSecondTableRow(null);
-        setSecondTableRow(params?.row || []);
-        setSecondDrawerOpen(true);
-    };
-
-    const handleOnRowClick = (params: GridRowParams) => {
-        setExpandedRows({});
-        setExpandedRows(params?.row || []);
-        setDrawerOpen(true);
-    };
-
-    const handleOnFirstTableRowClick = (params: GridRowParams) => {
-        setFirstTableRow(null);
-        setFirstTableRow(params?.row || []);
-        setFirstDrawerOpen(true);
-    };
 
     const tableHeaders: GridColDef[] = [
         {
@@ -150,12 +110,10 @@ const Exchanges = () => {
                             noRowsOverlay: CustomEmptyOverlayExchanges
                         }}
                         onCellClick={(params) => {
-                            console.log('PARAMS', params.row)
-                            setHighlightedCell({ id: params.id as number, field: params.field });
-                            setFirstTableFieldName(params.field);
+                            setHighlightedCell({id: params.id as number, field: params.field});
                         }}
                         getCellClassName={(params) =>
-                            (params.field === 'bindigs') &&
+                            (params.field === 'bindings') &&
                             highlightedCell.id === params.id && highlightedCell.field === params.field
                                 ? "highlighted-cell"
                                 : ""
@@ -164,13 +122,8 @@ const Exchanges = () => {
                 </Box>
             </Box>
             {Object.keys(expandedRows).map((rowId) => {
-                console.log('expandedRows[rowId]', expandedRows[rowId]);
-                console.log('rowID', rowId)
                 const row = Array.isArray(exchangesData) ? exchangesData.find((item) => item.id === expandedRows[rowId]) : null;
                 const field = expandedRows[rowId];
-
-                console.log('row', row)
-                console.log('field', field);
 
                 return (
                     <Box key={rowId}>
