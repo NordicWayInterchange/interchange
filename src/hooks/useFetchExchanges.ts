@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {Exchanges} from "@/types/exchanges";
+import {ExchangesType} from "@/types/exchangesType";
 
 const fetchExchanges: (
     commonName: string
-) => Promise<Exchanges[]> = async (commonName: string) => {
+) => Promise<ExchangesType[]> = async (commonName: string) => {
     const res = await fetch(`/api/${commonName}/exchanges`);
     if (res.ok) {
         return res.json();

@@ -1,0 +1,99 @@
+import {GridColDef} from "@mui/x-data-grid";
+import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
+import {Box, Divider} from "@mui/material";
+import Mainheading from "@/components/shared/typography/Mainheading";
+import Subheading from "@/components/shared/typography/Subheading";
+import DataGrid from "@/components/shared/datagrid/DataGrid";
+import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import React from "react";
+import {StyledTableHeader} from "@/components/styles/StyledElements";
+import {motion} from "framer-motion";
+
+
+type Props = {
+    nestedBindingData: any;
+    field: string | null;
+    isFlashing: boolean;
+};
+const NestedGridExchanges: React.FC<Props> = ({
+                                                  nestedBindingData,
+                                                  field,
+                                                  isFlashing
+                                              }: Props) => {
+
+    if (!nestedBindingData || !field) {
+        return null;
+    }
+
+    let nestedData: object[] = [];
+    let nestedColumns: GridColDef[] = [];
+
+    nestedData = nestedBindingData.bindings.map((binding: any, index: number) => ({
+        bindingKey: binding.bindingKey,
+        destination: binding.destination,
+        "x-filter-jms-selector": binding.arguments["x-filter-jms-selector"],
+        uniqueId: `${ binding.bindingKey}-${index}`
+    }));
+
+    console.log('nestedData', nestedData);
+
+    nestedColumns = [
+        {
+            ...dataGridTemplate, field: "bindingKey", headerName: "bindingKey", renderCell: (params) => {
+                return params.row.bindingKey;
+            }
+        },
+        {
+            ...dataGridTemplate, field: "destination", headerName: "Destination", renderCell: (params) => {
+                 return params.row.destination;
+            },
+        },
+        {
+            ...dataGridTemplate, field: "argmennts", headerName: "Jms selector",  flex: 2.7, minWidth: 400,
+            renderCell: (params) => (
+                <div
+                    style={{
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        lineHeight: 1.5,
+                        alignItems: 'start'
+                    }}
+                >
+                    {params.row?.["x-filter-jms-selector"]}
+                </div>
+            ),
+        },
+    ];
+
+
+    return (
+        <Box flex={1}>
+            <Mainheading>Bindings</Mainheading>
+            <Subheading>
+                These are all of bindings for selected exchange.
+            </Subheading>
+            <Divider sx={{marginY: 3}}/>
+            <Box sx={{height: 450, width: "100%"}}>
+                <Box sx={StyledTableHeader}>
+                    <motion.div
+                        animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
+                        transition={{duration: 0.3, ease: "easeInOut"}}
+                        style={{padding: "5px", borderRadius: "8px"}}
+                    >
+                        <DataGrid
+                            rows={nestedData}
+                            columns={nestedColumns}
+                            getRowId={(row) => row.uniqueId}
+                            sort={{field: "bindingKey", sort: "desc"}}
+                            slots={{
+                                noRowsOverlay: CustomEmptyOverlay
+                            }}
+                        />
+                    </motion.div>
+                </Box>
+            </Box>
+        </Box>
+    );
+}
+export default NestedGridExchanges;

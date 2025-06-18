@@ -11,10 +11,11 @@ import {
 } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
-import ControlConnectionDrawer from "@/components/neighbours/ControlConnectionDrawer";
 import {IFirstNeighbourTable} from "@/interfaces/IFirstNeighbourTable";
-import {ControlConnection} from "@/types/neighbours";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
+import NestedGridExchanges from "@/components/exchanges/NestedGridExchanges";
+import {ExchangesType} from "@/types/exchangesType";
+
 
 const Exchanges = () => {
     const {data: session} = useSession();
@@ -23,18 +24,21 @@ const Exchanges = () => {
         session?.user.commonName as string
     );
 
-    console.log("exchangesData", exchangesData);
     const [firstTableRow, setFirstTableRow] = useState<IFirstNeighbourTable | null>(null);
     const [firstTableFieldName, setFirstTableFieldName] = useState('');
     const [secondTableRow, setSecondTableRow] = useState(null);
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [firstDrawerOpen, setFirstDrawerOpen] = useState<boolean>(false);
     const [secondDrawerOpen, setSecondDrawerOpen] = useState<boolean>(false);
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
     const [isFlashing, setIsFlashing] = useState(false);
+
+    const [exchangeRow, setExchangeRow] = useState<ExchangesType | null>(null);
 
     const handleFirstDrawerClose = () => {
         setFirstDrawerOpen(false);
@@ -44,9 +48,14 @@ const Exchanges = () => {
         setSecondDrawerOpen(false);
     };
 
+    const handleMoreClose = () => {
+        setDrawerOpen(false);
+    };
+
     const handleCellClick = (row: any, field: any) => {
         setExpandedRows({});
         const rowId = row.id;
+        console.log("firstrowId", rowId);
         setExpandedRows((prev) => ({
             ...prev,
             [rowId]: prev[rowId] === field ? null : field,
@@ -59,6 +68,12 @@ const Exchanges = () => {
         setSecondTableRow(null);
         setSecondTableRow(params?.row || []);
         setSecondDrawerOpen(true);
+    };
+
+    const handleOnRowClick = (params: GridRowParams) => {
+        setExpandedRows({});
+        setExpandedRows(params?.row || []);
+        setDrawerOpen(true);
     };
 
     const handleOnFirstTableRowClick = (params: GridRowParams) => {
@@ -90,14 +105,14 @@ const Exchanges = () => {
                     <Box
                         style={{cursor: "pointer"}}
                         onClick={() => {
-                            console.log(params.row)
-                            setSecondTableRow(null);
-                            handleCellClick(params.row.bindings, "bindings")
+                            const rowId = params.row.id;
+                            setExpandedRows({});
+                            handleCellClick("bindings", rowId)
                         }}
                     >
                         {Array.isArray(bindings) ?
                             <StyledBorderlineSpan> {bindings.length} </StyledBorderlineSpan> :
-                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan>}
+                            <StyledBorderlineSpan> : 0 </StyledBorderlineSpan>}
                     </Box>
                 );
             },
@@ -135,14 +150,38 @@ const Exchanges = () => {
                             noRowsOverlay: CustomEmptyOverlayExchanges
                         }}
                         onCellClick={(params) => {
+                            console.log('PARAMS', params.row)
                             setHighlightedCell({ id: params.id as number, field: params.field });
                             setFirstTableFieldName(params.field);
                         }}
-                        onRowClick={handleOnFirstTableRowClick}/>
+                        getCellClassName={(params) =>
+                            (params.field === 'bindigs') &&
+                            highlightedCell.id === params.id && highlightedCell.field === params.field
+                                ? "highlighted-cell"
+                                : ""
+                        }/>
 
                 </Box>
             </Box>
+            {Object.keys(expandedRows).map((rowId) => {
+                console.log('expandedRows[rowId]', expandedRows[rowId]);
+                console.log('rowID', rowId)
+                const row = Array.isArray(exchangesData) ? exchangesData.find((item) => item.id === expandedRows[rowId]) : null;
+                const field = expandedRows[rowId];
 
+                console.log('row', row)
+                console.log('field', field);
+
+                return (
+                    <Box key={rowId}>
+                        <NestedGridExchanges
+                            nestedBindingData={row}
+                            field={field}
+                            isFlashing={isFlashing}
+                        />
+                    </Box>
+                );
+            })}
         </Box>
     );
 };

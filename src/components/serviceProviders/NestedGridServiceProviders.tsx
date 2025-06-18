@@ -3,7 +3,7 @@ import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
-import {Box, ChipProps, Divider, Typography} from "@mui/material";
+import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";

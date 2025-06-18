@@ -19,7 +19,7 @@ import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
-import {Exchanges} from "@/types/exchanges";
+import {ExchangesType} from "@/types/exchangesType";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 
 interface CustomSession extends Session {
@@ -43,7 +43,7 @@ const fetchServiceProviders = async (params: basicGetParams) => {
 
 const fetchAllExchanges = async (params: basicGetParams) => {
     const res = await fetchAdminUIAllExchanges(params);
-    const exchanges: Array<Exchanges> = await res.data;
+    const exchanges: Array<ExchangesType> = await res.data;
     return [res.status, exchanges];
 };
 
