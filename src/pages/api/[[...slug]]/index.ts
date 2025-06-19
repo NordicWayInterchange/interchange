@@ -13,13 +13,14 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders
+    fetchAdminUIServiceProviders, fetchAdminUIAllQueues
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
 import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
+import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
 
 interface CustomSession extends Session {
@@ -45,6 +46,12 @@ const fetchAllExchanges = async (params: basicGetParams) => {
     const res = await fetchAdminUIAllExchanges(params);
     const exchanges: Array<Exchanges> = await res.data;
     return [res.status, exchanges];
+};
+
+const fetchAllQueues = async (params: basicGetParams) => {
+    const res = await fetchAdminUIAllQueues(params);
+    const queues: Array<queues> = await res.data;
+    return [res.status, queues];
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
@@ -120,6 +127,7 @@ const getPaths: {
     neighbours: fetchNeighbours,
     serviceproviders: fetchServiceProviders,
     exchanges: fetchAllExchanges,
+    queues: fetchAllQueues,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,

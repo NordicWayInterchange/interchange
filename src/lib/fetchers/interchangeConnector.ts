@@ -110,3 +110,8 @@ export const fetchAdminUIAllExchanges: extendedGetFunction = async (params) => {
     const { actorCommonName } = params;
     return await fetchIXN(actorCommonName, `/exchanges`);
 };
+
+export const fetchAdminUIAllQueues: extendedGetFunction = async (params) => {
+    const { actorCommonName } = params;
+    return await fetchIXN(actorCommonName, `/queues`);
+};
