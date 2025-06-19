@@ -7,6 +7,7 @@ import React from "react";
 import Subheading from "@/components/shared/typography/Subheading";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
+import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
 
 export default function Home() {
     const {data: session} = useSession();
@@ -21,6 +22,17 @@ export default function Home() {
     const {data: exchangeData} = useFetchExchanges(
         session?.user.commonName as string
     );
+
+    const { data: matchingCapabilities } = useFetchMatchingCapabilities(
+        session?.user.commonName as string
+    );
+
+    const deliveriesWithMatchingCapability = matchingCapabilities?.some(item => item.matches?.length > 0) ?
+        (matchingCapabilities.map((item, index) => (
+        item.matches
+            .filter(match => match.capabilityMatchApi.length > 0)
+            .map((match, matchIndex) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
+
 
     const shortcuts = [
         {
@@ -37,6 +49,11 @@ export default function Home() {
             header: 'EXCHANGES',
             url: "/exchanges",
             count: exchangeData?.length,
+        },
+        {
+            header: 'DELIVERIES WITH MATCHING CAPABILITIES',
+            url: "/matchingCapabilitiesGraph",
+            count: deliveriesWithMatchingCapability,
         }
     ];
 

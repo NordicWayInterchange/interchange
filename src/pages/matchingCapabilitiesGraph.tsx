@@ -238,7 +238,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                     }}
                                 >
                                     {item.matches
-                                        .filter(match => match.capabilityMatchApi)
+                                        .filter(match => match.capabilityMatchApi.length > 0)
                                         .map((match, matchIndex) => (
                                             <Box
                                                 key={matchIndex}
