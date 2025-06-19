@@ -93,6 +93,7 @@ const NestedGridExchanges: React.FC<Props> = ({
                             slots={{
                                 noRowsOverlay: CustomEmptyOverlay
                             }}
+                            rowHeight={80}
                         />
                     </Box>
                 </Box>
