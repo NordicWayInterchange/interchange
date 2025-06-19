@@ -186,6 +186,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
 
     }, [matchingCapabilities]);
 
+    console.log('matchingCapabilities', matchingCapabilities);
     return (
         <Box flex={1}>
             <Mainheading>Graphs</Mainheading>
@@ -197,8 +198,8 @@ const MatchingCapabilitiesGraph: React.FC = () => {
             {(matchingCapabilities === undefined || matchingCapabilities === null) ? (
                 <Loading text="Matching capabilities graph" />
             ) : <>
-                {matchingCapabilities.map((sp, index) => (
-                    <Card key={index} variant="outlined" sx={{ marginBottom: 2, backgroundColor: '#F5F5F5' }}>
+                {matchingCapabilities.some(item => item.matches?.length > 0) ? (matchingCapabilities.map((item, index) => (
+                   item.matches?.length > 0 && (<Card key={index} variant="outlined" sx={{ marginBottom: 2, backgroundColor: '#F5F5F5' }}>
                         <CardContent
                             onClick={() => handleExpandClick(index)}
                             sx={{
@@ -208,7 +209,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                 cursor: 'pointer'
                             }}
                         >
-                            <Typography variant="h6">{sp.serviceProviderName}</Typography>
+                            <Typography variant="h6">{item.serviceProviderName}</Typography>
                             <IconButton onClick={(e) => {
                                 e.stopPropagation();
                                 handleExpandClick(index);
@@ -236,8 +237,8 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                         justifyContent: 'flex-start',
                                     }}
                                 >
-                                    {sp.matches
-                                        .filter(match => match.capabilityMatchApi.some((cap: { exists: any; }) => cap.exists))
+                                    {item.matches
+                                        .filter(match => match.capabilityMatchApi)
                                         .map((match, matchIndex) => (
                                             <Box
                                                 key={matchIndex}
@@ -251,7 +252,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                                 }}
                                             >
                                                 <GraphSection
-                                                    serviceProviderName={sp.serviceProviderName}
+                                                    serviceProviderName={item.serviceProviderName}
                                                     matches={[match]}
                                                 />
                                             </Box>
@@ -259,8 +260,8 @@ const MatchingCapabilitiesGraph: React.FC = () => {
                                 </Box>
                             </List>
                         </Collapse>
-                    </Card>
-                ))}
+                    </Card>)
+                ))) : (<Typography variant="body1">There is no matching capability found in any service providers</Typography>)}
             </>}
 
         </Box>
