@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import Subheading from "@/components/shared/typography/Subheading";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
+import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 
 export default function Home() {
     const {data: session} = useSession();
@@ -14,6 +15,10 @@ export default function Home() {
     );
 
     const {data: serviceProvidersData} = useFetchServiceProviders(
+        session?.user.commonName as string
+    );
+
+    const {data: exchangeData} = useFetchExchanges(
         session?.user.commonName as string
     );
 
@@ -27,6 +32,11 @@ export default function Home() {
             header: 'NEIGHBOURS',
             url: "/neighbours",
             count: neighbourData?.length,
+        },
+        {
+            header: 'EXCHANGES',
+            url: "/exchanges",
+            count: exchangeData?.length,
         }
     ];
 
