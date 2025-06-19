@@ -1,5 +1,5 @@
 
-export class ExchangesType {
+export type Exchanges = {
     id: string;
     name: string;
     durable: boolean;

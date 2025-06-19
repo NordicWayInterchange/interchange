@@ -186,7 +186,6 @@ const MatchingCapabilitiesGraph: React.FC = () => {
 
     }, [matchingCapabilities]);
 
-    console.log('matchingCapabilities', matchingCapabilities);
     return (
         <Box flex={1}>
             <Mainheading>Graphs</Mainheading>

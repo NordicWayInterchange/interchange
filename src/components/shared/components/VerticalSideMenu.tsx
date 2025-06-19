@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import HouseIcon from "@mui/icons-material/House";
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
-import EqualizerIcon from '@mui/icons-material/Equalizer';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 
 const drawerWidth = 145;
 
@@ -44,7 +44,7 @@ const SIDE_PAGES: Array<IPages> = [
     {
         text: "Graph Dashboard",
         url: "/matchingCapabilitiesGraph",
-        icon: <EqualizerIcon />
+        icon: <AutoGraphIcon />
     },
 ];
 
