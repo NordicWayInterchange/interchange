@@ -38,17 +38,17 @@ const NestedGridExchanges: React.FC<Props> = ({
 
     nestedColumns = [
         {
-            ...dataGridTemplate, field: "bindingKey", headerName: "bindingKey", renderCell: (params) => {
-                return params.row.bindingKey;
-            }
-        },
-        {
             ...dataGridTemplate, field: "destination", headerName: "Destination", renderCell: (params) => {
                 return params.row.destination;
             },
         },
         {
-            ...dataGridTemplate, field: "argmennts", headerName: "Jms selector", flex: 2.7, minWidth: 400,
+            ...dataGridTemplate, field: "bindingKey", headerName: "bindingKey", renderCell: (params) => {
+                return params.row.bindingKey;
+            }
+        },
+        {
+            ...dataGridTemplate, field: "argmennts", headerName: "Arguments", flex: 2.7, minWidth: 400,
             renderCell: (params) => (
                 <div
                     style={{
