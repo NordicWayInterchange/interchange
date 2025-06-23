@@ -8,6 +8,7 @@ import Subheading from "@/components/shared/typography/Subheading";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
+import {useFetchQueues} from "@/hooks/useFetchQueues";
 
 export default function Home() {
     const {data: session} = useSession();
@@ -24,6 +25,10 @@ export default function Home() {
     );
 
     const { data: matchingCapabilities } = useFetchMatchingCapabilities(
+        session?.user.commonName as string
+    );
+
+    const { data: queuesData } = useFetchQueues(
         session?.user.commonName as string
     );
 
@@ -49,6 +54,11 @@ export default function Home() {
             header: 'EXCHANGES',
             url: "/exchanges",
             count: exchangeData?.length,
+        },
+        {
+            header: 'QUEUES',
+            url: "/queues",
+            count: queuesData?.length,
         },
         {
             header: 'DELIVERIES WITH MATCHING CAPABILITIES',
