@@ -9,28 +9,58 @@ import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
 import {useFetchQueues} from "@/hooks/useFetchQueues";
+import Loading from "@/components/shared/components/Loading";
+
+function useAllApplicationData() {
+    const {data: session} = useSession();
+    const {data: neighbourData, isLoading: isLoadingNeighbour} = useFetchNeighbours(
+        session?.user.commonName as string
+    );
+
+    const {data: serviceProvidersData, isLoading: isLoadingServiceProvider} = useFetchServiceProviders(
+        session?.user.commonName as string
+    );
+
+    const {data: exchangeData, isLoading: isLoadingExchange} = useFetchExchanges(
+        session?.user.commonName as string
+    );
+
+    const {data: matchingCapabilities, isLoading: isLoadingMatchingCapabilities} = useFetchMatchingCapabilities(
+        session?.user.commonName as string
+    );
+
+    const {data: queuesData, isLoading: isLoadingQueues} = useFetchQueues(
+        session?.user.commonName as string
+    );
+    return {
+        session,
+        neighbourData,
+        isLoadingNeighbour,
+        serviceProvidersData,
+        isLoadingServiceProvider,
+        exchangeData,
+        isLoadingExchange,
+        matchingCapabilities,
+        isLoadingMatchingCapabilities,
+        queuesData,
+        isLoadingQueues
+    };
+}
 
 export default function Home() {
-    const {data: session} = useSession();
-    const {data: neighbourData} = useFetchNeighbours(
-        session?.user.commonName as string
-    );
-
-    const {data: serviceProvidersData} = useFetchServiceProviders(
-        session?.user.commonName as string
-    );
-
-    const {data: exchangeData} = useFetchExchanges(
-        session?.user.commonName as string
-    );
-
-    const { data: matchingCapabilities } = useFetchMatchingCapabilities(
-        session?.user.commonName as string
-    );
-
-    const { data: queuesData } = useFetchQueues(
-        session?.user.commonName as string
-    );
+    const {
+        session,
+        neighbourData,
+        isLoadingNeighbour,
+        serviceProvidersData,
+        isLoadingServiceProvider,
+        exchangeData,
+        isLoadingExchange,
+        matchingCapabilities,
+        isLoadingMatchingCapabilities,
+        queuesData,
+        isLoadingQueues
+    } = useAllApplicationData();
 
     const deliveriesWithMatchingCapability = matchingCapabilities?.some(item => item.matches?.length > 0) ?
         (matchingCapabilities.map((item, index) => (
@@ -67,6 +97,9 @@ export default function Home() {
         }
     ];
 
+    if (isLoadingNeighbour || isLoadingServiceProvider || isLoadingNeighbour || isLoadingExchange || isLoadingMatchingCapabilities || isLoadingQueues ) {
+        return <Loading text="Dashboard"/>
+    }
     return (
         <>
             <Box flex={1}>
