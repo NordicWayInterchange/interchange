@@ -8,14 +8,23 @@ import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
 import picocli.CommandLine.*;
 
 import java.io.File;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(
         name = "add",
         description = "Add a subscription for the service provider",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Examples:\n
+                        serviceproviderclient subscriptions add -s "originatingCountry='NO'" \n
+                        serviceproviderclient subscriptions add -f denm_sub.json -d "denm subscription" \n
+                        | description is optional
+                        """
+        }
 )
 public class AddSubscriptions implements Callable<Integer> {
 
@@ -39,7 +48,7 @@ public class AddSubscriptions implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description)));
+            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

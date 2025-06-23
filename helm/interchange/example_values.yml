@@ -1,7 +1,6 @@
 # Secrets:
 key_store_password: password                                      # Key store password
 trust_store_password: password                                    # Trust store password
-interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
 admin_password: not-a-secure-password                             # Password for a Qpid administrative user
 postgres_user: federation                                         # Database user
 postgres_password: federation                                     # Database password
@@ -30,7 +29,7 @@ self:                                                               # ------ Gen
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/qpid                  # Public container registry for Nordic Way where the docker images are located
+    repository: ghcr.io/nordicwayinterchange/qpid                  # Public container registry for Nordic Way where the docker images are located
     tag: "c6b1cf8"                                                  # Image tag for the Qpid-image
   expose_amqps: true                                                # Expose the AMPQS port for incoming messages.
   persistence:                                                      # Configure persistence of queues in Qpid
@@ -43,7 +42,7 @@ qpid:                                                               # Apache Qpi
 neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-discoverer-app
+    repository: ghcr.io/nordicwayinterchange/neighbour-discoverer-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -61,12 +60,12 @@ database:                                                           # Database o
 message_collector:
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/message-collector-app
+    repository: ghcr.io/nordicwayinterchange/message-collector-app
     tag: "c6b1cf8"
 neighbour_server:                                                   # Java application running a REST endpoints that other neighbours contact us through
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/neighbour-server-app
+    repository: ghcr.io/nordicwayinterchange/neighbour-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -74,7 +73,7 @@ neighbour_server:                                                   # Java appli
 routing_configurer:                                                 # Java application that uses the Qpid API to configure routing of messages
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/routing-configurer-app
+    repository: ghcr.io/nordicwayinterchange/routing-configurer-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .no.vegvesen
@@ -82,7 +81,7 @@ routing_configurer:                                                 # Java appli
 onboard_server:                                                     # Java application running a REST endpoint for managing Service Providers(create, read, update, delete)
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/onboard-server-app
+    repository: ghcr.io/nordicwayinterchange/onboard-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root
@@ -98,7 +97,7 @@ admin_server:
 napcore_server:
   replicas: 1
   image:
-    repository: europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-server-app
+    repository: ghcr.io/nordicwayinterchange/napcore-server-app
     tag: "c6b1cf8"
   logging:
   - logger_name: .root

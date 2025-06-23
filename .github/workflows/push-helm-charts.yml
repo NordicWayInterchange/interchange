@@ -34,8 +34,7 @@ jobs:
 
       - name: Setup helm
         uses: azure/setup-helm@v4.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm
@@ -58,7 +57,14 @@ jobs:
       - name: helm push to Google artifact registry
         run: |
           helm push ${{ env.HELM_CHART }} oci://${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/helm
+
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+
       - name: helm push to Github container registry
         run: |
-          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
           helm push ${{ env.HELM_CHART }} oci://ghcr.io/nordicwayinterchange

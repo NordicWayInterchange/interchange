@@ -10,7 +10,6 @@ import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
@@ -23,6 +22,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
+import no.vegvesen.ixn.napcore.model.CapabilityValidator;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.*;
@@ -154,7 +154,7 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionToNapSubscription(savedSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions", "/nap/{actorCommonName}/subscriptions/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Subscriptions")
     @Operation(summary = "Get subscriptions")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.LISTSUBSCRIPTIONSRESPONSE)))})
@@ -357,18 +357,14 @@ public class NapRestController {
             throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
-        if(!CapabilityValidator.isQuadTreeValid(capabilityToAdd.getApplication().getQuadTree())){
-            throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadtree %s", capabilitiesRequest, capabilitiesRequest.getApplication().getQuadTree()));
-        }
-
-        Set<String> capabilityProperties = CapabilityValidator.capabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
+        Set<String> capabilityProperties = CapabilityValidator.napcoreCapabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
         if(!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
-        Map<Boolean, String> validatedCapability = CapabilityValidator.capabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
-        if(validatedCapability.containsKey(false)){
-            throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapability.get(false), capabilityToAdd));
+        List<CapabilityErrorMessage> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
+        if(!validatedCapability.isEmpty()){
+            throw new CapabilityNotValidException(String.format("Bad api object. Capability: %s", capabilityToAdd), validatedCapability);
         }
 
         if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){

@@ -5,11 +5,9 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import java.util.HashSet;
 import java.util.Set;
 
+public class CapabilityApi implements Comparable<CapabilityApi> {
 
-public class CapabilityApi {
-
-
-    private Integer id;
+    private String id;
 
     private Long createdTimestamp;
 
@@ -24,7 +22,7 @@ public class CapabilityApi {
 
     private Set<CapabilityShardApi> shards = new HashSet<>();
 
-    public CapabilityApi(Integer id, ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards, CapabilityStatusApi status, Long createdTimestamp) {
+    public CapabilityApi(String id, ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards, CapabilityStatusApi status, Long createdTimestamp) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
@@ -33,11 +31,29 @@ public class CapabilityApi {
         this.createdTimestamp = createdTimestamp;
     }
 
-    public void setId(Integer id) {
+    public CapabilityApi(String id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.id = id;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+
+    public CapabilityApi(ApplicationApi application, MetadataApi metadata, Set<CapabilityShardApi> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.shards = shards;
+    }
+
+    public CapabilityApi(Set<CapabilityShardApi> shards) {
+        this.shards = shards;
+    }
+
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
@@ -83,6 +99,22 @@ public class CapabilityApi {
 
     public void setStatus(CapabilityStatusApi status) {
         this.status = status;
+    }
+
+    @Override
+    public int compareTo(CapabilityApi o) {
+        if(createdTimestamp == null && o.createdTimestamp == null) {
+            return 0;
+        }
+
+        if(o.createdTimestamp == null){
+            return 1;
+        }
+
+        if(createdTimestamp == null) {
+            return -1;
+        }
+        return Long.compare(createdTimestamp, o.createdTimestamp);
     }
 
     public String toString() {

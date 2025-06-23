@@ -9,7 +9,14 @@ import java.util.concurrent.Callable;
         name = "delete",
         description = "Delete a single delivery",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+        """
+                Example: \n
+                serviceproviderclient deliveries delete a4154ea0-77aa-4f04-9e3f-c325430fd2be
+                """
+}
 )
 public class DeleteDelivery implements Callable<Integer> {
 

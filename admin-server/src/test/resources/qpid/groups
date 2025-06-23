@@ -1,0 +1,5 @@
+federated-interchanges.users=
+administrators.users=qpid-admin,admin_server,localhost
+service-providers.users=
+remote-service-providers.users=
+clients-private-channels.users=

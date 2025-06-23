@@ -16,7 +16,16 @@ import java.util.concurrent.Callable;
         name = "add",
         description = "Add deliveries for service provider",
         defaultValueProvider = PropertiesDefaultProvider.class,
-        mixinStandardHelpOptions = true
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+        """
+                Examples: \n
+                serviceproviderclient deliveries add -s "originatingCountry='NO'" -d "NO DELIVERY" \n
+                serviceproviderclient deliveries add -f denmDelivery.json -d "DENM Delivery" \n
+                -d is optional
+                """
+}
 )
 public class AddDeliveries implements Callable<Integer> {
 

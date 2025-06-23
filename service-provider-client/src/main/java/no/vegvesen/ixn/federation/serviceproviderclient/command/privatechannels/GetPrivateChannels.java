@@ -8,7 +8,16 @@ import picocli.CommandLine.*;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@Command(name = "list", description = "list the private channels of a Service Provider")
+@Command(name = "list", description = "list the private channels of a Service Provider",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels list
+                        """
+        })
 public class GetPrivateChannels implements Callable<Integer> {
 
     @ParentCommand
