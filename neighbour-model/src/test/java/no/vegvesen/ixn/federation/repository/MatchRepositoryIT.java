@@ -55,7 +55,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, "my-sp");
+        Match match = new Match(locSub, sub);
         matchRepository.save(match);
 
         List<Match> allMatches = matchRepository.findAll();
@@ -74,7 +74,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub,sub,"my-sp");
+        Match match = new Match(locSub,sub);
         matchRepository.save(match);
 
         matchRepository.delete(match);
@@ -104,7 +104,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, "my-sp");
+        Match match = new Match(locSub, sub);
         matchRepository.save(match);
 
         matchRepository.deleteAll();
@@ -113,7 +113,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Set<Subscription> requestedSubscriptions = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions();
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
-        Set<LocalSubscription> localSubscriptions = savedServiceProvider.getSubscriptions();
+        List<LocalSubscription> localSubscriptions = savedServiceProvider.getSubscriptions();
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(0);
@@ -138,8 +138,8 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         assertThat(locSub.getId()).isNotNull(); //in other words, no need to assign it to a new variable, the original one has been updated.
 
-        Match match = new Match(locSub, sub, "my-sp");
-        Match match1 = new Match(locSub, sub1, "my-sp");
+        Match match = new Match(locSub, sub);
+        Match match1 = new Match(locSub, sub1);
         matchRepository.save(match);
         matchRepository.save(match1);
 
@@ -165,7 +165,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
 
         matchRepository.save(match);
 
@@ -187,7 +187,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
 
         matchRepository.save(match);
 
@@ -220,8 +220,8 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Subscription savedSubscription1 = savedNeighbour1.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
-        Match match1 = new Match(savedLocalSubscription, savedSubscription1, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
+        Match match1 = new Match(savedLocalSubscription, savedSubscription1);
         matchRepository.save(match);
         matchRepository.save(match1);
 
@@ -245,7 +245,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -276,7 +276,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -307,7 +307,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -341,7 +341,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match = new Match(savedLocalSubscription, savedSubscription);
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -383,8 +383,8 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
         neighbourRepository.save(neighbour);
 
-        Match match1 = new Match(locSub1, sub, serviceProviderName1);
-        Match match2 = new Match(locSub2, sub, serviceProviderName2);
+        Match match1 = new Match(locSub1, sub);
+        Match match2 = new Match(locSub2, sub);
 
         matchRepository.save(match1);
         matchRepository.save(match2);

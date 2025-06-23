@@ -12,7 +12,7 @@ public class Subscription implements Comparable<Subscription> {
 
     Set<SubscriptionEndpoint> endpoints;
 
-    Long lastUpdatedTimestamp;
+    Long lastStatusChange;
 
     String description;
 
@@ -24,7 +24,7 @@ public class Subscription implements Comparable<Subscription> {
         this.status = status;
         this.selector = selector;
         this.endpoints = endpoints;
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.lastStatusChange = lastUpdatedTimestamp;
         this.description = description;
     }
 
@@ -52,12 +52,12 @@ public class Subscription implements Comparable<Subscription> {
         this.endpoints = endpoints;
     }
 
-    public Long getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
+    public Long getLastStatusChange() {
+        return lastStatusChange;
     }
 
-    public void setLastUpdatedTimestamp(Long lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    public void setLastStatusChange(Long lastStatusChange) {
+        this.lastStatusChange = lastStatusChange;
     }
 
     public String getSelector() {
@@ -83,22 +83,22 @@ public class Subscription implements Comparable<Subscription> {
                 ", status=" + status +
                 ", selector='" + selector + '\'' +
                 ", endpoints=" + endpoints +
-                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", lastStatusChange=" + lastStatusChange +
                 ", description=" + description +
                 '}';
     }
 
     @Override
     public int compareTo(Subscription o) {
-        if(o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null) {
+        if(o.lastStatusChange == null && lastStatusChange == null) {
             return 0;
         }
-        if(o.lastUpdatedTimestamp == null){
+        if(o.lastStatusChange == null){
             return 1;
         }
-        if(lastUpdatedTimestamp == null){
+        if(lastStatusChange == null){
             return -1;
         }
-        return Long.compare(o.lastUpdatedTimestamp, lastUpdatedTimestamp);
+        return Long.compare(o.lastStatusChange, lastStatusChange);
     }
 }
