@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalSubscriptionEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
@@ -406,6 +407,25 @@ public class AdminRestController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}/endpoints")
+    @Tag(name = "Local subscriptions")
+    @Operation(summary = "Get local subscription's endpoints based on provided local subscription id for the specified service provider")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETENDPOINTSRESPONSE)))})
+    public List<LocalSubscriptionEndpointAdminApi> getLocalSubscriptionEndpoints(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List local subscription's endpoints for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalSubscription localSubscription = serviceProvider.getSubscription(subscriptionId);
+        subscriptionExists(subscriptionId, localSubscription);
+        return qpidService.getLocalSubscriptionEndpointApiList(localSubscription);
+    }
+
+
+
     private ServiceProvider serviceProviderExists(String actorCommonName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         if (serviceProvider == null) {
@@ -417,6 +437,12 @@ public class AdminRestController {
     private static void deliveryExists(String deliveryId, LocalDelivery delivery) {
         if (delivery == null) {
             throw new NotFoundException("Delivery with id " + deliveryId + " not found");
+        }
+    }
+
+    private static void subscriptionExists(String subscriptionId, LocalSubscription subscription) {
+        if (subscription == null) {
+            throw new NotFoundException("Subscription with id " + subscriptionId + " not found");
         }
     }
 

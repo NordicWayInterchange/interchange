@@ -2,9 +2,11 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalSubscriptionEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalSubscriptionEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
@@ -57,6 +59,28 @@ public class QpidService {
                             endpoint.getTarget()
                     ),
                     exchange != null
+                    )
+            );
+
+        }
+        return result;
+    }
+
+
+    public List<LocalSubscriptionEndpointAdminApi> getLocalSubscriptionEndpointApiList(LocalSubscription localSubscription) {
+        List<LocalSubscriptionEndpointAdminApi> result = new ArrayList<>();
+        for (LocalEndpoint endpoint : localSubscription.getLocalEndpoints()) {
+            Exchange exchange = adminQpidClient.getExchange(endpoint.getHost());
+            result.add(new LocalSubscriptionEndpointAdminApi(
+                            new LocalSubscriptionEndpointApi(
+                                    endpoint.getId(),
+                                    endpoint.getSource(),
+                                    endpoint.getHost(),
+                                    endpoint.getPort(),
+                                    endpoint.getMaxBandwidth(),
+                                    endpoint.getMaxMessageRate()
+                            ),
+                            exchange != null
                     )
             );
 
