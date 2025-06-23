@@ -1,14 +1,7 @@
 #!/bin/bash
 
-SERVICE_PROVIDER="king_olav.bouvetinterchange.eu"
-URL=""
-
-if [ $1 == 'messages' ]; then
-URL="amqps://a.qpid.bouvetinterchange.eu"
-
-else
+SERVICE_PROVIDER="king_olav.a.bouvetinterchange.eu"
 URL="https://a.bouvetinterchange.eu:8797/"
-fi
 
 docker run \
   -it \

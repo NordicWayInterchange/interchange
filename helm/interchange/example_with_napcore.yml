@@ -1,7 +1,6 @@
 # Secrets:
 key_store_password: password                                      # Key store password
 trust_store_password: password                                    # Trust store password
-interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
 admin_password: not-a-secure-password                             # Password for a Qpid administrative user
 postgres_user: federation                                         # Database user
 postgres_password: federation                                     # Database password
@@ -12,6 +11,9 @@ napcore_keystore_password: password
 napcore_nextauth_secret: ABC
 napcore_auth0_client_id: my_client
 napcore_auth0_client_secret: my_secret
+napcore_server_sign_store: "base64 encoded keystore file used for signing"
+napcore_server_sign_store_password: secret_password
+
 
 # Values:
 external_name: example-node.itsinterchange.eu
@@ -86,6 +88,7 @@ onboard_server:                                                     # Java appli
   - logger_name: .root
     level: info
 napcore_server:
+  enabled: true
   replicas: 1
   image:
     repository: ghcr.io/nordicwayinterchange/napcore-server-app

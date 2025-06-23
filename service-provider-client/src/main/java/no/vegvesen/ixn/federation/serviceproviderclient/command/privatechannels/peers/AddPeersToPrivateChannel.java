@@ -14,7 +14,13 @@ import java.util.concurrent.Callable;
         description = "Add private channel peers from file",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
-        version = "1.0"
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient privatechannels peers add -f peers.json 43f9ffe7-e8ed-4165-a61c-21f6f2e55a57
+                        """
+        }
 )
 public class AddPeersToPrivateChannel implements Callable<Integer> {
 

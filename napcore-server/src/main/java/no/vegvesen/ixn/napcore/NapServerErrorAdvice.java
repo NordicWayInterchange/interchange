@@ -57,6 +57,11 @@ public class NapServerErrorAdvice {
         return error(BAD_REQUEST, e);
     }
 
+    @ExceptionHandler({CapabilityNotValidException.class})
+    public ResponseEntity<ValidationErrorDetails> handleNotValidException(CapabilityNotValidException e) {
+        return notValidCapabilityError(e, e.getErrors());
+    }
+
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
         return error(NOT_FOUND, e);
@@ -94,4 +99,13 @@ public class NapServerErrorAdvice {
         return new ResponseEntity<>(errorDetails, status);
     }
 
+    private ResponseEntity<ValidationErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
+        ValidationErrorDetails errorDetails = new ValidationErrorDetails(
+                LocalDateTime.now(),
+                e.getMessage(),
+                validationErrors
+        );
+        logger.error("Error in interchange server. ", e);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
 }

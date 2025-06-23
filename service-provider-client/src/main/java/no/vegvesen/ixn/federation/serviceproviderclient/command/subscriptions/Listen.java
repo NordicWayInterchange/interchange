@@ -14,12 +14,26 @@ import picocli.CommandLine.ParentCommand;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-@Command(name = "listen", description = "Add subscription and receive messages")
+@Command(name = "listen", description = "Add subscription and receive messages",
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """ 
+                        Examples:\n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" \n
+                        serviceproviderclient subscriptions listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
+                        serviceproviderclient subscriptions listen -f sub.json \n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory \n
+                        serviceproviderclient subscriptions listen -s "originatingCountry='NO'" -d directory -c "NO subscription" \n
+                        # -d and -c is optional
+                        """
+        })
 public class Listen implements Callable<Integer> {
 
     @ParentCommand
@@ -47,7 +61,7 @@ public class Listen implements Callable<Integer> {
             subscriptions = addSubscriptionsResponse.getSubscriptions().stream().toList();
         }
         else if(option.selector != null){
-            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), Set.of(new AddSubscription(option.selector, description))));
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description))));
             subscriptions = addSubscriptionsResponse.getSubscriptions().stream().toList();
         } else if (option.id != null) {
             GetSubscriptionResponse getSubscriptionResponse = client.getSubscription(option.id);

@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.*;
-import org.assertj.core.util.Sets;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -86,7 +88,7 @@ public class SubscriptionCalculatorTest {
         LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
         LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
         ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-        serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
+        serviceProvider.setSubscriptions(List.of(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
         Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
         assertThat(localSubscriptions).hasSize(1);
     }
@@ -108,7 +110,7 @@ public class SubscriptionCalculatorTest {
         Optional<LocalDateTime> subscriptionUpdatedRequestedSaved = serviceProviderBefore.getSubscriptionUpdated();
         assertThat(subscriptionUpdatedRequestedSaved).isNotNull().isEqualTo(subscriptionUpdatedRequested);
 
-        Set<LocalSubscription> subscriptions = serviceProviderBefore.getSubscriptions();
+        List<LocalSubscription> subscriptions = serviceProviderBefore.getSubscriptions();
         LocalSubscription requestedSubscription = subscriptions.iterator().next();
         LocalSubscription createdSubscription = requestedSubscription.withStatus(LocalSubscriptionStatus.CREATED);
         subscriptions.remove(requestedSubscription);
