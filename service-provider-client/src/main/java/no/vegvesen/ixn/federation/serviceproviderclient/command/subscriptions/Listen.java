@@ -7,6 +7,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.PoolingConnectionCreator;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -14,10 +15,13 @@ import picocli.CommandLine.ParentCommand;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @Command(name = "listen", description = "Add subscription and receive messages",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
