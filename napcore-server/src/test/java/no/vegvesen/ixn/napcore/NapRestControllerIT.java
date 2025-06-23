@@ -336,7 +336,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1'22", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test
@@ -346,7 +346,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:publicationId", "DK", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
     }
 
     @Test
@@ -378,16 +378,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
         capabilitiesRequest.getApplication().setPublisherId("DK12345");
         capabilitiesRequest.getApplication().setOriginatingCountry("NOK");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
         capabilitiesRequest.getApplication().setOriginatingCountry("NO");
         capabilitiesRequest.getApplication().setProtocolVersion("*!!!");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
         capabilitiesRequest.getApplication().setProtocolVersion("protocolVersion");
         capabilitiesRequest.getApplication().setPublicationId("DK12345-publicationId");
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
 
     }
 
