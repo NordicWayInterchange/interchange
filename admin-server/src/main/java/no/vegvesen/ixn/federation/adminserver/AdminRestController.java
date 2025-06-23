@@ -23,11 +23,7 @@ import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
-import no.vegvesen.ixn.federation.model.LocalDelivery;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.OutgoingMatch;
-import no.vegvesen.ixn.federation.model.PrivateChannel;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
@@ -380,16 +376,35 @@ public class AdminRestController {
     @Tag(name = "Subscriptions")
     @Operation(summary = "Get subscription ids for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONIDSRESPONSE)))})
-    public List<String> getSubscriptionIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+    public List<String> getLocalSubscriptionIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List subscription ids for service provider {} for admin user {}", actorCommonName, adminUser);
+        logger.info("Log - List local subscription ids for service provider {} for admin user {}", actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         return typeTransformer.getSubscriptionIds(serviceProvider.getSubscriptions());
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}")
+    @Tag(name = "Subscriptions")
+    @Operation(summary = "Get local subscriptions based on provided local subscription id for the specified service provider")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONRESPONSE)))})
+    public LocalSubscriptionApi getLocalSubscriptionBasedOnLocalSubscriptionId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - Local subscription with subscriptionId {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalSubscription localSubscription = serviceProvider.getSubscription(subscriptionId);
+
+        return typeTransformer.localSubscriptionToLocalSubscriptionApi(localSubscription);
+    }
+
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);

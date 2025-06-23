@@ -224,6 +224,22 @@ public class TypeTransformer {
         return deliveryEndpointApiSet;
     }
 
+
+    public Set<LocalSubscriptionEndpointApi> locaEndpointSetToLocalSubscriptionEndpointApiSet(Set<LocalEndpoint> localEndpointSet) {
+        Set<LocalSubscriptionEndpointApi> subscriptionEndpointApiSet = new HashSet<>();
+        for (LocalEndpoint endpoint : localEndpointSet) {
+            subscriptionEndpointApiSet.add(new LocalSubscriptionEndpointApi(
+                    endpoint.getId(),
+                    endpoint.getSource(),
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate()
+            ));
+        }
+        return subscriptionEndpointApiSet;
+    }
+
     public PrivateChannelEndpointApi privateChannelEndpointToPrivateChannelEndpointApi(PrivateChannelEndpoint privateChannelEndpoint) {
         return new PrivateChannelEndpointApi(privateChannelEndpoint.getHost(), privateChannelEndpoint.getPort(), privateChannelEndpoint.getQueueName());
     }
@@ -266,6 +282,11 @@ public class TypeTransformer {
 
     public LocalDeliveryStatusApi localDeliveryStatusToDeliveryStatusApi(LocalDeliveryStatus localDeliveryStatus) {
         return LocalDeliveryStatusApi.valueOf(localDeliveryStatus.toString());
+    }
+
+
+    public LocalSubscriptionStatusApi localDeliveryStatusToDeliveryStatusApi(LocalSubscriptionStatus localSubscriptionStatus) {
+        return LocalSubscriptionStatusApi.valueOf(localSubscriptionStatus.toString());
     }
 
     public PrivateChannelStatusApi privateChannelStatusToPrivateChannelStatusApi(PrivateChannelStatus privateChannelStatus) {
@@ -345,6 +366,20 @@ public class TypeTransformer {
                     localDelivery.getDescription(),
                     localDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp())
             );
+    }
+
+    public  LocalSubscriptionApi localSubscriptionToLocalSubscriptionApi(LocalSubscription localSubscription) {
+        return new LocalSubscriptionApi(
+                localSubscription.getUuid(),
+                localDeliveryStatusToDeliveryStatusApi(localSubscription.getStatus()),
+                localSubscription.getSelector(),
+                localSubscription.getConsumerCommonName(),
+                localSubscription.getDescription(),
+                localSubscription.getErrorMessage(),
+                localConnectionToLocalConnectionApiSet(localSubscription.getConnections()),
+                locaEndpointSetToLocalSubscriptionEndpointApiSet(localSubscription.getLocalEndpoints()),
+                localDateTimeToTimestamp(localSubscription.getLastUpdated())
+        );
     }
 
     public List<NeighbourSubscriptionApi> neighbourSubscriptionSetToNeighbourSubscriptionApiList(Set<NeighbourSubscription> neighbourSubscriptions) {

@@ -347,4 +347,33 @@ public class ExampleAdminApiObjects {
             ]
             """;
 
+    static final String GETSUBSCRIPTIONRESPONSE = """
+            {
+                "id": "334c2c10-df87-4c91-8179-8db3f979c84d",
+                "status": "CREATED",
+                "selector": "originatingCountry = 'NO'",
+                "endpoints": [
+                    {
+                        "id": 1,
+                        "source": "loc-7e132a59-16db-4cf5-a7ca-eb6e3dc50d06",
+                        "host": "a.qpid.bouvetinterchange.eu",
+                        "port": 5671,
+                        "maxBandwidth": null,
+                        "maxMessageRate": null
+                    }
+                ],
+                "lastUpdated": 1745501167148,
+                "consumerCommonName": "a.bouvetinterchange.eu",
+                "connections": [
+                    {
+                        "id": 70,
+                        "source": "cap-5160b79c-c4c0-4dff-8543-3662c7cad516",
+                        "destination": "loc-7e132a59-16db-4cf5-a7ca-eb6e3dc50d06"
+                    }
+                ],
+                "description": null,
+                "errorMessage": null
+            }
+            """;
+
 }
