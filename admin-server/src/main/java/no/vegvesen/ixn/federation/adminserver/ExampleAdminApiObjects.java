@@ -341,4 +341,10 @@ public class ExampleAdminApiObjects {
               }
             """;
 
+    static final String GETSUBSCRIPTIONIDSRESPONSE =  """
+            [
+                "63993467-de1d-448b-8de5-425eab6ce3e4"
+            ]
+            """;
+
 }

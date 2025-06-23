@@ -314,6 +314,13 @@ public class TypeTransformer {
                 .toList();
     }
 
+    public List<String> getSubscriptionIds(List<LocalSubscription> subscriptionsList) {
+        return subscriptionsList.stream()
+                .map(LocalSubscription::getUuid)
+                .sorted()
+                .toList();
+    }
+
     public List<LocalDeliveryApi> localDeliveriesSetToDeliveriesApiList(Set<LocalDelivery> deliveriesSet) {
         List<LocalDeliveryApi> deliveriesApiList = new ArrayList<>();
         for (LocalDelivery delivery : deliveriesSet) {

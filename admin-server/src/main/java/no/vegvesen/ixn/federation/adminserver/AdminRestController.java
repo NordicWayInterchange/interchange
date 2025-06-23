@@ -375,6 +375,22 @@ public class AdminRestController {
 
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions")
+    @Tag(name = "Subscriptions")
+    @Operation(summary = "Get subscription ids for the specified service provider")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONIDSRESPONSE)))})
+    public List<String> getSubscriptionIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
+
+        logger.info("Log - List subscription ids for service provider {} for admin user {}", actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        return typeTransformer.getSubscriptionIds(serviceProvider.getSubscriptions());
+    }
+
     private ServiceProvider serviceProviderExists(String actorCommonName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);
         if (serviceProvider == null) {
