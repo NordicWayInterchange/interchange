@@ -473,6 +473,23 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
     }
 
+    @Test
+    public void testGetSubscriptionIdsForEachServiceProvider() {
+        String adminUser = "adminUser";
+
+        LocalSubscription aLocalSubscription =  new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b","consumer");
+
+        ServiceProvider sp = new ServiceProvider("my-sp");
+        sp.addLocalSubscription(aLocalSubscription);
+
+        serviceProviderRepository.save(sp);
+
+        List<String> response1 = restController.getLocalSubscriptionIdsForEachServiceProvider(adminUser, "my-sp");
+        assertThatThrownBy(() -> restController.getLocalSubscriptionIdsForEachServiceProvider(adminUser, "service-provider")).isInstanceOf(NotFoundException.class);
+
+        assertThat(response1).hasSize(1);
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test
