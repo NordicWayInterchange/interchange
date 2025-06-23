@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo hello world
+java -jar import-export-service.jar 
