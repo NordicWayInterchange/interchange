@@ -68,17 +68,38 @@ export default function Home() {
             .filter(match => match.capabilityMatchApi.length > 0)
             .map((match, matchIndex) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
 
+    const capabilitiesCount = serviceProvidersData?.map((item, index) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.length), 0);
+    const subscriptionsCount = serviceProvidersData?.map((item, index) => (item.subscriptions || [])).reduce((sum, subscriptions) => (sum + subscriptions.length), 0);
+    const deliveriesCount = serviceProvidersData?.map((item, index) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
+
+
+    const neighbourCapabilitiesCount = neighbourData?.map((item, index) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
+    const ourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
+    const neighbourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
+
 
     const shortcuts = [
         {
             header: 'SERVICE PROVIDERS',
+            firstSubValueHeader: 'CAPABILITIES',
+            secondSubValueHeader: 'SUBSCRIPTIONS',
+            thirdSubValueHeader: 'DELIVERIES',
             url: "/serviceProviders",
-            count: serviceProvidersData?.length
+            count: serviceProvidersData?.length,
+            firstSubValueCount: capabilitiesCount,
+            secondSubValueCount: subscriptionsCount,
+            thirdSubValueCount: deliveriesCount,
         },
         {
             header: 'NEIGHBOURS',
+            firstSubValueHeader: 'NEIGHBOUR CAPABILITIES',
+            secondSubValueHeader: 'OUR SUBSCRIPTIONS',
+            thirdSubValueHeader: 'NEIGHBOUR SUBSCRIPTIONS',
             url: "/neighbours",
             count: neighbourData?.length,
+            firstSubValueCount: neighbourCapabilitiesCount,
+            secondSubValueCount: ourRequestedSubscriptionsCount,
+            thirdSubValueCount: neighbourRequestedSubscriptionsCount,
         },
         {
             header: 'EXCHANGES',
@@ -132,20 +153,33 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 170,
+                                        width: 350,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 150,
+                                        height: 300,
                                         boxShadow: 1
                                     }}
                                 >
-                                    <Box>
-                                        <Typography sx={{fontWeight: 500, textAlign: 'center'}}>
-                                            {shortcut.count}<br />{shortcut.header}
-                                        </Typography>
+                                    <Box key={key} sx={{ textAlign: 'center', mb: 4 }}>
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{shortcut.header}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold' }} variant="h6">{shortcut.count}</Typography>
+                                        </Box>
+
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1}}>
+                                            {[{ header: shortcut.firstSubValueHeader, count: shortcut.firstSubValueCount }, { header: shortcut.secondSubValueHeader, count: shortcut.secondSubValueCount },
+                                                { header: shortcut.thirdSubValueHeader, count: shortcut.thirdSubValueCount }].map(
+                                                (entry, i) => (
+                                                    <Box key={i}>
+                                                        <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
+                                                    </Box>
+                                                )
+                                            )}
+                                        </Box>
                                     </Box>
                                 </Card>
                             </Link>
