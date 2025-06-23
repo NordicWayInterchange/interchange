@@ -31,8 +31,6 @@ jobs:
 
       - name: Setup helm
         uses: azure/setup-helm@v4.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Templating Interchange helm chart
         working-directory: ./helm/interchange
@@ -88,7 +86,7 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           path: interchange-swagger-docs
 
-      - name: Push to github pages
+      - name: Push swagger docs to github pages
         if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
@@ -96,10 +94,31 @@ jobs:
           cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
           cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
           cp /home/runner/work/interchange/interchange/napcore-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-napcore
+          cp /home/runner/work/interchange/interchange/admin-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-admin
           cd interchange-swagger-docs
           git add --all
           git commit --allow-empty -m "Updated swagger.json"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-swagger-docs.git --force
+        working-directory: ./
+
+      - name: checkout to client docs project
+        if: github.ref == 'refs/heads/federation-master'
+        uses: actions/checkout@v4
+        with:
+          repository: NordicWayInterchange/serviceprovider-client-documentation
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: serviceprovider-client-documentation
+
+      - name: Push client docs to github pages
+        if: github.ref == 'refs/heads/federation-master'
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name = "GitHub Actions"
+          cd ./serviceprovider-client-documentation
+          cp /home/runner/work/interchange/interchange/service-provider-client/target/generated-docs/*.html ./
+          git add --all
+          git commit --allow-empty -m "Updated html files"
+          git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/serviceprovider-client-documentation.git --force
         working-directory: ./
 
       - name: Persist to workspace
@@ -123,6 +142,28 @@ jobs:
         with:
           name: interchange
 
+      - name: Save tags to variables
+        run: |
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
+
+      - name: Build the Docker image
+        run: |
+          cd ./${{ matrix.Images }}          
+          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
+
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+
+      - name: Push docker image to Github container registry
+        run: |
+          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
+          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
+
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
         with:
@@ -138,22 +179,9 @@ jobs:
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
 
-      - name: Save tags to variables
-        run: |
-          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
-          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
-
-      - name: Build the Docker image
-        run: |
-          cd ./${{ matrix.Images }}          
-          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
 
       - name: Push docker image to Google artifact registry
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
-      - name: Push docker image to Github container registry
-        run: | 
-          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
-          echo ${{ secrets.REPO_ACCESS_TOKEN }} | docker login ghcr.io -u "Github Actions" --password-stdin
-          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
+

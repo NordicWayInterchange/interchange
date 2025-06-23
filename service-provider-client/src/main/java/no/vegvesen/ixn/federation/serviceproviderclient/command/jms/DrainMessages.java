@@ -6,7 +6,16 @@ import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "drain", description = "Drains the queue until there's more than 0.5 second delay")
+@Command(name = "drain", description = "Drains the queue until there's more than 0.5 second delay",
+        defaultValueProvider = PropertiesDefaultProvider.class,
+        mixinStandardHelpOptions = true,
+        version = "1.0",
+        customSynopsis = {
+                """
+                        Example:\n
+                        serviceproviderclient messages drain loc-60644a9f-ba59-480c-ade9-cfecda3784d6
+                        """
+        })
 public class DrainMessages implements Callable<Integer> {
 
     @Parameters(index = "0", paramLabel = "QUEUE", description = "The queueName to connect to")

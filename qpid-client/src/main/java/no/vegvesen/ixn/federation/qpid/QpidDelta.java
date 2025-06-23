@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class QpidDelta {
 
@@ -9,10 +8,17 @@ public class QpidDelta {
 
     List<Queue> queues = new ArrayList<>();
 
+    List<PrivateChannelMember> privateChannelUsers = new ArrayList<>();
+
     public QpidDelta(List<Exchange> exchanges, List<Queue> queues) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
+    }
 
+    public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<PrivateChannelMember> privateChannelUsers) {
+        this.exchanges.addAll(exchanges);
+        this.queues.addAll(queues);
+        this.privateChannelUsers.addAll(privateChannelUsers);
     }
 
     public void addExchange(Exchange exchange) {
@@ -31,16 +37,6 @@ public class QpidDelta {
         queues.remove(queue);
     }
 
-    public boolean exchangeExists(String exchangeName) {
-        return exchanges.stream()
-                .anyMatch(e -> e.getName().equals(exchangeName));
-    }
-
-    public boolean queueExists(String queueName) {
-        return queues.stream()
-                .anyMatch(q -> q.getName().equals(queueName));
-    }
-
     public Queue findByQueueName(String queueName) {
         return findQueueByName(queueName).orElse(null);
     }
@@ -57,28 +53,22 @@ public class QpidDelta {
                 .findFirst();
     }
 
-    public Set<String> getDestinationsFromExchangeName(String exchangeName) {
-        Set<String> result = new HashSet<>();
-        if (findExchangeByName(exchangeName).isPresent()) {
-            result = findExchangeByName(exchangeName).get().getBindings().stream()
-                    .map(Binding::getDestination)
-                    .collect(Collectors.toSet());
-        }
-        return result;
+    public Optional<PrivateChannelMember> findPrivateChannelUserByName(String privateChannelUserName) {
+        return privateChannelUsers.stream()
+                .filter(u -> u.name().equals(privateChannelUserName))
+                .findFirst();
     }
 
-    public void addBindingToExchange(String exchangeName, String selector, String destination) {
-        findExchangeByName(exchangeName).ifPresent(ex -> ex.addBinding(new Binding(
-                exchangeName,
-                destination,
-                new Filter(selector)
-        )));
+    public PrivateChannelMember findByPrivateChannelUserName(String serviceProviderUserName) {
+        return findPrivateChannelUserByName(serviceProviderUserName).orElse(null);
     }
 
-    public boolean exchangeHasBindingToQueue(String exchangeName, String queueName) {
-        return findExchangeByName(exchangeName)
-                .map(value -> value.isBoundToQueue(queueName))
-                .orElse(false);
+    public void removePrivateChannelUser(PrivateChannelMember privateChannelUser) {
+        privateChannelUsers.remove(privateChannelUser);
+    }
+
+    public void addPrivateChannelUser(PrivateChannelMember privateChannelUser) {
+        privateChannelUsers.add(privateChannelUser);
     }
 
     public Exchange findByExchangeName(String exchangeName) {

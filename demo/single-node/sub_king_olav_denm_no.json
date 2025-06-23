@@ -2,7 +2,7 @@
   "version" : "1.0",
   "subscriptions" : [
     {
-      "selector" : "publicationId = 'NO00000-pub-1'"
+      "selector" : "publicationId = 'NO00000:pub-1'"
 
     }]
 }
