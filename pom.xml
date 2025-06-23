@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.19-SNAPSHOT</version>
+    <version>1.0.21-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -92,7 +92,7 @@
         <dnsjava.version>3.6.3</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
         <bouncycastle.version>1.80</bouncycastle.version>
-        <postgresql.version>42.7.5</postgresql.version>
+        <postgresql.version>42.7.7</postgresql.version>
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
         <swagger-annotations-jakarta.version>2.2.29</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>

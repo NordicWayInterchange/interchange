@@ -142,6 +142,28 @@ jobs:
         with:
           name: interchange
 
+      - name: Save tags to variables
+        run: |
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
+
+      - name: Build the Docker image
+        run: |
+          cd ./${{ matrix.Images }}          
+          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
+
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+
+      - name: Push docker image to Github container registry
+        run: |
+          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
+          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
+
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
         with:
@@ -157,29 +179,9 @@ jobs:
       - name: Login to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }} --quiet
 
-      - name: Save tags to variables
-        run: |
-          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
-          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
-
-      - name: Build the Docker image
-        run: |
-          cd ./${{ matrix.Images }}          
-          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
 
       - name: Push docker image to Google artifact registry
         run: |
           docker tag ${{ matrix.Images }} ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           docker push --all-tags ${{ vars.REGIONAL_ARTIFACT_REGISTRY_URL }}/${{ vars.PROJECT_ID }}/${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}/${{ matrix.Images }}
 
-      - name: Login to Github container registry
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ghcr.io
-          username: "Github Actions"
-          password: ${{ secrets.REPO_ACCESS_TOKEN }}
-
-      - name: Push docker image to Github container registry
-        run: | 
-          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
-          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
