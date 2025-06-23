@@ -44,10 +44,22 @@ public class TypeTransformer {
                     localDateTimeToTimestamp(neighbour.getControlConnection().getLastFailedConnectionAttempt()),
                     localDateTimeToTimestamp(neighbour.getLastUpdated()),
                     neighbour.isIgnore(),
+                    connectionToConnectionApi(neighbour.getControlConnection()),
                     neighbour.getControlChannelPort()
             ));
         }
         return neighbourApiList;
+    }
+
+    public ConnectionApi connectionToConnectionApi(Connection connection) {
+        return new ConnectionApi(
+                connection.getId(),
+                localDateTimeToTimestamp(connection.getBackoffStart()),
+                connection.getBackoffAttempts(),
+                connectionStatusToConnectionStatusApi(connection.getConnectionStatus()),
+                localDateTimeToTimestamp(connection.getUnreachableTime()),
+                localDateTimeToTimestamp(connection.getLastFailedConnectionAttempt())
+        );
     }
 
     public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
@@ -286,13 +298,6 @@ public class TypeTransformer {
         return subscriptionApiList.stream().sorted().toList();
     }
 
-    public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {
-        Set<LocalConnectionApi> localConnectionApiSet = new HashSet<>();
-        for (LocalConnection localConnection : localConnectionSet) {
-            localConnectionApiSet.add(new LocalConnectionApi(localConnection.getId(), localConnection.getSource(), localConnection.getDestination()));
-        }
-        return localConnectionApiSet;
-    }
 
     public List<String> getDeliveryIds(Set<LocalDelivery> deliveriesSet) {
         return deliveriesSet.stream()
