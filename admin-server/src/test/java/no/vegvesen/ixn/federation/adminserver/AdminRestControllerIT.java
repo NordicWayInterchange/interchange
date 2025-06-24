@@ -2,11 +2,13 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
+import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalSubscriptionEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalSubscriptionEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
@@ -350,7 +352,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(response1).hasSize(2);
     }
 
-    @Test void testGetLocalDeliveryEndpoints() {
+    @Test
+    void testGetLocalDeliveryEndpoints() {
         String adminUser = "adminUser";
         String serviceProviderName = "sp1";
 
@@ -488,6 +491,34 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThatThrownBy(() -> restController.getLocalSubscriptionIdsForEachServiceProvider(adminUser, "service-provider")).isInstanceOf(NotFoundException.class);
 
         assertThat(response1).hasSize(1);
+    }
+
+    @Test
+    void testGetLocalSubscriptionEndpoints() {
+        String adminUser = "adminUser";
+        String serviceProviderName = "sp2";
+
+        LocalSubscription aLocalSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b","consumer");
+
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        sp.addLocalSubscription(aLocalSubscription);
+
+
+        serviceProviderRepository.save(sp);
+
+
+        LocalSubscriptionEndpointApi localSubscriptionEndpointApi = new LocalSubscriptionEndpointApi(1, "loc-7e132a59-16db-4cf5-a7ca", "a.qpid.bouvetinterchange.eu", 5671, null, null);
+        List<LocalSubscriptionEndpointAdminApi> result = Collections.singletonList(new LocalSubscriptionEndpointAdminApi(localSubscriptionEndpointApi, true));
+
+        when(qpidService.getLocalSubscriptionEndpointApiList(aLocalSubscription)).thenReturn(result);
+
+        assertThat(
+                restController
+                        .getLocalSubscriptionEndpoints(
+                                adminUser,
+                                serviceProviderName,
+                                aLocalSubscription.getUuid()
+                        )).isNotEmpty();
     }
 
     @Autowired
