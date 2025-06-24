@@ -25,22 +25,16 @@ public class SubscriptionCalculatorTest {
         LocalSubscription localSubB = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'SE'",myName);
         LocalSubscription localSubC = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'",myName);
 
-        ServiceProvider firstServiceProvider = new ServiceProvider();
-        firstServiceProvider.setName("First Service Provider");
-        firstServiceProvider.addLocalSubscription(localSubA);
-        firstServiceProvider.addLocalSubscription(localSubB);
+        ServiceProvider firstServiceProvider = new ServiceProvider("First Service Provider", Set.of(localSubA,localSubB));
 
-        ServiceProvider secondServiceProvider = new ServiceProvider();
-        secondServiceProvider.setName("Second Service Provider");
-        secondServiceProvider.addLocalSubscription(localSubB);
-        secondServiceProvider.addLocalSubscription(localSubC);
+        ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider", Set.of(localSubB,localSubC));
 
-        List<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toList());
+        List<ServiceProvider> serviceProviders = List.of(firstServiceProvider, secondServiceProvider);
 
         Set<LocalSubscription> selfSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
 
         assertThat(selfSubscriptions).hasSize(3);
-        assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
+        assertThat(selfSubscriptions).containsAll(Set.of(localSubA, localSubB, localSubC));
     }
 
 

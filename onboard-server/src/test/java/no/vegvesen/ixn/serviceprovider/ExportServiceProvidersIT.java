@@ -20,6 +20,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -43,8 +44,8 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
 
     @Test
     public void getServiceProviders() throws IOException {
-        ServiceProvider serviceProvider = new ServiceProvider("testuser");
-        serviceProvider.setCapabilities(
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "testuser",
                 new Capabilities(
                         Collections.singleton(
                                 new Capability(
@@ -61,28 +62,32 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
                                         )
                                 )
                         )
-                )
-        );
-        serviceProvider.setSubscriptions(List.of(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "originatingCountry = 'NO' and messageType = 'DENM'",
-                        "my-node")
-                )
+                ),
+                Set.of(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "originatingCountry = 'NO' and messageType = 'DENM'",
+                                "my-node")
+                ),
+                LocalDateTime.now()
         );
         repository.save(serviceProvider);
 
-        privateChannelRepository.save(new PrivateChannel(
-                Collections.singleton(new Peer("my-peer")),
-                PrivateChannelStatus.CREATED,
-                "my-channel",
-                new PrivateChannelEndpoint(
-                        "my-host",
-                        5671,
-                        "my-queue"
-                ),
-                serviceProvider.getName()
-        ));
+        privateChannelRepository.save(
+                new PrivateChannel(
+                        Collections.singleton(
+                                new Peer("my-peer")
+                        ),
+                        PrivateChannelStatus.CREATED,
+                        "my-channel",
+                        new PrivateChannelEndpoint(
+                                "my-host",
+                                5671,
+                                "my-queue"
+                        ),
+                        serviceProvider.getName()
+                )
+        );
 
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();

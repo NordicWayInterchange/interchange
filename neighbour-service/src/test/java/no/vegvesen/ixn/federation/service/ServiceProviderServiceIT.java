@@ -180,17 +180,20 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Test
     public void capabilityIsNotRemovedWhenThereAreOutgoingMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        String name = "service-provider";
 
         Capability capability = new Capability();
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        Capabilities capabilities = new Capabilities(new HashSet<>(Arrays.asList(capability)));
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
 
-        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, serviceProvider.getName());
+        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, name);
         outgoingMatchRepository.save(outgoingMatch);
 
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                name,
+                capabilities
+        );
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 
@@ -200,7 +203,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Test
     public void multipleCapabilitiesAreRemoved(){
-        ServiceProvider sp = new ServiceProvider("sp");
         Capabilities capabilities = new Capabilities( Set.of(
                 new Capability(
                         new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
@@ -218,7 +220,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         for(Capability i : capabilities.getCapabilities()){
             i.setStatus(CapabilityStatus.TEAR_DOWN);
         }
-        sp.setCapabilities(capabilities);
+        ServiceProvider sp = new ServiceProvider("sp", capabilities);
         repository.save(sp);
         service.removeTearDownCapabilities(sp.getName());
         ServiceProvider savedServiceProvider = repository.findByName(sp.getName());
@@ -226,13 +228,12 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     }
     @Test
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
         Capability capability = new Capability(null, new Metadata());
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        Capabilities capabilities = new Capabilities(new HashSet<>(List.of(capability)));
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",capabilities);
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 

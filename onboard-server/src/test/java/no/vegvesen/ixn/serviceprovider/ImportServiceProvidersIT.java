@@ -20,7 +20,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
+@Disabled("This test has been superseded by import-export-service, and needs to be looked at")
 @SpringBootTest
 public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitializer {
 
@@ -37,10 +37,9 @@ public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitial
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
-            ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
             Capabilities capabilities1 = new Capabilities(capabilities);
-            serviceProvider.setCapabilities(capabilities1);
+            ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),capabilities1);
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
                 //TODO have to generate queue name, as this was SP name before

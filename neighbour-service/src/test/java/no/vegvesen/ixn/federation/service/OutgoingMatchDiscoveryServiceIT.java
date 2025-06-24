@@ -13,10 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +39,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void testThatMatchIsCreated() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -69,10 +66,14 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+            Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -87,7 +88,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void testThatMultipleMatchesAreCreated() {
         LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -114,11 +114,15 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                 new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -133,7 +137,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void testThatDeliveryHasNoOverlap() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -161,10 +164,16 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
+        Capabilities capabilities = new Capabilities(Set.of(cap1, cap2));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                capabilities,
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -193,7 +202,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void matchesAreOnlyCreatedWhenCapabilityIsCreated() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -221,10 +229,13 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         );
         cap2.setStatus(CapabilityStatus.REQUESTED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
-
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+               Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -239,7 +250,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap = new Capability(
                 new DenmApplication(
@@ -254,10 +264,13 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         );
         cap.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Collections.singletonList(cap))));
-
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap)),
+               Set.of(),
+               Set.of(delivery),
+               LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -272,7 +285,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
     public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
         metadata.setShardCount(2);
@@ -290,10 +302,13 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         );
         cap.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Collections.singletonList(cap))));
-
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                 new Capabilities(Set.of(cap)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
