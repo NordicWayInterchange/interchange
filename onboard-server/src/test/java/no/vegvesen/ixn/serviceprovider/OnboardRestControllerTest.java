@@ -125,8 +125,10 @@ public class OnboardRestControllerTest {
 		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
-		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		ServiceProvider secondServiceProvider = new ServiceProvider(
+				serviceProviderName,
+				secondServiceProviderCapabilities
+		);
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 

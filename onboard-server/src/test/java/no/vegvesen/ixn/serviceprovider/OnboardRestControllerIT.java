@@ -114,20 +114,24 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         datexNO.setApplication(app);
         datexNO.setMetadata(meta);
 
-        ServiceProvider other = new ServiceProvider("other-service-provider");
-        other.setCapabilities(new Capabilities(
-                Collections.singleton(
-                        new Capability(
-                                new DatexApplication(
-                                        "NO00000",
-                                        "NO00000:pub-1",
-                                        "NO",
-                                        "1.0",
-                                        List.of("1200"),
-                                        "SituationPublication",
-                                        "publisherName"),
-                                new Metadata()
-                        ))));
+        ServiceProvider other = new ServiceProvider(
+                "other-service-provider",
+                new Capabilities(
+                        Set.of(
+                                new Capability(
+                                        new DatexApplication(
+                                                "NO00000",
+                                                "NO00000:pub-1",
+                                                "NO",
+                                                "1.0",
+                                                List.of("1200"),
+                                                "SituationPublication",
+                                                "publisherName"),
+                                        new Metadata()
+                                )
+                        )
+                )
+        );
 
         serviceProviderRepository.save(other);
 
@@ -272,31 +276,39 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     void testFetchingAllMatchingCapabilities() {
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "NPRA",
-                                "pub-1",
-                                "NO",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(serviceProvider);
-        ServiceProvider otherServiceProvider = new ServiceProvider();
-        otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "SPRA",
-                                "pub-2",
-                                "SE",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                "other",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "SPRA",
+                                                "pub-2",
+                                                "SE",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour("Neighbour",
@@ -326,53 +338,58 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGettingMatchingLocalCapabilities(){
-       ServiceProvider serviceProvider1 = new ServiceProvider("sp-1");
-       ServiceProvider serviceProvider2 = new ServiceProvider("sp-2");
-       serviceProvider1.setCapabilities(new Capabilities(
-               Set.of(
-                       new Capability(
-                               new DenmApplication(
-                                       "NPRA",
-                                       "pub-1",
-                                       "NO",
-                                       "1.0",
-                                       List.of("123"),
-                                       List.of(6)
-                                       ),
-                               new Metadata(RedirectStatus.OPTIONAL)
-                       ),
-                       new Capability(
-                               new DenmApplication(
-                                       "NPRA",
-                                       "pub-2",
-                                       "NO",
-                                       "1.0",
-                                       List.of("123"),
-                                       List.of(6)),
-                               new Metadata(RedirectStatus.OPTIONAL))
-               )
-       ));
-       serviceProvider2.setCapabilities(new Capabilities(
-               Set.of(new Capability(
-                       new DenmApplication(  "NPRA_2",
-                               "pub-3",
-                               "NO",
-                               "1.0",
-                               List.of("123"),
-                               List.of(6)),
-                       new Metadata(RedirectStatus.OPTIONAL)
-               ), new Capability(
-                       new DenmApplication(
-                               "NPRA_2",
-                               "pub-4",
-                               "NO",
-                               "1.0",
-                               List.of("123"),
-                               List.of(6)
-                       ),
-                       new Metadata(RedirectStatus.OPTIONAL)
-               ))
-       ));
+        ServiceProvider serviceProvider1 = new ServiceProvider(
+                "sp-1",
+                new Capabilities(
+                        Set.of(
+                                new Capability(
+                                        new DenmApplication(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                List.of("123"),
+                                                List.of(6)
+                                        ),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                ),
+                                new Capability(
+                                        new DenmApplication(
+                                                "NPRA",
+                                                "pub-2",
+                                                "NO",
+                                                "1.0",
+                                                List.of("123"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL))
+                        )
+                )
+        );
+        ServiceProvider serviceProvider2 = new ServiceProvider(
+                "sp-2",
+                new Capabilities(
+                        Set.of(new Capability(
+                                        new DenmApplication(  "NPRA_2",
+                                                "pub-3",
+                                                "NO",
+                                                "1.0",
+                                                List.of("123"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                ), new Capability(
+                                        new DenmApplication(
+                                                "NPRA_2",
+                                                "pub-4",
+                                                "NO",
+                                                "1.0",
+                                                List.of("123"),
+                                                List.of(6)
+                                        ),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
        serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
        assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
        assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
@@ -380,31 +397,39 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "NPRA",
-                                "pub-1",
-                                "NO",
-                                "1.0",
-                                List.of("123"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                List.of("123"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(serviceProvider);
-        ServiceProvider otherServiceProvider = new ServiceProvider();
-        otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "SPRA",
-                                "pub-2",
-                                "SE",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                "other",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "SPRA",
+                                                "pub-2",
+                                                "SE",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour("Neighbour", new NeighbourCapabilities(
@@ -434,18 +459,22 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     void testFetchingAllCapabilitiesWhenServiceProviderDoesNotExist() {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        ServiceProvider otherServiceProvider = new ServiceProvider();
-        otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "SPRA",
-                                "pub-1",
-                                "SE",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                "other",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "SPRA",
+                                                "pub-1",
+                                                "SE",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour("neighbour_1",new NeighbourCapabilities(
@@ -473,31 +502,38 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     void testFetchingAllMatchingCapabilitiesWhenSelectorIsNull() {
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        serviceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "NPRA",
-                                "pub-1",
-                                "NO",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(serviceProvider);
-        ServiceProvider otherServiceProvider = new ServiceProvider();
-        otherServiceProvider.setCapabilities(new Capabilities(
-                Collections.singleton(new Capability(
-                        new DenmApplication(
-                                "SPRA",
-                                "pub-2",
-                                "SE",
-                                "1.0",
-                                List.of("1234"),
-                                List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
-                ))));
+        ServiceProvider otherServiceProvider = new ServiceProvider("other",
+                new Capabilities(
+                        Collections.singleton(new Capability(
+                                        new DenmApplication(
+                                                "SPRA",
+                                                "pub-2",
+                                                "SE",
+                                                "1.0",
+                                                List.of("1234"),
+                                                List.of(6)),
+                                        new Metadata(RedirectStatus.OPTIONAL)
+                                )
+                        )
+                )
+        );
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour("neighbour",  new NeighbourCapabilities(
