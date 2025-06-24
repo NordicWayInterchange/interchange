@@ -146,7 +146,9 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
+        CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
+                UUID.randomUUID().toString(),
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -155,10 +157,9 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-        CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
-        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange("exchange");
 
         assertThat(CapabilityMatcher.matchCapabilitiesToSelector(Collections.singleton(capability), selector)).hasSize(1);

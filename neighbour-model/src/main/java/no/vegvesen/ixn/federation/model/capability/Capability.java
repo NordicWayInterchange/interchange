@@ -76,6 +76,13 @@ public class Capability {
         this.shards.addAll(shards);
     }
 
+    public Capability(Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }

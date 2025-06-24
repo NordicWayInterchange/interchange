@@ -348,10 +348,10 @@ public class NapRestControllerTest {
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         Capability capability = new Capability(
+                1,
                 new DatexApplication("NO12345", "NO12345:publicationId", "NO", "protocolVersion", List.of("123"), "Hello", "hello"),
                 new Metadata()
         );
-        capability.setId(1);
         when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(
                 1,
                 actorCommonName,

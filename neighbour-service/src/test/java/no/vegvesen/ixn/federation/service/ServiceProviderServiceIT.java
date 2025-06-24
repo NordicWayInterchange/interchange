@@ -242,15 +242,18 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Test
     public void capabilityIsNotRemovedIfThereAreNoOutgoingMatchesButHasShards(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
 
-        Capability capability = new Capability();
+        Capability capability = new Capability(
+                UUID.randomUUID().toString(),
+                new DenmApplication(),
+                new Metadata(),
+                List.of(new CapabilityShard())
+        );
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        Capabilities capabilities = new Capabilities(new HashSet<>(Set.of(capability)));
-        capability.setShards(List.of(new CapabilityShard()));
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",capabilities);
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 
