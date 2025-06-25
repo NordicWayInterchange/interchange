@@ -76,7 +76,7 @@ export default function Home() {
     const neighbourCapabilitiesCount = neighbourData?.map((item, index) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
     const ourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
-
+    const exchangeBindingCount = exchangeData?.map((item, index) => (item.bindings || [])).reduce((sum, binding) => (sum + binding.length), 0);
 
     const shortcuts = [
         {
@@ -103,8 +103,10 @@ export default function Home() {
         },
         {
             header: 'EXCHANGES',
+            firstSubValueHeader: 'BINDINGS',
             url: "/exchanges",
             count: exchangeData?.length,
+            firstSubValueCount: exchangeBindingCount,
         },
         {
             header: 'QUEUES',
