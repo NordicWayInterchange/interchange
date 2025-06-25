@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalSubscriptionEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedSubscriptionApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
@@ -374,7 +375,7 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions")
-    @Tag(name = "Subscriptions")
+    @Tag(name = "Local subscriptions")
     @Operation(summary = "Get subscription ids for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONIDSRESPONSE)))})
     public List<String> getLocalSubscriptionIdsForEachServiceProvider(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
@@ -390,7 +391,7 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}")
-    @Tag(name = "Subscriptions")
+    @Tag(name = "Local subscriptions")
     @Operation(summary = "Get local subscriptions based on provided local subscription id for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONRESPONSE)))})
     public LocalSubscriptionApi getLocalSubscriptionBasedOnLocalSubscriptionId(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
@@ -424,7 +425,23 @@ public class AdminRestController {
         return qpidService.getLocalSubscriptionEndpointApiList(localSubscription);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}/matches")
+    @Tag(name = "Local subscriptions")
+    @Operation(summary = "Get capabilities match a local subscription for the specified service provider and subscription id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHRESPONSE)))})
+    public CapabilitiesLinkedSubscriptionApi getSubscriptionsExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+        validatePathVariable(actorCommonName);
 
+        logger.info("Log - List capabilities match a subscription with id {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
+        ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+
+        LocalSubscription subscription = serviceProvider.findSubscriptionByUuid(subscriptionId);
+        subscriptionExists(subscriptionId, subscription);
+        List<OutgoingMatch> allByLocalSubscriptionUuid = outgoingMatchRepository.findAllByLocalSubscription_Uuid(subscriptionId);
+        return qpidService.getCapabilitiesLinkedSubscription(subscription, allByLocalSubscriptionUuid);
+    }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(actorCommonName);

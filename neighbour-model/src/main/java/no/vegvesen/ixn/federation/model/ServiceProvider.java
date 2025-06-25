@@ -235,6 +235,14 @@ public class ServiceProvider {
 				.orElse(null);
 	}
 
+	public LocalSubscription findSubscriptionByUuid(String subscriptionUuid) {
+		return subscriptions
+				.stream()
+				.filter(localSubscription -> localSubscription.getUuid().equals(subscriptionUuid))
+				.findFirst()
+				.orElse(null);
+	}
+
 	public Capability getCapability(String capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()

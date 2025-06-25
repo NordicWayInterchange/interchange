@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalSubscriptionEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
+import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedSubscriptionApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalSubscriptionEndpointApi;
@@ -120,6 +121,18 @@ public class QpidService {
             }
         }
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
+    }
+
+    public CapabilitiesLinkedSubscriptionApi getCapabilitiesLinkedSubscription(LocalSubscription subscription, List<OutgoingMatch> matches) {
+        String uuid = subscription.getUuid();
+        List<CapabilityMatchApi> capabilityMatches = new ArrayList<>();
+        for (OutgoingMatch match : matches) {
+            Capability capability = match.getCapability();
+            for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
+              //TODO : capabilityShards
+            }
+        }
+        return new CapabilitiesLinkedSubscriptionApi(uuid,capabilityMatches);
     }
 
     public List<Exchange> getAllExchanges() {

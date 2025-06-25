@@ -17,6 +17,8 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
 
     List<OutgoingMatch> findAllByLocalDelivery_Uuid(String uuid);
 
+    List<OutgoingMatch> findAllByLocalSubscription_Uuid(String uuid);
+
     List<OutgoingMatch> findAllByCapability_Id(Integer id);
 
     OutgoingMatch findAllByCapability_Uuid(String uuid);
