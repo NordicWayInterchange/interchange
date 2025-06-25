@@ -63,20 +63,20 @@ export default function Home() {
     } = useAllApplicationData();
 
     const deliveriesWithMatchingCapability = matchingCapabilities?.some(item => item.matches?.length > 0) ?
-        (matchingCapabilities.map((item, index) => (
+        (matchingCapabilities.map((item) => (
         item.matches
             .filter(match => match.capabilityMatchApi.length > 0)
-            .map((match, matchIndex) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
+            .map((match) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
 
-    const capabilitiesCount = serviceProvidersData?.map((item, index) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.length), 0);
-    const subscriptionsCount = serviceProvidersData?.map((item, index) => (item.subscriptions || [])).reduce((sum, subscriptions) => (sum + subscriptions.length), 0);
-    const deliveriesCount = serviceProvidersData?.map((item, index) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
+    const capabilitiesCount = serviceProvidersData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.length), 0);
+    const subscriptionsCount = serviceProvidersData?.map((item) => (item.subscriptions || [])).reduce((sum, subscriptions) => (sum + subscriptions.length), 0);
+    const deliveriesCount = serviceProvidersData?.map((item) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
+    const privateChannelsCount = serviceProvidersData?.map((item) => (item.privatechannels || [])).reduce((sum, privatechannels) => (sum + privatechannels.length), 0);
 
-
-    const neighbourCapabilitiesCount = neighbourData?.map((item, index) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
-    const ourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
-    const neighbourRequestedSubscriptionsCount = neighbourData?.map((item, index) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
-    const exchangeBindingCount = exchangeData?.map((item, index) => (item.bindings || [])).reduce((sum, binding) => (sum + binding.length), 0);
+    const neighbourCapabilitiesCount = neighbourData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
+    const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
+    const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
+    const exchangeBindingCount = exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0);
 
     const shortcuts = [
         {
@@ -84,11 +84,13 @@ export default function Home() {
             firstSubValueHeader: 'CAPABILITIES',
             secondSubValueHeader: 'SUBSCRIPTIONS',
             thirdSubValueHeader: 'DELIVERIES',
+            fourthSubValueHeader: 'PRIVATE CHANNELS',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
             secondSubValueCount: subscriptionsCount,
             thirdSubValueCount: deliveriesCount,
+            fourthSubValueCount: privateChannelsCount,
         },
         {
             header: 'NEIGHBOURS',
@@ -161,13 +163,13 @@ export default function Home() {
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 300,
+                                        height: 290,
                                         boxShadow: 1
                                     }}
                                 >
-                                    <Box key={key} sx={{ textAlign: 'center', mb: 4 }}>
+                                    <Box key={key} sx={{ textAlign: 'center' }}>
                                         <Box>
-                                            <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{shortcut.header}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.header}</Typography>
                                             <Typography sx={{ fontWeight: 'bold' }} variant="h6">{shortcut.count}</Typography>
                                         </Box>
 
@@ -181,6 +183,10 @@ export default function Home() {
                                                     </Box>
                                                 )
                                             )}
+                                        </Box>
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold' }} >{shortcut.fourthSubValueCount}</Typography>
                                         </Box>
                                     </Box>
                                 </Card>
