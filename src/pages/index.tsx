@@ -87,10 +87,10 @@ export default function Home() {
         {
             icon: <SyncAltIcon />,
             header: 'SERVICE PROVIDERS',
-            firstSubValueHeader: 'CAPABILITIES',
-            secondSubValueHeader: 'SUBSCRIPTIONS',
-            thirdSubValueHeader: 'DELIVERIES',
-            fourthSubValueHeader: 'PRIVATE CHANNELS',
+            firstSubValueHeader: 'Capabiltieis',
+            secondSubValueHeader: 'Subscriptions',
+            thirdSubValueHeader: 'Deliveries',
+            fourthSubValueHeader: 'Private channels',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
@@ -101,9 +101,9 @@ export default function Home() {
         {
             icon: <Groups2Icon />,
             header: 'NEIGHBOURS',
-            firstSubValueHeader: 'NEIGHBOUR CAPABILITIES',
-            secondSubValueHeader: 'OUR SUBSCRIPTIONS',
-            thirdSubValueHeader: 'NEIGHBOUR SUBSCRIPTIONS',
+            firstSubValueHeader: 'Neighbour capabilities',
+            secondSubValueHeader: 'Our subscriptions',
+            thirdSubValueHeader: 'Neighbour subscriptions',
             url: "/neighbours",
             count: neighbourData?.length,
             firstSubValueCount: neighbourCapabilitiesCount,
@@ -113,7 +113,7 @@ export default function Home() {
         {
             icon: <ChangeCircleIcon />,
             header: 'EXCHANGES',
-            firstSubValueHeader: 'BINDINGS',
+            firstSubValueHeader: 'Bindings',
             url: "/exchanges",
             count: exchangeData?.length,
             firstSubValueCount: exchangeBindingCount,
@@ -126,9 +126,10 @@ export default function Home() {
         },
         {
             icon: <EqualizerIcon />,
-            header: 'DELIVERIES WITH MATCHING CAPABILITIES',
+            header: 'GRAPHS',
             url: "/matchingCapabilitiesGraph",
-            count: deliveriesWithMatchingCapability,
+            firstSubValueHeader: 'Deliveries with matching capabilities',
+            firstSubValueCount: deliveriesWithMatchingCapability,
         }
     ];
 
@@ -167,36 +168,36 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 350,
+                                        width: 280,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 290,
+                                        height: 280,
                                         boxShadow: 1
                                     }}
                                 >
-                                    <Box key={key} sx={{ textAlign: 'center' }}>
+                                    <Box key={key} sx={{ textAlign: 'center', mt:5 }}>
                                         <Box>
                                             <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.icon}</Typography>
                                             <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.header}</Typography>
-                                            <Typography sx={{ fontWeight: 'bold' }} variant="h6">{shortcut.count}</Typography>
+                                            <Typography  variant="h6">{shortcut.count}</Typography>
                                         </Box>
 
-                                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1}}>
+                                        <Box sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 5}}>
                                             {[{ header: shortcut.firstSubValueHeader, count: shortcut.firstSubValueCount }, { header: shortcut.secondSubValueHeader, count: shortcut.secondSubValueCount },
                                                 { header: shortcut.thirdSubValueHeader, count: shortcut.thirdSubValueCount }].map(
                                                 (entry, i) => (
                                                     <Box key={i}>
-                                                        <Typography sx={{ fontWeight: 'bold', textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
                                                         <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
                                                     </Box>
                                                 )
                                             )}
                                         </Box>
                                         <Box>
-                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
+                                            <Typography sx={{  textDecoration: "underline"}} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
                                             <Typography sx={{ fontWeight: 'bold' }} >{shortcut.fourthSubValueCount}</Typography>
                                         </Box>
                                     </Box>
