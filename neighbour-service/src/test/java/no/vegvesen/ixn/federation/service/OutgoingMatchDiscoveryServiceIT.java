@@ -189,9 +189,13 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery");
         LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-
-        serviceProvider.setDeliveries(new HashSet<>(Arrays.asList(delivery1, delivery2)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(),
+                Set.of(),
+                Set.of(delivery1,delivery2),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
 
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Collections.singletonList(serviceProvider));

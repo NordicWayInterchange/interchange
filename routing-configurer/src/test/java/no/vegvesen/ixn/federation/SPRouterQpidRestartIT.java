@@ -340,12 +340,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "my-service-provider",
-                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'NO'";
         String deliveryExchangeName = "del-" + UUID.randomUUID();
@@ -356,7 +350,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 deliverySelector,
                 LocalDeliveryStatus.CREATED);
 
-        serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now());
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
@@ -379,23 +378,22 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "my-service-provider",
-                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'SE'";
         String deliveryExchangeName = "del-" + UUID.randomUUID();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
-                new HashSet<>(Collections.singletonList(endpoint)),
+                Set.of(endpoint),
                 deliverySelector,
                 LocalDeliveryStatus.NO_OVERLAP);
 
-        serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now());
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);

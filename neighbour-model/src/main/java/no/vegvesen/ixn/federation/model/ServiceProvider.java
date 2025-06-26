@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
@@ -39,8 +37,7 @@ public class ServiceProvider {
 	public ServiceProvider() {
 	}
 
-	@JsonCreator
-	public ServiceProvider(@JsonProperty("name") String name) {
+	public ServiceProvider(String name) {
 		this.name = name;
 	}
 
@@ -48,6 +45,12 @@ public class ServiceProvider {
 						   Set<LocalSubscription> subscriptions) {
 		this.name = name;
 		this.subscriptions.addAll(subscriptions);
+	}
+
+	public ServiceProvider(String name,
+						   Capabilities capabilities) {
+		this.name = name;
+		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(Integer id,
@@ -71,12 +74,6 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = subscriptionUpdated;
-	}
-
-	public ServiceProvider(String name,
-						   Capabilities capabilities) {
-		this.name = name;
-		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(String name,
