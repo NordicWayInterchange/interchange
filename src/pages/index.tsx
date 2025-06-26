@@ -81,7 +81,7 @@ export default function Home() {
     const neighbourCapabilitiesCount = neighbourData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
     const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
-    const exchangeBindingCount = exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0);
+    const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
 
     const shortcuts = [
         {
