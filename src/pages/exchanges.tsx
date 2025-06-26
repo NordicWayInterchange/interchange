@@ -48,6 +48,7 @@ const Exchanges = () => {
             ...dataGridTemplate,
             field: "id",
             headerName: "ID",
+            flex: 2
         },
         {
             ...dataGridTemplate,
