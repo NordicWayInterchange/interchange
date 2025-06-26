@@ -10,6 +10,11 @@ import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
 import {useFetchQueues} from "@/hooks/useFetchQueues";
 import Loading from "@/components/shared/components/Loading";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import Groups2Icon from "@mui/icons-material/Groups2";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
+import DensitySmallIcon from "@mui/icons-material/DensitySmall";
+import EqualizerIcon from "@mui/icons-material/Equalizer";
 
 function useAllApplicationData() {
     const {data: session} = useSession();
@@ -80,6 +85,7 @@ export default function Home() {
 
     const shortcuts = [
         {
+            icon: <SyncAltIcon />,
             header: 'SERVICE PROVIDERS',
             firstSubValueHeader: 'CAPABILITIES',
             secondSubValueHeader: 'SUBSCRIPTIONS',
@@ -93,6 +99,7 @@ export default function Home() {
             fourthSubValueCount: privateChannelsCount,
         },
         {
+            icon: <Groups2Icon />,
             header: 'NEIGHBOURS',
             firstSubValueHeader: 'NEIGHBOUR CAPABILITIES',
             secondSubValueHeader: 'OUR SUBSCRIPTIONS',
@@ -104,6 +111,7 @@ export default function Home() {
             thirdSubValueCount: neighbourRequestedSubscriptionsCount,
         },
         {
+            icon: <ChangeCircleIcon />,
             header: 'EXCHANGES',
             firstSubValueHeader: 'BINDINGS',
             url: "/exchanges",
@@ -111,11 +119,13 @@ export default function Home() {
             firstSubValueCount: exchangeBindingCount,
         },
         {
+            icon: <DensitySmallIcon />,
             header: 'QUEUES',
             url: "/queues",
             count: queuesData?.length,
         },
         {
+            icon: <EqualizerIcon />,
             header: 'DELIVERIES WITH MATCHING CAPABILITIES',
             url: "/matchingCapabilitiesGraph",
             count: deliveriesWithMatchingCapability,
@@ -169,6 +179,7 @@ export default function Home() {
                                 >
                                     <Box key={key} sx={{ textAlign: 'center' }}>
                                         <Box>
+                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.icon}</Typography>
                                             <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.header}</Typography>
                                             <Typography sx={{ fontWeight: 'bold' }} variant="h6">{shortcut.count}</Typography>
                                         </Box>
@@ -178,14 +189,14 @@ export default function Home() {
                                                 { header: shortcut.thirdSubValueHeader, count: shortcut.thirdSubValueCount }].map(
                                                 (entry, i) => (
                                                     <Box key={i}>
-                                                        <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ fontWeight: 'bold', textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
                                                         <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
                                                     </Box>
                                                 )
                                             )}
                                         </Box>
                                         <Box>
-                                            <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
                                             <Typography sx={{ fontWeight: 'bold' }} >{shortcut.fourthSubValueCount}</Typography>
                                         </Box>
                                     </Box>
