@@ -52,14 +52,14 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Test
     public void subscriptionIsDeleted() {
         String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        SubscriptionRequest subscriptionRequest = new SubscriptionRequest(subscriptions);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptionRequest);
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);
@@ -71,14 +71,14 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Test
     public void subscriptionDeleteWithSubscriptionNotFound() {
         String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        SubscriptionRequest subscriptionRequest = new SubscriptionRequest(subscriptions);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptionRequest);
         neighbourRepository.save(neighbour);
 
         doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
