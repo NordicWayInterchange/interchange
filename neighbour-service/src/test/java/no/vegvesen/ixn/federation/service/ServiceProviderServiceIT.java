@@ -50,11 +50,10 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void redirectEndpointsAreSavedFromNeighbour() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
         LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
 
-        serviceProvider.addLocalSubscription(localSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName,Set.of(localSubscription));
 
         repository.save(serviceProvider);
 

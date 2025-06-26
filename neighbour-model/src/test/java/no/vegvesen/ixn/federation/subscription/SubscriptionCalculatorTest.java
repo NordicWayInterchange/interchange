@@ -48,9 +48,8 @@ public class SubscriptionCalculatorTest {
 
     @Test
     void calculateLastUpdatedSubscriptionOneSub() {
-        ServiceProvider serviceProvider = new ServiceProvider();
         LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'","");
-        serviceProvider.addLocalSubscription(subscription);
+        ServiceProvider serviceProvider = new ServiceProvider("a",Set.of(subscription));
         Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
         assertThat(lastUpdated).isPresent();
         assertThat(SubscriptionCalculator.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated.get());

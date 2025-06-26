@@ -588,13 +588,8 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
 		String consumerCommonName = nodeProperties.getName();
 
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		Set<LocalSubscription> localSubscriptions = Set.of(new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName));
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscriptions.add(subscription);
-
-		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-		serviceProvider.addLocalSubscription(subscription);
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
 				.thenReturn(Set.of(

@@ -42,7 +42,6 @@ public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitial
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),capabilities1);
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
-                //TODO have to generate queue name, as this was SP name before
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                         localActorSubscription.getSelector(),
                        "my-interchange" )); //already have the user from the Service provider
