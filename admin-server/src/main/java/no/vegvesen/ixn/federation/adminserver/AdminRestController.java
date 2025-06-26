@@ -437,10 +437,11 @@ public class AdminRestController {
         logger.info("Log - List capabilities match a subscription with id {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
-        LocalSubscription subscription = serviceProvider.findSubscriptionByUuid(subscriptionId);
+        /*LocalSubscription subscription = serviceProvider.findSubscriptionByUuid(subscriptionId);
         subscriptionExists(subscriptionId, subscription);
         List<OutgoingMatch> allByLocalSubscriptionUuid = outgoingMatchRepository.findAllByLocalSubscription_Uuid(subscriptionId);
-        return qpidService.getCapabilitiesLinkedSubscription(subscription, allByLocalSubscriptionUuid);
+        return qpidService.getCapabilitiesLinkedSubscription(subscription, allByLocalSubscriptionUuid);*/
+        return null;
     }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {
