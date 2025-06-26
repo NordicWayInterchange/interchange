@@ -80,12 +80,12 @@ public class SubscriptionCalculatorTest {
     void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
         LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
         LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
-        ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-        serviceProvider.setSubscriptions(List.of(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
+        ServiceProvider serviceProvider = new ServiceProvider("serviceprovider",Set.of(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
         Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
         assertThat(localSubscriptions).hasSize(1);
     }
 
+    //TODO review this test. It might not be relevant anymore
     @Test
     void serviceProviderGetsNewSubscriptionCreatedUpdatesSelfLastSubscriptionUpdate() {
         String serviceProviderName = "SelfServiceIT-service-provider";
@@ -103,13 +103,9 @@ public class SubscriptionCalculatorTest {
         Optional<LocalDateTime> subscriptionUpdatedRequestedSaved = serviceProviderBefore.getSubscriptionUpdated();
         assertThat(subscriptionUpdatedRequestedSaved).isNotNull().isEqualTo(subscriptionUpdatedRequested);
 
-        List<LocalSubscription> subscriptions = serviceProviderBefore.getSubscriptions();
-        LocalSubscription requestedSubscription = subscriptions.iterator().next();
-        LocalSubscription createdSubscription = requestedSubscription.withStatus(LocalSubscriptionStatus.CREATED);
-        subscriptions.remove(requestedSubscription);
-        subscriptions.add(createdSubscription);
-        serviceProviderBefore.updateSubscriptions(subscriptions);
-
+        serviceProviderBefore.getSubscriptions().forEach(subscription -> {
+            subscription.setStatus(LocalSubscriptionStatus.CREATED);
+        });
 
         assertThat(serviceProviderBefore.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(subscriptionUpdatedRequested.get()));
 

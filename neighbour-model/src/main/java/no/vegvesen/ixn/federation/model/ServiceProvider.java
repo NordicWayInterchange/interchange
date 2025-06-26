@@ -131,6 +131,7 @@ public class ServiceProvider {
 
 	public void setSubscriptions(List<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
+		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	public Optional<LocalDateTime> getSubscriptionUpdated() {
@@ -158,11 +159,6 @@ public class ServiceProvider {
 						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
 				);
 		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-		this.subscriptionUpdated = LocalDateTime.now();
-	}
-
-	public void updateSubscriptions(List<LocalSubscription> newSubscriptions) {
-		this.setSubscriptions(newSubscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
@@ -248,13 +244,6 @@ public class ServiceProvider {
 				.filter(c->c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
-	}
-
-	public List<LocalSubscription> getSavedSubscriptions(List<LocalSubscription> allSubscriptions){
-		return this.getSubscriptions()
-				.stream()
-				.filter(allSubscriptions::contains)
-				.collect(Collectors.toList());
 	}
 
 	public LocalSubscription getSubscription(String subscriptionId){
