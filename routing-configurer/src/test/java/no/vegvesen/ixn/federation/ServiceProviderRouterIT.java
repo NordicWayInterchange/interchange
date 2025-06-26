@@ -499,9 +499,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
-		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String source = "king_gustaf_source";
-		king_gustaf.addLocalSubscription(new LocalSubscription(
+		LocalSubscription subscription = new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
@@ -513,7 +512,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 								qpidContainer.getAmqpsPort()
 						)
 				)
-		));
+		);
 
 		Capability capability = new Capability(
 				new DatexApplication(
@@ -532,7 +531,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(capability
 				)
 		);
-		king_gustaf.setCapabilities(capabilities);
 		String deliverySelector = "messageType = 'DATEX2'";
 		LocalDelivery localDelivery = new LocalDelivery(
 				1,
@@ -545,7 +543,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				qpidContainer.getAmqpsPort(),
 				exchangeName
 		));
-		king_gustaf.addDeliveries(Collections.singleton(localDelivery));
+		ServiceProvider king_gustaf = new ServiceProvider(
+				"king_gustaf",
+				capabilities,
+				Set.of(subscription),
+				Set.of(localDelivery),
+				LocalDateTime.now()
+		);
 
 		OutgoingMatch outgoingMatch = new OutgoingMatch(
 				localDelivery,
@@ -620,24 +624,22 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
-		serviceProvider.setCapabilities(new Capabilities(new HashSet<>()));
+		serviceProvider.setCapabilities(new Capabilities());
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
 	}
 
 	@Test
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
@@ -647,7 +649,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
@@ -662,7 +664,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonShardedCapabilityIsSetUp() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
@@ -671,7 +672,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
@@ -712,16 +713,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
-		serviceProvider.setCapabilities(new Capabilities(new HashSet<>()));
+		serviceProvider.setCapabilities(new Capabilities());
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
@@ -1105,8 +1105,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionConnectsToCapabilityExchange() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-1", "my-interchange", 5671);
@@ -1129,8 +1127,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex8");
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+		Capabilities capabilities = new Capabilities(Collections.singleton(denmCapability));
+		ServiceProvider otherSP = new ServiceProvider("other-sp",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
@@ -1143,8 +1142,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionConnectsToCapabilityWithMultipleShards() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-2", "my-interchange", 5671);
@@ -1177,8 +1174,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+		Capabilities capabilities = new Capabilities(Collections.singleton(denmCapability));
+		ServiceProvider otherSP = new ServiceProvider("other-sp",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
@@ -1192,8 +1190,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void connectionGetsRemovedWhenCapabilityIsRemoved(){
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-3", "my-interchange", 5671);
@@ -1217,8 +1213,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+        ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Collections.singleton(denmCapability)));
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
@@ -1239,8 +1235,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionKeepsConnectionToOneCapabilityAndTearsDownAnother() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-4", "my-interchange", 5671);
@@ -1281,8 +1275,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(denmCapability1, denmCapability2))));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+        ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Set.of(denmCapability1, denmCapability2)));
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
