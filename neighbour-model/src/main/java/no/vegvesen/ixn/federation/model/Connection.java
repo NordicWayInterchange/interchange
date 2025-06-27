@@ -74,6 +74,12 @@ public class Connection {
         this.backoffStart = null;
     }
 
+    public void unreachable() {
+        setConnectionStatus(ConnectionStatus.UNREACHABLE);
+        this.backoffAttempts = 0;
+        this.backoffStart = null;
+    }
+
     // Calculates next possible post attempt time, using exponential backoff
     LocalDateTime getNextPostAttemptTime(GracefulBackoffProperties backoffProperties) {
 
