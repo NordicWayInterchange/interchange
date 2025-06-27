@@ -94,6 +94,7 @@ jobs:
           cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
           cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
           cp /home/runner/work/interchange/interchange/napcore-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-napcore
+          cp /home/runner/work/interchange/interchange/admin-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-admin
           cd interchange-swagger-docs
           git add --all
           git commit --allow-empty -m "Updated swagger.json"
@@ -159,6 +160,6 @@ jobs:
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
 
       - name: Push docker image to Github container registry
-        run: | 
+        run: |
           docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}

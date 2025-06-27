@@ -60,7 +60,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - ADMIN_NAME=admin.bouvetinterchange.eu
+      - ADMIN_NAME=admin.a.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -104,13 +104,16 @@ services:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
-      - NAP_NAME=nap.bouvetinterchange.eu
+      - NAP_NAME=nap.a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - SIGN_STORE=/jks/keys/ca.a.bouvetinterchange.eu.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -287,7 +290,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - ADMIN_NAME=admin.bouvetinterchange.eu
+      - ADMIN_NAME=admin.b.bouvetinterchange.eu
     networks:
       - testing_net
 

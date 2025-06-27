@@ -1,22 +1,21 @@
 package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
-import java.time.LocalDateTime;
 
 public class ConnectionApi {
 
     private Integer id;
 
-    private LocalDateTime backoffStart;
+    private Long backoffStart;
 
     private int backoffAttempts = 0;
 
     private ConnectionStatusApi connectionStatus;
 
-    private LocalDateTime unreachableTime;
+    private Long unreachableTime;
 
-    private LocalDateTime lastFailedConnectionAttempt;
+    private Long lastFailedConnectionAttempt;
 
-    public ConnectionApi(Integer id, LocalDateTime backoffStart, int backoffAttempts, ConnectionStatusApi connectionStatus, LocalDateTime unreachableTime, LocalDateTime lastFailedConnectionAttempt) {
+    public ConnectionApi(Integer id, Long backoffStart, int backoffAttempts, ConnectionStatusApi connectionStatus, Long unreachableTime, Long lastFailedConnectionAttempt) {
         this.id = id;
         this.backoffStart = backoffStart;
         this.backoffAttempts = backoffAttempts;
@@ -33,11 +32,11 @@ public class ConnectionApi {
         this.id = id;
     }
 
-    public LocalDateTime getBackoffStart() {
+    public Long getBackoffStart() {
         return backoffStart;
     }
 
-    public void setBackoffStart(LocalDateTime backoffStart) {
+    public void setBackoffStart(Long backoffStart) {
         this.backoffStart = backoffStart;
     }
 
@@ -57,19 +56,19 @@ public class ConnectionApi {
         this.connectionStatus = connectionStatus;
     }
 
-    public LocalDateTime getUnreachableTime() {
+    public Long getUnreachableTime() {
         return unreachableTime;
     }
 
-    public void setUnreachableTime(LocalDateTime unreachableTime) {
+    public void setUnreachableTime(Long unreachableTime) {
         this.unreachableTime = unreachableTime;
     }
 
-    public LocalDateTime getLastFailedConnectionAttempt() {
+    public Long getLastFailedConnectionAttempt() {
         return lastFailedConnectionAttempt;
     }
 
-    public void setLastFailedConnectionAttempt(LocalDateTime lastFailedConnectionAttempt) {
+    public void setLastFailedConnectionAttempt(Long lastFailedConnectionAttempt) {
         this.lastFailedConnectionAttempt = lastFailedConnectionAttempt;
     }
 
