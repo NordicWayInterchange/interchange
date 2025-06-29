@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import HouseIcon from "@mui/icons-material/House";
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import DensitySmallIcon from '@mui/icons-material/DensitySmall';
 
 const drawerWidth = 145;
 
@@ -40,6 +41,11 @@ const SIDE_PAGES: Array<IPages> = [
         text: "Exchanges",
         url: "/exchanges",
         icon: <ChangeCircleIcon />
+    },
+    {
+        text: "Queues",
+        url: "/queues",
+        icon: <DensitySmallIcon />
     },
     {
         text: "Graph Dashboard",

@@ -8,55 +8,140 @@ import Subheading from "@/components/shared/typography/Subheading";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import {useFetchMatchingCapabilities} from "@/hooks/useFetchMatchingCapabilities";
+import {useFetchQueues} from "@/hooks/useFetchQueues";
+import Loading from "@/components/shared/components/Loading";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import Groups2Icon from "@mui/icons-material/Groups2";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
+import DensitySmallIcon from "@mui/icons-material/DensitySmall";
+import AutoGraphIcon from "@mui/icons-material/AutoGraph";
+
+function useAllApplicationData() {
+    const {data: session} = useSession();
+    const {data: neighbourData, isLoading: isLoadingNeighbour} = useFetchNeighbours(
+        session?.user.commonName as string
+    );
+
+    const {data: serviceProvidersData, isLoading: isLoadingServiceProvider} = useFetchServiceProviders(
+        session?.user.commonName as string
+    );
+
+    const {data: exchangeData, isLoading: isLoadingExchange} = useFetchExchanges(
+        session?.user.commonName as string
+    );
+
+    const {data: matchingCapabilities, isLoading: isLoadingMatchingCapabilities} = useFetchMatchingCapabilities(
+        session?.user.commonName as string
+    );
+
+    const {data: queuesData, isLoading: isLoadingQueues} = useFetchQueues(
+        session?.user.commonName as string
+    );
+    return {
+        session,
+        neighbourData,
+        isLoadingNeighbour,
+        serviceProvidersData,
+        isLoadingServiceProvider,
+        exchangeData,
+        isLoadingExchange,
+        matchingCapabilities,
+        isLoadingMatchingCapabilities,
+        queuesData,
+        isLoadingQueues
+    };
+}
 
 export default function Home() {
-    const {data: session} = useSession();
-    const {data: neighbourData} = useFetchNeighbours(
-        session?.user.commonName as string
-    );
-
-    const {data: serviceProvidersData} = useFetchServiceProviders(
-        session?.user.commonName as string
-    );
-
-    const {data: exchangeData} = useFetchExchanges(
-        session?.user.commonName as string
-    );
-
-    const { data: matchingCapabilities } = useFetchMatchingCapabilities(
-        session?.user.commonName as string
-    );
+    const {
+        session,
+        neighbourData,
+        isLoadingNeighbour,
+        serviceProvidersData,
+        isLoadingServiceProvider,
+        exchangeData,
+        isLoadingExchange,
+        matchingCapabilities,
+        isLoadingMatchingCapabilities,
+        queuesData,
+        isLoadingQueues
+    } = useAllApplicationData();
 
     const deliveriesWithMatchingCapability = matchingCapabilities?.some(item => item.matches?.length > 0) ?
-        (matchingCapabilities.map((item, index) => (
+        (matchingCapabilities.map((item) => (
         item.matches
             .filter(match => match.capabilityMatchApi.length > 0)
-            .map((match, matchIndex) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
+            .map((match) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
 
+    const capabilitiesCount = serviceProvidersData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.length), 0);
+    const subscriptionsCount = serviceProvidersData?.map((item) => (item.subscriptions || [])).reduce((sum, subscriptions) => (sum + subscriptions.length), 0);
+    const deliveriesCount = serviceProvidersData?.map((item) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
+    const privateChannelsCount = serviceProvidersData?.map((item) => (item.privatechannels || [])).reduce((sum, privatechannels) => (sum + privatechannels.length), 0);
+
+    const neighbourCapabilitiesCount = neighbourData?.reduce((sum, item) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const innerArray = item?.capabilities?.capabilities;
+        return sum + (Array.isArray(innerArray) ? innerArray.length : 0);
+    }, 0) ?? 0;
+
+    const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
+    const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
+    const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
 
     const shortcuts = [
         {
+            icon: <SyncAltIcon />,
             header: 'SERVICE PROVIDERS',
+            firstSubValueHeader: 'Capabiltieis',
+            secondSubValueHeader: 'Subscriptions',
+            thirdSubValueHeader: 'Deliveries',
+            fourthSubValueHeader: 'Private channels',
             url: "/serviceProviders",
-            count: serviceProvidersData?.length
+            count: serviceProvidersData?.length,
+            firstSubValueCount: capabilitiesCount,
+            secondSubValueCount: subscriptionsCount,
+            thirdSubValueCount: deliveriesCount,
+            fourthSubValueCount: privateChannelsCount,
         },
         {
+            icon: <Groups2Icon />,
             header: 'NEIGHBOURS',
+            firstSubValueHeader: 'Neighbour capabilities',
+            secondSubValueHeader: 'Our subscriptions',
+            thirdSubValueHeader: 'Neighbour subscriptions',
             url: "/neighbours",
             count: neighbourData?.length,
+            firstSubValueCount: neighbourCapabilitiesCount,
+            secondSubValueCount: ourRequestedSubscriptionsCount,
+            thirdSubValueCount: neighbourRequestedSubscriptionsCount,
         },
         {
+            icon: <ChangeCircleIcon />,
             header: 'EXCHANGES',
+            firstSubValueHeader: 'Bindings',
             url: "/exchanges",
             count: exchangeData?.length,
+            firstSubValueCount: exchangeBindingCount,
         },
         {
-            header: 'DELIVERIES WITH MATCHING CAPABILITIES',
+            icon: <DensitySmallIcon />,
+            header: 'QUEUES',
+            url: "/queues",
+            count: queuesData?.length,
+        },
+        {
+            icon: <AutoGraphIcon />,
+            header: 'GRAPHS',
             url: "/matchingCapabilitiesGraph",
-            count: deliveriesWithMatchingCapability,
+            firstSubValueHeader: 'Deliveries with matching capabilities',
+            firstSubValueCount: deliveriesWithMatchingCapability,
         }
     ];
 
+    if (isLoadingNeighbour || isLoadingServiceProvider || isLoadingNeighbour || isLoadingExchange || isLoadingMatchingCapabilities || isLoadingQueues ) {
+        return <Loading text="Dashboard"/>
+    }
     return (
         <>
             <Box flex={1}>
@@ -89,20 +174,38 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 170,
+                                        width: 280,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 150,
+                                        height: 280,
                                         boxShadow: 1
                                     }}
                                 >
-                                    <Box>
-                                        <Typography sx={{fontWeight: 500, textAlign: 'center'}}>
-                                            {shortcut.count}<br />{shortcut.header}
-                                        </Typography>
+                                    <Box key={key} sx={{ textAlign: 'center', mt:5 }}>
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.icon}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold', textDecoration: "underline"}} variant="subtitle1">{shortcut.header}</Typography>
+                                            <Typography  variant="h6">{shortcut.count}</Typography>
+                                        </Box>
+
+                                        <Box sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 5}}>
+                                            {[{ header: shortcut.firstSubValueHeader, count: shortcut.firstSubValueCount }, { header: shortcut.secondSubValueHeader, count: shortcut.secondSubValueCount },
+                                                { header: shortcut.thirdSubValueHeader, count: shortcut.thirdSubValueCount }].map(
+                                                (entry, i) => (
+                                                    <Box key={i}>
+                                                        <Typography sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
+                                                    </Box>
+                                                )
+                                            )}
+                                        </Box>
+                                        <Box>
+                                            <Typography sx={{  textDecoration: "underline"}} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
+                                            <Typography sx={{ fontWeight: 'bold' }} >{shortcut.fourthSubValueCount}</Typography>
+                                        </Box>
                                     </Box>
                                 </Card>
                             </Link>

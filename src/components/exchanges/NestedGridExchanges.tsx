@@ -73,6 +73,8 @@ const NestedGridExchanges: React.FC<Props> = ({
                 transition={{duration: 0.3, ease: "easeInOut"}}
                 style={{padding: "5px", borderRadius: "8px"}}
             >
+
+                <Divider style={{ margin: '20px 0', visibility: 'hidden' }}/>
                 <Mainheading>Bindings</Mainheading>
                 <Subheading>
                     These are all of bindings for exchange with id:
