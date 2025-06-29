@@ -78,7 +78,13 @@ export default function Home() {
     const deliveriesCount = serviceProvidersData?.map((item) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
     const privateChannelsCount = serviceProvidersData?.map((item) => (item.privatechannels || [])).reduce((sum, privatechannels) => (sum + privatechannels.length), 0);
 
-    const neighbourCapabilitiesCount = neighbourData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.capabilities.length), 0);
+    const neighbourCapabilitiesCount = neighbourData?.reduce((sum, item) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const innerArray = item?.capabilities?.capabilities;
+        return sum + (Array.isArray(innerArray) ? innerArray.length : 0);
+    }, 0) ?? 0;
+
     const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
     const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
