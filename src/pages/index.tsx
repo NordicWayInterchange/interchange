@@ -14,7 +14,7 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import Groups2Icon from "@mui/icons-material/Groups2";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import DensitySmallIcon from "@mui/icons-material/DensitySmall";
-import EqualizerIcon from "@mui/icons-material/Equalizer";
+import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 
 function useAllApplicationData() {
     const {data: session} = useSession();
@@ -125,7 +125,7 @@ export default function Home() {
             count: queuesData?.length,
         },
         {
-            icon: <EqualizerIcon />,
+            icon: <AutoGraphIcon />,
             header: 'GRAPHS',
             url: "/matchingCapabilitiesGraph",
             firstSubValueHeader: 'Deliveries with matching capabilities',
