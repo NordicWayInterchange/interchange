@@ -6,8 +6,8 @@ export type ServiceProviders = {
     subscriptions: Array<ServiceProviderSubscriptions>;
     capabilities: Array<ServiceProviderCapabilities>;
     deliveries: Array<ServiceProviderDeliveries>;
-    privateChannels: Array<ServiceProviderPrivatechannels>;
-    privateChannelsPeer: Array<ServiceProviderPrivatechannelsPeer>;
+    privateChannels: Array<ServiceProviderPrivateChannels>;
+    privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer>;
 };
 
 export type ServiceProviderSubscriptions = {
@@ -95,7 +95,7 @@ export type ServiceProviderPrivatechannels = {
     lastUpdated: number;
 };
 
-export type ServiceProviderPrivatechannelsPeer = {
+export type ServiceProviderPrivateChannelsPeer = {
     id: string;
     peers: Array<string>;
     status: PrivateChannelStatus;
