@@ -7,6 +7,7 @@ export type ServiceProviders = {
     capabilities: Array<ServiceProviderCapabilities>;
     deliveries: Array<ServiceProviderDeliveries>;
     privateChannels: Array<ServiceProviderPrivateChannels>;
+    privateChannelsPeers: Array<ServiceProviderPrivateChannelsPeers>;
 };
 
 export type ServiceProviderSubscriptions = {
@@ -86,6 +87,15 @@ export type Connection = {
 };
 
 export type ServiceProviderPrivateChannels = {
+    id: string;
+    peers: Array<string>;
+    status: PrivateChannelStatus;
+    description: string;
+    endpoint: EndPoint;
+    lastUpdated: number;
+};
+
+export type ServiceProviderPrivateChannelsPeers = {
     id: string;
     peers: Array<string>;
     status: PrivateChannelStatus;

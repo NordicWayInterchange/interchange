@@ -13,12 +13,12 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders, fetchAdminUIAllQueues
+    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeers
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
-import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeers} from "@/types/serviceProviders";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
@@ -58,6 +58,12 @@ const fetchPrivateChannels = async (params: extendedGetParams) => {
     const res = await fetchAdminUIPrivateChannels(params);
     const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
     return [res.status, privateChannels];
+};
+
+const fetchPrivateChannelsPeers = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIPrivateChannelsPeers(params);
+    const privateChannelsPeers: Array<ServiceProviderPrivateChannelsPeers> = await res.data;
+    return [res.status, privateChannelsPeers];
 };
 
 const fetchDeliveryIds = async (params: extendedGetParams) => {
@@ -129,6 +135,7 @@ const getPaths: {
     exchanges: fetchAllExchanges,
     queues: fetchAllQueues,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
+    "/serviceproviders/[serviceProviderName]/privatechannels/peer": fetchPrivateChannelsPeers,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,

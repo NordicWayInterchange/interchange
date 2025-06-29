@@ -66,6 +66,11 @@ export const fetchAdminUIPrivateChannels: extendedGetFunction = async (params) =
     return await fetchIXN(adminUser, `/serviceproviders/${serviceProviderName}/privatechannels`);
 };
 
+export const fetchAdminUIPrivateChannelsPeers: extendedGetFunction = async (params) => {
+    const { actorCommonName, serviceProviderName} = params;
+    return await fetchIXN(actorCommonName, `/serviceproviders/${serviceProviderName}/privatechannels/peer`);
+};
+
 export const fetchAdminUIDeliveryIds: extendedGetFunction = async (params) => {
     const { adminUser, serviceProviderName} = params;
     return await fetchIXN(adminUser, `/serviceproviders/${serviceProviderName}/deliveries`);
