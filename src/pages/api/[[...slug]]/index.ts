@@ -13,12 +13,12 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeers
+    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeer
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
-import {ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeers} from "@/types/serviceProviders";
+import {ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeer} from "@/types/serviceProviders";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
@@ -60,10 +60,10 @@ const fetchPrivateChannels = async (params: extendedGetParams) => {
     return [res.status, privateChannels];
 };
 
-const fetchPrivateChannelsPeers = async (params: extendedGetParams) => {
-    const res = await fetchAdminUIPrivateChannelsPeers(params);
-    const privateChannelsPeers: Array<ServiceProviderPrivateChannelsPeers> = await res.data;
-    return [res.status, privateChannelsPeers];
+const fetchPrivateChannelsPeer = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIPrivateChannelsPeer(params);
+    const privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer> = await res.data;
+    return [res.status, privateChannelsPeer];
 };
 
 const fetchDeliveryIds = async (params: extendedGetParams) => {
@@ -135,7 +135,7 @@ const getPaths: {
     exchanges: fetchAllExchanges,
     queues: fetchAllQueues,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
-    "/serviceproviders/[serviceProviderName]/privatechannels/peer": fetchPrivateChannelsPeers,
+    "/serviceproviders/[serviceProviderName]/privatechannels/peer": fetchPrivateChannelsPeer,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,

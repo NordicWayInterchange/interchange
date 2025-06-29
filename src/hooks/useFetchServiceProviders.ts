@@ -3,7 +3,7 @@ import {
     ServiceProviderCapabilities,
     ServiceProviderDeliveries,
     ServiceProviderPrivateChannels,
-    ServiceProviderPrivateChannelsPeers,
+    ServiceProviderPrivateChannelsPeer,
     ServiceProviders,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
@@ -17,7 +17,7 @@ const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
     capabilities: Array<ServiceProviderCapabilities>;
     deliveries: Array<ServiceProviderDeliveries>;
     privateChannels: Array<ServiceProviderPrivateChannels>;
-    privateChannelsPeers: Array<ServiceProviderPrivateChannelsPeers>;
+    privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer>;
     privatechannels: any
 } | {
     id: number;
@@ -26,32 +26,49 @@ const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
     capabilities: Array<ServiceProviderCapabilities>;
     deliveries: Array<ServiceProviderDeliveries>;
     privateChannels: Array<ServiceProviderPrivateChannels>;
-    privateChannelsPeers: Array<ServiceProviderPrivateChannelsPeers>;
+    privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer>;
     privatechannels: number
 }>[]> = async (commonName: string) => {
     const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         const serviceProviders: ServiceProviders[] = await res.json();
         const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
-            const fetchServiceProviderPrivateChannels = await fetch(
-                `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
-            );
-            const fetchServiceProviderPrivateChannelsPeers = await fetch(
-                `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels/peer`
-            );
-            if (fetchServiceProviderPrivateChannelsPeers.ok) {
-                const peersData = await fetchServiceProviderPrivateChannelsPeers.json();
-                return { ...serviceProvider, privatechannelsPeers: peersData };
-            }
-            if (fetchServiceProviderPrivateChannels.ok) {
-                const privateChannelsData = await fetchServiceProviderPrivateChannels.json();
-                return { ...serviceProvider, privatechannels: privateChannelsData };
-            } else {
-                console.error(
-                    `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannels.status} - ${fetchServiceProviderPrivateChannels.statusText}`
-                );
-                return {...serviceProvider, privatechannels: 0 };
-            }
+            let fetchServiceProviderPrivateChannels = null;
+            let fetchServiceProviderPrivateChannelsPeer = null;
+            let privateChannelsData = null;
+            let peersData = null;
+            try {
+                fetchServiceProviderPrivateChannels = await fetch(
+                   `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
+               );
+                if (fetchServiceProviderPrivateChannels.ok) {
+                     privateChannelsData = await fetchServiceProviderPrivateChannels.json();
+                }
+           } catch (err) {
+               console.error(
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannels?.status} - ${fetchServiceProviderPrivateChannels?.statusText}`
+               );
+               return {...serviceProvider, privatechannels: 0 };
+           }
+
+           try {
+               fetchServiceProviderPrivateChannelsPeer = await fetch(
+                   `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels/peer`
+               );
+               if (fetchServiceProviderPrivateChannelsPeer.ok) {
+                    peersData = await fetchServiceProviderPrivateChannelsPeer.json();
+               }
+           } catch (err) {
+               console.error(
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannelsPeer?.status} - ${fetchServiceProviderPrivateChannelsPeer?.statusText}`
+               );
+               return {...serviceProvider, privatechannelsPeer: 0 };
+           }
+            return {
+                ...serviceProvider,
+                privateChannels: privateChannelsData ?? [],
+                privateChannelsPeer: peersData ?? [],
+            };
         }));
         return Promise.all(seasonedServiceProviders);
     } else {
