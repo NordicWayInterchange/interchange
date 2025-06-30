@@ -66,8 +66,8 @@ const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
            }
             return {
                 ...serviceProvider,
-                privateChannels: privateChannelsData ?? [],
-                privateChannelsPeer: peersData ?? [],
+                privatechannels: privateChannelsData ?? [],
+                privatechannelsPeer: peersData ?? [],
             };
         }));
         return Promise.all(seasonedServiceProviders);
