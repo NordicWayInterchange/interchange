@@ -24,14 +24,14 @@ export default function DataGrid(props: Props) {
                 initialState={{
                     pagination: {
                         paginationModel: {
-                            pageSize: 10,
+                            pageSize: 5,
                         },
                     },
                     sorting: {
                         sortModel: [sort],
                     },
                 }}
-                pageSizeOptions={[10, 25, 50]}
+                pageSizeOptions={[5, 10, 20]}
             />
         </Box>
     );

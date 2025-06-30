@@ -3,6 +3,7 @@ name: Docker Image CI
 permissions:
   contents: read
   id-token: write
+  packages: write
 
 on:
   push:
@@ -26,11 +27,11 @@ jobs:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Login to Github container registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v3.4.0
         with:
           registry: ghcr.io
-          username: "Github Actions"
-          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create tag
         run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"

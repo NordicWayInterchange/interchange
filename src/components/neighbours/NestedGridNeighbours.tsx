@@ -1,5 +1,5 @@
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Chip} from "@/components/shared/Chip";
+import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
 import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
@@ -12,7 +12,7 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {timeConverter} from "@/lib/timeConverter";
 import {GridColDef} from "@mui/x-data-grid";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
 
 type Props = {
     row: any;
@@ -36,7 +36,15 @@ function extractedSubscriptionAttributes(subscription: any) {
     };
 }
 
-const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbourRow, handleMoreClose, handleOnRowClick, isFlashing}: Props) => {
+const NestedGridNeighbours: React.FC<Props> = ({
+                                                   row,
+                                                   field,
+                                                   drawerOpen,
+                                                   neighbourRow,
+                                                   handleMoreClose,
+                                                   handleOnRowClick,
+                                                   isFlashing
+                                               }: Props) => {
 
     const nestedTableTitle: { [key: string]: string } = {
         capabilities: "Capabilities",
@@ -130,27 +138,29 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
                     These are all of Capabilities with last capability exchange
                     <Chip
                         label={timeConverter(row.capabilities.lastCapabilityExchange)}
-                        sx={{ backgroundColor: "#ffbf7d", color: "black" }}
+                        sx={{backgroundColor: "#ffbf7d", color: "black"}}
                     />
                     . You can click a row to view more information.
                 </Box>
-        );
+            );
         } else return `These are all of ${heading}. You can click a row to view more information.`;
     }
 
     return (
         <Box flex={1}>
-            <Mainheading>{heading}</Mainheading>
-            <Subheading>
-                {getSubheading()}
-            </Subheading>
-            <Divider sx={{marginY: 3}}/>
-            <Box sx={{height: 450, width: "100%"}}>
-                <motion.div
-                    animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
-                    transition={{duration: 0.3, ease: "easeInOut"}}
-                    style={{padding: "5px", borderRadius: "8px"}}
-                >
+            <motion.div
+                animate={{backgroundColor: isFlashing ? "#ffdbb0" : "#f0f1f1"}}
+                transition={{duration: 0.3, ease: "easeInOut"}}
+                style={{padding: "5px", borderRadius: "8px"}}
+            >
+                <Divider style={{ margin: '20px 0', visibility: 'hidden' }}/>
+                <Mainheading>{heading}</Mainheading>
+                <Subheading>
+                    {getSubheading()}
+                </Subheading>
+                <Divider sx={{marginY: 3}}/>
+                <Box sx={{height: 450, width: "100%"}}>
+
                     {heading === 'Capabilities' && (
                         <DataGrid
                             rows={nestedData}
@@ -175,8 +185,7 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
                             }}
                         />
                     )}
-                </motion.div>
-                {neighbourRow && heading === 'Capabilities' && (
+                    {neighbourRow && heading === 'Capabilities' && (
                         <CapabilityDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
@@ -187,13 +196,14 @@ const NestedGridNeighbours : React.FC<Props> = ({row, field, drawerOpen, neighbo
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={neighbourRow as Subscription}
+                            commonAttributes={neighbourRow as Subscription}
                             heading={heading}
                         />
                     )}
-            </Box>
+                </Box>
+            </motion.div>
 
         </Box>
-);
+    );
 }
 export default NestedGridNeighbours;

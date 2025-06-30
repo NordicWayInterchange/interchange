@@ -15,6 +15,9 @@ import {IPages} from "@/interfaces/IPages";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import HouseIcon from "@mui/icons-material/House";
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import DensitySmallIcon from '@mui/icons-material/DensitySmall';
 
 const drawerWidth = 145;
 
@@ -33,6 +36,21 @@ const SIDE_PAGES: Array<IPages> = [
         text: "Neighbours",
         url: "/neighbours",
         icon: <Groups2Icon />
+    },
+    {
+        text: "Exchanges",
+        url: "/exchanges",
+        icon: <ChangeCircleIcon />
+    },
+    {
+        text: "Queues",
+        url: "/queues",
+        icon: <DensitySmallIcon />
+    },
+    {
+        text: "Graph Dashboard",
+        url: "/matchingCapabilitiesGraph",
+        icon: <AutoGraphIcon />
     },
 ];
 
@@ -64,13 +82,13 @@ const VerticalSideMenu: React.FC = () => {
                         '&:hover': {
                             backgroundColor: 'menuHoverColor',
                             border: "1px solid",
-                            borderColor: "menuHoverColor",
+                            borderColor: "menuBorderColor",
                         },
                     }}
                     disablePadding
                 >
 
-                <ListItemIcon sx={{ justifyContent: 'center', marginTop: 1}}>{page.icon}</ListItemIcon>
+                <ListItemIcon sx={{ justifyContent: 'center', marginTop: 1, color: "inherit"}}>{page.icon}</ListItemIcon>
                 <ListItemText  sx={{
                     textAlign: 'center',
                     marginTop: 1,

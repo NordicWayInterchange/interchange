@@ -2,8 +2,8 @@ import Box from "@mui/material/Box";
 import React, { ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { CircularProgress, CssBaseline, Toolbar } from "@mui/material";
-import VerticalSideMenu from "@/components/shared/VerticalSideMenu";
-import Header from "@/components/shared/Header";
+import VerticalSideMenu from "@/components/shared/components/VerticalSideMenu";
+import Header from "@/components/shared/components/Header";
 
 type LayoutProps = {
     children: ReactNode;

@@ -2,10 +2,26 @@ import logger from "@/lib/logger";
 import {NextApiRequest, NextApiResponse} from "next";
 import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
-import {fetchAdminUINeighbours, fetchAdminUIServiceProviders} from "@/lib/fetchers/interchangeConnector";
+import {
+    fetchAdminUIDeliveryEndpoints,
+    fetchAdminUIDeliveryIds, fetchAdminUIDeliveryInfo,
+    fetchAdminUIAllExchanges,
+    fetchAdminUIExchangeValidator,
+    fetchAdminUIMatchingCapabilities,
+    fetchAdminUIMatchingCapabilityDetails,
+    fetchAdminUIMatchingCapabilityShardDetails,
+    fetchAdminUINeighbours,
+    fetchAdminUIPrivateChannels,
+    fetchAdminUIQueueValidator,
+    fetchAdminUIServiceProviders, fetchAdminUIAllQueues
+} from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
+import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
+import {queues} from "@/types/queues";
+import {Exchanges} from "@/types/exchanges";
 
 interface CustomSession extends Session {
     user: {
@@ -26,14 +42,80 @@ const fetchServiceProviders = async (params: basicGetParams) => {
     return [res.status, serviceProviders];
 };
 
+const fetchAllExchanges = async (params: basicGetParams) => {
+    const res = await fetchAdminUIAllExchanges(params);
+    const exchanges: Array<Exchanges> = await res.data;
+    return [res.status, exchanges];
+};
+
+const fetchAllQueues = async (params: basicGetParams) => {
+    const res = await fetchAdminUIAllQueues(params);
+    const queues: Array<queues> = await res.data;
+    return [res.status, queues];
+};
+
+const fetchPrivateChannels = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIPrivateChannels(params);
+    const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
+    return [res.status, privateChannels];
+};
+
+const fetchDeliveryIds = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIDeliveryIds(params);
+    const deliveryIds: Array<string> = await res.data;
+    return [res.status, deliveryIds];
+};
+
+const fetchDeliveryInfo = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIDeliveryInfo(params);
+    const deliveryDetails: Array<Delivery> = await res.data;
+    return [res.status, deliveryDetails];
+};
+
+const fetchMatchingCapabilitiesForDeliveries = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIMatchingCapabilities(params);
+    const matchingCapabilities: Array<GraphSectionProps> = await res.data;
+    return [res.status, matchingCapabilities];
+};
+
+const fetchMatchingDeliveryEndpoints = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIDeliveryEndpoints(params);
+    const deliveryEndpoints: Array<GraphSectionProps> = await res.data;
+    return [res.status, deliveryEndpoints];
+};
+
+const fetchMatchingCapabilityDetailsForDeliveries = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIMatchingCapabilityDetails(params);
+    const matchingCapabilityDetails: Array<GraphSectionProps> = await res.data;
+    return [res.status, matchingCapabilityDetails];
+};
+
+
+const fetchMatchingCapabilityShardDetails = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIMatchingCapabilityShardDetails(params);
+    const capabilityShards: Array<Shard> = await res.data;
+    return [res.status, capabilityShards];
+};
+
+const fetchQueueValidator = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIQueueValidator(params);
+    const queueExists: boolean = await res.data;
+    return [res.status, queueExists];
+};
+
+const fetchExchangeValidator = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIExchangeValidator(params);
+    const exchangeExists: boolean = await res.data;
+    return [res.status, exchangeExists];
+};
+
 export type basicGetParams = {
     actorCommonName: string;
-    selector?: string;
+    pathParam?: string;
 };
 export type extendedGetParams = {
     actorCommonName: string;
     pathParam?: string;
-    selector?: string;
 };
 
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
@@ -42,8 +124,19 @@ export type extendedGetFunction = (params: extendedGetParams) => Promise<any>;
 const getPaths: {
     [key: string]: basicGetFunction | extendedGetFunction;
 } = {
-    "neighbours": fetchNeighbours,
-    "serviceproviders": fetchServiceProviders,
+    neighbours: fetchNeighbours,
+    serviceproviders: fetchServiceProviders,
+    exchanges: fetchAllExchanges,
+    queues: fetchAllQueues,
+    "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
+    "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/endpoints": fetchMatchingDeliveryEndpoints,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]": fetchMatchingCapabilityDetailsForDeliveries,
+    "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]/[shardId]": fetchMatchingCapabilityShardDetails,
+    queueValidator: fetchQueueValidator,
+    exchangeValidator: fetchExchangeValidator,
 };
 const findHandler: (params: any) =>
     | {
@@ -59,20 +152,53 @@ const findHandler: (params: any) =>
         path = [],
         method,
         actorCommonName,
-        selector = "",
+        selector = ""
     } = params;
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
-            const lastSegment = path[path.length - 1];
-            const fn = getPaths[lastSegment];
-            if (possiblePaths.includes(lastSegment)) {
+
+            const matchedPath = possiblePaths.find((pattern) => {
+                const patternSegments = pattern.split("/").filter(Boolean);
+                if (patternSegments.length !== path.length) return false;
+
+                return patternSegments.every((segment, idx) => {
+                    return segment.startsWith("[") && segment.endsWith("]") || segment === path[idx];
+                });
+            });
+
+            if (matchedPath) {
+                const patternSegments = matchedPath.split("/").filter(Boolean);
+
+                const params: Record<string, string> = { actorCommonName };
+                patternSegments.forEach((segment, idx) => {
+                    if (segment.startsWith("[") && segment.endsWith("]")) {
+                        const paramName = segment.slice(1, -1);
+                        params[paramName] = path[idx];
+                    }
+                });
+
                 return {
-                    fn,
-                    params: { actorCommonName, selector },
+                    fn: getPaths[matchedPath],
+                    params,
                 };
             }
 
+            const lastSegment = path[path.length - 1];
+            if (possiblePaths.includes(lastSegment)) {
+                return {
+                    fn: getPaths[lastSegment],
+                    params: { actorCommonName, selector },
+                };
+            }
+            if (path.length > 1 && possiblePaths.includes(path[0])) {
+                return {
+                    fn: getPaths[path[0]],
+                    params: { actorCommonName, pathParam: path[1] },
+                };
+            }
+
+            return {};
         default:
             return {};
     }

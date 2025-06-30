@@ -1,17 +1,17 @@
 import {GridColDef} from "@mui/x-data-grid";
 import {timeConverter} from "@/lib/timeConverter";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
-import {Chip} from "@/components/shared/Chip";
+import {Chip} from "@/components/shared/components/Chip";
 import {messageTypeChips, statusChips} from "@/lib/statusChips";
 import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import Subheading from "@/components/shared/typography/Subheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverlay";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries,
+    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -19,12 +19,16 @@ import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {ExpandedRows} from "@/types/expandedRows";
 import NestedGridConnections from "@/components/serviceProviders/NestedGridServiceProvidedConnections";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
+import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
+import {fetchExchangeNameExists} from "@/hooks/useFetchExchangeNameExists";
+import {useSession} from "next-auth/react";
+
 
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
@@ -45,6 +49,43 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         id: number | null;
         field: string | null;
     }>({id: null, field: null});
+    const [invalidDeliveryIds, setInvalidDeliveryIds] = useState<Set<string>>(new Set());
+    const {data: session} = useSession();
+
+    useEffect(() => {
+        const validateAllDeliveries = async () => {
+            const invalidIds = new Set<string>();
+            for (const delivery of row.deliveries) {
+                let exists = true;
+                for (const endpoint of delivery.endpoints || []) {
+                    const exchangeName = endpoint.target;
+                    if (!exchangeName) {
+                        exists = false;
+                        break;
+                    }
+                    try {
+                        const result = await fetchExchangeNameExists(session?.user.commonName as string, exchangeName);
+                        if (!result) {
+                            exists = false;
+                            break;
+                        }
+                    } catch (error) {
+                        exists = false;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    invalidIds.add(delivery.id);
+                }
+            }
+
+            setInvalidDeliveryIds(invalidIds);
+        };
+
+        validateAllDeliveries();
+    }, [row.deliveries]);
+
+
     const handleCellClick = (row: any, field: any, rowId: number) => {
         setExpandedRows({});
         setExpandedRows((prev) => ({
@@ -157,17 +198,60 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"},
         ];
     } else if (field === "deliveries") {
-        nestedData = row.deliveries.map((subscription: any) => ({
-            id: subscription.id,
-            status: subscription.status,
-            selector: subscription.selector,
-            description: subscription.description,
-            endpoints: subscription.endpoints,
-            lastUpdatedTimestamp: timeConverter(subscription.lastUpdatedTimestamp)
+        nestedData = row.deliveries.map((delivery: any) => ({
+            id: delivery.id,
+            status: delivery.status,
+            selector: delivery.selector,
+            description: delivery.description,
+            endpoints: delivery.endpoints,
+            lastUpdatedTimestamp: timeConverter(delivery.lastUpdatedTimestamp)
         }));
 
         nestedColumns = [
-            {...dataGridTemplate, field: "id", headerName: "ID"},
+            {
+                ...dataGridTemplate,
+                field: "id",
+                headerName: "ID",
+                renderCell: (params) => {
+                    const isInvalid = invalidDeliveryIds.has(params.value);
+                    return (
+                        <Box style={{color: isInvalid ? "red" : "inherit"}}>
+                            {params.value}
+                        </Box>
+                    );
+                }
+            },
+            {
+                ...dataGridTemplate,
+                field: "status",
+                headerName: "Status",
+                renderCell: (cell) => (
+                    <Chip
+                        color={statusChips[cell.value as keyof typeof statusChips] as ChipProps["color"]}
+                        label={cell.value}
+                    />
+                ),
+            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"},
+        ];
+    } else if (field === "privateChannels" && row.privatechannels) {
+        nestedData = row.privatechannels.map((privateChannel: any) => ({
+            id: privateChannel.id,
+            status: privateChannel.status,
+            peers: privateChannel.peers,
+            description: privateChannel.description,
+            endpoint: privateChannel.endpoint,
+            lastUpdated: timeConverter(privateChannel.lastUpdated)
+        }));
+
+        nestedColumns = [
+            {
+                ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
+                    const value = params.row.id;
+                    return value ? value.substring(0, 8) : '';
+                }
+            },
             {
                 ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
                     return (
@@ -178,8 +262,14 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     );
                 }
             },
+            {
+                ...dataGridTemplate, field: "peers", headerName: "Number of peers", renderCell: (params) => {
+                    const value = params.row.peers;
+                    return Array.isArray(value) ? value.length : 0;
+                },
+            },
             {...dataGridTemplate, field: "description", headerName: "Description"},
-            {...dataGridTemplate, field: "lastUpdatedTimestamp", headerName: "Last Updated"}
+            {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
         ];
     }
 
@@ -190,37 +280,40 @@ const NestedGridServiceProviders: React.FC<Props> = ({
 
     return (
         <Box flex={1}>
-            <Mainheading>{headerContent}</Mainheading>
-            <Subheading>
-                These are all of {field}. You can click a row to view more information.
-            </Subheading>
-            <Divider sx={{marginY: 3}}/>
-            <Box sx={StyledTableHeader}>
-                <motion.div
-                    animate={{backgroundColor: isFlashing ? "#ffbf7d" : "#f0f1f1"}}
-                    transition={{duration: 0.3, ease: "easeInOut"}}
-                    style={{padding: "5px", borderRadius: "8px"}}
-                >
-                    <DataGrid
-                        rows={nestedData}
-                        columns={nestedColumns}
-                        getRowId={(row) => row.id}
-                        onRowClick={handleOnRowClick}
-                        sort={{field: "createdTimestamp", sort: "desc"}}
-                        slots={{
-                            noRowsOverlay: CustomEmptyOverlay
-                        }}
-                        onCellClick={(params) => {
-                            setHighlightedCell({id: params.id as number, field: params.field});
-                        }}
-                        getCellClassName={(params) =>
-                            params.field === 'connections' &&
-                            highlightedCell.id === params.id && highlightedCell.field === params.field
-                                ? "highlighted-cell"
-                                : ""
-                        }
-                    />
-                </motion.div>
+            <motion.div
+                animate={{backgroundColor: isFlashing ? "#ffdbb0" : "#f0f1f1"}}
+                transition={{duration: 0.3, ease: "easeInOut"}}
+                style={{padding: "5px", borderRadius: "8px"}}
+            >
+                <Divider style={{ margin: '20px 0', visibility: 'hidden' }}/>
+                <Mainheading>{headerContent}</Mainheading>
+                <Subheading>
+                    These are all of {field}. You can click a row to view more information.
+                </Subheading>
+                <Divider sx={{marginY: 3}}/>
+                <Box sx={{height: 450, width: "100%"}}>
+                    <Box sx={StyledTableHeader}>
+
+                        <DataGrid
+                            rows={nestedData}
+                            columns={nestedColumns}
+                            getRowId={(row) => row.id}
+                            onRowClick={handleOnRowClick}
+                            sort={{field: "createdTimestamp", sort: "desc"}}
+                            slots={{
+                                noRowsOverlay: CustomEmptyOverlay
+                            }}
+                            onCellClick={(params) => {
+                                setHighlightedCell({id: params.id as number, field: params.field});
+                            }}
+                            getCellClassName={(params) =>
+                                params.field === 'connections' &&
+                                highlightedCell.id === params.id && highlightedCell.field === params.field
+                                    ? "highlighted-cell"
+                                    : ""
+                            }
+                        />
+                    </Box>
                     {serviceProviderRow && field === 'capabilities' && (
                         <CapabilityDrawer
                             handleMoreClose={handleMoreClose}
@@ -232,7 +325,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
                         />
                     )}
@@ -240,29 +333,38 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            subscriptions={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
+                            commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
                         />
                     )}
-            </Box>
-            {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
-                if (!row) {
-                    return null;
-                }
-                const filteredConnections = nestedConnectionData.filter(
-                    (connection: any) => connection.subscriptionId === serviceProviderRow?.id
-                );
-                return (
-                    <Box key={rowId}>
-                        <NestedGridConnections
-                            row={serviceProviderRow}
-                            nestedConnectionData={filteredConnections}
-                            nestedConnectionColumns={nestedConnectionColumns}
-                            isFlashing={isFlashing}
+                    {serviceProviderRow && field === 'privateChannels' && (
+                        <PrivateChannelDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
                         />
-                    </Box>
-                );
-            }) : null}
+                    )}
+                </Box>
+                {field === 'subscriptions' ? Object.keys(expandedRows).map((rowId) => {
+                    const filteredConnections = nestedConnectionData.filter(
+                        (connection: any) => connection.subscriptionId === serviceProviderRow?.id
+                    );
+                    if (!row || !serviceProviderRow) {
+                        return null;
+                    }
+
+                    return (
+                        <Box key={rowId} sx={{height: 100, width: "100%"}}>
+                            <NestedGridConnections
+                                row={serviceProviderRow}
+                                nestedConnectionData={filteredConnections}
+                                nestedConnectionColumns={nestedConnectionColumns}
+                                isFlashing={isFlashing}
+                            />
+                        </Box>
+                    );
+                }) : null}
+            </motion.div>
         </Box>
     );
 }
