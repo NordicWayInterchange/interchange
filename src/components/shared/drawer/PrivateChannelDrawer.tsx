@@ -10,18 +10,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import Loading from "@/components/shared/components/Loading";
-import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeer} from "@/types/serviceProviders";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {Chip} from "@/components/shared/components/Chip";
 import {colorMapping, statusChips} from "@/lib/statusChips";
 
 type Props = {
-    privateChannel: ServiceProviderPrivateChannels;
+    privateChannel: ServiceProviderPrivateChannels | ServiceProviderPrivateChannelsPeer;
     open: boolean;
+    title: string;
     handleMoreClose: () => void;
 };
 
-const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) => {
+const PrivateChannelDrawer = ({privateChannel, open, title, handleMoreClose}: Props) => {
     if (!privateChannel) {
         return <Loading text=""/>
     }
@@ -48,7 +49,7 @@ const PrivateChannelDrawer = ({privateChannel, open, handleMoreClose}: Props) =>
                         </ListItem>
                         <ListItem>
                             <StyledHeaderBox>
-                                <Typography>PrivateChannel details</Typography>
+                                <Typography>{title} details</Typography>
                                 <Chip
                                     color={chipColor}
                                     label={statusKey}

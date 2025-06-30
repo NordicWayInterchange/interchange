@@ -161,6 +161,29 @@ export default function ServiceProviders() {
                     </Box>
                 );
             },
+        },
+        {
+            ...dataGridTemplate,
+            field: "privateChannelsPeer",
+            headerName: "Private channels peer",
+            headerClassName: 'custom-header',
+            renderCell: (params) => {
+                const serviceProviderPrivateChannelsPeer = params.row.privatechannelsPeer;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => {
+                            const rowId = params.row.id;
+                            setServiceProviderRow(null);
+                            handleCellClick("privateChannelsPeer", rowId)
+                        }}
+                    >
+                        {Array.isArray(serviceProviderPrivateChannelsPeer) ?
+                            <StyledBorderlineSpan> {serviceProviderPrivateChannelsPeer.length}  </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
+                    </Box>
+                );
+            },
         }
     ];
 

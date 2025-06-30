@@ -11,7 +11,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
+    ServiceProviderDeliveries, ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeer,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -271,6 +271,36 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
         ];
+    } else if (field === "privateChannelsPeer" && row.privatechannelsPeer) {
+        nestedData = row.privatechannelsPeer.map((privateChannelPeer: any) => ({
+            id: privateChannelPeer.id,
+            status: privateChannelPeer.status,
+            peers: privateChannelPeer.peers,
+            description: privateChannelPeer.description,
+            endpoint: privateChannelPeer.endpoint,
+            lastUpdated: timeConverter(privateChannelPeer.lastUpdated)
+        }));
+
+        nestedColumns = [
+            {
+                ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
+                    const value = params.row.id;
+                    return value ? value.substring(0, 8) : '';
+                }
+            },
+            {
+                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
+                    return (
+                        <Chip
+                            color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
+                            label={cell.value}
+                        />
+                    );
+                }
+            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
+        ];
     }
 
     const getHeader = () => {
@@ -341,7 +371,16 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <PrivateChannelDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
+                            title= "Private channels"
                             privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
+                        />
+                    )}
+                    {serviceProviderRow && field === 'privateChannelsPeer' && (
+                        <PrivateChannelDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            title= "Private channel subscription"
+                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannelsPeer}
                         />
                     )}
                 </Box>
