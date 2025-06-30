@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliver
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalSubscriptionEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
@@ -123,17 +124,39 @@ public class QpidService {
         return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
     }
 
-    public CapabilitiesLinkedSubscriptionApi getCapabilitiesLinkedSubscription(LocalSubscription subscription, List<OutgoingMatch> matches) {
-        String uuid = subscription.getUuid();
+    public CapabilitiesLinkedSubscriptionApi getCapabilitiesLinkedSubscription(LocalSubscription subscription, Set<Capability> localCratedCapability) {
+        Set<Capability> allMatchingLocalCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(localCratedCapability,subscription.getSelector());
         List<CapabilityMatchApi> capabilityMatches = new ArrayList<>();
-        for (OutgoingMatch match : matches) {
-            Capability capability = match.getCapability();
-            for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
-              //TODO : capabilityShards
+        for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
+            String subscriptionEndpoint = endpoint.getSource();
+            for (Capability capability : allMatchingLocalCapabilities) {
+                String capabilityUuid = capability.getUuid();
+                for (CapabilityShard shard : capability.getShards()) {
+                    Exchange exchange = adminQpidClient.getExchange(shard.getExchangeName());
+                    Binding binding;
+                    boolean exists;
+                    if (exchange != null) {
+                        binding = exchange.getBindingTo(subscriptionEndpoint);
+                        exists = binding != null;
+                    } else {
+                        binding = new Binding(shard.getExchangeName(), subscriptionEndpoint, new Filter(subscription.getSelector()));
+                        exists = false;
+                    }
+                    capabilityMatches.add(
+                            new CapabilityMatchApi(
+                                    capabilityUuid,
+                                    shard.getShardId(),
+                                    binding,
+                                    exists
+                            )
+                    );
+                }
             }
         }
-        return new CapabilitiesLinkedSubscriptionApi(uuid,capabilityMatches);
+        return new CapabilitiesLinkedSubscriptionApi(subscription.getUuid(),capabilityMatches);
     }
+
+
 
     public List<Exchange> getAllExchanges() {
         try {

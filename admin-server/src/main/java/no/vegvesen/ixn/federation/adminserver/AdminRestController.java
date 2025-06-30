@@ -23,6 +23,7 @@ import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
@@ -436,12 +437,12 @@ public class AdminRestController {
 
         logger.info("Log - List capabilities match a subscription with id {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
+        LocalSubscription subscription = serviceProvider.getSubscription(subscriptionId);
 
-        /*LocalSubscription subscription = serviceProvider.findSubscriptionByUuid(subscriptionId);
-        subscriptionExists(subscriptionId, subscription);
-        List<OutgoingMatch> allByLocalSubscriptionUuid = outgoingMatchRepository.findAllByLocalSubscription_Uuid(subscriptionId);
-        return qpidService.getCapabilitiesLinkedSubscription(subscription, allByLocalSubscriptionUuid);*/
-        return null;
+        List<ServiceProvider> allServiceProviders = serviceProviderRepository.findAll();
+        Set<Capability> allCreatedLocalCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(allServiceProviders);
+
+        return qpidService.getCapabilitiesLinkedSubscription(subscription, allCreatedLocalCapabilities);
     }
 
     private ServiceProvider serviceProviderExists(String actorCommonName) {

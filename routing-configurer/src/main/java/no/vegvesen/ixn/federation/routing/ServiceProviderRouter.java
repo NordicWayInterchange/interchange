@@ -542,6 +542,7 @@ public class ServiceProviderRouter {
                             .map(LocalConnection::getSource)
                             .collect(Collectors.toSet());
 
+                    //TODO this filters out created capabilities. This is done already above!
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
