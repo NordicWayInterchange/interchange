@@ -28,8 +28,6 @@ export default function ServiceProviders() {
         session?.user.commonName as string
     );
 
-    console.log("serviceProviderData", serviceProviderData);
-
     const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
@@ -213,7 +211,7 @@ export default function ServiceProviders() {
                             }}
                             getCellClassName={(params) =>
                                 (params.field === 'subscriptions' || params.field === 'capabilities'
-                                    || params.field === 'deliveries' || params.field === 'privateChannels' ) &&
+                                    || params.field === 'deliveries' || params.field === 'privateChannels' || params.field === 'privateChannelsPeer' ) &&
                                 highlightedCell.id === params.id && highlightedCell.field === params.field
                                     ? "highlighted-cell"
                                     : ""
@@ -245,3 +243,4 @@ export default function ServiceProviders() {
         </>
     );
 }
+
