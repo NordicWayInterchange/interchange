@@ -11,7 +11,7 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -40,7 +40,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Autowired
     NeighbourSubscriptionDeleteService service;
 
-    @MockBean
+    @MockitoBean
     NeighbourFacade mockNeighbourFacade;
 
     @Test

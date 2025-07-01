@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import javax.naming.NamingException;
@@ -70,10 +70,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		qpidContainer.start();
 	}
 
-	@MockBean
+	@MockitoBean
 	ServiceProviderRepository serviceProviderRepository;
 
-	@MockBean
+	@MockitoBean
 	PrivateChannelRepository privateChannelRepository;
 
 	@Autowired
@@ -82,13 +82,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
  	@Autowired
 	ServiceProviderRouter router;
 
-	@MockBean
+	@MockitoBean
 	MatchRepository matchRepository;
 
-	@MockBean
+	@MockitoBean
 	ListenerEndpointRepository listenerEndpointRepository;
 
-	@MockBean
+	@MockitoBean
 	OutgoingMatchRepository outgoingMatchRepository;
 
 	@Test

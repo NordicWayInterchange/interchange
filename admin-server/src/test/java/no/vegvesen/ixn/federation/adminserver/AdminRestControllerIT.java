@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,14 +45,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 
 @SpringBootTest(classes = {TestApplication.class, MockSslBundle.class})
 public class AdminRestControllerIT extends PostgresContainerBase {
 
-
-    private MockMvc mockMvc;
 
     @Autowired
     NeighbourRepository neighbourRepository;
@@ -69,10 +66,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Autowired
     AdminRestController restController;
 
-    @MockBean
+    @MockitoBean
     CertService certService;
 
-    @MockBean
+    @MockitoBean
     QpidService qpidService;
 
     @DynamicPropertySource

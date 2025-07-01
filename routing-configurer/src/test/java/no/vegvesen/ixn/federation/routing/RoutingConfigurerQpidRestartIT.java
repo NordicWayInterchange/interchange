@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
@@ -83,22 +83,22 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         qpidContainer.start();
     }
 
-    @MockBean
+    @MockitoBean
     NeighbourService neighbourService;
 
     @Autowired
     RoutingConfigurer routingConfigurer;
 
-    @MockBean
+    @MockitoBean
     ListenerEndpointRepository listenerEndpointRepository;
 
     @Autowired
     QpidClient client;
 
-    @MockBean
+    @MockitoBean
     ServiceProviderRouter serviceProviderRouter;
 
-    @MockBean
+    @MockitoBean
     InterchangeNodeProperties properties;
 
     @Test
