@@ -127,6 +127,7 @@ public class QpidService {
     public CapabilitiesLinkedSubscriptionApi getCapabilitiesLinkedSubscription(LocalSubscription subscription, Set<Capability> localCratedCapability) {
         Set<Capability> allMatchingLocalCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(localCratedCapability,subscription.getSelector());
         List<CapabilityMatchApi> capabilityMatches = new ArrayList<>();
+        //TODO we don't know which endpoint is mapped to which shard...
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String subscriptionEndpoint = endpoint.getSource();
             for (Capability capability : allMatchingLocalCapabilities) {
