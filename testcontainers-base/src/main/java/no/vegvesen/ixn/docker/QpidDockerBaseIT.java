@@ -29,7 +29,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
 	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
-		Path imageLocation = getFolderPath("qpid-test");
+		Path imageLocation = getFolderPath("qpid");
 		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
 				imageLocation, configPath);
 		Stream<HostStore> stream = stores.hostStores().stream();

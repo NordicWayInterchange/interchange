@@ -17,15 +17,13 @@ public class NeighbourTest {
 
 	@Test
 	public void getControlChannelUrlWithDomainNameAndSpecifiedNonDefaultPorts() {
-		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", null, null, null);
-		fullDomainName.setControlChannelPort("1234");
+		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "1234");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top:1234/alive");
 	}
 
 	@Test
 	public void getControlChannelUrlWithDomainNameAndSpecifiedDefaultPorts() {
-		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", null, null, null);
-		fullDomainName.setControlChannelPort("443");
+		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "443");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top/alive");
 	}
 
@@ -38,8 +36,7 @@ public class NeighbourTest {
 	@Test
 	public void expectedUrlIsCreated() {
 		String expectedURL = "https://ericsson.itsinterchange.eu:8080/";
-		Neighbour ericsson = new Neighbour("ericsson.itsinterchange.eu", null, null, null);
-		ericsson.setControlChannelPort("8080");
+		Neighbour ericsson = new Neighbour("ericsson.itsinterchange.eu", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "8080");
 		String actualURL = ericsson.getControlChannelUrl("/");
 		assertThat(expectedURL).isEqualTo(actualURL);
 	}
@@ -52,8 +49,7 @@ public class NeighbourTest {
 
 	@Test
 	public void getControlChannelUrlWithoutDomainNameAndSpecificPort() {
-		Neighbour fullDomainName = new Neighbour("my-host", null, null, null);
-		fullDomainName.setControlChannelPort("1234");
+		Neighbour fullDomainName = new Neighbour("my-host", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "1234");
 		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
 	}
 
@@ -73,7 +69,7 @@ public class NeighbourTest {
 		fedIn.setSuccessfulRequest(now);
 		NeighbourCapabilities capabilities = new NeighbourCapabilities();
 		capabilities.setLastCapabilityExchange(now.minusHours(1));
-		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn, new Connection());
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, new NeighbourSubscriptionRequest(), fedIn, new Connection());
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
 	}
 
@@ -110,8 +106,7 @@ public class NeighbourTest {
 
 	@Test
 	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourNeverSeen() {
-		Neighbour neverSeen = new Neighbour();
-		neverSeen.setName("never-seen");
+		Neighbour neverSeen = new Neighbour("never-seen", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		assertThat(neverSeen.needsOurUpdatedCapabilities(Optional.empty())).isTrue();
 	}
 
@@ -129,9 +124,7 @@ public class NeighbourTest {
 
 	@NonNull
 	private Neighbour neighbourSeenYesterday() {
-		Neighbour seenYesterday = new Neighbour();
-		seenYesterday.setName("seen-yesterday");
-		seenYesterday.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newHashSet()));
+		Neighbour seenYesterday = new Neighbour("seen-yesterday",new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newHashSet()), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
 		return seenYesterday;
 	}

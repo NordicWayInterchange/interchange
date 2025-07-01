@@ -2,20 +2,15 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -25,7 +20,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
+/**
+ * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
+ * the actual hostname would normally end up as something like "localhost".
+ */
+@Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
@@ -42,21 +41,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			Path.of("qpid")
 			);
 
-	@DynamicPropertySource
-	static void datasourceProperties(DynamicPropertyRegistry registry) {
-		logger.info("server url: {}", qpidContainer.getHttpUrl());
-		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+	@BeforeEach
+	void setup(){
+		client = new QpidClient(
+				qpidContainer.getHttpsUrl(),
+				qpidContainer.getvHostName(),
+				new QpidClientConfig(sslClientContext(stores,"routing_configurer")).qpidRestTemplate()
+		);
 	}
 
-	@BeforeAll
-	static void setup(){
-		qpidContainer.start();
-	}
-
-	@Autowired
 	QpidClient client;
 
 	@Test

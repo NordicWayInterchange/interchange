@@ -192,8 +192,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void emptyIncomingSubscriptionRequestReturnsException() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour1");
+        Neighbour neighbour = new Neighbour("my-neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour1", Collections.emptySet());
@@ -204,8 +203,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void incomingSubscriptionRequestIsSavedWithSubscriptionRequestStatusEstablished() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour2");
+        Neighbour neighbour = new Neighbour("my-neighbour2", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour2");
@@ -223,8 +221,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void deleteOneSubscriptionAndGetSubscriptionRequestStatusModified() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour3");
+        Neighbour neighbour = new Neighbour("my-neighbour3", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour3");
@@ -250,8 +247,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void deleteLastSubscriptionTearsDownSubscriptionRequest() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour4");
+        Neighbour neighbour = new Neighbour("my-neighbour4", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour4");
@@ -276,8 +272,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void incomingSubscriptionsAreAddedToAlreadyExistingSubscriptions() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour5");
+        Neighbour neighbour = new Neighbour("my-neighbour5", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour5");
@@ -306,9 +301,9 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void incomingSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
-        Neighbour neighbour = new Neighbour();
         String neighbourName = "my-service-provider-wants-direct-subscription";
-        neighbour.setName(neighbourName);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+
 
         repository.save(neighbour);
 
@@ -326,9 +321,8 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
     @Test
     public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
-        Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
-        neighbour.setName(name);
+        Neighbour neighbour = new Neighbour(name, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
                 name,

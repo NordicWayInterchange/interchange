@@ -19,8 +19,11 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -146,7 +150,9 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
+        CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
+                UUID.randomUUID().toString(),
                 new DenmApplication(
                         "NO12345",
                         "pub-1",
@@ -155,10 +161,9 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-        CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
-        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange("exchange");
 
         assertThat(CapabilityMatcher.matchCapabilitiesToSelector(Collections.singleton(capability), selector)).hasSize(1);
@@ -170,9 +175,14 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 selector,
                 LocalDeliveryStatus.CREATED);
 
-        ServiceProvider aServiceProvider = new ServiceProvider(serviceProviderName);
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(capability), null));
-        aServiceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                serviceProviderName,
+                new Capabilities(Sets.newLinkedHashSet(capability), null),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+
+        );
         ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
         serviceProviderRepository.save(aServiceProvider);
 
@@ -188,10 +198,11 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
-        SSLConnectionSocketFactory sslConnectionSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext).build();
+        DefaultClientTlsStrategy strategy = new DefaultClientTlsStrategy(sslContext);
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
                 .create()
-                .setSSLSocketFactory(sslConnectionSocketFactory).build();
+                .setTlsSocketStrategy(strategy)
+                .build();
         CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
         return new RestTemplate(new HttpComponentsClientHttpRequestFactory(client));
     }

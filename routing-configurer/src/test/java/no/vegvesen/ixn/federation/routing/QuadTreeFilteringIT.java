@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.qpid;
+package no.vegvesen.ixn.federation.routing;
 
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
@@ -9,6 +9,7 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.SelectorBuilder;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

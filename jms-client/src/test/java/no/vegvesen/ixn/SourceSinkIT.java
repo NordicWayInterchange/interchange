@@ -55,6 +55,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Test
 	public void invalidDatexMessageThrowsError() throws JMSException, NamingException{
+		System.out.println(qpidContainer.getHttpUrl());
         try (Source kingHaraldTestQueueSource = new Source(Url, "test-queue", kingHaraldSSlContext)) {
             kingHaraldTestQueueSource.start();
             JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder()

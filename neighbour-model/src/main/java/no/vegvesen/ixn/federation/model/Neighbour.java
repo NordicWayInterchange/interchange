@@ -81,6 +81,12 @@ public class Neighbour {
 		this.controlChannelPort = controlChannelPort;
 	}
 
+	public Neighbour(String nodeName, String controlChannelPort) {
+		this.setName(nodeName);
+		this.controlChannelPort = controlChannelPort;
+
+	}
+
 	public String getName() {
 		return name;
 	}
