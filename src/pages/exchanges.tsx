@@ -116,7 +116,7 @@ const Exchanges = () => {
                         variant="outlined"
                         value={searchId}
                         onChange={(e) => setSearchId(e.target.value)}
-                        style={{ marginBottom: 16 }}
+                        style={{ marginBottom: 16, marginTop: -25 }}
                         type="text"
                     />
                     <DataGrid
