@@ -78,13 +78,12 @@ public class ImportTransformer {
     }
 
     public Capability transformCapabilityImportApiToCapability(CapabilityImportApi capability) {
-        Capability newCapability = new Capability(
+        return new Capability(
                 capability.getUuid(),
                 capabilityTransformer.applicationApiToApplication(capability.getApplication()),
-                transformMetadataImportApiToMetadata(capability.getMetadata())
+                transformMetadataImportApiToMetadata(capability.getMetadata()),
+                capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList())
         );
-        newCapability.setShards(capability.getShards().stream().map(this::transformCapabilityShardImportApiToCapabilityShard).collect(Collectors.toList()));
-        return newCapability;
     }
 
     public CapabilityStatus transformCapabilityStatusImportApiToCapabilityStatus(CapabilityImportApi.CapabilityStatusImportApi status) {

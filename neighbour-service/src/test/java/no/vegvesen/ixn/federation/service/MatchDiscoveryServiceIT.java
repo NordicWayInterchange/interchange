@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,12 +53,10 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
         LocalSubscription localSubscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
         LocalSubscription localSubscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
-        ServiceProvider serviceProvider1 = new ServiceProvider("service-provider1");
-        serviceProvider1.addLocalSubscription(localSubscription1);
+        ServiceProvider serviceProvider1 = new ServiceProvider("service-provider1", Set.of(localSubscription1));
         serviceProviderRepository.save(serviceProvider1);
 
-        ServiceProvider serviceProvider2 = new ServiceProvider("service-provider2");
-        serviceProvider2.addLocalSubscription(localSubscription2);
+        ServiceProvider serviceProvider2 = new ServiceProvider("service-provider2",Set.of(localSubscription2));
         serviceProviderRepository.save(serviceProvider2);
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
@@ -80,8 +79,7 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
         String consumerCommonName = "service-provider";
         LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        serviceProvider.addLocalSubscription(localSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",Set.of(localSubscription));
         serviceProviderRepository.save(serviceProvider);
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
@@ -105,8 +103,7 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
 
         LocalSubscription localSubscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
-        ServiceProvider serviceProvider1 = new ServiceProvider("service-provider1");
-        serviceProvider1.addLocalSubscription(localSubscription1);
+        ServiceProvider serviceProvider1 = new ServiceProvider("service-provider1",Set.of(localSubscription1));
         serviceProviderRepository.save(serviceProvider1);
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
@@ -132,8 +129,7 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
 
         LocalSubscription localSubscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
-        ServiceProvider serviceProvider2 = new ServiceProvider("service-provider2");
-        serviceProvider2.addLocalSubscription(localSubscription2);
+        ServiceProvider serviceProvider2 = new ServiceProvider("service-provider2",Set.of(localSubscription2));
         serviceProviderRepository.save(serviceProvider2);
 
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
@@ -149,8 +145,7 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
 
         LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
 
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        serviceProvider.addLocalSubscription(localSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",Set.of(localSubscription));
         serviceProviderRepository.save(serviceProvider);
 
         Subscription subscription = new Subscription(SubscriptionStatus.TEAR_DOWN, selector, "", consumerCommonName);

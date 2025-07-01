@@ -73,8 +73,7 @@ class NeighbourServiceTest {
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
+		Neighbour ericssonNeighbour = new Neighbour("ericsson", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
         CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
@@ -112,8 +111,7 @@ class NeighbourServiceTest {
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
+		Neighbour ericssonNeighbour = new Neighbour("ericsson", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
         neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
@@ -128,8 +126,7 @@ class NeighbourServiceTest {
 		unknownNeighbour.setName("unknownNeighbour");
 		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilityApi(new DatexApplicationApi("", "", "NO", "", List.of(), "", "publisherName"), new MetadataApi())));
 
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
+		Neighbour ericssonNeighbour = new Neighbour("ericsson", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
 		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, Collections.emptySet()));
@@ -172,8 +169,7 @@ class NeighbourServiceTest {
 		doReturn(updatedNeighbour).when(neighbourRepository).findByName(anyString());
 
 		// Mock response from DNS facade on Server
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
+		Neighbour ericssonNeighbour = new Neighbour("ericsson", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
 		neighbourService.incomingSubscriptionRequest(ericsson);
 		verify(neighbourRepository, times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
@@ -232,8 +228,7 @@ class NeighbourServiceTest {
 
 		Subscription subscription = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", myName);
 
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
 
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.singleton(getDatexNeighbourCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), subscriptionRequest);
@@ -250,8 +245,7 @@ class NeighbourServiceTest {
 
 		Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
 
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-		existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
+		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1)));
 
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
@@ -273,8 +267,7 @@ class NeighbourServiceTest {
 		Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/localnode/subscriptions/1", "localnode");
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/localnode/subscriptions/2", "localnode");
 
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
+		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
@@ -308,8 +301,7 @@ class NeighbourServiceTest {
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
 		Subscription subscription3 = new Subscription(3, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'FI'", "/neighbour/subscriptions/3", "self");
 
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
-		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
+		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE"), getDatexNeighbourCapability("FI")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
@@ -348,9 +340,9 @@ class NeighbourServiceTest {
 
 	@Test
 	public void tearDownListenerEndpointsForIgnoredNeighbours(){
-		Neighbour neighbour = new Neighbour();
 		String neighbourName = "my-ignored-neighbour";
-		neighbour.setName(neighbourName);
+		Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+
 		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
 		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
 
@@ -371,9 +363,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void doNotTearDownListenerEndpointsForNonIgnoredNeighbours(){
-		Neighbour neighbour = new Neighbour();
 		String neighbourName = "my-ignored-neighbour";
-		neighbour.setName(neighbourName);
 		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
 		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
 

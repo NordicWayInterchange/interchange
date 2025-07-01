@@ -23,12 +23,11 @@ public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 	private NeighbourRepository neighbourRepository;
 
 	private Neighbour createNeighbourObject(String name, CapabilitiesStatus capStatus){
-		Neighbour neighbour = new Neighbour(name,
+        return new Neighbour(name,
 				new NeighbourCapabilities(capStatus, Collections.emptySet()),
 				new NeighbourSubscriptionRequest(new HashSet<>()),
-				new SubscriptionRequest(new HashSet<>()));
-		neighbour.setControlChannelPort("8080");
-		return neighbour;
+				new SubscriptionRequest(new HashSet<>()),
+				"8080");
 	}
 
 	public boolean interchangeInList(String interchangeName, List<Neighbour> listOfInterchanges){
@@ -43,8 +42,7 @@ public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 
 	@Test
 	public void helperMethodIsTrueIfInterchangeIsInList(){
-		Neighbour volvo = new Neighbour();
-		volvo.setName("Volvo");
+		Neighbour volvo = new Neighbour("Volvo", null, null, null);
 
 		List<Neighbour> volvoInList = Collections.singletonList(volvo);
 
@@ -53,8 +51,7 @@ public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 
 	@Test
 	public void helperMethodIsFalseIfInterchangeNotInList(){
-		Neighbour tesla = new Neighbour();
-		tesla.setName("Tesla");
+		Neighbour tesla = new Neighbour("Tesla", null, null, null);
 
 		List<Neighbour> volvoNotInList = Collections.singletonList(tesla);
 

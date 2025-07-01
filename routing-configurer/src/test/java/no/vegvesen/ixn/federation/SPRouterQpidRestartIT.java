@@ -107,8 +107,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, "", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -128,8 +127,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "my-service-provider");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, "my-service-provider", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -150,8 +148,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-service-provider");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.TEAR_DOWN, selector, "my-service-provider", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -173,8 +170,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.REQUESTED, selector, "", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -194,8 +190,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.TEAR_DOWN, selector, "", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -216,8 +211,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, "");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.ILLEGAL, selector, "", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -317,8 +311,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
         String selector = "originatingCountry = 'NO'";
 
-        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
-        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+        LocalSubscription subscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, "", new HashSet<>(), new HashSet<>(Collections.singleton(endpoint)));
 
         ServiceProvider serviceProvider2 = new ServiceProvider(
                 "my-service-provider-2",
@@ -347,12 +340,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "my-service-provider",
-                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'NO'";
         String deliveryExchangeName = "del-" + UUID.randomUUID();
@@ -363,7 +350,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 deliverySelector,
                 LocalDeliveryStatus.CREATED);
 
-        serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now());
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
@@ -386,23 +378,22 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new Metadata(RedirectStatus.OPTIONAL)
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "my-service-provider",
-                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                LocalDateTime.now());
 
         String deliverySelector = "originatingCountry = 'SE'";
         String deliveryExchangeName = "del-" + UUID.randomUUID();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
-                new HashSet<>(Collections.singletonList(endpoint)),
+                Set.of(endpoint),
                 deliverySelector,
                 LocalDeliveryStatus.NO_OVERLAP);
 
-        serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(capability)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now());
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);

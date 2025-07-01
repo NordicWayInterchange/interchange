@@ -15,22 +15,22 @@ public class CapabilitiesTransformer {
 	private final CapabilityToCapabilityApiTransformer dataTypeTransformer = new CapabilityToCapabilityApiTransformer();
 
 	public Capabilities capabilitiesApiToCapabilities(CapabilitiesApi capabilitiesApi) {
-		Capabilities capabilities = new Capabilities();
-		capabilities.setCapabilities(dataTypeTransformer.capabilitiesApiToCapabilities(capabilitiesApi.getCapabilities()));
-		return capabilities;
+        return new Capabilities(
+				dataTypeTransformer.capabilitiesApiToCapabilities(capabilitiesApi.getCapabilities())
+		);
 	}
 	public NeighbourCapabilities capabilitiesApiToNeighbourCapabilities(CapabilitiesApi capabilitiesApi){
-		NeighbourCapabilities capabilities = new NeighbourCapabilities();
-		capabilities.setCapabilities(dataTypeTransformer.capabilityApiToNeighbourCapabilities(capabilitiesApi.getCapabilities()));
-		capabilities.setStatus(CapabilitiesStatus.KNOWN);
-		return capabilities;
+        return new NeighbourCapabilities(
+                CapabilitiesStatus.KNOWN,
+                dataTypeTransformer.capabilityApiToNeighbourCapabilities(capabilitiesApi.getCapabilities())
+        );
 	}
 
 	public CapabilitiesApi selfToCapabilityApi(String name, Set<Capability> localCapabilities) {
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
-		capabilitiesApi.setName(name);
-		capabilitiesApi.setCapabilities(dataTypeTransformer.capabilitiesToCapabilitiesApi(localCapabilities));
-		return capabilitiesApi;
+        return new CapabilitiesApi(
+                name,
+                dataTypeTransformer.capabilitiesToCapabilitiesApi(localCapabilities)
+        );
 	}
 
 }

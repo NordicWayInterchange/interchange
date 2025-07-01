@@ -148,7 +148,6 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 Collections.emptySet(),
                 LocalDateTime.now()
         );
-
         serviceProviderRepository.save(serviceProvider);
         assertThat(restController.getServiceProviders(adminUser)).isNotEmpty();
         assertThat(serviceProvider.getSubscriptions().size()).isEqualTo(2);
@@ -248,15 +247,15 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         );
 
 
-        LocalDelivery aDelivery = new LocalDelivery();
-        aDelivery.setSelector(selector);
+        LocalDelivery aDelivery = new LocalDelivery(selector, "description");
 
-        LocalDelivery bDelivery = new LocalDelivery();
-        bDelivery.setSelector("originatingCountry='SE'");
-
-        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), null));
-        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery)));
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                actorCommonName,
+                new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), null),
+                Set.of(),
+                Set.of(aDelivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(aServiceProvider);
 
 
@@ -338,9 +337,13 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         bDelivery.setSelector("originatingCountry='SE'");
 
 
-        ServiceProvider aServiceProvider = new ServiceProvider(actorCommonName);
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1), null));
-        aServiceProvider.addDeliveries(new HashSet<>(List.of(aDelivery, bDelivery)));
+        ServiceProvider aServiceProvider = new ServiceProvider(
+                actorCommonName,
+                new Capabilities(Set.of(aCap1), null),
+                Set.of(),
+                Set.of(aDelivery, bDelivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(aServiceProvider);
 
 

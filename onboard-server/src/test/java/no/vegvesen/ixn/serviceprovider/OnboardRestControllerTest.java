@@ -125,8 +125,10 @@ public class OnboardRestControllerTest {
 		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
-		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		ServiceProvider secondServiceProvider = new ServiceProvider(
+				serviceProviderName,
+				secondServiceProviderCapabilities
+		);
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -253,9 +255,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
 		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.updateSubscriptions(new ArrayList<>(Arrays.asList(seSubs,fiSubs)));
+		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName, Set.of(seSubs,fiSubs));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self

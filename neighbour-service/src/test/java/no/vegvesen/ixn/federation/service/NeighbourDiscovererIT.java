@@ -70,10 +70,8 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", nodeProperties.getName()));
 
-		Neighbour neighbour1 = new Neighbour();
-		neighbour1.setName("neighbour-one");
-		Neighbour neighbour2 = new Neighbour();
-		neighbour2.setName("neighbour-two");
+		Neighbour neighbour1 = new Neighbour("neighbour-one", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+		Neighbour neighbour2 = new Neighbour("neighbour-two", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
 		NeighbourCapabilities c1 = new NeighbourCapabilities(
 				CapabilitiesStatus.KNOWN,
@@ -517,12 +515,10 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		Endpoint endpoint = new Endpoint(
 			"source",
 				"host",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
 
-		SubscriptionShard shard = new SubscriptionShard("target");
-
-		endpoint.setShard(shard);
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
@@ -592,13 +588,8 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
 		String consumerCommonName = nodeProperties.getName();
 
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		Set<LocalSubscription> localSubscriptions = Set.of(new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName));
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscriptions.add(subscription);
-
-		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-		serviceProvider.addLocalSubscription(subscription);
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
 				.thenReturn(Set.of(
@@ -632,8 +623,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 			neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusHours(1));
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
-
-		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
+		neighbour.getCapabilities().getCapabilities().clear();
 
 		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Collections.emptySet());
 
@@ -656,11 +646,9 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		Endpoint endpoint = new Endpoint(
 				"neighbour-endpoints-source",
 				"neighbour-endpoints",
-				5671
+				5671,
+				new SubscriptionShard("neighbour-endpoints-target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("neighbour-endpoints-target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -741,12 +729,9 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		Endpoint endpoint = new Endpoint(
 				"neighbour-endpoints-failed-source",
 				"neighbour-endpoints-failed",
-				5671
+				5671,
+				new SubscriptionShard("neighbour-endpoints-failed-target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("neighbour-endpoints-failed-target");
-		endpoint.setShard(shard);
-
 		sub.setEndpoints(Collections.singleton(endpoint));
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
@@ -918,11 +903,9 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		Endpoint endpoint = new Endpoint(
 				"source",
 				"neighbour",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -985,11 +968,9 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		Endpoint endpoint = new Endpoint(
 				"source",
 				"neighbour",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -1041,7 +1022,6 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	@Test
 	public void neighbourIsIgnoredDuringCapabilityExchange(){
 		String name = "ignoredNeighbour1";
-		Neighbour neighbour = ignoredNeighbour(name);
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
 	}
@@ -1068,7 +1048,6 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	public void neighbourIsIgnoredWhenPollingSubscription(){
 		String name = "ignoredNeighbour3";
 		Neighbour neighbour = ignoredNeighbour(name);
-		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED))));
 		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(0)).pollSubscriptionStatus(any(),any());
 	}
@@ -1111,7 +1090,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 						)
 				)),
 				new NeighbourSubscriptionRequest(),
-				new SubscriptionRequest()
+				new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED)))
 		);
 		neighbour.setIgnore(true);
 		repository.save(neighbour);

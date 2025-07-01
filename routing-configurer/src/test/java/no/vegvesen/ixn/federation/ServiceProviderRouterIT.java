@@ -93,13 +93,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
-		ServiceProvider nordea = new ServiceProvider("nordea");
 		LocalSubscription localSubscription1 = new LocalSubscription(
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2' and originatingCountry = 'NO'",
 				HOST_NAME
 		);
-		nordea.addLocalSubscription(localSubscription1);
+		ServiceProvider nordea = new ServiceProvider("nordea",Set.of(localSubscription1));
 
 		when(serviceProviderRepository.save(any())).thenReturn(nordea);
 		nordea = router.syncSubscriptions(nordea, client.getQpidDelta());
@@ -463,35 +462,37 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void removeSubscriptionWhenSelectorIsInvalid(){
-		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
+		ServiceProvider king_gustaf = new ServiceProvider(
+				"king_gustaf",
+			Set.of(
+					new LocalSubscription(
+							1,
+							LocalSubscriptionStatus.ERROR,
+							"1=1",
+							HOST_NAME,
+							Collections.emptySet(),
+							Set.of()
+					),
+					new LocalSubscription(
+							2,
+							LocalSubscriptionStatus.ERROR,
+							"messageType = 'DATEX2'",
+							HOST_NAME,
+							Collections.emptySet(),
+							Set.of()
+					),
+					new LocalSubscription(
+							3,
+							LocalSubscriptionStatus.REQUESTED,
+							"messageType = 'DATEX23'",
+							HOST_NAME,
+							Collections.emptySet(),
+							Set.of()
+					)
+			)
+
+		);
 		when(serviceProviderRepository.save(king_gustaf)).thenReturn(king_gustaf);
-
-		king_gustaf.addLocalSubscription(new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.ERROR,
-				"1=1",
-				HOST_NAME,
-				Collections.emptySet(),
-				Set.of()
-		));
-
-		king_gustaf.addLocalSubscription(new LocalSubscription(
-				2,
-				LocalSubscriptionStatus.ERROR,
-				"messageType = 'DATEX2'",
-				HOST_NAME,
-				Collections.emptySet(),
-				Set.of()
-		));
-
-		king_gustaf.addLocalSubscription(new LocalSubscription(
-				3,
-				LocalSubscriptionStatus.REQUESTED,
-				"messageType = 'DATEX23'",
-				HOST_NAME,
-				Collections.emptySet(),
-				Set.of()
-		));
 		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
 		router.removeUnwantedSubscriptions(king_gustaf);
 		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
@@ -499,9 +500,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
-		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String source = "king_gustaf_source";
-		king_gustaf.addLocalSubscription(new LocalSubscription(
+		LocalSubscription subscription = new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
@@ -513,7 +513,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 								qpidContainer.getAmqpsPort()
 						)
 				)
-		));
+		);
 
 		Capability capability = new Capability(
 				new DatexApplication(
@@ -532,7 +532,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(capability
 				)
 		);
-		king_gustaf.setCapabilities(capabilities);
 		String deliverySelector = "messageType = 'DATEX2'";
 		LocalDelivery localDelivery = new LocalDelivery(
 				1,
@@ -545,7 +544,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				qpidContainer.getAmqpsPort(),
 				exchangeName
 		));
-		king_gustaf.addDeliveries(Collections.singleton(localDelivery));
+		ServiceProvider king_gustaf = new ServiceProvider(
+				"king_gustaf",
+				capabilities,
+				Set.of(subscription),
+				Set.of(localDelivery),
+				LocalDateTime.now()
+		);
 
 		OutgoingMatch outgoingMatch = new OutgoingMatch(
 				localDelivery,
@@ -588,10 +593,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider(
 				serviceProviderName,
-				Collections.singleton(localSubscription)
+				Set.of(localSubscription)
 		);
-
-		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
@@ -606,10 +609,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.queueExists(endpoint.getSource())).isTrue();
 
-		toreDownServiceProvider.setSubscriptions(
-				toreDownServiceProvider.getSubscriptions().stream()
-						.map(localSubscription1 -> localSubscription1.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
-						.collect(Collectors.toList()));
+		toreDownServiceProvider.getSubscriptions().forEach(s -> s.setStatus(LocalSubscriptionStatus.TEAR_DOWN));
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
@@ -620,24 +620,22 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
-		serviceProvider.setCapabilities(new Capabilities(new HashSet<>()));
+		serviceProvider.setCapabilities(new Capabilities());
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
 	}
 
 	@Test
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
@@ -647,7 +645,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
@@ -662,7 +660,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonShardedCapabilityIsSetUp() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
@@ -671,7 +668,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
 		assertThat(cap.getStatus()).isEqualTo(CapabilityStatus.CREATED);
@@ -695,9 +692,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"AND originatingCountry = 'SE'",
 				"my-service-provider");
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
-		serviceProvider.addLocalSubscription(sub1);
-		serviceProvider.addLocalSubscription(sub2);
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(sub1,sub2));
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
@@ -712,16 +707,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
-		serviceProvider.setCapabilities(capabilities);
+		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
-		serviceProvider.setCapabilities(new Capabilities(new HashSet<>()));
+		serviceProvider.setCapabilities(new Capabilities());
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
@@ -733,15 +727,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-node");
-		localSubscription.setLocalEndpoints(Collections.singleton(
-				new LocalEndpoint(queueName,
-						nodeProperties.getName(),
-						Integer.parseInt(nodeProperties.getMessageChannelPort())
-				)
-		));
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.TEAR_DOWN, selector, "my-node", new HashSet<>(),
+				Collections.singleton(
+						new LocalEndpoint(queueName,
+								nodeProperties.getName(),
+								Integer.parseInt(nodeProperties.getMessageChannelPort())
+						)));
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName,Set.of(localSubscription));
 
 		client.createQueue(queueName);
 
@@ -757,6 +749,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -766,11 +759,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard));
-
 		client.createHeadersExchange("cap-ex1");
 
 		String deliveryExchangeName = "my-exchange5";
@@ -799,6 +790,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-non-exist-ex1", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -808,10 +800,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-non-exist-ex1", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard));
 
 
 		String deliveryExchangeName = "my-exchange-non-exist5";
@@ -841,6 +832,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex2", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -850,12 +842,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard1)
 		);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex2", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard1));
 		client.createHeadersExchange("cap-ex2");
 
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -865,10 +857,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(5)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard2)
 		);
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex3", "publicationId = 'pub-1'");
-		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex3");
 
 		String deliveryExchangeName = "my-exchange6";
@@ -896,6 +887,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String exchangeName = "my-exchange8";
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -905,10 +897,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
@@ -937,6 +928,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -946,10 +938,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex5");
 
 		String deliveryExchangeName = "my-exchange9";
@@ -981,6 +972,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex6", "publicationId = 'pub-1'");
 		Capability denmCapability1 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -990,12 +982,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard1)
 		);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex6", "publicationId = 'pub-1'");
-		denmCapability1.setShards(Collections.singletonList(shard1));
 		client.createHeadersExchange("cap-ex6");
 
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex7", "publicationId = 'pub-1'");
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1005,10 +997,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1233"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard2)
 		);
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex7", "publicationId = 'pub-1'");
-		denmCapability2.setShards(Collections.singletonList(shard2));
 		client.createHeadersExchange("cap-ex7");
 
 		String deliveryExchangeName = "my-exchange10";
@@ -1041,6 +1032,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		metadata.setShardCount(3);
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex12");
+
+		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex13", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex13");
+
+		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex14", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex14");
 
 		Capability denmCapability = new Capability(
 				new DenmApplication(
@@ -1051,23 +1050,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				metadata,
+				Arrays.asList(shard1, shard2, shard3)
 		);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex12");
 
-		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex13", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex13");
-
-		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex14", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex14");
-
-		denmCapability.setShards(Arrays.asList(shard1, shard2, shard3));
 
 		String deliveryExchangeName = "my-exchange11";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery");
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
-		delivery.setStatus(LocalDeliveryStatus.CREATED);
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -1108,14 +1098,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionConnectsToCapabilityExchange() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-1", "my-interchange", 5671);
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-1");
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1125,15 +1114,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex8", "publicationId = 'pub-1'");
-		denmCapability.setShards(Collections.singletonList(shard));
 		client.createHeadersExchange("cap-ex8");
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+		Capabilities capabilities = new Capabilities(Collections.singleton(denmCapability));
+		ServiceProvider otherSP = new ServiceProvider("other-sp",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
@@ -1146,8 +1135,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionConnectsToCapabilityWithMultipleShards() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-2", "my-interchange", 5671);
@@ -1156,6 +1143,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		metadata.setShardCount(3);
+
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex9");
+
+		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex10", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex10");
+
+		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex11", "publicationId = 'pub-1'");
+		client.createHeadersExchange("cap-ex11");
 
 		Capability denmCapability = new Capability(
 				new DenmApplication(
@@ -1166,22 +1162,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				metadata
+				metadata,
+				Arrays.asList(shard1, shard2, shard3)
 		);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex9");
-
-		CapabilityShard shard2 = new CapabilityShard(2, "cap-ex10", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex10");
-
-		CapabilityShard shard3 = new CapabilityShard(3, "cap-ex11", "publicationId = 'pub-1'");
-		client.createHeadersExchange("cap-ex11");
-
-		denmCapability.setShards(Arrays.asList(shard1, shard2, shard3));
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+		Capabilities capabilities = new Capabilities(Collections.singleton(denmCapability));
+		ServiceProvider otherSP = new ServiceProvider("other-sp",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
@@ -1195,14 +1183,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void connectionGetsRemovedWhenCapabilityIsRemoved(){
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-3", "my-interchange", 5671);
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-3");
 
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex15", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1212,16 +1199,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
 		);
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex15", "publicationId = 'pub-1'");
 		client.createHeadersExchange("cap-ex15");
 
-		denmCapability.setShards(Collections.singletonList(shard));
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(Collections.singleton(denmCapability)));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+        ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Collections.singleton(denmCapability)));
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
@@ -1242,14 +1228,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionKeepsConnectionToOneCapabilityAndTearsDownAnother() {
-		ServiceProvider mySP = new ServiceProvider("my-sp");
-		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint("endpoint-4", "my-interchange", 5671);
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-4");
 
+		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex16", "publicationId = 'pub-1'");
 		Capability denmCapability1 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1259,14 +1244,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard1)
 		);
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex16", "publicationId = 'pub-1'");
 		client.createHeadersExchange("cap-ex16");
 
-		denmCapability1.setShards(Collections.singletonList(shard1));
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
 
+		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex17", "publicationId = 'pub-2'");
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1276,16 +1261,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard2)
 		);
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex17", "publicationId = 'pub-2'");
 		client.createHeadersExchange("cap-ex17");
 
-		denmCapability2.setShards(Collections.singletonList(shard2));
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
 
-		mySP.addLocalSubscription(subscription);
-		otherSP.setCapabilities(new Capabilities(new HashSet<>(Arrays.asList(denmCapability1, denmCapability2))));
+		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
+        ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Set.of(denmCapability1, denmCapability2)));
 
 		when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
@@ -1433,11 +1417,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
 
@@ -1467,11 +1449,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange(exchangeName);
 		client.createHeadersExchange(exchangeName2);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider", Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
 
@@ -1506,11 +1486,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
 
@@ -1541,11 +1519,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
 
@@ -1573,11 +1549,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createQueue(queueName);
 		client.createHeadersExchange(exchangeName);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(
+				UUID.randomUUID().toString(),
+				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
+				new HashSet<>(),
+				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
 
@@ -1718,11 +1697,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange(exchangeName);
 		client.createHeadersExchange(exchangeName2);
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		serviceProvider.addLocalSubscription(localSubscription);
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(),
+				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
+				new HashSet<>(),
+				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
 
