@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {GridColDef} from "@mui/x-data-grid";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, Divider} from "@mui/material";
+import {Box, Divider, TextField} from "@mui/material";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import Subheading from "@/components/shared/typography/Subheading";
@@ -19,6 +19,8 @@ const Queues = () => {
     const {data: queuesData, isLoading} = useFetchQueues(
         session?.user.commonName as string
     );
+    const [searchId, setSearchId] = useState("");
+
 
     const tableHeaders: GridColDef[] = [
         {
@@ -53,6 +55,14 @@ const Queues = () => {
         }
     ];
 
+    const rows = Array.isArray(queuesData) ? queuesData : [];
+
+    const filteredRows = searchId.trim()
+        ? rows.filter((row) =>
+            row.id?.toString().includes(searchId.trim())
+        )
+        : rows;
+
     return (
         <Box flex={1}>
             <Mainheading>Queues</Mainheading>
@@ -62,9 +72,17 @@ const Queues = () => {
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
+                    <TextField
+                        label="Search by ID"
+                        variant="outlined"
+                        value={searchId}
+                        onChange={(e) => setSearchId(e.target.value)}
+                        style={{ marginBottom: 16 }}
+                        type="text"
+                    />
                     <DataGrid
                         columns={tableHeaders}
-                        rows={queuesData || []}
+                        rows={filteredRows || []}
                         loading={isLoading}
                         getRowId={(row) => row.id}
                         sort={{field: "id", sort: "desc"}}

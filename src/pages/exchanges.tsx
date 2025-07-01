@@ -121,7 +121,7 @@ const Exchanges = () => {
                     />
                     <DataGrid
                         columns={tableHeaders}
-                        rows={filteredRows }
+                        rows={filteredRows}
                         loading={isLoading}
                         getRowId={(row) => row.id}
                         sort={{field: "id", sort: "desc"}}
