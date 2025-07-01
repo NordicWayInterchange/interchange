@@ -11,7 +11,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeer,
+    ServiceProviderDeliveries, ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -28,7 +28,7 @@ import {useSession} from "next-auth/react";
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
@@ -372,7 +372,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             title= "Private channels"
-                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannels}
                         />
                     )}
                     {serviceProviderRow && field === 'privateChannelsPeer' && (
@@ -380,7 +380,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             title= "Private channel subscription"
-                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannelsPeer}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
                         />
                     )}
                 </Box>

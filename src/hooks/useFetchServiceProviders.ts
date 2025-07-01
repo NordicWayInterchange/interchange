@@ -1,66 +1,41 @@
 import {useQuery} from "@tanstack/react-query";
-import {
-    ServiceProviderCapabilities,
-    ServiceProviderDeliveries,
-    ServiceProviderPrivateChannels,
-    ServiceProviderPrivateChannelsPeer,
-    ServiceProviders,
-    ServiceProviderSubscriptions
-} from "@/types/serviceProviders";
+import {ServiceProviders} from "@/types/serviceProviders";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
-    id: number;
-    name: string;
-    subscriptions: Array<ServiceProviderSubscriptions>;
-    capabilities: Array<ServiceProviderCapabilities>;
-    deliveries: Array<ServiceProviderDeliveries>;
-    privateChannels: Array<ServiceProviderPrivateChannels>;
-    privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer>;
-    privatechannels: any
-} | {
-    id: number;
-    name: string;
-    subscriptions: Array<ServiceProviderSubscriptions>;
-    capabilities: Array<ServiceProviderCapabilities>;
-    deliveries: Array<ServiceProviderDeliveries>;
-    privateChannels: Array<ServiceProviderPrivateChannels>;
-    privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer>;
-    privatechannels: number
-}>[]> = async (commonName: string) => {
+const fetchServiceProviders = async (
+    commonName: string,
+): Promise<any> => {
     const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         const serviceProviders: ServiceProviders[] = await res.json();
         const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
-            let fetchServiceProviderPrivateChannels = null;
-            let fetchServiceProviderPrivateChannelsPeer = null;
+            let fetchServiceProviderPrivatechannels = null;
+            let fetchServiceProviderPrivatechannelsPeer = null;
             let privateChannelsData = null;
             let peersData = null;
             try {
-                fetchServiceProviderPrivateChannels = await fetch(
+                fetchServiceProviderPrivatechannels = await fetch(
                    `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
                );
-                if (fetchServiceProviderPrivateChannels.ok) {
-                     privateChannelsData = await fetchServiceProviderPrivateChannels.json();
+                if (fetchServiceProviderPrivatechannels.ok) {
+                     privateChannelsData = await fetchServiceProviderPrivatechannels.json();
                 }
            } catch (err) {
                console.error(
-                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannels?.status} - ${fetchServiceProviderPrivateChannels?.statusText}`
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivatechannels?.status} - ${fetchServiceProviderPrivatechannels?.statusText}`
                );
                return {...serviceProvider, privatechannels: 0 };
            }
 
            try {
-               fetchServiceProviderPrivateChannelsPeer = await fetch(
+               fetchServiceProviderPrivatechannelsPeer = await fetch(
                    `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels/peer`
                );
-               if (fetchServiceProviderPrivateChannelsPeer.ok) {
-                    peersData = await fetchServiceProviderPrivateChannelsPeer.json();
+               if (fetchServiceProviderPrivatechannelsPeer.ok) {
+                    peersData = await fetchServiceProviderPrivatechannelsPeer.json();
                }
            } catch (err) {
                console.error(
-                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannelsPeer?.status} - ${fetchServiceProviderPrivateChannelsPeer?.statusText}`
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivatechannelsPeer?.status} - ${fetchServiceProviderPrivatechannelsPeer?.statusText}`
                );
                return {...serviceProvider, privatechannelsPeer: 0 };
            }
