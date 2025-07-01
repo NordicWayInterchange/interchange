@@ -18,7 +18,7 @@ import {
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
-import {ServiceProviderPrivateChannels, ServiceProviderPrivateChannelsPeer} from "@/types/serviceProviders";
+import {ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer} from "@/types/serviceProviders";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
@@ -56,13 +56,13 @@ const fetchAllQueues = async (params: basicGetParams) => {
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
     const res = await fetchAdminUIPrivateChannels(params);
-    const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
+    const privateChannels: Array<ServiceProviderPrivatechannels> = await res.data;
     return [res.status, privateChannels];
 };
 
 const fetchPrivateChannelsPeer = async (params: extendedGetParams) => {
     const res = await fetchAdminUIPrivateChannelsPeer(params);
-    const privateChannelsPeer: Array<ServiceProviderPrivateChannelsPeer> = await res.data;
+    const privateChannelsPeer: Array<ServiceProviderPrivatechannelsPeer> = await res.data;
     return [res.status, privateChannelsPeer];
 };
 
