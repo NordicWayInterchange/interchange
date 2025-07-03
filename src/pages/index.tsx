@@ -99,7 +99,7 @@ export default function Home() {
             secondSubValueHeader: 'Subscriptions',
             thirdSubValueHeader: 'Deliveries',
             fourthSubValueHeader: 'Private channels',
-            fifthSubValueHeader: 'Private channels peers',
+            fifthSubValueHeader: 'Private channel subscriptions',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
@@ -178,13 +178,13 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 280,
+                                        width: 310,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 280,
+                                        height: 300,
                                         boxShadow: 1
                                     }}
                                 >
@@ -210,7 +210,7 @@ export default function Home() {
                                             {[{ header: shortcut.fourthSubValueHeader, count: shortcut.fourthSubValueCount }, { header: shortcut.fifthSubValueHeader, count: shortcut.fifthSubValueCount}].map(
                                                 (entry, i) => (
                                                     <Box key={i}>
-                                                        <Typography sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography noWrap={true} sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
                                                         <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
                                                     </Box>
                                                 )

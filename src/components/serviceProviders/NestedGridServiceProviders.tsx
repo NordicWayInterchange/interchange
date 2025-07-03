@@ -248,8 +248,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         nestedColumns = [
             {
                 ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
-                    const value = params.row.id;
-                    return value ? value.substring(0, 8) : '';
+                    return params.row.id;
+                    //return value ? value.substring(0, 8) : ''; // shorten the id later?
                 }
             },
             {
@@ -284,8 +284,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         nestedColumns = [
             {
                 ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
-                    const value = params.row.id;
-                    return value ? value.substring(0, 8) : '';
+                    return params.row.id;
+                    //return value ? value.substring(0, 8) : ''; Shorten the id later?
                 }
             },
             {
@@ -379,7 +379,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <PrivateChannelDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            title= "Private channel subscription"
+                            title= "Private channel subscriptions"
                             privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
                         />
                     )}
