@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import jakarta.transaction.Transactional;
 
@@ -165,9 +166,16 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", "Test subscription");
+        Set<LocalDelivery> deliveries = Set.of(delivery);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(),
+                Set.of(),
+                deliveries,
+                LocalDateTime.now()
+
+        );
 
         repository.save(serviceProvider);
         service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
