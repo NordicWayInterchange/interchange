@@ -13,6 +13,7 @@ import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import NestedGridExchanges from "@/components/exchanges/NestedGridExchanges";
+import SearchBox from "@/components/shared/components/SearchBox";
 
 
 const Exchanges = () => {
@@ -111,14 +112,7 @@ const Exchanges = () => {
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
-                    <TextField
-                        label="Search by ID"
-                        variant="outlined"
-                        value={searchId}
-                        onChange={(e) => setSearchId(e.target.value)}
-                        style={{ marginBottom: 16, marginTop: -25 }}
-                        type="text"
-                    />
+                    <SearchBox searchId={searchId} setSearchId={setSearchId} />
                     <DataGrid
                         columns={tableHeaders}
                         rows={filteredRows}

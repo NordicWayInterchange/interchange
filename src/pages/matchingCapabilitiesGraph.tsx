@@ -190,8 +190,8 @@ const MatchingCapabilitiesGraph: React.FC = () => {
         <Box flex={1}>
             <Mainheading>Graphs</Mainheading>
             <Subheading>
-                You can click on each service providers to see matching capabilities for each delivery. You can also
-                click on each box, to view more information.
+                These include only the service providers that have matching capabilities for each delivery. You can click on each service providers and the boxes inside
+                to view more information.
             </Subheading>
             <Divider sx={{marginY: 3}}/>
             {(matchingCapabilities === undefined || matchingCapabilities === null) ? (
