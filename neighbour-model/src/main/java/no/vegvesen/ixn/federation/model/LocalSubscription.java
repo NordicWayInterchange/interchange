@@ -17,6 +17,7 @@ public class LocalSubscription {
     @Column(name="id")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
@@ -40,6 +41,9 @@ public class LocalSubscription {
     @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
     private Set<LocalConnection> connections = new HashSet<>();
 
+    @Column
+    private String description;
+
     // ErrorMessage is needed for sending the error message back to the user
     // Any subscription with an error message is deleted shortly after creation
     @Column
@@ -48,19 +52,14 @@ public class LocalSubscription {
     public LocalSubscription() {
     }
 
-    public LocalSubscription(String selector, String consumerCommonName) {
+    public LocalSubscription(String selector, String consumerCommonName, String description){
         this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
+        this.description = description;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
-        this.selector = new Selector(selector);
-        this.consumerCommonName = consumerCommonName;
-    }
-
-    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
-        this.id = id;
         this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
@@ -71,7 +70,6 @@ public class LocalSubscription {
         this.selector = new Selector(selector);
         this.consumerCommonName = consumerCommonName;
     }
-
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
@@ -127,6 +125,10 @@ public class LocalSubscription {
         }
     }
 
+    public void addLocalEndpoint(LocalEndpoint newEndpoint) {
+        localEndpoints.add(newEndpoint);
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -151,39 +153,37 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer sub_id) {
+        this.id = sub_id;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LocalSubscription that = (LocalSubscription) o;
-        return Objects.equals(selector, that.selector) &&
-                Objects.equals(consumerCommonName, that.consumerCommonName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(selector, consumerCommonName);
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    @Override
-    public String toString() {
-        return "LocalSubscription{" +
-                "id=" + id +
-                "uuid=" + uuid +
-                ", status=" + status +
-                ", selector=" + selector +
-                ", consumerCommonName=" + consumerCommonName +
-                ", errorMessage=" + errorMessage +
-                '}';
+    public boolean isSharded() {
+        return selector.getSelector().contains("shardId");
     }
 
     public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {
@@ -195,15 +195,31 @@ public class LocalSubscription {
         }
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalSubscription that = (LocalSubscription) o;
+        return Objects.equals(selector, that.selector) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName) &&
+                Objects.equals(description, that.description);
     }
 
-    public void setId(Integer sub_id) {
-        this.id = sub_id;
+    @Override
+    public int hashCode() {
+        return Objects.hash(selector, consumerCommonName, description);
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    @Override
+    public String toString() {
+        return "LocalSubscription{" +
+                "id=" + id +
+                "uuid=" + uuid +
+                ", status=" + status +
+                ", selector=" + selector +
+                ", consumerCommonName=" + consumerCommonName +
+                ", errorMessage=" + errorMessage +
+                ", description=" + description +
+                '}';
     }
 }

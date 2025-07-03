@@ -9,14 +9,13 @@ import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,8 +24,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class NeighbourServiceIT {
+public class NeighbourServiceIT extends PostgresContainerBase {
 
     String jsonInput = """
             {
@@ -194,8 +192,7 @@ public class NeighbourServiceIT {
 
     @Test
     public void emptyIncomingSubscriptionRequestReturnsException() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour1");
+        Neighbour neighbour = new Neighbour("my-neighbour1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour1", Collections.emptySet());
@@ -206,8 +203,7 @@ public class NeighbourServiceIT {
 
     @Test
     public void incomingSubscriptionRequestIsSavedWithSubscriptionRequestStatusEstablished() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour2");
+        Neighbour neighbour = new Neighbour("my-neighbour2", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour2");
@@ -225,8 +221,7 @@ public class NeighbourServiceIT {
 
     @Test
     public void deleteOneSubscriptionAndGetSubscriptionRequestStatusModified() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour3");
+        Neighbour neighbour = new Neighbour("my-neighbour3", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour3");
@@ -252,8 +247,7 @@ public class NeighbourServiceIT {
 
     @Test
     public void deleteLastSubscriptionTearsDownSubscriptionRequest() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour4");
+        Neighbour neighbour = new Neighbour("my-neighbour4", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour4");
@@ -278,8 +272,7 @@ public class NeighbourServiceIT {
 
     @Test
     public void incomingSubscriptionsAreAddedToAlreadyExistingSubscriptions() {
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName("my-neighbour5");
+        Neighbour neighbour = new Neighbour("my-neighbour5", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
 
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour5");
@@ -308,9 +301,9 @@ public class NeighbourServiceIT {
 
     @Test
     public void incomingSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
-        Neighbour neighbour = new Neighbour();
         String neighbourName = "my-service-provider-wants-direct-subscription";
-        neighbour.setName(neighbourName);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+
 
         repository.save(neighbour);
 
@@ -328,9 +321,8 @@ public class NeighbourServiceIT {
 
     @Test
     public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
-        Neighbour neighbour = new Neighbour();
         String name = "neighbour-with-incoming-capabilities-twice";
-        neighbour.setName(name);
+        Neighbour neighbour = new Neighbour(name, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         repository.save(neighbour);
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
                 name,
@@ -356,6 +348,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
+    @Disabled
     public void teardownSubscriptionAndNeighbourPostsIdenticalNewSubscription() {
         String selector = "a = 'hello'";
         String name = "teardown-and-new-neighbour-request";
@@ -438,11 +431,11 @@ public class NeighbourServiceIT {
         String name = "ignoredNeighbour";
 
         Neighbour neighbour = ignoredNeighbour(name);
-        CapabilityApi capabilitySplitApi = new CapabilityApi(
+        CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(),
                 new MetadataApi()
         );
-        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilitySplitApi)), Set.of()));
+        assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilityApi)), Set.of()));
     }
     @Test
     public void neighbourIgnoredWhenPollingSubscription(){

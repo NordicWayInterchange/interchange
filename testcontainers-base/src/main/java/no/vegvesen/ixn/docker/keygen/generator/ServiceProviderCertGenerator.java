@@ -1,11 +1,7 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -70,7 +66,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
                 outputPath);
     }
 
-        @Override
+    @Override
     public void configure() {
         this.withFileSystemBind(hostCsrPath,containerCsrPath, BindMode.READ_ONLY);
         this.withFileSystemBind(hostCaCertPath,containerCaCertPath,BindMode.READ_ONLY);

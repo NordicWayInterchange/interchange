@@ -3,8 +3,7 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +47,21 @@ public class NapServerErrorAdvice {
         return error(BAD_REQUEST, e);
     }
 
+    @ExceptionHandler({DeliveryPostException.class})
+    public ResponseEntity<ErrorDetails> handleDeliveryPostException(DeliveryPostException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({CapabilityPostException.class})
+    public ResponseEntity<ErrorDetails> handleCapabilityPostException(CapabilityPostException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({CapabilityNotValidException.class})
+    public ResponseEntity<ValidationErrorDetails> handleNotValidException(CapabilityNotValidException e) {
+        return notValidCapabilityError(e, e.getErrors());
+    }
+
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
         return error(NOT_FOUND, e);
@@ -63,6 +77,21 @@ public class NapServerErrorAdvice {
         return error(INTERNAL_SERVER_ERROR,e);
     }
 
+    @ExceptionHandler({PrivateChannelException.class})
+    public ResponseEntity<ErrorDetails> handlePrivateChannelException(PrivateChannelException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({PathVariableException.class})
+    public ResponseEntity<ErrorDetails> handlePathVariableException(PathVariableException e){
+        return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({AlreadyExistsException.class})
+    public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
+        return error(CONFLICT, e);
+    }
+
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
 
@@ -70,4 +99,13 @@ public class NapServerErrorAdvice {
         return new ResponseEntity<>(errorDetails, status);
     }
 
+    private ResponseEntity<ValidationErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
+        ValidationErrorDetails errorDetails = new ValidationErrorDetails(
+                LocalDateTime.now(),
+                e.getMessage(),
+                validationErrors
+        );
+        logger.error("Error in interchange server. ", e);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
 }

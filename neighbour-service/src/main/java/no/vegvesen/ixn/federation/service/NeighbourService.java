@@ -216,7 +216,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.ACCEPTED);
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findDistinctNeighboursByIgnoreIsAndNeighbourRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, NeighbourSubscriptionStatus.ACCEPTED, NeighbourSubscriptionStatus.CREATED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
 	}
@@ -245,8 +245,8 @@ public class NeighbourService {
 		}
 	}
 
-	public String getNodeName() {
-		return interchangeNodeProperties.getName();
+	public String getBrokerExternalName() {
+		return interchangeNodeProperties.getBrokerExternalName();
 	}
 
 	public String getMessagePort() {

@@ -15,7 +15,7 @@ public class LocalDelivery {
     @Column(name="id")
     private Integer id;
 
-    @Column
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -29,10 +29,11 @@ public class LocalDelivery {
     @UpdateTimestamp
     private LocalDateTime lastUpdatedTimestamp;
 
-    private String exchangeName = "";
-
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
+
+    @Column
+    private String description;
 
     @Column
     private String errorMessage;
@@ -45,6 +46,14 @@ public class LocalDelivery {
         this.endpoints.addAll(endpoints);
         this.selector = new Selector(selector);
         this.status = status;
+    }
+
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status, String description) {
+        this.id = id;
+        this.endpoints.addAll(endpoints);
+        this.selector = new Selector(selector);
+        this.status = status;
+        this.description = description;
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
@@ -61,8 +70,19 @@ public class LocalDelivery {
     }
 
 
-    public LocalDelivery(String selector, LocalDeliveryStatus status) {
-        this.endpoints = Collections.emptySet();
+    public LocalDelivery(String selector, String description){
+        this.selector = new Selector(selector);
+        this.description = description;
+    }
+
+    public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
+        this.selector = new Selector(selector);
+        this.status = status;
+        this.description = description;
+    }
+
+    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
+        this.endpoints = endpoints;
         this.selector = new Selector(selector);
         this.status = status;
     }
@@ -115,14 +135,6 @@ public class LocalDelivery {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getExchangeName() {
-        return exchangeName;
-    }
-
-    public void setExchangeName(String exchangeName) {
-        this.exchangeName = exchangeName;
-    }
-
     public LocalDeliveryStatus getStatus() {
         return status;
     }
@@ -135,6 +147,14 @@ public class LocalDelivery {
         this.endpoints.removeAll(endpointsToRemove);
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -145,10 +165,6 @@ public class LocalDelivery {
 
     public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
         this.endpoints.remove(endpoint);
-    }
-
-    public boolean exchangeExists() {
-        return !exchangeName.isEmpty();
     }
 
     @Override
@@ -168,13 +184,13 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
-                "uuid=" + uuid +
+                ", uuid=" + uuid +
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 ", errorMessage=" + errorMessage +
+                ", description=" + description +
                 '}';
     }
 }

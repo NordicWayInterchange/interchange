@@ -35,6 +35,14 @@ public class NeighbourSubscriptionRequest {
         this.subscription.addAll(subscription);
     }
 
+    public Integer getSubreq_id() {
+        return subreq_id;
+    }
+
+    public void setSubreq_id(Integer subreq_id) {
+        this.subreq_id = subreq_id;
+    }
+
     public Set<NeighbourSubscription> getSubscriptions() {
         return subscription;
     }
@@ -77,6 +85,13 @@ public class NeighbourSubscriptionRequest {
         return getSubscriptions().stream()
                 .filter(s -> s.getSubscriptionStatus().equals(status))
                 .collect(Collectors.toSet());
+    }
+    public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatusIn(NeighbourSubscriptionStatus ... status) {
+        Set<NeighbourSubscription> neighbourSubscriptions = new HashSet<>();
+        for(NeighbourSubscriptionStatus neighbourStatus : status){
+            neighbourSubscriptions.addAll(getSubscriptions().stream().filter(s -> s.getSubscriptionStatus().equals(neighbourStatus)).collect(Collectors.toSet()));
+        }
+        return neighbourSubscriptions;
     }
 
     public boolean hasTearDownSubscriptions() {

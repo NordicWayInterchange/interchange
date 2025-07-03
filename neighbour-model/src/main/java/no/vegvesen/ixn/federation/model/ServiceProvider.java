@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -18,6 +17,7 @@ public class ServiceProvider {
 	@Column(name = "id")
 	private Integer id;
 
+	@Column(length = 320)
 	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -26,7 +26,7 @@ public class ServiceProvider {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
-	private Set<LocalSubscription> subscriptions = new HashSet<>();
+	private List<LocalSubscription> subscriptions = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
@@ -37,8 +37,7 @@ public class ServiceProvider {
 	public ServiceProvider() {
 	}
 
-	@JsonCreator
-	public ServiceProvider(@JsonProperty("name") String name) {
+	public ServiceProvider(String name) {
 		this.name = name;
 	}
 
@@ -46,6 +45,12 @@ public class ServiceProvider {
 						   Set<LocalSubscription> subscriptions) {
 		this.name = name;
 		this.subscriptions.addAll(subscriptions);
+	}
+
+	public ServiceProvider(String name,
+						   Capabilities capabilities) {
+		this.name = name;
+		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(Integer id,
@@ -65,17 +70,10 @@ public class ServiceProvider {
 						   Capabilities capabilities,
 						   Set<LocalSubscription> subscriptions,
 						   LocalDateTime subscriptionUpdated) {
-
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = subscriptionUpdated;
-	}
-
-	public ServiceProvider(String name,
-						   Capabilities capabilities) {
-		this.name = name;
-		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(String name,
@@ -114,7 +112,7 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 	}
 
-	public Set<LocalSubscription> getSubscriptions() {
+	public List<LocalSubscription> getSubscriptions() {
 		return subscriptions;
 	}
 
@@ -123,13 +121,14 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void addLocalSubscriptions(Set<LocalSubscription> subscriptions) {
+	public void addLocalSubscriptions(List<LocalSubscription> subscriptions) {
 		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
+	public void setSubscriptions(List<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
+		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	public Optional<LocalDateTime> getSubscriptionUpdated() {
@@ -160,29 +159,18 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
-		this.setSubscriptions(newSubscriptions);
-		this.subscriptionUpdated = LocalDateTime.now();
-	}
-
-	//TODO: REMOVE
-	public void removeSubscription(LocalSubscription subscription) {
-		subscriptions.remove(subscription);
-		this.subscriptionUpdated = LocalDateTime.now();
-	}
-
 	public void removeSubscriptions(Set<LocalSubscription> subscriptionsToRemove) {
 		subscriptions.removeAll(subscriptionsToRemove);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
-		return (capabilities.hasDataTypes() ||
+		return (!capabilities.getCapabilities().isEmpty() ||
 				!activeSubscriptions().isEmpty());
 	}
 
 	public boolean hasCapabilities () {
-		return capabilities.hasDataTypes();
+		return !capabilities.getCapabilities().isEmpty();
 	}
 
 	public boolean hasDeliveries () {
@@ -205,7 +193,6 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
-
 	public void setDeliveries(Set<LocalDelivery> deliveries) {
 		this.deliveries = deliveries;
 	}
@@ -218,6 +205,10 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
+    public void addDelivery(LocalDelivery newDelivery){
+        deliveries.add(newDelivery);
+    }
+
 	public void removeLocalDelivery(String deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
@@ -229,6 +220,14 @@ public class ServiceProvider {
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
+	public LocalDelivery findDeliveryByUuid(String deliveryUuid) {
+		return deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getUuid().equals(deliveryUuid))
+				.findFirst()
+				.orElse(null);
+	}
+
 	public Capability getCapability(String capabilityId){
 		return
 				getCapabilities().getCapabilities().stream()
@@ -237,11 +236,11 @@ public class ServiceProvider {
 						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
-	public Set<LocalSubscription> getSavedSubscriptions(Set<LocalSubscription> allSubscriptions){
-		return this.getSubscriptions()
-				.stream()
-				.filter(subscription -> allSubscriptions.contains(subscription))
-				.collect(Collectors.toSet());
+	public Capability getCreatedCapability(String capabilityId){
+		return getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED).stream()
+				.filter(c->c.getUuid().equals(capabilityId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
 	public LocalSubscription getSubscription(String subscriptionId){
@@ -255,7 +254,7 @@ public class ServiceProvider {
 	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries){
 		return this.getDeliveries()
 				.stream()
-				.filter(delivery -> allDeliveries.contains(delivery))
+				.filter(allDeliveries::contains)
 				.collect(Collectors.toSet());
 	}
 

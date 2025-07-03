@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -8,19 +9,18 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,22 +30,22 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class ExportServiceProvidersIT {
+public class ExportServiceProvidersIT extends PostgresContainerBase {
 
     @TempDir
     Path tempDir;
 
     @Autowired
     ServiceProviderRepository repository;
+
     @Autowired
     PrivateChannelRepository privateChannelRepository;
 
 
     @Test
     public void getServiceProviders() throws IOException {
-        ServiceProvider serviceProvider = new ServiceProvider("testuser");
-        serviceProvider.setCapabilities(
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "testuser",
                 new Capabilities(
                         Collections.singleton(
                                 new Capability(
@@ -62,27 +62,32 @@ public class ExportServiceProvidersIT {
                                         )
                                 )
                         )
-                )
-        );
-        serviceProvider.setSubscriptions(Collections.singleton(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "originatingCountry = 'NO' and messageType = 'DENM'",
-                        "my-node")
-                )
+                ),
+                Set.of(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "originatingCountry = 'NO' and messageType = 'DENM'",
+                                "my-node")
+                ),
+                LocalDateTime.now()
         );
         repository.save(serviceProvider);
 
-        privateChannelRepository.save(new PrivateChannel(
-                "my-peer",
-                PrivateChannelStatus.CREATED,
-                new PrivateChannelEndpoint(
-                        "my-host",
-                        5671,
-                        "my-queue"
-                ),
-                serviceProvider.getName()
-        ));
+        privateChannelRepository.save(
+                new PrivateChannel(
+                        Collections.singleton(
+                                new Peer("my-peer")
+                        ),
+                        PrivateChannelStatus.CREATED,
+                        "my-channel",
+                        new PrivateChannelEndpoint(
+                                "my-host",
+                                5671,
+                                "my-queue"
+                        ),
+                        serviceProvider.getName()
+                )
+        );
 
         Path path = tempDir.resolve("output.json");
         List<ServiceProvider> serviceProviderList = repository.findAll();
@@ -121,7 +126,8 @@ public class ExportServiceProvidersIT {
             Set<PrivateChannelResponseApi> privateChannels = new HashSet<>();
             for (PrivateChannel privateChannel : serviceProviderPrivateChannelList) {
                 PrivateChannelEndpointApi endpointApi = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(),privateChannel.getEndpoint().getPort(),privateChannel.getEndpoint().getQueueName());
-                privateChannels.add(new PrivateChannelResponseApi(privateChannel.getPeerName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpointApi, privateChannel.getUuid()));
+                Set<String> peers = privateChannel.getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
+                privateChannels.add(new PrivateChannelResponseApi(peers, PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), privateChannel.getDescription(), endpointApi, privateChannel.getUuid()));
             }
             serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
@@ -129,6 +135,4 @@ public class ExportServiceProvidersIT {
         System.out.println(writer.writeValueAsString(serviceProviders));
         writer.writeValue(path.toFile(),serviceProviders);
     }
-
-
 }

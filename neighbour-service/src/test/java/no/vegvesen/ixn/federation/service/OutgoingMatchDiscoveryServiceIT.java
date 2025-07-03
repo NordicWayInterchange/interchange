@@ -7,23 +7,19 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class OutgoingMatchDiscoveryServiceIT {
+public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Autowired
     private OutgoingMatchRepository repository;
@@ -41,9 +37,8 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatMatchIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -54,8 +49,9 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
+        cap1.setStatus(CapabilityStatus.CREATED);
 
         Capability cap2 = new Capability(
                 new DenmApplication(
@@ -66,14 +62,18 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+            Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -86,9 +86,8 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatMultipleMatchesAreCreated() {
-        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -99,7 +98,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -112,14 +111,18 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -132,9 +135,8 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void testThatDeliveryHasNoOverlap() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
         Capability cap1 = new Capability(
                 new DenmApplication(
@@ -145,7 +147,7 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -158,14 +160,20 @@ public class OutgoingMatchDiscoveryServiceIT {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata()
+                new Metadata(RedirectStatus.OPTIONAL)
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
-        serviceProvider.setCapabilities(new Capabilities(
-                Sets.newHashSet(Arrays.asList(cap1, cap2))));
+        Capabilities capabilities = new Capabilities(Set.of(cap1, cap2));
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                capabilities,
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+
+        );
         serviceProviderRepository.save(serviceProvider);
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
@@ -178,16 +186,140 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
-        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
-        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
+        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery");
+        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery");
 
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-
-        serviceProvider.setDeliveries(new HashSet<>(Arrays.asList(delivery1, delivery2)));
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "service-provider",
+                new Capabilities(),
+                Set.of(),
+                Set.of(delivery1,delivery2),
+                LocalDateTime.now()
+        );
         serviceProviderRepository.save(serviceProvider);
 
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Collections.singletonList(serviceProvider));
         assertThat(repository.findAll()).hasSize(0);
     }
 
+    @Test
+    public void matchesAreOnlyCreatedWhenCapabilityIsCreated() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap1.setStatus(CapabilityStatus.CREATED);
+
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-2",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap2.setStatus(CapabilityStatus.REQUESTED);
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap1, cap2)),
+               Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(1);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Set.of(cap)),
+               Set.of(),
+               Set.of(delivery),
+               LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(0);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+
+
+        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        metadata.setShardCount(2);
+
+        Capability cap = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singletonList("1234"),
+                        Collections.singletonList(6)
+                ),
+                metadata
+        );
+        cap.setStatus(CapabilityStatus.CREATED);
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                 new Capabilities(Set.of(cap)),
+                Set.of(),
+                Set.of(delivery),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(1);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
 }

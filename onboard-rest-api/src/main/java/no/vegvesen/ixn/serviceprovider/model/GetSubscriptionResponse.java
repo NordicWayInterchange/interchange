@@ -1,16 +1,28 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 import java.util.Set;
 
 public class GetSubscriptionResponse {
+
     private String id;
+
     private String path;
+
     private String selector;
+
     private String consumerCommonName;
+
     private long lastUpdatedTimestamp;
+
     private LocalActorSubscriptionStatusApi status;
+
     private Set<LocalEndpointApi> localEndpointApis;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String description;
 
     public GetSubscriptionResponse() {
     }
@@ -21,7 +33,8 @@ public class GetSubscriptionResponse {
                                    String consumerCommonName,
                                    long lastUpdatedTimestamp,
                                    LocalActorSubscriptionStatusApi status,
-                                   Set<LocalEndpointApi> localEndpointApis) {
+                                   Set<LocalEndpointApi> localEndpointApis,
+                                   String subscription) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -29,6 +42,7 @@ public class GetSubscriptionResponse {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
         this.localEndpointApis = localEndpointApis;
+        this.description = subscription;
     }
 
     public String getId() {
@@ -87,6 +101,14 @@ public class GetSubscriptionResponse {
         this.localEndpointApis = localEndpointApis;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,6 +131,7 @@ public class GetSubscriptionResponse {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
                 ", endpoints=" + localEndpointApis +
+                ", description=" + description +
                 '}';
     }
 }

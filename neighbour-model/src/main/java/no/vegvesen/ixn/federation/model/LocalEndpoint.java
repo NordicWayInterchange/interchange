@@ -36,6 +36,14 @@ public class LocalEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getSource() {
         return source;
     }
@@ -74,10 +82,6 @@ public class LocalEndpoint {
 
     public void setMaxMessageRate(Integer maxMessageRate) {
         this.maxMessageRate = maxMessageRate;
-    }
-
-    public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        return source.equals(listenerEndpoint.getSource()) && host.equals(listenerEndpoint.getHost()) && port.equals(listenerEndpoint.getPort());
     }
 
     @Override

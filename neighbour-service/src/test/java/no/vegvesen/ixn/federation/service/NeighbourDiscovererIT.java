@@ -12,14 +12,11 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.net.ssl.SSLContext;
 import jakarta.transaction.Transactional;
@@ -30,19 +27,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import no.vegvesen.ixn.docker.PostgresContainerBase;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class NeighbourDiscovererIT {
+public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 	private final LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
-	@MockBean
+	@MockitoBean
 	SSLContext mockedSSL;
 
-	@MockBean
+	@MockitoBean
 	DNSFacade mockDnsFacade;
 
-	@MockBean
+	@MockitoBean
 	NeighbourFacade mockNeighbourFacade;
 
 	@Autowired
@@ -71,10 +70,8 @@ public class NeighbourDiscovererIT {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", nodeProperties.getName()));
 
-		Neighbour neighbour1 = new Neighbour();
-		neighbour1.setName("neighbour-one");
-		Neighbour neighbour2 = new Neighbour();
-		neighbour2.setName("neighbour-two");
+		Neighbour neighbour1 = new Neighbour("neighbour-one", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+		Neighbour neighbour2 = new Neighbour("neighbour-two", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
 		NeighbourCapabilities c1 = new NeighbourCapabilities(
 				CapabilitiesStatus.KNOWN,
@@ -518,12 +515,10 @@ public class NeighbourDiscovererIT {
 		Endpoint endpoint = new Endpoint(
 			"source",
 				"host",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
 
-		SubscriptionShard shard = new SubscriptionShard("target");
-
-		endpoint.setShard(shard);
 		subscription.setEndpoints(Collections.singleton(endpoint));
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
@@ -593,13 +588,8 @@ public class NeighbourDiscovererIT {
 		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
 		String consumerCommonName = nodeProperties.getName();
 
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		Set<LocalSubscription> localSubscriptions = Set.of(new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName));
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
-		localSubscriptions.add(subscription);
-
-		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-		serviceProvider.addLocalSubscription(subscription);
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
 				.thenReturn(Set.of(
@@ -633,10 +623,9 @@ public class NeighbourDiscovererIT {
 			neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusHours(1));
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
+		neighbour.getCapabilities().getCapabilities().clear();
 
-		neighbour.setCapabilities(new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
-
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Capability.transformNeighbourCapabilityToCapability(neighbour.getCapabilities().getCapabilities()));
+		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Collections.emptySet());
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
@@ -657,11 +646,9 @@ public class NeighbourDiscovererIT {
 		Endpoint endpoint = new Endpoint(
 				"neighbour-endpoints-source",
 				"neighbour-endpoints",
-				5671
+				5671,
+				new SubscriptionShard("neighbour-endpoints-target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("neighbour-endpoints-target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -742,12 +729,9 @@ public class NeighbourDiscovererIT {
 		Endpoint endpoint = new Endpoint(
 				"neighbour-endpoints-failed-source",
 				"neighbour-endpoints-failed",
-				5671
+				5671,
+				new SubscriptionShard("neighbour-endpoints-failed-target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("neighbour-endpoints-failed-target");
-		endpoint.setShard(shard);
-
 		sub.setEndpoints(Collections.singleton(endpoint));
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(
@@ -919,11 +903,9 @@ public class NeighbourDiscovererIT {
 		Endpoint endpoint = new Endpoint(
 				"source",
 				"neighbour",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -986,11 +968,9 @@ public class NeighbourDiscovererIT {
 		Endpoint endpoint = new Endpoint(
 				"source",
 				"neighbour",
-				5671
+				5671,
+				new SubscriptionShard("target")
 		);
-
-		SubscriptionShard shard = new SubscriptionShard("target");
-		endpoint.setShard(shard);
 
 		sub.setEndpoints(Collections.singleton(endpoint));
 
@@ -1042,7 +1022,6 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void neighbourIsIgnoredDuringCapabilityExchange(){
 		String name = "ignoredNeighbour1";
-		Neighbour neighbour = ignoredNeighbour(name);
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
 	}
@@ -1069,7 +1048,6 @@ public class NeighbourDiscovererIT {
 	public void neighbourIsIgnoredWhenPollingSubscription(){
 		String name = "ignoredNeighbour3";
 		Neighbour neighbour = ignoredNeighbour(name);
-		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED))));
 		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(0)).pollSubscriptionStatus(any(),any());
 	}
@@ -1112,7 +1090,7 @@ public class NeighbourDiscovererIT {
 						)
 				)),
 				new NeighbourSubscriptionRequest(),
-				new SubscriptionRequest()
+				new SubscriptionRequest(Set.of(new Subscription("test", SubscriptionStatus.REQUESTED)))
 		);
 		neighbour.setIgnore(true);
 		repository.save(neighbour);

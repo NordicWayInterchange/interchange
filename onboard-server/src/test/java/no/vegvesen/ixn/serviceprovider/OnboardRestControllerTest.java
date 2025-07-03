@@ -18,12 +18,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDateTime;
@@ -41,13 +41,13 @@ public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private ServiceProviderRepository serviceProviderRepository;
 
-	@MockBean
+	@MockitoBean
 	private NeighbourRepository neighbourRepository;
 
-	@MockBean
+	@MockitoBean
 	private PrivateChannelRepository privateChannelRepository;
 
 	@Autowired
@@ -75,11 +75,11 @@ public class OnboardRestControllerTest {
 	@Test
 	void postingCapabilitiesReturnsStatusOk() throws Exception {
 
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
+		DatexApplicationApi app = new DatexApplicationApi("NO12345", "NO12345:NO-pub", "NO", "1.0", List.of("1200"), "SituationPublication", "publisherName");
 		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilityApi datexNo = new CapabilityApi();
 		datexNo.setApplication(app);
@@ -114,7 +114,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void deletingExistingCapabilitiesReturnsNoContent() throws Exception {
-		String serviceProviderName = "Second Service Provider";
+		String serviceProviderName = "SecondServiceProvider";
 		mockCertificate(serviceProviderName);
 		UUID uuid = UUID.randomUUID();
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
@@ -125,8 +125,10 @@ public class OnboardRestControllerTest {
 		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
-		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		ServiceProvider secondServiceProvider = new ServiceProvider(
+				serviceProviderName,
+				secondServiceProviderCapabilities
+		);
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -174,10 +176,10 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
-		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider);
+		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider, "DATEX sub");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(subscription1)
+				List.of(subscription1)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
@@ -210,9 +212,8 @@ public class OnboardRestControllerTest {
 
 		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(new AddSubscription(
-						"originatingCountry = 'NO'"
-				))
+				List.of(new AddSubscription(
+						"originatingCountry = 'NO'", "NO SUB"))
 		);
 
 		String validJson = objectMapper.writeValueAsString(request);
@@ -254,9 +255,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
 		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
+		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName, Set.of(seSubs,fiSubs));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -331,10 +330,10 @@ public class OnboardRestControllerTest {
 		mockCertificate(secondServiceProviderName);
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
-		AddSubscription addSubscription = new AddSubscription(selector);
+		AddSubscription addSubscription = new AddSubscription(selector, "DATEX SUB");
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
-				Collections.singleton(addSubscription)
+				List.of(addSubscription)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
@@ -365,7 +364,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void getCapabilitiesReturnsStatusOk()throws Exception{
-		String serviceProviderName = "First Service Provider";
+		String serviceProviderName = "FirstServiceProvider";
 		mockCertificate(serviceProviderName);
 
 		when(serviceProviderRepository.save(any())).thenReturn(new ServiceProvider(serviceProviderName));
@@ -390,11 +389,11 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void postingDeliveryReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 		AddDeliveriesRequest request = new AddDeliveriesRequest(
 				firstServiceProvider,
-				Collections.singleton(new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'"))
+				Collections.singleton(new AddDelivery("messageType = 'DATEX2' and originatingCountry = 'SE'", "DATEX Delivery"))
 		);
 
 		String requestBody = objectMapper.writeValueAsString(request);
@@ -423,7 +422,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void listingDeliveriesReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				1,
@@ -445,7 +444,7 @@ public class OnboardRestControllerTest {
 
 	@Test
 	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
@@ -457,7 +456,8 @@ public class OnboardRestControllerTest {
 		);
 		LocalDelivery localDelivery = new LocalDelivery(
 		"originatingCountry='NO'",
-		LocalDeliveryStatus.REQUESTED
+		LocalDeliveryStatus.REQUESTED,
+				"delivery"
 		);
 		localDelivery.setUuid(uuid.toString());
 
@@ -477,7 +477,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void deleteDeliveryReturnsNoContent() throws Exception {
 
-		String firstServiceProvider = "First Service Provider";
+		String firstServiceProvider = "FirstServiceProvider";
 		UUID uuid = UUID.randomUUID();
 		mockCertificate(firstServiceProvider);
 		ServiceProvider serviceProvider = new ServiceProvider(
@@ -525,6 +525,7 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(0)).save(any());
 	}
+
 	@Test
 	public void testAddingNullChannel() throws Exception{
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
@@ -540,11 +541,12 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(0)).save(any());
 	}
+
 	@Test
 	public void testAddingChannelWithServiceProviderAsPeerName() throws Exception {
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
-		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(serviceProviderName)));
+		AddPrivateChannelRequest request = new AddPrivateChannelRequest(serviceProviderName, List.of(new PrivateChannelRequestApi(Collections.singleton(serviceProviderName), "my-channel")));
 
 		mockMvc.perform(
 				post(String.format("/%s/privatechannels", serviceProviderName))
@@ -555,6 +557,7 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(0)).save(any());
 	}
+
 	@Test
 	public void testAddingInvalidRequest() throws Exception{
 		String serviceProviderName = "king_olav.bouvetinterchange.eu";
@@ -575,7 +578,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuid(any(),any())).thenReturn(savedPrivateChannel);
@@ -595,7 +598,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuid(serviceProviderName, savedPrivateChannel.getUuid())).thenReturn(savedPrivateChannel);
 
@@ -627,7 +630,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 		savedPrivateChannel.setUuid(UUID.randomUUID().toString());
 
 		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(any(), any(), any())).thenReturn(savedPrivateChannel);
@@ -644,7 +647,7 @@ public class OnboardRestControllerTest {
 	@Test
 	public void testGettingNonExistentChannel() throws Exception {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
-		PrivateChannel savedPrivateChannel = new PrivateChannel("king_gustaf.bouvetinterchange.eu", PrivateChannelStatus.REQUESTED, serviceProviderName);
+		PrivateChannel savedPrivateChannel = new PrivateChannel(Collections.singleton(new Peer("king_gustaf.bouvetinterchange.eu")), PrivateChannelStatus.REQUESTED, "my-channel", serviceProviderName);
 
 		mockCertificate(serviceProviderName);
 		when(privateChannelRepository.findByServiceProviderNameAndUuidAndStatusIsNot(serviceProviderName, savedPrivateChannel.getUuid(), PrivateChannelStatus.TEAR_DOWN)).thenReturn(savedPrivateChannel);
@@ -661,7 +664,7 @@ public class OnboardRestControllerTest {
 		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
 		mockCertificate(serviceProviderName);
 
-		PrivateChannel privateChannel = new PrivateChannel(serviceProviderName, PrivateChannelStatus.CREATED,serviceProviderName);
+		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer(serviceProviderName)), PrivateChannelStatus.CREATED, "my-channel", serviceProviderName);
 		when(privateChannelRepository.findAllByPeerName(any())).thenReturn(List.of(privateChannel));
 
 		mockMvc.perform(
@@ -670,4 +673,5 @@ public class OnboardRestControllerTest {
 
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
+
 }

@@ -14,31 +14,34 @@ public class Queue {
 
     private Long maximumMessageTtl;
 
+    private Boolean ensureNondestructiveConsumers;
+
     public Queue() {
 
     }
 
-    public Queue(String name, String id, Boolean durable, Long maximumMessageTtl) {
+    public Queue(String name, String id, Boolean durable, Long maximumMessageTtl, Boolean ensureNondestructiveConsumers) {
         this.name = name;
         this.id = id;
         this.durable = durable;
         this.maximumMessageTtl = maximumMessageTtl;
+        this.ensureNondestructiveConsumers = ensureNondestructiveConsumers;
     }
 
     public Queue(String name) {
-        this(name, null,null,null);
+        this(name, null,null,null, null);
     }
 
     public Queue(String name, long maximumMessageTtl) {
-        this(name,null,null,maximumMessageTtl);
+        this(name,null,null,maximumMessageTtl, null);
     }
 
     public Queue(String name, String id) {
-        this(name, id, null,null);
+        this(name, id, null,null, null);
     }
 
     public Queue(String name, boolean durable) {
-        this(name,null,durable,null);
+        this(name,null,durable,null, null);
     }
 
     public String getName() {
@@ -57,6 +60,10 @@ public class Queue {
         return durable;
     }
 
+    public Boolean getEnsureNondestructiveConsumers() {
+        return ensureNondestructiveConsumers;
+    }
+
     @Override
     public String toString() {
         return "Queue{" +
@@ -64,7 +71,7 @@ public class Queue {
                 ", name='" + name + '\'' +
                 ", durable=" + durable +
                 ", maximumMessageTtl=" + maximumMessageTtl +
+                ", ensureNondestructiveConsumers=" + ensureNondestructiveConsumers +
                 '}';
     }
-
 }

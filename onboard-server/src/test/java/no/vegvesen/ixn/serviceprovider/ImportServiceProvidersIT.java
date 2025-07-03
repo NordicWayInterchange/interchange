@@ -5,12 +5,10 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,11 +20,9 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
+@Disabled("This test has been superseded by import-export-service, and needs to be looked at")
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class ImportServiceProvidersIT {
-
+public class ImportServiceProvidersIT extends ServiceProviderImport.LocalInitializer {
 
     @Autowired
     ServiceProviderRepository repository;
@@ -41,14 +37,11 @@ public class ImportServiceProvidersIT {
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
-            ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
-            Capabilities capabilities1 = new Capabilities();
-            capabilities1.setCapabilities(capabilities);
-            serviceProvider.setCapabilities(capabilities1);
+            Capabilities capabilities1 = new Capabilities(capabilities);
+            ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),capabilities1);
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
-                //TODO have to generate queue name, as this was SP name before
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                         localActorSubscription.getSelector(),
                        "my-interchange" )); //already have the user from the Service provider

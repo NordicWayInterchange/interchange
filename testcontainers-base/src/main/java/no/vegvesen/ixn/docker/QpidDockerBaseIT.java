@@ -29,7 +29,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
 	public static QpidContainer getQpidTestContainer(CaStores stores, String vhostName, String hostname, Path configPath) {
-		Path imageLocation = getFolderPath("qpid-test");
+		Path imageLocation = getFolderPath("qpid");
 		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
 				imageLocation, configPath);
 		Stream<HostStore> stream = stores.hostStores().stream();
@@ -37,12 +37,12 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		CaStore caStore = stores.trustStore();
 		String keystoreName = hostStore.path().getFileName().toString();
 		String keystorePassword = hostStore.password();
-		String truststoreName = caStore.path().getFileName().toString();
-		String truststorePassword = caStore.password();
+		String truststoreName = caStore.truststoreName().getFileName().toString();
+		String truststorePassword = caStore.truststorePassword();
 		return new QpidContainer("qpid-it-memory",
 				imageLocation,
 				configPath,
-				caStore.path().getParent(),
+				caStore.truststoreName().getParent(),
 				keystoreName,
 				keystorePassword,
 				truststoreName,
@@ -96,15 +96,15 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(
-						caStore.path().toString(),
-						caStore.password(),
+						caStore.truststoreName().toString(),
+						caStore.truststorePassword(),
 						KeystoreType.JKS
 				)
 		);
 	}
 
 	public static String getTrustStorePath(CaStores stores) {
-		return stores.trustStore().path().toString();
+		return stores.trustStore().truststoreName().toString();
 	}
 
 	public static String getClientStorePath(String clientName, List<ClientStore> clientStores) {
@@ -122,19 +122,11 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 						KeystoreType.PKCS12
 				),
 				new KeystoreDetails(
-						trustStore.path().toString(),
-						trustStore.password(),
+						trustStore.truststoreName().toString(),
+						trustStore.truststorePassword(),
 						KeystoreType.JKS
 				)
 		);
-	}
-
-	private static HostStore getHostStore(String hostname, Stream<HostStore> stream) {
-		return stream.filter(h -> h.hostname().equals(hostname)).findAny().orElseThrow(() -> new RuntimeException("No store found for hostname: " + hostname));
-	}
-
-	private static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
-		return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
 	}
 
 }

@@ -6,12 +6,10 @@ import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 import jakarta.transaction.Transactional;
@@ -20,18 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class ServiceProviderServiceIT {
+public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Autowired
     ServiceProviderRepository repository;
 
     @Autowired
     NeighbourRepository neighbourRepository;
-
-    @Mock
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Autowired
     MatchRepository matchRepository;
@@ -41,7 +35,6 @@ public class ServiceProviderServiceIT {
 
     @Autowired
     OutgoingMatchRepository outgoingMatchRepository;
-
 
     @Test
     public void repositoryIsAutowired() {
@@ -57,11 +50,10 @@ public class ServiceProviderServiceIT {
     public void redirectEndpointsAreSavedFromNeighbour() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
         LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
 
-        serviceProvider.addLocalSubscription(localSubscription);
+        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName,Set.of(localSubscription));
 
         repository.save(serviceProvider);
 
@@ -79,7 +71,7 @@ public class ServiceProviderServiceIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(localSubscription, subscription, serviceProviderName);
+        Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
         service.syncServiceProviders("my-node", 5671);
@@ -98,18 +90,19 @@ public class ServiceProviderServiceIT {
     public void redirectEndpointIsRemovedWhenSubscriptionToNeighbourIsRemoved() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-
         LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
-
-        serviceProvider.addLocalSubscription(localSubscription);
-
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceProviderName,
+                Set.of(localSubscription));
         repository.save(serviceProvider);
 
-        Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, serviceProviderName);
         Endpoint endpoint = new Endpoint("re-queue", "neighbour", 5671);
-
-        subscription.setEndpoints(Collections.singleton(endpoint));
+        Subscription subscription = new Subscription(
+                SubscriptionStatus.CREATED,
+                selector,
+                "/",
+                serviceProviderName,
+                Set.of(endpoint));
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
@@ -120,7 +113,7 @@ public class ServiceProviderServiceIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(localSubscription, subscription, serviceProviderName);
+        Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
         service.syncServiceProviders("my-node", 5671);
@@ -129,8 +122,8 @@ public class ServiceProviderServiceIT {
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
 
-        neighbourRepository.deleteAll();
         matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
 
         service.syncServiceProviders("my-node", 5671);
 
@@ -138,34 +131,11 @@ public class ServiceProviderServiceIT {
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);
     }
 
-    @Test
-    public void localDeliveryGetsEndpointWithExchangeNameAsTarget(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("host",5671, "target");
-        delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-
-        repository.save(serviceProvider);
-        service.updateNewLocalDeliveryEndpoints(serviceProvider.getName(), "host", 5671);
-        ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedAgainServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(1);
-
-        savedAgainServiceProvider.getDeliveries().stream().findFirst().get().setExchangeName("exchangeName");
-        repository.save(savedAgainServiceProvider);
-
-        service.updateNewLocalDeliveryEndpoints(serviceProvider.getName(), "host", 5671);
-        savedAgainServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedAgainServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(2);
-
-    }
 
     @Test
     public void deliveryReceivesExchangeNameWhenItDoesNotExist(){
-
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.REQUESTED);
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         // Will only receive Exchange Name if outgoing match(es) exist
@@ -173,22 +143,21 @@ public class ServiceProviderServiceIT {
         outgoingMatchRepository.save(outgoingMatch);
 
         repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName());
+        service.updateDeliveryStatus(serviceProvider.getName(), "my-interchange", 5671);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
 
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getExchangeName()).contains("del");
+        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(1);
     }
 
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExist(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.CREATED);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description");
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         repository.save(serviceProvider);
 
-        service.updateDeliveryStatus(serviceProvider.getName());
+        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
         assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
@@ -197,72 +166,33 @@ public class ServiceProviderServiceIT {
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery("a = b",LocalDeliveryStatus.REQUESTED);
-        serviceProvider.addDeliveries(Set.of(delivery));
+        LocalDelivery delivery = new LocalDelivery();
+        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName());
+        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
         assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
     }
 
-    @Test
-    public void doNotRemoveLocalDeliveryEndpointIfItHasOutGoingMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
-        delivery.setExchangeName("target");
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("host",5671, "target");
-        delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
-
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
-        outgoingMatchRepository.save(outgoingMatch);
-        repository.save(serviceProvider);
-
-        service.updateTearDownLocalDeliveryEndpoints(serviceProvider.getName());
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(1);
-
-    }
-
-    @Test
-    public void removeLocalDeliveryEndpointIfItHasNoMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
-
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("host",5671, "target");
-        delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
-
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
-
-        outgoingMatchRepository.save(outgoingMatch);
-        repository.save(serviceProvider);
-
-        service.updateTearDownLocalDeliveryEndpoints(serviceProvider.getName());
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(0);
-
-    }
 
     @Test
     public void capabilityIsNotRemovedWhenThereAreOutgoingMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        String name = "service-provider";
 
-        Capabilities capabilities = new Capabilities();
         Capability capability = new Capability();
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
-        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, serviceProvider.getName());
+
+        OutgoingMatch outgoingMatch = new OutgoingMatch(null, capability, name);
         outgoingMatchRepository.save(outgoingMatch);
 
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                name,
+                capabilities
+        );
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 
@@ -272,28 +202,24 @@ public class ServiceProviderServiceIT {
 
     @Test
     public void multipleCapabilitiesAreRemoved(){
-        ServiceProvider sp = new ServiceProvider("sp");
-        Capabilities capabilities = new Capabilities();
-        capabilities.setCapabilities(
-                Set.of(
-                        new Capability(
-                            new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
-                            new Metadata()
+        Capabilities capabilities = new Capabilities( Set.of(
+                new Capability(
+                        new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
+                        new Metadata()
                 ),
-                        new Capability(
-                                new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
-                                new Metadata()
-                        ),
-                        new Capability(
-                                new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
-                                new Metadata()
-                        ))
-        );
+                new Capability(
+                        new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
+                        new Metadata()
+                ),
+                new Capability(
+                        new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
+                        new Metadata()
+                )));
 
         for(Capability i : capabilities.getCapabilities()){
             i.setStatus(CapabilityStatus.TEAR_DOWN);
         }
-        sp.setCapabilities(capabilities);
+        ServiceProvider sp = new ServiceProvider("sp", capabilities);
         repository.save(sp);
         service.removeTearDownCapabilities(sp.getName());
         ServiceProvider savedServiceProvider = repository.findByName(sp.getName());
@@ -301,14 +227,12 @@ public class ServiceProviderServiceIT {
     }
     @Test
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        Capabilities capabilities = new Capabilities();
         Capability capability = new Capability(null, new Metadata());
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",capabilities);
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 
@@ -318,18 +242,18 @@ public class ServiceProviderServiceIT {
 
     @Test
     public void capabilityIsNotRemovedIfThereAreNoOutgoingMatchesButHasShards(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        Capabilities capabilities = new Capabilities();
-        Capability capability = new Capability();
+
+        Capability capability = new Capability(
+                UUID.randomUUID().toString(),
+                new DenmApplication(),
+                new Metadata(),
+                List.of(new CapabilityShard())
+        );
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
+        Capabilities capabilities = new Capabilities(Set.of(capability));
 
-        Metadata metadata = new Metadata();
-        metadata.setShards(List.of(new Shard()));
-        capability.setMetadata(metadata);
-        capabilities.setCapabilities(new HashSet<>(Arrays.asList(capability)));
-
-        serviceProvider.setCapabilities(capabilities);
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider",capabilities);
         repository.save(serviceProvider);
         service.removeTearDownCapabilities(serviceProvider.getName());
 
@@ -341,8 +265,7 @@ public class ServiceProviderServiceIT {
     public void deliveryWithErrorGetsRemovedFromServiceProvider(){
         String serviceProviderName = "my-service-provider";
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-        LocalDelivery delivery = new LocalDelivery();
-        delivery.setStatus(LocalDeliveryStatus.ERROR);
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description");
         serviceProvider.addDeliveries(Set.of(delivery));
 
         repository.save(serviceProvider);

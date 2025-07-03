@@ -24,6 +24,7 @@ public class CollectorCreator {
     private String localIxnDomainName;
     private String localIxnFederationPort;
     private String writeQueue;
+    Integer prefetch;
 
     CollectorCreator(SSLContext sslContext,
                      String localIxnDomainName,
@@ -38,9 +39,10 @@ public class CollectorCreator {
     @Autowired
     public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
         this.sslContext = sslContext;
-        this.localIxnDomainName = interchangeNodeProperties.getName();
+        this.localIxnDomainName = interchangeNodeProperties.getBrokerExternalName();
         this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
         this.writeQueue = collectorProperties.getWritequeue();
+        this.prefetch = collectorProperties.getPrefetch();
     }
 
     MessageCollectorListener setupCollection(ListenerEndpoint listenerEndpoint) {
@@ -63,7 +65,7 @@ public class CollectorCreator {
             throw new MessageCollectorException(String.format("Could not start source at URL '%s', exchange '%s', tearing down.",writeUrl,writeSource), e);
         }
         try {
-            readSink.startWithMessageListener(listener);
+            readSink.startWithMessageListener(listener, prefetch);
             readSink.setExceptionListener(listener);
 
         } catch (NamingException | JMSException e) {

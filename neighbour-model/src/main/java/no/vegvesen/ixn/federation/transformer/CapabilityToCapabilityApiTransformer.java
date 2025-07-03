@@ -66,6 +66,13 @@ public class CapabilityToCapabilityApiTransformer {
 		);
 	}
 
+	public CapabilityApi neighbourCapabilityToCapabilityApi(NeighbourCapability capability) {
+		return new CapabilityApi(
+				capability.getApplication().toApi(),
+				capability.getMetadata().toApi()
+		);
+	}
+
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
 		return switch (applicationApi){
 			case DatexApplicationApi datex -> new DatexApplication(datex.getPublisherId(), datex.getPublicationId(), datex.getOriginatingCountry(), datex.getProtocolVersion(), datex.getQuadTree(), datex.getPublicationType(), datex.getPublisherName());
@@ -84,6 +91,8 @@ public class CapabilityToCapabilityApiTransformer {
 		Metadata metadata = new Metadata();
 		if (metadataApi.getShardCount() != null)
 			metadata.setShardCount(metadataApi.getShardCount());
+		else
+			metadata.setShardCount(1);
 		if (metadataApi.getInfoUrl() != null)
 			metadata.setInfoUrl(metadataApi.getInfoUrl());
 		if (metadataApi.getMaxBandwidth() != null)

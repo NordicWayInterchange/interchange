@@ -2,10 +2,14 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
+import org.apache.qpid.server.model.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface PrivateChannelRepository extends CrudRepository<PrivateChannel, Integer> {
+
+    List<PrivateChannel> findAll();
 
     List<PrivateChannel> findAllByServiceProviderName(String serviceProviderName);
 
@@ -13,11 +17,19 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
 
     PrivateChannel findByServiceProviderNameAndUuidAndStatusIsNot(String serviceProviderName, String uuid, PrivateChannelStatus status);
 
+    PrivateChannel findByServiceProviderNameAndUuidAndStatus(String serviceProviderName, String Uuid, PrivateChannelStatus status);
+
     PrivateChannel findByServiceProviderNameAndUuid(String serviceProviderName, String uuid);
 
-    List<PrivateChannel> findAllByPeerName(String peerName);
+    @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName")
+    List<PrivateChannel> findAllByPeerName(@Param(name = "peerName") String peerName);
+
+    @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName and pc.status=:status")
+    List<PrivateChannel> findAllByPeerNameAndStatus(@Param(name = "peerName") String peerName, @Param(name = "status") PrivateChannelStatus status);
+
+    @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName and pc.uuid=:uuid")
+    PrivateChannel findByUuidAndPeerName(@Param(name = "uuid") String uuid, @Param(name = "peerName") String peerName);
 
     long countByServiceProviderNameAndStatus(String serviceProviderName, PrivateChannelStatus status);
 
-    long countByPeerNameAndStatus(String peerName, PrivateChannelStatus status);
 }

@@ -1,15 +1,15 @@
 package no.vegvesen.ixn.federation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Random;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Entity
 public class Connection {
@@ -74,6 +74,12 @@ public class Connection {
         this.backoffStart = null;
     }
 
+    public void unreachable() {
+        setConnectionStatus(ConnectionStatus.UNREACHABLE);
+        this.backoffAttempts = 0;
+        this.backoffStart = null;
+    }
+
     // Calculates next possible post attempt time, using exponential backoff
     LocalDateTime getNextPostAttemptTime(GracefulBackoffProperties backoffProperties) {
 
@@ -84,6 +90,38 @@ public class Connection {
 
         logger.info("Next allowed post time: {}", nextPostAttempt.toString());
         return nextPostAttempt;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static void setLogger(Logger logger) {
+        Connection.logger = logger;
+    }
+
+    public LocalDateTime getBackoffStart() {
+        return backoffStart;
+    }
+
+    public LocalDateTime getUnreachableTime() {
+        return unreachableTime;
+    }
+
+    public void setUnreachableTime(LocalDateTime unreachableTime) {
+        this.unreachableTime = unreachableTime;
+    }
+
+    public LocalDateTime getLastFailedConnectionAttempt() {
+        return lastFailedConnectionAttempt;
     }
 
     public LocalDateTime getBackoffStartTime() { return backoffStart; }

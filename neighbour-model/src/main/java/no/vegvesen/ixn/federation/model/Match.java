@@ -18,8 +18,6 @@ public class Match {
     @JoinColumn(name = "sub", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_match_subscription"))
     private Subscription subscription;
 
-    private String serviceProviderName;
-
     public Match() {
 
     }
@@ -27,12 +25,6 @@ public class Match {
     public Match(LocalSubscription localSubscription, Subscription subscription) {
         this.localSubscription = localSubscription;
         this.subscription = subscription;
-    }
-
-    public Match(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName) {
-        this.localSubscription = localSubscription;
-        this.subscription = subscription;
-        this.serviceProviderName = serviceProviderName;
     }
 
     public LocalSubscription getLocalSubscription() {
@@ -51,14 +43,6 @@ public class Match {
         this.subscription = subscription;
     }
 
-    public String getServiceProviderName() {
-        return serviceProviderName;
-    }
-
-    public void setServiceProviderName(String serviceProviderName) {
-        this.serviceProviderName = serviceProviderName;
-    }
-
     public boolean subscriptionIsTearDown() {
         return subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN);
     }
@@ -73,13 +57,12 @@ public class Match {
         if (!(o instanceof Match)) return false;
         Match match = (Match) o;
         return localSubscription.equals(match.localSubscription) &&
-                subscription.equals(match.subscription) &&
-                serviceProviderName.equals(match.serviceProviderName);
+                subscription.equals(match.subscription);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(localSubscription, subscription, serviceProviderName);
+        return Objects.hash(localSubscription, subscription);
     }
 
     @Override

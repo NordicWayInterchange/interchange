@@ -1,11 +1,10 @@
 package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import org.assertj.core.util.Sets;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -26,22 +25,16 @@ public class SubscriptionCalculatorTest {
         LocalSubscription localSubB = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'SE'",myName);
         LocalSubscription localSubC = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'",myName);
 
-        ServiceProvider firstServiceProvider = new ServiceProvider();
-        firstServiceProvider.setName("First Service Provider");
-        firstServiceProvider.addLocalSubscription(localSubA);
-        firstServiceProvider.addLocalSubscription(localSubB);
+        ServiceProvider firstServiceProvider = new ServiceProvider("First Service Provider", Set.of(localSubA,localSubB));
 
-        ServiceProvider secondServiceProvider = new ServiceProvider();
-        secondServiceProvider.setName("Second Service Provider");
-        secondServiceProvider.addLocalSubscription(localSubB);
-        secondServiceProvider.addLocalSubscription(localSubC);
+        ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider", Set.of(localSubB,localSubC));
 
-        List<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toList());
+        List<ServiceProvider> serviceProviders = List.of(firstServiceProvider, secondServiceProvider);
 
         Set<LocalSubscription> selfSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
 
         assertThat(selfSubscriptions).hasSize(3);
-        assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
+        assertThat(selfSubscriptions).containsAll(Set.of(localSubA, localSubB, localSubC));
     }
 
 
@@ -55,7 +48,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     void calculateLastUpdatedSubscriptionOneSub() {
-        ServiceProvider serviceProvider = new ServiceProvider();
+        ServiceProvider serviceProvider = new ServiceProvider("a");
         LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'","");
         serviceProvider.addLocalSubscription(subscription);
         Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
@@ -88,12 +81,12 @@ public class SubscriptionCalculatorTest {
     void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
         LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
         LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
-        ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-        serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
+        ServiceProvider serviceProvider = new ServiceProvider("serviceprovider",Set.of(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
         Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
         assertThat(localSubscriptions).hasSize(1);
     }
 
+    //TODO review this test. It might not be relevant anymore
     @Test
     void serviceProviderGetsNewSubscriptionCreatedUpdatesSelfLastSubscriptionUpdate() {
         String serviceProviderName = "SelfServiceIT-service-provider";
@@ -111,13 +104,9 @@ public class SubscriptionCalculatorTest {
         Optional<LocalDateTime> subscriptionUpdatedRequestedSaved = serviceProviderBefore.getSubscriptionUpdated();
         assertThat(subscriptionUpdatedRequestedSaved).isNotNull().isEqualTo(subscriptionUpdatedRequested);
 
-        Set<LocalSubscription> subscriptions = serviceProviderBefore.getSubscriptions();
-        LocalSubscription requestedSubscription = subscriptions.iterator().next();
-        LocalSubscription createdSubscription = requestedSubscription.withStatus(LocalSubscriptionStatus.CREATED);
-        subscriptions.remove(requestedSubscription);
-        subscriptions.add(createdSubscription);
-        serviceProviderBefore.updateSubscriptions(subscriptions);
-
+        serviceProviderBefore.getSubscriptions().forEach(subscription -> {
+            subscription.setStatus(LocalSubscriptionStatus.CREATED);
+        });
 
         assertThat(serviceProviderBefore.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(subscriptionUpdatedRequested.get()));
 
@@ -151,7 +140,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
                 capabilities, ""
@@ -170,7 +159,7 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 Collections.singleton(
-                        new Capability(
+                        new NeighbourCapability(
                             new DatexApplication(
                                     "NO0001",
                                     "",
@@ -199,7 +188,7 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 new HashSet<>(Arrays.asList(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
@@ -210,7 +199,7 @@ public class SubscriptionCalculatorTest {
                                         "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new Capability(
+                        new NeighbourCapability(
                             new DenmApplication(
                                 "NO0001",
                                 "pub-123",
@@ -242,7 +231,7 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 Collections.singleton(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "",
@@ -275,7 +264,7 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 new HashSet<>(Arrays.asList(
-                        new Capability(
+                        new NeighbourCapability(
                                 new DatexApplication(
                                         "NO0001",
                                         "pub-1",
@@ -286,7 +275,7 @@ public class SubscriptionCalculatorTest {
                                         "publisherName"
                                 ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new Capability(
+                        new NeighbourCapability(
                                 new DenmApplication(
                                         "NO0001",
                                         "pub-123",
@@ -307,7 +296,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
@@ -319,7 +308,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<NeighbourCapability> capabilities = Collections.singleton(getDatexNeighbourCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
                 capabilities, "");
@@ -331,10 +320,15 @@ public class SubscriptionCalculatorTest {
                 .contains("messageType = 'DATEX2'");
     }
 
-    private Capability getDatexCapability(String country) {
-        return new Capability(
+    private NeighbourCapability getDatexCapability(String country) {
+        return new NeighbourCapability(
                 new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 
+    private NeighbourCapability getDatexNeighbourCapability(String country) {
+        return new NeighbourCapability(
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
+                new Metadata(RedirectStatus.OPTIONAL));
+    }
 }

@@ -60,9 +60,9 @@ public class Exchange {
     }
 
 
-    public boolean isBoundToQueue(String queueName) {
+    public boolean isBoundTo(String destinationName) {
         return bindings.stream()
-                .anyMatch(q -> q.getDestination().equals(queueName));
+                .anyMatch(binding -> binding.getDestination().equals(destinationName));
     }
 
 

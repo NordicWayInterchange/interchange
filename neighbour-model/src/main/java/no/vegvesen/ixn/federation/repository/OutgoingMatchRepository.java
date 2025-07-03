@@ -15,13 +15,15 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
 
     List<OutgoingMatch> findAllByLocalDelivery_Id(Integer id);
 
-    List<OutgoingMatch> findAllByLocalDelivery_ExchangeName(String deliveryExchangeName);
-
-    OutgoingMatch findByLocalDelivery_Id(Integer id);
+    List<OutgoingMatch> findAllByLocalDelivery_Uuid(String uuid);
 
     List<OutgoingMatch> findAllByCapability_Id(Integer id);
+
+    OutgoingMatch findAllByCapability_Uuid(String uuid);
 
     OutgoingMatch findByCapability_Id(Integer id);
 
     OutgoingMatch findByCapability_IdAndLocalDelivery_Id(Integer capabilityId, Integer localDeliveryId);
+
+    OutgoingMatch findByCapability_UuidAndLocalDelivery_Uuid(String capabilityUuid, String localDeliveryUuid);
 }

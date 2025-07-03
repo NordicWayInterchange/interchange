@@ -23,12 +23,10 @@ import static org.mockito.Mockito.*;
 @Disabled("Change and reenable when the qpid client refactoring is done")
 public class QpidClientLoggerTest {
 
-
     private RestTemplate template;
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private QpidClient client;
-
 
     @BeforeEach
     public void setUp() {
@@ -73,7 +71,6 @@ public class QpidClientLoggerTest {
 
     @Test
     public void createDirectExchange() {
-
         String exchangeName = "exchangeName";
         when(template.postForEntity(anyString(), any(CreateExchangeRequest.class),any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new Exchange(exchangeName),HttpStatus.OK));
@@ -87,7 +84,6 @@ public class QpidClientLoggerTest {
 
     @Test
     public void createTopicExchange() {
-
         String exchangeName = "exchangeName";
         when(template.postForEntity(anyString(), any(CreateExchangeRequest.class),any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new Exchange(exchangeName),HttpStatus.OK));
@@ -99,7 +95,6 @@ public class QpidClientLoggerTest {
                 .isEmpty();
     }
 
-
     @Test
     public void removeExchange() {
         String exchangeName = "someExhange";
@@ -110,41 +105,10 @@ public class QpidClientLoggerTest {
                 .anyMatch(formattedMessageContains(exchangeName));
         assertThat(errorEvents(appender.list.stream()))
                 .isEmpty();
-
-    }
-
-    @Test
-    public void addMemberToGroup() {
-        String memberName = "groupMember";
-        String group = "myGroup";
-        when(template.postForEntity(anyString(),any(GroupMember.class),any(Class.class)))
-                .thenReturn(new ResponseEntity<>(new GroupMember(memberName),HttpStatus.OK));
-        client.addMemberToGroup(memberName, group);
-        assertThat(infoEvents(appender.list.stream()))
-                .hasSize(1)
-                .anyMatch(formattedMessageContains(memberName))
-                .anyMatch(formattedMessageContains(group));
-        assertThat(errorEvents(appender.list.stream()))
-                .isEmpty();
-    }
-
-    @Test
-    public void removeMemberFromGroup() {
-        String memberName = "aMember";
-        String groupName = "aGroup";
-        client.removeMemberFromGroup(new GroupMember(memberName), groupName);
-        assertThat(infoEvents(appender.list.stream()))
-                .hasSize(1)
-                .anyMatch(formattedMessageContains(memberName))
-                .anyMatch(formattedMessageContains(groupName));
-        assertThat(errorEvents(appender.list.stream()))
-                .isEmpty();
-
     }
 
     @Test
     public void addBinding() {
-
         String selector = "a = b";
         String source = "source";
         String destination = "destination";
@@ -189,5 +153,4 @@ public class QpidClientLoggerTest {
     private static Predicate<ILoggingEvent> eventIsError() {
         return e -> e.getLevel().equals(Level.ERROR);
     }
-
 }

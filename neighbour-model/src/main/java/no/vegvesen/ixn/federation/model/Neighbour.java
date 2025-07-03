@@ -73,6 +73,20 @@ public class Neighbour {
 		this.controlConnection = controlConnection;
 	}
 
+	public Neighbour(String name, NeighbourCapabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, String controlChannelPort) {
+		this.setName(name);
+		this.capabilities = capabilities;
+		this.neighbourRequestedSubscriptions = subscriptions;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
+		this.controlChannelPort = controlChannelPort;
+	}
+
+	public Neighbour(String nodeName, String controlChannelPort) {
+		this.setName(nodeName);
+		this.controlChannelPort = controlChannelPort;
+
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -82,6 +96,14 @@ public class Neighbour {
 			throw new DiscoveryException(String.format("Server name '%s' shall not end with \".\"", name));
 		}
 		this.name = name;
+	}
+
+	public LocalDateTime getLastUpdated() {
+		return lastUpdated;
+	}
+
+	public Integer getNeighbour_id() {
+		return neighbour_id;
 	}
 
 	public boolean isIgnore() {
@@ -209,7 +231,8 @@ public class Neighbour {
 		if (localCapabilitiesUpdated.isPresent()) {
 			logger.debug("Local capabilities updated {}, last neighbour capability exchange {}", localCapabilitiesUpdated, this.getCapabilities().getLastCapabilityExchange());
 			return this.capabilitiesNeverSeen()
-					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated.get());
+					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated.get())
+					|| this.getCapabilities().getLastCapabilityExchange().isBefore(LocalDateTime.now().minusMinutes(15));
 		} else {
 			return this.capabilitiesNeverSeen();
 		}

@@ -2,10 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryPostException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -60,6 +57,16 @@ public class OnboardServerErrorAdvice {
 	@ExceptionHandler({DeliveryPostException.class})
 	public ResponseEntity<ErrorDetails> handleDeliveryChannelPostException(DeliveryPostException e) {
 		return error(BAD_REQUEST, e);
+	}
+
+	@ExceptionHandler({PathVariableException.class})
+	public ResponseEntity<ErrorDetails> handlePathVariableException(PathVariableException e){
+		return error(BAD_REQUEST, e);
+	}
+
+	@ExceptionHandler({AlreadyExistsException.class})
+	public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
+		return error(CONFLICT, e);
 	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {

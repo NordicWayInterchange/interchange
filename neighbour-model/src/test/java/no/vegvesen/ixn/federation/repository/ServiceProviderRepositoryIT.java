@@ -1,23 +1,23 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import jakarta.transaction.Transactional;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class ServiceProviderRepositoryIT {
+public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 
 	@Autowired
 	ServiceProviderRepository repository;
@@ -60,8 +60,7 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void savingServiceProviderWithLocalSubscriptionGivesNonNullSubscription(){
-		ServiceProvider volvo = new ServiceProvider("Volvo");
-		volvo.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'FI'",myName));
+		ServiceProvider volvo = new ServiceProvider("Volvo", Set.of(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'FI'",myName)));
 		repository.save(volvo);
 
 		ServiceProvider volvoFromRepository = repository.findByName("Volvo");
@@ -73,9 +72,9 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void findBySubscriptionRequestStatusGivesEntireObjectWithAllSubscriptions() {
-		ServiceProvider volvo = new ServiceProvider("Volvo");
-		volvo.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'FI'", myName));
-		volvo.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'", myName));
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'FI'", myName);
+		LocalSubscription subscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO'", myName);
+		ServiceProvider volvo = new ServiceProvider("Volvo",Set.of(subscription,subscription1));
 		repository.save(volvo);
 
 		List<ServiceProvider> providers = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED);
@@ -86,14 +85,12 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void findByLocalSubscriptionStatusRequestedCanBeRetrieved() {
-		ServiceProvider audi = new ServiceProvider("audi");
 		LocalSubscription audiSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'DE'", myName);
-		audi.addLocalSubscription(audiSubscription);
+		ServiceProvider audi = new ServiceProvider("audi", Set.of(audiSubscription));
 		repository.save(audi);
 
-		ServiceProvider ford = new ServiceProvider("Ford");
 		LocalSubscription fordSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'FI'", myName);
-		ford.addLocalSubscription(fordSubscription);
+		ServiceProvider ford = new ServiceProvider("Ford",Set.of(fordSubscription));
 		repository.save(ford);
 
 		List<ServiceProvider> spListRequested = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
@@ -102,15 +99,14 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void findByLocalSubscriptionStatusRequestedCanBeRetrievedSavedWithNewStatusAndNotFound() {
-		ServiceProvider fiat = new ServiceProvider("fiat");
-		fiat.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'DE'", myName));
+		ServiceProvider fiat = new ServiceProvider("fiat",Set.of(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'DE'", myName)));
 		repository.save(fiat);
 
 		List<ServiceProvider> spListRequested = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
 		assertThat(spListRequested).hasSize(1).contains(fiat);
 
 		fiat = spListRequested.get(0);
-		Set<LocalSubscription> subscriptions = fiat.getSubscriptions();
+		List<LocalSubscription> subscriptions = fiat.getSubscriptions();
 		assertThat(subscriptions).hasSize(1);
 		LocalSubscription subscription = subscriptions.stream().findFirst().orElseThrow(() -> new NotFoundException("already asserted subscription not present"));
 		subscription.setStatus(LocalSubscriptionStatus.CREATED);
@@ -122,8 +118,7 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void newServiceProviderWithLocalSubscriptionCanBeStoredAndRetrieved() {
-		ServiceProvider bentley = new ServiceProvider("bentley");
-		bentley.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", myName));
+		ServiceProvider bentley = new ServiceProvider("bentley",Set.of(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", myName)));
 
 		repository.save(bentley);
 
@@ -135,21 +130,21 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void testChangingLocalSubscriptionsWithNewSetAnSeeIfWeGetDeletedOneThatIsRemoved() {
 		String name = "serviceProvider";
-		ServiceProvider serviceProvider = new ServiceProvider(name);
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", myName);
 		LocalSubscription denmSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN,"messageType = 'DENM'", myName);
-		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription,denmSubscription)));
+		ServiceProvider serviceProvider = new ServiceProvider(name,Set.of(datexSubscription, denmSubscription));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);
 		assertThat(serviceProvider.getSubscriptions()).hasSize(2);
 
 		//Now, filter out the TEAR_DOWN subscription, and see if it is removed from the database
-		Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions()
-				.stream()
-				.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)
+		Set<LocalSubscription> tearDown = serviceProvider
+				.getSubscriptions()
+				.stream().
+				filter(s -> s.getStatus() == LocalSubscriptionStatus.TEAR_DOWN)
 				.collect(Collectors.toSet());
-		serviceProvider.updateSubscriptions(localSubscriptions);
+		serviceProvider.removeSubscriptions(tearDown);
 		serviceProvider = repository.save(serviceProvider);
 
 		//so we should only have 1 subscription, with status REQUESTED
@@ -157,13 +152,12 @@ public class ServiceProviderRepositoryIT {
 		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED));
 
 		//Update the REQUESTED to CREATED
-		Set<LocalSubscription> updated = serviceProvider.getSubscriptions()
-				.stream()
-				.filter(localSubscription -> localSubscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED))
-				.map(localSubscription -> localSubscription.withStatus(LocalSubscriptionStatus.CREATED))
-				.collect(Collectors.toSet());
-
-		serviceProvider.updateSubscriptions(updated);
+		serviceProvider.getSubscriptions().forEach( s -> {
+					if (s.getStatus() == LocalSubscriptionStatus.REQUESTED) {
+						s.setStatus(LocalSubscriptionStatus.CREATED);
+					}
+				}
+		);
 		serviceProvider = repository.save(serviceProvider);
 
 		//So should have 1 subscription, status CREATED
@@ -174,9 +168,8 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void testThatWeCanDeleteALocalSubcriptionForAServiceProvider() {
 		String name = "serviceProvider";
-		ServiceProvider serviceProvider = new ServiceProvider(name);
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", myName);
-		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription)));
+		ServiceProvider serviceProvider = new ServiceProvider(name,Set.of(datexSubscription));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);
@@ -198,10 +191,9 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void testThatServiceProviderSavesLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
 		String name = "my-service-provider";
-		ServiceProvider sp = new ServiceProvider(name);
 
 		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", myName);
-		sp.addLocalSubscription(sub);
+		ServiceProvider sp = new ServiceProvider(name,Set.of(sub));
 
 		repository.save(sp);
 

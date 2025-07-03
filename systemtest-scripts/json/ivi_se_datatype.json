@@ -1,19 +1,20 @@
 {
-  "messageType": "IVI",
-  "publisherId": "SE-12345",
-  "publisherName": "Some Swedish publisher",
-  "originatingCountry": "SE",
-  "protocolVersion": "IVI:1.2",
-  "contentType": "application/base64",
-  "quadTree": [
-    "01230122",
-    "01230123"
-  ],
-  "serviceType": "some-ivi-service-type?",
-  "iviType": 128,
-  "pictogramCategoryCodes": [
-    557,
-    559,
-    612
-  ]
+  "capabilities": [
+    {
+      "application": {
+        "messageType": "IVI",
+        "publisherId": "SE12345",
+        "publicationId": "SE12345:99",
+        "publisherName": "Some Swedish publisher",
+        "originatingCountry": "SE",
+        "protocolVersion": "IVI:1.2",
+        "contentType": "application/base64",
+        "quadTree": [
+          "01230122",
+          "01230123"
+        ],
+        "serviceType": "some-ivi-service-type?"
+      },
+      "metadata": {}
+    }]
 }

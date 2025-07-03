@@ -1,20 +1,24 @@
 package no.vegvesen.ixn.federation.model.capability;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 import java.util.UUID;
 
 @Entity
 @Table(name = "capability")
+@JsonIgnoreProperties(value = "createdTimestamp")
 public class Capability {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_plit_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -26,27 +30,57 @@ public class Capability {
     private Metadata metadata;
 
     @Enumerated(EnumType.STRING)
-    private CapabilityStatus status = CapabilityStatus.CREATED;
+    private CapabilityStatus status = CapabilityStatus.REQUESTED;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name="fk_cap_shard"))
+    private List<CapabilityShard> shards = new ArrayList<>();
+
+    private LocalDateTime createdTimestamp;
 
     public Capability() {
-
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
     }
 
     public Capability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+    }
+
+    public Capability(Application application, Metadata metadata, LocalDateTime createdTimestamp) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public Capability(String uuid, Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.uuid = uuid;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
+    }
+
+    public Capability(Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
     }
 
     public void setId(Integer id) {
@@ -93,19 +127,49 @@ public class Capability {
         return metadata.getShardCount() > 1;
     }
 
-    public boolean hasShards() {
-        return metadata.hasShards();
+    public LocalDateTime getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
-    public static Set<Capability> transformNeighbourCapabilityToCapability(Set<NeighbourCapability> neighbourCapabilities){
-        Set<Capability> capabilities = new HashSet<>();
-        for(NeighbourCapability i : neighbourCapabilities){
-            capabilities.add(
-                    new Capability(i.getApplication(), i.getMetadata())
-            );
+    public void setCreatedTimestamp(LocalDateTime lastUpdatedTimestamp) {
+        this.createdTimestamp = lastUpdatedTimestamp;
+    }
 
+    public List<CapabilityShard> getShards() {
+        return shards;
+    }
+
+    public void setShards(List<CapabilityShard> shards) {
+        this.shards.clear();
+        if (shards != null) {
+            this.shards.addAll(shards);
         }
-        return capabilities;
+    }
+
+    public Optional<CapabilityShard> getShard(Integer id) {
+        return shards.stream()
+                .filter(shard -> shard.getShardId().equals(id))
+                .findFirst();
+    }
+
+    public void addShards(List<CapabilityShard> shards){
+        this.shards.addAll(shards);
+    }
+
+    public boolean hasShards() {
+        return !shards.isEmpty();
+    }
+
+    public void removeShards() {
+        this.shards.clear();
+    }
+
+    public Set<String> getExchangesFromShards() {
+        Set<String> exchanges = new HashSet<>();
+        for (CapabilityShard shard : shards) {
+            exchanges.add(shard.getExchangeName());
+        }
+        return exchanges;
     }
 
     @Override
@@ -128,7 +192,8 @@ public class Capability {
                 "uuid="+uuid +
                 ", application=" + application +
                 ", metadata=" + metadata +
-                ", status=" + status + '\'' +
+                ", status=" + status +
+                ", shards=" + shards +
                 '}';
     }
 }

@@ -13,10 +13,13 @@ public class LocalDeliveryEndpoint {
     private Integer id;
 
     private String host;
+
     private int port;
+
     private String target;
 
     private Integer maxBandwidth;
+
     private Integer maxMessageRate;
 
     public LocalDeliveryEndpoint() {
@@ -37,10 +40,6 @@ public class LocalDeliveryEndpoint {
 
     public LocalDeliveryEndpoint(String host, int port, String target) {
         this(null,host,port,target, null,null);
-    }
-
-    public LocalDeliveryEndpoint(Integer id, String host, int port, String target) {
-        this(id,host,port,target,null,null);
     }
 
     public String getHost() {
@@ -81,6 +80,10 @@ public class LocalDeliveryEndpoint {
 
     public void setMaxMessageRate(Integer maxMessageRate) {
         this.maxMessageRate = maxMessageRate;
+    }
+
+    public boolean targetExists() {
+        return !target.isEmpty();
     }
 
     @Override

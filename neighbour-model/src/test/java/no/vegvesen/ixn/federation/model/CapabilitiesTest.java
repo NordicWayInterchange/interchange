@@ -16,10 +16,8 @@ public class CapabilitiesTest {
 
     @Test
     public void testAddAllDatatypesRetainsExistingObjects() {
-        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata(RedirectStatus.OPTIONAL));
-        firstCapability.setId(1);
-        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata(RedirectStatus.OPTIONAL));
-        secondCapability.setId(2);
+        Capability firstCapability = new Capability(1,new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata(RedirectStatus.OPTIONAL));
+        Capability secondCapability = new Capability(2,new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata(RedirectStatus.OPTIONAL));
         Capabilities capabilities = new Capabilities(
                 new HashSet<>(Arrays.asList(
                         firstCapability,

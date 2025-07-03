@@ -19,6 +19,7 @@ services:
         aliases:
           - dns.bouvetinterchange.eu
 
+
   a_db:
     image: postgres:15.1
     container_name: a_db
@@ -32,6 +33,36 @@ services:
       - POSTGRES_DB=federation
     networks:
     - testing_net
+
+
+  a_admin:
+    build:
+      context: ../admin-server-app
+    container_name: a_admin
+    depends_on:
+      - a_db
+    links:
+      - "a_qpid:a.bouvetinterchange.eu"
+    ports:
+      - 32665:8899
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - BASE_URL=https://a.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8899
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - ADMIN_NAME=admin.a.bouvetinterchange.eu
+    networks:
+      - testing_net
 
   a_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
@@ -73,13 +104,16 @@ services:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
-      - NAP_NAME=nap.bouvetinterchange.eu
+      - NAP_NAME=nap.a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - SIGN_STORE=/jks/keys/ca.a.bouvetinterchange.eu.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -99,7 +133,7 @@ services:
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/a.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
@@ -158,6 +192,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
     - testing_net
 
@@ -183,6 +218,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -195,8 +231,8 @@ services:
     depends_on:
     - a_db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
+    - "a_qpid:a.qpid.bouvetinterchange.eu"
+    - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
     - "../tmp:/jks"
     environment:
@@ -210,11 +246,13 @@ services:
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
+    - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+    - PREFETCH=1000
     networks:
     - testing_net
 
   b_db:
-    image: postgres:9.6
+    image: postgres:15.1
     container_name: b_db
     depends_on:
     - mock-dns-server
@@ -226,6 +264,35 @@ services:
       - POSTGRES_DB=federation
     networks:
     - testing_net
+
+  b_admin:
+    build:
+      context: ../admin-server-app
+    container_name: b_admin
+    depends_on:
+      - b_db
+    links:
+      - "b_qpid:b.bouvetinterchange.eu"
+    ports:
+      - 32667:8899
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - BASE_URL=https://b.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
+      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=b.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8899
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - ADMIN_NAME=admin.b.bouvetinterchange.eu
+    networks:
+      - testing_net
 
   b_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
@@ -301,6 +368,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -321,7 +389,7 @@ services:
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/jks/keys/b.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
@@ -354,6 +422,8 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
+
     networks:
     - testing_net
 
@@ -365,8 +435,8 @@ services:
     depends_on:
       - b_db
     links:
-      - "a_qpid:a.bouvetinterchange.eu"
-      - "b_qpid:b.bouvetinterchange.eu"
+      - "a_qpid:a.qpid.bouvetinterchange.eu"
+      - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -380,6 +450,8 @@ services:
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
+      - PREFETCH=1000
     networks:
     - testing_net
 

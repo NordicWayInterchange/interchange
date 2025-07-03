@@ -27,15 +27,11 @@ public class CapabilityCalculatorTest {
         Capability b = new Capability(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
         Capability c = new Capability(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
 
-        ServiceProvider firstServiceProvider = new ServiceProvider();
-        firstServiceProvider.setName("First Service Provider");
         Capabilities firstServiceProviderCapabilities = new Capabilities(Stream.of(a, b).collect(Collectors.toSet()));
-        firstServiceProvider.setCapabilities(firstServiceProviderCapabilities);
+        ServiceProvider firstServiceProvider = new ServiceProvider("First Service Provider",firstServiceProviderCapabilities);
 
-        ServiceProvider secondServiceProvider = new ServiceProvider();
-        secondServiceProvider.setName("Second Service Provider");
         Capabilities secondServiceProviderCapabilities = new Capabilities(Stream.of(b, c).collect(Collectors.toSet()));
-        secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+        ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider", secondServiceProviderCapabilities);
 
         Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
@@ -53,8 +49,7 @@ public class CapabilityCalculatorTest {
     }
 
     @Test
-    void calculateLastUpdatedCapabiltiesOneCap() {
-        ServiceProvider serviceProvider = new ServiceProvider();
+    void calculateLastUpdatedCapabilitiesOneCap() {
         LocalDateTime lastUpdated = LocalDateTime.now();
         Capabilities capabilities = new Capabilities(
                 Sets.newLinkedHashSet(new Capability(
@@ -68,8 +63,8 @@ public class CapabilityCalculatorTest {
                                 "publisherName"),
                         new Metadata())),
                 lastUpdated);
-        serviceProvider.setCapabilities(capabilities);
-        LocalDateTime result = CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
+        ServiceProvider serviceProvider = new ServiceProvider("a",capabilities,Set.of(),lastUpdated);
+        LocalDateTime result = CapabilityCalculator.calculateLastUpdatedCapabilities(List.of(serviceProvider));
         assertThat(result).isEqualTo(lastUpdated);
     }
 
@@ -101,43 +96,37 @@ public class CapabilityCalculatorTest {
                                 "publisherName"),
                         new Metadata())),
                 latest);
-        ServiceProvider earliestSP = new ServiceProvider();
-        earliestSP.setCapabilities(earliestCap);
-        ServiceProvider latestSP = new ServiceProvider();
-        latestSP.setCapabilities(latestCap);
+        ServiceProvider earliestSP = new ServiceProvider("earliest",earliestCap,Set.of(),earliest);
+        ServiceProvider latestSP = new ServiceProvider("latest",latestCap,Set.of(),latest);
         assertThat(CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(latestSP,earliestSP))).isEqualTo(latest);
     }
 
     @Test
     void calculateGetLastUpdatedLocalCapabilities() {
         LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-        Capability aCap1 = getDatexCapability("SE");
-        Capability aCap2 = getDatexCapability("SE");
-        ServiceProvider aServiceProvider = new ServiceProvider();
-        aServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
+        Capability aCap1 = getDatexCapability("SE", "a","1");
+        Capability aCap2 = getDatexCapability("SE", "a","2");
+        ServiceProvider aServiceProvider = new ServiceProvider("a",new Capabilities(Set.of(aCap1, aCap2), aCapDate));
 
         LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
-        Capability bCap1 = getDatexCapability("SE");
-        Capability bCap2 = getDatexCapability("SE");
-        ServiceProvider bServiceProvider = new ServiceProvider();
-        bServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
+        Capability bCap1 = getDatexCapability("SE","b","1");
+        Capability bCap2 = getDatexCapability("SE","b","2");
+        ServiceProvider bServiceProvider = new ServiceProvider("b",new Capabilities(Set.of(bCap1, bCap2), bCapDate));
 
         LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-        Capability cCap1 = getDatexCapability("FI");
-        Capability cCap2 = getDatexCapability("FI");
-        ServiceProvider cServiceProvider = new ServiceProvider();
-        cServiceProvider.setCapabilities(new Capabilities(Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
+        Capability cCap1 = getDatexCapability("FI", "c","1");
+        Capability cCap2 = getDatexCapability("FI", "c","2");
+        ServiceProvider cServiceProvider = new ServiceProvider("c",new Capabilities(Set.of(cCap1, cCap2), cCapDate));
 
-        List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
-
+        List<ServiceProvider> serviceProviders = List.of(aServiceProvider, bServiceProvider, cServiceProvider);
 
         LocalDateTime lastUpdatedCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders);
 
         assertThat(lastUpdatedCapabilities).isEqualTo(bCapDate);
     }
 
-    private Capability getDatexCapability(String originatingCountry) {
-        return new Capability(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
+    private Capability getDatexCapability(String originatingCountry, String publisher, String publication) {
+        return new Capability(new DatexApplication(publisher, publisher + ":" + publication, originatingCountry, "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
     }
 
 }

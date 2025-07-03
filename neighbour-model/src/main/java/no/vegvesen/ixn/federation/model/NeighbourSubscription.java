@@ -14,6 +14,7 @@ public class NeighbourSubscription {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neigh_sub_seq")
     private Integer id;
 
+    @Column(nullable = false)
     private String uuid = UUID.randomUUID().toString();
 
     @Enumerated(EnumType.STRING)
@@ -37,23 +38,10 @@ public class NeighbourSubscription {
 
     }
 
-    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus) {
-        this.selector = new Selector(selector);
-        this.subscriptionStatus = subscriptionStatus;
-    }
-
     public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus, String consumerCommonName) {
         this.selector = new Selector(selector);
         this.subscriptionStatus = subscriptionStatus;
         this.consumerCommonName = consumerCommonName;
-    }
-
-    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
-        this.subscriptionStatus = subscriptionStatus;
-        this.selector = new Selector(selector);
-        this.path = path;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
     }
 
     public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -69,8 +57,7 @@ public class NeighbourSubscription {
         this.selector = new Selector(selector);
         this.path = path;
         this.consumerCommonName = consumerCommonName;
-        this.endpoints.addAll(endpoints);
-        this.uuid = uuid;
+        this.endpoints = endpoints;
     }
 
     public Integer getId() {
@@ -138,6 +125,10 @@ public class NeighbourSubscription {
 
     public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    public boolean isSharded() {
+        return selector.getSelector().contains("shardId");
     }
 
     @Override

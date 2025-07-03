@@ -27,10 +27,6 @@ public class Metadata {
 
     private Integer repetitionInterval;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "met_id", foreignKey = @ForeignKey(name="fk_met"))
-    private List<Shard> shards = new ArrayList<>();
-
     public Metadata() {
 
     }
@@ -49,6 +45,10 @@ public class Metadata {
         this("", 1, redirectPolicy, 0, 0, 0);
     }
 
+    //for testing
+    public Metadata(RedirectStatus redirectPolicy, Integer shardCount) {
+        this("", shardCount, redirectPolicy, 0, 0, 0);
+    }
     public String getInfoUrl() {
         return infoUrl;
     }
@@ -102,6 +102,9 @@ public class Metadata {
     }
 
     public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
+        if (status == null) {
+            return RedirectStatusApi.OPTIONAL;
+        }
         switch (status) {
             case MANDATORY:
                 return RedirectStatusApi.MANDATORY;
@@ -110,33 +113,6 @@ public class Metadata {
             default:
                 return RedirectStatusApi.OPTIONAL;
         }
-    }
-
-    public List<Shard> getShards() {
-        return shards;
-    }
-
-    public void setShards(List<Shard> shards) {
-        this.shards.clear();
-        if (shards != null) {
-            this.shards.addAll(shards);
-        }
-    }
-
-    public boolean hasShards() {
-        return !shards.isEmpty();
-    }
-
-    public void removeShards() {
-        this.shards.clear();
-    }
-
-    public Set<String> getExchangesFromShards() {
-        Set<String> exchanges = new HashSet<>();
-        for (Shard shard : shards) {
-            exchanges.add(shard.getExchangeName());
-        }
-        return exchanges;
     }
 
     @Override

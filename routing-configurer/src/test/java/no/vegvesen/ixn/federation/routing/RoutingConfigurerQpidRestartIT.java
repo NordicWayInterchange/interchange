@@ -7,7 +7,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.model.capability.Shard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -15,21 +15,18 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -42,8 +39,6 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurer.class})
-@ContextConfiguration(initializers = {RoutingConfigurerQpidRestartIT.Initializer.class})
-@Testcontainers
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
@@ -56,13 +51,6 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
             "king_gustaf"
     );
 
-    @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer(
-            stores,
-            HOST_NAME,
-            HOST_NAME,
-            Path.of("qpid")
-            );
 
     @Qualifier("getTestSslContext")
     @Autowired
@@ -70,50 +58,54 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingConfigurerQpidRestartIT.class);
 
-    static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    @Container
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
+            stores,
+            HOST_NAME,
+            HOST_NAME,
+            Path.of("qpid")
+    );
 
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            String httpsUrl = qpidContainer.getHttpsUrl();
-            String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: {}", httpUrl);
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + httpsUrl,
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + getTrustStorePath(stores),
-                    "test.ssl.key-store=" +  getClientStorePath("routing_configurer",stores.clientStores())
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        String httpsUrl = qpidContainer.getHttpsUrl();
+        String httpUrl = qpidContainer.getHttpUrl();
+        logger.info("server url: {}", httpUrl);
+        registry.add("routing-configurer.baseUrl", () -> httpsUrl);
+        registry.add("routing-configurer.vhost", () -> "localhost");
+        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
+        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
     }
 
-    @MockBean
+    @BeforeAll
+    static void setUp(){
+        qpidContainer.start();
+    }
+
+    @MockitoBean
     NeighbourService neighbourService;
 
     @Autowired
     RoutingConfigurer routingConfigurer;
 
-    @MockBean
+    @MockitoBean
     ListenerEndpointRepository listenerEndpointRepository;
 
     @Autowired
     QpidClient client;
 
-    @MockBean
+    @MockitoBean
     ServiceProviderRouter serviceProviderRouter;
 
-    @MockBean
+    @MockitoBean
     InterchangeNodeProperties properties;
 
     @Test
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID();
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
-        metadata.setShards(Collections.singletonList(shard));
-
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
@@ -123,9 +115,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                metadata
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -155,10 +147,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRedirectNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID();
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        Shard shard = new Shard(1, exchangeName, "publicationId = 'pub-1'");
-        metadata.setShards(Collections.singletonList(shard));
-
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO2345",
@@ -168,9 +157,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                metadata
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(

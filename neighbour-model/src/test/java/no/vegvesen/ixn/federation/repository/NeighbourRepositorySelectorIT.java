@@ -1,12 +1,11 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -17,21 +16,18 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class NeighbourRepositorySelectorIT {
-
+public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 
 	@Autowired
 	private NeighbourRepository neighbourRepository;
 
 	private Neighbour createNeighbourObject(String name, CapabilitiesStatus capStatus){
-		Neighbour neighbour = new Neighbour(name,
+        return new Neighbour(name,
 				new NeighbourCapabilities(capStatus, Collections.emptySet()),
 				new NeighbourSubscriptionRequest(new HashSet<>()),
-				new SubscriptionRequest(new HashSet<>()));
-		neighbour.setControlChannelPort("8080");
-		return neighbour;
+				new SubscriptionRequest(new HashSet<>()),
+				"8080");
 	}
 
 	public boolean interchangeInList(String interchangeName, List<Neighbour> listOfInterchanges){
@@ -46,8 +42,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void helperMethodIsTrueIfInterchangeIsInList(){
-		Neighbour volvo = new Neighbour();
-		volvo.setName("Volvo");
+		Neighbour volvo = new Neighbour("Volvo", null, null, null);
 
 		List<Neighbour> volvoInList = Collections.singletonList(volvo);
 
@@ -56,8 +51,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void helperMethodIsFalseIfInterchangeNotInList(){
-		Neighbour tesla = new Neighbour();
-		tesla.setName("Tesla");
+		Neighbour tesla = new Neighbour("Tesla", null, null, null);
 
 		List<Neighbour> volvoNotInList = Collections.singletonList(tesla);
 
