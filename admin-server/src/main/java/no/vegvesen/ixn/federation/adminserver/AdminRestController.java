@@ -295,13 +295,13 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/deliveries/{deliveryId}/matches")
     @Tag(name = "Deliveries")
     @Operation(summary = "Get capabilities match a delivery for the specified service provider and delivery id")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHRESPONSE)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHINGDELIVEIRSRESPONSE)))})
     public CapabilitiesLinkedDeliveryApi getDeliveriesExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List capabilities match a delivery with id {} for service provider {} for admin user {}", deliveryId, actorCommonName, adminUser);
+        logger.info("Log - List capabilities matching a delivery with id {} for service provider {} for admin user {}", deliveryId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         LocalDelivery delivery = serviceProvider.findDeliveryByUuid(deliveryId);
@@ -375,7 +375,7 @@ public class AdminRestController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions")
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/localsubscriptions")
     @Tag(name = "Local subscriptions")
     @Operation(summary = "Get subscription ids for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONIDSRESPONSE)))})
@@ -391,7 +391,7 @@ public class AdminRestController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/localsubscriptions/{subscriptionId}")
     @Tag(name = "Local subscriptions")
     @Operation(summary = "Get local subscriptions based on provided local subscription id for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONRESPONSE)))})
@@ -409,7 +409,7 @@ public class AdminRestController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}/endpoints")
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/localsubscriptions/{subscriptionId}/endpoints")
     @Tag(name = "Local subscriptions")
     @Operation(summary = "Get local subscription's endpoints based on provided local subscription id for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETENDPOINTSRESPONSE)))})
@@ -426,16 +426,16 @@ public class AdminRestController {
         return qpidService.getLocalSubscriptionEndpointApiList(localSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/subscriptions/{subscriptionId}/matches")
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/{actorCommonName}/localsubscriptions/{subscriptionId}/localmatches")
     @Tag(name = "Local subscriptions")
-    @Operation(summary = "Get capabilities match a local subscription for the specified service provider and subscription id")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHRESPONSE)))})
+    @Operation(summary = "Get capabilities matching a local subscription for the specified service provider and subscription id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETCAPABILITIESMATCHINGLOCALSUBSCRIPTIONSRESPONSE)))})
     public CapabilitiesLinkedSubscriptionApi getSubscriptionsExchangeBindingToMatchingCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
 
-        logger.info("Log - List capabilities match a subscription with id {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
+        logger.info("Log - List local capabilities matching a subscription with id {} for service provider {} for admin user {}", subscriptionId, actorCommonName, adminUser);
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
         LocalSubscription subscription = serviceProvider.getSubscription(subscriptionId);
 

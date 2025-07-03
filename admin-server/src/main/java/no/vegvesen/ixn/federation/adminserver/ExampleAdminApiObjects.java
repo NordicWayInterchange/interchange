@@ -281,7 +281,7 @@ public class ExampleAdminApiObjects {
                ]
             """;
 
-    static final String GETCAPABILITIESMATCHRESPONSE = """
+    static final String GETCAPABILITIESMATCHINGDELIVEIRSRESPONSE = """
             {
                      "deliveryId": "5090213f-9c2f-40a0-972c-4a730a5c0317",
                      "capabilityMatchApi": [
@@ -374,6 +374,20 @@ public class ExampleAdminApiObjects {
                 "description": null,
                 "errorMessage": null
             }
+            """;
+
+    static final String GETCAPABILITIESMATCHINGLOCALSUBSCRIPTIONSRESPONSE = """
+            {
+                 "subscriptionId": "334c2c10-df87-4c91-8179-8db3f979c84d",
+                 "capabilityMatchApi": [
+                     {
+                         "capabilityId": "43296cfb-ac14-4da1-8c94-1595ae3f3dfb",
+                         "shardId": 2,
+                         "binding": null,
+                         "exists": false
+                     }
+                 ]
+             }
             """;
 
 }
