@@ -348,7 +348,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
                 deliverySelector,
-                LocalDeliveryStatus.CREATED);
+                LocalDeliveryStatus.CREATED,
+                null);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -386,7 +387,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 1,
                 Set.of(endpoint),
                 deliverySelector,
-                LocalDeliveryStatus.NO_OVERLAP);
+                LocalDeliveryStatus.NO_OVERLAP,
+                null);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",

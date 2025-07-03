@@ -139,7 +139,8 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
-                LocalDeliveryStatus.CREATED);
+                LocalDeliveryStatus.CREATED,
+                null);
 
         List<LocalDeliveryEndpointAdminApi> response1 = service.getLocalDeliveryEndpointApiList(delivery);
         assertThat(response1).isNotEmpty();
@@ -173,7 +174,8 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
-                LocalDeliveryStatus.CREATED);
+                LocalDeliveryStatus.CREATED,
+                null);
 
         ServiceProvider aServiceProvider = new ServiceProvider(
                 serviceProviderName,

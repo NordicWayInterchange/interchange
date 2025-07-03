@@ -22,6 +22,7 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
+    //TODO this should be set as non-null.
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
     @Column(columnDefinition="TEXT")
     private String selector = "";
@@ -39,22 +40,20 @@ public class LocalDelivery {
     @Column
     private String errorMessage;
 
+    @Column
+    private String dlqName;
+
     public LocalDelivery() {
     }
 
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status) {
+    //TODO need to make this a bit better, as there can be a bit of confusion on the ID bit.
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status, String dlqName) {
         this.id = id;
         this.endpoints.addAll(endpoints);
         this.selector = selector;
         this.status = status;
-    }
+        this.dlqName = dlqName;
 
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status, String description) {
-        this.id = id;
-        this.endpoints.addAll(endpoints);
-        this.selector = selector;
-        this.status = status;
-        this.description = description;
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
@@ -65,7 +64,7 @@ public class LocalDelivery {
     }
 
     public LocalDelivery(Integer id, String selector, LocalDeliveryStatus status) {
-        this(id, Collections.emptySet(),selector,status);
+        this(id, Collections.emptySet(),selector,status, null);
     }
 
     public LocalDelivery(String selector, String description){
@@ -77,12 +76,6 @@ public class LocalDelivery {
         this.selector = selector;
         this.status = status;
         this.description = description;
-    }
-
-    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
-        this.endpoints = endpoints;
-        this.selector = selector;
-        this.status = status;
     }
 
     public Integer getId() {
@@ -165,6 +158,10 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -182,13 +179,14 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
-                ", uuid=" + uuid +
+                ", uuid='" + uuid + '\'' +
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
-                ", errorMessage=" + errorMessage +
-                ", description=" + description +
+                ", description='" + description + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", dlqName='" + dlqName + '\'' +
                 '}';
     }
 }
