@@ -343,9 +343,9 @@ public class ServiceProviderRouter {
 
                     String capabilitySelector;
                     if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), i+1);
                     } else {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
                     }
                     CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
                     newShards.add(newShard);

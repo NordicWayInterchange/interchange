@@ -2,8 +2,6 @@ package no.vegvesen.ixn.federation.selector;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,8 +13,7 @@ import java.util.stream.Collectors;
  */
 public class SelectorBuilder {
 
-	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);
-	private Map<String, String> values = new HashMap<>();
+	private final Map<String, String> values = new HashMap<>();
 
 	public SelectorBuilder() {
 
@@ -37,7 +34,7 @@ public class SelectorBuilder {
 		}
 		List<String> elements = Arrays.asList(commaSeparatedString.split(","));
 		return elements.stream()
-				.filter(s -> s.length() > 0)
+				.filter(s -> !s.isEmpty())
 				.collect(Collectors.toList());
 	}
 
@@ -69,17 +66,9 @@ public class SelectorBuilder {
 	}
 
 	private void addSelector(Set<String> selectorElements, String s) {
-		if (s != null && s.length() > 0) {
+		if (s != null && !s.isEmpty()) {
 			selectorElements.add(s);
 		}
-	}
-
-	private String singleValueSelector(MessageProperty property) {
-		String propertyValue = getPropertyValue(property);
-		if (propertyValue == null) {
-			return null;
-		}
-		return oneSelector(property, propertyValue);
 	}
 
 	private String oneSelector(MessageProperty property, String propertyValue) {
@@ -119,8 +108,8 @@ public class SelectorBuilder {
 
 	/**
 	 * Adds string form of quadTree, usually from message headers
-	 * @param quadTree
-	 * @return
+	 * @param quadTree the quadTree
+	 * @return SelectorBuilder for further building
 	 */
 	public SelectorBuilder quadTree(String quadTree) {
 		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
@@ -129,8 +118,8 @@ public class SelectorBuilder {
 
 	/**
 	 * Adds a set of individual quadtrees, ususally from a Capability
-	 * @param quadTrees
-	 * @return
+	 * @param quadTrees the quadTrees to add
+	 * @return SelectorBuilder for further building
 	 */
 	public SelectorBuilder quadTree(List<String> quadTrees) {
 		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",",quadTrees));
@@ -164,7 +153,7 @@ public class SelectorBuilder {
 
 	public SelectorBuilder causeCode(List<Integer> causeCodes) {
 		String strings = causeCodes.stream()
-				.map(n -> String.valueOf(n))
+				.map(String::valueOf)
 				.collect(Collectors.joining(","));
 		values.put(MessageProperty.CAUSE_CODE.getName(), strings);
 		return this;

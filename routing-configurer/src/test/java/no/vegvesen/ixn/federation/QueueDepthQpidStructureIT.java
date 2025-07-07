@@ -68,7 +68,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         List.of(5, 6)
                 )
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 
@@ -112,7 +112,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         List.of(5, 6)
                 )
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueOne, new Filter(selector)));
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueTwo, new Filter(selector)));
@@ -157,7 +157,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         List.of(5, 6)
                 )
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
 
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
 

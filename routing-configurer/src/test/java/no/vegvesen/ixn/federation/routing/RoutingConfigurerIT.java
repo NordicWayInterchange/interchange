@@ -315,7 +315,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
         ServiceProvider sp = new ServiceProvider("sp", new Capabilities(Set.of(cap)));
 
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(cap, null);
+		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(cap.getApplication(), null);
 
 		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
 		System.out.println(joinedSelector);

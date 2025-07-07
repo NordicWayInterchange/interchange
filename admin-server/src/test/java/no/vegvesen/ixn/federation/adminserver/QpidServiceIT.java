@@ -90,7 +90,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                         List.of(5, 6)
                 )
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
     }

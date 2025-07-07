@@ -78,7 +78,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         List.of(5, 6)
                 )
         );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         System.out.println(qpidContainer.getHttpUrl());
 
@@ -174,7 +174,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(exchangeName);
 
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
         System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
@@ -321,8 +321,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         String subscriptionSelector = subscription.getSelector();
 
-        String capabilitySelector1 = MessageValidatingSelectorCreator.makeSelector(capability1, null);
-        String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(capability2, null);
+        String capabilitySelector1 = MessageValidatingSelectorCreator.makeSelector(capability1.getApplication(), null);
+        String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(capability2.getApplication(), null);
 
         String joinedSelector1 = String.format("(%s) AND (%s)", capabilitySelector1, deliverySelector);
         System.out.println(joinedSelector1);
@@ -398,7 +398,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createHeadersExchange(capabilityExchange);
 
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
 
         String deliverySelector = delivery.getSelector();
 
