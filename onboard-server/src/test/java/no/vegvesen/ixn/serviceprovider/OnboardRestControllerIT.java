@@ -650,7 +650,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
         LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
@@ -689,7 +689,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider, List.of(new AddSubscription(selector, nodeProperties.getName(), "DATEX sub")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider, request);
         assertThat(response.getSubscriptions()).hasSize(1);
-        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().orElseThrow();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
     }
@@ -703,7 +703,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
-        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().orElseThrow();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
@@ -717,7 +717,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, List.of(addSubscription));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
-        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().orElseThrow();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
@@ -749,8 +749,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
 
         assertThat(response.getSubscriptions()).hasSize(1);
-        assertThat(response.getSubscriptions().stream().findFirst().get().getErrorMessage()).isNotBlank();
-        assertThat(response.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
+        assertThat(response.getSubscriptions().stream().findFirst().orElseThrow().getErrorMessage()).isNotBlank();
+        assertThat(response.getSubscriptions().stream().findFirst().orElseThrow().getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
@@ -766,7 +766,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
         List<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
-        LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
+        LocalSubscription subscription = localSubscriptions.stream().findFirst().orElseThrow();
 
         assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
 
@@ -813,7 +813,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
-        LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
+        LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().orElseThrow();
         restController.deleteSubscription(serviceProviderName, subscriptionApi.getId().toString());
 
         ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
@@ -889,7 +889,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddSubscriptionsResponse response = restController.addSubscriptions("king_olav.bouvetinterchange.eu", request);
 
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
-        LocalActorSubscription subscription = anySubscription.get();
+        LocalActorSubscription subscription = anySubscription.orElseThrow();
         GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
         verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -1063,7 +1063,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
         AddPeersRequest request = new AddPeersRequest(new ArrayList<>(List.of("king_thomas.bouvetinterchange.eu")));
         restController.addPeersToPrivateChannel(serviceProviderName, uuid, request);
-        assertThat(privateChannelRepository.findAllByServiceProviderName(serviceProviderName).stream().findFirst().get().getPeers()).hasSize(2);
+        assertThat(privateChannelRepository.findAllByServiceProviderName(serviceProviderName).stream().findFirst().orElseThrow().getPeers()).hasSize(2);
     }
 
     @Test
@@ -1158,7 +1158,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         Delivery addedDelivery = response.getDeliveries().stream()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
@@ -1221,7 +1221,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
-        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        Delivery delivery = response.getDeliveries().stream().findFirst().orElseThrow();
         assertThat(delivery.getErrorMessage()).isNotBlank();
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
@@ -1241,7 +1241,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
-        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        Delivery delivery = response.getDeliveries().stream().findFirst().orElseThrow();
         assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
@@ -1274,7 +1274,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         );
         AddDeliveriesResponse addDeliveriesResponse = restController.addDeliveries(serviceProviderName, request);
 
-        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().get().getId().toString();
+        String deliveryId = addDeliveriesResponse.getDeliveries().stream().findFirst().orElseThrow().getId().toString();
         GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
 
         assertThat(getDeliveryResponse).isNotNull();
@@ -1304,7 +1304,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         );
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
 
-        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().get().getId().toString());
+        restController.deleteDelivery(serviceProviderName, response.getDeliveries().stream().findFirst().orElseThrow().getId().toString());
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()
                 .stream()
                 .filter(i -> i.getStatus().equals(DeliveryStatus.ILLEGAL)))
@@ -1337,8 +1337,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                         new MetadataApi()
                 ))
         );
-        assertTrue(checkUuid(restController.addCapabilities(serviceProviderName,request).getCapabilities().stream().findFirst().get().getId()));
-        assertTrue(checkUuid(restController.listCapabilities(serviceProviderName).getCapabilities().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(restController.addCapabilities(serviceProviderName,request).getCapabilities().stream().findFirst().orElseThrow().getId()));
+        assertTrue(checkUuid(restController.listCapabilities(serviceProviderName).getCapabilities().stream().findFirst().orElseThrow().getId()));
     }
 
 
@@ -1347,9 +1347,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "serviceProvider_uuid_2";
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProviderName, List.of(new AddSubscription("originatingCountry='NO'", "SUB")));
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, request);
-        assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().get().getId()));
-        assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().get().getId()));
-        assertTrue(checkUuid(restController.getSubscription(serviceProviderName, response.getSubscriptions().stream().findFirst().get().getId()).getId()));
+        assertTrue(checkUuid(response.getSubscriptions().stream().findFirst().orElseThrow().getId()));
+        assertTrue(checkUuid(restController.listSubscriptions(serviceProviderName).getSubscriptions().stream().findFirst().orElseThrow().getId()));
+        assertTrue(checkUuid(restController.getSubscription(serviceProviderName, response.getSubscriptions().stream().findFirst().orElseThrow().getId()).getId()));
     }
 
 
@@ -1359,8 +1359,8 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProvider2 = "sp";
         AddPrivateChannelRequest request = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(Collections.singleton("serviceProvider_uuid_3"), "my-channel")));
         AddPrivateChannelResponse response = restController.addPrivateChannels(serviceProvider2, request);
-        assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().get().getId()));
-        assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().get().getId()));
+        assertTrue(checkUuid(response.getPrivateChannels().stream().findFirst().orElseThrow().getId()));
+        assertTrue(checkUuid(restController.listPrivateChannels(serviceProvider2).getPrivateChannels().stream().findFirst().orElseThrow().getId()));
         assertTrue(checkUuid(restController.getPrivateChannel(serviceProvider2, response.getPrivateChannels().stream().findFirst().get().getId()).getId()));
 
         assertTrue(checkUuid(restController.listPeerPrivateChannels(serviceProviderName).getPrivateChannels().stream().findFirst().get().getId()));

@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.capability.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class CapabilityToCapabilityApiTransformer {
@@ -30,10 +30,28 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
+		Application application = applicationApiToApplication(capabilityApi.getApplication());
 		return new Capability(
-				applicationApiToApplication(capabilityApi.getApplication()),
-				metadataApiToMetadata(capabilityApi.getMetadata())
+				application,
+				metadataApiToMetadata(capabilityApi.getMetadata()),
+				createCapabilityShards(application,capabilityApi.getMetadata().getShardCount())
 		);
+	}
+
+	private List<CapabilityShard> createCapabilityShards(Application application, Integer shardCount) {
+		List<CapabilityShard> capabilityShards = new ArrayList<>();
+		for (int i = 0; i < shardCount; i++) {
+			String exchangeName = "cap-" + UUID.randomUUID();
+			String capabilitySelector;
+			if (shardCount > 1) {
+				capabilitySelector = MessageValidatingSelectorCreator.makeSelector(application, i+1);
+			} else {
+				capabilitySelector = MessageValidatingSelectorCreator.makeSelector(application,null);
+			}
+			CapabilityShard shard = new CapabilityShard(i + 1,exchangeName, capabilitySelector);
+			capabilityShards.add(shard);
+		}
+		return capabilityShards;
 	}
 
 	public Set<Capability> capabilitiesApiToCapabilities(Set<CapabilityApi> capabilityApis) {

@@ -53,6 +53,14 @@ public class Capability {
         this.createdTimestamp = LocalDateTime.now();
     }
 
+
+    public Capability(Application application, Metadata metadata, List<CapabilityShard> shards) {
+        this.application = application;
+        this.metadata = metadata;
+        this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(shards);
+    }
+
     public Capability(String uuid, Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
@@ -77,13 +85,6 @@ public class Capability {
         this.application = application;
         this.metadata = metadata;
         this.uuid = uuid;
-        this.createdTimestamp = LocalDateTime.now();
-        this.shards.addAll(shards);
-    }
-
-    public Capability(Application application, Metadata metadata, List<CapabilityShard> shards) {
-        this.application = application;
-        this.metadata = metadata;
         this.createdTimestamp = LocalDateTime.now();
         this.shards.addAll(shards);
     }
