@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.selector.SelectorBuilder;
 import org.junit.Test;
 
 import java.util.Arrays;

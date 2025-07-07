@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.qpid;
+package no.vegvesen.ixn.federation.selector;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
@@ -147,6 +147,11 @@ public class SelectorBuilder {
 		return this;
 	}
 
+	public SelectorBuilder shardId(String shardId) {
+		values.put(MessageProperty.SHARD_ID.getName(), shardId);
+		return this;
+	}
+
 	public SelectorBuilder protocolVersion(String protocolVersion) {
 		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
 		return this;
@@ -167,11 +172,6 @@ public class SelectorBuilder {
 
 	public SelectorBuilder publicationTypes(String publicationType) {
 		values.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
-		return this;
-	}
-
-	public SelectorBuilder shardId(String shardId) {
-		values.put(MessageProperty.SHARD_ID.getName(), shardId);
 		return this;
 	}
 }

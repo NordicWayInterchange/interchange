@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.routing;
 
-import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
+import no.vegvesen.ixn.federation.capability.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;

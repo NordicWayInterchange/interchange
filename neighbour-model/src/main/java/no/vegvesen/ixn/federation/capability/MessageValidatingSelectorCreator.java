@@ -1,9 +1,10 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.selector.SelectorBuilder;
 
 public class MessageValidatingSelectorCreator {
 

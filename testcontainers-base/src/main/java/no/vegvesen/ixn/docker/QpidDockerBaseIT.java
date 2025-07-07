@@ -7,10 +7,17 @@ import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.ClientStore;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -129,4 +136,13 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		);
 	}
 
+	protected static RestTemplate createRestTemplate(SSLContext sslContext) {
+		DefaultClientTlsStrategy strategy = new DefaultClientTlsStrategy(sslContext);
+		PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
+				.create()
+				.setTlsSocketStrategy(strategy)
+				.build();
+		CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(client));
+	}
 }

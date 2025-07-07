@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.capability.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.model.capability.*;
 import org.junit.Test;
 
