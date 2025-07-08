@@ -344,7 +344,7 @@ public class ServiceProviderRouter {
     }
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
-        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+        for (Capability capability : serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN, CapabilityStatus.TO_DELETE)) {
             for (CapabilityShard shard : capability.getShards()) {
                 Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
                 if (exchange != null) {
