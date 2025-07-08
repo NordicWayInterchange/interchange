@@ -275,7 +275,11 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
-        assertThat(capability.hasShards()).isFalse();
+        //assertThat(capability.hasShards()).isFalse();
+        assertThat(capability.getStatus()).isEqualTo(CapabilityStatus.TO_DELETE);
+        for (CapabilityShard shard : capability.getShards()) {
+            assertThat(client.getExchange(shard.getExchangeName())).isNull();
+        }
     }
 
     @Test

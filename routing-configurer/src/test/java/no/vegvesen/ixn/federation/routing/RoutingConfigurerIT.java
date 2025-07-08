@@ -1239,8 +1239,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	public Capability getShardedCapability(String publicationId, RedirectStatus redirect, String exchangeName1, String exchangeName2, String exchangeName3) {
-		Metadata metadata = new Metadata(redirect);
-		metadata.setShardCount(3);
+		Metadata metadata = new Metadata(redirect,3);
 		CapabilityShard shard1 = new CapabilityShard(1, exchangeName1, "publicationId = '" + publicationId + "'");
 		CapabilityShard shard2 = new CapabilityShard(2, exchangeName2, "publicationId = '" + publicationId + "'");
 		CapabilityShard shard3 = new CapabilityShard(3, exchangeName3, "publicationId = '" + publicationId + "'");

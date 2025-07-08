@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = NapRestController.class)
-@ContextConfiguration(classes = {NapRestController.class, InterchangeNodeProperties.class, NapRestControllerTest.NapCorePropertiesCreator.class})
+@ContextConfiguration(classes = {NapRestController.class, InterchangeNodeProperties.class, NapRestControllerTest.NapCorePropertiesCreator.class, CapabilityToCapabilityApiTransformer.class})
 public class NapRestControllerTest {
 
     public static final String NODE_NAME = "interchangenode";
@@ -69,7 +69,7 @@ public class NapRestControllerTest {
     @Autowired
     private NapRestController restController;
 
-    @MockitoBean
+    @Autowired
     private CapabilityToCapabilityApiTransformer transformer;
 
     @Autowired
@@ -359,10 +359,12 @@ public class NapRestControllerTest {
                 Set.of(),
                 null
         ));
+        /*
         when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
                 new DatexApplicationApi("NO12345", "NO12345:publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
                 new MetadataApi()
         ));
+        */
         mockMvc.perform(
                 post(String.format("/nap/%s/capabilities", actorCommonName))
                         .accept(MediaType.APPLICATION_JSON)
@@ -390,10 +392,6 @@ public class NapRestControllerTest {
                 """;
         String actorCommonName = "actor";
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
-        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
-                new DatexApplicationApi("NO12345", "NO12345:publicationId","NO", null, List.of("123"), "Hello", "hello"),
-                new MetadataApi()
-        ));
         mockMvc.perform(
                 post(String.format("/nap/%s/capabilities", actorCommonName))
                         .accept(MediaType.APPLICATION_JSON)

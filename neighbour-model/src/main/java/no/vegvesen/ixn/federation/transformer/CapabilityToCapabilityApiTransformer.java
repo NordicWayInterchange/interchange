@@ -106,35 +106,30 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	public Metadata metadataApiToMetadata(MetadataApi metadataApi) {
-		Metadata metadata = new Metadata();
-		if (metadataApi.getShardCount() != null)
-			metadata.setShardCount(metadataApi.getShardCount());
-		else
-			metadata.setShardCount(1);
-		if (metadataApi.getInfoUrl() != null)
-			metadata.setInfoUrl(metadataApi.getInfoUrl());
-		if (metadataApi.getMaxBandwidth() != null)
-			metadata.setMaxBandwidth(metadataApi.getMaxBandwidth());
-		if (metadataApi.getMaxMessageRate() != null)
-			metadata.setMaxMessageRate(metadataApi.getMaxMessageRate());
-		if (metadataApi.getRepetitionInterval() != null)
-			metadata.setRepetitionInterval(metadataApi.getRepetitionInterval());
-
-		metadata.setRedirectPolicy(transformRedirectStatusApiToRedirectStatus(metadataApi.getRedirectPolicy()));
-		return metadata;
+		int shardCount;
+		if (metadataApi.getShardCount() != null) {
+			shardCount = metadataApi.getShardCount();
+		} else {
+			shardCount = 1;
+		}
+        return new Metadata(
+                metadataApi.getInfoUrl(),
+                shardCount,
+                transformRedirectStatusApiToRedirectStatus(metadataApi.getRedirectPolicy()),
+                metadataApi.getMaxBandwidth(),
+                metadataApi.getMaxMessageRate(),
+                metadataApi.getRepetitionInterval()
+        );
 	}
 
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
 		if (status == null) {
 			return RedirectStatus.OPTIONAL;
 		}
-		switch (status) {
-			case MANDATORY:
-				return RedirectStatus.MANDATORY;
-			case NOT_AVAILABLE:
-				return RedirectStatus.NOT_AVAILABLE;
-			default:
-				return RedirectStatus.OPTIONAL;
-		}
+        return switch (status) {
+            case MANDATORY -> RedirectStatus.MANDATORY;
+            case NOT_AVAILABLE -> RedirectStatus.NOT_AVAILABLE;
+            default -> RedirectStatus.OPTIONAL;
+        };
 	}
 }

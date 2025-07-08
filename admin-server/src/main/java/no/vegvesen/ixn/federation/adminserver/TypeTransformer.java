@@ -14,11 +14,10 @@ import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.model.capability.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -80,9 +79,10 @@ public class TypeTransformer {
 
         List<MatchingCapabilityApi> matchingCapabilities = new ArrayList<>();
         for (Capability capability : capabilities) {
-            matchingCapabilities.add(new MatchingCapabilityApi(
+            matchingCapabilities.add(
+                    new MatchingCapabilityApi(
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi()
+                    metadataToMetadataApi(capability.getMetadata(),capability.shardCount())
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
@@ -92,6 +92,31 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities;
+    }
+
+    public MetadataApi metadataToMetadataApi(Metadata metadata, int shardCount) {
+        return new MetadataApi(
+                shardCount,
+                metadata.getInfoUrl(),
+                redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()),
+                metadata.getMaxBandwidth(),
+                metadata.getMaxMessageRate(),
+                metadata.getRepetitionInterval()
+        );
+    }
+
+    public RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus redirectStatus) {
+       switch (redirectStatus) {
+           case MANDATORY -> {
+               return RedirectStatusApi.MANDATORY;
+           }
+           case NOT_AVAILABLE ->  {
+               return RedirectStatusApi.NOT_AVAILABLE;
+           }
+           default -> {
+               return RedirectStatusApi.OPTIONAL;
+           }
+       }
     }
 
     public List<PrivateChannelApi> privateChannelListToPrivateChannelApiList(List<PrivateChannel> privateChannelList) {
@@ -243,6 +268,7 @@ public class TypeTransformer {
         return capabilityApiList.stream().sorted().toList();
     }
 
+    //TODO take into account TO_DELETE
     public CapabilityStatusApi capabilityStatusToCapabilityStatusApi(CapabilityStatus capabilityStatus) {
         return CapabilityStatusApi.valueOf(capabilityStatus.toString());
     }

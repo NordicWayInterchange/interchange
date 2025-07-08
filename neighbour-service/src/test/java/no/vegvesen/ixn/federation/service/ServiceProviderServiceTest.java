@@ -58,9 +58,8 @@ public class ServiceProviderServiceTest {
                         List.of("0122"),
                         List.of(6)
                 ),
-                new Metadata()
+                new Metadata(1)
         );
-        capability.getMetadata().setShardCount(1);
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(

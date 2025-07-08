@@ -56,6 +56,14 @@ public class Capabilities {
 				.collect(Collectors.toSet());
 	}
 
+	public Set<Capability> getCapabilitiesByStatusIsNot(CapabilityStatus ...statuses) {
+		List<CapabilityStatus> statusesList = Arrays.asList(statuses);
+		return capabilities.stream()
+				.filter(c -> ! statusesList.contains(c.getStatus()))
+				.collect(Collectors.toSet());
+	}
+
+
 	public void setCapabilities(Set<Capability> capabilities) {
 		this.capabilities.clear();
 		if ( capabilities != null ) {

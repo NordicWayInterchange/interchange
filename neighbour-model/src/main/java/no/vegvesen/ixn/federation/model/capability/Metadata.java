@@ -100,20 +100,30 @@ public class Metadata {
     }
 
     public MetadataApi toApi() {
-        return new MetadataApi(getShardCount(), getInfoUrl(), toRedirectStatusApi(getRedirectPolicy()), getMaxBandwidth(), getMaxMessageRate(), getRepetitionInterval());
+        return new MetadataApi(
+                getShardCount(),
+                getInfoUrl(),
+                redirectStatusToRedirectStatusApi(getRedirectPolicy()),
+                getMaxBandwidth(),
+                getMaxMessageRate(),
+                getRepetitionInterval()
+        );
     }
 
-    public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
-        if (status == null) {
+    public RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus redirectStatus) {
+        if (redirectStatus == null) {
             return RedirectStatusApi.OPTIONAL;
         }
-        switch (status) {
-            case MANDATORY:
+        switch (redirectStatus) {
+            case MANDATORY -> {
                 return RedirectStatusApi.MANDATORY;
-            case NOT_AVAILABLE:
+            }
+            case NOT_AVAILABLE ->  {
                 return RedirectStatusApi.NOT_AVAILABLE;
-            default:
+            }
+            default -> {
                 return RedirectStatusApi.OPTIONAL;
+            }
         }
     }
 

@@ -117,19 +117,19 @@ public class ServiceProviderService {
     public void removeTearDownCapabilities(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 
-        List<Capability> capabilitiesWithStatusTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
-                .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
+        List<Capability> capabilitiesWithStatusToDelete = serviceProvider.getCapabilities().getCapabilities().stream()
+                .filter(c -> c.getStatus().equals(CapabilityStatus.TO_DELETE))
                 .toList();
 
         Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
         HashSet<Capability> capabilitiesToRemove = new HashSet<>();
-        for (Capability capability : capabilitiesWithStatusTearDown) {
+        for (Capability capability : capabilitiesWithStatusToDelete) {
             List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByCapability_Id(capability.getId());
             if (possibleMatches.isEmpty()) {
-                if (!capability.hasShards()) {
-                    logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
-                    capabilitiesToRemove.add(capability);
-                }
+                //if (!capability.hasShards()) {
+                logger.info("Removing capability with id {} and status TO_DELETE", capability.getId());
+                capabilitiesToRemove.add(capability);
+                //}
             }
         }
 

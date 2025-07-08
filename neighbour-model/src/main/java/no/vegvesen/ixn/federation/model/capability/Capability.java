@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import no.vegvesen.ixn.federation.capability.MessageValidatingSelectorCreator;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -9,6 +10,11 @@ import java.util.*;
 
 import java.util.UUID;
 
+/**
+ * This class takes both a list of CapabilityShards, and a ShardCound in the metadata section.
+ * We are working towards only having the list, not the count (so we need to check that we have shardCound number of
+ * shards in the list).
+ */
 @Entity
 @Table(name = "capability")
 @JsonIgnoreProperties(value = "createdTimestamp")
@@ -51,6 +57,7 @@ public class Capability {
         this.application = application;
         this.metadata = metadata;
         this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(createCapabilityShards(application, metadata.getShardCount()));
     }
 
 
@@ -59,6 +66,10 @@ public class Capability {
         this.metadata = metadata;
         this.createdTimestamp = LocalDateTime.now();
         this.shards.addAll(shards);
+        if (metadata.getShardCount() != shards.size()) {
+            throw new IllegalArgumentException("metadata shardcount must match the capability shard list length");
+        }
+        this.createdTimestamp =  LocalDateTime.now();
     }
 
     public Capability(String uuid, Application application, Metadata metadata) {
@@ -66,6 +77,7 @@ public class Capability {
         this.metadata = metadata;
         this.uuid = uuid;
         this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(createCapabilityShards(application, metadata.getShardCount()));
     }
 
     public Capability(Integer id, Application application, Metadata metadata) {
@@ -73,12 +85,14 @@ public class Capability {
         this.application = application;
         this.metadata = metadata;
         this.createdTimestamp = LocalDateTime.now();
+        this.shards.addAll(createCapabilityShards(application, metadata.getShardCount()));
     }
 
     public Capability(Application application, Metadata metadata, LocalDateTime createdTimestamp) {
         this.application = application;
         this.metadata = metadata;
         this.createdTimestamp = createdTimestamp;
+        this.shards.addAll(createCapabilityShards(application, metadata.getShardCount()));
     }
 
     public Capability(String uuid, Application application, Metadata metadata, List<CapabilityShard> shards) {
@@ -87,6 +101,9 @@ public class Capability {
         this.uuid = uuid;
         this.createdTimestamp = LocalDateTime.now();
         this.shards.addAll(shards);
+        if (metadata.getShardCount() != shards.size()) {
+            throw new IllegalArgumentException("metadata shardcount must match the capability shard list length");
+        }
     }
 
     public void setId(Integer id) {
@@ -130,7 +147,7 @@ public class Capability {
     }
 
     public boolean isSharded() {
-        return metadata.getShardCount() > 1;
+        return shards.size() > 1;
     }
 
     public LocalDateTime getCreatedTimestamp() {
@@ -176,6 +193,27 @@ public class Capability {
             exchanges.add(shard.getExchangeName());
         }
         return exchanges;
+    }
+
+    public int shardCount() {
+        return shards.size();
+    }
+
+
+    public static List<CapabilityShard> createCapabilityShards(Application application, int shardCount) {
+        List<CapabilityShard> capabilityShards = new ArrayList<>();
+        for (int i = 0; i < shardCount; i++) {
+            String exchangeName = "cap-" + UUID.randomUUID();
+            String capabilitySelector;
+            if (shardCount > 1) {
+                capabilitySelector = MessageValidatingSelectorCreator.makeSelector(application, i+1);
+            } else {
+                capabilitySelector = MessageValidatingSelectorCreator.makeSelector(application,null);
+            }
+            CapabilityShard shard = new CapabilityShard(i + 1,exchangeName, capabilitySelector);
+            capabilityShards.add(shard);
+        }
+        return capabilityShards;
     }
 
     @Override

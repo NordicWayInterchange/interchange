@@ -376,7 +376,7 @@ public class NapRestController {
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
                 .stream()
                 .filter(a->a.equals(capabilityToAdd))
-                .findFirst().get();
+                .findFirst().orElseThrow(); //TODO don't have a mapping for this error, it shold never happen
 
         logger.info("Returning updated Service Provider: {}", savedServiceProvider);
         return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability);

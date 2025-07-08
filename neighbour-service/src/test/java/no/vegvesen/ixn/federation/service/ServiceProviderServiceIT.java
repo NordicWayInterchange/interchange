@@ -214,7 +214,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
                 )));
 
         for(Capability i : capabilities.getCapabilities()){
-            i.setStatus(CapabilityStatus.TEAR_DOWN);
+            i.setStatus(CapabilityStatus.TO_DELETE);
         }
         ServiceProvider sp = new ServiceProvider("sp", capabilities);
         repository.save(sp);
@@ -226,7 +226,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
 
         Capability capability = new Capability(null);
-        capability.setStatus(CapabilityStatus.TEAR_DOWN);
+        capability.setStatus(CapabilityStatus.TO_DELETE);
         Capabilities capabilities = new Capabilities(Set.of(capability));
 
         ServiceProvider serviceProvider = new ServiceProvider("service-provider",capabilities);

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.routing;
 
-import no.vegvesen.ixn.federation.capability.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
@@ -330,38 +329,16 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
-        Set<Capability> requestedCaps = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN);
+        Set<Capability> requestedCaps = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN, CapabilityStatus.TO_DELETE);
         for (Capability capability : requestedCaps) {
-            if (!capability.hasShards()) {
-                List<CapabilityShard> newShards = new ArrayList<>();
-                int numberOfShards = capability.getMetadata().getShardCount();
-                for (int i = 0; i < numberOfShards; i++) {
-                    String exchangeName = "cap-" + UUID.randomUUID();
-                    Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
-                    logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+            for (CapabilityShard shard : capability.getShards()) {
+                Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                if (exchange == null) {
+                    exchange = qpidClient.createHeadersExchange(shard.getExchangeName());
                     delta.addExchange(exchange);
-
-                    String capabilitySelector;
-                    if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), i+1);
-                    } else {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability.getApplication(), null);
-                    }
-                    CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
-                    newShards.add(newShard);
                 }
-                capability.setShards(newShards);
-                capability.setStatus(CapabilityStatus.CREATED);
-            } else {
-                for (CapabilityShard shard : capability.getShards()) {
-                    Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
-                    if (exchange == null) {
-                        exchange = qpidClient.createHeadersExchange(shard.getExchangeName());
-                        delta.addExchange(exchange);
-                    }
-                }
-                capability.setStatus(CapabilityStatus.CREATED);
             }
+            capability.setStatus(CapabilityStatus.CREATED);
         }
         return repository.save(serviceProvider);
     }
@@ -388,22 +365,18 @@ public class ServiceProviderRouter {
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
-        if (!tearDownCapabilities.isEmpty()) {
-            for (Capability capability : tearDownCapabilities) {
-                if (capability.hasShards()) {
-                    for (CapabilityShard shard : capability.getShards()) {
-                        Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
-                        if (exchange != null) {
-                            qpidClient.removeExchange(exchange);
-                            logger.info("Removed exchange {} for Capability with id {}", shard.getExchangeName(), capability.getId());
-                            delta.removeExchange(exchange);
-                        }
-                    }
-                    capability.removeShards();
+        for (Capability capability : tearDownCapabilities) {
+            for (CapabilityShard shard : capability.getShards()) {
+                Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                if (exchange != null) {
+                    qpidClient.removeExchange(exchange);
+                    logger.info("Removed exchange {} for Capability with id {}", shard.getExchangeName(), capability.getId());
+                    delta.removeExchange(exchange);
                 }
             }
-            serviceProvider = repository.save(serviceProvider);
+            capability.setStatus(CapabilityStatus.TO_DELETE);
         }
+        serviceProvider = repository.save(serviceProvider);
         return serviceProvider;
     }
 
