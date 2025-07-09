@@ -126,10 +126,8 @@ public class ServiceProviderService {
         for (Capability capability : capabilitiesWithStatusToDelete) {
             List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByCapability_Id(capability.getId());
             if (possibleMatches.isEmpty()) {
-                //if (!capability.hasShards()) {
                 logger.info("Removing capability with id {} and status TO_DELETE", capability.getId());
                 capabilitiesToRemove.add(capability);
-                //}
             }
         }
 

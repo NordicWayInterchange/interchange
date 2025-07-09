@@ -359,12 +359,6 @@ public class NapRestControllerTest {
                 Set.of(),
                 null
         ));
-        /*
-        when(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(any())).thenReturn(new CapabilityApi(
-                new DatexApplicationApi("NO12345", "NO12345:publicationId","NO", "protocolVersion", List.of("123"), "Hello", "hello"),
-                new MetadataApi()
-        ));
-        */
         mockMvc.perform(
                 post(String.format("/nap/%s/capabilities", actorCommonName))
                         .accept(MediaType.APPLICATION_JSON)
