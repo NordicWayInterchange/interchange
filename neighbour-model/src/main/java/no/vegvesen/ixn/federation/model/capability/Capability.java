@@ -51,6 +51,7 @@ public class Capability {
     public Capability(Application application) {
         this.application = application;
         this.metadata = new Metadata();
+        this.shards.addAll(createCapabilityShards(application, metadata.getShardCount()));
         this.createdTimestamp = LocalDateTime.now();
     }
     public Capability(Application application, Metadata metadata) {

@@ -241,14 +241,14 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
-                new Capabilities(new HashSet<>(Collections.singletonList(capability))),
+                new Capabilities(Set.of(capability)),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
 
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
-        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().getFirst().getExchangeName())).isTrue();
         assertThat(client.getQueuePublishingLinks("bi-queue")).hasSize(1);
     }
 
