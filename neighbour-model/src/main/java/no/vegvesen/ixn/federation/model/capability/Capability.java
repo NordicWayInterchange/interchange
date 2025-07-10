@@ -176,16 +176,8 @@ public class Capability {
                 .findFirst();
     }
 
-    public void addShards(List<CapabilityShard> shards){
-        this.shards.addAll(shards);
-    }
-
     public boolean hasShards() {
         return !shards.isEmpty();
-    }
-
-    public void removeShards() {
-        this.shards.clear();
     }
 
     public Set<String> getExchangesFromShards() {
