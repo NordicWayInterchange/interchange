@@ -225,7 +225,15 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
 
-        Capability capability = new Capability(null);
+        Capability capability = new Capability(new DatexApplication(
+            "pub-123",
+            "pub-123:0001",
+            "NO",
+            "1.0",
+            List.of("123"),
+            "SituationPublcation",
+            "Some Road authority"
+        ));
         capability.setStatus(CapabilityStatus.TO_DELETE);
         Capabilities capabilities = new Capabilities(Set.of(capability));
 

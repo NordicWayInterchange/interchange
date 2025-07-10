@@ -637,9 +637,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
 
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName")
+				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
+				new Metadata(3)
 		);
-		cap.getMetadata().setShardCount(3);
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
@@ -1027,8 +1027,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata = new Metadata();
-		metadata.setShardCount(3);
+		Metadata metadata = new Metadata(3);
 		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
 		client.createHeadersExchange("cap-ex12");
 
@@ -1138,8 +1137,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-2");
 
-		Metadata metadata = new Metadata();
-		metadata.setShardCount(3);
+		Metadata metadata = new Metadata(3);
 
 		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
 		client.createHeadersExchange("cap-ex9");
