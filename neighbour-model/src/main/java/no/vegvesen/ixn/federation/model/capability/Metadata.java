@@ -7,6 +7,12 @@ import no.vegvesen.ixn.federation.model.RedirectStatus;
 import jakarta.persistence.*;
 import java.util.*;
 
+/**
+ * This class takes shardCount as an argument, which is redundant due to this also being represented as a list of
+ * CapabilityShards in the objects that contains instances of this class.
+ * We are migrating towards removing shardCount from this class, and do it in the construction of object of the
+ * containing classes.
+ */
 @Entity
 @Table(name = "metadata")
 public class Metadata {
