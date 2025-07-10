@@ -307,7 +307,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						List.of("12004"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		cap.setStatus(CapabilityStatus.CREATED);

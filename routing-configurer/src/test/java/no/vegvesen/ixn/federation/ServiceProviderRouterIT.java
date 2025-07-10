@@ -525,7 +525,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						"publicationType",
 						"publisherName"
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 		capability.setStatus(CapabilityStatus.CREATED);
 		Capabilities capabilities = new Capabilities(
@@ -621,7 +621,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata())));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -639,7 +639,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 		cap.getMetadata().setShardCount(3);
 
@@ -663,7 +663,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		Capabilities capabilities = new Capabilities(
@@ -708,7 +708,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata())));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed",capabilities);
 
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
@@ -759,7 +759,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		client.createHeadersExchange("cap-ex1");
@@ -800,7 +800,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 
@@ -842,7 +842,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard1)
 		);
 		client.createHeadersExchange("cap-ex2");
@@ -857,7 +857,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(5)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard2)
 		);
 		client.createHeadersExchange("cap-ex3");
@@ -897,7 +897,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		client.createHeadersExchange("cap-ex4");
@@ -938,7 +938,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		client.createHeadersExchange("cap-ex5");
@@ -982,7 +982,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard1)
 		);
 		client.createHeadersExchange("cap-ex6");
@@ -997,7 +997,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1233"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard2)
 		);
 		client.createHeadersExchange("cap-ex7");
@@ -1030,7 +1030,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata metadata = new Metadata();
 		metadata.setShardCount(3);
 		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex12", "publicationId = 'pub-1'");
 		client.createHeadersExchange("cap-ex12");
@@ -1114,7 +1114,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		client.createHeadersExchange("cap-ex8");
@@ -1141,7 +1141,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		subscription.addLocalEndpoint(endpoint);
 		client.createQueue("endpoint-2");
 
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata metadata = new Metadata();
 		metadata.setShardCount(3);
 
 		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
@@ -1199,7 +1199,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard)
 		);
 		client.createHeadersExchange("cap-ex15");
@@ -1244,7 +1244,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard1)
 		);
 		client.createHeadersExchange("cap-ex16");
@@ -1261,7 +1261,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of("1234"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL),
+				new Metadata(),
 				Collections.singletonList(shard2)
 		);
 		client.createHeadersExchange("cap-ex17");

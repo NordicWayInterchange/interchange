@@ -63,12 +63,12 @@ public class NeighbourServiceDiscoveryTest {
 	private NeighbourCapability getDatexNeighbourCapability(String originatingCountry) {
 		return new NeighbourCapability(
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL));
+				new Metadata());
 	}
 	private Capability getDatexCapability(String originatingCountry) {
 		return new Capability(
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL));
+				new Metadata());
 	}
 
 	@BeforeEach

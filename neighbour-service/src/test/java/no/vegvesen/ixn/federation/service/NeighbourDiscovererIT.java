@@ -84,7 +84,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 								List.of(),
 								"SituationPublication",
 								"publisherName"),
-						new Metadata(RedirectStatus.OPTIONAL))));
+						new Metadata())));
 
 		NeighbourCapabilities c2 = new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
 				Sets.newLinkedHashSet(new NeighbourCapability(
@@ -96,7 +96,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 								List.of(),
 								"SituationPublication",
 								"publisherName"),
-						new Metadata(RedirectStatus.OPTIONAL))));
+						new Metadata())));
 		when(mockDnsFacade.lookupNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
 
 		checkForNewNeighbours();
@@ -175,7 +175,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 										"SituationPublication",
 										"publisherName"
 								),
-								new Metadata(RedirectStatus.OPTIONAL)
+								new Metadata()
 						)),
 						LocalDateTime.now()
 				),
@@ -221,7 +221,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 										"SituationPublication",
 										"publisherName"
 								),
-								new Metadata(RedirectStatus.OPTIONAL)
+								new Metadata()
 						)),
 						LocalDateTime.now()
 				),
@@ -269,7 +269,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												"SituationPublication",
 												"publisherName"
 										),
-										new Metadata(RedirectStatus.OPTIONAL)
+										new Metadata()
 								),
 								new NeighbourCapability(
 										new DenmApplication(
@@ -280,7 +280,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 									),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -331,7 +331,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 										"SituationPublication",
 										"publisherName"
 								),
-								new Metadata(RedirectStatus.OPTIONAL)
+								new Metadata()
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -384,7 +384,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 										"SituationPublication",
 										"publisherName"
 								),
-								new Metadata(RedirectStatus.OPTIONAL)
+								new Metadata()
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -406,7 +406,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 										"SituationPublication",
 										"publisherName"
 								),
-								new Metadata(RedirectStatus.OPTIONAL)
+								new Metadata()
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -472,7 +472,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -546,7 +546,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -577,7 +577,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -675,7 +675,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of(),
 												List.of()
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -757,7 +757,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of(),
 												List.of()
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -803,7 +803,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -860,7 +860,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of("0122"),
 												List.of(6)
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -932,7 +932,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of(),
 												List.of()
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),
@@ -997,7 +997,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 												List.of(),
 												List.of()
 										),
-										new Metadata(RedirectStatus.OPTIONAL))
+										new Metadata())
 						)),
 						LocalDateTime.now()
 				),

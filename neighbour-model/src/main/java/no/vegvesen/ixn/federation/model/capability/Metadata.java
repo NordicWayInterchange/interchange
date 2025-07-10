@@ -17,9 +17,10 @@ public class Metadata {
 
     private String infoUrl;
 
-    private Integer shardCount;
+    private Integer shardCount = 1;
 
-    private RedirectStatus redirectPolicy;
+    @Enumerated(EnumType.STRING)
+    private RedirectStatus redirectPolicy = RedirectStatus.OPTIONAL;
 
     private Integer maxBandwidth;
 
@@ -42,13 +43,14 @@ public class Metadata {
 
     //for testing
     public Metadata(RedirectStatus redirectPolicy) {
-        this("", 1, redirectPolicy, 0, 0, 0);
+        this.redirectPolicy = redirectPolicy;
     }
 
     //for testing
-    public Metadata(RedirectStatus redirectPolicy, Integer shardCount) {
-        this("", shardCount, redirectPolicy, 0, 0, 0);
+    public Metadata(Integer shardCount) {
+        this.shardCount = shardCount;
     }
+
     public String getInfoUrl() {
         return infoUrl;
     }

@@ -161,7 +161,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL),
+                new Metadata(),
                 Collections.singletonList(shard)
         );
         client.createHeadersExchange("exchange");

@@ -287,7 +287,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -304,7 +304,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -322,7 +322,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                         "1.0",
                                         List.of("1234"),
                                         List.of(6)),
-                                new Metadata(RedirectStatus.OPTIONAL)
+                                new Metadata()
                         ))), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -351,7 +351,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 List.of("123"),
                                                 List.of(6)
                                         ),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 ),
                                 new Capability(
                                         new DenmApplication(
@@ -361,7 +361,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("123"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL))
+                                        new Metadata())
                         )
                 )
         );
@@ -375,7 +375,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("123"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 ), new Capability(
                                         new DenmApplication(
                                                 "NPRA_2",
@@ -385,7 +385,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 List.of("123"),
                                                 List.of(6)
                                         ),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -408,7 +408,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("123"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -425,7 +425,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -442,7 +442,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 "1.0",
                                 List.of("1234"),
                                 List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
+                        new Metadata()
                 ))), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 
         neighbourRepository.save(neighbour);
@@ -470,7 +470,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -487,7 +487,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 "1.0",
                                 List.of("1234"),
                                 List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
+                        new Metadata()
                 ))),
                 new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
@@ -513,7 +513,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -529,7 +529,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1234"),
                                                 List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
+                                        new Metadata()
                                 )
                         )
                 )
@@ -546,7 +546,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 "1.0",
                                 List.of("1234"),
                                 List.of(6)),
-                        new Metadata(RedirectStatus.OPTIONAL)
+                        new Metadata()
                 ))),
                 new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 

@@ -16,14 +16,14 @@ public class CapabilitiesTest {
 
     @Test
     public void testAddAllDatatypesRetainsExistingObjects() {
-        Capability firstCapability = new Capability(1,new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata(RedirectStatus.OPTIONAL));
-        Capability secondCapability = new Capability(2,new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata(RedirectStatus.OPTIONAL));
+        Capability firstCapability = new Capability(1,new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
+        Capability secondCapability = new Capability(2,new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata());
         Capabilities capabilities = new Capabilities(
                 new HashSet<>(Arrays.asList(
                         firstCapability,
                         secondCapability
                 )));
-        capabilities.replaceCapabilities(Collections.singleton(new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata(RedirectStatus.OPTIONAL))));
+        capabilities.replaceCapabilities(Collections.singleton(new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata())));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         //Test that the original object is the one retained
         assertThat(capabilities.getCapabilities().stream().findFirst().get().getId()).isEqualTo(1);

@@ -49,7 +49,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -62,7 +62,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -98,7 +98,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -111,7 +111,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -147,7 +147,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -160,7 +160,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         List.of("1234"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -216,7 +216,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -229,7 +229,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.REQUESTED);
 
@@ -264,7 +264,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata()
         );
         cap.setStatus(CapabilityStatus.CREATED);
 
@@ -290,7 +290,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
+        Metadata metadata = new Metadata();
         metadata.setShardCount(2);
 
         Capability cap = new Capability(

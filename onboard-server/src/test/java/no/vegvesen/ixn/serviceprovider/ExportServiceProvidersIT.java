@@ -57,9 +57,7 @@ public class ExportServiceProvidersIT extends PostgresContainerBase {
                                                 List.of("123"),
                                                 List.of(6)
                                         ),
-                                        new Metadata(
-                                                RedirectStatus.OPTIONAL
-                                        )
+                                        new Metadata()
                                 )
                         )
                 ),

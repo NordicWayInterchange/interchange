@@ -168,7 +168,7 @@ public class SubscriptionCalculatorTest {
                                     List.of("0122"),
                                     "SituationPublication",
                                     "publisherName"
-                            ), new Metadata(RedirectStatus.OPTIONAL)
+                            ), new Metadata()
                         )
                 ), ""
         );
@@ -197,7 +197,7 @@ public class SubscriptionCalculatorTest {
                                         List.of("0122"),
                                         "SituationPublication",
                                         "publisherName"
-                                ), new Metadata(RedirectStatus.OPTIONAL)
+                                ), new Metadata()
                         ),
                         new NeighbourCapability(
                             new DenmApplication(
@@ -207,7 +207,7 @@ public class SubscriptionCalculatorTest {
                                 "1.0",
                                 List.of("0122"),
                                 List.of(6)
-                        ),  new Metadata(RedirectStatus.OPTIONAL))
+                        ),  new Metadata())
                 )), ""
         );
         assertThat(calculatedSubscriptions)
@@ -240,7 +240,7 @@ public class SubscriptionCalculatorTest {
                                         List.of("0122"),
                                         "SituationPublication",
                                         "publisherName"
-                                ), new Metadata(RedirectStatus.OPTIONAL)
+                                ), new Metadata()
                         )
                 ), ""
         );
@@ -273,7 +273,7 @@ public class SubscriptionCalculatorTest {
                                         List.of("0122"),
                                         "SituationPublication",
                                         "publisherName"
-                                ), new Metadata(RedirectStatus.OPTIONAL)
+                                ), new Metadata()
                         ),
                         new NeighbourCapability(
                                 new DenmApplication(
@@ -283,7 +283,7 @@ public class SubscriptionCalculatorTest {
                                         "1.0",
                                         List.of("0122"),
                                         List.of(6)
-                                ),  new Metadata(RedirectStatus.OPTIONAL))
+                                ),  new Metadata())
                 )), ""
         );
         assertThat(calculatedSubscriptions)
@@ -323,12 +323,12 @@ public class SubscriptionCalculatorTest {
     private NeighbourCapability getDatexCapability(String country) {
         return new NeighbourCapability(
                 new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
-                new Metadata(RedirectStatus.OPTIONAL));
+                new Metadata());
     }
 
     private NeighbourCapability getDatexNeighbourCapability(String country) {
         return new NeighbourCapability(
                 new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"),
-                new Metadata(RedirectStatus.OPTIONAL));
+                new Metadata());
     }
 }

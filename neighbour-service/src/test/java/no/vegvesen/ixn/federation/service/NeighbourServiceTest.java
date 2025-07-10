@@ -392,6 +392,6 @@ class NeighbourServiceTest {
 	}
 
 	private NeighbourCapability getDatexNeighbourCapability(String country) {
-		return new NeighbourCapability(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL));
+		return new NeighbourCapability(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"), new Metadata());
 	}
 }

@@ -28,14 +28,14 @@ class CapabilityMatcherTest {
 					List.of("1022133", "1022330", "102320", "12003020", "120030010", "120012100", "120030012", "1023213000", "1022303", "12001030", "12001032", "1200201", "12002310", "12001023", "12001220", "12001022", "12003002", "12001222", "120030222", "120030220", "12003000", "12002031", "12002033", "12001021", "12001020", "1200212", "1200213", "1200210", "1200211", "1200013", "12002303", "120003", "12002302", "12001012", "12002301", "12002300", "102322011", "1023211", "1023212", "1023210", "102231", "102232", "12001010", "1200100", "1200023", "12001202", "10223310", "12002211", "12001201", "12001200", "102303", "102302"),
 					List.of(6)
 			),
-			new Metadata(RedirectStatus.OPTIONAL)
+			new Metadata()
 	);
 
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, List.of(6));
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability capability = new NeighbourCapability(denm_a_b_causeCode_1_2,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
@@ -46,7 +46,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -57,7 +57,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -68,7 +68,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", "1.0", QUAD_TREE_0121_0122, "SituationBublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -79,7 +79,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "SituationPublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -90,7 +90,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -101,7 +101,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", "1.0", QUAD_TREE_0121_0122, "MeasuredDataPublication", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -112,7 +112,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -123,7 +123,7 @@ class CapabilityMatcherTest {
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
 		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, "Obstruction", "publisherName");
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability datexCapability = new NeighbourCapability(datexApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
@@ -141,7 +141,7 @@ class CapabilityMatcherTest {
 				quadTreeTiles,
 				List.of(6));
 
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability capability = new NeighbourCapability(application,meta);
 
 		LocalSubscription subscription = new LocalSubscription(
@@ -168,7 +168,7 @@ class CapabilityMatcherTest {
 								"DENM:1.2.2",
 								List.of("12004"),
 								List.of(5)),
-						new Metadata(RedirectStatus.OPTIONAL)
+						new Metadata()
 				)),
 				Collections.singleton(new LocalSubscription(
 						52,
@@ -191,7 +191,7 @@ class CapabilityMatcherTest {
 								"DENM:1.2.2",
 								List.of("12004"),
 								List.of(5, 6)),
-						new Metadata(RedirectStatus.OPTIONAL)
+						new Metadata()
 				)),
 				Collections.singleton(new LocalSubscription(
 						52,
@@ -207,7 +207,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void matchIviSelectorWithQuadTree() {
 		IvimApplication application = new IvimApplication("NO-12345", "pub-2131", "NO", "IVI:1.0", List.of("12004"));
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability capability = new NeighbourCapability(application,meta);
 
 		String consumerCommonName = "";
@@ -224,7 +224,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability capability = new NeighbourCapability(application,meta);
 		String consumerCommonName = "";
 		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id = 2 or id = 3", consumerCommonName, "SPATEM SUB");
@@ -236,7 +236,7 @@ class CapabilityMatcherTest {
 	@Test
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		CamApplication camApplication = new CamApplication("publ-id-1", "pub-1", "NO", "1.0", QUAD_TREE_0121_0122);
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability camCapability = new NeighbourCapability(camApplication,meta);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(camCapability),
@@ -253,7 +253,7 @@ class CapabilityMatcherTest {
 				"SPATEM:1.0",
 				List.of("12003")
 		);
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		NeighbourCapability capability = new NeighbourCapability(application,meta);
 		String consumerCommonName = "";
 		LocalSubscription localSubscription = new LocalSubscription("name = 'fish'", consumerCommonName, "fish sub");
@@ -266,7 +266,7 @@ class CapabilityMatcherTest {
 	void newMatchDenmCapabilityWithSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, List.of(6));
 
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5";
 
 		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isTrue();
@@ -275,7 +275,7 @@ class CapabilityMatcherTest {
 	@Test
 	void matchShardedSelectorToShardedCapability() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singletonList(6));
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5 AND shardId = 2";
 
@@ -285,7 +285,7 @@ class CapabilityMatcherTest {
 	@Test
 	void shardedSubscriptionDoesNotMatchShardedCapability() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, Collections.singletonList(6));
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 
 		String selector = "originatingCountry = 'NO' AND shardId = 2 AND (causeCode = 6 OR causeCode = 5)";
 
@@ -296,7 +296,7 @@ class CapabilityMatcherTest {
 	@Disabled
 	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, List.of());
-		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Metadata meta = new Metadata();
 		Capability capability = new Capability(denm_a_b_causeCode_1_2,meta);
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 5";
@@ -368,7 +368,7 @@ class CapabilityMatcherTest {
 	public void missingPublisherName() {
 		Capability capability = new Capability(
 				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", null),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
 		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
@@ -381,7 +381,7 @@ class CapabilityMatcherTest {
 	public void publisherNameInCapability() {
 		Capability capability = new Capability(
 				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", "NO-PUB"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
@@ -401,7 +401,7 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
@@ -410,7 +410,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchUnshardedSubscriptionToShardedCapability() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
+		Metadata metadata = new Metadata(3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -429,7 +429,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchShardedSubscriptionToShardedCapabilityAndShardIdIsHigherOnSubscription() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
+		Metadata metadata = new Metadata(3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -448,7 +448,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void capabilityIsNotAddedMultipleTimesWhenMatchingMultipleShardsInSelector() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
+		Metadata metadata = new Metadata(3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -476,7 +476,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of(6)
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
@@ -494,7 +494,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
@@ -512,7 +512,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "quadTree like '%,123%'";
@@ -530,7 +530,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "quadTree not like '%,123%'";
@@ -549,7 +549,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
@@ -567,7 +567,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
@@ -585,7 +585,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
@@ -603,7 +603,7 @@ class CapabilityMatcherTest {
 						List.of("123"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
@@ -622,7 +622,7 @@ class CapabilityMatcherTest {
 						List.of("122"),
 						List.of()
 				),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata()
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')";
