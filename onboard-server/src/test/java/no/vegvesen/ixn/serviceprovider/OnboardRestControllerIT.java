@@ -356,7 +356,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("123"),
-                                                List.of(6))
+                                                List.of(6)
+                                        )
+                                )
                         )
                 )
         );
