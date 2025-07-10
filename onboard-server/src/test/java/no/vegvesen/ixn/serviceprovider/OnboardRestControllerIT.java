@@ -126,8 +126,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("1200"),
                                                 "SituationPublication",
-                                                "publisherName"),
-                                        new Metadata()
+                                                "publisherName")
                                 )
                         )
                 )
@@ -286,8 +285,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -303,8 +301,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "SE",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -350,8 +347,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("123"),
                                                 List.of(6)
-                                        ),
-                                        new Metadata()
+                                        )
                                 ),
                                 new Capability(
                                         new DenmApplication(
@@ -360,8 +356,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("123"),
-                                                List.of(6)),
-                                        new Metadata())
+                                                List.of(6))
                         )
                 )
         );
@@ -374,8 +369,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("123"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 ), new Capability(
                                         new DenmApplication(
                                                 "NPRA_2",
@@ -384,8 +378,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "1.0",
                                                 List.of("123"),
                                                 List.of(6)
-                                        ),
-                                        new Metadata()
+                                        )
                                 )
                         )
                 )
@@ -407,8 +400,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("123"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -424,8 +416,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "SE",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -469,8 +460,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "SE",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -512,8 +502,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "NO",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )
@@ -528,8 +517,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                                 "SE",
                                                 "1.0",
                                                 List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata()
+                                                List.of(6))
                                 )
                         )
                 )

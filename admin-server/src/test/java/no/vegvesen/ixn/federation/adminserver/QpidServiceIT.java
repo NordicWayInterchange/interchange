@@ -98,8 +98,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
                         "1.0",
                         List.of("12", "13"),
                         List.of(5, 6)
-                ),
-                new Metadata()
+                )
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));

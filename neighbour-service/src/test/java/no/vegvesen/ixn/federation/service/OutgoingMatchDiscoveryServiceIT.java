@@ -48,8 +48,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -61,8 +60,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -97,8 +95,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -110,8 +107,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
         cap2.setStatus(CapabilityStatus.CREATED);
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -146,8 +142,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -159,8 +154,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         List.of("1234"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -215,8 +209,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
-                ),
-                new Metadata()
+                )
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
@@ -228,8 +221,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
-                ),
-                new Metadata()
+                )
         );
         cap2.setStatus(CapabilityStatus.REQUESTED);
 
@@ -263,8 +255,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         "DENM:1.2.2",
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
-                ),
-                new Metadata()
+                )
         );
         cap.setStatus(CapabilityStatus.CREATED);
 
@@ -290,9 +281,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
 
 
-        Metadata metadata = new Metadata();
-        metadata.setShardCount(2);
-
         Capability cap = new Capability(
                 new DenmApplication(
                         "NPRA",
@@ -302,7 +290,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                metadata
+                new Metadata(2)
         );
         cap.setStatus(CapabilityStatus.CREATED);
 

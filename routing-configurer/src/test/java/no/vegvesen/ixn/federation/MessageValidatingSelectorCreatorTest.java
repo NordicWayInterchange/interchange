@@ -19,8 +19,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 "DENM:1.2.2",
                                 List.of("123","122"),
                                 List.of(6, 5)
-                        ),
-                        new Metadata()
+                        )
                 ), null
         );
         assertThat(selector).contains("publisherId = 'NO-123'");
@@ -43,9 +42,9 @@ public class MessageValidatingSelectorCreatorTest {
                                 "NO",
                                 "1.0",
                                 List.of("122,123")
-                        ),
-                        new Metadata()
-                ), null
+                        )
+                ),
+                null
         );
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
@@ -68,8 +67,7 @@ public class MessageValidatingSelectorCreatorTest {
                                 List.of("1"),
                                 "Weather",
                                 "PublisherName"
-                        ),
-                        new Metadata()
+                        )
                 ), null
         );
         assertThat(selector).contains("messageType = 'DATEX2'");

@@ -23,7 +23,7 @@ public class CapabilitiesTest {
                         firstCapability,
                         secondCapability
                 )));
-        capabilities.replaceCapabilities(Collections.singleton(new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata())));
+        capabilities.replaceCapabilities(Collections.singleton(new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)))));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         //Test that the original object is the one retained
         assertThat(capabilities.getCapabilities().stream().findFirst().get().getId()).isEqualTo(1);
@@ -32,12 +32,12 @@ public class CapabilitiesTest {
     @Test
     public void testAddingNewCapabilityToExistingSetReplacesIt() {
 
-        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
+        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)));
         Capabilities capabilities = new Capabilities(
                 Collections.singleton(
                         firstCapability
                 ));
-        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata());
+        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)));
         capabilities.replaceCapabilities(Collections.singleton(secondCapability));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         assertThat(capabilities.getCapabilities().stream().findFirst().get()).isEqualTo(secondCapability);
@@ -46,13 +46,13 @@ public class CapabilitiesTest {
     @Test
     public void testAddingSeveralCapabilitiesToSingeltonSet() {
 
-        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
+        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)));
         Capabilities capabilities = new Capabilities(
                 Collections.singleton(
                         firstCapability
                 ));
-        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata());
-        Capability thirdCapability = new Capability(new DenmApplication("NO00002", "pub-1", "NO", "DENM:1.2.2", List.of("3"), List.of(3)), new Metadata());
+        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)));
+        Capability thirdCapability = new Capability(new DenmApplication("NO00002", "pub-1", "NO", "DENM:1.2.2", List.of("3"), List.of(3)));
 
         capabilities.replaceCapabilities(new HashSet<>(Arrays.asList(secondCapability,thirdCapability)));
         assertThat(capabilities.getCapabilities()).hasSize(2);
@@ -63,8 +63,8 @@ public class CapabilitiesTest {
     public void testAddingSeveralCapabilitiesToEmptySet() {
         Capabilities capabilities = new Capabilities(
                 Collections.emptySet());
-        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)), new Metadata());
-        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)), new Metadata());
+        Capability firstCapability = new Capability(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", List.of("1"), List.of(1)));
+        Capability secondCapability = new Capability(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", List.of("2"), List.of(2)));
 
         capabilities.replaceCapabilities(new HashSet<>(Arrays.asList(firstCapability,secondCapability)));
         assertThat(capabilities.getCapabilities()).hasSize(2);

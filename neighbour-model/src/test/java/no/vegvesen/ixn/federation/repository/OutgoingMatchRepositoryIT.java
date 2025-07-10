@@ -56,7 +56,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
 
         Metadata meta = new Metadata();
 
-        Capability cap = new Capability(app, meta);
+        Capability cap = new Capability(app);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
@@ -91,7 +91,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
 
         Metadata meta = new Metadata();
 
-        Capability cap = new Capability(app, meta);
+        Capability cap = new Capability(app);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",
@@ -130,7 +130,7 @@ public class OutgoingMatchRepositoryIT extends PostgresContainerBase {
 
         Metadata meta = new Metadata();
 
-        Capability cap = new Capability(app, meta);
+        Capability cap = new Capability(app);
 
         ServiceProvider sp = new ServiceProvider(
                 "my-sp",

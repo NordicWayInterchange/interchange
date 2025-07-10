@@ -65,8 +65,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "1.0",
                         List.of("12", "13"),
                         List.of(5, 6)
-                ),
-                new Metadata()
+                )
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 
@@ -110,8 +109,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "DENM:1.2.2",
                         List.of("12", "13"),
                         List.of(5, 6)
-                ),
-                new Metadata()
+                )
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 
@@ -156,8 +154,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
                         "1.0",
                         List.of("12", "13"),
                         List.of(5, 6)
-                ),
-                new Metadata()
+                )
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
 

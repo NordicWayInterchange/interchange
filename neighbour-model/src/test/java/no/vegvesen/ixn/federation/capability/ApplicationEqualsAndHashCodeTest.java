@@ -148,8 +148,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "no",
                         "1.0",
                         List.of()
-                ),
-                new Metadata()
+                )
         );
         Capability cap3 = new Capability(
                 new CamApplication(
@@ -158,8 +157,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "no",
                         "1.0",
                         List.of()
-                ),
-                new Metadata()
+                )
         );
         cap3.setStatus(CapabilityStatus.TEAR_DOWN);
 
@@ -194,8 +192,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         List.of("122"),
                         "pubType",
                         "publishername"
-                ),
-                new Metadata()
+                )
         );
         Capability cap3   = new Capability(
                 new DatexApplication(
@@ -206,8 +203,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         List.of("123"),
                         "pubType",
                         "publishername"
-                ),
-                new Metadata()
+                )
         );
         assertThat(cap1).isNotEqualTo(cap2);
         assertThat(cap1).isEqualTo(cap3);
@@ -251,8 +247,7 @@ public class ApplicationEqualsAndHashCodeTest {
                         "1.0",
                         List.of("123,213"),
                         List.of(2,3)
-                ),
-                new Metadata()
+                )
         );
         assertThat(cap1).isNotEqualTo(cap2);
         assertThat(cap1).isEqualTo(cap3);

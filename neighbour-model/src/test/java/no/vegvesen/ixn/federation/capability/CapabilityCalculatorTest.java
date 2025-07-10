@@ -23,9 +23,9 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateSelfCapabilitiesTest() {
 
-        Capability a = new Capability(new DatexApplication("SE-213", "se-pub", "SE", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
-        Capability b = new Capability(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
-        Capability c = new Capability(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication","publisherName"), new Metadata());
+        Capability a = new Capability(new DatexApplication("SE-213", "se-pub", "SE", "1.0", List.of(), "SituationPublication", "publisherName"));
+        Capability b = new Capability(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", List.of(), "SituationPublication","publisherName"));
+        Capability c = new Capability(new DatexApplication("NO-213", "no-pub", "NO", "1.0", List.of(), "SituationPublication","publisherName"));
 
         Capabilities firstServiceProviderCapabilities = new Capabilities(Stream.of(a, b).collect(Collectors.toSet()));
         ServiceProvider firstServiceProvider = new ServiceProvider("First Service Provider",firstServiceProviderCapabilities);
@@ -52,7 +52,7 @@ public class CapabilityCalculatorTest {
     void calculateLastUpdatedCapabilitiesOneCap() {
         LocalDateTime lastUpdated = LocalDateTime.now();
         Capabilities capabilities = new Capabilities(
-                Sets.newLinkedHashSet(new Capability(
+                Set.of(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub",
@@ -60,8 +60,8 @@ public class CapabilityCalculatorTest {
                                 "1.0",
                                 List.of(),
                                 "SituationPublication",
-                                "publisherName"),
-                        new Metadata())),
+                                "publisherName")
+                        )),
                 lastUpdated);
         ServiceProvider serviceProvider = new ServiceProvider("a",capabilities,Set.of(),lastUpdated);
         LocalDateTime result = CapabilityCalculator.calculateLastUpdatedCapabilities(List.of(serviceProvider));
@@ -73,7 +73,7 @@ public class CapabilityCalculatorTest {
         LocalDateTime earliest = LocalDateTime.of(2021, Month.DECEMBER,3,0,0);
         LocalDateTime latest = LocalDateTime.of(2021,Month.DECEMBER,4,0,0);
         Capabilities earliestCap = new Capabilities(
-                Collections.singleton(new Capability(
+                Set.of(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub-1",
@@ -81,11 +81,11 @@ public class CapabilityCalculatorTest {
                                 "1.0",
                                 List.of(),
                                 "SituationPublication",
-                                "publisherName"),
-                        new Metadata())),
+                                "publisherName")
+                        )),
                 earliest);
         Capabilities latestCap = new Capabilities(
-                Collections.singleton(new Capability(
+                Set.of(new Capability(
                         new DatexApplication(
                                 "NO-123",
                                 "no-pub-2",
@@ -93,8 +93,8 @@ public class CapabilityCalculatorTest {
                                 "1.0",
                                 List.of(),
                                 "SituationPublication",
-                                "publisherName"),
-                        new Metadata())),
+                                "publisherName")
+                        )),
                 latest);
         ServiceProvider earliestSP = new ServiceProvider("earliest",earliestCap,Set.of(),earliest);
         ServiceProvider latestSP = new ServiceProvider("latest",latestCap,Set.of(),latest);
@@ -126,7 +126,7 @@ public class CapabilityCalculatorTest {
     }
 
     private Capability getDatexCapability(String originatingCountry, String publisher, String publication) {
-        return new Capability(new DatexApplication(publisher, publisher + ":" + publication, originatingCountry, "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata());
+        return new Capability(new DatexApplication(publisher, publisher + ":" + publication, originatingCountry, "1.0", List.of(), "SituationPublication", "publisherName"));
     }
 
 }

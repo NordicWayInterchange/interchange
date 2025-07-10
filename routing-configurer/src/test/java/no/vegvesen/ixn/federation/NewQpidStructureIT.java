@@ -82,8 +82,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "1.0",
                         List.of("12","13"),
                         List.of(5, 6)
-                ),
-                new Metadata()
+                )
         );
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
@@ -164,8 +163,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "DENM:1.2.2",
                         List.of("12004"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
 
         LocalDelivery delivery = new LocalDelivery(
@@ -295,8 +293,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "DENM:1.2.2",
                         List.of("12002", "12003"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
 
         Capability capability2 = new Capability(
@@ -307,8 +304,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "DENM:1.2.2",
                         List.of("12003"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
 
         LocalDelivery delivery = new LocalDelivery(
@@ -394,8 +390,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         "DENM:1.2.2",
                         List.of("12003"),
                         List.of(6)
-                ),
-                new Metadata()
+                )
         );
 
         LocalDelivery delivery = new LocalDelivery(

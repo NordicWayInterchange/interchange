@@ -42,6 +42,10 @@ public class Capability {
         this.createdTimestamp = LocalDateTime.now();
     }
 
+    public Capability(Application application) {
+        this.application = application;
+        this.createdTimestamp = LocalDateTime.now();
+    }
     public Capability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;

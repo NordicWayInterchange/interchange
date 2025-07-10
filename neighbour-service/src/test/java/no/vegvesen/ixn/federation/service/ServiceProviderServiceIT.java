@@ -204,16 +204,13 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void multipleCapabilitiesAreRemoved(){
         Capabilities capabilities = new Capabilities( Set.of(
                 new Capability(
-                        new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname"),
-                        new Metadata()
+                        new DatexApplication(1+"test", 1+"test", 1+"test", 1+"test", List.of("123123"),"12", "pubname")
                 ),
                 new Capability(
-                        new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname"),
-                        new Metadata()
+                        new DatexApplication(2+"test", 2+"test", 2+"test", 2+"test", List.of("123123"),"123", "pubname")
                 ),
                 new Capability(
-                        new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname"),
-                        new Metadata()
+                        new DatexApplication(3+"test", 3+"test", 3+"test", 3+"test", List.of("123123"),"1234", "pubname")
                 )));
 
         for(Capability i : capabilities.getCapabilities()){
@@ -228,7 +225,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void capabilityIsRemovedWhenThereAreNoOutgoingMatches(){
 
-        Capability capability = new Capability(null, new Metadata());
+        Capability capability = new Capability(null);
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
         Capabilities capabilities = new Capabilities(Set.of(capability));
 

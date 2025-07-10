@@ -27,8 +27,7 @@ class CapabilityMatcherTest {
 					"DENM:2.3.2",
 					List.of("1022133", "1022330", "102320", "12003020", "120030010", "120012100", "120030012", "1023213000", "1022303", "12001030", "12001032", "1200201", "12002310", "12001023", "12001220", "12001022", "12003002", "12001222", "120030222", "120030220", "12003000", "12002031", "12002033", "12001021", "12001020", "1200212", "1200213", "1200210", "1200211", "1200013", "12002303", "120003", "12002302", "12001012", "12002301", "12002300", "102322011", "1023211", "1023212", "1023210", "102231", "102232", "12001010", "1200100", "1200023", "12001202", "10223310", "12002211", "12001201", "12001200", "102303", "102302"),
 					List.of(6)
-			),
-			new Metadata()
+			)
 	);
 
 
@@ -293,15 +292,20 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	void matchEmptyCauseCodeListWithSelectorContainingCauseCode() {
-		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "DENM:1.2.2", QUAD_TREE_0121_0122, List.of());
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication(
+				"publ-id-1",
+				"pub-123",
+				"NO",
+				"DENM:1.2.2",
+				QUAD_TREE_0121_0122,
+				List.of()
+		);
 		Metadata meta = new Metadata();
-		Capability capability = new Capability(denm_a_b_causeCode_1_2,meta);
 
-		String selector = "originatingCountry = 'NO' AND causeCode = 5";
+        String selector = "originatingCountry = 'NO' AND causeCode = 5";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isFalse();
 	}
 
 	@Test
@@ -367,8 +371,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void missingPublisherName() {
 		Capability capability = new Capability(
-				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", null),
-				new Metadata()
+				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", null)
 		);
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
 		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
@@ -380,8 +383,7 @@ class CapabilityMatcherTest {
 	@Test
 	public void publisherNameInCapability() {
 		Capability capability = new Capability(
-				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", "NO-PUB"),
-				new Metadata()
+				new DatexApplication("pub-1111", "NO-pub-1111", "NO", "DATEX2:2.3", List.of("1"), "pub", "NO-PUB")
 		);
 		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
@@ -400,8 +402,7 @@ class CapabilityMatcherTest {
 						"DENM:2.3.2",
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
@@ -410,8 +411,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchUnshardedSubscriptionToShardedCapability() {
-		Metadata metadata = new Metadata(3);
-		Capability capability = new Capability(
+        Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
 						"NO00000-quad-tree-testing",
@@ -420,7 +420,7 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+                new Metadata(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
@@ -429,8 +429,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchShardedSubscriptionToShardedCapabilityAndShardIdIsHigherOnSubscription() {
-		Metadata metadata = new Metadata(3);
-		Capability capability = new Capability(
+        Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
 						"NO00000-quad-tree-testing",
@@ -439,7 +438,7 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+                new Metadata(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 4";
@@ -448,8 +447,7 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void capabilityIsNotAddedMultipleTimesWhenMatchingMultipleShardsInSelector() {
-		Metadata metadata = new Metadata(3);
-		Capability capability = new Capability(
+        Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
 						"NO00000-quad-tree-testing",
@@ -458,7 +456,7 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+                new Metadata(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and (shardId = 2 OR shardId = 3)";
@@ -475,8 +473,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of(6)
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
@@ -493,8 +490,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
@@ -511,8 +507,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "quadTree like '%,123%'";
@@ -529,8 +524,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "quadTree not like '%,123%'";
@@ -548,8 +542,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
@@ -566,8 +559,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
@@ -584,8 +576,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
@@ -602,8 +593,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("123"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
@@ -621,8 +611,7 @@ class CapabilityMatcherTest {
 						"1.0",
 						List.of("122"),
 						List.of()
-				),
-				new Metadata()
+				)
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')";

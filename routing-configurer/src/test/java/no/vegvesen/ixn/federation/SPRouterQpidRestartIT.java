@@ -236,8 +236,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "1.2.2",
                         List.of("0123"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -263,8 +262,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "1.2.2",
                         List.of("0123"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
@@ -291,8 +289,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "1.2.2",
                         List.of("0123"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
 
         ServiceProvider serviceProvider1 = new ServiceProvider(
@@ -336,8 +333,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "1.2.2",
                         List.of("0123"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
 
 
@@ -374,8 +370,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                         "1.2.2",
                         List.of("0123"),
                         List.of(5)
-                ),
-                new Metadata()
+                )
         );
 
 

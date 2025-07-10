@@ -209,11 +209,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(response2).hasSize(0);
 
 
-        DenmApplication app = new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1));
-
-        Metadata meta =  new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0);
-
-        Capability cap = new Capability(app, meta);
+        Capability cap = new Capability(new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1)));
 
         LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
 
@@ -234,13 +230,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         String selector = "publicationId='DK12345:publication-id'";
 
         Capability aCap1 = new Capability(
-                new DatexApplication("DK12345","DK12345:publication-id","FI","1", List.of("1"), "type","name"),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
-        );
+                new DatexApplication("DK12345","DK12345:publication-id","FI","1", List.of("1"), "type","name"));
 
         Capability aCap2 = new Capability(
-                new DenmApplication("publisher-1", "publisher-1-0123", "DK", "DENM:1.1.0", List.of("123"), List.of(1)),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+                new DenmApplication("publisher-1", "publisher-1-0123", "DK", "DENM:1.1.0", List.of("123"), List.of(1))
         );
 
 
@@ -323,8 +316,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         String selector = "publicationId='DK12345'";
 
         Capability aCap1 = new Capability(
-                new DatexApplication("DK12345","DK12345","FI","1", List.of("1"), "type","name"),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+                new DatexApplication("DK12345","DK12345","FI","1", List.of("1"), "type","name")
         );
 
         LocalDelivery aDelivery = new LocalDelivery();
