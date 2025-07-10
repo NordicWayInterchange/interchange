@@ -51,6 +51,12 @@ public class Metadata {
         this.shardCount = shardCount;
     }
 
+    //for testing
+    public Metadata(RedirectStatus redirectStatus, Integer shardCount) {
+        this.redirectPolicy = redirectStatus;
+        this.shardCount = shardCount;
+    }
+
     public String getInfoUrl() {
         return infoUrl;
     }

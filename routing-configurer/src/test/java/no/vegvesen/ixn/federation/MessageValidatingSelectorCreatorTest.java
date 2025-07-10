@@ -12,7 +12,6 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void testCreatingDENMValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new Capability(
                         new DenmApplication(
                                 "NO-123",
                                 "pub-1",
@@ -20,8 +19,8 @@ public class MessageValidatingSelectorCreatorTest {
                                 "DENM:1.2.2",
                                 List.of("123","122"),
                                 List.of(6, 5)
-                        )
-                ), null
+                        ),
+                null
         );
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("publicationId = 'pub-1'");
@@ -36,14 +35,12 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createIviMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new Capability(
-                        new IvimApplication(
-                                "NO-123",
-                                "pub-1",
-                                "NO",
-                                "1.0",
-                                List.of("122,123")
-                        )
+                new IvimApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("122,123")
                 ),
                 null
         );
@@ -59,16 +56,14 @@ public class MessageValidatingSelectorCreatorTest {
     @Test
     public void createDatexMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new Capability(
-                        new DatexApplication(
-                                "NO-123",
-                                "pub-1",
-                                "NO",
-                                "1.0",
-                                List.of("1"),
-                                "Weather",
-                                "PublisherName"
-                        )
+                new DatexApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1"),
+                        "Weather",
+                        "PublisherName"
                 ), null
         );
         assertThat(selector).contains("messageType = 'DATEX2'");
