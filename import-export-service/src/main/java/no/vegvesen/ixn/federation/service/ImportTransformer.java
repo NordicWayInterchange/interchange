@@ -210,15 +210,14 @@ public class ImportTransformer {
     }
 
     public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription) {
-        NeighbourSubscription neighbourSubscription1 = new NeighbourSubscription(
-                neighbourSubscription.getUuid(), transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
+        return new NeighbourSubscription(
+                neighbourSubscription.getUuid(),
+                transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
                 neighbourSubscription.getSelector(),
                 neighbourSubscription.getPath(),
                 neighbourSubscription.getConsumerCommonName(),
                 neighbourSubscription.getEndpoints().stream().map(this::transformNeighbourEndpointImportApiToNeighbourEndpoint).collect(Collectors.toSet())
         );
-        neighbourSubscription1.setUuid(neighbourSubscription.getUuid());
-        return neighbourSubscription1;
     }
 
     public NeighbourSubscriptionStatus transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi status) {
