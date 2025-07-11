@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
+import exception.NapcoreAlreadyExistsException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -129,7 +130,8 @@ public class NapRestController {
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
 
         if(serviceProvider.getSubscriptions().contains(localSubscription)){
-            throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
+            //throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
+           // throw new CapabilityErrorMessage(CapabilityErrorCode.REDUNDANT_CAPABILITY, String.format("Subscription %s already exists", ""));
         }
 
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
@@ -354,7 +356,8 @@ public class NapRestController {
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
         if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
-            throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
+           // throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
+            throw new NapcoreAlreadyExistsException(new CapabilityErrorMessage(CapabilityErrorCode.REDUNDANT_CAPABILITY, String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest)));
         }
 
         Set<String> capabilityProperties = CapabilityValidator.napcoreCapabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
