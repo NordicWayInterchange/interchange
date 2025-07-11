@@ -147,21 +147,7 @@ public class NeighbourService {
 		logger.debug("Saving neighbour in DB to generate paths for the subscriptions.");
 		// Save neighbour in DB to generate subscription ids for subscription paths.
 		neighbour = neighbourRepository.save(neighbour);
-		persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
-
-		logger.info("Paths for requested subscriptions created.");
-		// Create a path for each subscription
-		for (NeighbourSubscription subscription : persistentRequest.getSubscriptions()) {
-			//String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getUuid();
-			//subscription.setPath(path);
-			subscription.constructPath(neighbour.getName());
-			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
-		}
-
-
-		// Save neighbour again, with generated paths.
-		neighbourRepository.save(neighbour);
-		logger.info("Saving updated Neighbour: {}", neighbour.toString());
+		logger.info("Saving updated Neighbour: {}", neighbour);
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 

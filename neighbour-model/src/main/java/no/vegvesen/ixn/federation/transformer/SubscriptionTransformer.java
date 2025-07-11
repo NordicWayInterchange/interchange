@@ -12,17 +12,19 @@ import java.util.*;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<NeighbourSubscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
+	public Set<NeighbourSubscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String neighbourName) {
 		ArrayList<NeighbourSubscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
 			String consumerCommonName = subscriptionRequestApi.getConsumerCommonName();
 			if (consumerCommonName == null) {
-				consumerCommonName = ixnName;
+				consumerCommonName = neighbourName;
 			}
 			NeighbourSubscription subscription = new NeighbourSubscription(
-					subscriptionRequestApi.getSelector(),
 					NeighbourSubscriptionStatus.REQUESTED,
-					consumerCommonName);
+					subscriptionRequestApi.getSelector(),
+					neighbourName,
+					consumerCommonName
+			);
 			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);

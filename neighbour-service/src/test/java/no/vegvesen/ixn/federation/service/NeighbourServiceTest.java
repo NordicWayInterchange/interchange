@@ -172,11 +172,8 @@ class NeighbourServiceTest {
 		);
 		doReturn(updatedNeighbour).when(neighbourRepository).findByName(anyString());
 
-		// Mock response from DNS facade on Server
-		Neighbour ericssonNeighbour = new Neighbour("ericsson", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
-
 		neighbourService.incomingSubscriptionRequest(ericsson);
-		verify(neighbourRepository, times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 		verify(neighbourRepository, times(1)).findByName(anyString());
 		verify(dnsFacade, times(0)).lookupNeighbours();
 	}

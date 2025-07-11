@@ -57,13 +57,19 @@ public class NeighbourSubscription {
         constructPath(neighbourName);
     }
 
-    //TODO this constructor never sets UUID, need to make a test for this, or remove the constructor
     public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
+    }
+
+    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String neighbourName, String consumerCommonName) {
+        this.subscriptionStatus = subscriptionStatus;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+        constructPath(neighbourName);
     }
 
     public Integer getId() {
