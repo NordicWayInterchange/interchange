@@ -100,6 +100,10 @@ public class NeighbourSubscription {
         this.path = path;
     }
 
+    public void constructPath(String neighbourName) {
+        this.path = neighbourName + "/subscriptions/" + uuid;
+    }
+
     public String getConsumerCommonName() {
         return consumerCommonName;
     }

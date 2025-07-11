@@ -102,10 +102,7 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void canTransformSubscriptionsToSubscriptionResponseApi() {
 		NeighbourSubscription subscription = new NeighbourSubscription();
-		UUID uuid = UUID.randomUUID();
-		subscription.setUuid(uuid.toString());
-		String path = "bouvet/subscriptions/1";
-		subscription.setPath(path);
+		subscription.constructPath("bouvet");
 		String selector = "originatingCountry = 'NO'";
 		subscription.setSelector(selector);
 		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
@@ -116,7 +113,8 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(response.getSubscriptions()).hasSize(1);
 
 		RequestedSubscriptionResponseApi subsResponse = response.getSubscriptions().iterator().next();
-		assertThat(subsResponse.getId()).isEqualTo(uuid.toString());
+		assertThat(subsResponse.getId()).isEqualTo(subscription.getUuid());
+		String path = "bouvet/subscriptions/" + subscription.getUuid();
 		assertThat(subsResponse.getPath()).isEqualTo(path);
 		assertThat(subsResponse.getSelector()).isEqualTo(selector);
 		assertThat(subsResponse.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);

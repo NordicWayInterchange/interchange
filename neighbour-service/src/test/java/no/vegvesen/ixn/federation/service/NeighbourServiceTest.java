@@ -164,7 +164,7 @@ class NeighbourServiceTest {
 					int i = 0;
 					for (NeighbourSubscription subscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()) {
 						subscription.setId(i);
-						subscription.setPath("/ericsson/");
+						subscription.constructPath("ericsson");
 						i++;
 					}
 					return neighbour;
@@ -201,7 +201,7 @@ class NeighbourServiceTest {
 		int id = 1;
 		NeighbourSubscription subscription = new NeighbourSubscription();
 		subscription.setId(id);
-		subscription.setPath("/" + neighbourName + "/subscriptions/" + id);
+		subscription.constructPath(neighbourName);
 		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
 		subscription.setSelector("originatingCountry = 'NO'");
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest();
