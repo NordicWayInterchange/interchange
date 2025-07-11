@@ -136,7 +136,6 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	//TODO IncomingSubscriptionRequest needs to be worked a bit on. Right now, it's difficult to test this method using mocks!
 	void postingSubscriptionRequestReturnsStatusRequested() {
 
 		// Create incoming subscription request api objcet
@@ -157,24 +156,12 @@ class NeighbourServiceTest {
 		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
-		when(neighbourRepository.save(updatedNeighbour)).thenAnswer(
-				a -> {
-					Object argument = a.getArgument(0);
-					Neighbour neighbour = (Neighbour)argument;
-					int i = 0;
-					for (NeighbourSubscription subscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()) {
-						subscription.setId(i);
-						subscription.constructPath("ericsson");
-						i++;
-					}
-					return neighbour;
-				}
-		);
 		doReturn(updatedNeighbour).when(neighbourRepository).findByName(anyString());
+		when(neighbourRepository.save(updatedNeighbour)).thenReturn(updatedNeighbour);
 
 		neighbourService.incomingSubscriptionRequest(ericsson);
-		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 		verify(neighbourRepository, times(1)).findByName(anyString());
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 		verify(dnsFacade, times(0)).lookupNeighbours();
 	}
 
