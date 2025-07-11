@@ -97,15 +97,15 @@ public class SubscriptionRequestTransformerTest {
 		String hostName = "myName";
 		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
+		Set<NeighbourEndpoint> endpoints = Set.of(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)));
 		NeighbourSubscription subscription = new NeighbourSubscription(
-				1,
 				NeighbourSubscriptionStatus.CREATED,
 				selector,
 				neighbourName,
-				 "myNeighbour"
+				 "myNeighbour",
+				endpoints
+
 		);
-		Set<NeighbourEndpoint> endpoints = Set.of(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)));
-		subscription.setEndpoints(endpoints);
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
 		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);

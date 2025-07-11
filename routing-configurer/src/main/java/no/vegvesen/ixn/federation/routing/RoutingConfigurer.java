@@ -163,6 +163,7 @@ public class RoutingConfigurer {
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
+				//TODO should set endpoints on creation of NeighbourSubscription
 				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
 				if(endpoint == null) {
 					String queueName = "sub-" + UUID.randomUUID();
@@ -212,6 +213,7 @@ public class RoutingConfigurer {
 
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities, QpidDelta delta) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
+			//TODO this is a lot of logic, look at making it a bit more explicit
 			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());

@@ -128,7 +128,7 @@ public class NeighbourSubscription {
         return endpoints;
     }
 
-    //TODO should we only allow setting endp
+    //TODO should we only allow setting endpoints on construction?
     public void setEndpoints(Set<NeighbourEndpoint> newEndpoints) {
         this.endpoints.clear();
         if (newEndpoints != null) {

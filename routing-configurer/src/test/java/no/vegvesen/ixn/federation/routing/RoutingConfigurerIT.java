@@ -801,11 +801,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				5671
 		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
-				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourName
+				"a = b",
+				neighbourName,
+				neighbourName,
+				Set.of(endpoint)
 		);
-		subscription.setEndpoints(singleton(endpoint));
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
@@ -838,10 +839,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				5671
 		);
 		NeighbourSubscription subscription = new NeighbourSubscription(
-				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourName);
-		subscription.setEndpoints(singleton(endpoint));
+				"a = b",
+				neighbourName,
+				neighbourName,
+				Set.of(endpoint)
+		);
 		String nonTeardownQueueName = "non-teardown-queue";
 		NeighbourEndpoint nonTearDownEndpoint = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -849,10 +852,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				5671
 		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
-				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				neighbourName);
-		nonTearDownSubscription.setEndpoints(singleton(nonTearDownEndpoint));
+				"c = d",
+				neighbourName,
+				neighbourName,
+				Set.of(nonTearDownEndpoint)
+		);
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
@@ -895,17 +900,19 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"hostName",
 				5671
 		);
-		NeighbourSubscription subscription = new NeighbourSubscription(
-				"a = b",
-				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName);
-		subscription.setEndpoints(singleton(endpoint));
 		String neighbourName = "redirect-neighbour";
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				NeighbourSubscriptionStatus.TEAR_DOWN,
+				"a = b",
+				neighbourName,
+				neighbourSPName,
+				Set.of(endpoint)
+		);
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
 				new NeighbourSubscriptionRequest(
-						singleton(subscription)
+						Set.of(subscription)
 				),
 				new SubscriptionRequest()
 		);
@@ -934,11 +941,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"hostName",
 				5671
 		);
+		String neighbourName = "redirect-neighbour";
 		NeighbourSubscription subscription = new NeighbourSubscription(
-				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName);
-		subscription.setEndpoints(singleton(endpoint));
+				"a = b",
+				neighbourName,
+				neighbourSPName,
+				Set.of(endpoint)
+		);
 		String nonTeardownQueueName = "non-teardown-redirected-queue";
 		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -946,11 +956,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				5671
 		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
-				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				neighbourSPName);
-		nonTearDownSubscription.setEndpoints(singleton(endpointNonTearDown));
-		String neighbourName = "redirect-neighbour";
+				"c = d",
+				neighbourName,
+				neighbourSPName,
+				Set.of(endpointNonTearDown)
+		);
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
@@ -996,11 +1007,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"hostName",
 				5671
 		);
+		String neighbourName = "redirect-neighbour-xx";
 		NeighbourSubscription subscription = new NeighbourSubscription(
-				"a = b",
 				NeighbourSubscriptionStatus.TEAR_DOWN,
-				neighbourSPName);
-		subscription.setEndpoints(singleton(endpoint));
+				"a = b",
+				neighbourName,
+				neighbourSPName,
+				Set.of(endpoint)
+		);
 		String nonTeardownQueueName = "non-teardown-redirected-queue-x";
 		NeighbourEndpoint endpointNonTearDown = new NeighbourEndpoint(
 				nonTeardownQueueName,
@@ -1008,11 +1022,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				5671
 		);
 		NeighbourSubscription nonTearDownSubscription = new NeighbourSubscription(
-				"c = d",
 				NeighbourSubscriptionStatus.CREATED,
-				otherNeighbourSPName);
-		nonTearDownSubscription.setEndpoints(singleton(endpointNonTearDown));
-		String neighbourName = "redirect-neighbour-xx";
+				"c = d",
+				neighbourName,
+				otherNeighbourSPName,
+				Set.of(endpointNonTearDown)
+		);
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),
