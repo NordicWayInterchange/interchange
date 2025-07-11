@@ -149,7 +149,7 @@ class NeighbourServiceTest {
 				1,
 				NeighbourSubscriptionStatus.REQUESTED,
 				"originatingCountry = 'FI'",
-				"/ericsson/",
+				"ericsson",
 				"ericsson"
 		);
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, Collections.emptySet());
@@ -208,8 +208,6 @@ class NeighbourServiceTest {
 				neighbourName,
 				"test"
 		);
-		//TODO
-		subscription.constructPath(neighbourName);
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), subscriptionRequest,new SubscriptionRequest());

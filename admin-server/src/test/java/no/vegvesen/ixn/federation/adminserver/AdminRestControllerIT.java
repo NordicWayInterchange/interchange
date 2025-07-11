@@ -105,8 +105,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGetNeighbours() {
         String adminUser = "adminUser";
+        String neighbourName = "neighbour";
         Neighbour neighbour = new Neighbour(
-                "neighbour",
+                neighbourName,
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
                         Set.of(
                                 new NeighbourCapability(
@@ -115,12 +116,13 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "originatingCountry='NO'", "https://path/id", "neighbour", Set.of())
+                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "originatingCountry='NO'", neighbourName, neighbourName, Set.of())
                 )),
                 new SubscriptionRequest(),
                 new Connection()
         );
         neighbourRepository.save(neighbour);
+        //TODO test the actual result details
         assertThat(restController.getNeighbours(adminUser)).isNotEmpty();
     }
 

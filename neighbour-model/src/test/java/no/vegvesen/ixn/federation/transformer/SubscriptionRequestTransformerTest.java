@@ -56,9 +56,16 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void subscriptionSubscriptionPollResponse() {
 		String selector = "originatingCountry = 'NO'";
-		String path = "myName/subscriptions/1";
+		String neighbourName = "company";
 		String consumerCommonName = "myName";
-		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				1,
+				NeighbourSubscriptionStatus.REQUESTED,
+				selector,
+				neighbourName,
+				consumerCommonName
+		);
+		String path = neighbourName + "/subscriptions/" + subscription.getUuid();
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
@@ -90,9 +97,15 @@ public class SubscriptionRequestTransformerTest {
 		String hostName = "myName";
 		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
-		String path = "myName/subscriptions/1";
-		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.CREATED,selector,path, "myNeighbour");
-		subscription.setEndpoints(new HashSet<>(Collections.singleton(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)))));
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				1,
+				NeighbourSubscriptionStatus.CREATED,
+				selector,
+				neighbourName,
+				 "myNeighbour"
+		);
+		Set<NeighbourEndpoint> endpoints = Set.of(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)));
+		subscription.setEndpoints(endpoints);
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
 		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);

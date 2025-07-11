@@ -49,15 +49,15 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    //TODO path should change to neighbourName, and path should be created from this internally
-    public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
+    public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String neighbourName, String consumerCommonName) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
-        this.path = path;
         this.consumerCommonName = consumerCommonName;
+        constructPath(neighbourName);
     }
 
+    //TODO this constructor never sets UUID, need to make a test for this, or remove the constructor
     public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
@@ -122,6 +122,7 @@ public class NeighbourSubscription {
         return endpoints;
     }
 
+    //TODO should we only allow setting endp
     public void setEndpoints(Set<NeighbourEndpoint> newEndpoints) {
         this.endpoints.clear();
         if (newEndpoints != null) {
