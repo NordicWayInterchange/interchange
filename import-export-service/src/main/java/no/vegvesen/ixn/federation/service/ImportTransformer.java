@@ -8,8 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -211,7 +209,6 @@ public class ImportTransformer {
 
     public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription) {
         return new NeighbourSubscription(
-                neighbourSubscription.getUuid(),
                 transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
                 neighbourSubscription.getSelector(),
                 neighbourSubscription.getPath(),

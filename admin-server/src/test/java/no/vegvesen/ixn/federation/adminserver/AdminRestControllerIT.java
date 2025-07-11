@@ -116,7 +116,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "originatingCountry='NO'", neighbourName, neighbourName, Set.of())
+                        new NeighbourSubscription(NeighbourSubscriptionStatus.CREATED, "originatingCountry='NO'", neighbourName, neighbourName, Set.of())
                 )),
                 new SubscriptionRequest(),
                 new Connection()
@@ -196,7 +196,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
+                        new NeighbourSubscription(NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
                 )),
                 new SubscriptionRequest(),
                 new Connection()
