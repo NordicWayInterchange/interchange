@@ -38,12 +38,18 @@ public class NeighbourSubscription {
 
     }
 
+    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus) {
+        this.selector = selector;
+        this.subscriptionStatus = subscriptionStatus;
+    }
+
     public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus, String consumerCommonName) {
         this.selector = selector;
         this.subscriptionStatus = subscriptionStatus;
         this.consumerCommonName = consumerCommonName;
     }
 
+    //TODO path should change to neighbourName, and path should be created from this internally
     public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;

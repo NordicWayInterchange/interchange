@@ -198,12 +198,18 @@ class NeighbourServiceTest {
 	@Test
 	public void findSubscriptionsHappyCase() {
 		String neighbourName = "neighbour";
+		NeighbourSubscriptionStatus status = NeighbourSubscriptionStatus.REQUESTED;
 		int id = 1;
-		NeighbourSubscription subscription = new NeighbourSubscription();
-		subscription.setId(id);
+		String selector = "originatingCountry = 'NO'";
+		NeighbourSubscription subscription = new NeighbourSubscription(
+				id,
+				status,
+				selector,
+				neighbourName,
+				"test"
+		);
+		//TODO
 		subscription.constructPath(neighbourName);
-		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
-		subscription.setSelector("originatingCountry = 'NO'");
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), subscriptionRequest,new SubscriptionRequest());

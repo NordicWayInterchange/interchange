@@ -101,11 +101,9 @@ public class SubscriptionRequestTransformerTest {
 
 	@Test
 	public void canTransformSubscriptionsToSubscriptionResponseApi() {
-		NeighbourSubscription subscription = new NeighbourSubscription();
-		subscription.constructPath("bouvet");
 		String selector = "originatingCountry = 'NO'";
-		subscription.setSelector(selector);
-		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
+        NeighbourSubscription subscription = new NeighbourSubscription(selector, NeighbourSubscriptionStatus.REQUESTED);
+		subscription.constructPath("bouvet");
 
 		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi("bouvet", Collections.singleton(subscription));
 		assertThat(response.getVersion()).isEqualTo("2.0");
