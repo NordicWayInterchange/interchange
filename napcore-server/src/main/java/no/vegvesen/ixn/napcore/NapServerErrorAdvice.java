@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
+import exception.NapcoreAlreadyExistsException;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
@@ -89,6 +90,11 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({AlreadyExistsException.class})
     public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
+        return error(CONFLICT, e);
+    }
+
+    @ExceptionHandler({NapcoreAlreadyExistsException.class})
+    public ResponseEntity<ValidationErrorDetails> handleNapcoreAlreadyExistsException(NapcoreAlreadyExistsException e){
         return error(CONFLICT, e);
     }
 
