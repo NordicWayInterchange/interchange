@@ -1,22 +1,45 @@
 import {TextField} from "@mui/material";
 import React from "react";
+import SearchIcon from '@mui/icons-material/Search';
 
 interface Props {
     searchId: string,
-    setSearchId?: (value: (((prevState: string) => string) | string)) => void
+    setSearchId?: (value: (((prevState: string) => string) | string)) => void,
+    label: string
 }
 
-const SearchBox = ({searchId, setSearchId}: Props) => {
+const SearchBox = ({searchId, setSearchId, label}: Props) => {
     return (
         <TextField
-            label="Search by ID"
+            label={
+                <span style={{display: 'flex', alignItems: 'center', gap: 4, transform: 'translateY(-1px)'}}>
+          <SearchIcon fontSize="small"/>
+                    {`Find ${label} by ID in table`}
+        </span>
+            }
             variant="outlined"
             value={searchId}
             onChange={(e) => setSearchId ? setSearchId(e.target.value) : null}
-            style={{ marginBottom: 16, marginTop: -20 }}
+            style={{marginBottom: 16, width: '330px'}}
             type="text"
+            sx={textFieldSx}
         />
     );
+};
+
+const textFieldSx = {
+    "& .MuiInputLabel-root.Mui-focused": {
+        color: "searchBoxFocusedFontColor",
+    },
+    '& .MuiInput-underline:before': {
+        borderBottom: '2px solid #dd7100 !important',
+    },
+    '& .MuiInput-underline:after': {
+        borderBottom: '2px solid #FF9600',
+    },
+    position: "relative",
+    top: "-20px",
+    bgcolor: "mainBackgroundColor",
 };
 
 export default SearchBox;

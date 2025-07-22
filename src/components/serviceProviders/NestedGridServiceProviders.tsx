@@ -318,7 +318,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 <Divider style={{ margin: '20px 0', visibility: 'hidden' }}/>
                 <Mainheading>{headerContent}</Mainheading>
                 <Subheading>
-                    These are all of {field}. You can click a row to view more information.
+                    These are all of {field}. You can click a row to see details.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>

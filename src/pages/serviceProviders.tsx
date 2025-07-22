@@ -191,7 +191,7 @@ export default function ServiceProviders() {
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
                     These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell
-                    to view more information.
+                    to see details.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {GridColDef} from "@mui/x-data-grid";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, Divider, TextField} from "@mui/material";
+import {Box, Divider} from "@mui/material";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import Subheading from "@/components/shared/typography/Subheading";
@@ -71,9 +71,10 @@ const Queues = () => {
                 These are all of qpid queues.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
+            <SearchBox searchId={searchId} setSearchId={setSearchId} label="queues"/>
+            <Divider style={{ margin: '-5px 0', visibility: 'hidden' }}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
-                    <SearchBox searchId={searchId} setSearchId={setSearchId} />
                     <DataGrid
                         columns={tableHeaders}
                         rows={filteredRows || []}

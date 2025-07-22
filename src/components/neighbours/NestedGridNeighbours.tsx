@@ -140,10 +140,10 @@ const NestedGridNeighbours: React.FC<Props> = ({
                         label={timeConverter(row.capabilities.lastCapabilityExchange)}
                         sx={{backgroundColor: "#ffbf7d", color: "black"}}
                     />
-                    . You can click a row to view more information.
+                    . You can click a row to see details.
                 </Box>
             );
-        } else return `These are all of ${heading}. You can click a row to view more information.`;
+        } else return `These are all of ${heading}. You can click a row to see details.`;
     }
 
     return (
