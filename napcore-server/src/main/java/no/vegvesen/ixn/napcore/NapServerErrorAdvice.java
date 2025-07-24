@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.napcore;
 
-import exception.NapcoreAlreadyExistsException;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
@@ -93,9 +92,9 @@ public class NapServerErrorAdvice {
         return error(CONFLICT, e);
     }
 
-    @ExceptionHandler({NapcoreAlreadyExistsException.class})
-    public ResponseEntity<ValidationErrorDetails> handleNapcoreAlreadyExistsException(NapcoreAlreadyExistsException e){
-        return error(CONFLICT, e);
+    @ExceptionHandler({NapcoreNotValidException.class})
+    public ResponseEntity<NapcoreErrorDetails> handleNapcoreAlreadyExistsException(NapcoreNotValidException e){
+        return notValidNapcoreError(e, e.getErrors());
     }
 
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
@@ -107,6 +106,16 @@ public class NapServerErrorAdvice {
 
     private ResponseEntity<ValidationErrorDetails> notValidCapabilityError(Exception e, Object validationErrors) {
         ValidationErrorDetails errorDetails = new ValidationErrorDetails(
+                LocalDateTime.now(),
+                e.getMessage(),
+                validationErrors
+        );
+        logger.error("Error in interchange server. ", e);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<NapcoreErrorDetails> notValidNapcoreError(Exception e, Object validationErrors) {
+        NapcoreErrorDetails errorDetails = new NapcoreErrorDetails(
                 LocalDateTime.now(),
                 e.getMessage(),
                 validationErrors
