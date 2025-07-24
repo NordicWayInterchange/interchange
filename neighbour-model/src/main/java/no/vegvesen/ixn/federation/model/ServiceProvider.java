@@ -164,14 +164,18 @@ public class ServiceProvider {
 				.map(String::trim)
 				.toList();
 
-		LocalSubscription subscriptionToDelete = subscriptions
-				.stream()
-				.filter(subscription -> false)
-				.findFirst()
-				.orElseThrow(
-						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
-				);
-		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		uuidList
+				.forEach(uuid -> {
+					LocalSubscription subscriptionToDelete = subscriptions
+							.stream()
+							.filter(subscription -> subscription.getUuid().equals(uuid))
+							.findFirst()
+							.orElseThrow(
+									() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
+							);
+					subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+				});
+
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
