@@ -204,6 +204,22 @@ public class NapRestController {
         logger.debug("Updated Service Provider: {}", saved);
     }
 
+    @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/subscriptions/multiple/{subscriptionIds}"})
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Tag(name = "Subscriptions")
+    @Operation(summary = "Delete multiple subscriptions")
+    public void deleteMultipleSubscriptions(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionIds") String subscriptionIds) {
+        validatePathVariable(actorCommonName);
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Service Provider {}, DELETE subscriptions {}", actorCommonName, subscriptionIds);
+
+        ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
+        serviceProviderToUpdate.removeLocalSubscriptions(subscriptionIds);
+
+        ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+        logger.debug("Updated Service Providers: {}", saved);
+    }
+
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/subscriptions/capabilities" }, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Subscriptions")
     @Operation(summary = "Get capabilities matching subscription")
