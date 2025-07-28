@@ -5,22 +5,23 @@ import SearchIcon from '@mui/icons-material/Search';
 interface Props {
     searchId: string,
     setSearchId?: (value: (((prevState: string) => string) | string)) => void,
-    label: string
+    label: string,
+    searchElement: string,
 }
 
-const SearchBox = ({searchId, setSearchId, label}: Props) => {
+const SearchBox = ({searchId, setSearchId, label, searchElement}: Props) => {
     return (
         <TextField
             label={
-                <span style={{display: 'flex', alignItems: 'center', gap: 4, transform: 'translateY(-1px)'}}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, transform: 'translateY(-1px)' }}>
           <SearchIcon fontSize="small"/>
-                    {`Find ${label} by ID in table`}
+                    {`Find ${label} by ${searchElement} in table`}
         </span>
             }
-            variant="outlined"
+            variant="standard"
             value={searchId}
             onChange={(e) => setSearchId ? setSearchId(e.target.value) : null}
-            style={{marginBottom: 16, width: '330px'}}
+            style={{ marginRight: 1, width: '330px' }}
             type="text"
             sx={textFieldSx}
         />
@@ -32,13 +33,13 @@ const textFieldSx = {
         color: "searchBoxFocusedFontColor",
     },
     '& .MuiInput-underline:before': {
-        borderBottom: '2px solid #dd7100 !important',
+        borderBottom: '2px solid #dd7100',
     },
     '& .MuiInput-underline:after': {
         borderBottom: '2px solid #FF9600',
     },
     position: "relative",
-    top: "-20px",
+    top: "-3px",
     bgcolor: "mainBackgroundColor",
 };
 

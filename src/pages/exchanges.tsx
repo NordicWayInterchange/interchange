@@ -109,19 +109,11 @@ const Exchanges = () => {
             <Subheading>
                 These are all of qpid exchanges. You can click on each row to see more information.
             </Subheading>
-            <Divider sx={{marginY: 4}}/>
-            <SearchBox searchId={searchId} setSearchId={setSearchId} label="exchanges"/>
-            <Divider style={{ margin: '-5px 0', visibility: 'hidden' }}/>
+            <Divider sx={{marginY: 2}}/>
+            <SearchBox searchId={searchId} setSearchId={setSearchId} label="exchange" searchElement="id"/>
+            <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
-                    <TextField
-                        label="Search by ID"
-                        variant="outlined"
-                        value={searchId}
-                        onChange={(e) => setSearchId(e.target.value)}
-                        style={{ marginBottom: 16, marginTop: -25 }}
-                        type="text"
-                    />
                     <DataGrid
                         columns={tableHeaders}
                         rows={filteredRows}
