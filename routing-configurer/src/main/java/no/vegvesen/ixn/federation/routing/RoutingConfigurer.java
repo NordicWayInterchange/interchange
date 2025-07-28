@@ -164,6 +164,7 @@ public class RoutingConfigurer {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
 				//TODO should set endpoints on creation of NeighbourSubscription
+				//This, however might not be so easy, as we need the broker name and port
 				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
 				if(endpoint == null) {
 					String queueName = "sub-" + UUID.randomUUID();

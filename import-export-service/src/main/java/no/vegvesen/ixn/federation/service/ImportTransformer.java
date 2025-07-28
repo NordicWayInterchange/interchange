@@ -168,9 +168,10 @@ public class ImportTransformer {
     }
 
     public Neighbour transformNeighbourImportApiToNeighbour(NeighbourImportApi neighbour) {
-        return new Neighbour(neighbour.getName(),
+        String name = neighbour.getName();
+        return new Neighbour(name,
                 transformNeighbourCapabilitiesImportApiToNeighbourCapabilities(neighbour.getCapabilities()),
-                new NeighbourSubscriptionRequest(neighbour.getNeighbourSubscriptions().stream().map(this::transformNeighbourSubscriptionImportApiToNeighbourSubscription).collect(Collectors.toSet())),
+                new NeighbourSubscriptionRequest(neighbour.getNeighbourSubscriptions().stream().map(neighbourSubscription -> transformNeighbourSubscriptionImportApiToNeighbourSubscription(neighbourSubscription, name)).collect(Collectors.toSet())),
                 new SubscriptionRequest(neighbour.getOurSubscriptions().stream().map(this::transformSubscriptionImportApiToSubscription).collect(Collectors.toSet())),
                 neighbour.getControlChannelPort()
         );
@@ -207,11 +208,11 @@ public class ImportTransformer {
         }
     }
 
-    public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription) {
+    public NeighbourSubscription transformNeighbourSubscriptionImportApiToNeighbourSubscription(NeighbourSubscriptionImportApi neighbourSubscription, String neighbourName) {
         return new NeighbourSubscription(
                 transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(neighbourSubscription.getStatus()),
                 neighbourSubscription.getSelector(),
-                neighbourSubscription.getPath(),
+                neighbourName,
                 neighbourSubscription.getConsumerCommonName(),
                 neighbourSubscription.getEndpoints().stream().map(this::transformNeighbourEndpointImportApiToNeighbourEndpoint).collect(Collectors.toSet())
         );

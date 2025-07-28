@@ -102,7 +102,7 @@ public class SubscriptionRequestTransformerTest {
 				NeighbourSubscriptionStatus.CREATED,
 				selector,
 				neighbourName,
-				 "myNeighbour",
+				neighbourName,
 				endpoints
 
 		);

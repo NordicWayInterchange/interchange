@@ -196,7 +196,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
+                        new NeighbourSubscription(NeighbourSubscriptionStatus.CREATED, selector, "neighbour", "neighbour", Set.of())
                 )),
                 new SubscriptionRequest(),
                 new Connection()

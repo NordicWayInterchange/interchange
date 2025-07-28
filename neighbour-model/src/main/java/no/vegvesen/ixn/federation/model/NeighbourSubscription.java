@@ -57,14 +57,15 @@ public class NeighbourSubscription {
         constructPath(neighbourName);
     }
 
-    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+    public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String neighbourName, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
-        this.path = path;
         this.consumerCommonName = consumerCommonName;
         this.endpoints = endpoints;
+        constructPath(neighbourName);
     }
 
+    //This constructor is used in transformer
     public NeighbourSubscription(NeighbourSubscriptionStatus subscriptionStatus, String selector, String neighbourName, String consumerCommonName) {
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
