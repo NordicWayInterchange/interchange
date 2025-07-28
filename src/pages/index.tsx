@@ -99,7 +99,7 @@ export default function Home() {
             secondSubValueHeader: 'Subscriptions',
             thirdSubValueHeader: 'Deliveries',
             fourthSubValueHeader: 'Private channels',
-            fifthSubValueHeader: 'Private channel subscriptions',
+            fifthSubValueHeader: 'Private channel peers',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
@@ -178,13 +178,13 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 310,
+                                        width: 280,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 300,
+                                        height: 280,
                                         boxShadow: 1
                                     }}
                                 >

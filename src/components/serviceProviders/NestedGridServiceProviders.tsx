@@ -379,7 +379,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <PrivateChannelDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            title= "Private channel subscriptions"
+                            title= "Private channel peers"
                             privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
                         />
                     )}

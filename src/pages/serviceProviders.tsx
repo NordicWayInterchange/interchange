@@ -163,7 +163,7 @@ export default function ServiceProviders() {
         {
             ...dataGridTemplate,
             field: "privateChannelsPeer",
-            headerName: "Private channel subscriptions",
+            headerName: "Private channel peers",
             headerClassName: 'custom-header',
             renderCell: (params) => {
                 const serviceProviderPrivatechannelsPeer = params.row.privatechannelsPeer;
