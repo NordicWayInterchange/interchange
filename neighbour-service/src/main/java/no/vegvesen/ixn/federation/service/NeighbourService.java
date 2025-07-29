@@ -119,7 +119,7 @@ public class NeighbourService {
 	}
 
 	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
+		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest,getBrokerExternalName(), getMessagePort());
 		logger.debug("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.debug("Looking up neighbour in database.");

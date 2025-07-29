@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.model.NeighbourSubscription;
-import no.vegvesen.ixn.federation.model.NeighbourSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,18 +9,25 @@ import java.util.*;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<NeighbourSubscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String neighbourName) {
+	//TODO this needs to be refactored and cleaned up
+	public Set<NeighbourSubscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String neighbourName, String brokerExternalName, String messagePort) {
 		ArrayList<NeighbourSubscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
 			String consumerCommonName = subscriptionRequestApi.getConsumerCommonName();
+			String prefix;
 			if (consumerCommonName == null) {
 				consumerCommonName = neighbourName;
+				prefix = "sub-";
+			} else {
+				prefix = "re-";
 			}
+			NeighbourEndpoint neighbourEndpoint = new NeighbourEndpoint(prefix + UUID.randomUUID(),brokerExternalName,Integer.parseInt(messagePort));
 			NeighbourSubscription subscription = new NeighbourSubscription(
 					NeighbourSubscriptionStatus.REQUESTED,
 					subscriptionRequestApi.getSelector(),
 					neighbourName,
-					consumerCommonName
+					consumerCommonName,
+					Set.of(neighbourEndpoint)
 			);
 			subscriptions.add(subscription);
 		}

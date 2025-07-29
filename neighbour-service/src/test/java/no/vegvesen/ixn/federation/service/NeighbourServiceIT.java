@@ -227,7 +227,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour3");
         RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour3");
 
-        SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour3", new HashSet<>(Arrays.asList(sub1, sub2)));
+        SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour3", Set.of(sub1, sub2));
 
         SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(subscriptionRequestApi);
         RequestedSubscriptionResponseApi no = responseApi.getSubscriptions().stream().filter(r -> r.getSelector().contains("NO")).findFirst().get();

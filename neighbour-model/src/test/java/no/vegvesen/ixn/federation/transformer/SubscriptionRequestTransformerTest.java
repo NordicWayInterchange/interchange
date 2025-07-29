@@ -20,7 +20,7 @@ public class SubscriptionRequestTransformerTest {
 		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.emptySet());
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).isEmpty();
-		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
+		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi, name, "5671");
 		assertThat(result.getSubscriptions()).isEmpty();
 	}
 
@@ -37,7 +37,7 @@ public class SubscriptionRequestTransformerTest {
 		RequestedSubscriptionApi onlySubscription = requestApi.getSubscriptions().iterator().next();
 		assertThat(onlySubscription.getSelector()).isEqualTo(selector);
 
-		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
+		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi,  name, "5671");
 		assertThat(result.getSubscriptions()).hasSize(1);
 		NeighbourSubscription subscription = result.getSubscriptions().iterator().next();
 		assertThat(subscription.getSelector()).isEqualTo(selector);

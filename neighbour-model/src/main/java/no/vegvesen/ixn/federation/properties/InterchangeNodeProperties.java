@@ -10,8 +10,15 @@ public class InterchangeNodeProperties {
 	public InterchangeNodeProperties() {
 	}
 
-	public InterchangeNodeProperties(String name, String messageChannelPort) {
+	public  InterchangeNodeProperties(String name,String messageChannelPort) {
 		this.name = name;
+		this.messageChannelPort = messageChannelPort;
+	}
+
+	public InterchangeNodeProperties(String name, String messageChannelPort, String brokerExternalName) {
+		this.name = name;
+		this.messageChannelPort = messageChannelPort;
+		this.brokerExternalName = brokerExternalName;
 	}
 
 	/**
@@ -34,7 +41,11 @@ public class InterchangeNodeProperties {
 		this.name = name;
 	}
 
+
 	public String getBrokerExternalName() {
+		if(brokerExternalName == null || brokerExternalName.isEmpty()) {
+			return name;
+		}
 		return brokerExternalName;
 	}
 

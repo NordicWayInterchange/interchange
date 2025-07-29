@@ -132,9 +132,6 @@ public class RoutingConfigurer {
 		}
 	}
 
-	//Both neighbour and service providers binds to outgoingExchange to receive local messages
-	//Service provider also binds to incomingExchange to receive messages from neighbours
-	//This avoids loop of messages
 	private void setupRouting(List<Neighbour> readyToSetupRouting, QpidDelta delta) {
 		for (Neighbour subscriber : readyToSetupRouting) {
 			setupNeighbourRouting(subscriber, delta);
@@ -164,7 +161,7 @@ public class RoutingConfigurer {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
 				//TODO should set endpoints on creation of NeighbourSubscription
-				//This, however might not be so easy, as we need the broker name and port
+				//At the moment, we only cerate one endpoint, so that shouldn't be the biggest issue
 				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
 				if(endpoint == null) {
 					String queueName = "sub-" + UUID.randomUUID();
