@@ -110,11 +110,11 @@ const fetchExchangeValidator = async (params: extendedGetParams) => {
 };
 
 export type basicGetParams = {
-    actorCommonName: string;
+    adminUser: string;
     pathParam?: string;
 };
 export type extendedGetParams = {
-    actorCommonName: string;
+    adminUser: string;
     pathParam?: string;
 };
 
@@ -151,7 +151,7 @@ const findHandler: (params: any) =>
     const {
         path = [],
         method,
-        actorCommonName,
+        adminUser,
         selector = ""
     } = params;
     switch (method) {
@@ -170,7 +170,7 @@ const findHandler: (params: any) =>
             if (matchedPath) {
                 const patternSegments = matchedPath.split("/").filter(Boolean);
 
-                const params: Record<string, string> = { actorCommonName };
+                const params: Record<string, string> = { adminUser };
                 patternSegments.forEach((segment, idx) => {
                     if (segment.startsWith("[") && segment.endsWith("]")) {
                         const paramName = segment.slice(1, -1);
@@ -188,13 +188,13 @@ const findHandler: (params: any) =>
             if (possiblePaths.includes(lastSegment)) {
                 return {
                     fn: getPaths[lastSegment],
-                    params: { actorCommonName, selector },
+                    params: { adminUser, selector },
                 };
             }
             if (path.length > 1 && possiblePaths.includes(path[0])) {
                 return {
                     fn: getPaths[path[0]],
-                    params: { actorCommonName, pathParam: path[1] },
+                    params: { adminUser, pathParam: path[1] },
                 };
             }
 
@@ -249,16 +249,16 @@ export default async function handler(
         ? req.query.selector[0]
         : req.query.selector;
 
-    const [actorCommonName, ...path] = slug;
+    const [adminUser, ...path] = slug;
     const urlPath = path.join("/");
     const { method, body } = req;
 
-    if (actorCommonName && path) {
+    if (adminUser && path) {
         const executer = findHandler({
             method,
             path,
             body,
-            actorCommonName,
+            adminUser,
             selector,
         });
 
