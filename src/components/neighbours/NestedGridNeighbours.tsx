@@ -148,9 +148,8 @@ const NestedGridNeighbours: React.FC<Props> = ({
         } else return `These are all of ${heading}. You can click a row to see details.`;
     }
 
-    const rows = Array.isArray(nestedData) ? nestedData : [];
+    const rows = (Array.isArray(nestedData) ? nestedData : []) as {id: string;}[];
 
-    // @ts-expect-error
     const filteredRows = searchId.trim()
         ? rows.filter((row) =>
             row.id?.toString().includes(searchId.trim())

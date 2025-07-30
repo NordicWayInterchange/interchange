@@ -315,9 +315,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
     }
     const headerContent = getHeader();
 
-    const rows = Array.isArray(nestedData) ? nestedData : [];
+    const rows = (Array.isArray(nestedData) ? nestedData : []) as {id: string; publicationId: string}[];
 
-    // @ts-expect-error
     const filteredRows = searchId.trim()
         ? rows.filter((row) =>
             field === "capabilities" ? row.publicationId?.toString().includes(searchId.trim()) : row.id?.toString().includes(searchId.trim())
