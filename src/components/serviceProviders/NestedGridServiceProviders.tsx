@@ -34,6 +34,12 @@ type Props = {
     handleOnRowClick: (arg0: any) => void;
     isFlashing: boolean;
 };
+
+type Row = {
+    id: string;
+    publicationId: string;
+}
+// @ts-ignore
 const NestedGridServiceProviders: React.FC<Props> = ({
                                                          row,
                                                          field,
@@ -311,6 +317,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
 
     const rows = Array.isArray(nestedData) ? nestedData : [];
 
+    // @ts-expect-error
     const filteredRows = searchId.trim()
         ? rows.filter((row) =>
             field === "capabilities" ? row.publicationId?.toString().includes(searchId.trim()) : row.id?.toString().includes(searchId.trim())
@@ -330,7 +337,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     These are all of {field}. You can click a row to see details.
                 </Subheading>
                 <Divider sx={{marginY: 2}}/>
-                <SearchBox searchId={searchId} setSearchId={setSearchId} label={field} searchElement="id"></SearchBox>
+                <SearchBox searchId={searchId} setSearchId={setSearchId} label={field} searchElement={field === "capabilities" ? "publicationID" : "id"}></SearchBox>
                 <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
                 <Box sx={{height: 450, width: "100%"}}>
                     <Box sx={StyledTableHeader}>
