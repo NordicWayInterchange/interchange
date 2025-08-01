@@ -214,7 +214,7 @@ public class NapRestController {
         logger.info("Service Provider {}, DELETE subscriptions {}", actorCommonName, subscriptionIds);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.removeLocalSubscriptions(subscriptionIds);
+        serviceProviderToUpdate.removeMultipleLocalSubscriptions(subscriptionIds);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
         logger.debug("Updated Service Providers: {}", saved);
