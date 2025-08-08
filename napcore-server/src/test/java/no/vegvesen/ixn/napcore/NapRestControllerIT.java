@@ -6,16 +6,16 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.Peer;
-import no.vegvesen.ixn.federation.model.PeerStatus;
-import no.vegvesen.ixn.federation.model.PrivateChannel;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.napcore.model.Subscription;
+import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -296,6 +296,42 @@ public class NapRestControllerIT extends PostgresContainerBase {
         for(Delivery response : napRestController.getDeliveries(actorCommonName)){
             assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
         }
+    }
+
+
+    @Test
+    public void testDeletingMultipleSubscriptions(){
+        String actorCommonName = "actor";
+        Subscription subscription1 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "sub1"));
+
+        Subscription subscription2 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='SE'", "sub2"));
+
+        Subscription subscription3 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='FI'", "sub3"));
+        assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(3);
+
+        String multipleSubscriptionIds = subscription1.getId() + ',' + subscription2.getId() + ',' + subscription3.getId();
+        napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds);
+        for(Subscription response : napRestController.getSubscriptions(actorCommonName)){
+            assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
+        }
+    }
+
+    @Test
+    public void testDeletingOneExistingAndOneNonExistingSubscriptions(){
+        String actorCommonName = "actor";
+        Subscription subscription1 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "sub1"));
+        assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
+
+        String multipleSubscriptionIds = subscription1.getId() + ',' + "123";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds));
+    }
+
+    @Test
+    public void testDeletingNonExistingMultipleSubscriptions(){
+        String actorCommonName = "actor";
+
+        String multipleSubscriptionIds = "321" + ',' + "123";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds));
     }
 
     @Test
