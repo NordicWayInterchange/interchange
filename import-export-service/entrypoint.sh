@@ -1,3 +1,5 @@
 #!/bin/bash
 
-java -jar import-export-service.jar 
+echo "ENTRYPOINT - import-export-service"
+
+java -jar import-export-service.jar export

@@ -40,7 +40,7 @@ public class ExportApplication {
                 privateChannelRepository.findAll().stream().map(exportTransformer::transformPrivateChannelToPrivateChannelExportApi).collect(Collectors.toSet())
         );
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-        String localPath = "";
+        String localPath = "/output";
         Path path = Paths.get(localPath, "dump.json");
         writer.writeValue(path.toFile(), exportModel);
     }
