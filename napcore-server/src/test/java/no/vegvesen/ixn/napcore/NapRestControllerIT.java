@@ -310,7 +310,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(3);
 
         String multipleSubscriptionIds = subscription1.getId() + ',' + subscription2.getId() + ',' + subscription3.getId();
-        napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds);
+        napRestController.deleteSubscription(actorCommonName, multipleSubscriptionIds);
         for(Subscription response : napRestController.getSubscriptions(actorCommonName)){
             assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
         }
@@ -323,15 +323,28 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
 
         String multipleSubscriptionIds = subscription1.getId() + ',' + "123";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds));
+        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, multipleSubscriptionIds));
     }
 
     @Test
-    public void testDeletingNonExistingMultipleSubscriptions(){
+    public void testDeletingMultipleNonExistingSubscriptions(){
         String actorCommonName = "actor";
 
-        String multipleSubscriptionIds = "321" + ',' + "123";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteMultipleSubscriptions(actorCommonName, multipleSubscriptionIds));
+        String multipleInvalidSubscriptionIds = "321" + ',' + "123";
+        assertThrows(NotFoundException.class, () -> napRestController.deleteSubscription(actorCommonName, multipleInvalidSubscriptionIds));
+    }
+
+    @Test
+    public void testDeletingSubscriptionsWithExtraCommas(){
+        String actorCommonName = "actor";
+        Subscription subscription1 = napRestController.addSubscription(actorCommonName, new SubscriptionRequest("originatingCountry='NO'", "sub1"));
+        assertThat(napRestController.getSubscriptions(actorCommonName)).hasSize(1);
+
+        String SubscriptionIdWithExtraCommas = subscription1.getId() + ',' + ',';
+        napRestController.deleteSubscription(actorCommonName, SubscriptionIdWithExtraCommas);
+        for(Subscription response : napRestController.getSubscriptions(actorCommonName)){
+            assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.NOT_VALID);
+        }
     }
 
     @Test
