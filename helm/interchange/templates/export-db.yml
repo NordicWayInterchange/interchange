@@ -13,21 +13,11 @@ spec:
       restartPolicy: Never
       containers:
         - name: export-db
-          image: "{{ }}"
           imagePullPolicy: IfNotPresent
           env:
-            - name: DB_HOST
-              value: "{{ .Values.database.postgres_db }}"
-            - name: DB_PORT
-              value: "{{ .Values.}}"
-            - name: DB_USER
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
+            - name: SPRING_DATASOURCE_USERNAME
               value: "{{ .Values.postgres_user}}"
-            - name: DB_PASSWORD
+            - name: SPRING_DATASOURCE_PASSWORD
               value: "{{ .Values.postgres_password }}"
-          volumeMounts:
-            - mountPath: /exports
-              name: export-volume
-      volumes:
-        - name: export-volume
-          persistentVolumeClaim:
-            claimName: {{ include "export-db.fullname" . }}--pvc

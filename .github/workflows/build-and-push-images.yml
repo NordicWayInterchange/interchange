@@ -132,7 +132,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
+        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app, import-export-service]
     defaults:
       run:
         shell: bash
