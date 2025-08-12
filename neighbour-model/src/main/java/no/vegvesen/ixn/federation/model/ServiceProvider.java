@@ -159,15 +159,8 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void removeMultipleLocalSubscriptions(String uuids){
-		List<String> uuidList = Arrays.stream(uuids.split(","))
-				.map(String::trim)
-				.toList();
-
-		if (uuidList.isEmpty()) return;
-
-		uuidList
-				.forEach(uuid -> {
+	public void removeOneOrMultipleLocalSubscriptions(List<String> subscriptionUuidList){
+		subscriptionUuidList.forEach(uuid -> {
 					LocalSubscription subscriptionToDelete = subscriptions
 							.stream()
 							.filter(subscription -> subscription.getUuid().equals(uuid))
