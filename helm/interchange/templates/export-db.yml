@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name}}--export-db
+  labels:
+    app: interchange
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: export-db
+    release: {{ .Release.Name }}
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: export-db
+          image: "{{ }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_HOST
+              value: "{{ .Values.database.postgres_db }}"
+            - name: DB_PORT
+              value: "{{ .Values.}}"
+            - name: DB_USER
+              value: "{{ .Values.postgres_user}}"
+            - name: DB_PASSWORD
+              value: "{{ .Values.postgres_password }}"
+          volumeMounts:
+            - mountPath: /exports
+              name: export-volume
+      volumes:
+        - name: export-volume
+          persistentVolumeClaim:
+            claimName: {{ include "export-db.fullname" . }}--pvc
