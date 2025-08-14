@@ -11,7 +11,9 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer,
+    ServiceProviderDeliveries,
+    ServiceProviderPrivatechannels,
+    ServiceProviderPrivateChannelsPeer,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -28,18 +30,13 @@ import SearchBox from "@/components/shared/components/SearchBox";
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | ServiceProviderPrivateChannelsPeer | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
     isFlashing: boolean;
 };
 
-type Row = {
-    id: string;
-    publicationId: string;
-}
-// @ts-ignore
 const NestedGridServiceProviders: React.FC<Props> = ({
                                                          row,
                                                          field,
@@ -396,7 +393,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             title= "Private channel peers"
-                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannelsPeer}
                         />
                     )}
                 </Box>
