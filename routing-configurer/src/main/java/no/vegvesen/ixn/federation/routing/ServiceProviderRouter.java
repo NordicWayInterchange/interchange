@@ -551,11 +551,13 @@ public class ServiceProviderRouter {
         for (Capability capability : matchingCapabilities) {
             for (CapabilityShard shard : capability.getShards()) {
                 if (!isExistingConnection(subscription, capability, shard)) {
-                    Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
-                    if (shardExchange != null) {
-                        addConnectionToSubscription(subscription, shard, shardExchange);
-                    } else {
-                        logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
+                    if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())){
+                        Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
+                        if (shardExchange != null) {
+                            addConnectionToSubscription(subscription, shard, shardExchange);
+                        } else {
+                            logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
+                        }
                     }
                 }
             }
@@ -566,8 +568,7 @@ public class ServiceProviderRouter {
         Set<String> existingConnections = subscription.getConnections().stream()
                 .map(LocalConnection::getSource)
                 .collect(Collectors.toSet());
-        return existingConnections.contains(shard.getExchangeName()) &&
-                CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector());
+        return existingConnections.contains(shard.getExchangeName());
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
