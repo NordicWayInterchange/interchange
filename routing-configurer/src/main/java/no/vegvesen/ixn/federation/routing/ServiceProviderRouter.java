@@ -556,10 +556,6 @@ public class ServiceProviderRouter {
     }
 
     private void renameFunction(LocalSubscription subscription, Set<Capability> matchingCapabilities, QpidDelta delta) {
-        Set<String> existingConnections = subscription.getConnections().stream()
-                .map(LocalConnection::getSource)
-                .collect(Collectors.toSet());
-
         for (Capability capability : matchingCapabilities) {
             for (CapabilityShard shard : capability.getShards()) {
                 if (!isExistingConnection(subscription, capability, shard)) {
