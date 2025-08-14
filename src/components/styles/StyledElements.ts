@@ -64,7 +64,7 @@ export const StyledTableHeader = {
         backgroundColor: '#ffbf7d',
     },
     '& .custom-header': {
-        backgroundColor: 'headerBackgroundColor',
+        backgroundColor: '#444F55 !important',
         color: '#ffbf7d',
         fontWeight: 'bold',
     },
