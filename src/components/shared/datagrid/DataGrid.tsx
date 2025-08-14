@@ -1,8 +1,7 @@
 import React from "react";
-import { DataGrid as MuiDataGrid, DataGridProps } from "@mui/x-data-grid";
+import {DataGrid as MuiDataGrid, DataGridProps, GridSortDirection} from "@mui/x-data-grid";
 import { styled } from "@mui/material/styles";
 import { Box } from "@mui/material";
-import { GridSortDirection } from "@mui/x-data-grid/models/gridSortModel";
 
 interface Props extends DataGridProps {
     sort: { field: string; sort: GridSortDirection };

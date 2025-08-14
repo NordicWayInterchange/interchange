@@ -10,13 +10,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {ContentCopy} from "@/components/shared/actions/ContentCopy";
 import Loading from "@/components/shared/components/Loading";
-import {ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer} from "@/types/serviceProviders";
+import {ServiceProviderPrivatechannels, ServiceProviderPrivateChannelsPeer} from "@/types/serviceProviders";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {Chip} from "@/components/shared/components/Chip";
 import {colorMapping, statusChips} from "@/lib/statusChips";
 
 type Props = {
-    privateChannel: ServiceProviderPrivatechannels | ServiceProviderPrivatechannelsPeer;
+    privateChannel: ServiceProviderPrivatechannels | ServiceProviderPrivateChannelsPeer;
     open: boolean;
     title: string;
     handleMoreClose: () => void;
