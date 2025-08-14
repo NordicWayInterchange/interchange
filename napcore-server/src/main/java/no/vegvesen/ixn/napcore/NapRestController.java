@@ -191,11 +191,11 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionIds}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Subscriptions")
-    @Operation(summary = "Delete one or multiple subscriptions")
+    @Operation(summary = "Delete one or multiple subscriptions separated by comma")
     public void deleteSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionIds") String subscriptionIds) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionIds);
+        logger.info("Service Provider {}, DELETE one or multiple subscriptions {}", actorCommonName, subscriptionIds);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         List<String> uuidList = transformToUuidList(subscriptionIds);
