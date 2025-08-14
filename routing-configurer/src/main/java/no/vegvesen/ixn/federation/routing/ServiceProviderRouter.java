@@ -531,42 +531,29 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
-        //TODO: endre så capability-listen filtreres én gang, ikke 2. Lag test på at dette gjøres rett.
         if (!serviceProvider.hasActiveSubscriptions()) {
             return serviceProvider;
         }
-
-        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        Set<Capability> allCreatedCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
         Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
-
         for (LocalSubscription subscription : activeSubscriptions) {
-            if (serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                continue;
+            if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
+                Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
+                createConnectionIfNotExistingConnection(subscription, matchingCapabilities, delta);
             }
-            //TODO: vurder, har det noe å si at sjekken flyttes over?
-            removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
-
-            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
-
-            renameFunction(subscription, matchingCapabilities, delta);
         }
-
-        serviceProvider = repository.save(serviceProvider); //TODO: Vurder, trenger man å save dersom man returnerer i første if?
+        serviceProvider = repository.save(serviceProvider);
         return serviceProvider;
     }
 
-    private void renameFunction(LocalSubscription subscription, Set<Capability> matchingCapabilities, QpidDelta delta) {
+    private void createConnectionIfNotExistingConnection(LocalSubscription subscription, Set<Capability> matchingCapabilities, QpidDelta delta) {
         for (Capability capability : matchingCapabilities) {
             for (CapabilityShard shard : capability.getShards()) {
                 if (!isExistingConnection(subscription, capability, shard)) {
-                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
                     Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
                     if (shardExchange != null) {
-                        Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
-                        qpidClient.addBinding(shard.getExchangeName(), binding);
-                        shardExchange.addBinding(binding);
-                        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
-                        subscription.addConnection(connection);
+                        addConnectionToSubscription(subscription, shard, shardExchange);
                     } else {
                         logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
                     }
@@ -596,5 +583,14 @@ public class ServiceProviderRouter {
             }
         }
         subscription.getConnections().removeAll(unwantedConnections);
+    }
+
+    private void addConnectionToSubscription(LocalSubscription subscription, CapabilityShard shard, Exchange shardExchange) {
+        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+        Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
+        qpidClient.addBinding(shard.getExchangeName(), binding);
+        shardExchange.addBinding(binding);
+        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
+        subscription.addConnection(connection);
     }
 }
