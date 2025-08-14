@@ -1,7 +1,11 @@
+const withTM = require('next-transpile-modules')([
+    '@mui/x-data-grid',
+]);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    output: "standalone",
+    output: 'standalone',
 };
 
-module.exports = nextConfig;
+module.exports = withTM(nextConfig);

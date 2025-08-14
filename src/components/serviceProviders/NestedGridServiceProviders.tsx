@@ -11,7 +11,9 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer,
+    ServiceProviderDeliveries,
+    ServiceProviderPrivatechannels,
+    ServiceProviderPrivateChannelsPeer,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -23,17 +25,18 @@ import {motion} from "framer-motion";
 import PrivateChannelDrawer from "@/components/shared/drawer/PrivateChannelDrawer";
 import {fetchExchangeNameExists} from "@/hooks/useFetchExchangeNameExists";
 import {useSession} from "next-auth/react";
-
+import SearchBox from "@/components/shared/components/SearchBox";
 
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | ServiceProviderPrivateChannelsPeer | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
     isFlashing: boolean;
 };
+
 const NestedGridServiceProviders: React.FC<Props> = ({
                                                          row,
                                                          field,
@@ -51,6 +54,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
     }>({id: null, field: null});
     const [invalidDeliveryIds, setInvalidDeliveryIds] = useState<Set<string>>(new Set());
     const {data: session} = useSession();
+    const [searchId, setSearchId] = useState("");
 
     useEffect(() => {
         const validateAllDeliveries = async () => {
@@ -308,6 +312,14 @@ const NestedGridServiceProviders: React.FC<Props> = ({
     }
     const headerContent = getHeader();
 
+    const rows = (Array.isArray(nestedData) ? nestedData : []) as {id: string; publicationId: string}[];
+
+    const filteredRows = searchId.trim()
+        ? rows.filter((row) =>
+            field === "capabilities" ? row.publicationId?.toString().includes(searchId.trim()) : row.id?.toString().includes(searchId.trim())
+        )
+        : rows;
+
     return (
         <Box flex={1}>
             <motion.div
@@ -320,12 +332,13 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 <Subheading>
                     These are all of {field}. You can click a row to see details.
                 </Subheading>
-                <Divider sx={{marginY: 3}}/>
+                <Divider sx={{marginY: 2}}/>
+                <SearchBox searchId={searchId} setSearchId={setSearchId} label={field} searchElement={field === "capabilities" ? "publicationID" : "id"}></SearchBox>
+                <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
                 <Box sx={{height: 450, width: "100%"}}>
                     <Box sx={StyledTableHeader}>
-
                         <DataGrid
-                            rows={nestedData}
+                            rows={filteredRows}
                             columns={nestedColumns}
                             getRowId={(row) => row.id}
                             onRowClick={handleOnRowClick}
@@ -380,7 +393,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
                             title= "Private channel peers"
-                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
+                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannelsPeer}
                         />
                     )}
                 </Box>

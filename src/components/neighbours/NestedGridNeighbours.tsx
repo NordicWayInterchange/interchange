@@ -4,7 +4,7 @@ import {messageTypeChips, statusChips} from "@/lib/statusChips";
 import {Box, ChipProps, Divider} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
-import React from "react";
+import React, {useState} from "react";
 import {Capability, Subscription} from "@/types/neighbours";
 import Subheading from "@/components/shared/typography/Subheading";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -13,6 +13,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import {timeConverter} from "@/lib/timeConverter";
 import {GridColDef} from "@mui/x-data-grid";
 import {motion} from "framer-motion";
+import SearchBox from "@/components/shared/components/SearchBox";
 
 type Props = {
     row: any;
@@ -46,6 +47,7 @@ const NestedGridNeighbours: React.FC<Props> = ({
                                                    isFlashing
                                                }: Props) => {
 
+    const [searchId, setSearchId] = useState("");
     const nestedTableTitle: { [key: string]: string } = {
         capabilities: "Capabilities",
         ourRequestedSubscriptions: "Our Subscriptions",
@@ -146,6 +148,14 @@ const NestedGridNeighbours: React.FC<Props> = ({
         } else return `These are all of ${heading}. You can click a row to see details.`;
     }
 
+    const rows = (Array.isArray(nestedData) ? nestedData : []) as {id: string;}[];
+
+    const filteredRows = searchId.trim()
+        ? rows.filter((row) =>
+            row.id?.toString().includes(searchId.trim())
+        )
+        : rows;
+
     return (
         <Box flex={1}>
             <motion.div
@@ -159,11 +169,13 @@ const NestedGridNeighbours: React.FC<Props> = ({
                     {getSubheading()}
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
+                <SearchBox searchId={searchId} setSearchId={setSearchId} label={field} searchElement="id"></SearchBox>
+                <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
                 <Box sx={{height: 450, width: "100%"}}>
 
                     {heading === 'Capabilities' && (
                         <DataGrid
-                            rows={nestedData}
+                            rows={filteredRows}
                             columns={nestedColumns}
                             getRowId={(row) => row.id}
                             onRowClick={handleOnRowClick}
@@ -175,7 +187,7 @@ const NestedGridNeighbours: React.FC<Props> = ({
                     )}
                     {(heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
                         <DataGrid
-                            rows={nestedData}
+                            rows={filteredRows}
                             columns={nestedColumns}
                             getRowId={(row) => row.id}
                             onRowClick={handleOnRowClick}
