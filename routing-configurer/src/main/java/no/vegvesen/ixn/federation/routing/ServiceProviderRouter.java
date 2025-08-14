@@ -57,7 +57,7 @@ public class ServiceProviderRouter {
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
-            logger.debug("Checking service provider {}",name);
+            logger.debug("Checking service provider {}", name);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
@@ -116,7 +116,7 @@ public class ServiceProviderRouter {
                 // Remove the subscription from the ServiceProvider
                 //serviceProvider.removeSubscription(subscription);
                 break;
-                //needs testing.
+            //needs testing.
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
                 break;
@@ -179,7 +179,7 @@ public class ServiceProviderRouter {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)) {
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
@@ -343,7 +343,7 @@ public class ServiceProviderRouter {
 
                     String capabilitySelector;
                     if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i + 1);
                     } else {
                         capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                     }
@@ -371,7 +371,7 @@ public class ServiceProviderRouter {
             for (CapabilityShard shard : capability.getShards()) {
                 Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
                 if (exchange != null) {
-                    if (! exchange.isBoundTo("bi-queue")) {
+                    if (!exchange.isBoundTo("bi-queue")) {
                         Binding binding = new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector()));
                         qpidClient.addBinding(shard.getExchangeName(), binding);
                         exchange.addBinding(binding);
@@ -432,20 +432,20 @@ public class ServiceProviderRouter {
                                 // is created in the previous loop if it didn't already exist
                                 if (endpointExchange != null) {
                                     if (shardExchange != null) {
-                                        if (! endpointExchange.isBoundTo(shardExchange.getName())) {
+                                        if (!endpointExchange.isBoundTo(shardExchange.getName())) {
                                             if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), delivery.getSelector())) {
                                                 String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
                                                 Binding binding = new Binding(endpointExchange.getName(), shardExchange.getName(), new Filter(joinedSelector));
                                                 qpidClient.addBinding(endpointExchange.getName(), binding);
                                                 endpointExchange.addBinding(binding);
-                                                logger.info("Added binding from {} to {}",endpointExchange.getName(),shardExchange.getName());
+                                                logger.info("Added binding from {} to {}", endpointExchange.getName(), shardExchange.getName());
                                             }
                                         }
                                     } else {
-                                        logger.info("No shard exchange found in qpid with name {}",shard.getExchangeName());
+                                        logger.info("No shard exchange found in qpid with name {}", shard.getExchangeName());
                                     }
                                 } else {
-                                    logger.info("No delivery endpoint exchange found in qpid with name {}",endpoint.getTarget());
+                                    logger.info("No delivery endpoint exchange found in qpid with name {}", endpoint.getTarget());
                                 }
                             }
                         }
@@ -531,42 +531,60 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
-        if (serviceProvider.hasActiveSubscriptions()) {
-            Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-            Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
-            for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
+        //TODO: endre så capability-listen filtreres én gang, ikke 2. Lag test på at dette gjøres rett.
+        if (!serviceProvider.hasActiveSubscriptions()) {
+            return serviceProvider;
+        }
 
-                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    Set<String> existingConnections = subscription.getConnections().stream()
-                            .map(LocalConnection::getSource)
-                            .collect(Collectors.toSet());
+        Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+        Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
 
-                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities.stream().filter(c -> c.getStatus().equals(CapabilityStatus.CREATED)).collect(Collectors.toSet()), subscription.getSelector());
-                    for (Capability capability : matchingCapabilities) {
-                        for (CapabilityShard shard : capability.getShards()) {
-                            if (!existingConnections.contains(shard.getExchangeName())) {
-                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
-                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                    Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
-                                    if (shardExchange != null) {
-                                        Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
-                                        qpidClient.addBinding(shard.getExchangeName(), binding);
-                                        shardExchange.addBinding(binding);
-                                        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
-                                        subscription.addConnection(connection);
-                                    } else {
-                                        logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
-                                    }
-                                }
-                            }
-                        }
+        for (LocalSubscription subscription : activeSubscriptions) {
+            if (serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                continue;
+            }
+            //TODO: vurder, har det noe å si at sjekken flyttes over?
+            removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
+
+            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
+
+            renameFunction(subscription, matchingCapabilities, delta);
+        }
+
+        serviceProvider = repository.save(serviceProvider); //TODO: Vurder, trenger man å save dersom man returnerer i første if?
+        return serviceProvider;
+    }
+
+    private void renameFunction(LocalSubscription subscription, Set<Capability> matchingCapabilities, QpidDelta delta) {
+        Set<String> existingConnections = subscription.getConnections().stream()
+                .map(LocalConnection::getSource)
+                .collect(Collectors.toSet());
+
+        for (Capability capability : matchingCapabilities) {
+            for (CapabilityShard shard : capability.getShards()) {
+                if (!isExistingConnection(subscription, capability, shard)) {
+                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                    Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
+                    if (shardExchange != null) {
+                        Binding binding = new Binding(shard.getExchangeName(), endpoint.getSource(), new Filter(subscription.getSelector()));
+                        qpidClient.addBinding(shard.getExchangeName(), binding);
+                        shardExchange.addBinding(binding);
+                        LocalConnection connection = new LocalConnection(shard.getExchangeName(), endpoint.getSource());
+                        subscription.addConnection(connection);
+                    } else {
+                        logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
                     }
                 }
             }
-            serviceProvider = repository.save(serviceProvider);
         }
-        return serviceProvider;
+    }
+
+    private boolean isExistingConnection(LocalSubscription subscription, Capability capability, CapabilityShard shard) {
+        Set<String> existingConnections = subscription.getConnections().stream()
+                .map(LocalConnection::getSource)
+                .collect(Collectors.toSet());
+        return existingConnections.contains(shard.getExchangeName()) &&
+                CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector());
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
