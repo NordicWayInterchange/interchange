@@ -1,43 +1,49 @@
 import {useQuery} from "@tanstack/react-query";
-import {
-    ServiceProviderCapabilities, ServiceProviderDeliveries, ServiceProviderPrivateChannels,
-    ServiceProviders,
-    ServiceProviderSubscriptions
-} from "@/types/serviceProviders";
+import {ServiceProviders} from "@/types/serviceProviders";
 
-const fetchServiceProviders: (commonName: string) => Promise<Awaited<{
-    id: number;
-    name: string;
-    subscriptions: Array<ServiceProviderSubscriptions>;
-    capabilities: Array<ServiceProviderCapabilities>;
-    deliveries: Array<ServiceProviderDeliveries>;
-    privateChannels: Array<ServiceProviderPrivateChannels>;
-    privatechannels: any
-} | {
-    id: number;
-    name: string;
-    subscriptions: Array<ServiceProviderSubscriptions>;
-    capabilities: Array<ServiceProviderCapabilities>;
-    deliveries: Array<ServiceProviderDeliveries>;
-    privateChannels: Array<ServiceProviderPrivateChannels>;
-    privatechannels: number
-}>[]> = async (commonName: string) => {
+const fetchServiceProviders = async (
+    commonName: string,
+): Promise<any> => {
     const res = await fetch(`/api/${commonName}/serviceproviders`);
     if (res.ok) {
         const serviceProviders: ServiceProviders[] = await res.json();
         const seasonedServiceProviders = await Promise.all (serviceProviders.map(async (serviceProvider) => {
-            const fetchServiceProviderPrivateChannels = await fetch(
-                `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
-            );
-            if (fetchServiceProviderPrivateChannels.ok) {
-                const data = await fetchServiceProviderPrivateChannels.json();
-                return { ...serviceProvider, privatechannels: data };
-            } else {
-                console.error(
-                    `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivateChannels.status} - ${fetchServiceProviderPrivateChannels.statusText}`
-                );
-                return {...serviceProvider, privatechannels: 0 };
-            }
+            let fetchServiceProviderPrivatechannels = null;
+            let fetchServiceProviderPrivatechannelsPeer = null;
+            let privateChannelsData = null;
+            let peersData = null;
+            try {
+                fetchServiceProviderPrivatechannels = await fetch(
+                   `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels`
+               );
+                if (fetchServiceProviderPrivatechannels.ok) {
+                     privateChannelsData = await fetchServiceProviderPrivatechannels.json();
+                }
+           } catch (err) {
+               console.error(
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivatechannels?.status} - ${fetchServiceProviderPrivatechannels?.statusText}`
+               );
+               return {...serviceProvider, privatechannels: 0 };
+           }
+
+           try {
+               fetchServiceProviderPrivatechannelsPeer = await fetch(
+                   `/api/${commonName}/serviceproviders/${serviceProvider.name}/privatechannels/peer`
+               );
+               if (fetchServiceProviderPrivatechannelsPeer.ok) {
+                    peersData = await fetchServiceProviderPrivatechannelsPeer.json();
+               }
+           } catch (err) {
+               console.error(
+                   `error when fetching ${serviceProvider.name} - ${fetchServiceProviderPrivatechannelsPeer?.status} - ${fetchServiceProviderPrivatechannelsPeer?.statusText}`
+               );
+               return {...serviceProvider, privatechannelsPeer: 0 };
+           }
+            return {
+                ...serviceProvider,
+                privatechannels: privateChannelsData ?? [],
+                privatechannelsPeer: peersData ?? [],
+            };
         }));
         return Promise.all(seasonedServiceProviders);
     } else {

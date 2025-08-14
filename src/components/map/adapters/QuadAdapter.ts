@@ -76,13 +76,7 @@ const QuadAdapter = (map: Map) => ({
     layers[currentHash.substring(0, zoom)] = true;
 
     return layers;
-  },
-  labels: function (hash: string) {
-    return {
-      long: hash,
-      short: hash.substring(-1, 1),
-    };
-  },
+  }
 });
 
 export default QuadAdapter;

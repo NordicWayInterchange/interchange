@@ -11,7 +11,7 @@ import {CustomEmptyOverlay} from "@/components/shared/datagrid/CustomEmptyOverla
 import React, {useEffect, useState} from "react";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
+    ServiceProviderDeliveries, ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import CapabilityDrawer from "@/components/shared/drawer/CapabilityDrawer";
@@ -28,7 +28,7 @@ import {useSession} from "next-auth/react";
 type Props = {
     row: any;
     drawerOpen: boolean;
-    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null;
+    serviceProviderRow: ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null;
     field: string | null;
     handleMoreClose: () => void;
     handleOnRowClick: (arg0: any) => void;
@@ -248,8 +248,8 @@ const NestedGridServiceProviders: React.FC<Props> = ({
         nestedColumns = [
             {
                 ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
-                    const value = params.row.id;
-                    return value ? value.substring(0, 8) : '';
+                    return params.row.id;
+                    //return value ? value.substring(0, 8) : ''; // shorten the id later?
                 }
             },
             {
@@ -271,6 +271,36 @@ const NestedGridServiceProviders: React.FC<Props> = ({
             {...dataGridTemplate, field: "description", headerName: "Description"},
             {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
         ];
+    } else if (field === "privateChannelsPeer" && row.privatechannelsPeer) {
+        nestedData = row.privatechannelsPeer.map((privateChannelPeer: any) => ({
+            id: privateChannelPeer.id,
+            status: privateChannelPeer.status,
+            peers: privateChannelPeer.peers,
+            description: privateChannelPeer.description,
+            endpoint: privateChannelPeer.endpoint,
+            lastUpdated: timeConverter(privateChannelPeer.lastUpdated)
+        }));
+
+        nestedColumns = [
+            {
+                ...dataGridTemplate, field: "id", headerName: "ID", renderCell: (params) => {
+                    return params.row.id;
+                    //return value ? value.substring(0, 8) : ''; Shorten the id later?
+                }
+            },
+            {
+                ...dataGridTemplate, field: "status", headerName: "Status", renderCell: (cell) => {
+                    return (
+                        <Chip
+                            color={statusChips[cell.value as keyof typeof statusChips] as ChipProps['color']}
+                            label={cell.value}
+                        />
+                    );
+                }
+            },
+            {...dataGridTemplate, field: "description", headerName: "Description"},
+            {...dataGridTemplate, field: "lastUpdated", headerName: "Last Updated"}
+        ];
     }
 
     const getHeader = () => {
@@ -288,7 +318,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                 <Divider style={{ margin: '20px 0', visibility: 'hidden' }}/>
                 <Mainheading>{headerContent}</Mainheading>
                 <Subheading>
-                    These are all of {field}. You can click a row to view more information.
+                    These are all of {field}. You can click a row to see details.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>
@@ -341,7 +371,16 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                         <PrivateChannelDrawer
                             handleMoreClose={handleMoreClose}
                             open={drawerOpen}
-                            privateChannel={serviceProviderRow as ServiceProviderPrivateChannels}
+                            title= "Private channels"
+                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannels}
+                        />
+                    )}
+                    {serviceProviderRow && field === 'privateChannelsPeer' && (
+                        <PrivateChannelDrawer
+                            handleMoreClose={handleMoreClose}
+                            open={drawerOpen}
+                            title= "Private channel peers"
+                            privateChannel={serviceProviderRow as ServiceProviderPrivatechannelsPeer}
                         />
                     )}
                 </Box>

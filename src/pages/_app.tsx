@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {HydrationBoundary, QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {useState} from 'react';
 import {SessionProvider} from "next-auth/react";
 import {ThemeProvider} from "@mui/material";
@@ -16,11 +16,13 @@ export default function App({
     return (
         <SessionProvider session={session}>
             <QueryClientProvider client={queryClient}>
+                <HydrationBoundary state={pageProps.dehydratedState}>
                 <ThemeProvider theme={theme}>
                     <Layout>
                         <Component {...pageProps} />
                     </Layout>
                 </ThemeProvider>
+                </HydrationBoundary>
                 <ReactQueryDevtools />
             </QueryClientProvider>
         </SessionProvider>

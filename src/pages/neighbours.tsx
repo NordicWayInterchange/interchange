@@ -188,7 +188,7 @@ const Neighbours = () => {
                 These are all of neighbours. You can click on each row to see control connection details. You can also
                 click on
                 each capabilities, our subscriptions or neighbour subscriptions cell
-                to view more information.
+                to see details.
             </Subheading>
             <Divider sx={{marginY: 4}}/>
             <Box sx={{height: 450, width: "100%"}}>

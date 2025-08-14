@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {GridColDef} from "@mui/x-data-grid";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, Divider, TextField} from "@mui/material";
+import {Box, Divider} from "@mui/material";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import Subheading from "@/components/shared/typography/Subheading";
@@ -11,6 +11,7 @@ import {
 } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import { StyledTableHeader} from "@/components/styles/StyledElements";
 import {useFetchQueues} from "@/hooks/useFetchQueues";
+import SearchBox from "@/components/shared/components/SearchBox";
 
 
 const Queues = () => {
@@ -69,17 +70,11 @@ const Queues = () => {
             <Subheading>
                 These are all of qpid queues.
             </Subheading>
-            <Divider sx={{marginY: 4}}/>
+            <Divider sx={{marginY: 2}}/>
+            <SearchBox searchId={searchId} setSearchId={setSearchId} label="queue" searchElement="id"/>
+            <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
-                    <TextField
-                        label="Search by ID"
-                        variant="outlined"
-                        value={searchId}
-                        onChange={(e) => setSearchId(e.target.value)}
-                        style={{ marginBottom: 16 }}
-                        type="text"
-                    />
                     <DataGrid
                         columns={tableHeaders}
                         rows={filteredRows || []}

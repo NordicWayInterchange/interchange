@@ -13,12 +13,12 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders, fetchAdminUIAllQueues
+    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeer
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {Session} from "next-auth";
-import {ServiceProviderPrivateChannels} from "@/types/serviceProviders";
+import {ServiceProviderPrivatechannels, ServiceProviderPrivatechannelsPeer} from "@/types/serviceProviders";
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
@@ -56,8 +56,14 @@ const fetchAllQueues = async (params: basicGetParams) => {
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
     const res = await fetchAdminUIPrivateChannels(params);
-    const privateChannels: Array<ServiceProviderPrivateChannels> = await res.data;
+    const privateChannels: Array<ServiceProviderPrivatechannels> = await res.data;
     return [res.status, privateChannels];
+};
+
+const fetchPrivateChannelsPeer = async (params: extendedGetParams) => {
+    const res = await fetchAdminUIPrivateChannelsPeer(params);
+    const privateChannelsPeer: Array<ServiceProviderPrivatechannelsPeer> = await res.data;
+    return [res.status, privateChannelsPeer];
 };
 
 const fetchDeliveryIds = async (params: extendedGetParams) => {
@@ -110,11 +116,11 @@ const fetchExchangeValidator = async (params: extendedGetParams) => {
 };
 
 export type basicGetParams = {
-    actorCommonName: string;
+    adminUser: string;
     pathParam?: string;
 };
 export type extendedGetParams = {
-    actorCommonName: string;
+    adminUser: string;
     pathParam?: string;
 };
 
@@ -129,6 +135,7 @@ const getPaths: {
     exchanges: fetchAllExchanges,
     queues: fetchAllQueues,
     "/serviceproviders/[serviceProviderName]/privatechannels": fetchPrivateChannels,
+    "/serviceproviders/[serviceProviderName]/privatechannels/peer": fetchPrivateChannelsPeer,
     "/serviceproviders/[serviceProviderName]/deliveries": fetchDeliveryIds,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]": fetchDeliveryInfo,
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches": fetchMatchingCapabilitiesForDeliveries,
@@ -151,7 +158,7 @@ const findHandler: (params: any) =>
     const {
         path = [],
         method,
-        actorCommonName,
+        adminUser,
         selector = ""
     } = params;
     switch (method) {
@@ -170,7 +177,7 @@ const findHandler: (params: any) =>
             if (matchedPath) {
                 const patternSegments = matchedPath.split("/").filter(Boolean);
 
-                const params: Record<string, string> = { actorCommonName };
+                const params: Record<string, string> = { adminUser };
                 patternSegments.forEach((segment, idx) => {
                     if (segment.startsWith("[") && segment.endsWith("]")) {
                         const paramName = segment.slice(1, -1);
@@ -188,13 +195,13 @@ const findHandler: (params: any) =>
             if (possiblePaths.includes(lastSegment)) {
                 return {
                     fn: getPaths[lastSegment],
-                    params: { actorCommonName, selector },
+                    params: { adminUser, selector },
                 };
             }
             if (path.length > 1 && possiblePaths.includes(path[0])) {
                 return {
                     fn: getPaths[path[0]],
-                    params: { actorCommonName, pathParam: path[1] },
+                    params: { adminUser, pathParam: path[1] },
                 };
             }
 
@@ -249,16 +256,16 @@ export default async function handler(
         ? req.query.selector[0]
         : req.query.selector;
 
-    const [actorCommonName, ...path] = slug;
+    const [adminUser, ...path] = slug;
     const urlPath = path.join("/");
     const { method, body } = req;
 
-    if (actorCommonName && path) {
+    if (adminUser && path) {
         const executer = findHandler({
             method,
             path,
             body,
-            actorCommonName,
+            adminUser,
             selector,
         });
 

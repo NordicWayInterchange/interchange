@@ -73,11 +73,13 @@ export default function Home() {
             .filter(match => match.capabilityMatchApi.length > 0)
             .map((match) => (match))))).reduce((sum, matchResult) => sum + matchResult.length, 0) : 0;
 
-    const capabilitiesCount = serviceProvidersData?.map((item) => (item.capabilities || [])).reduce((sum, capabilities) => (sum + capabilities.length), 0);
-    const subscriptionsCount = serviceProvidersData?.map((item) => (item.subscriptions || [])).reduce((sum, subscriptions) => (sum + subscriptions.length), 0);
-    const deliveriesCount = serviceProvidersData?.map((item) => (item.deliveries || [])).reduce((sum, deliveries) => (sum + deliveries.length), 0);
-    const privateChannelsCount = serviceProvidersData?.map((item) => (item.privatechannels || [])).reduce((sum, privatechannels) => (sum + privatechannels.length), 0);
+    const capabilitiesCount = serviceProvidersData?.map((item: { capabilities: any; }) => (item.capabilities || [])).reduce((sum: any, capabilities: string | any[]) => (sum + capabilities.length), 0);
+    const subscriptionsCount = serviceProvidersData?.map((item: { subscriptions: any; }) => (item.subscriptions || [])).reduce((sum: any, subscriptions: string | any[]) => (sum + subscriptions.length), 0);
+    const deliveriesCount = serviceProvidersData?.map((item: { deliveries: any; }) => (item.deliveries || [])).reduce((sum: any, deliveries: string | any[]) => (sum + deliveries.length), 0);
+    const privateChannelsCount = serviceProvidersData?.map((item: { privatechannels: any; }) => (item.privatechannels || [])).reduce((sum: any, privatechannels: string | any[]) => (sum + privatechannels.length), 0);
+    const privateChannelsPeerCount = serviceProvidersData?.map((item: { privatechannelsPeer: any; }) => (item.privatechannelsPeer || [])).reduce((sum: any, privatechannelsPeer: string | any[]) => (sum + privatechannelsPeer.length), 0);
 
+    console.log('privateChannelsCount', privateChannelsPeerCount)
     const neighbourCapabilitiesCount = neighbourData?.reduce((sum, item) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -97,12 +99,14 @@ export default function Home() {
             secondSubValueHeader: 'Subscriptions',
             thirdSubValueHeader: 'Deliveries',
             fourthSubValueHeader: 'Private channels',
+            fifthSubValueHeader: 'Private channel peers',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
             secondSubValueCount: subscriptionsCount,
             thirdSubValueCount: deliveriesCount,
             fourthSubValueCount: privateChannelsCount,
+            fifthSubValueCount: privateChannelsPeerCount,
         },
         {
             icon: <Groups2Icon />,
@@ -202,9 +206,15 @@ export default function Home() {
                                                 )
                                             )}
                                         </Box>
-                                        <Box>
-                                            <Typography sx={{  textDecoration: "underline"}} variant="subtitle2">{shortcut.fourthSubValueHeader}</Typography>
-                                            <Typography sx={{ fontWeight: 'bold' }} >{shortcut.fourthSubValueCount}</Typography>
+                                        <Box sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 1}}>
+                                            {[{ header: shortcut.fourthSubValueHeader, count: shortcut.fourthSubValueCount }, { header: shortcut.fifthSubValueHeader, count: shortcut.fifthSubValueCount}].map(
+                                                (entry, i) => (
+                                                    <Box key={i}>
+                                                        <Typography noWrap={true} sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
+                                                    </Box>
+                                                )
+                                            )}
                                         </Box>
                                     </Box>
                                 </Card>

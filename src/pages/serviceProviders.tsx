@@ -12,7 +12,7 @@ import {useSession} from "next-auth/react";
 import {useFetchServiceProviders} from "@/hooks/useFetchServiceProviders";
 import {
     ServiceProviderCapabilities,
-    ServiceProviderDeliveries, ServiceProviderPrivateChannels,
+    ServiceProviderDeliveries, ServiceProviderPrivatechannels,
     ServiceProviderSubscriptions
 } from "@/types/serviceProviders";
 import {ExpandedRows} from "@/types/expandedRows";
@@ -28,7 +28,7 @@ export default function ServiceProviders() {
         session?.user.commonName as string
     );
 
-    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivateChannels | null>(null);
+    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -143,7 +143,7 @@ export default function ServiceProviders() {
             headerName: "Private channels",
             headerClassName: 'custom-header',
             renderCell: (params) => {
-                const serviceProviderPrivateChannels = params.row.privatechannels;
+                const serviceProviderPrivatechannels = params.row.privatechannels;
                 return (
                     <Box
                         style={{cursor: "pointer"}}
@@ -153,8 +153,31 @@ export default function ServiceProviders() {
                             handleCellClick("privateChannels", rowId)
                         }}
                     >
-                        {Array.isArray(serviceProviderPrivateChannels) ?
-                            <StyledBorderlineSpan> {serviceProviderPrivateChannels.length}  </StyledBorderlineSpan> :
+                        {Array.isArray(serviceProviderPrivatechannels) ?
+                            <StyledBorderlineSpan> {serviceProviderPrivatechannels.length}  </StyledBorderlineSpan> :
+                            <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
+                    </Box>
+                );
+            },
+        },
+        {
+            ...dataGridTemplate,
+            field: "privateChannelsPeer",
+            headerName: "Private channel peers",
+            headerClassName: 'custom-header',
+            renderCell: (params) => {
+                const serviceProviderPrivatechannelsPeer = params.row.privatechannelsPeer;
+                return (
+                    <Box
+                        style={{cursor: "pointer"}}
+                        onClick={() => {
+                            const rowId = params.row.id;
+                            setServiceProviderRow(null);
+                            handleCellClick("privateChannelsPeer", rowId)
+                        }}
+                    >
+                        {Array.isArray(serviceProviderPrivatechannelsPeer) ?
+                            <StyledBorderlineSpan> {serviceProviderPrivatechannelsPeer.length}  </StyledBorderlineSpan> :
                             <StyledBorderlineSpan> {0} </StyledBorderlineSpan> }
                     </Box>
                 );
@@ -168,7 +191,7 @@ export default function ServiceProviders() {
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
                     These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell
-                    to view more information.
+                    to see details.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>
@@ -188,7 +211,7 @@ export default function ServiceProviders() {
                             }}
                             getCellClassName={(params) =>
                                 (params.field === 'subscriptions' || params.field === 'capabilities'
-                                    || params.field === 'deliveries' || params.field === 'privateChannels' ) &&
+                                    || params.field === 'deliveries' || params.field === 'privateChannels' || params.field === 'privateChannelsPeer' ) &&
                                 highlightedCell.id === params.id && highlightedCell.field === params.field
                                     ? "highlighted-cell"
                                     : ""
@@ -220,3 +243,4 @@ export default function ServiceProviders() {
         </>
     );
 }
+
