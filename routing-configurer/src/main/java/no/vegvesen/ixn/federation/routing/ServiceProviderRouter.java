@@ -531,37 +531,32 @@ public class ServiceProviderRouter {
     }
 
     public ServiceProvider syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> serviceProviders) {
-        if (!serviceProvider.hasActiveSubscriptions()) {
-            return serviceProvider;
-        }
-        Set<Capability> allCreatedCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
-        Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
-        for (LocalSubscription subscription : activeSubscriptions) {
-            if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
-                Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
-                createConnectionIfNotExistingConnection(subscription, matchingCapabilities, delta);
-            }
-        }
-        serviceProvider = repository.save(serviceProvider);
-        return serviceProvider;
-    }
-
-    private void createConnectionIfNotExistingConnection(LocalSubscription subscription, Set<Capability> matchingCapabilities, QpidDelta delta) {
-        for (Capability capability : matchingCapabilities) {
-            for (CapabilityShard shard : capability.getShards()) {
-                if (!isExistingConnection(subscription, capability, shard)) {
-                    if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())){
-                        Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
-                        if (shardExchange != null) {
-                            addConnectionToSubscription(subscription, shard, shardExchange);
-                        } else {
-                            logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
+        if (serviceProvider.hasActiveSubscriptions()) {
+            Set<Capability> allCreatedCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+            Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
+            for (LocalSubscription subscription : activeSubscriptions) {
+                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                    removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
+                    Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
+                    for (Capability capability : matchingCapabilities) {
+                        for (CapabilityShard shard : capability.getShards()) {
+                            if (!isExistingConnection(subscription, capability, shard)) {
+                                if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())){
+                                    Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
+                                    if (shardExchange != null) {
+                                        addConnectionToSubscription(subscription, shard, shardExchange);
+                                    } else {
+                                        logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
+            serviceProvider = repository.save(serviceProvider);
         }
+        return serviceProvider;
     }
 
     private boolean isExistingConnection(LocalSubscription subscription, Capability capability, CapabilityShard shard) {
