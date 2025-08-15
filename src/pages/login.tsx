@@ -8,6 +8,8 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { Card, Typography} from "@mui/material";
 import * as React from "react";
 import {StyledButton} from "@/components/styles/StyledElements";
+import {Box} from "@mui/system";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export default function Login({}: InferGetServerSidePropsType<
     typeof getServerSideProps
@@ -23,6 +25,9 @@ export default function Login({}: InferGetServerSidePropsType<
                 width: "500px",
             }}
         >
+            <Box sx={{ alignSelf: "center" }}>
+            <AdminPanelSettingsIcon sx={{ fontSize: 100 }} />
+            </Box>
             <Typography variant="body1">
                 Access to this application is restricted to authorized users only. If
                 you believe you should have access, please send an email to
