@@ -535,8 +535,8 @@ public class ServiceProviderRouter {
             Set<Capability> allCreatedCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : activeSubscriptions) {
+                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
