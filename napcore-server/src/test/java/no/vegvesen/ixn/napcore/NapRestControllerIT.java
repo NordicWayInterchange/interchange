@@ -348,6 +348,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testDeletingNoSubscriptions() {
+        String actorCommonName = "actor";
+        assertThrows(NothingToDeleteException.class, () -> napRestController.deleteSubscription(actorCommonName, ""));
+    }
+
+    @Test
     public void testAddingCapability(){
         String actorCommonName = "actor";
         CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest(

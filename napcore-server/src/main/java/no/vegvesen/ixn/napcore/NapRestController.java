@@ -199,6 +199,9 @@ public class NapRestController {
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         List<String> uuidList = transformToUuidList(subscriptionIds);
+        if (uuidList.isEmpty()) {
+            throw new NothingToDeleteException("No subsctiptionIds supplied to delete");
+        }
         serviceProviderToUpdate.removeOneOrMultipleLocalSubscriptions(uuidList);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
@@ -647,10 +650,6 @@ public class NapRestController {
     }
 
     private List<String> transformToUuidList(String uuids) {
-        if (uuids == null || uuids.isBlank()) {
-            return Collections.emptyList();
-        }
-
         return Arrays.stream(uuids.split(","))
                 .map(String::trim)
                 .filter(uuid-> !uuid.isEmpty())
