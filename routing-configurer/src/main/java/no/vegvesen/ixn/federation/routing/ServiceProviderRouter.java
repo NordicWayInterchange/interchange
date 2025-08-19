@@ -540,7 +540,7 @@ public class ServiceProviderRouter {
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
-                            if (!isExistingConnection(subscription, capability, shard)) {
+                            if (!isExistingConnection(subscription, shard)) {
                                 if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())){
                                     Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
                                     if (shardExchange != null) {
@@ -559,7 +559,7 @@ public class ServiceProviderRouter {
         return serviceProvider;
     }
 
-    private boolean isExistingConnection(LocalSubscription subscription, Capability capability, CapabilityShard shard) {
+    private boolean isExistingConnection(LocalSubscription subscription, CapabilityShard shard) {
         Set<String> existingConnections = subscription.getConnections().stream()
                 .map(LocalConnection::getSource)
                 .collect(Collectors.toSet());
