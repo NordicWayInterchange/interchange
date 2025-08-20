@@ -159,6 +159,21 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void removeOneOrMultipleLocalSubscriptions(List<String> subscriptionUuidList){
+		subscriptionUuidList.forEach(uuid -> {
+					LocalSubscription subscriptionToDelete = subscriptions
+							.stream()
+							.filter(subscription -> subscription.getUuid().equals(uuid))
+							.findFirst()
+							.orElseThrow(
+									() -> new NotFoundException("The subscription to delete with Uuid '" + uuid + "' is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
+							);
+					subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+				});
+
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public void removeSubscriptions(Set<LocalSubscription> subscriptionsToRemove) {
 		subscriptions.removeAll(subscriptionsToRemove);
 		this.subscriptionUpdated = LocalDateTime.now();
