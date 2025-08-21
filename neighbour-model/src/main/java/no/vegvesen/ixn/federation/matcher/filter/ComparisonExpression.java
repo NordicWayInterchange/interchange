@@ -110,6 +110,17 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
         return UnaryExpression.createNOT(doCreateEqual(left, ConstantExpression.NULL()));
     }
 
+    public static <E> TrileanExpression<E> createNotEqual(Expression<E> left, Expression<E> right) {
+        return UnaryExpression.createNOT(createEqual(left, right));
+    }
+
+    public static <E> TrileanExpression<E> createEqual(Expression<E> left, Expression<E> right) {
+        checkEqualOperand(left);
+        checkEqualOperand(right);
+        checkEqualOperandCompatability(left, right);
+        return new EqualityExpression<>(left, right);
+    }
+
     private static <E> TrileanExpression<E> doCreateEqual(Expression<E> left, Expression<E> right) {
         return new EqualExpression<>(left, right);
     }
@@ -126,6 +137,11 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
             @Override
             public String getExpressionSymbol() {
                 return ">";
+            }
+
+            @Override
+            public String toString() {
+                return left.toString() + " " + getExpressionSymbol() + " " + right.toString();
             }
         };
     }
@@ -208,6 +224,14 @@ public abstract class ComparisonExpression<T> extends BinaryExpression<T> implem
             Object value = ((ConstantExpression) expr).getValue();
             if (value == null) {
                 throw new SelectorParsingException("'" + expr + "' cannot be compared.");
+            }
+        }
+    }
+
+    private static <E> void checkEqualOperandCompatability(Expression<E> left, Expression<E> right) {
+        if ((left instanceof ConstantExpression) && (right instanceof ConstantExpression)) {
+            if ((left instanceof TrileanExpression) && !(right instanceof TrileanExpression)) {
+                throw new SelectorParsingException("'" + left + "' cannot be compared with '" + right + "'");
             }
         }
     }
