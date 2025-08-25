@@ -42,8 +42,8 @@ public class Exchange {
         this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(),null);
     }
 
-    public Exchange(String name, String type) {
-        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>(),null);
+    public Exchange(String name, String type, AlternateBinding alternateBinding) {
+        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>(),alternateBinding);
     }
 
     public Exchange(String name, List<Binding> bindings) {
