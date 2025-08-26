@@ -44,7 +44,7 @@ public class ServiceProviderServiceTest {
     @Test
     public void updateDeliveryStatusShouldNotChangeTheStatusOfADeliveryThatDoesNotHaveAnExchangeYet() {
         LocalDelivery localDelivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );
@@ -90,7 +90,7 @@ public class ServiceProviderServiceTest {
     @Test
     public void updateDeliveryStatusShouldMakeDeliveryNoOverlapIfNoCapabilitiesMatch() {
         LocalDelivery localDelivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 "publicationId = '0001:0001'",
                 LocalDeliveryStatus.REQUESTED
         );

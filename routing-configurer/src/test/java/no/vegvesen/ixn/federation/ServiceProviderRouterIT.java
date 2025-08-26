@@ -534,7 +534,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		String deliverySelector = "messageType = 'DATEX2'";
 		LocalDelivery localDelivery = new LocalDelivery(
-				1,
+				UUID.randomUUID().toString(),
 				deliverySelector,
 				LocalDeliveryStatus.CREATED
 		);
@@ -1077,7 +1077,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownDeliveryQueueShouldNotChangeRequestedDeliveries() {
 		LocalDelivery localDelivery = new LocalDelivery(
-				1,
+				UUID.randomUUID().toString(),
 				"a = b",
 				LocalDeliveryStatus.REQUESTED
 		);
