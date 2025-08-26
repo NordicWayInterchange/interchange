@@ -40,21 +40,30 @@ public class ExchangeWithDdlQueueTest extends QpidDockerBaseIT {
     }
 
     @Test
-    public void testExchangeWithDlq() throws Exception {
-        String queueName = "bi-queue";
+    public void testSettingDdlQueuetoExchange() throws Exception {
+        String queueName = "dlqueue";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(), queueName, sslContext);
         source.start();
 
-        System.out.println(qpidContainer.getHttpUrl());
-
         Exchange exchange = new Exchange("test-exchange", "direct", new AlternateBinding(queueName));
-
 
         assertThat(exchange.getName()).isEqualTo("test-exchange");
         assertThat(exchange.getAlternateBinding()).isNotNull();
         assertThat(exchange.getAlternateBinding().destination()).isEqualTo(queueName);
+    }
 
+    @Test
+    public void testExchangeWithoutDdlQueue() throws Exception {
+        String queueName = "dlqueue";
+
+        Source source = new Source(qpidContainer.getAmqpsUrl(), queueName, sslContext);
+        source.start();
+
+        Exchange exchange = new Exchange("test-exchange", "direct", null);
+
+        assertThat(exchange.getName()).isEqualTo("test-exchange");
+        assertThat(exchange.getAlternateBinding()).isNull();
     }
 
 }

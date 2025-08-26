@@ -93,6 +93,7 @@ public class Exchange {
                 ", durable=" + durable +
                 ", type='" + type + '\'' +
                 ", bindings=" + bindings +
+                ", alternateBinding=" + (alternateBinding != null ? alternateBinding.destination() : "null") +
                 '}';
     }
 }
