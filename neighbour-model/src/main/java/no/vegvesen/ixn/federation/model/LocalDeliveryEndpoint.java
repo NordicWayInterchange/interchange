@@ -22,24 +22,28 @@ public class LocalDeliveryEndpoint {
 
     private Integer maxMessageRate;
 
+    private String dlqName;
+
+
     public LocalDeliveryEndpoint() {
     }
 
-    public LocalDeliveryEndpoint(Integer id, String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalDeliveryEndpoint(Integer id, String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
         this.id = id;
         this.host = host;
         this.port = port;
         this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlqName = dlqName;
     }
 
     public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
-        this(null,host,port,target,maxBandwidth,maxMessageRate);
+        this(null,host,port,target,maxBandwidth,maxMessageRate, null);
     }
 
     public LocalDeliveryEndpoint(String host, int port, String target) {
-        this(null,host,port,target, null,null);
+        this(null,host,port,target, null,null, null);
     }
 
     public String getHost() {
@@ -86,6 +90,14 @@ public class LocalDeliveryEndpoint {
         return !target.isEmpty();
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
+    public void setDlqName(String dlqName) {
+        this.dlqName = dlqName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,6 +121,7 @@ public class LocalDeliveryEndpoint {
                 ", target='" + target + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dlqName='" + dlqName + '\'' +
                 '}';
     }
 }

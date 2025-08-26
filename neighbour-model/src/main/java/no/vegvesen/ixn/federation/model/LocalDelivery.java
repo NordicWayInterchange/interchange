@@ -40,19 +40,14 @@ public class LocalDelivery {
     @Column
     private String errorMessage;
 
-    @Column
-    private String dlqName;
-
     public LocalDelivery() {
     }
 
-    public LocalDelivery(String uuid, HashSet<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus localDeliveryStatus, String dlqName) {
+    public LocalDelivery(String uuid, HashSet<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus localDeliveryStatus) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.selector = selector;
         this.status = localDeliveryStatus;
-        this.dlqName = dlqName;
-
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
@@ -159,10 +154,6 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
-    public String getDlqName() {
-        return dlqName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -187,7 +178,6 @@ public class LocalDelivery {
                 ", status=" + status +
                 ", description='" + description + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
-                ", dlqName='" + dlqName + '\'' +
                 '}';
     }
 }

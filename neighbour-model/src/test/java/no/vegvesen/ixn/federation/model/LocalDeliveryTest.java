@@ -4,14 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
-import static no.vegvesen.ixn.docker.DockerBaseIT.getDockerHost;
 import static org.assertj.core.api.Assertions.assertThat;
 public class LocalDeliveryTest {
-
-    public static final String HOST_NAME = getDockerHost();
-
 
     @Test
     public void hashCodeAndEquals() {
@@ -50,16 +47,25 @@ public class LocalDeliveryTest {
     public void TestLocalDeliveryWithDlqTest() {
         String queueName = "dlqueue";
         String selector = "originatingCountry = 'NO'";
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
+
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(
+                1,
+                "host",
+                123,
+                "target",
+                2,
+                3,
+                queueName
+        );
 
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
-                LocalDeliveryStatus.CREATED,
-                queueName);
+                LocalDeliveryStatus.CREATED);
 
-        assertThat(delivery.getDlqName()).isEqualTo(queueName);
+        System.out.println(delivery);
+        assertThat(Objects.requireNonNull(delivery.getEndpoints().stream().findFirst().orElse(null)).getDlqName()).isEqualTo(queueName);
     }
 
 }
