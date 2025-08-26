@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-public class ExchangeWithDdlQueueTest extends QpidDockerBaseIT {
+public class DlqExchangeTest extends QpidDockerBaseIT {
 
     public static final String HOST_NAME = getDockerHost();
     private static final ClusterKeyGenerator.CaStores stores = generateStores(getTargetFolderPathForTestClass(no.vegvesen.ixn.federation.BiQpidStructureIT.class), "my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
@@ -40,29 +40,29 @@ public class ExchangeWithDdlQueueTest extends QpidDockerBaseIT {
     }
 
     @Test
-    public void testSettingDdlQueuetoExchange() throws Exception {
+    public void testSettingDlQueuetoExchange() throws Exception {
         String queueName = "dlqueue";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(), queueName, sslContext);
         source.start();
 
-        Exchange exchange = new Exchange("test-exchange", "direct", new AlternateBinding(queueName));
+        Exchange exchange = new Exchange("exchange-with-dlqueue", "direct", new AlternateBinding(queueName));
 
-        assertThat(exchange.getName()).isEqualTo("test-exchange");
+        assertThat(exchange.getName()).isEqualTo("exchange-with-dlqueue");
         assertThat(exchange.getAlternateBinding()).isNotNull();
         assertThat(exchange.getAlternateBinding().destination()).isEqualTo(queueName);
     }
 
     @Test
-    public void testExchangeWithoutDdlQueue() throws Exception {
+    public void testExchangeWithoutDlQueue() throws Exception {
         String queueName = "dlqueue";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(), queueName, sslContext);
         source.start();
 
-        Exchange exchange = new Exchange("test-exchange", "direct", null);
+        Exchange exchange = new Exchange("exchange-without-dlqueue", "direct", null);
 
-        assertThat(exchange.getName()).isEqualTo("test-exchange");
+        assertThat(exchange.getName()).isEqualTo("exchange-without-dlqueue");
         assertThat(exchange.getAlternateBinding()).isNull();
     }
 
