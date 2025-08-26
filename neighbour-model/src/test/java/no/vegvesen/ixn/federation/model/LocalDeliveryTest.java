@@ -2,8 +2,15 @@ package no.vegvesen.ixn.federation.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.HashSet;
+
+import static no.vegvesen.ixn.docker.DockerBaseIT.getDockerHost;
 import static org.assertj.core.api.Assertions.assertThat;
 public class LocalDeliveryTest {
+
+    public static final String HOST_NAME = getDockerHost();
+
 
     @Test
     public void hashCodeAndEquals() {
@@ -36,6 +43,22 @@ public class LocalDeliveryTest {
                 .isEqualTo(localDelivery2.hashCode())
                 .isEqualTo(localDelivery3.hashCode())
                 .isEqualTo(localDelivery4.hashCode());
+    }
+
+    @Test
+    public void TestLocalDeliveryWithDlqTest() {
+        String queueName = "dlqueue";
+        String selector = "originatingCountry = 'NO'";
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
+
+        LocalDelivery delivery = new LocalDelivery(
+                1,
+                new HashSet<>(Collections.singletonList(endpoint)),
+                selector,
+                LocalDeliveryStatus.CREATED,
+                queueName);
+
+        assertThat(delivery.getDlqName()).isEqualTo(queueName);
     }
 
 }
