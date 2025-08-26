@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 
 import static no.vegvesen.ixn.docker.DockerBaseIT.getDockerHost;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +16,7 @@ public class LocalDeliveryTest {
     @Test
     public void hashCodeAndEquals() {
         LocalDelivery localDelivery1 = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 "messageType = 'DENM'",
                 LocalDeliveryStatus.REQUESTED
         );
@@ -52,7 +53,7 @@ public class LocalDeliveryTest {
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
 
         LocalDelivery delivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
                 LocalDeliveryStatus.CREATED,

@@ -46,12 +46,11 @@ public class LocalDelivery {
     public LocalDelivery() {
     }
 
-    //TODO need to make this a bit better, as there can be a bit of confusion on the ID bit.
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status, String dlqName) {
-        this.id = id;
-        this.endpoints.addAll(endpoints);
+    public LocalDelivery(String uuid, HashSet<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus localDeliveryStatus, String dlqName) {
+        this.uuid = uuid;
+        this.endpoints = endpoints;
         this.selector = selector;
-        this.status = status;
+        this.status = localDeliveryStatus;
         this.dlqName = dlqName;
 
     }
@@ -63,8 +62,10 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery(Integer id, String selector, LocalDeliveryStatus status) {
-        this(id, Collections.emptySet(),selector,status, null);
+    public LocalDelivery(String uuid, String selector, LocalDeliveryStatus status) {
+        this.uuid = uuid;
+        this.selector = selector;
+        this.status = status;
     }
 
     public LocalDelivery(String selector, String description){

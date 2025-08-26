@@ -345,11 +345,11 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         String deliveryExchangeName = "del-" + UUID.randomUUID();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 new HashSet<>(Collections.singletonList(endpoint)),
                 deliverySelector,
-                LocalDeliveryStatus.CREATED,
-                null);
+                LocalDeliveryStatus.CREATED
+        );
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -384,11 +384,11 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         String deliveryExchangeName = "del-" + UUID.randomUUID();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 Set.of(endpoint),
                 deliverySelector,
-                LocalDeliveryStatus.NO_OVERLAP,
-                null);
+                LocalDeliveryStatus.NO_OVERLAP
+        );
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
