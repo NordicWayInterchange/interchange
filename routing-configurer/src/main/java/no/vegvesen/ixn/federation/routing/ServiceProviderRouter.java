@@ -499,25 +499,23 @@ public class ServiceProviderRouter {
         List<ServiceProvider> serviceProviders = repository.findAll();
         QpidDelta delta = qpidClient.getQpidDelta();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
-                if (localSubscription.isSubscriptionWanted() && !localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
-                    if (!localSubscription.getLocalEndpoints().isEmpty()) {
-                        List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                        for (Match match : matches) {
-                            if (match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                                for (Endpoint endpoint : match.getSubscription().getEndpoints()) {
-                                    if (endpoint.hasShard()) {
-                                        Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
-                                        if (exchange != null) {
-                                            for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                                Queue queue = delta.findByQueueName(queueName);
-                                                if (queue != null && !exchange.isBoundTo(queue.getName())) {
-                                                    String exchangeName = exchange.getName();
-                                                    logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-                                                    Binding binding = new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector()));
-                                                    qpidClient.addBinding(exchangeName, binding);
-                                                    exchange.addBinding(binding);
-                                                }
+            for (LocalSubscription localSubscription : serviceProvider.wantedNonRedirectSubscriptions()) {
+                if (!localSubscription.getLocalEndpoints().isEmpty()) {
+                    List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+                    for (Match match : matches) {
+                        if (match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
+                            for (Endpoint endpoint : match.getSubscription().getEndpoints()) {
+                                if (endpoint.hasShard()) {
+                                    Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
+                                    if (exchange != null) {
+                                        for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
+                                            Queue queue = delta.findByQueueName(queueName);
+                                            if (queue != null && !exchange.isBoundTo(queue.getName())) {
+                                                String exchangeName = exchange.getName();
+                                                logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
+                                                Binding binding = new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector()));
+                                                qpidClient.addBinding(exchangeName, binding);
+                                                exchange.addBinding(binding);
                                             }
                                         }
                                     }

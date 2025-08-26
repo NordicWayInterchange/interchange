@@ -281,6 +281,14 @@ public class ServiceProvider {
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
 	}
 
+    public Set<LocalSubscription> wantedNonRedirectSubscriptions() {
+        return getSubscriptions()
+                .stream()
+                .filter(LocalSubscription::isSubscriptionWanted)
+                .filter(l -> !l.getConsumerCommonName().equals(name))
+                .collect(Collectors.toSet());
+    }
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
