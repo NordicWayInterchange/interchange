@@ -45,7 +45,7 @@ public class CreateExchangeRequest {
         return "CreateExchangeRequest{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
-                ", alternateBinding=" + alternateBinding +
+                ", alternateBinding=" + (alternateBinding != null ? alternateBinding.destination() : "null") +
                 '}';
     }
 }
