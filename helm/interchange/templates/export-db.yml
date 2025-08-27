@@ -13,6 +13,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: export-db
+          image: "{{ .Values.export_service.image.repository}}:{{ .Values.export_service.image.tag }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_DATASOURCE_URL

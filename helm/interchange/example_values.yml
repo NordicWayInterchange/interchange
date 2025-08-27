@@ -102,3 +102,7 @@ napcore_server:
   logging:
   - logger_name: .root
     level: info
+export_service:
+  image:
+    repository: ghcr.io/nordicwayinterchange/import-export-service
+    tag: "c6b1cf8"
