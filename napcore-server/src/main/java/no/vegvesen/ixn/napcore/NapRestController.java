@@ -188,17 +188,21 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionId}"})
+    @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/subscriptions/{subscriptionIds}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Subscriptions")
-    @Operation(summary = "Delete subscription")
-    public void deleteSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionId") String subscriptionId) {
+    @Operation(summary = "Delete one or multiple subscriptions separated by comma")
+    public void deleteSubscription(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("subscriptionIds") String subscriptionIds) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
+        logger.info("Service Provider {}, DELETE one or multiple subscriptions {}", actorCommonName, subscriptionIds);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
-        serviceProviderToUpdate.removeLocalSubscription(subscriptionId);
+        List<String> uuidList = transformToUuidList(subscriptionIds);
+        if (uuidList.isEmpty()) {
+            throw new NothingToDeleteException("No subsctiptionIds supplied to delete");
+        }
+        serviceProviderToUpdate.removeOneOrMultipleLocalSubscriptions(uuidList);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
         logger.debug("Updated Service Provider: {}", saved);
@@ -643,6 +647,13 @@ public class NapRestController {
         if(!matcher.matches()){
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
+    }
+
+    private List<String> transformToUuidList(String uuids) {
+        return Arrays.stream(uuids.split(","))
+                .map(String::trim)
+                .filter(uuid-> !uuid.isEmpty())
+                .collect(Collectors.toList());
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {

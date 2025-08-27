@@ -11,10 +11,11 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +40,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Autowired
     NeighbourSubscriptionDeleteService service;
 
-    @MockBean
+    @MockitoBean
     NeighbourFacade mockNeighbourFacade;
 
     @Test
@@ -51,15 +52,14 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Test
     public void subscriptionIsDeleted() {
         String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName(neighbourName);
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        SubscriptionRequest subscriptionRequest = new SubscriptionRequest(subscriptions);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptionRequest);
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);
@@ -71,15 +71,14 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Test
     public void subscriptionDeleteWithSubscriptionNotFound() {
         String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName(neighbourName);
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        SubscriptionRequest subscriptionRequest = new SubscriptionRequest(subscriptions);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptionRequest);
         neighbourRepository.save(neighbour);
 
         doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
@@ -92,15 +91,11 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     @Test
     public void subscriptionDeleteWithSubscriptionGoneWrong() {
         String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName(neighbourName);
 
-        Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(
+                new HashSet<>(List.of(new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN)))
+        ));
 
-        Set<Subscription> subscriptions = new HashSet<>();
-        subscriptions.add(ourSubscription);
-
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         doThrow(new SubscriptionDeleteException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
@@ -111,14 +106,9 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
 
     @Test
     public void subscriptionIsNotDeletedBeforeSubscriptionShardIsRemoved() {
-        String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName(neighbourName);
-
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
 
-        Endpoint endpoint = new Endpoint("my-source", "my-host", 5671);
-        endpoint.setShard(new SubscriptionShard("my-exchange"));
+        Endpoint endpoint = new Endpoint("my-source", "my-host", 5671,new SubscriptionShard("my-exchange"));
 
         Set<Endpoint> endpoints = new HashSet<>();
         endpoints.add(endpoint);
@@ -127,7 +117,9 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
+        String neighbourName = "my-neighbour";
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(subscriptions));
+
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);
@@ -137,16 +129,12 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
 
     @Test
     public void subscriptionIsDeletedAfterSubscriptionShardIsRemoved() {
-        String neighbourName = "my-neighbour";
-        Neighbour neighbour = new Neighbour();
-        neighbour.setName(neighbourName);
-
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
-
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
+        String neighbourName = "my-neighbour";
+        Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(subscriptions));
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);

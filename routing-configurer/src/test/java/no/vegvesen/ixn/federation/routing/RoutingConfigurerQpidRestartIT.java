@@ -22,17 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -89,28 +83,29 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
         qpidContainer.start();
     }
 
-    @MockBean
+    @MockitoBean
     NeighbourService neighbourService;
 
     @Autowired
     RoutingConfigurer routingConfigurer;
 
-    @MockBean
+    @MockitoBean
     ListenerEndpointRepository listenerEndpointRepository;
 
     @Autowired
     QpidClient client;
 
-    @MockBean
+    @MockitoBean
     ServiceProviderRouter serviceProviderRouter;
 
-    @MockBean
+    @MockitoBean
     InterchangeNodeProperties properties;
 
     @Test
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID();
 
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO12345",
@@ -120,10 +115,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
-        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -153,6 +147,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRedirectNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID();
 
+        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 new DenmApplication(
                         "NO2345",
@@ -162,10 +157,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                         List.of("0123"),
                         List.of(5)
                 ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(shard)
         );
-        CapabilityShard shard = new CapabilityShard(1, exchangeName, "publicationId = 'pub-1'");
-        capability.setShards(Collections.singletonList(shard));
         client.createHeadersExchange(exchangeName);
 
         ServiceProvider serviceProvider = new ServiceProvider(

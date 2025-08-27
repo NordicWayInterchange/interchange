@@ -18,12 +18,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDateTime;
@@ -41,13 +41,13 @@ public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private ServiceProviderRepository serviceProviderRepository;
 
-	@MockBean
+	@MockitoBean
 	private NeighbourRepository neighbourRepository;
 
-	@MockBean
+	@MockitoBean
 	private PrivateChannelRepository privateChannelRepository;
 
 	@Autowired
@@ -125,8 +125,10 @@ public class OnboardRestControllerTest {
 		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(capabilities);
 
-		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		ServiceProvider secondServiceProvider = new ServiceProvider(
+				serviceProviderName,
+				secondServiceProviderCapabilities
+		);
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -253,9 +255,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
 		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.updateSubscriptions(new ArrayList<>(Arrays.asList(seSubs,fiSubs)));
+		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName, Set.of(seSubs,fiSubs));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self

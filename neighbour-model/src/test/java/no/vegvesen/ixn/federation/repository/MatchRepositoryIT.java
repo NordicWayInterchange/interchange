@@ -45,8 +45,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void saveNeighbourAndServiceProviderBeforeSavingMatch() {
-        ServiceProvider sp = new ServiceProvider("my-sp");
-        sp.addLocalSubscription(locSub);
+        ServiceProvider sp = new ServiceProvider("my-sp",Set.of(locSub));
 
         serviceProviderRepository.save(sp);
 
@@ -64,8 +63,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void deletingMatchFromDatabase() {
-        ServiceProvider sp = new ServiceProvider("my-sp");
-        sp.addLocalSubscription(locSub);
+        ServiceProvider sp = new ServiceProvider("my-sp",Set.of(locSub));
 
         serviceProviderRepository.save(sp);
 
@@ -94,8 +92,7 @@ public class MatchRepositoryIT extends PostgresContainerBase {
 
     @Test
     public void deleteSubscriptionAndLocalSubscriptionBeforeDeletingMatch() {
-        ServiceProvider sp = new ServiceProvider("my-sp");
-        sp.addLocalSubscription(locSub);
+        ServiceProvider sp = new ServiceProvider("my-sp",Set.of(locSub));
 
         serviceProviderRepository.save(sp);
 

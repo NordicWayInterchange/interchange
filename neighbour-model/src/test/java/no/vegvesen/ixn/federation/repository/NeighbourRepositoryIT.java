@@ -47,8 +47,7 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 
 		Set<Subscription> inbound = new HashSet<>();
 		inbound.add(new Subscription("inbound is true", SubscriptionStatus.CREATED, ""));
-		SubscriptionRequest inSubReq = new SubscriptionRequest();
-		inSubReq.setSubscriptions(inbound);
+		SubscriptionRequest inSubReq = new SubscriptionRequest(inbound);
 
 		Neighbour inOutIxn = new Neighbour("in-out-interchange", new NeighbourCapabilities(), outSubReq, inSubReq);
 		Neighbour savedInOut = repository.save(inOutIxn);
@@ -171,8 +170,7 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 
 	@Test
 	public void controlConnectionStatusCanBeQueried() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("some-neighbour2");
+		Neighbour neighbour = new Neighbour("some-neighbour2", null, null, null);
 		neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
@@ -182,8 +180,6 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 
 	@Test
 	public void selectorOutOfSizeScope() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("some-neighbour3");
 		String selector = "publisherName = 'Some Norwegian publisher' " +
 				"AND (quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND protocolVersion = 'DATEX2:2.3' " +
@@ -197,7 +193,8 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, "");
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
-		neighbour.setOurRequestedSubscriptions(subscriptionRequest);
+		Neighbour neighbour = new Neighbour("some-neighbour3", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(),subscriptionRequest);
+
 
 		repository.save(neighbour);
 	}

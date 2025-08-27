@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
@@ -39,8 +37,7 @@ public class ServiceProvider {
 	public ServiceProvider() {
 	}
 
-	@JsonCreator
-	public ServiceProvider(@JsonProperty("name") String name) {
+	public ServiceProvider(String name) {
 		this.name = name;
 	}
 
@@ -48,6 +45,12 @@ public class ServiceProvider {
 						   Set<LocalSubscription> subscriptions) {
 		this.name = name;
 		this.subscriptions.addAll(subscriptions);
+	}
+
+	public ServiceProvider(String name,
+						   Capabilities capabilities) {
+		this.name = name;
+		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(Integer id,
@@ -71,12 +74,6 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = subscriptionUpdated;
-	}
-
-	public ServiceProvider(String name,
-						   Capabilities capabilities) {
-		this.name = name;
-		this.capabilities = capabilities;
 	}
 
 	public ServiceProvider(String name,
@@ -131,6 +128,7 @@ public class ServiceProvider {
 
 	public void setSubscriptions(List<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
+		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	public Optional<LocalDateTime> getSubscriptionUpdated() {
@@ -161,8 +159,18 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptions(List<LocalSubscription> newSubscriptions) {
-		this.setSubscriptions(newSubscriptions);
+	public void removeOneOrMultipleLocalSubscriptions(List<String> subscriptionUuidList){
+		subscriptionUuidList.forEach(uuid -> {
+					LocalSubscription subscriptionToDelete = subscriptions
+							.stream()
+							.filter(subscription -> subscription.getUuid().equals(uuid))
+							.findFirst()
+							.orElseThrow(
+									() -> new NotFoundException("The subscription to delete with Uuid '" + uuid + "' is not in the Service Provider subscriptions. Cannot delete subscription that doesn't exist.")
+							);
+					subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+				});
+
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
@@ -248,13 +256,6 @@ public class ServiceProvider {
 				.filter(c->c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
-	}
-
-	public List<LocalSubscription> getSavedSubscriptions(List<LocalSubscription> allSubscriptions){
-		return this.getSubscriptions()
-				.stream()
-				.filter(allSubscriptions::contains)
-				.collect(Collectors.toList());
 	}
 
 	public LocalSubscription getSubscription(String subscriptionId){

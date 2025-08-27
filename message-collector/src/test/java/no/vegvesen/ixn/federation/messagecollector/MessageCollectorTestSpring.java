@@ -7,8 +7,8 @@ import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import javax.net.ssl.SSLContext;
 
@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableScheduling //Enable scheduling to verify scheduling parameters annotated with ${...}
 class MessageCollectorTestSpring {
 
-	@MockBean
+	@MockitoBean
 	SSLContext sslContext;
 
-	@MockBean
+	@MockitoBean
 	ListenerEndpointRepository listenerEndpointRepository;
 
-	@MockBean
+	@MockitoBean
 	MatchDiscoveryService matchDiscoveryService;
 
 	@Autowired

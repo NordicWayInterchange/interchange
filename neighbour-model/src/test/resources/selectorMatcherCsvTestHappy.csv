@@ -32,3 +32,5 @@
 "{""originatingCountry"": ""NO"", ""quadTree"":[""0121""]}","originatingCountry = 'NO' AND quadTree NOT LIKE '%,0121%,' AND NOT quadTree LIKE '%,0122%,'",0,quad tree true and false and true
 "{""originatingCountry"": ""NO"", ""quadTree"":[""0121""]}","originatingCountry = 'NO' AND NOT quadTree LIKE '%,0121%,' AND quadTree NOT LIKE '%,0122%,'",0,quad tree true and false and true
 "{""originatingCountry"": ""NO"", ""quadTree"":[""0121""]}","originatingCountry = 'NO' AND NOT quadTree LIKE '%,0121%,' AND NOT quadTree LIKE '%,0122%,'",0,quad tree true and false and true
+"{""originatingCountry"": ""NO"", ""quadTree"":[""0121""]}","originatingCountry = 'NO' AND NOT quadTree LIKE '%,0122%,' AND NOT quadTree LIKE '%,0121%,'",0,Quad tree true and true and false
+"{""originatingCountry"": ""NO"", ""quadTree"":[""0121""]}","originatingCountry = 'NO' AND NOT (quadTree LIKE '%,0122%,') AND NOT (quadTree LIKE '%,0121%,')",0,quad tree true and false and true

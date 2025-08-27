@@ -62,6 +62,11 @@ public class NapServerErrorAdvice {
         return notValidCapabilityError(e, e.getErrors());
     }
 
+    @ExceptionHandler({NothingToDeleteException.class})
+    public ResponseEntity<ErrorDetails> handleNoDeliveryToDeleteException(NothingToDeleteException e) {
+        return error(BAD_REQUEST,e);
+    }
+
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
         return error(NOT_FOUND, e);

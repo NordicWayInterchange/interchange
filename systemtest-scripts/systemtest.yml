@@ -252,7 +252,7 @@ services:
     - testing_net
 
   b_db:
-    image: postgres:9.6
+    image: postgres:15.1
     container_name: b_db
     depends_on:
     - mock-dns-server
