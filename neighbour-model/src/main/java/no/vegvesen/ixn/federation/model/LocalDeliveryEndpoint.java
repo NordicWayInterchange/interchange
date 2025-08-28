@@ -90,10 +90,6 @@ public class LocalDeliveryEndpoint {
         return !target.isEmpty();
     }
 
-    public boolean dlqNameExists() {
-        return !dlqName.isEmpty();
-    }
-
     public String getDlqName() {
         return dlqName;
     }

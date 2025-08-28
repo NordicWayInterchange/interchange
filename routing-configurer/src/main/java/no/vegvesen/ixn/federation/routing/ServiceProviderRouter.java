@@ -489,7 +489,7 @@ public class ServiceProviderRouter {
                                 }
                                 endpointsToRemove.add(endpoint);
                             }
-                            if (endpoint.dlqNameExists()) {
+                            if (endpoint.getDlqName() != null) {
                                 String dlqName = endpoint.getDlqName();
                                 Exchange dlqExchange = delta.findByExchangeName(dlqName);
                                 if (dlqExchange != null) {
