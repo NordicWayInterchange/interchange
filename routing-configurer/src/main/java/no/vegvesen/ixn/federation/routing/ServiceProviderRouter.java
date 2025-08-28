@@ -481,23 +481,24 @@ public class ServiceProviderRouter {
                             if (endpoint.targetExists()) {
                                 String target = endpoint.getTarget();
                                 Exchange exchange = delta.findByExchangeName(target);
-                                if (endpoint.dlqNameExists()) {
-                                    String dlqName = endpoint.getDlqName();
-                                    Exchange dlqExchange = delta.findByExchangeName(dlqName);
-                                    if (exchange != null) {
-                                        logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-                                        qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                                        qpidClient.removeExchange(exchange);
-                                        delta.removeExchange(exchange);
-                                    }
-                                    if (dlqExchange != null) {
-                                        logger.info("Removing endpoint with dlQueue with name {} for service provider {}", dlqName, serviceProvider.getName());
-                                        qpidClient.removeWriteAccess(serviceProvider.getName(), dlqName);
-                                        qpidClient.removeExchange(dlqExchange);
-                                        delta.removeExchange(dlqExchange);
-                                    }
-                                    endpointsToRemove.add(endpoint);
+                                if (exchange != null) {
+                                    logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                                    qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                                    qpidClient.removeExchange(exchange);
+                                    delta.removeExchange(exchange);
                                 }
+                                endpointsToRemove.add(endpoint);
+                            }
+                            if (endpoint.dlqNameExists()) {
+                                String dlqName = endpoint.getDlqName();
+                                Exchange dlqExchange = delta.findByExchangeName(dlqName);
+                                if (dlqExchange != null) {
+                                    logger.info("Removing endpoint with dlQueue with name {} for service provider {}", dlqName, serviceProvider.getName());
+                                    qpidClient.removeWriteAccess(serviceProvider.getName(), dlqName);
+                                    qpidClient.removeExchange(dlqExchange);
+                                    delta.removeExchange(dlqExchange);
+                                }
+                                endpointsToRemove.add(endpoint);
                             }
                         }
                         delivery.removeAllEndpoints(endpointsToRemove);
