@@ -224,9 +224,9 @@ public class RoutingConfigurer {
 				if (member == null) {
 					logger.debug("remote service provider '{}' did not exist in group", subscriberName);
 					 qpidClient.addRemoteServiceProvicerMemberToGroup(subscriberName);
-					logger.debug("Added remote service provider '{}' to group", subscriberName);
+					logger.info("Added remote service provider '{}' to group", subscriberName);
 				} else {
-					logger.warn("Remote service provider '{}' already exists in the group", subscriberName);
+					logger.debug("Remote service provider '{}' already exists in the group", subscriberName);
 				}
 
 				for (Capability capability : matchingCaps) {
@@ -243,7 +243,7 @@ public class RoutingConfigurer {
 				subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
-				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
+				logger.debug("Subscription {} does not match any Service Provider Capability", subscription);
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 		}
@@ -266,14 +266,14 @@ public class RoutingConfigurer {
 											new SubscriptionShard(exchangeName)
 									);
 									qpidClient.createHeadersExchange(exchangeName);
-									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+									logger.info("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName(), endpoint.getDynamicFilter());
 								}
 								else{
 									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
 									if(exchange == null){
 										qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
-										logger.debug("Set up exchange for subscription with id {}", subscription.getId());
+										logger.info("Set up exchange for subscription with id {}", subscription.getId());
 									}
 								}
 							}
@@ -288,7 +288,7 @@ public class RoutingConfigurer {
 	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName, String dynamicFilter) {
 		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
 			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName, dynamicFilter));
-			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint);
+			logger.info("ListenerEndpoint was created: {}", savedListenerEndpoint);
 		}
 	}
 
@@ -312,7 +312,7 @@ public class RoutingConfigurer {
 								Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
 								if (exchange != null) {
 									qpidClient.removeExchange(exchange);
-									logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+									logger.info("Removed exchange for subscription with id {}", subscription.getId());
 								}
 								endpoint.removeShard();
 							}
@@ -334,7 +334,7 @@ public class RoutingConfigurer {
 									Exchange exchange = qpidClient.getExchange(shard.getExchangeName());
 									if (exchange != null) {
 										qpidClient.removeExchange(exchange);
-										logger.debug("Removed exchange for subscription with id {}", subscription.getId());
+										logger.info("Removed exchange for subscription with id {}", subscription.getId());
 									}
 									endpoint.removeShard();
 								}
@@ -359,6 +359,7 @@ public class RoutingConfigurer {
 		if (queue == null) {
 			queue = qpidClient.createQueue(queueName);
 			qpidClient.addReadAccess(subscriberName, queueName);
+            logger.info("Created queue {} for user {}", queueName, subscriberName);
 			delta.addQueue(queue);
 		}
 	}

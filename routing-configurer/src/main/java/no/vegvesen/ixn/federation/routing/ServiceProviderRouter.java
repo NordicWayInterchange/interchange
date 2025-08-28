@@ -416,7 +416,17 @@ public class ServiceProviderRouter {
                         String exchangeName = endpoint.getTarget();
                         Exchange exchange = delta.findByExchangeName(exchangeName);
                         if (exchange == null) {
-                            exchange = qpidClient.createDirectExchange(exchangeName);
+                            if (endpoint.getDlqName() != null) {
+                                Queue queue = qpidClient.getQueue(endpoint.getDlqName());
+                                if (queue == null) {
+                                    Queue createdDlq = qpidClient.createQueue(endpoint.getDlqName());
+                                    qpidClient.addReadAccess(serviceProvider.getName(),createdDlq.getName());
+                                    delta.addQueue(createdDlq);
+                                }
+                                exchange = qpidClient.createDirectExchangeWithDlq(exchangeName, endpoint.getDlqName());
+                            } else {
+                                exchange = qpidClient.createDirectExchange(exchangeName);
+                            }
                             qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
                             delta.addExchange(exchange);
                         }
@@ -429,8 +439,6 @@ public class ServiceProviderRouter {
                                 Exchange endpointExchange = delta.findByExchangeName(endpoint.getTarget());
                                 Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
 
-                                Exchange dlqExchange  = delta.findByExchangeName(endpoint.getDlqName());
-                                String dlqName  = endpoint.getDlqName();
                                 //NOTE, there's not much chance of the endpointExchange not existing, since it most likely
                                 // is created in the previous loop if it didn't already exist
                                 if (endpointExchange != null) {
@@ -442,15 +450,6 @@ public class ServiceProviderRouter {
                                                 qpidClient.addBinding(endpointExchange.getName(), binding);
                                                 endpointExchange.addBinding(binding);
                                                 logger.info("Added binding from {} to {}", endpointExchange.getName(), shardExchange.getName());
-                                                if (dlqExchange != null) {
-                                                    if (!dlqExchange.isBoundTo(dlqName)) {
-                                                        qpidClient.addBinding(dlqName, binding);
-                                                        dlqExchange.addBinding(binding);
-                                                        logger.info("Added binding from {} to {}", dlqExchange.getName(), dlqName);
-                                                    }
-                                                } else {
-                                                    logger.info("No dlqExchange found in qpid with name {}", dlqName);
-                                                }
                                             }
                                         }
                                     } else {
