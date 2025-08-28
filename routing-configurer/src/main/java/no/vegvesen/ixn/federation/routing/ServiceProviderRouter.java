@@ -435,18 +435,24 @@ public class ServiceProviderRouter {
                                 // is created in the previous loop if it didn't already exist
                                 if (endpointExchange != null) {
                                     if (shardExchange != null) {
-                                        if(dlqExchange != null) {
                                             if (!endpointExchange.isBoundTo(shardExchange.getName()) || !dlqExchange.isBoundTo(dlqName)) {
                                                 if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), delivery.getSelector())) {
                                                     String joinedSelector = joinTwoSelectors(shard.getSelector(), delivery.getSelector());
                                                     Binding binding = new Binding(endpointExchange.getName(), shardExchange.getName(), new Filter(joinedSelector));
                                                     qpidClient.addBinding(endpointExchange.getName(), binding);
-                                                    qpidClient.addBinding(dlqName, binding);
                                                     endpointExchange.addBinding(binding);
                                                     logger.info("Added binding from {} to {}", endpointExchange.getName(), shardExchange.getName());
+                                                    if (dlqExchange != null) {
+                                                        if (!dlqExchange.isBoundTo(dlqName)) {
+                                                            qpidClient.addBinding(dlqName, binding);
+                                                            dlqExchange.addBinding(binding);
+                                                            logger.info("Added binding from {} to {}", dlqExchange.getName(), dlqName);
+                                                        }
+                                                    } else {
+                                                        logger.info("No dlqExchange found in qpid with name {}",dlqName);
+                                                    }
                                                 }
                                             }
-                                        }
                                     } else {
                                         logger.info("No shard exchange found in qpid with name {}",shard.getExchangeName());
                                     }
