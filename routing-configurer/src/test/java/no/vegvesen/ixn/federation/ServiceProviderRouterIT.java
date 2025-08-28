@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -783,6 +784,59 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
 		assertThat(deliveryExchange).isNotNull();
 		assertThat(deliveryExchange.getBindings()).hasSize(1);
+	}
+
+	@Test
+	public void createDlQueueAndConnectForServiceProvider() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String queueName = "dlq-" + UUID.randomUUID();
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("cap-ex1");
+
+		String deliveryExchangeName = "my-exchange5";
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				"target",
+				2,
+				3,
+				queueName));
+
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		verify(serviceProviderRepository, times(1)).save(any());
+
+		QpidDelta delta = client.getQpidDelta();
+		String dlqName = Objects.requireNonNull(delivery.getEndpoints().stream().findFirst().orElse(null)).getDlqName();
+		Assertions.assertThat(dlqName).isEqualTo(queueName);
+
+
+		Exchange deliveryExchange = delta.findByExchangeName("target");
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(1);
+
+		assertThat(client.getQueue(queueName)).isNotNull();
 	}
 
 	@Test
