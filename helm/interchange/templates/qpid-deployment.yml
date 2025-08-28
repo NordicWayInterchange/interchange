@@ -56,6 +56,10 @@ spec:
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
+        - name: INTERNAL_KEY_STORE
+          value: {{ .Values.self.secret_mount_path }}{{ .Values.qpid.internal_key_store_name }}
+        - name: INTERNAL_KEY_STORE_PASSWORD
+          value: {{ .Values.qpid.internal_key_store_password | quote }}
         {{- if .Values.qpid.java_mem }}
         - name: QPID_JAVA_MEM
           value: {{ .Values.qpid.java_mem }}
