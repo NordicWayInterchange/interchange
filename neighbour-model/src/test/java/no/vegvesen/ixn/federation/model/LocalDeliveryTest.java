@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 public class LocalDeliveryTest {
@@ -46,6 +43,7 @@ public class LocalDeliveryTest {
     @Test
     public void TestLocalDeliveryWithDlqTest() {
         String queueName = "dlqueue";
+        String secondQueueName = "second_dlqueue";
         String selector = "originatingCountry = 'NO'";
 
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(
@@ -58,14 +56,24 @@ public class LocalDeliveryTest {
                 queueName
         );
 
+        LocalDeliveryEndpoint secondEndpoint = new LocalDeliveryEndpoint(
+                1,
+                "host",
+                456,
+                "target",
+                2,
+                3,
+                secondQueueName
+        );
+
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
-                new HashSet<>(Collections.singletonList(endpoint)),
+                new HashSet<>(Set.of(endpoint, secondEndpoint)),
                 selector,
                 LocalDeliveryStatus.CREATED);
 
-        System.out.println(delivery);
         assertThat(Objects.requireNonNull(delivery.getEndpoints().stream().findFirst().orElse(null)).getDlqName()).isEqualTo(queueName);
+        assertThat(Objects.requireNonNull(delivery.getEndpoints().stream().skip(1).findFirst().orElse(null)).getDlqName()).isEqualTo(secondQueueName);
     }
 
 }
