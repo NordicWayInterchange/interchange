@@ -126,7 +126,8 @@ public class NapCoreAPIDocumentationTest {
                 "serviceProvider",
                 "originatingCountry='NO'",
                 1,
-                5
+                5,
+                null
         )), 93124429L, "NO delivery");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
     }
@@ -140,7 +141,8 @@ public class NapCoreAPIDocumentationTest {
                 "serviceProvider",
                 "originatingCountry='NO'",
                 1,
-                5
+                5,
+                null
         )), 93124429L, "NO delivery"));
         deliveries.add(new Delivery(UUID.randomUUID().toString(), "messageType='DATEX'", DeliveryStatus.REQUESTED, List.of(new DeliveryEndpoint(
                 "a.bouvetinterchange.eu",
@@ -148,7 +150,8 @@ public class NapCoreAPIDocumentationTest {
                 "serviceProvider",
                 "messageType='DATEX'",
                 1,
-                5
+                5,
+                null
         )), 93124469L, "DATEX delivery"));
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deliveries));
     }

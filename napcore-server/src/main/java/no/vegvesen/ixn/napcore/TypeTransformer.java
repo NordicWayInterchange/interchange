@@ -88,7 +88,7 @@ public class TypeTransformer {
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
         List<DeliveryEndpoint> endpoints = new ArrayList<>();
         for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
-            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate()));
+            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate(), endpoint.getDlqName()));
         }
         return endpoints;
     }
