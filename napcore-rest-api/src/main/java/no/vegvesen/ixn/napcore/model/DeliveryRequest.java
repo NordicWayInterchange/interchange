@@ -6,7 +6,7 @@ public class DeliveryRequest {
 
     String description;
 
-    String dlqueue;
+    Boolean dlqueue;
 
     public DeliveryRequest() {
     }
@@ -36,11 +36,11 @@ public class DeliveryRequest {
         this.description = description;
     }
 
-    public String getDlqueue() {
+    public boolean isDlqueue() {
         return dlqueue;
     }
 
-    public void setDlqueue(String dlqueue) {
+    public void setDlqueue(boolean dlqueue) {
         this.dlqueue = dlqueue;
     }
 

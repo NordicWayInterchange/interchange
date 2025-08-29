@@ -40,6 +40,9 @@ public class LocalDelivery {
     @Column
     private String errorMessage;
 
+    @Column
+    private Boolean dlqueue;
+
     public LocalDelivery() {
     }
 
@@ -72,6 +75,12 @@ public class LocalDelivery {
         this.selector = selector;
         this.status = status;
         this.description = description;
+    }
+
+    public LocalDelivery(String selector, String description, Boolean dlqueue) {
+        this.selector = selector;
+        this.description = description;
+        this.dlqueue = dlqueue;
     }
 
     public Integer getId() {
@@ -154,6 +163,14 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
+    public boolean isDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -178,6 +195,7 @@ public class LocalDelivery {
                 ", status=" + status +
                 ", description='" + description + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
+                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

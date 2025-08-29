@@ -50,7 +50,7 @@ public class TypeTransformer {
     }
 
     public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector(), delivery.getDescription());
+        return new LocalDelivery(delivery.getSelector(), delivery.getDescription(), delivery.isDlqueue());
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
