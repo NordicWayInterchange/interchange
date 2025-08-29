@@ -6,7 +6,7 @@ public class DeliveryRequest {
 
     String description;
 
-    Boolean dlqueue;
+    boolean dlqueue;
 
     public DeliveryRequest() {
     }
