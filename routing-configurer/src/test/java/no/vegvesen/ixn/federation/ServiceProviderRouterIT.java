@@ -985,7 +985,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String exchangeName = "dlq-exchange";
 		String dlqName = "dlq-name";
 
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex40", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -998,7 +998,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL),
 				Collections.singletonList(shard)
 		);
-		client.createHeadersExchange("cap-ex4");
+		client.createHeadersExchange("cap-ex40");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
@@ -1080,10 +1080,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void tearDownDlqNameAndTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-		String exchangeName = "dlq-exchange";
+		String exchangeName = "dlq1-exchange";
 		String dlqName = "dlq-name";
 
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex50", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -1096,7 +1096,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL),
 				Collections.singletonList(shard)
 		);
-		client.createHeadersExchange("cap-ex5");
+		client.createHeadersExchange("cap-ex50");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
