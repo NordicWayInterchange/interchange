@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
@@ -791,7 +792,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String queueName = "dlq-" + UUID.randomUUID();
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
+		CapabilityShard shard = new CapabilityShard(1, "dlq-ex1", "publicationId = 'pub-1'");
 		Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -804,9 +805,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL),
 				Collections.singletonList(shard)
 		);
-		client.createHeadersExchange("cap-ex1");
+		client.createHeadersExchange("dlq-ex1");
 
-		String deliveryExchangeName = "my-exchange5";
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
 				1,
@@ -976,6 +976,59 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(delivery.getEndpoints()).isEmpty();
 	}
+
+
+	@Test
+	public void tearDownDlqForDeliveryByDeletedDelivery() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String exchangeName = "dlq-exchange";
+		String dlqName = "dlq-name";
+
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("cap-ex4");
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				"target",
+				2,
+				3,
+				dlqName));
+
+		serviceProvider.addDeliveries(Set.of(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+
+		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+
+		assertThat(client.queueExists(dlqName)).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(delivery.getEndpoints()).isEmpty();
+	}
+
 
 	@Test
 	public void tearDownTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
