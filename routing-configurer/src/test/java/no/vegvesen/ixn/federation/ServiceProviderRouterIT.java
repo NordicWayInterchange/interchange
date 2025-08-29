@@ -1005,7 +1005,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				"host",
 				123,
-				"target",
+				exchangeName,
 				2,
 				3,
 				dlqName));
@@ -1071,6 +1071,62 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		assertThat(delivery.getEndpoints()).isEmpty();
+		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+	}
+
+
+
+	@Test
+	public void tearDownDlqNameAndTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String exchangeName = "dlq-exchange";
+		String dlqName = "dlq-name";
+
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex5", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("cap-ex5");
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				exchangeName,
+				2,
+				3,
+				dlqName));
+
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		assertThat(client.exchangeExists(delivery.getEndpoints().stream().findFirst().get().getTarget())).isTrue();
+		assertThat(client.queueExists(delivery.getEndpoints().stream().findFirst().get().getDlqName())).isTrue();
+
+		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
+
+		assertThat(delivery.getEndpoints()).isEmpty();
+		assertThat(client.queueExists(dlqName)).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
 	}
 
