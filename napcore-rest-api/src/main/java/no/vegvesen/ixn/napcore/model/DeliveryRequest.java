@@ -6,6 +6,8 @@ public class DeliveryRequest {
 
     String description;
 
+    String dlqueue;
+
     public DeliveryRequest() {
     }
 
@@ -34,11 +36,20 @@ public class DeliveryRequest {
         this.description = description;
     }
 
+    public String getDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(String dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public String toString(){
         return "DeliveryRequest{" +
                 "selector='" + selector + '\'' +
                 ", description=" + description +
+                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

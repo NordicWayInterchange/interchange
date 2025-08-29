@@ -105,6 +105,15 @@ public class ServiceProviderService {
                                     host, port, target
                             ));
                         }
+                        for (LocalDeliveryEndpoint localDeliveryEndpoint : delivery.getEndpoints()) {
+                            String dlqName = localDeliveryEndpoint.getDlqName();
+                            if (dlqName != null && !dlqName.isEmpty()) {
+                                String target = "dlq-" + UUID.randomUUID();
+                                delivery.addEndpoint(new LocalDeliveryEndpoint(
+                                        null, host, port, target, null, null, dlqName
+                                ));
+                            }
+                        }
                         delivery.setStatus(LocalDeliveryStatus.CREATED);
                         logger.info("Delivery with id {} is set to status CREATED", delivery.getId());
                     }
