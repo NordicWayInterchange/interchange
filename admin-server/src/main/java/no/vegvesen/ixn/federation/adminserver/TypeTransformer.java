@@ -218,7 +218,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     endpoint.getMaxBandwidth(),
-                    endpoint.getMaxMessageRate()
+                    endpoint.getMaxMessageRate(),
+                    endpoint.getDlqName()
             ));
         }
         return deliveryEndpointApiSet;

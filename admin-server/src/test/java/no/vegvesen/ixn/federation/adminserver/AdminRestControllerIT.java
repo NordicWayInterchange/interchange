@@ -350,10 +350,10 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         assertThat(response1).hasSize(2);
     }
 
-    @Test void testGetLocalDeliveryEndpoints() {
+    @Test void testGetLocalDeliveryEndpointsWithDlqueueName() {
         String adminUser = "adminUser";
         String serviceProviderName = "sp1";
-
+        String queueName = "dl-queue";
         LocalDelivery aDelivery = new LocalDelivery();
 
         ServiceProvider aServiceProvider = new ServiceProvider(
@@ -366,9 +366,17 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         serviceProviderRepository.save(aServiceProvider);
 
-        LocalDeliveryEndpointApi localDeliveryEndpointApi = new LocalDeliveryEndpointApi(HOST_NAME, 5671, "exchange");
+        LocalDeliveryEndpointApi localDeliveryEndpointApi = new LocalDeliveryEndpointApi(
+                HOST_NAME,
+                5671,
+                "target",
+                2,
+                3,
+                queueName);
         List<LocalDeliveryEndpointAdminApi> result = Collections.singletonList(new LocalDeliveryEndpointAdminApi(localDeliveryEndpointApi, true));
         when(qpidService.getLocalDeliveryEndpointApiList(aDelivery)).thenReturn(result);
+
+        assertThat(result.getFirst().localDeliveryEndpointApi().getDlqName()).isEqualTo(queueName);
 
         assertThat(
                 restController
