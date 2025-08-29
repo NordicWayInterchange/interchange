@@ -46,6 +46,10 @@ public class LocalDeliveryEndpoint {
         this(null,host,port,target, null,null, null);
     }
 
+    public LocalDeliveryEndpoint(String host, int port, String target, String dlqName) {
+        this(null,host,port,target, null,null, dlqName);
+    }
+
     public String getHost() {
         return host;
     }

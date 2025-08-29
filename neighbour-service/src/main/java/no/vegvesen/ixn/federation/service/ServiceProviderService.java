@@ -101,19 +101,16 @@ public class ServiceProviderService {
                     } else {
                         if (delivery.getEndpoints().isEmpty()) {
                             String target = "del-" + UUID.randomUUID();
-                            delivery.addEndpoint(new LocalDeliveryEndpoint(
-                                    host, port, target
-                            ));
-                        }
-                        if (delivery.isDlqueue()) {
-                            for (LocalDeliveryEndpoint localDeliveryEndpoint : delivery.getEndpoints()) {
-                                String dlqName = localDeliveryEndpoint.getDlqName();
-                                if (dlqName != null && !dlqName.isEmpty()) {
-                                    String target = "dlq-" + UUID.randomUUID();
-                                    delivery.addEndpoint(new LocalDeliveryEndpoint(
-                                            null, host, port, target, null, null, dlqName
-                                    ));
-                                }
+                            if (!delivery.isDlqueue()) {
+                                delivery.addEndpoint(new LocalDeliveryEndpoint(
+                                        host, port, target
+                                ));
+                            }
+                            if (delivery.isDlqueue()) {
+                                String dlqName = "dlq-" + UUID.randomUUID();
+                                delivery.addEndpoint(new LocalDeliveryEndpoint(
+                                        host, port, target, dlqName
+                                ));
                             }
                         }
                         delivery.setStatus(LocalDeliveryStatus.CREATED);

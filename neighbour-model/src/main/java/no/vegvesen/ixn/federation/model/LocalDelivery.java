@@ -41,7 +41,7 @@ public class LocalDelivery {
     private String errorMessage;
 
     @Column
-    private boolean dlqueue;
+    private Boolean dlqueue = false;
 
     public LocalDelivery() {
     }
