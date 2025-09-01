@@ -22,7 +22,7 @@ public class WriteToFileMessageListener implements MessageListener {
     public WriteToFileMessageListener(String directoryName) {
         this.directory = new File(directoryName);
         if(!directory.exists()){
-            directory.mkdir();
+            throw new RuntimeException("Directory does not exist: " + directoryName);
         }
     }
 
@@ -34,7 +34,6 @@ public class WriteToFileMessageListener implements MessageListener {
             System.out.println("** Message received **");
             Map<String, Object> metadataContent = createMetadataContentMap(message);
 
-            //TODO: Vurder endring.
             messages += 1;
             File messageFile = new File(directory, "file-"+messages);
             File metadataFile = new File(directory, "file-"+messages+"-metadata.txt");
@@ -58,7 +57,7 @@ public class WriteToFileMessageListener implements MessageListener {
                     }
                     try (PrintWriter printWriter = new PrintWriter(metadataFile)) {
                         printWriter.write(new ObjectMapper()
-                                .writeValueAsString(jmsTextMessage.getBody(String.class)));
+                                .writeValueAsString(metadataContent));
                     }
                 }
                 default -> System.err.println("Message type unknown: " + message.getClass().getName());
