@@ -9,8 +9,6 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 
 import java.util.Base64;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 public class WriteToScreenMessageListener implements MessageListener {
     public WriteToScreenMessageListener() {
