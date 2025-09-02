@@ -57,7 +57,7 @@ spec:
         - name: PASSWD_FILE
           value: /config/passwd
         - name: INTERNAL_KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}{{ .Values.qpid.internal_key_store_name }}
+          value: {{ .Values.qpid.internal_keys_path }}{{ .Values.qpid.internal_key_store_name }}
         - name: INTERNAL_KEY_STORE_PASSWORD
           value: {{ .Values.qpid.internal_key_store_password | quote }}
         {{- if .Values.qpid.java_mem }}
@@ -73,6 +73,8 @@ spec:
           mountPath: /config
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}
+        - name: internal_keys
+          mountPath: {{ .Values.qpid.internal_keys_path | quote }}
         - name: storage
           mountPath: /work/default
           subPath: default
@@ -95,6 +97,9 @@ spec:
       - name: secure
         secret:
           secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+      - name: internal_keys
+        secret:
+          secretName: {{ required "must provide .Values.qpid.internal_secrets_name" .Values.qpid.internal_secrets_name }}
       - name: storage
       {{- if .Values.qpid.persistence.enabled }}
         persistentVolumeClaim:
