@@ -2,7 +2,6 @@
 
 This is a command-line client meant to be used to interact with the interchange. This framework assumes that a user uses bash or zsh shells
 
-For help with any command, type ```serviceprovicerclient <command> --help```
 
 ## Command alias
 
@@ -10,6 +9,9 @@ For easier execution of the command, add the line below to your .bashrc or .bash
 ```alias serviceproviderclient='java -jar <absolute-path-to-jar>/service-provider-client-1.0.23-SNAPSHOT.jar'```
 
 For some more help on bash and aliases, see [W3Scools tutorial on Bash alias](https://www.w3schools.com/bash/bash_alias.php)
+
+
+For help with any subcommand, type ```serviceprovicerclient <command> --help```
 
 ## Auto-completion
 This tool supports auto-completion in bash and zsh. To use, first create a completion 
