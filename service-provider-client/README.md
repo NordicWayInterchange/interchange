@@ -4,20 +4,33 @@ This is a command-line client meant to be used to interact with the interchange.
 
 For help with any command, type ```serviceprovicerclient <command> --help```
 
-This tool supports auto-completion in bash and zsh, to use, first create a completion 
-file using the command ```java -cp service-provider-client-1.0.23-SNAPSHOT.jar picocli.AutoComplete no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication```
+## Command alias
 
-The auto-completion file assumes the name of the command is ```serviceproviderclient```
-
-To create a command-completion ready client, you have to firstly generate the file as described above, and the new file 
-will be created in the folder the command is called from.
-
-To get autocomplete working, first create an alias for the command, then source the completion file, for example
-
+For easier execution of the command, add the line below to your .bashrc or .bash_aliases file:
 ```alias serviceproviderclient='java -jar <absolute-path-to-jar>/service-provider-client-1.0.23-SNAPSHOT.jar'```
+
+## Auto-completion
+This tool supports auto-completion in bash and zsh. To use, first create a completion 
+file using the command ```java -cp service-provider-client-1.0.23-SNAPSHOT.jar picocli.AutoComplete no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication```
+The the new file will be created in the folder the command is called from.
+
+The auto-completion file assumes the name of the command is ```serviceproviderclient```, as in the alias shown above.
+
 Then 
 ```. <path to completion file>``` (notice the dot in the beginning). This will create an alias for the serviceproviderclient
 command, and give autocomplete for the different switches and subcommands when pressing tab twice in the shell.
+
+
+## Generating keys
+
+In order to generate the key and trust stores for using the Interchange, you have to generate keys and certificate in the portal.
+Enter the country code and the organisation name, and click "Generate certificate".
+This will start the download of three files. Store them in a single directory.
+
+Then, in you shell, run the command ```serviceproviderclient portalstore <path to where you stored you certs> <path to where you want to store your credentials>```
+Make sure the second path already exists.
+This will create a .p12 and .jks file in the second path. The .p12 file should be used in the  ```--keystorepath``` setting, and the .jks file in the ```--truststorepath``` setting.
+The ```--user```` setting can be obtained by looking at the "Home" page in the portal, and can be copied by clicking the copy icon.
 
 ## Tip
 
