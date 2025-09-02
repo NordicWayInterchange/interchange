@@ -59,7 +59,7 @@ spec:
         - name: INTERNAL_KEY_STORE
           value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
         - name: INTERNAL_KEY_STORE_PASSWORD
-          value: {{ .Values.qpid.internal_key_store_password | quote }}
+          value: {{ .Values.internal_key_store_password | quote }}
         {{- if .Values.qpid.java_mem }}
         - name: QPID_JAVA_MEM
           value: {{ .Values.qpid.java_mem }}
