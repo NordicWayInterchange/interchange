@@ -9,6 +9,8 @@ For help with any command, type ```serviceprovicerclient <command> --help```
 For easier execution of the command, add the line below to your .bashrc or .bash_aliases file:
 ```alias serviceproviderclient='java -jar <absolute-path-to-jar>/service-provider-client-1.0.23-SNAPSHOT.jar'```
 
+For some more help on bash and aliases, see [W3Scools tutorial on Bash alias](https://www.w3schools.com/bash/bash_alias.php)
+
 ## Auto-completion
 This tool supports auto-completion in bash and zsh. To use, first create a completion 
 file using the command ```java -cp service-provider-client-1.0.23-SNAPSHOT.jar picocli.AutoComplete no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication```
@@ -30,6 +32,7 @@ This will start the download of three files. Store them in a single directory.
 Then, in you shell, run the command ```serviceproviderclient portalstore <path to where you stored you certs> <path to where you want to store your credentials>```
 Make sure the second path already exists.
 This will create a .p12 and .jks file in the second path. The .p12 file should be used in the  ```--keystorepath``` setting, and the .jks file in the ```--truststorepath``` setting.
+
 The ````--user```` setting can be obtained by looking at the "Home" page in the portal, and can be copied by clicking the copy icon.
 
 ## Tip
