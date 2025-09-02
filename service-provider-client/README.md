@@ -1,6 +1,7 @@
 # Service Provider Client
 
-This is a command-line client meant to be used to interact with the interchange. This framework assumes that a user uses bash or zsh shells.
+This is a command-line client meant to be used to interact with the interchange. The command can be used from both Windows and Linux 
+command lines, but the following documentation assumes bash or zsh shells. 
 
 
 ## Command alias
