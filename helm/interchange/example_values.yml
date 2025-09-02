@@ -6,6 +6,8 @@ postgres_user: federation                                         # Database use
 postgres_password: federation                                     # Database password
 key_store: "base64 endcoded keystore file"
 trust_store: "base64 encoded truststore file"
+internal_keystore: "base64 encoded internal keystore file"
+internal_key_store_password: "internalkeystorepassword"
 napcore_keystore: "base64 encoded napcore keystore file"
 napcore_keystore_password: password
 napcore_nextauth_secret: ABC
@@ -39,8 +41,6 @@ qpid:                                                               # Apache Qpi
   memorydump:
     enabled: true                                                   # store a memory dump on persistent disk
   java_mem: -Xmx1g -XX:MaxDirectMemorySize=3g                       # memory instructions for qpid
-  internal_key_store_name: myInternalKeystore.p12                   # name of internal keystore that contains internal host cert for qpid
-  internal_key_store_password: "password"                           # password for the internal keystore
 neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
   replicas: 1
   image:
