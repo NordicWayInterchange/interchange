@@ -6,6 +6,8 @@ public class AddDelivery {
 
     private String description;
 
+    private Boolean dlqueue = false;
+
     public AddDelivery() {
 
     }
@@ -35,11 +37,20 @@ public class AddDelivery {
         this.description = description;
     }
 
+    public Boolean isDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public String toString() {
         return "AddDelivery{" +
                 "selector='" + selector + '\'' +
                 "description=" + description +
+                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

@@ -71,10 +71,11 @@ public class LocalDelivery {
         this.description = description;
     }
 
-    public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
+    public LocalDelivery(String selector, LocalDeliveryStatus status, String description, Boolean dlqueue) {
         this.selector = selector;
         this.status = status;
         this.description = description;
+        this.dlqueue = dlqueue;
     }
 
     public LocalDelivery(String selector, String description, Boolean dlqueue) {
@@ -195,7 +196,7 @@ public class LocalDelivery {
                 ", status=" + status +
                 ", description='" + description + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
-                ", dlqueue=" + dlqueue +
+                ", dlqueue='" + dlqueue + '\'' +
                 '}';
     }
 }
