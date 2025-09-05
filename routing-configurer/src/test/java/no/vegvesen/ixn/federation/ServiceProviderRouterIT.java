@@ -767,7 +767,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex1");
 
 		String deliveryExchangeName = "my-exchange5";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -807,7 +807,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("dlq-ex1");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
 				1,
 				"host",
@@ -860,7 +860,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 		String deliveryExchangeName = "my-exchange-non-exist5";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -917,7 +917,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex3");
 
 		String deliveryExchangeName = "my-exchange6";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -956,7 +956,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex4");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, exchangeName));
 		delivery.setId(1);
 		serviceProvider.addDeliveries(Set.of(delivery));
@@ -1000,7 +1000,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex40");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
 				1,
 				"host",
@@ -1051,7 +1051,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex5");
 
 		String deliveryExchangeName = "my-exchange9";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
 
@@ -1098,7 +1098,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex50");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint(
 				1,
 				"host",
@@ -1166,7 +1166,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex7");
 
 		String deliveryExchangeName = "my-exchange10";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "No delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "No delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
 
@@ -1219,7 +1219,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 		String deliveryExchangeName = "my-exchange11";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
