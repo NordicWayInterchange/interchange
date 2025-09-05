@@ -285,7 +285,8 @@ public class OnboardRestAPIDocumentationTest {
                         System.currentTimeMillis(),
                         DeliveryStatus.REQUESTED,
                         null,
-                        null
+                        null,
+                        false
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -303,8 +304,8 @@ public class OnboardRestAPIDocumentationTest {
                         System.currentTimeMillis(),
                         DeliveryStatus.CREATED,
                         null,
-                        null
-
+                        null,
+                        false
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();

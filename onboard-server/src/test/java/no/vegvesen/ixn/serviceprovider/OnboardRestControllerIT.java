@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -1184,6 +1185,36 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(2);
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
+    }
+
+    @Test
+    public void testAddingDeliveryWithoutDescriptionAndWithDlqueue(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+                new AddDelivery("originatingCountry='NO'"),
+                new AddDelivery("originatingCountry='SE'", "description", true)
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(2);
+        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
+        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> !obj.getDlqueue()));
+
+        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
+    }
+
+    @Test
+    public void testAddingDeliveryOneWithOnlySelectorOneWithDescriptionAndBothIncludingDlqueue(){
+        String serviceProviderName = "my-service-provider";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
+                new AddDelivery("originatingCountry='NO'", true),
+                new AddDelivery("originatingCountry='SE'", "description", true)
+        ));
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(2);
+        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
+        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
+
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
     }
 

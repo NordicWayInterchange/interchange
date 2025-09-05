@@ -21,6 +21,18 @@ public class AddDelivery {
         this.description = description;
      }
 
+    public AddDelivery(String selector, String description, Boolean dlqueue) {
+        this.selector = selector;
+        this.description = description;
+        this.dlqueue = dlqueue;
+    }
+
+    //With only selector and Dlqueue?
+    public AddDelivery(String selector, Boolean dlqueue) {
+        this.selector = selector;
+        this.dlqueue = dlqueue;
+    }
+
     public void setSelector(String selector) {
         this.selector = selector;
     }
