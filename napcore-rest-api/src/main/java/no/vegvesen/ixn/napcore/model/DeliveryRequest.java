@@ -20,6 +20,18 @@ public class DeliveryRequest {
         this.description = description;
     }
 
+    public DeliveryRequest(String selector, Boolean dlqueue) {
+        this.selector = selector;
+        this.dlqueue = dlqueue;
+    }
+
+    public DeliveryRequest(String selector, String description, Boolean dlqueue) {
+        this.selector = selector;
+        this.description = description;
+        this.dlqueue = dlqueue;
+    }
+
+
     public String getSelector() {
         return selector;
     }
@@ -36,11 +48,11 @@ public class DeliveryRequest {
         this.description = description;
     }
 
-    public boolean isDlqueue() {
+    public Boolean isDlqueue() {
         return dlqueue;
     }
 
-    public void setDlqueue(boolean dlqueue) {
+    public void setDlqueue(Boolean dlqueue) {
         this.dlqueue = dlqueue;
     }
 

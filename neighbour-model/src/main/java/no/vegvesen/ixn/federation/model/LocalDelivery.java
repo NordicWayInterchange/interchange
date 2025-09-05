@@ -163,11 +163,11 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
-    public boolean isDlqueue() {
+    public Boolean isDlqueue() {
         return dlqueue;
     }
 
-    public void setDlqueue(boolean dlqueue) {
+    public void setDlqueue(Boolean dlqueue) {
         this.dlqueue = dlqueue;
     }
 

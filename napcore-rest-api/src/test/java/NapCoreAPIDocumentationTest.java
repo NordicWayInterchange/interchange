@@ -114,7 +114,7 @@ public class NapCoreAPIDocumentationTest {
 
     @Test
     public void addDeliveryResponse() throws JsonProcessingException {
-        Delivery delivery = new Delivery(UUID.randomUUID().toString(), "originatingCountry='NO'", DeliveryStatus.REQUESTED, null, 93124429L, "NO delivery");
+        Delivery delivery = new Delivery(UUID.randomUUID().toString(), "originatingCountry='NO'", DeliveryStatus.REQUESTED, null, 93124429L, "NO delivery", false);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
     }
 
@@ -128,7 +128,7 @@ public class NapCoreAPIDocumentationTest {
                 1,
                 5,
                 null
-        )), 93124429L, "NO delivery");
+        )), 93124429L, "NO delivery", false);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
     }
 
@@ -143,7 +143,7 @@ public class NapCoreAPIDocumentationTest {
                 1,
                 5,
                 null
-        )), 93124429L, "NO delivery"));
+        )), 93124429L, "NO delivery", false));
         deliveries.add(new Delivery(UUID.randomUUID().toString(), "messageType='DATEX'", DeliveryStatus.REQUESTED, List.of(new DeliveryEndpoint(
                 "a.bouvetinterchange.eu",
                 1337,
@@ -152,7 +152,7 @@ public class NapCoreAPIDocumentationTest {
                 1,
                 5,
                 null
-        )), 93124469L, "DATEX delivery"));
+        )), 93124469L, "DATEX delivery", false));
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deliveries));
     }
 

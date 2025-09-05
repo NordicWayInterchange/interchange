@@ -60,7 +60,8 @@ public class TypeTransformer {
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
                 transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp()),
-                localDelivery.getDescription()
+                localDelivery.getDescription(),
+                localDelivery.isDlqueue()
         );
     }
 

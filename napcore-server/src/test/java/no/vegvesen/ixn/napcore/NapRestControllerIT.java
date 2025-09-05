@@ -173,6 +173,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingDeliveryWithDlqAndValidSelectorGivesRequestedDelivery(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery", true);
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+        assertThat(response.getDescription()).isEqualTo(DeliveryStatus.REQUESTED);
+    }
+
+    @Test
     public void testAddingDeliveryThatAlreadyExistsThrowsException(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
