@@ -20,7 +20,7 @@ const Queues = () => {
     const {data: queuesData, isLoading} = useFetchQueues(
         session?.user.commonName as string
     );
-    const [searchId, setSearchId] = useState("");
+    const [searchName, setSearchName] = useState("");
 
 
     const tableHeaders: GridColDef[] = [
@@ -58,9 +58,10 @@ const Queues = () => {
 
     const rows = Array.isArray(queuesData) ? queuesData : [];
 
-    const filteredRows = searchId.trim()
+    console.log(searchName)
+    const filteredRows = searchName.trim()
         ? rows.filter((row) =>
-            row.id?.toString().includes(searchId.trim())
+            row.name?.toString().includes(searchName.trim())
         )
         : rows;
 
@@ -71,7 +72,7 @@ const Queues = () => {
                 These are all of qpid queues.
             </Subheading>
             <Divider sx={{marginY: 2}}/>
-            <SearchBox searchId={searchId} setSearchId={setSearchId} label="queue" searchElement="id"/>
+            <SearchBox searchId={searchName} setSearchId={setSearchName} label="a queue" searchElement="name"/>
             <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>

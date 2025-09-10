@@ -30,7 +30,7 @@ const Exchanges = () => {
         field: string | null;
     }>({id: null, field: null});
     const [isFlashing, setIsFlashing] = useState(false);
-    const [searchId, setSearchId] = useState("");
+    const [seachName, setSearchName] = useState("");
 
     const handleCellClick = (row: any, field: any) => {
         setExpandedRows({});
@@ -96,9 +96,9 @@ const Exchanges = () => {
 
     const rows = Array.isArray(exchangesData) ? exchangesData : [];
 
-    const filteredRows = searchId.trim()
+    const filteredRows = seachName.trim()
         ? rows.filter((row) =>
-            row.id?.toString().includes(searchId.trim())
+            row.name?.toString().includes(seachName.trim())
         )
         : rows;
 
@@ -110,7 +110,7 @@ const Exchanges = () => {
                 These are all of qpid exchanges. You can click on each row to see more information.
             </Subheading>
             <Divider sx={{marginY: 2}}/>
-            <SearchBox searchId={searchId} setSearchId={setSearchId} label="exchange" searchElement="id"/>
+            <SearchBox searchId={seachName} setSearchId={setSearchName} label="an exchange" searchElement="name"/>
             <Divider style={{ margin: '8px 0', visibility: 'hidden' }}/>
             <Box sx={{height: 450, width: "100%"}}>
                 <Box sx={StyledTableHeader}>
