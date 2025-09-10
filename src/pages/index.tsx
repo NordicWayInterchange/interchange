@@ -89,8 +89,8 @@ export default function Home() {
     const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
     const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
-    const locSubqCount = queuesData?.filter(item => item.name.startsWith("loc-")).length;
-    const dlqCount = queuesData?.filter(item => item.name.startsWith("dlq-")).length;
+    const locSubqCount = Array.isArray(queuesData)? queuesData.filter(item => item.name.startsWith("loc-")).length : 0;
+    const dlqCount = Array.isArray(queuesData) ?queuesData.filter(item => item.name.startsWith("dlq-")).length : 0;
 
     const shortcuts = [
         {
