@@ -184,6 +184,23 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                                 },
                                             }}
                                         />
+                                        {commonAttributes.endpoints[0].dlqName && (
+                                            <TextField
+                                                value={commonAttributes.endpoints[0].dlqName || ""}
+                                                label="Dead letter queue name"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy
+                                                                    value={commonAttributes.endpoints[0].dlqName}/>
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                        )}
                                         {commonAttributes.endpoints[0].maxBandwidth && (<TextField
                                             value={commonAttributes.endpoints[0].maxBandwidth || ""}
                                             label="Max bandwidth"
