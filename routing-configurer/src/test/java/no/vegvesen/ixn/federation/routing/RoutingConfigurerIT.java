@@ -1050,6 +1050,36 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueue(nonTeardownQueue.getName())).isNotNull();
 	}
 
+    @Test
+    public void teardownNeighbourSubscriptionsThatDoesNotExistInBroker() {
+        String uuid = UUID.randomUUID().toString();
+        String neighbourName = "neighbour";
+        Neighbour neighbour = new Neighbour(
+                neighbourName,
+                new NeighbourCapabilities(),
+                new NeighbourSubscriptionRequest(
+                       Set.of(
+                               new NeighbourSubscription(
+                                       uuid,
+                                       NeighbourSubscriptionStatus.TEAR_DOWN,
+                                       "a = b",
+                                       "/subs/" + uuid,
+                                        neighbourName,
+                                       Set.of(
+                                               new NeighbourEndpoint(
+                                                       UUID.randomUUID().toString(),
+                                                       "broker." + neighbourName,
+                                                       443
+                                               )
+                                       )
+                               )
+                       )
+               ),
+               new SubscriptionRequest()
+        );
+        routingConfigurer.tearDownNeighbourRouting(neighbour);
+    }
+
 	@Test
 	public void oneShardedCapabilityAndOneShardedRedirectSubscription() {
 		Capability cap = getShardedCapability("pub-1", RedirectStatus.OPTIONAL, "cap-ex30", "cap-ex31", "cap-ex32");

@@ -81,7 +81,6 @@ public class RoutingConfigurer {
 			}
 		}
 		Set<String> redirectedServiceProviders = new HashSet<>();
-		try {
 			for (NeighbourSubscription sub : subscriptions) {
                 String consumerCommonName = sub.getConsumerCommonName();
                 for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
@@ -127,9 +126,6 @@ public class RoutingConfigurer {
 					}
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Could not remove routing for neighbour {}", name, e);
-		}
 	}
 
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages
