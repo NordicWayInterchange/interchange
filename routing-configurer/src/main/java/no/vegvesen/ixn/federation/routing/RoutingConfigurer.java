@@ -83,14 +83,14 @@ public class RoutingConfigurer {
 		Set<String> redirectedServiceProviders = new HashSet<>();
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
-				for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-					Queue queue = qpidClient.getQueue(endpoint.getSource());
-					if (queue != null) {
-						qpidClient.removeQueue(queue);
-					}
+                String consumerCommonName = sub.getConsumerCommonName();
+                for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
+                    Queue queue = qpidClient.getQueue(endpoint.getSource());
+                    if (queue != null) {
+                        qpidClient.removeQueue(queue);
+                        qpidClient.removeReadAccess(consumerCommonName, queue.getName());
+                    }
 
-					String consumerCommonName = sub.getConsumerCommonName();
-					qpidClient.removeReadAccess(consumerCommonName, queue.getName());
 					if (! consumerCommonName.equals(neighbour.getName())) {
 						redirectedServiceProviders.add(consumerCommonName);
 					}
