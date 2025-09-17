@@ -2,8 +2,6 @@
   "version" : "1.0",
   "name" : "king_olav.bouvetinterchange.eu",
   "deliveries" : [ {
-    "selector" : "publicationId = 'NO00000-pub-1'"
-  }, {
-    "selector" : "publicationId = 'NO00000-pub-2'"
+    "selector" : "publicationId = 'NO00000:pub-1'"
   } ]
 }

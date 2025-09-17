@@ -55,7 +55,8 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         String passwdFileName = "passwd";
         String passwdContainerPath = configPathInContainer + passwdFileName;
         this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
-        this.withEnv("KEY_STORE", "/jks/" + keyStore);
+        String keystoreLocation = "/jks/" + keyStore;
+        this.withEnv("KEY_STORE", keystoreLocation);
         this.withEnv("KEY_STORE_PASSWORD", keyStorePassword);
         this.withEnv("TRUST_STORE", "/jks/" + trustStore);
         this.withEnv("TRUST_STORE_PASSWORD", trustStorePassword);
@@ -65,6 +66,8 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         this.withEnv("STATIC_GROUPS_FILE", configPathInContainer + "groups");
         this.withEnv("GROUPS_FILE",workConfigInContainer + "groups");
         this.withEnv("PASSWD_FILE",passwdContainerPath);
+        this.withEnv("INTERNAL_KEY_STORE", keystoreLocation); //for testing locally we use the same internal and external keystores
+        this.withEnv("INTERNAL_KEY_STORE_PASSWORD", keyStorePassword);
     }
 
     @Override
