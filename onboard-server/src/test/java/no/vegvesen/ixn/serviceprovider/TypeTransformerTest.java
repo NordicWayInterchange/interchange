@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.capability.MapemApplication;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

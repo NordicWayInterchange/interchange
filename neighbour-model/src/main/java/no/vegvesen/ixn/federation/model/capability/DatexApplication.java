@@ -1,10 +1,9 @@
 package no.vegvesen.ixn.federation.model.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-
 import jakarta.persistence.*;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 
 import java.util.List;
 import java.util.Objects;

@@ -1,9 +1,9 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
+import no.vegvesen.ixn.shared.capability.DenmApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
