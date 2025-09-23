@@ -15,8 +15,6 @@ public class Delivery {
 
     private DeliveryStatus status;
 
-    private Boolean dlqueue;
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
@@ -26,7 +24,7 @@ public class Delivery {
     public Delivery() {
     }
 
-    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage, String description, Boolean dlqueue) {
+    public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage, String description) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -34,7 +32,6 @@ public class Delivery {
         this.status = status;
         this.errorMessage = errorMessage;
         this.description = description;
-        this.dlqueue = dlqueue;
     }
     public String getId() {
         return id;
@@ -91,15 +88,6 @@ public class Delivery {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public Boolean getDlqueue() {
-        return dlqueue;
-    }
-
-    public void setDlqueue(Boolean dlqueue) {
-        this.dlqueue = dlqueue;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -122,7 +110,6 @@ public class Delivery {
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
                 ", errorMessage=" + errorMessage +
-                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

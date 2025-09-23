@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class DeliveryEndpoint {
@@ -8,6 +10,8 @@ public class DeliveryEndpoint {
     private String target;
     private int maxBandwidth;
     private int maxMessageRate;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String dlqName;
 
     public DeliveryEndpoint() {

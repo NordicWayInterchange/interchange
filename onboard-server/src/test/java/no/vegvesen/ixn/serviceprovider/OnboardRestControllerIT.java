@@ -1190,36 +1190,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testAddingDeliveryWithoutDescriptionAndWithDlqueue(){
-        String serviceProviderName = "my-service-provider";
-        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
-                new AddDelivery("originatingCountry='NO'"),
-                new AddDelivery("originatingCountry='SE'", "description", true)
-        ));
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
-        assertThat(response.getDeliveries()).hasSize(2);
-        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
-
-        assertEquals(1, response.getDeliveries().stream().filter(Delivery::getDlqueue).count()); // At least one delivery has dlqueue set to true
-        assertEquals(1, response.getDeliveries().stream().filter(obj -> !obj.getDlqueue()).count()); // At least one delivery has dlqueue set to false
-
-    }
-
-    @Test
-    public void testAddingDeliveryOneWithOnlySelectorOneWithDescriptionAndBothIncludingDlqueue(){
-        String serviceProviderName = "my-service-provider";
-        AddDeliveriesRequest request = new AddDeliveriesRequest(serviceProviderName, Set.of(
-                new AddDelivery("originatingCountry='NO'", true),
-                new AddDelivery("originatingCountry='SE'", "description", true)
-        ));
-        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
-        assertThat(response.getDeliveries()).hasSize(2);
-        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
-
-        assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
-    }
-
-    @Test
     public void testAddingMoreThanOneIdenticalDeliveries() {
         String serviceProviderName = "my-service-provider";
         String selector = "messageType='DENM'";

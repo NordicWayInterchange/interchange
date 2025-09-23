@@ -109,8 +109,7 @@ public class TypeTransformer {
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                     transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus()),
                     delivery.getErrorMessage(),
-                    delivery.getDescription(),
-                    delivery.isDlqueue()
+                    delivery.getDescription()
                     )
             );
         }
