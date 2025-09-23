@@ -8,8 +8,8 @@
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>shared</artifactId>
-            <version>1.0.23-SNAPSHOT</version>
+            <artifactId>shared-api-model</artifactId>
+            <version>1.0.24-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
