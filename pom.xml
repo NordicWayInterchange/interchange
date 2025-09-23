@@ -262,6 +262,6 @@
         <module>admin-server-app</module>
         <module>import-export-service</module>
         <module>csr-generator</module>
-        <module>shared</module>
+        <module>shared-api-model</module>
     </modules>
 </project>
