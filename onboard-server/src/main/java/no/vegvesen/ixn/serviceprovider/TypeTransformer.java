@@ -222,7 +222,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     0,
-                    0
+                    0,
+                    endpoint.getDlqName()
             ));
         }
         return result;
