@@ -34,6 +34,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1197,10 +1198,11 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(2);
-        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
-        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> !obj.getDlqueue()));
-
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
+
+        assertEquals(1, response.getDeliveries().stream().filter(Delivery::getDlqueue).count()); // At least one delivery has dlqueue set to true
+        assertEquals(1, response.getDeliveries().stream().filter(obj -> !obj.getDlqueue()).count()); // At least one delivery has dlqueue set to false
+
     }
 
     @Test
@@ -1212,7 +1214,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ));
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(2);
-        Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
         Assert.assertTrue(response.getDeliveries().stream().anyMatch(obj -> obj.getDlqueue()));
 
         assertThat(restController.listDeliveries(serviceProviderName).getDeliveries()).hasSize(2);
@@ -1319,6 +1320,37 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         GetDeliveryResponse getDeliveryResponse = restController.getDelivery(serviceProviderName, deliveryId);
 
         assertThat(getDeliveryResponse).isNotNull();
+        assertThrows(NotFoundException.class, () -> {
+            restController.getDelivery(serviceProviderName, "999");
+        });
+    }
+
+    @Test
+    public void testGettingDeliveryWithDlq() {
+        String serviceProviderName = "my-service-provider";
+        String queueName = "dlqueue";
+
+        GetDeliveryResponse response = new GetDeliveryResponse(
+                UUID.randomUUID().toString(),
+                Collections.singleton(new DeliveryEndpoint(
+                        "amqps://sp-1",
+                        5671,
+                        "sp1-1",
+                        0,
+                        0,
+                        queueName
+                )),
+                "/sp-1/deliveries/1",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                DeliveryStatus.CREATED,
+                null
+        );
+
+
+        System.out.println(response);
+        assertThat(response).isNotNull();
+        assertThat(response.getEndpoints().stream().findFirst().orElse(null).getDlqName()).isEqualTo(queueName);
         assertThrows(NotFoundException.class, () -> {
             restController.getDelivery(serviceProviderName, "999");
         });
