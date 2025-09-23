@@ -9,7 +9,10 @@
       "name" : "a.bouvetinterchange.eu"
     }, {
       "name" : "a.qpid.bouvetinterchange.eu"
-    } ],
+    },
+    {
+        "name" : "a_qpid"
+    }],
     "clientRequests" : [ {
       "name" : "king_olav.a.bouvetinterchange.eu",
       "country" : "NO",
@@ -31,6 +34,8 @@
       "name" : "b.bouvetinterchange.eu"
     }, {
       "name" : "b.qpid.bouvetinterchange.eu"
+    }, {
+      "name" : "b_qpid"
     } ],
     "clientRequests" : [ {
       "name" : "king_gustaf.b.bouvetinterchange.eu",

@@ -6,6 +6,8 @@ postgres_user: federation                                         # Database use
 postgres_password: federation                                     # Database password
 key_store: "base64 endcoded keystore file"
 trust_store: "base64 encoded truststore file"
+internal_keystore: "base64 encoded internal keystore file"
+internal_key_store_password: "internalkeystorepassword"
 napcore_keystore: "base64 encoded napcore keystore file"
 napcore_keystore_password: password
 napcore_nextauth_secret: ABC

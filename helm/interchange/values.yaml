@@ -19,6 +19,8 @@ qpid:
     storageClassName: standard
     size: 10Gi
 
+  internal_keys_path: /internal_keys/
+
   memorydump:
     enabled: false
 

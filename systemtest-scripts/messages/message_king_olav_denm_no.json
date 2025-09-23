@@ -3,7 +3,7 @@
     "messageText" : "This is my message",
     "userId" : "king_olav.bouvetinterchange.eu",
     "publisherId" : "NO00000",
-    "publicationId" : "NO00000-pub-1",
+    "publicationId" : "NO00000:pub-1",
     "originatingCountry" : "NO",
     "protocolVersion" : "DENM:1.2.2",
     "serviceType" : "service",
