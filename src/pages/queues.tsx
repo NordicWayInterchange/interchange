@@ -58,7 +58,6 @@ const Queues = () => {
 
     const rows = Array.isArray(queuesData) ? queuesData : [];
 
-    console.log(searchName)
     const filteredRows = searchName.trim()
         ? rows.filter((row) =>
             row.name?.toString().includes(searchName.trim())

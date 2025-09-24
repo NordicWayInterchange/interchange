@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {GridColDef} from "@mui/x-data-grid";
 import {useSession} from "next-auth/react";
 import Mainheading from "@/components/shared/typography/Mainheading";
-import {Box, Divider, TextField} from "@mui/material";
+import {Box, Divider, IconButton} from "@mui/material";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import Subheading from "@/components/shared/typography/Subheading";
@@ -14,7 +14,8 @@ import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/Style
 import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import NestedGridExchanges from "@/components/exchanges/NestedGridExchanges";
 import SearchBox from "@/components/shared/components/SearchBox";
-
+import { Tooltip } from '@mui/material';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const Exchanges = () => {
     const {data: session} = useSession();
@@ -55,7 +56,32 @@ const Exchanges = () => {
             ...dataGridTemplate,
             field: "name",
             headerName: "Name",
-            flex: 2
+            flex: 2,
+            renderCell: (params) => (
+                <Box display="flex" alignItems="center" gap={0.75}>
+                    <div
+                        style={{
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: 3.5,
+                            alignItems: 'start'
+                        }}
+                    >
+                        {params.row.name}
+                    </div>
+                    <Tooltip title={`Dead Letter Queue: ${params.row.alternateBinding?.destination ? params.row.alternateBinding?.destination : "Does  not exist"}`} placement="top"
+                             slotProps={{
+                                 tooltip: {
+                                     sx: {fontSize: '.87rem'}
+                                 },
+                             }}>
+                        <IconButton size="small" sx={{ padding: 0 }}>
+                            <InfoOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            ),
         },
         {
             ...dataGridTemplate,
