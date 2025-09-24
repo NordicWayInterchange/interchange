@@ -79,7 +79,6 @@ export default function Home() {
     const privateChannelsCount = serviceProvidersData?.map((item: { privatechannels: any; }) => (item.privatechannels || [])).reduce((sum: any, privatechannels: string | any[]) => (sum + privatechannels.length), 0);
     const privateChannelsPeerCount = serviceProvidersData?.map((item: { privatechannelsPeer: any; }) => (item.privatechannelsPeer || [])).reduce((sum: any, privatechannelsPeer: string | any[]) => (sum + privatechannelsPeer.length), 0);
 
-    console.log('privateChannelsCount', privateChannelsPeerCount)
     const neighbourCapabilitiesCount = neighbourData?.reduce((sum, item) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -90,6 +89,8 @@ export default function Home() {
     const ourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.ourRequestedSubscriptions || [])).reduce((sum, ourRequestedSubscriptions) => (sum + ourRequestedSubscriptions.subscriptions.length), 0);
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
     const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
+    const locSubqCount = Array.isArray(queuesData)? queuesData.filter(item => item.name.startsWith("loc-")).length : 0;
+    const dlqCount = Array.isArray(queuesData) ?queuesData.filter(item => item.name.startsWith("dlq-")).length : 0;
 
     const shortcuts = [
         {
@@ -133,6 +134,10 @@ export default function Home() {
             header: 'QUEUES',
             url: "/queues",
             count: queuesData?.length,
+            firstSubValueHeader: 'Dead letter queues(DLQ)',
+            firstSubValueCount: dlqCount,
+            secondSubValueHeader: 'Local subscription queues',
+            secondSubValueCount: locSubqCount,
         },
         {
             icon: <AutoGraphIcon />,
