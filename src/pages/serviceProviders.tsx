@@ -28,8 +28,6 @@ export default function ServiceProviders() {
         session?.user.commonName as string
     );
 
-    console.log("serviceProviderData", serviceProviderData);
-
     const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;

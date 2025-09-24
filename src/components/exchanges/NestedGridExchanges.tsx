@@ -55,7 +55,7 @@ const NestedGridExchanges: React.FC<Props> = ({
                         whiteSpace: 'normal',
                         wordBreak: 'break-word',
                         overflowWrap: 'break-word',
-                        lineHeight: 1.5,
+                        lineHeight: 2,
                         alignItems: 'start'
                     }}
                 >
