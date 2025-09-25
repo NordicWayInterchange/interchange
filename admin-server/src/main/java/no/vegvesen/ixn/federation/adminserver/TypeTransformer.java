@@ -130,7 +130,8 @@ public class TypeTransformer {
                     exchange.getId(),
                     exchange.isDurable(),
                     exchange.getType(),
-                    exchange.getBindings())
+                    exchange.getBindings(),
+                    exchange.getAlternateBinding())
             );
         }
         return exchangeApiList;

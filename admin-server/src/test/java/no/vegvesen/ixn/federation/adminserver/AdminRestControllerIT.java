@@ -160,7 +160,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                 "0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0",
                 true,
                 "headers",
-                List.of(new Binding("my-test-binding-key", queueName ,new Filter("a = 'b'")))
+                List.of(new Binding("my-test-binding-key", queueName ,new Filter("a = 'b'"))),
+                null
         );
 
         assertThat(exchange.getId()).isEqualTo("0ba738de-b0ef-4ed8-b3a1-e35c03c18ae0");
