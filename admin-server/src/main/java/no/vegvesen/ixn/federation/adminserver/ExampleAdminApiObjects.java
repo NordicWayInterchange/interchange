@@ -220,7 +220,10 @@ public class ExampleAdminApiObjects {
                                 "x-filter-jms-selector": "(quadTree like '%,1203%') AND (causeCode = 5) AND (publicationId = 'NO00002:test') AND (messageType = 'DENM') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'SE')"
                             }
                         }
-                    ]
+                    ],
+                    "alternateBinding": {
+                    "destination": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9"
+                    }
                 }]
             """;
 
