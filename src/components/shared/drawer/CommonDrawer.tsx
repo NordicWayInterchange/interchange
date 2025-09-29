@@ -187,7 +187,7 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                         {commonAttributes.endpoints[0].dlqName && (
                                             <TextField
                                                 value={commonAttributes.endpoints[0].dlqName || ""}
-                                                label="Dead letter queue name"
+                                                label="Dead letter queue"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {

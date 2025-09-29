@@ -90,7 +90,7 @@ export default function Home() {
     const neighbourRequestedSubscriptionsCount = neighbourData?.map((item) => (item.neighbourRequestedSubscriptions || [])).reduce((sum, neighbourRequestedSubscriptions) => (sum + neighbourRequestedSubscriptions.subscriptions.length), 0);
     const exchangeBindingCount = Array.isArray(exchangeData) ? exchangeData?.map((item) => (item.bindings || [])).reduce((sum, bindings) => (sum + bindings.length), 0) : [] ;
     const locSubqCount = Array.isArray(queuesData)? queuesData.filter(item => item.name.startsWith("loc-")).length : 0;
-    const dlqCount = Array.isArray(queuesData) ?queuesData.filter(item => item.name.startsWith("dlq-")).length : 0;
+    const dlqCount = Array.isArray(queuesData) ?queuesData.filter(item => item.name.startsWith("dlq")).length : 0;
 
     const shortcuts = [
         {
