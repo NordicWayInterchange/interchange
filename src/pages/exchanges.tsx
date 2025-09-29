@@ -15,7 +15,8 @@ import {useFetchExchanges} from "@/hooks/useFetchExchanges";
 import NestedGridExchanges from "@/components/exchanges/NestedGridExchanges";
 import SearchBox from "@/components/shared/components/SearchBox";
 import { Tooltip } from '@mui/material';
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import SearchOffIcon from '@mui/icons-material/SearchOff';
+import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 
 const Exchanges = () => {
     const {data: session} = useSession();
@@ -76,8 +77,9 @@ const Exchanges = () => {
                                      sx: {fontSize: '.87rem'}
                                  },
                              }}>
-                        <IconButton size="small" sx={{ padding: 0 }}>
-                            <InfoOutlinedIcon fontSize="small" />
+                        <IconButton size="small" sx={{ padding: 1 }}>
+                            {(params.row.alternateBinding?.destination ? <WhereToVoteIcon fontSize="small"/> :
+                                <SearchOffIcon fontSize="small"/>)}
                         </IconButton>
                     </Tooltip>
                 </Box>

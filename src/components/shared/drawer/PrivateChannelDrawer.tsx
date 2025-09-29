@@ -213,7 +213,7 @@ const primaryTextStyle = {
     whiteSpace: "nowrap",
     position: "relative",
     top: "-22px",
-    marginBottom: "-40px"
+    marginBottom: "-25px"
 };
 
 const secondaryContainerStyle = {
@@ -222,7 +222,7 @@ const secondaryContainerStyle = {
     width: "100%",
     ml: "9px",
     position: "relative",
-    top: "-9px"
+    top: "-16px"
 };
 
 export default PrivateChannelDrawer;
