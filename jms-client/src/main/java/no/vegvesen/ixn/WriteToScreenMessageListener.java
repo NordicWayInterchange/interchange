@@ -53,7 +53,6 @@ public class WriteToScreenMessageListener implements MessageListener {
     }
 
     private void printMetadataContent(Message message) throws JMSException {
-        //TODO: Enumeration er erstattet av Iterator, vurder om dette kan endres.
         Enumeration<String> propertyNames = message.getPropertyNames();
         while (propertyNames.hasMoreElements()) {
             String propertyName = propertyNames.nextElement();

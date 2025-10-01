@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
+import no.vegvesen.ixn.model.DirectoryDoesNotExistException;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
@@ -22,7 +23,7 @@ public class WriteToFileMessageListener implements MessageListener {
     public WriteToFileMessageListener(String directoryName) {
         this.directory = new File(directoryName);
         if(!directory.exists()){
-            throw new RuntimeException("Directory does not exist: " + directoryName);
+            throw new DirectoryDoesNotExistException("Directory does not exist: " + directoryName);
         }
     }
 
