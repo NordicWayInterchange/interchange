@@ -544,7 +544,7 @@ public class ServiceProviderRouter {
                                     if (shardExchange != null) {
                                         addConnectionToSubscription(subscription, shard, shardExchange);
                                     } else {
-                                        logger.info("Cound not find exchange {} for shard", shard.getExchangeName());
+                                        logger.info("Could not find exchange {} for shard", shard.getExchangeName());
                                     }
                                 }
                             }
