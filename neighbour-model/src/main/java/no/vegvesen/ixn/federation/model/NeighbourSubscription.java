@@ -53,6 +53,7 @@ public class NeighbourSubscription {
     }
 
     public NeighbourSubscription(String uuid, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<NeighbourEndpoint> endpoints) {
+        this.uuid = uuid;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
         this.path = path;

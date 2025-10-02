@@ -8,7 +8,7 @@ import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionResponseApi {
-    private String version = ApiVersion.version;
+    private String version = ApiVersion.VERSION_1_2;
     private String name;
     private Set<RequestedSubscriptionResponseApi> subscriptions = new HashSet<>();
 

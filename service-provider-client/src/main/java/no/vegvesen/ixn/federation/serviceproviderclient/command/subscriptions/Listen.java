@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.WriteToFileMessageListener;
+import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine;
@@ -104,7 +106,7 @@ public class Listen implements Callable<Integer> {
                 url,
                 endpointApi.getSource(),
                 parentCommand.getParent().createSSLContext(),
-                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
+                directory != null ? new WriteToFileMessageListener(directory) : new WriteToScreenMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
