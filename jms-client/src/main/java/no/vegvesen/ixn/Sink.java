@@ -25,6 +25,8 @@ public class Sink implements AutoCloseable {
 
 	private ExceptionListener exceptionListener;
 
+	private String dynamicFilter;
+
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
         this.queueName = queueName;
@@ -45,6 +47,15 @@ public class Sink implements AutoCloseable {
 		this.sslContext = sslContext;
 		this.listener = listener;
 		this.exceptionListener = exceptionListener;
+	}
+
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener, String dynamicFilter) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+		this.exceptionListener = exceptionListener;
+		this.dynamicFilter = dynamicFilter;
 	}
 
 	public void startWithMessageListener(MessageListener newListener, Integer prefetch) throws JMSException, NamingException {
@@ -78,7 +89,7 @@ public class Sink implements AutoCloseable {
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = session.createConsumer(destination);
+		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
@@ -89,7 +100,7 @@ public class Sink implements AutoCloseable {
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = session.createConsumer(destination);
+		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
