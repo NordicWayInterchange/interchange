@@ -4,12 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>onboard-rest-api</artifactId>
+    <parent>
+        <groupId>net.nordicway.interchange</groupId>
+        <artifactId>interchange-parent</artifactId>
+        <version>1.0.25-SNAPSHOT</version>
+    </parent>
 
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>shared-api-model</artifactId>
-            <version>1.0.24-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -27,13 +32,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <parent>
-        <groupId>net.nordicway.interchange</groupId>
-        <artifactId>interchange-parent</artifactId>
-        <version>1.0.25-SNAPSHOT</version>
-    </parent>
-
-
-    
 </project>
