@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.jms;
 
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.WriteToFileMessageListener;
+import no.vegvesen.ixn.WriteToScreenMessageListener;
 import picocli.CommandLine.*;
 
 import java.util.concurrent.Callable;
@@ -45,7 +47,7 @@ public class ReceiveMessages implements Callable<Integer> {
                 parentCommand.getUrl(),
                 queueName,
                 parentCommand.createContext(),
-                directory != null ? new Sink.DefaultMessageListener(directory) : new Sink.DefaultMessageListener(),
+                directory != null ? new WriteToFileMessageListener(directory) : new WriteToScreenMessageListener(),
                 exceptionListener)
         ) {
             sink.start();
