@@ -5,6 +5,8 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.federation.qpid.Binding;
+import no.vegvesen.ixn.federation.qpid.Filter;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -20,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +68,51 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isPresent();
         }
+    }
+
+    @Test
+    public void dynamicFilterMatchesOneMessageAndNotAnother() throws Exception{
+        String queueName = "bi-queue";
+
+        qpidClient.createHeadersExchange("test-exchange1");
+        qpidClient.createHeadersExchange("test-exchange2");
+        qpidClient.addBinding("test-exchange1", new Binding("test-exchange1", queueName, new Filter("originatingCountry = 'FI'")));
+        qpidClient.addBinding("test-exchange2", new Binding("test-exchange2", queueName, new Filter("originatingCountry = 'SE'")));
+
+        AtomicInteger numMessages = new AtomicInteger();
+
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                queueName,
+                sslContext,
+                message -> numMessages.incrementAndGet(),
+                "originatingCountry = 'NO'"
+               )) {
+            sink.start();
+            try ( Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("")
+                        .publisherId("NO-123")
+                        .publicationId("pub-1")
+                        .messageType(Constants.DENM)
+                        .causeCode(6)
+                        .subCauseCode(61)
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,")
+                        .shardId(1)
+                        .shardCount(1)
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+
+            }
+            sink.close();
+            sink.start();
+        }
+        assertThat(numMessages.get()).isEqualTo(1);
     }
 
     /*
