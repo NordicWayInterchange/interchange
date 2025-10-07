@@ -20,8 +20,10 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -282,4 +284,42 @@ public class SourceSinkIT extends QpidDockerBaseIT {
         }
         assertThat(await).isTrue();
 	}
+
+	@Test
+	public void dynamicFilterMatchesOneMessage() throws Exception{
+		AtomicInteger numMessages = new AtomicInteger();
+
+		try (Sink sink = new Sink(Url, "test-queue",
+				kingHaraldSSlContext,
+				text -> numMessages.incrementAndGet(),
+				"originatingCountry='NO'"
+		)) {
+			sink.start();
+				try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+				source.start();
+				String messageText = "This is my DENM message :) ";
+				byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+				source.sendNonPersistentMessage(source.createMessageBuilder()
+						.bytesMessage(bytemessage)
+						.userId("")
+						.publisherId("NO-123")
+						.publicationId("pub-1")
+						.messageType(Constants.DENM)
+						.causeCode(6)
+						.subCauseCode(61)
+						.originatingCountry("NO")
+						.protocolVersion("DENM:1.2.2")
+						.quadTreeTiles(",12003,")
+						.shardId(1)
+						.shardCount(1)
+						.timestamp(System.currentTimeMillis())
+						.build());
+
+				}
+			sink.close();
+			sink.start();
+		}
+		assertThat(numMessages.get()).isEqualTo(1);
+	}
+
 }

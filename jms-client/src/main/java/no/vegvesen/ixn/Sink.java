@@ -41,21 +41,20 @@ public class Sink implements AutoCloseable {
 		this.listener = listener;
 	}
 
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, String dynamicFilter) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+		this.dynamicFilter = dynamicFilter;
+	}
+
 	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener) {
 		this.url = url;
 		this.queueName = queueName;
 		this.sslContext = sslContext;
 		this.listener = listener;
 		this.exceptionListener = exceptionListener;
-	}
-
-	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener, String dynamicFilter) {
-		this.url = url;
-		this.queueName = queueName;
-		this.sslContext = sslContext;
-		this.listener = listener;
-		this.exceptionListener = exceptionListener;
-		this.dynamicFilter = dynamicFilter;
 	}
 
 	public void startWithMessageListener(MessageListener newListener, Integer prefetch) throws JMSException, NamingException {
