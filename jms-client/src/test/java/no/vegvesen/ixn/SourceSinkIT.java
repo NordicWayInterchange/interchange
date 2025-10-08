@@ -285,13 +285,13 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-    public void dynamicFilterMatchesOneMessage() throws Exception{
+    public void dynamicFilterMatchesOnlyOneMessageAndNotTheOther() throws Exception{
         AtomicInteger numMessages = new AtomicInteger();
 
         try (Sink sink = new Sink(Url, "test-queue",
                 kingHaraldSSlContext,
                 text -> numMessages.incrementAndGet(),
-                "originatingCountry='NO'"
+                "originatingCountry='NO' and causeCode = 6"
         )) {
             sink.start();
             try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
@@ -328,6 +328,41 @@ public class SourceSinkIT extends QpidDockerBaseIT {
             sink.start();
         }
         assertThat(numMessages.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void dynamicFilterDoesNotMatchAnyMessage() throws Exception{
+        AtomicInteger numMessages = new AtomicInteger();
+
+        try (Sink sink = new Sink(Url, "test-queue",
+                kingHaraldSSlContext,
+                text -> numMessages.incrementAndGet(),
+                "originatingCountry='NO' and messageType = 'IVIM'"
+        )) {
+            sink.start();
+            try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .textMessage(messageText)
+                        .userId("")
+                        .publisherId("NO-123")
+                        .publicationId("pub-1")
+                        .messageType(Constants.DENM)
+                        .causeCode(6)
+                        .subCauseCode(61)
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,")
+                        .shardId(1)
+                        .shardCount(1)
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+            }
+            sink.close();
+            sink.start();
+        }
+        assertThat(numMessages.get()).isEqualTo(0);
     }
 
 }
