@@ -22,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
@@ -72,23 +73,30 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void dynamicFilterMatchesOneMessageAndNotAnother() throws Exception{
-        String queueName = "bi-queue";
+        String consumeQueue = "bi-queue";
+        String deliveryExchange = "del-123456789";
+        String capabilityExchange = "cap-123456789";
 
-        qpidClient.createHeadersExchange("test-exchange1");
-        qpidClient.createHeadersExchange("test-exchange2");
-        qpidClient.addBinding("test-exchange1", new Binding("test-exchange1", queueName, new Filter("originatingCountry = 'FI'")));
-        qpidClient.addBinding("test-exchange2", new Binding("test-exchange2", queueName, new Filter("originatingCountry = 'SE'")));
+        String capabilitySelector = "originatingCountry = 'NO'";
+        String deliverySelector ="originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
+        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
+
+        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(capabilityExchange);
+
+        qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, null)); //arguments= new Filter(joinedSelector)?
+        qpidClient.addBinding(capabilityExchange, new Binding(capabilityExchange, consumeQueue, null)); //arguments = new Filter(capabilitySelector)?
 
         AtomicInteger numMessages = new AtomicInteger();
 
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
-                queueName,
+                consumeQueue,
                 sslContext,
                 message -> numMessages.incrementAndGet(),
                 "originatingCountry = 'NO'"
-               )) {
+        )) {
             sink.start();
-            try ( Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext)) {
+            try ( Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
                 source.start();
                 String messageText = "This is my DENM message :) ";
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
@@ -107,12 +115,12 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
                         .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
-
             }
             sink.close();
             sink.start();
+            Thread.sleep(200);
         }
-        assertThat(numMessages.get()).isEqualTo(1);
+        assertThat(numMessages.get()).isEqualTo(2);
     }
 
     /*
