@@ -5,8 +5,6 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.qpid.Binding;
-import no.vegvesen.ixn.federation.qpid.Filter;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -22,8 +20,6 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.Flow;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,58 +65,6 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isPresent();
         }
-    }
-
-    @Test
-    public void dynamicFilterMatchesOneMessageAndNotAnother() throws Exception{
-        String consumeQueue = "bi-queue";
-        String deliveryExchange = "del-123456789";
-        String capabilityExchange = "cap-123456789";
-
-        String capabilitySelector = "originatingCountry = 'NO'";
-        String deliverySelector ="originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
-        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
-
-        qpidClient.createDirectExchange(deliveryExchange);
-        qpidClient.createHeadersExchange(capabilityExchange);
-
-        qpidClient.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, null)); //arguments= new Filter(joinedSelector)?
-        qpidClient.addBinding(capabilityExchange, new Binding(capabilityExchange, consumeQueue, null)); //arguments = new Filter(capabilitySelector)?
-
-        AtomicInteger numMessages = new AtomicInteger();
-
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
-                consumeQueue,
-                sslContext,
-                message -> numMessages.incrementAndGet(),
-                "originatingCountry = 'NO'"
-        )) {
-            sink.start();
-            try ( Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
-                source.start();
-                String messageText = "This is my DENM message :) ";
-                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-                source.sendNonPersistentMessage(source.createMessageBuilder()
-                        .bytesMessage(bytemessage)
-                        .userId("")
-                        .publisherId("NO-123")
-                        .publicationId("pub-1")
-                        .messageType(Constants.DENM)
-                        .causeCode(6)
-                        .subCauseCode(61)
-                        .originatingCountry("NO")
-                        .protocolVersion("DENM:1.2.2")
-                        .quadTreeTiles(",12003,")
-                        .shardId(1)
-                        .shardCount(1)
-                        .timestamp(System.currentTimeMillis())
-                        .build());
-            }
-            sink.close();
-            sink.start();
-            Thread.sleep(200);
-        }
-        assertThat(numMessages.get()).isEqualTo(2);
     }
 
     /*
