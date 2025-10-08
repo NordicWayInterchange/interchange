@@ -285,40 +285,49 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void dynamicFilterMatchesOneMessage() throws Exception{
-		AtomicInteger numMessages = new AtomicInteger();
+    public void dynamicFilterMatchesOneMessage() throws Exception{
+        AtomicInteger numMessages = new AtomicInteger();
 
-		try (Sink sink = new Sink(Url, "test-queue",
-				kingHaraldSSlContext,
-				text -> numMessages.incrementAndGet(),
-				"originatingCountry='NO'"
-		)) {
-			sink.start();
-				try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
-				source.start();
-				String messageText = "This is my DENM message :) ";
-				byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-				source.sendNonPersistentMessage(source.createMessageBuilder()
-						.bytesMessage(bytemessage)
-						.userId("")
-						.publisherId("NO-123")
-						.publicationId("pub-1")
-						.messageType(Constants.DENM)
-						.causeCode(6)
-						.subCauseCode(61)
-						.originatingCountry("NO")
-						.protocolVersion("DENM:1.2.2")
-						.quadTreeTiles(",12003,")
-						.shardId(1)
-						.shardCount(1)
-						.timestamp(System.currentTimeMillis())
-						.build());
-
-				}
-			sink.close();
-			sink.start();
-		}
-		assertThat(numMessages.get()).isEqualTo(1);
-	}
+        try (Sink sink = new Sink(Url, "test-queue",
+                kingHaraldSSlContext,
+                text -> numMessages.incrementAndGet(),
+                "originatingCountry='NO'"
+        )) {
+            sink.start();
+            try (Source source = new Source(Url, "test-queue", kingHaraldSSlContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .textMessage(messageText)
+                        .userId("")
+                        .publisherId("NO-123")
+                        .publicationId("pub-1")
+                        .messageType(Constants.DENM)
+                        .causeCode(6)
+                        .subCauseCode(61)
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,")
+                        .shardId(1)
+                        .shardCount(1)
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .textMessage(messageText)
+                        .publisherId("SE-234")
+                        .publicationId("1")
+                        .messageType(Constants.DENM)
+                        .causeCode(6)
+                        .subCauseCode(61)
+                        .originatingCountry("SE")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",13003")
+                        .build());
+            }
+            sink.close();
+            sink.start();
+        }
+        assertThat(numMessages.get()).isEqualTo(1);
+    }
 
 }
