@@ -260,6 +260,26 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 	}
 
 	@Test
+	public void addSubscriptionWithEndpointWithDynamicFilter() {
+		Endpoint endpoint = new Endpoint("my-queue","my-host", 5671, "originatingCountry = 'NO'");
+
+		Subscription sub = new Subscription(SubscriptionStatus.REQUESTED,"originatingCountry = 'NO'","", "my-neighbour-1",Set.of(endpoint));
+
+		Set<Subscription> subs = Collections.singleton(sub);
+		SubscriptionRequest subscriptions = new SubscriptionRequest(subs);
+		Neighbour neighbour = new Neighbour("my-neighbour-1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptions);
+
+		repository.save(neighbour);
+
+		Neighbour savedNeighbour = repository.findByName("my-neighbour-1");
+
+		Subscription savedSub = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+		assertThat(savedSub.getEndpoints()).hasSize(1);
+		assertThat(savedSub.getEndpoints().stream().findFirst().get().getDynamicFilter()).isEqualTo("originatingCountry = 'NO'");
+	}
+
+	@Test
 	public void getBySubscriptionStatusOnSubscriptionsReturnsOneNeighbour(){
 		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "my-multi-neighbour");
 		Endpoint endpoint1 = new Endpoint("my-queue-1","my-host", 5671);

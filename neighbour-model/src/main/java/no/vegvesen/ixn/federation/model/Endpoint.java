@@ -17,6 +17,7 @@ public class Endpoint {
     private Integer port;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
+    private String dynamicFilter;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "subshard_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_sub_shard"))
@@ -37,6 +38,11 @@ public class Endpoint {
 
     public Endpoint(String source, String host, Integer port) {
         this(null,source,host,port,null,null);
+    }
+
+    public Endpoint(String source, String host, Integer port, String dynamicFilter) {
+        this(null,source,host,port,null,null);
+        this.setDynamicFilter(dynamicFilter);
     }
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
@@ -100,6 +106,14 @@ public class Endpoint {
         this.shard = null;
     }
 
+    public String getDynamicFilter() {
+        return dynamicFilter;
+    }
+
+    public void setDynamicFilter(String dynamicFilter) {
+        this.dynamicFilter = dynamicFilter;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -124,6 +138,7 @@ public class Endpoint {
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dynamicFilter=" + dynamicFilter +
                 '}';
     }
 }
