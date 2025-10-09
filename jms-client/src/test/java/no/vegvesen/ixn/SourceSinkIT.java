@@ -324,8 +324,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
                         .quadTreeTiles(",13003")
                         .build());
             }
-            sink.close();
-            sink.start();
         }
         assertThat(numMessages.get()).isEqualTo(1);
     }
@@ -359,8 +357,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
                         .timestamp(System.currentTimeMillis())
                         .build());
             }
-            sink.close();
-            sink.start();
         }
         assertThat(numMessages.get()).isEqualTo(0);
     }
