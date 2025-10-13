@@ -34,6 +34,14 @@ public class Sink implements AutoCloseable {
 		this.listener = new WriteToScreenMessageListener();
     }
 
+	public Sink(String url, String queueName, SSLContext sslContext, String dynamicFilter) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = new WriteToScreenMessageListener();
+		this.dynamicFilter = dynamicFilter;
+	}
+
 	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener) {
 		this.url = url;
 		this.queueName = queueName;
