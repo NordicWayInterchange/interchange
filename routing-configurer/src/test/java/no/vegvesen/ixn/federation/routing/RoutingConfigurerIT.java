@@ -622,6 +622,28 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void createNeighbourWithSubscriptionEndpointContainsDynamicFilter() {
+		String selector = "a=b";
+		String exchangeName = "subscription-exchange";
+		String dynamicFilter = "originatingCountry='NO'";
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
+		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671, dynamicFilter)));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour("neighbour",new NeighbourCapabilities(),new NeighbourSubscriptionRequest(),new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint("one", "my-source", "my-host", 5671, new Connection(), exchangeName, dynamicFilter));
+		routingConfigurer.setUpSubscriptionExchanges();
+
+		assertThat(subscription.getEndpoints()).hasSize(1);
+		verify(listenerEndpointRepository, times(1)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
 	public void tearDownSubscriptionShardExchange() {
 		String selector = "a=b";
 		String exchangeName = "subscription-exchange";

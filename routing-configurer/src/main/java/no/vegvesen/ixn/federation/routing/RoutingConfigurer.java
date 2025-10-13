@@ -267,7 +267,7 @@ public class RoutingConfigurer {
 									);
 									qpidClient.createHeadersExchange(exchangeName);
 									logger.debug("Set up exchange for subscription with id {}", subscription.getId());
-									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName());
+									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName(), endpoint.getDynamicFilter());
 								}
 								else{
 									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
@@ -285,9 +285,9 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName) {
+	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName, String dynamicFilter) {
 		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName));
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName, dynamicFilter));
 			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint);
 		}
 	}
