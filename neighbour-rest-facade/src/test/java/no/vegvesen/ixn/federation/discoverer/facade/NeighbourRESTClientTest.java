@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
-import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -227,7 +227,7 @@ public class NeighbourRESTClientTest {
     @Test
     public void doPollSubscriptionStatusStatusOk() {
         when(template.getForEntity(any(String.class),any(Class.class)))
-                .thenReturn(new ResponseEntity<>(new SubscriptionPollResponseApi(),HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(new SubscriptionPollResponseApiV1(),HttpStatus.OK));
         client.doPollSubscriptionStatus("https://test.server/","test");
         verify(template).getForEntity(any(String.class),any(Class.class));
         assertThat(infoEvents(appender)).isEmpty();
