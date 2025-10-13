@@ -177,7 +177,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		}

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,18 +37,18 @@ public class SubscriptionRequestTransformer {
         return new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 	}
 
-	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
+	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApiV1 subscriptionApiV1) {
 		Subscription subscription = new Subscription();
-		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
-		subscription.setSelector(subscriptionApi.getSelector());
-		subscription.setPath(subscriptionApi.getPath());
-		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
-		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
+		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApiV1.getStatus()));
+		subscription.setSelector(subscriptionApiV1.getSelector());
+		subscription.setPath(subscriptionApiV1.getPath());
+		subscription.setLastUpdatedTimestamp(subscriptionApiV1.getLastUpdatedTimestamp());
+		subscription.setConsumerCommonName(subscriptionApiV1.getConsumerCommonName());
 
-		Set<EndpointApiV1> apiEndpoints = subscriptionApi.getEndpoints();
-		if (apiEndpoints != null) {
+		Set<EndpointApiV1> apiEndpointsV1 = subscriptionApiV1.getEndpointsV1();
+		if (apiEndpointsV1 != null) {
 			Set<Endpoint> endpoints = new HashSet<>();
-			for (EndpointApiV1 endpointApi : apiEndpoints) {
+			for (EndpointApiV1 endpointApi : apiEndpointsV1) {
 				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
 				endpoints.add(endpoint);
 			}
@@ -58,15 +58,15 @@ public class SubscriptionRequestTransformer {
 
 	}
 
-	public SubscriptionPollResponseApi neighbourSubscriptionToSubscriptionPollResponseApi(NeighbourSubscription subscription) {
-		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setId(subscription.getUuid());
-		response.setSelector(subscription.getSelector());
-		response.setPath(subscription.getPath());
+	public SubscriptionPollResponseApiV1 neighbourSubscriptionToSubscriptionPollResponseApiV1(NeighbourSubscription subscription) {
+		SubscriptionPollResponseApiV1 responseV1 = new SubscriptionPollResponseApiV1();
+		responseV1.setId(subscription.getUuid());
+		responseV1.setSelector(subscription.getSelector());
+		responseV1.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
-		response.setStatus(status);
-		response.setConsumerCommonName(subscription.getConsumerCommonName());
-		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
+		responseV1.setStatus(status);
+		responseV1.setConsumerCommonName(subscription.getConsumerCommonName());
+		responseV1.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			Set<EndpointApiV1> newEndpoints = new HashSet<>();
 			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
@@ -79,10 +79,10 @@ public class SubscriptionRequestTransformer {
 				);
 				newEndpoints.add(endpointApi);
 			}
-			response.setEndpoints(newEndpoints);
+			responseV1.setEndpointsV1(newEndpoints);
 			//TODO: Return redirectQueueName
 		}
-		return response;
+		return responseV1;
 	}
 
 }

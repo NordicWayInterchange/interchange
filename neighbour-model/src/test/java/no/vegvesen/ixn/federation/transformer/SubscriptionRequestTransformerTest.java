@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		String consumerCommonName = "myName";
 		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
+		SubscriptionPollResponseApiV1 responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
 		assertThat(responseApi.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
@@ -73,7 +72,7 @@ public class SubscriptionRequestTransformerTest {
 
 	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
-		SubscriptionPollResponseApi api = new SubscriptionPollResponseApiV1(
+		SubscriptionPollResponseApiV1 apiV1 = new SubscriptionPollResponseApiV1(
 				UUID.randomUUID().toString(),
 				"t = b",
 				"/mynode/1",
@@ -81,7 +80,7 @@ public class SubscriptionRequestTransformerTest {
 				"mynode",
 				null
 		);
-		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(api);
+		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(apiV1);
 		assertThat(subscription.getEndpoints()).isEmpty();
 
 	}
@@ -95,10 +94,10 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.CREATED,selector,path, "myNeighbour");
 		subscription.setEndpoints(new HashSet<>(Collections.singleton(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)))));
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
-		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
-		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
+		SubscriptionPollResponseApiV1 responseApiV1 = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
+		assertThat(responseApiV1.getEndpointsV1().size()).isEqualTo(1);
+		assertThat(new ArrayList<>(responseApiV1.getEndpointsV1()).get(0).getHost()).isEqualTo(hostName);
+		assertThat(new ArrayList<>(responseApiV1.getEndpointsV1()).get(0).getPort().toString()).isEqualTo(port);
 	}
 
 	@Test

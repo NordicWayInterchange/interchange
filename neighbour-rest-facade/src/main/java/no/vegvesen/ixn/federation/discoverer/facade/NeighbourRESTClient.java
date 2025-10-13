@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,12 +141,12 @@ public class NeighbourRESTClient {
         return responseApi;
     }
 
-    SubscriptionPollResponseApi doPollSubscriptionStatus(String url, String name) {
-        SubscriptionPollResponseApi subscriptionApi;
+    SubscriptionPollResponseApiV1 doPollSubscriptionStatus(String url, String name) {
+        SubscriptionPollResponseApiV1 subscriptionApiV1;
         try {
-            ResponseEntity<SubscriptionPollResponseApi> response = restTemplate.getForEntity(url, SubscriptionPollResponseApi.class);
+            ResponseEntity<SubscriptionPollResponseApiV1> response = restTemplate.getForEntity(url, SubscriptionPollResponseApiV1.class);
             logHttpEntity(response, "Poll subscription");
-            subscriptionApi = response.getBody();
+            subscriptionApiV1 = response.getBody();
 
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
@@ -174,7 +175,7 @@ public class NeighbourRESTClient {
             logger.debug("Received network layer error", e);
             throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception", e);
         }
-        return subscriptionApi;
+        return subscriptionApiV1;
     }
 
     public void deleteSubscriptions(String url, String name) {
