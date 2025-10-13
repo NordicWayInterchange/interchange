@@ -41,12 +41,6 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String keystorePassword = hostStore.password();
 		String truststoreName = caStore.truststoreName().getFileName().toString();
 		String truststorePassword = caStore.truststorePassword();
-        /*
-        String dockerImageName = new ImageFromDockerfile("qpid-it-memory", false)
-                .withFileFromPath(".", imageLocation).getDockerImageName();
-
-         */
-        //DockerImageName imageName = DockerImageName.parse(dockerImageName);
         DockerImageName imageName = DockerImageName.parse("apache/qpid-broker-j:10.0.0-alpine");
         return new QpidContainer(
                 imageName,
