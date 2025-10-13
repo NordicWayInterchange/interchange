@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -175,14 +177,14 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void subscriptionPollResponse() throws JsonProcessingException {
-        SubscriptionPollResponseApi response = new SubscriptionPollResponseApi(
+        SubscriptionPollResponseApi response = new SubscriptionPollResponseApiV1(
                 UUID.randomUUID().toString(),
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
                 "node-1",
                 Collections.singleton(
-                        new EndpointApi(
+                        new EndpointApiV1(
                                 "source-1",
                                 "endpoint-1",
                                 5671

@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +73,7 @@ public class SubscriptionRequestTransformerTest {
 
 	@Test
 	public void subscriptionPollApiWithNullEndpoint() {
-		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi(
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApiV1(
 				UUID.randomUUID().toString(),
 				"t = b",
 				"/mynode/1",

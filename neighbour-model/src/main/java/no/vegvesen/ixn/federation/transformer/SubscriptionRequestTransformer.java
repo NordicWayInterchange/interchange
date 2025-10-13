@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,10 +45,10 @@ public class SubscriptionRequestTransformer {
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
 		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
-		Set<EndpointApi> apiEndpoints = subscriptionApi.getEndpoints();
+		Set<EndpointApiV1> apiEndpoints = subscriptionApi.getEndpoints();
 		if (apiEndpoints != null) {
 			Set<Endpoint> endpoints = new HashSet<>();
-			for (EndpointApi endpointApi : apiEndpoints) {
+			for (EndpointApiV1 endpointApi : apiEndpoints) {
 				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
 				endpoints.add(endpoint);
 			}
@@ -68,9 +68,9 @@ public class SubscriptionRequestTransformer {
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			Set<EndpointApi> newEndpoints = new HashSet<>();
+			Set<EndpointApiV1> newEndpoints = new HashSet<>();
 			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
-				EndpointApi endpointApi = new EndpointApi(
+				EndpointApiV1 endpointApi = new EndpointApiV1(
 						endpoint.getSource(),
 						endpoint.getHost(),
 						endpoint.getPort(),
