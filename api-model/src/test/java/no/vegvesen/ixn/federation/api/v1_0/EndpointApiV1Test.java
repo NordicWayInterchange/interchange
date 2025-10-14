@@ -20,14 +20,15 @@ public class EndpointApiV1Test {
     }
 
     @Test
-    public void readEndpointWithoutBandwidthAndMessageRate() throws JsonProcessingException {
-        String input = "{\"source\":\"mySource\",\"host\":\"myHost\",\"port\":123}";
-        EndpointApiV1 endpointApi = new ObjectMapper().readValue(input, EndpointApiV1.class);
-        assertThat(endpointApi.getSource()).isEqualTo("mySource");
-        assertThat(endpointApi.getHost()).isEqualTo("myHost");
-        assertThat(endpointApi.getPort()).isEqualTo(123);
-        assertThat(endpointApi.getMaxMessageRate()).isNull();
-        assertThat(endpointApi.getMaxBandwidth()).isNull();
+    public void readEndpointV1WithoutBandwidthAndMessageRate() throws JsonProcessingException {
+        String input = "{\"version\":\"1.2\",\"source\":\"mySource\",\"host\":\"myHost\",\"port\":123}";
+        EndpointApiV1 endpointApiV1 = new ObjectMapper().readValue(input, EndpointApiV1.class);
+        assertThat(endpointApiV1.getVersion()).isEqualTo("1.2");
+        assertThat(endpointApiV1.getSource()).isEqualTo("mySource");
+        assertThat(endpointApiV1.getHost()).isEqualTo("myHost");
+        assertThat(endpointApiV1.getPort()).isEqualTo(123);
+        assertThat(endpointApiV1.getMaxMessageRate()).isNull();
+        assertThat(endpointApiV1.getMaxBandwidth()).isNull();
 
     }
 }

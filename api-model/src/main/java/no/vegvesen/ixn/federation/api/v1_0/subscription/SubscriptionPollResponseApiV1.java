@@ -20,7 +20,8 @@ public class SubscriptionPollResponseApiV1 extends SubscriptionPollResponseApi {
                                          String selector,
                                          String path,
                                          SubscriptionStatusApi status,
-                                         String consumerCommonName,Set<EndpointApiV1> endpointsV1) {
+                                         String consumerCommonName,
+                                         Set<EndpointApiV1> endpointsV1) {
         super(id, selector, path, status, consumerCommonName);
         this.endpointsV1 = endpointsV1;
     }
@@ -31,6 +32,14 @@ public class SubscriptionPollResponseApiV1 extends SubscriptionPollResponseApi {
 
     public void setEndpointsV1( Set<EndpointApiV1> endpointsV1) {
         this.endpointsV1 = endpointsV1;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override

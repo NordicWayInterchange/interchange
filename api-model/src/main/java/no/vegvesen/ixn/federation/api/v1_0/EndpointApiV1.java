@@ -79,6 +79,14 @@ public class EndpointApiV1 {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

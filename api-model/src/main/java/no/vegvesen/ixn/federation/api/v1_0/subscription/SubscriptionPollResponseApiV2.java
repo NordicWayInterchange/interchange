@@ -20,7 +20,8 @@ public class SubscriptionPollResponseApiV2 extends SubscriptionPollResponseApi {
                                          String selector,
                                          String path,
                                          SubscriptionStatusApi status,
-                                         String consumerCommonName,Set<EndpointApiV2> endpointsV2) {
+                                         String consumerCommonName,
+                                         Set<EndpointApiV2> endpointsV2) {
         super(id, selector, path, status, consumerCommonName);
         this.endpointsV2 = endpointsV2;
     }
@@ -33,6 +34,13 @@ public class SubscriptionPollResponseApiV2 extends SubscriptionPollResponseApi {
         this.endpointsV2 = endpointsV2;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     @Override
     public boolean equals(Object o) {

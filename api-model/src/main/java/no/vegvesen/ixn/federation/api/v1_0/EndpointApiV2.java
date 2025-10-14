@@ -91,6 +91,14 @@ public class EndpointApiV2 {
         this.requiresDynamicFilter = requiresDynamicFilter;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

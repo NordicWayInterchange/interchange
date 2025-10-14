@@ -33,11 +33,12 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseUnknownJsonField() throws JsonProcessingException {
-        String input = "{\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"endpointsV1\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+        String input = "{\"foo\":\"bar\",\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"endpointsV1\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApiV1 result = mapper.readValue(input,SubscriptionPollResponseApiV1.class);
         System.out.println(mapper.writeValueAsString(result));
         assertThat(result.getConsumerCommonName()).isEqualTo("client1");
+        assertThat(result.getVersion()).isEqualTo("1.2");
         assertThat(result.getEndpointsV1().stream().findFirst().get().getHost()).isEqualTo("b.c-its-interchange.eu");
     }
 
