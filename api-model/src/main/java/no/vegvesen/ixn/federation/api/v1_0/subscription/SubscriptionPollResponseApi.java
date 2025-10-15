@@ -21,7 +21,7 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = SubscriptionPollResponseApiV2.class, name = ApiVersion.VERSION_2_0)
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SubscriptionPollResponseApi {
+public abstract class SubscriptionPollResponseApi {
 
     private String version;
 
