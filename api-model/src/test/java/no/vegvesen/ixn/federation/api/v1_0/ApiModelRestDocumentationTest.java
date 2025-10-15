@@ -7,6 +7,8 @@ import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponse
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class ApiModelRestDocumentationTest {
@@ -183,13 +185,14 @@ public class ApiModelRestDocumentationTest {
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
                 "node-1",
-                Collections.singleton(
+                Set.of(
                         new EndpointApiV1(
                                 "source-1",
                                 "endpoint-1",
                                 5671
                         )
-                )
+                ),
+                Instant.now().toEpochMilli()
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));

@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation.server;
 import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -23,7 +24,10 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -66,11 +70,22 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
     @Test
     public void pollSubscriptionIncludesTimestamp(){
 
-        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(new NeighbourSubscription("1=1", NeighbourSubscriptionStatus.CREATED, "neighbour2")));
+        String uuid = UUID.randomUUID().toString();
+        NeighbourSubscription subscription = new NeighbourSubscription(
+                uuid,
+                NeighbourSubscriptionStatus.CREATED,
+                "1=1",
+                "/subscriptions/" + uuid,
+                "neighbour2",
+                Set.of()
+        );
+        subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
+        NeighbourSubscriptionRequest request = new NeighbourSubscriptionRequest(Set.of(subscription));
         Neighbour neighbour = new Neighbour("neighbour2", new NeighbourCapabilities(), request, new SubscriptionRequest());
         neighbour = neighbourRepository.save(neighbour);
 
-        assertThat(neighbourRestController.pollSubscription(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getUuid()).toString().toLowerCase()).contains("lastupdatedtimestamp");
+        SubscriptionPollResponseApi responseApi = neighbourRestController.pollSubscription(neighbour.getName(), uuid);
+        assertThat(responseApi.getLastUpdatedTimestamp()).isGreaterThanOrEqualTo(0);
     }
 
     @Test

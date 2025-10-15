@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponse
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,7 +79,8 @@ public class SubscriptionRequestTransformerTest {
 				"/mynode/1",
 				SubscriptionStatusApi.REQUESTED,
 				"mynode",
-				null
+				null,
+                Instant.now().toEpochMilli()
 		);
 		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(apiV1);
 		assertThat(subscription.getEndpoints()).isEmpty();
@@ -95,9 +97,9 @@ public class SubscriptionRequestTransformerTest {
 		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.CREATED,selector,path, "myNeighbour");
 		subscription.setEndpoints(new HashSet<>(Collections.singleton(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)))));
 		SubscriptionPollResponseApiV1 responseApiV1 = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
-		assertThat(responseApiV1.getEndpointsV1().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApiV1.getEndpointsV1()).get(0).getHost()).isEqualTo(hostName);
-		assertThat(new ArrayList<>(responseApiV1.getEndpointsV1()).get(0).getPort().toString()).isEqualTo(port);
+		assertThat(responseApiV1.getEndpoints().size()).isEqualTo(1);
+		assertThat(new ArrayList<>(responseApiV1.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
+		assertThat(new ArrayList<>(responseApiV1.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
 	}
 
 	@Test

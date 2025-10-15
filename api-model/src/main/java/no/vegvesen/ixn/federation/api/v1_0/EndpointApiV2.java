@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class EndpointApiV2 {
-
-    private String version = ApiVersion.VERSION_2_0;
 
     private String source;
 
     private String host;
     private Integer port;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean requiresDynamicFilter;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -91,14 +90,6 @@ public class EndpointApiV2 {
         this.requiresDynamicFilter = requiresDynamicFilter;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -120,7 +111,6 @@ public class EndpointApiV2 {
     @Override
     public String toString() {
         return "EndpointApiV2{" +
-                "version='" + version + '\'' +
                 "source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +

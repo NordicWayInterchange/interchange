@@ -8,8 +8,6 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EndpointApiV1 {
 
-    private String version = ApiVersion.VERSION_1_2;
-
     private String source;
 
     private String host;
@@ -79,13 +77,6 @@ public class EndpointApiV1 {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -107,7 +98,6 @@ public class EndpointApiV1 {
     @Override
     public String toString() {
         return "EndpointApi{" +
-                "version='" + version + '\'' +
                 "source='" + source + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +

@@ -45,7 +45,7 @@ public class SubscriptionRequestTransformer {
 		subscription.setLastUpdatedTimestamp(subscriptionApiV1.getLastUpdatedTimestamp());
 		subscription.setConsumerCommonName(subscriptionApiV1.getConsumerCommonName());
 
-		Set<EndpointApiV1> apiEndpointsV1 = subscriptionApiV1.getEndpointsV1();
+		Set<EndpointApiV1> apiEndpointsV1 = subscriptionApiV1.getEndpoints();
 		if (apiEndpointsV1 != null) {
 			Set<Endpoint> endpoints = new HashSet<>();
 			for (EndpointApiV1 endpointApi : apiEndpointsV1) {
@@ -59,30 +59,29 @@ public class SubscriptionRequestTransformer {
 	}
 
 	public SubscriptionPollResponseApiV1 neighbourSubscriptionToSubscriptionPollResponseApiV1(NeighbourSubscription subscription) {
-		SubscriptionPollResponseApiV1 responseV1 = new SubscriptionPollResponseApiV1();
-		responseV1.setId(subscription.getUuid());
-		responseV1.setSelector(subscription.getSelector());
-		responseV1.setPath(subscription.getPath());
-		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
-		responseV1.setStatus(status);
-		responseV1.setConsumerCommonName(subscription.getConsumerCommonName());
-		responseV1.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
-		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			Set<EndpointApiV1> newEndpoints = new HashSet<>();
-			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
-				EndpointApiV1 endpointApi = new EndpointApiV1(
-						endpoint.getSource(),
-						endpoint.getHost(),
-						endpoint.getPort(),
-						endpoint.getMaxBandwidth(),
-						endpoint.getMaxMessageRate()
-				);
-				newEndpoints.add(endpointApi);
-			}
-			responseV1.setEndpointsV1(newEndpoints);
-			//TODO: Return redirectQueueName
-		}
-		return responseV1;
+        Set<EndpointApiV1> newEndpoints = new HashSet<>();
+        if (subscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) {
+            for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
+                EndpointApiV1 endpointApi = new EndpointApiV1(
+                        endpoint.getSource(),
+                        endpoint.getHost(),
+                        endpoint.getPort(),
+                        endpoint.getMaxBandwidth(),
+                        endpoint.getMaxMessageRate()
+                );
+                newEndpoints.add(endpointApi);
+            }
+        }
+
+        return new SubscriptionPollResponseApiV1(
+                subscription.getUuid(),
+                subscription.getSelector(),
+                subscription.getPath(),
+                subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus()),
+                subscription.getConsumerCommonName(),
+                newEndpoints,
+                subscription.getLastUpdatedTimestamp()
+        );
 	}
 
 }

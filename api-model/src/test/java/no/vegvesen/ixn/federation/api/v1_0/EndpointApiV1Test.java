@@ -21,9 +21,8 @@ public class EndpointApiV1Test {
 
     @Test
     public void readEndpointV1WithoutBandwidthAndMessageRate() throws JsonProcessingException {
-        String input = "{\"version\":\"1.2\",\"source\":\"mySource\",\"host\":\"myHost\",\"port\":123}";
+        String input = "{\"source\":\"mySource\",\"host\":\"myHost\",\"port\":123}";
         EndpointApiV1 endpointApiV1 = new ObjectMapper().readValue(input, EndpointApiV1.class);
-        assertThat(endpointApiV1.getVersion()).isEqualTo("1.2");
         assertThat(endpointApiV1.getSource()).isEqualTo("mySource");
         assertThat(endpointApiV1.getHost()).isEqualTo("myHost");
         assertThat(endpointApiV1.getPort()).isEqualTo(123);
