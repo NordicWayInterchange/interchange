@@ -381,6 +381,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 						.build());
 
 			}
+            Thread.sleep(300);
 			assertThat(numMessages.get()).isEqualTo(1);
 		}
 	}
