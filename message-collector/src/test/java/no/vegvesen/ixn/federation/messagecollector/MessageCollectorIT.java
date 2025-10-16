@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -316,5 +317,71 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
                 throw new RuntimeException(e);
             }
         }
+	}
+
+	@Test
+	public void testMessagesWithDynamicFilterWithMessageCollectors() throws Exception {
+		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+		String dynamicFilter = "originatingCountry= 'SE'";
+
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(HOST_NAME, HOST_NAME, HOST_NAME, producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange", dynamicFilter);
+
+		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint));
+
+		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
+		CollectorCreator collectorCreator = new CollectorCreator(
+				sslServerContext(stores,HOST_NAME),
+				HOST_NAME,
+				localIxnFederationPort,
+				"subscriptionExchange");
+
+		MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		collector.runSchedule();
+		assertThat(collector.getListeners()).hasSize(1);
+
+		AtomicInteger numMessages = new AtomicInteger();
+
+		try (Sink sink = new Sink(
+				consumerContainer.getAmqpsUrl(),
+				"sp_consumer",
+				sslClientContext(stores, CONSUMER_SP_NAME),
+				text -> numMessages.incrementAndGet(),
+				dynamicFilter
+		)) {
+			sink.start();
+			try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
+				source.start();
+				source.sendNonPersistentMessage(source.createMessageBuilder()
+						.textMessage("This is a DENM message")
+						.userId("")
+						.publisherId("NO-123")
+						.publicationId("pub-1")
+						.messageType(Constants.DENM)
+						.causeCode(6)
+						.subCauseCode(61)
+						.originatingCountry("NO")
+						.protocolVersion("DENM:1.2.2")
+						.quadTreeTiles(",12003,")
+						.shardId(1)
+						.shardCount(1)
+						.timestamp(System.currentTimeMillis())
+						.build());
+
+				source.sendNonPersistentMessage(source.createMessageBuilder()
+						.textMessage("This is a DENM message")
+						.publisherId("SE-234")
+						.publicationId("1")
+						.messageType(Constants.DENM)
+						.causeCode(6)
+						.subCauseCode(61)
+						.originatingCountry("SE")
+						.protocolVersion("DENM:1.2.2")
+						.quadTreeTiles(",13003")
+						.build());
+
+			}
+			assertThat(numMessages.get()).isEqualTo(1);
+		}
 	}
 }
