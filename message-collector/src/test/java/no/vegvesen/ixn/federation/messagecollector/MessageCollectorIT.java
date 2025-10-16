@@ -346,8 +346,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				consumerContainer.getAmqpsUrl(),
 				"sp_consumer",
 				sslClientContext(stores, CONSUMER_SP_NAME),
-				text -> numMessages.incrementAndGet(),
-				dynamicFilter
+				text -> numMessages.incrementAndGet()
 		)) {
 			sink.start();
 			try (Source source = createSource(producerContainer.getAmqpsUrl(), HOST_NAME, stores, PRODUCER_SP_NAME)) {
