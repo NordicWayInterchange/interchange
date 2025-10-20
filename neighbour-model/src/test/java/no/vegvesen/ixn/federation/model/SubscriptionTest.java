@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 public class SubscriptionTest {
@@ -124,8 +125,8 @@ public class SubscriptionTest {
                 "host2",
                 123
         );
-        subscription.setEndpoints(new HashSet<>(Arrays.asList(firstEndpoint,secondEndpoint)));
+        subscription.setEndpoints(Set.of(firstEndpoint,secondEndpoint));
         assertThat(subscription.getEndpoints()).hasSize(2);
-        assertThat(subscription.getEndpoints()).containsExactly(firstEndpoint,secondEndpoint);
+        assertThat(subscription.getEndpoints()).contains(firstEndpoint,secondEndpoint);
     }
 }
