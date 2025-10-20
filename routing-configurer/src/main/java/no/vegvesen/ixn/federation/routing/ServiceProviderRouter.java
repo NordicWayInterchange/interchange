@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
 
@@ -56,30 +56,34 @@ public class ServiceProviderRouter {
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
-            String name = serviceProvider.getName();
-            logger.debug("Checking service provider {}", name);
-            syncPrivateChannels(serviceProvider, delta);
-            serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
-            serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
-            serviceProvider = syncSubscriptions(serviceProvider, delta);
-            serviceProvider = removeUnwantedSubscriptions(serviceProvider);
-
-            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
-            if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                if (groupMember == null) {
-                    qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
-                }
-            } else {
-                if (groupMember != null) {
-                    qpidClient.removeServiceProviderMemberFromGroup(groupMember);
-                }
-            }
-
-            serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
-            bindCapabilityExchangesToBiQueue(serviceProvider, delta);
-            serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
-            serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
+            syncServiceProvider(serviceProvider, delta, serviceProviders);
         }
+    }
+
+    private void syncServiceProvider(ServiceProvider serviceProvider, QpidDelta delta, Iterable<ServiceProvider> allServiceProviders) {
+        String name = serviceProvider.getName();
+        logger.debug("Checking service provider {}", name);
+        syncPrivateChannels(serviceProvider, delta);
+        serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
+        serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
+        serviceProvider = syncSubscriptions(serviceProvider, delta);
+        serviceProvider = removeUnwantedSubscriptions(serviceProvider);
+
+        ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
+        if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
+            if (groupMember == null) {
+                qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
+            }
+        } else {
+            if (groupMember != null) {
+                qpidClient.removeServiceProviderMemberFromGroup(groupMember);
+            }
+        }
+
+        serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
+        bindCapabilityExchangesToBiQueue(serviceProvider, delta);
+        serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, allServiceProviders);
+        setUpDeliveryQueue(serviceProvider, delta);
     }
 
     public ServiceProvider syncSubscriptions(ServiceProvider serviceProvider, QpidDelta delta) {
@@ -100,7 +104,7 @@ public class ServiceProviderRouter {
         switch (subscription.getStatus()) {
             case REQUESTED:
                 if (subscription.getLocalEndpoints().isEmpty()) {
-                    String queueName = "loc-" + UUID.randomUUID().toString();
+                    String queueName = "loc-" + UUID.randomUUID();
                     LocalEndpoint endpoint = new LocalEndpoint(queueName, nodeName, Integer.parseInt(messageChannelPort));
                     subscription.getLocalEndpoints().add(endpoint);
                 }
@@ -174,6 +178,7 @@ public class ServiceProviderRouter {
             subscription.setStatus(LocalSubscriptionStatus.CREATED);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
             //Just skip
+            logger.debug("Redirect subscription already in CREATED state");
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
             subscription.getLocalEndpoints().clear();
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
