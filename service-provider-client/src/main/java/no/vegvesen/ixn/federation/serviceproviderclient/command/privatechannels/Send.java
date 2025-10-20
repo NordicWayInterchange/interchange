@@ -6,7 +6,6 @@ import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine;
@@ -22,7 +21,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
 
 @CommandLine.Command(name="send",
-        description = "Add delivery and send message",
+        description = "Add private channel and send message",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0",
@@ -36,7 +35,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 public class Send implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    DeliveriesCommand parentCommand;
+    PrivateChannelsCommand parentCommand;
 
     @CommandLine.Option(names = {"-m", "--message"}, description = "The message json file", required = true)
     File messageFile;
@@ -44,7 +43,7 @@ public class Send implements Callable<Integer> {
     @CommandLine.Option(names = {"-b", "--binary"}, description = "Send file")
     boolean binary;
 
-    @CommandLine.Option(names = {"-d", "--description"}, description = "Description of delivery")
+    @CommandLine.Option(names = {"-d", "--description"}, description = "Description of private channel")
     String description;
 
     @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
@@ -72,8 +71,8 @@ public class Send implements Callable<Integer> {
             TimeUnit.SECONDS.sleep(3);
             privateChannel = client.getPrivateChannel(privateChannelId);
         }
-        if (! privateChannel.getStatus().equals(DeliveryStatus.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected private channel status: %s for delivery %s", privateChannel.getStatus(), privateChannel.getId()));
+        if (! privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
         }
         PrivateChannelEndpointApi privateChannelEndpoint = privateChannel.getEndpoint();
         if (privateChannelEndpoint == null) {
