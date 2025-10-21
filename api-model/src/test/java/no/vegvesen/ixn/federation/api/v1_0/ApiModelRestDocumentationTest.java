@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -196,6 +197,24 @@ public class ApiModelRestDocumentationTest {
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+        SubscriptionPollResponseApi response2 = new SubscriptionPollResponseApiV2(
+                UUID.randomUUID().toString(),
+                "a = b",
+                "/subscriptions/2",
+                SubscriptionStatusApi.CREATED,
+                "node-1",
+                Set.of(
+                        new EndpointApiV2(
+                                "source-1",
+                                "host-1",
+                                5671,
+                                true
+                        )
+                ),
+                Instant.now().toEpochMilli()
+        );
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response2));
     }
 
     @Test

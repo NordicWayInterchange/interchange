@@ -319,4 +319,5 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 		assertThat(repository.findByName("my-multi-neighbour2").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
 
+
 }

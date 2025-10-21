@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,23 +39,50 @@ public class SubscriptionRequestTransformer {
         return new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 	}
 
-	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApiV1 subscriptionApiV1) {
+    //TODO need the selector from the subscription...
+	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription();
-		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApiV1.getStatus()));
-		subscription.setSelector(subscriptionApiV1.getSelector());
-		subscription.setPath(subscriptionApiV1.getPath());
-		subscription.setLastUpdatedTimestamp(subscriptionApiV1.getLastUpdatedTimestamp());
-		subscription.setConsumerCommonName(subscriptionApiV1.getConsumerCommonName());
+		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
+		subscription.setSelector(subscriptionApi.getSelector());
+		subscription.setPath(subscriptionApi.getPath());
+		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
+		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
-		Set<EndpointApiV1> apiEndpointsV1 = subscriptionApiV1.getEndpoints();
-		if (apiEndpointsV1 != null) {
-			Set<Endpoint> endpoints = new HashSet<>();
-			for (EndpointApiV1 endpointApi : apiEndpointsV1) {
-				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
-				endpoints.add(endpoint);
-			}
-			subscription.setEndpoints(endpoints);
-		}
+        if (subscriptionApi instanceof SubscriptionPollResponseApiV1 subscriptionPollResponseApiV1) {
+            Set<EndpointApiV1> apiEndpointsV1 = subscriptionPollResponseApiV1.getEndpoints();
+            if (apiEndpointsV1 != null) {
+                Set<Endpoint> endpoints = new HashSet<>();
+                for (EndpointApiV1 endpointApi : apiEndpointsV1) {
+                    Endpoint endpoint = new Endpoint(
+                            endpointApi.getSource(),
+                            endpointApi.getHost(),
+                            endpointApi.getPort(),
+                            endpointApi.getMaxBandwidth(),
+                            endpointApi.getMaxMessageRate(),
+                            null
+                    );
+                    endpoints.add(endpoint);
+                }
+                subscription.setEndpoints(endpoints);
+            }
+        } else if (subscriptionApi instanceof SubscriptionPollResponseApiV2 subscriptionPollResponseApiV2) {
+            Set<EndpointApiV2> apiEndpointsV2 = subscriptionPollResponseApiV2.getEndpoints();
+            if (apiEndpointsV2 != null) {
+                Set<Endpoint> endpoints = new HashSet<>();
+                for (EndpointApiV2 endpointApi : apiEndpointsV2) {
+                    Endpoint endpoint = new Endpoint(
+                            endpointApi.getSource(),
+                            endpointApi.getHost(),
+                            endpointApi.getPort(),
+                            endpointApi.getMaxBandwidth(),
+                            endpointApi.getMaxMessageRate(),
+                            subscriptionApi.getSelector()
+                    );
+                    endpoints.add(endpoint);
+                }
+                subscription.setEndpoints(endpoints);
+            }
+        }
 		return subscription;
 
 	}

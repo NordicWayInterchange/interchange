@@ -141,12 +141,12 @@ public class NeighbourRESTClient {
         return responseApi;
     }
 
-    SubscriptionPollResponseApiV1 doPollSubscriptionStatus(String url, String name) {
-        SubscriptionPollResponseApiV1 subscriptionApiV1;
+    SubscriptionPollResponseApi doPollSubscriptionStatus(String url, String name) {
+        SubscriptionPollResponseApi subscriptionApi;
         try {
-            ResponseEntity<SubscriptionPollResponseApiV1> response = restTemplate.getForEntity(url, SubscriptionPollResponseApiV1.class);
+            ResponseEntity<SubscriptionPollResponseApi> response = restTemplate.getForEntity(url, SubscriptionPollResponseApi.class);
             logHttpEntity(response, "Poll subscription");
-            subscriptionApiV1 = response.getBody();
+            subscriptionApi = response.getBody();
 
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
@@ -175,7 +175,7 @@ public class NeighbourRESTClient {
             logger.debug("Received network layer error", e);
             throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception", e);
         }
-        return subscriptionApiV1;
+        return subscriptionApi;
     }
 
     public void deleteSubscriptions(String url, String name) {
