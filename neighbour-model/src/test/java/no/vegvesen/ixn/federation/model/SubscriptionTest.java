@@ -129,4 +129,15 @@ public class SubscriptionTest {
         assertThat(subscription.getEndpoints()).hasSize(2);
         assertThat(subscription.getEndpoints()).contains(firstEndpoint,secondEndpoint);
     }
+
+    @Test
+    public void saveSubscriptionWithNullConsumerCommonName() {
+        Subscription subscription = new Subscription(
+                "a = b",
+                SubscriptionStatus.REQUESTED
+        );
+        subscription.setPath("/a");
+        Subscription sub2 = new  Subscription();
+        assertThat(sub2.equals(subscription)).isFalse();
+    }
 }

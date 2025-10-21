@@ -319,24 +319,5 @@ public class NeighbourRepositoryIT extends PostgresContainerBase {
 		assertThat(repository.findByName("my-multi-neighbour2").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
 
-    @Test
-    public void saveSubscriptionWithNullConsumerCommonName() {
-        Subscription subscription = new Subscription(
-                "a = b",
-                SubscriptionStatus.REQUESTED
-        );
-        subscription.setPath("/a");
-        Neighbour neighbour = new Neighbour(
-             "yetanotherneighbour",
-             new NeighbourCapabilities(),
-             new NeighbourSubscriptionRequest(),
-             new SubscriptionRequest(
-                     Set.of(subscription)
-             )
-        );
-        System.out.println(neighbour);
-        repository.save(neighbour);
-        Subscription sub2 = new  Subscription();
-        assertThat(sub2.equals(subscription)).isFalse();
-    }
+
 }

@@ -149,10 +149,9 @@ public class Subscription {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Subscription)) return false;
-		Subscription that = (Subscription) o;
-		return selector.equals(that.selector) &&
-				consumerCommonName.equals(that.consumerCommonName);
+		if (!(o instanceof Subscription that)) return false;
+        return Objects.equals(selector,that.selector) &&
+				Objects.equals(consumerCommonName, that.consumerCommonName);
 	}
 
 	@Override
