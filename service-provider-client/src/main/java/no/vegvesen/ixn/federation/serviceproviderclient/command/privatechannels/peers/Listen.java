@@ -20,9 +20,10 @@ import java.util.concurrent.TimeUnit;
         version = "1.0",
         customSynopsis = {
                 """ 
-                        Examples:\n
-                        serviceproviderclient privatechannels listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
-                        serviceproviderclient privatechannels listen -f private_channel_king_olav.json \n
+                        Examples: \n
+                        serviceproviderclient privatechannels peers listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
+                        serviceproviderclient privatechannels peers listen -f private_channel_king_olav.json -d directory \n
+                        # -d is optional
                         """
         })
 
@@ -36,9 +37,6 @@ public class Listen implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
-
-    @CommandLine.Option(names = {"-c", "--comment"})
-    String description;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 

@@ -29,7 +29,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
                 """
                         Examples: \n
                         serviceproviderclient privatechannels send -m message.json -i 5d16cb60-0534-4469-b525-f92a5953322c \n
-                        serviceproviderclient privatechannels send -m message.json -f denm_delivery.json \n
+                        serviceproviderclient privatechannels send -m message.json -f privatechannels.json \n
                         """
         })
 public class Send implements Callable<Integer> {
@@ -42,9 +42,6 @@ public class Send implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-b", "--binary"}, description = "Send file")
     boolean binary;
-
-    @CommandLine.Option(names = {"-d", "--description"}, description = "Description of private channel")
-    String description;
 
     @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
     PrivatechannelsOption option;
@@ -74,11 +71,11 @@ public class Send implements Callable<Integer> {
         if (! privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
             throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
         }
+
         PrivateChannelEndpointApi privateChannelEndpoint = privateChannel.getEndpoint();
         if (privateChannelEndpoint == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }
-
 
         String queueName = privateChannelEndpoint.getQueueName();
         String url = "amqps://" + privateChannelEndpoint.getHost();
