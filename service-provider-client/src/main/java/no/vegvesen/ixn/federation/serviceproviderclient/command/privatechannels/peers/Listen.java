@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
                 """ 
                         Examples: \n
                         serviceproviderclient privatechannels peers listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
-                        serviceproviderclient privatechannels peers listen -f private_channel_king_olav.json -d directory \n
-                        # -d is optional
                         """
         })
 
@@ -44,18 +42,23 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-
-        if (option.file != null) {
+        String id = "";
+       /* Do we need to read peers from a file?
+       if (option.file != null) {
             ObjectMapper mapper = new ObjectMapper();
             AddPeersRequest request = mapper.readValue(option.file, AddPeersRequest.class);
             client.addPeersToPrivateChannel(option.id, request);
             System.out.printf("successfully added %s to private channel with id %s", request.getPeersToAdd(), option.id);
 
+        } else */
+        if (option.id != null) {
+            id = option.id;
+
         } else {
-            throw new RuntimeException("Need to specify either id, selector or file");
+            throw new RuntimeException("Need to specify either id or file");
         }
 
-        GetPrivateChannelResponse privateChannel = client.getPrivateChannel(option.id);
+        GetPrivateChannelResponse privateChannel = client.getPrivateChannel(id);
         while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED)) {
             privateChannel = client.getPrivateChannel(privateChannel.getId());
             TimeUnit.SECONDS.sleep(2);
@@ -63,7 +66,6 @@ public class Listen implements Callable<Integer> {
 
         if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
             throw new RuntimeException(String.format("Unexpected private channel status %s for private channel %s", privateChannel.getStatus(), privateChannel.getId()));
-
         }
 
         PrivateChannelEndpointApi endpointApi = client
@@ -75,10 +77,9 @@ public class Listen implements Callable<Integer> {
         if (endpointApi == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }
-
         String url = "amqps://" + endpointApi.getHost();
 
-        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
+        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getQueueName(), url);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
             counter.countDown();

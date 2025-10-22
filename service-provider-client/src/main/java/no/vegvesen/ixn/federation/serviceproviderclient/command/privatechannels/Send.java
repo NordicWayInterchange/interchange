@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
@@ -20,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
 
 
-@CommandLine.Command(name="send",
+@CommandLine.Command(name = "send",
         description = "Add private channel and send message",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
@@ -29,7 +28,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
                 """
                         Examples: \n
                         serviceproviderclient privatechannels send -m message.json -i 5d16cb60-0534-4469-b525-f92a5953322c \n
-                        serviceproviderclient privatechannels send -m message.json -f privatechannels.json \n
+                        serviceproviderclient privatechannels send -m message.json -f privatechannels.json -b \n
                         """
         })
 public class Send implements Callable<Integer> {
@@ -51,14 +50,13 @@ public class Send implements Callable<Integer> {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String privateChannelId;
-        if(option.file != null){
+        if (option.file != null) {
             ObjectMapper mapper = new ObjectMapper();
             AddPrivateChannelRequest privateChannelRequest = mapper.readValue(option.file, AddPrivateChannelRequest.class);
             AddPrivateChannelResponse privateChannelResponse = client.addPrivateChannel(privateChannelRequest);
             privateChannelId = privateChannelResponse.getPrivateChannels().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated private channel was created, " +
                     "but could not find it in response")).getId();
-        }
-        else{
+        } else {
             privateChannelId = option.id;
         }
 
@@ -68,7 +66,7 @@ public class Send implements Callable<Integer> {
             TimeUnit.SECONDS.sleep(3);
             privateChannel = client.getPrivateChannel(privateChannelId);
         }
-        if (! privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
+        if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
             throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
         }
 
@@ -76,22 +74,20 @@ public class Send implements Callable<Integer> {
         if (privateChannelEndpoint == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }
-
         String queueName = privateChannelEndpoint.getQueueName();
         String url = "amqps://" + privateChannelEndpoint.getHost();
 
-        System.out.printf("Sending message from file %s%n",messageFile);
+        System.out.printf("Sending message from file %s%n", messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
         validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
 
-            while(true) {
+            while (true) {
                 try {
                     source.start();
                     break;
-                }
-                catch (InvalidDestinationException e){
+                } catch (InvalidDestinationException e) {
                     System.out.println("\nRetrying\n");
                     TimeUnit.SECONDS.sleep(3);
                 }
@@ -99,7 +95,7 @@ public class Send implements Callable<Integer> {
 
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
-                switch (message){
+                switch (message) {
                     case DenmMessage ignored -> {
                         messageBuilder
                                 .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
@@ -186,24 +182,23 @@ public class Send implements Callable<Integer> {
     }
 
     private void validateInput(Messages messages) throws Exception {
-        for(Message message : messages.getMessages()){
-            if(binary) {
-                if(message.getMessageType().equals(DATEX_2)){
+        for (Message message : messages.getMessages()) {
+            if (binary) {
+                if (message.getMessageType().equals(DATEX_2)) {
                     throw new Exception("DATEX messages can not be sent binary.");
                 }
                 if (message.getFile() == null) {
                     throw new Exception("Message does not contain file");
                 }
-            }
-            else{
-                if(message.getMessageText() == null){
+            } else {
+                if (message.getMessageText() == null) {
                     throw new Exception("Message does not contain messageText");
                 }
             }
         }
     }
 
-    private static class PrivatechannelsOption{
+    private static class PrivatechannelsOption {
         @CommandLine.Option(names = {"-f", "--file"}, required = true, description = "The privatechannel json file")
         File file;
 
