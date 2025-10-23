@@ -22,8 +22,7 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String selector = "";
 
     @Column
