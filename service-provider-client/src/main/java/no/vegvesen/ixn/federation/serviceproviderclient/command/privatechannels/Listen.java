@@ -5,7 +5,6 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.WriteToFileMessageListener;
 import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers.PeersCommand;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine;
 
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Listen implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    PeersCommand parentCommand;
+    PrivateChannelsCommand parentCommand;
 
     @CommandLine.ArgGroup(multiplicity = "1")
     PrivateChannelsOption option;
@@ -40,7 +39,7 @@ public class Listen implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().createClient();
 
         String id;
         if (option.id != null) {
@@ -59,12 +58,7 @@ public class Listen implements Callable<Integer> {
             throw new RuntimeException(String.format("Unexpected private channel status %s for private channel %s", privateChannel.getStatus(), privateChannel.getId()));
         }
 
-        PrivateChannelEndpointApi endpointApi = client
-                .getPeerPrivateChannels()
-                .getPrivateChannels()
-                .getFirst()
-                .getEndpoint();
-
+        PrivateChannelEndpointApi endpointApi = privateChannel.getEndpoint();
         if (endpointApi == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }
@@ -78,7 +72,7 @@ public class Listen implements Callable<Integer> {
         try (Sink sink = new Sink(
                 url,
                 endpointApi.getQueueName(),
-                parentCommand.getParent().getParent().createSSLContext(),
+                parentCommand.getParent().createSSLContext(),
                 directory != null ? new WriteToFileMessageListener(directory) : new WriteToScreenMessageListener(),
                 exceptionListener)
         ) {
