@@ -1,27 +1,27 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.WriteToFileMessageListener;
 import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers.PeersCommand;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@CommandLine.Command(name = "listen", description = "Add private channel peers and receive messages",
+@CommandLine.Command(name = "listen", description = "Receive messages",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0",
         customSynopsis = {
                 """ 
                         Examples: \n
-                        serviceproviderclient privatechannels peers listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
+                        serviceproviderclient privatechannels listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 -d directory \n
+                        # -d is optional
                         """
         })
 
@@ -42,20 +42,11 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-        String id = "";
-       /* Do we need to read peers from a file?
-       if (option.file != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            AddPeersRequest request = mapper.readValue(option.file, AddPeersRequest.class);
-            client.addPeersToPrivateChannel(option.id, request);
-            System.out.printf("successfully added %s to private channel with id %s", request.getPeersToAdd(), option.id);
-
-        } else */
+        String id;
         if (option.id != null) {
             id = option.id;
-
         } else {
-            throw new RuntimeException("Need to specify either id or file");
+            throw new RuntimeException("Need to specify either id");
         }
 
         GetPrivateChannelResponse privateChannel = client.getPrivateChannel(id);
@@ -98,9 +89,6 @@ public class Listen implements Callable<Integer> {
     }
 
     private static class PrivateChannelsOption {
-        @CommandLine.Option(names = {"-f", "--filename"}, description = "The private channel json file")
-        File file;
-
         @CommandLine.Option(names = {"-i", "--id"}, description = "The private channel Id")
         String id;
     }
