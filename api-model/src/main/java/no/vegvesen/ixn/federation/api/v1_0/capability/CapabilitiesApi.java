@@ -9,7 +9,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilitiesApi {
 
-    private String version = ApiVersion.version;
+    private String version = ApiVersion.VERSION_2_0;
 
     private String name;
 
