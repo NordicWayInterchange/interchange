@@ -137,8 +137,8 @@ public class NeighbourSubscription {
         if (this == o) return true;
         if (!(o instanceof NeighbourSubscription)) return false;
         NeighbourSubscription that = (NeighbourSubscription) o;
-        return selector.equals(that.selector) &&
-                consumerCommonName.equals(that.consumerCommonName);
+        return Objects.equals(selector, that.selector) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
