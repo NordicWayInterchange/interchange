@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.EndpointApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ public class SwaggerConfig {
             application.getOneOf().remove(0);
 
             openApi.getComponents().addSchemas("SubscriptionPollResponseApi", ModelConverters.getInstance().readAllAsResolvedSchema(SubscriptionPollResponseApi.class).schema);
-            openApi.getComponents().addSchemas("EndpointApi", ModelConverters.getInstance().readAllAsResolvedSchema(EndpointApi.class).schema);
+            openApi.getComponents().addSchemas("EndpointApi", ModelConverters.getInstance().readAllAsResolvedSchema(EndpointApiV1.class).schema);
 
             schemas.get("RequestedSubscriptionApi").setRequired(List.of("selector"));
 
