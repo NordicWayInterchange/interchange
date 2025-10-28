@@ -20,9 +20,9 @@ import java.util.concurrent.Callable;
         customSynopsis = {
                 """
                         Examples:\n
-                        serviceproviderclient subscriptions add -s "originatingCountry='NO'" \n
-                        serviceproviderclient subscriptions add -f denm_sub.json -d "denm subscription" \n
-                        | description is optional
+                        serviceproviderclient subscriptions add -s "originatingCountry='NO'" -d "Description to subscription"\n
+                        serviceproviderclient subscriptions add -f denm_sub.json \n
+                        -d is optional
                         """
         }
 )
