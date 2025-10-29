@@ -38,6 +38,9 @@ public class LocalDeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
         this.dlqName = dlqName;
     }
+    public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
+        this(null,host,port,target,maxBandwidth,maxMessageRate,dlqName);
+    }
 
     public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
         this(null,host,port,target,maxBandwidth,maxMessageRate, null);

@@ -15,6 +15,7 @@ public class DeliveryImportApi {
 
     private DeliveryStatusImportApi status;
 
+    private Boolean dlq;
 
 
     public enum DeliveryStatusImportApi {
@@ -24,15 +25,18 @@ public class DeliveryImportApi {
     public DeliveryImportApi() {
 
     }
-    public DeliveryImportApi(String uuid, Set<DeliveryEndpointImportApi> endpoints,
+    public DeliveryImportApi(String uuid,
+                             Set<DeliveryEndpointImportApi> endpoints,
                              String path,
                              String selector,
-                             DeliveryStatusImportApi status) {
+                             DeliveryStatusImportApi status,
+                             Boolean dlq) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.status = status;
+        this.dlq = dlq;
     }
 
     public String getUuid() {
@@ -75,26 +79,35 @@ public class DeliveryImportApi {
         this.status = status;
     }
 
+    public Boolean getDlq() {
+        return dlq;
+    }
+
+    public void setDlq(Boolean dlq) {
+        this.dlq = dlq;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlq, that.dlq);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoints, path, selector, status);
+        return Objects.hash(uuid, endpoints, path, selector, status, dlq);
     }
 
     @Override
     public String toString() {
         return "DeliveryImportApi{" +
-                "endpoints=" + endpoints +
+                "uuid='" + uuid + '\'' +
+                ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
+                ", dlq=" + dlq +
                 '}';
     }
 }

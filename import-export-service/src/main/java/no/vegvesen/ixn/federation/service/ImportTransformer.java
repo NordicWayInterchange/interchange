@@ -130,10 +130,12 @@ public class ImportTransformer {
     }
 
     public LocalDelivery transformDeliveryImportApiToLocalDelivery(DeliveryImportApi delivery) {
-        return new LocalDelivery(delivery.getUuid(),delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
+        return new LocalDelivery(
+                delivery.getUuid(),
+                delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                //transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus())
-                LocalDeliveryStatus.REQUESTED
+                LocalDeliveryStatus.REQUESTED,
+                delivery.getDlq()
         );
     }
 
@@ -142,7 +144,8 @@ public class ImportTransformer {
                 endpoint.getPort(),
                 endpoint.getTarget(),
                 endpoint.getMaxBandwidth(),
-                endpoint.getMaxMessageRate()
+                endpoint.getMaxMessageRate(),
+                endpoint.getDlqName()
         );
     }
 
