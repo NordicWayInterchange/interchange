@@ -15,7 +15,7 @@ public class DeliveryImportApi {
 
     private DeliveryStatusImportApi status;
 
-    private Boolean dlq;
+    private Boolean dlqueue;
 
 
     public enum DeliveryStatusImportApi {
@@ -30,13 +30,13 @@ public class DeliveryImportApi {
                              String path,
                              String selector,
                              DeliveryStatusImportApi status,
-                             Boolean dlq) {
+                             Boolean dlqueue) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.status = status;
-        this.dlq = dlq;
+        this.dlqueue = dlqueue;
     }
 
     public String getUuid() {
@@ -79,24 +79,24 @@ public class DeliveryImportApi {
         this.status = status;
     }
 
-    public Boolean getDlq() {
-        return dlq;
+    public Boolean getDlqueue() {
+        return dlqueue;
     }
 
-    public void setDlq(Boolean dlq) {
-        this.dlq = dlq;
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlq, that.dlq);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, endpoints, path, selector, status, dlq);
+        return Objects.hash(uuid, endpoints, path, selector, status, dlqueue);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class DeliveryImportApi {
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
-                ", dlq=" + dlq +
+                ", dlq=" + dlqueue +
                 '}';
     }
 }

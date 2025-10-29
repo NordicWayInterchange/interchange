@@ -8,8 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -135,7 +133,7 @@ public class ImportTransformer {
                 delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 LocalDeliveryStatus.REQUESTED,
-                delivery.getDlq()
+                delivery.getDlqueue()
         );
     }
 
