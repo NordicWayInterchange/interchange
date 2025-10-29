@@ -62,15 +62,16 @@ public class Send implements Callable<Integer> {
 
         GetPrivateChannelResponse privateChannel = client.getPrivateChannel(privateChannelId);
 
-        int attempts = 0;
-        int maxAttempts = 10;
-        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && attempts < maxAttempts) {
+        int maxRetries = 10;
+        int retries = 0;
+        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
             TimeUnit.SECONDS.sleep(3);
             privateChannel = client.getPrivateChannel(privateChannelId);
-            attempts++;
+            retries++;
         }
-        if (attempts == maxAttempts) {
-            throw new RuntimeException("Timeout waiting for private channel status to change from REQUESTED to CREATED");
+
+        if (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED)) {
+            throw new RuntimeException(String.format("Private channel %s is still in REQUESTED state after the timeout", privateChannel.getId()));
         }
         if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
             throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
