@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
         customSynopsis = {
         """
                 Examples: \n
-                serviceproviderclient deliveries add -s "originatingCountry='NO'" -d "Description to delivery" -dlq=true \n
+                serviceproviderclient deliveries add -s "originatingCountry='NO'" -d "Description to delivery" -dlq \n
                 serviceproviderclient deliveries add -f denmDelivery.json \n
                 -d is optional
                 -dlq is optional

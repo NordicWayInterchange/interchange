@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.dlqueue;
 
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
 @CommandLine.Command(name = "listen", description = "Listen to a dlq for a delivery",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
@@ -19,14 +20,14 @@ import java.util.concurrent.TimeUnit;
         customSynopsis = {
                 """ 
                         Examples:\n
-                        serviceproviderclient deliveries listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 -d directory \n
+                        serviceproviderclient deliveries dlq listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 -d directory \n
                         # -d is optional
                         """
         })
 public class Listen implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    DeliveriesCommand parentCommand;
+    DlqCommand parentCommand;
 
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
@@ -38,7 +39,7 @@ public class Listen implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        ServiceProviderClient client = parentCommand.getParent().createClient();
+        ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
         String deliveryId;
         if (option.id != null) {
@@ -59,7 +60,7 @@ public class Listen implements Callable<Integer> {
         }
 
         if (delivery.getStatus().equals(DeliveryStatus.REQUESTED)) {
-            throw new RuntimeException(String.format("Delivery %s is still in REQUESTED state after %s retries", delivery.getId(), maxRetries));
+            throw new RuntimeException(String.format("Delivery %s is still in REQUESTED state after the timeout", delivery.getId()));
         }
 
         if (!delivery.getStatus().equals(DeliveryStatus.CREATED)) {
@@ -81,7 +82,7 @@ public class Listen implements Callable<Integer> {
         try (Sink sink = new Sink(
                 url,
                 deliveryEndpoint.getTarget(),
-                parentCommand.getParent().createSSLContext(),
+                parentCommand.getParent().getParent().createSSLContext(),
                 directory != null ? new WriteToFileMessageListener(directory) : new WriteToScreenMessageListener(),
                 exceptionListener)
         ) {
