@@ -132,7 +132,8 @@ public class ExportTransformer {
                 delivery.getUuid(),
                 delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus())
+                transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus()),
+                delivery.isDlqueue()
                 );
     }
 
@@ -141,7 +142,8 @@ public class ExportTransformer {
                 endpoint.getPort(),
                 endpoint.getTarget(),
                 endpoint.getMaxBandwidth(),
-                endpoint.getMaxMessageRate()
+                endpoint.getMaxMessageRate(),
+                endpoint.getDlqName()
         );
     }
 
