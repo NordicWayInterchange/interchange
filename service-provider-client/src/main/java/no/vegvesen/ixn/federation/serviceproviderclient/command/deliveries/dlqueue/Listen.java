@@ -32,8 +32,8 @@ public class Listen implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
-    @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
-    DeliveriesOption option;
+    @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The delivery id")
+    String id;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 
@@ -41,21 +41,14 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-        String deliveryId;
-        if (option.id != null) {
-            deliveryId = option.id;
-        } else {
-            throw  new RuntimeException("Need to specify delivery id");
-        }
-
-        GetDeliveryResponse delivery = client.getDelivery(deliveryId);
+        GetDeliveryResponse delivery = client.getDelivery(id);
 
         int maxRetries = 10;
         int retries = 0;
 
         while (delivery.getStatus().equals(DeliveryStatus.REQUESTED) && retries < maxRetries) {
             TimeUnit.SECONDS.sleep(3);
-            delivery = client.getDelivery(deliveryId);
+            delivery = client.getDelivery(id);
             retries++;
         }
 
@@ -67,7 +60,8 @@ public class Listen implements Callable<Integer> {
             throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(), delivery.getId()));
         }
 
-        if (delivery.getEndpoints().stream().findFirst().orElseThrow().getDlqName() == null) {
+        String dlqName = delivery.getEndpoints().stream().findFirst().orElseThrow().getDlqName();
+        if (dlqName == null) {
             throw new RuntimeException(String.format("There is no dlq assigned for delivery %s", delivery.getId()));
         }
 
@@ -81,7 +75,7 @@ public class Listen implements Callable<Integer> {
         };
         try (Sink sink = new Sink(
                 url,
-                deliveryEndpoint.getTarget(),
+                dlqName,
                 parentCommand.getParent().getParent().createSSLContext(),
                 directory != null ? new WriteToFileMessageListener(directory) : new WriteToScreenMessageListener(),
                 exceptionListener)
@@ -92,9 +86,5 @@ public class Listen implements Callable<Integer> {
         return 0;
     }
 
-    private static class DeliveriesOption {
-        @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The delivery id")
-        String id;
-    }
 }
 
