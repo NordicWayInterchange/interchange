@@ -1,0 +1,9 @@
+{
+  "version" : "1.0",
+  "name" : "king_olav.bouvetinterchange.eu",
+  "deliveries" : [ {
+    "selector" : "originatingCountry = 'NO'",
+    "description" : "Deliveries to King Olav in Bouvet Interchange for Norway",
+    "dlqueue": true
+  } ]
+}
