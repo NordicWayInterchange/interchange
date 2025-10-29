@@ -59,16 +59,16 @@ public class Listen implements Callable<Integer> {
         if (!delivery.getStatus().equals(DeliveryStatus.CREATED)) {
             throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(), delivery.getId()));
         }
+        DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not determine delivery endpoint from response"));
 
-        String dlqName = delivery.getEndpoints().stream().findFirst().orElseThrow().getDlqName();
+        String dlqName = deliveryEndpoint.getDlqName();
         if (dlqName == null) {
             throw new RuntimeException(String.format("There is no dlq assigned for delivery %s", delivery.getId()));
         }
 
-        DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not determine delivery endpoint from response"));
         String url = "amqps://" + deliveryEndpoint.getHost();
 
-        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", deliveryEndpoint.getHost(), url);
+        System.out.printf("Listening for messages from queue [%s] on server [%s]%n", dlqName, url);
         ExceptionListener exceptionListener = e -> {
             System.out.println("Exception received: " + e);
             counter.countDown();
