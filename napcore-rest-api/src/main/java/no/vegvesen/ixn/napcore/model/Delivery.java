@@ -17,16 +17,19 @@ public class Delivery implements Comparable<Delivery>{
 
     String description;
 
+    Boolean dlqueue = false;
+
     public Delivery(){
     }
 
-    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp, String description) {
+    public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp, String description, Boolean dlqueue) {
         this.id = id;
         this.selector = selector;
         this.status = status;
         this.endpoints = endpoints;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.description = description;
+        this.dlqueue = dlqueue;
     }
 
     public String getId() {
@@ -80,6 +83,14 @@ public class Delivery implements Comparable<Delivery>{
         this.description = description;
     }
 
+    public Boolean getDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public String toString(){
         return "Delivery{" +
@@ -89,6 +100,7 @@ public class Delivery implements Comparable<Delivery>{
                 ", endpoints=" + endpoints  +
                 ", lastUpdatedTimestamp: " + lastUpdatedTimestamp +
                 ", description=" + description +
+                ", dlqueue=" + dlqueue +
                 "}";
     }
 

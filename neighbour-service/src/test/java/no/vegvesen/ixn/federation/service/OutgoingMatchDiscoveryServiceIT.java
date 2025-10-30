@@ -37,7 +37,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatMatchIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "NO delivery", false);
 
 
         Capability cap1 = new Capability(
@@ -86,7 +86,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatMultipleMatchesAreCreated() {
-        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY");
+        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED, "NPRA DELIVERY", false);
 
 
         Capability cap1 = new Capability(
@@ -135,7 +135,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void testThatDeliveryHasNoOverlap() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED, "DE delivery", true);
 
 
         Capability cap1 = new Capability(
@@ -186,8 +186,8 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
-        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery");
-        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery");
+        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL, "Illegal delivery", false);
+        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "No delivery", false);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "service-provider",
@@ -204,7 +204,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchesAreOnlyCreatedWhenCapabilityIsCreated() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery", false);
 
 
         Capability cap1 = new Capability(
@@ -252,7 +252,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchIsNotCreatedWhenCapabilityIsNotShardedAndLocalDeliveryIsSharded() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' AND shardId = 2", LocalDeliveryStatus.REQUESTED, "Delivery", false);
 
 
         Capability cap = new Capability(
@@ -287,7 +287,7 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Test
     public void matchIsCreatedWhenCapabilityIsShardedAndLocalDeliveryIsNotSharded() {
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery", false);
 
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);

@@ -293,7 +293,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		LocalDelivery delivery = new LocalDelivery(
 				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
 				LocalDeliveryStatus.CREATED,
-				"DENM Delivery"
+				"DENM Delivery",
+				false
 		);
 		String deliveryExchangeName = "del-ex10";
 

@@ -13,22 +13,25 @@ public class DeliveryExportApi {
 
     private DeliveryStatusExportApi status;
 
-    public enum DeliveryStatusExportApi{
-        REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR
-    }
+    private Boolean dlqueue;
 
+    public enum DeliveryStatusExportApi{
+        REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR;
+
+    }
     public DeliveryExportApi() {
 
     }
-
     public DeliveryExportApi(String uuid,
                              Set<DeliveryEndpointExportApi> endpoints,
                              String selector,
-                             DeliveryStatusExportApi status) {
+                             DeliveryStatusExportApi status,
+                             Boolean dlqueue) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.selector = selector;
         this.status = status;
+        this.dlqueue = dlqueue;
     }
 
     public Set<DeliveryEndpointExportApi> getEndpoints() {
@@ -63,16 +66,24 @@ public class DeliveryExportApi {
         this.uuid = uuid;
     }
 
+    public Boolean getDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryExportApi that = (DeliveryExportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status;
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, endpoints, selector, status);
+        return Objects.hash(uuid, endpoints, selector, status, dlqueue);
     }
 
     @Override
@@ -82,6 +93,7 @@ public class DeliveryExportApi {
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
+                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

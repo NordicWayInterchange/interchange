@@ -57,7 +57,7 @@ public class ServiceProviderRouter {
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
-            logger.debug("Checking service provider {}", name);
+            logger.debug("Checking service provider {}",name);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
@@ -116,7 +116,7 @@ public class ServiceProviderRouter {
                 // Remove the subscription from the ServiceProvider
                 //serviceProvider.removeSubscription(subscription);
                 break;
-            //needs testing.
+                //needs testing.
             case ERROR:
                 subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
                 break;
@@ -179,7 +179,7 @@ public class ServiceProviderRouter {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)) {
+        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
@@ -343,7 +343,7 @@ public class ServiceProviderRouter {
 
                     String capabilitySelector;
                     if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i + 1);
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
                     } else {
                         capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                     }
@@ -416,7 +416,19 @@ public class ServiceProviderRouter {
                         String exchangeName = endpoint.getTarget();
                         Exchange exchange = delta.findByExchangeName(exchangeName);
                         if (exchange == null) {
-                            exchange = qpidClient.createDirectExchange(exchangeName);
+                            if (endpoint.getDlqName() != null) {
+                                Queue queue = qpidClient.getQueue(endpoint.getDlqName());
+                                if (queue == null) {
+                                    Queue createdDlq = qpidClient.createQueue(endpoint.getDlqName());
+                                    qpidClient.addReadAccess(serviceProvider.getName(),createdDlq.getName());
+                                    delta.addQueue(createdDlq);
+                                }
+                                exchange = qpidClient.createDirectExchangeWithDlq(exchangeName, endpoint.getDlqName());
+                                logger.info("Created direct exchange {} with dlqueue {}", exchangeName, endpoint.getDlqName());
+                            } else {
+                                exchange = qpidClient.createDirectExchange(exchangeName);
+                                logger.info("Created exchange {}", exchangeName);
+                            }
                             qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
                             delta.addExchange(exchange);
                         }
@@ -428,6 +440,7 @@ public class ServiceProviderRouter {
                             for (CapabilityShard shard : capability.getShards()) {
                                 Exchange endpointExchange = delta.findByExchangeName(endpoint.getTarget());
                                 Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
+
                                 //NOTE, there's not much chance of the endpointExchange not existing, since it most likely
                                 // is created in the previous loop if it didn't already exist
                                 if (endpointExchange != null) {
@@ -442,10 +455,10 @@ public class ServiceProviderRouter {
                                             }
                                         }
                                     } else {
-                                        logger.info("No shard exchange found in qpid with name {}", shard.getExchangeName());
+                                        logger.info("No shard exchange found in qpid with name {}",shard.getExchangeName());
                                     }
                                 } else {
-                                    logger.info("No delivery endpoint exchange found in qpid with name {}", endpoint.getTarget());
+                                    logger.info("No delivery endpoint exchange found in qpid with name {}",endpoint.getTarget());
                                 }
                             }
                         }
@@ -476,6 +489,16 @@ public class ServiceProviderRouter {
                                     delta.removeExchange(exchange);
                                 }
                                 endpointsToRemove.add(endpoint);
+                            }
+                            if (endpoint.getDlqName() != null) {
+                                String dlqName = endpoint.getDlqName();
+                                Queue dlq = delta.findByQueueName(dlqName);
+                                if (dlq != null) {
+                                    logger.info("Removing endpoint with dlQueue with name {} for service provider {}", dlqName, serviceProvider.getName());
+                                    qpidClient.removeReadAccess(serviceProvider.getName(), dlqName);
+                                    qpidClient.removeQueue(dlq);
+                                    delta.removeQueue(dlq);
+                                }
                             }
                         }
                         delivery.removeAllEndpoints(endpointsToRemove);

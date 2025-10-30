@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class DeliveryEndpoint {
@@ -9,15 +11,19 @@ public class DeliveryEndpoint {
     private int maxBandwidth;
     private int maxMessageRate;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String dlqName;
+
     public DeliveryEndpoint() {
     }
 
-    public DeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+    public DeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
         this.host = host;
         this.port = port;
         this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlqName = dlqName;
     }
 
     public DeliveryEndpoint(String host, int port, String target) {
@@ -66,6 +72,14 @@ public class DeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
+    public void setDlqName(String dlqName) {
+        this.dlqName = dlqName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,6 +101,7 @@ public class DeliveryEndpoint {
                 ", target='" + target + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dlqName='" + dlqName + '\'' +
                 '}';
     }
 

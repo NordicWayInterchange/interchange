@@ -131,15 +131,19 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     }
 
     @Test
-    public void testGetLocalDeliveryEndpointApiList() {
+    public void testGetLocalDeliveryEndpointApiListWithDlq() {
         String selector = "originatingCountry = 'NO'";
+        String queueName = "bi-queue";
 
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange", queueName);
         LocalDelivery delivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
-                LocalDeliveryStatus.CREATED);
+                LocalDeliveryStatus.CREATED
+        );
+
+        assertThat(service.getLocalDeliveryEndpointApiList(delivery).getFirst().localDeliveryEndpointApi().getDlqName()).isEqualTo(queueName);
 
         List<LocalDeliveryEndpointAdminApi> response1 = service.getLocalDeliveryEndpointApiList(delivery);
         assertThat(response1).isNotEmpty();
@@ -170,10 +174,11 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(HOST_NAME, 5671, "exchange");
         LocalDelivery delivery = new LocalDelivery(
-                1,
+                UUID.randomUUID().toString(),
                 new HashSet<>(Collections.singletonList(endpoint)),
                 selector,
-                LocalDeliveryStatus.CREATED);
+                LocalDeliveryStatus.CREATED
+        );
 
         ServiceProvider aServiceProvider = new ServiceProvider(
                 serviceProviderName,

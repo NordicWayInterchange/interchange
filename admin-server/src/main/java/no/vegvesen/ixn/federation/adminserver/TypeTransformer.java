@@ -130,7 +130,8 @@ public class TypeTransformer {
                     exchange.getId(),
                     exchange.isDurable(),
                     exchange.getType(),
-                    exchange.getBindings())
+                    exchange.getBindings(),
+                    exchange.getAlternateBinding())
             );
         }
         return exchangeApiList;
@@ -218,7 +219,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     endpoint.getMaxBandwidth(),
-                    endpoint.getMaxMessageRate()
+                    endpoint.getMaxMessageRate(),
+                    endpoint.getDlqName()
             ));
         }
         return deliveryEndpointApiSet;

@@ -14,6 +14,8 @@ public class DeliveryEndpointImportApi {
 
     private Integer maxMessageRate;
 
+    private String dlqName;
+
     public DeliveryEndpointImportApi() {
 
     }
@@ -22,12 +24,14 @@ public class DeliveryEndpointImportApi {
                                      Integer port,
                                      String target,
                                      Integer maxBandwidth,
-                                     Integer maxMessageRate) {
+                                     Integer maxMessageRate,
+                                     String dlqName) {
         this.host = host;
         this.port = port;
         this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlqName = dlqName;
     }
 
     public String getHost() {
@@ -70,17 +74,24 @@ public class DeliveryEndpointImportApi {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
+    public void setDlqName(String dlqName) {
+        this.dlqName = dlqName;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryEndpointImportApi that = (DeliveryEndpointImportApi) o;
-        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target) && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate);
+        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target) && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(dlqName, that.dlqName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, port, target, maxBandwidth, maxMessageRate);
+        return Objects.hash(host, port, target, maxBandwidth, maxMessageRate, dlqName);
     }
 
     @Override
@@ -91,6 +102,7 @@ public class DeliveryEndpointImportApi {
                 ", target='" + target + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dlqName='" + dlqName + '\'' +
                 '}';
     }
 }

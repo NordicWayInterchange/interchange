@@ -89,7 +89,7 @@ public class TypeTransformer {
     }
 
     public LocalDelivery transformDeliveryToLocalDelivery(AddDelivery delivery) {
-        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED, delivery.getDescription());
+        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED, delivery.getDescription(), delivery.isDlqueue());
     }
 
     public AddDeliveriesResponse transformToDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
@@ -221,7 +221,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     0,
-                    0
+                    0,
+                    endpoint.getDlqName()
             ));
         }
         return result;
