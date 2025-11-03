@@ -319,7 +319,6 @@ public class ServiceProvider {
 		return "ServiceProvider{" +
 				"id=" + id +
 				", name='" + name + '\'' +
-				", biConsumer=" + biConsumer +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +
