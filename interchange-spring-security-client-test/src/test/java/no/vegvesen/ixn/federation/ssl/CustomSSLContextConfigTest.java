@@ -23,7 +23,7 @@ class CustomSSLContextConfigTest {
 	void defaultSSLContextWithSystemParametersSetContainsCustomKey() throws Exception {
 		assertThat(sslContext).isNotNull();
 		assertThat(sslContext.getProtocol())
-				.isIn("TLS", "TLSv1.2", "TLSv1.3");
+				.isIn( "TLSv1.3");
 
 
 		SSLEngine engine = sslContext.createSSLEngine();
