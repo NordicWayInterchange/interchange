@@ -18,6 +18,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -797,6 +798,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
         napRestController.deletePeerFromPrivateChannel(actorCommonName, privateChannelId, peerToDelete);
 
         assertThat(napRestController.getPrivateChannels(actorCommonName).getFirst().getPeers()).hasSize(0);
+    }
+
+    @Test
+    public void testGetServiceProviderHasAccessToBiConsumer() {
+        String actorCommonName = "actor";
+        ServiceProvider sp = new ServiceProvider(actorCommonName);
+        sp = serviceProviderRepository.save(sp);
+        sp.setHasBiConsumerAccess(true);
+        assertThat(napRestController.getServiceProviderBiConsumerAccess(actorCommonName).toString()).isEqualTo("ServiceProvider {name='actor', access=true}");
     }
 
     @Autowired

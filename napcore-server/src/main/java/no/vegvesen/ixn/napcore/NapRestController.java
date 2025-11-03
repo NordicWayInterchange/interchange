@@ -642,6 +642,19 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/bi-consumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-consumer")
+    @Operation(summary = "Does service provider have access to bi-consumer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETBICONSUMERACCESS)))})
+    public ServiceProviderResponse getServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+        validatePathVariable(actorCommonName);
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get service provider {} have access to bi-consumer", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        return typeTransformer.transformBiConsumerAccess(serviceProvider);
+    }
+
     private void validatePathVariable(String pathVariable){
         Matcher matcher = pattern.matcher(pathVariable);
         if(!matcher.matches()){

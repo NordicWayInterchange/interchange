@@ -299,4 +299,11 @@ public class ExampleApiObjects {
                     "description": "private channel between king olav and king gustaf"
                 }
                 """;
+
+    static final String GETBICONSUMERACCESS = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
 }

@@ -107,11 +107,11 @@ public class ServiceProvider {
 		this.id = id;
 	}
 
-	public boolean isBiConsumer() {
+	public boolean hasBiConsumerAccess() {
 		return biConsumer;
 	}
 
-	public void setBiConsumer(boolean biConsumer) {
+	public void setHasBiConsumerAccess(boolean biConsumer) {
 		this.biConsumer = biConsumer;
 	}
 
