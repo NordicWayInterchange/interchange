@@ -655,6 +655,19 @@ public class NapRestController {
         return typeTransformer.transformBiConsumerAccess(serviceProvider);
     }
 
+    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/bi-consumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-consumer")
+    @Operation(summary = "Add access to bi-consumer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider bi-consumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
+    public ServiceProviderResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName,  @RequestBody boolean BiConsumerAccess) {
+        validatePathVariable(actorCommonName);
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Adds or removes access to bi-consumer in service provider {}", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        return typeTransformer.transformAddBiConsumerAccess(serviceProvider, BiConsumerAccess);
+    }
+
     private void validatePathVariable(String pathVariable){
         Matcher matcher = pattern.matcher(pathVariable);
         if(!matcher.matches()){

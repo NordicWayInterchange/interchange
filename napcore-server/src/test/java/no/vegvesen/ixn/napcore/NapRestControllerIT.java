@@ -809,6 +809,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.getServiceProviderBiConsumerAccess(actorCommonName).toString()).isEqualTo("ServiceProvider {name='actor', access=true}");
     }
 
+
+    @Test
+    public void testPutServiceProviderHasAccessToBiConsumer() {
+        String actorCommonName = "actor";
+        assertThat(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, true).toString()).isEqualTo("ServiceProvider {name='actor', access=true}");
+        assertThat(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, false).toString()).isEqualTo("ServiceProvider {name='actor', access=false}");
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

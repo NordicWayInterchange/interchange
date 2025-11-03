@@ -185,6 +185,13 @@ public class TypeTransformer {
         );
     }
 
+    public ServiceProviderResponse transformAddBiConsumerAccess(ServiceProvider serviceProvider, boolean access) {
+        return new ServiceProviderResponse(
+                serviceProvider.getName(),
+                access
+        );
+    }
+
     public PrivateChannelStatus transformPrivateChannelStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus status) {
         return switch (status) {
             case REQUESTED -> PrivateChannelStatus.REQUESTED;
