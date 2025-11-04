@@ -17,15 +17,18 @@ public class DeliveryEndpoint {
 
     private Integer maxMessageRate;
 
+    private String dlqName;
+
     public DeliveryEndpoint(){}
 
-    public DeliveryEndpoint(String host, Integer port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
+    public DeliveryEndpoint(String host, Integer port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
         this.host = host;
         this.port = port;
         this.target = target;
         this.selector = selector;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlqName = dlqName;
     }
 
     public String getHost() {
@@ -76,6 +79,14 @@ public class DeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
+    public void setDlqName(String dlqName) {
+        this.dlqName = dlqName;
+    }
+
     @Override
     public String toString(){
         return "DeliveryEndpoint{" +
@@ -85,6 +96,7 @@ public class DeliveryEndpoint {
                 "selector='" + selector + "'" +
                 "maxBandwidth=" + maxBandwidth +
                 "maxMessageRate=" + maxMessageRate +
+                "dlqName=" + dlqName +
                 "}";
     }
 }

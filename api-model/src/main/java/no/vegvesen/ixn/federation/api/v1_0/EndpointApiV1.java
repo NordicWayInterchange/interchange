@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EndpointApi {
+public class EndpointApiV1 {
 
     private String source;
 
@@ -19,17 +19,17 @@ public class EndpointApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer maxMessageRate;
 
-    public EndpointApi() {
+    public EndpointApiV1() {
 
     }
 
-    public EndpointApi(String source, String host, Integer port) {
+    public EndpointApiV1(String source, String host, Integer port) {
         this.source = source;
         this.host = host;
         this.port = port;
     }
 
-    public EndpointApi(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+    public EndpointApiV1(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
         this.source = source;
         this.host = host;
         this.port = port;
@@ -77,11 +77,12 @@ public class EndpointApi {
         this.maxMessageRate = maxMessageRate;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EndpointApi)) return false;
-        EndpointApi that = (EndpointApi) o;
+        if (!(o instanceof EndpointApiV1)) return false;
+        EndpointApiV1 that = (EndpointApiV1) o;
         return source.equals(that.source) &&
                 host.equals(that.host) &&
                 port.equals(that.port) &&

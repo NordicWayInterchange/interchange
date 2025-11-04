@@ -50,7 +50,7 @@ public class TypeTransformer {
     }
 
     public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector(), delivery.getDescription());
+        return new LocalDelivery(delivery.getSelector(), delivery.getDescription(), delivery.isDlqueue());
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){
@@ -60,7 +60,8 @@ public class TypeTransformer {
                 transformLocalDeliveryStatusToNapDeliveryStatus(localDelivery.getStatus()),
                 transformLocalDeliveryEndpointsToNapEndpoints(localDelivery.getEndpoints()),
                 transformLocalDateTimeToTimestamp(localDelivery.getLastUpdatedTimestamp()),
-                localDelivery.getDescription()
+                localDelivery.getDescription(),
+                localDelivery.isDlqueue()
         );
     }
 
@@ -88,7 +89,7 @@ public class TypeTransformer {
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
         List<DeliveryEndpoint> endpoints = new ArrayList<>();
         for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
-            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate()));
+            endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate(), endpoint.getDlqName()));
         }
         return endpoints;
     }

@@ -6,6 +6,8 @@ public class DeliveryRequest {
 
     String description;
 
+    Boolean dlqueue = false;
+
     public DeliveryRequest() {
     }
 
@@ -17,6 +19,18 @@ public class DeliveryRequest {
         this.selector = selector;
         this.description = description;
     }
+
+    public DeliveryRequest(String selector, Boolean dlqueue) {
+        this.selector = selector;
+        this.dlqueue = dlqueue;
+    }
+
+    public DeliveryRequest(String selector, String description, Boolean dlqueue) {
+        this.selector = selector;
+        this.description = description;
+        this.dlqueue = dlqueue;
+    }
+
 
     public String getSelector() {
         return selector;
@@ -34,11 +48,20 @@ public class DeliveryRequest {
         this.description = description;
     }
 
+    public Boolean isDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public String toString(){
         return "DeliveryRequest{" +
                 "selector='" + selector + '\'' +
                 ", description=" + description +
+                ", dlqueue=" + dlqueue +
                 '}';
     }
 }

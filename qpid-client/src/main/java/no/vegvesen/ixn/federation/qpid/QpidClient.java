@@ -122,6 +122,10 @@ public class QpidClient {
 		return createExchange(new CreateExchangeRequest(name,"headers"));
 	}
 
+	public Exchange createDirectExchangeWithDlq(String name, String dlqName) {
+		return createExchange(new CreateExchangeRequest(name,"direct",new AlternateBinding(dlqName)));
+	}
+
 	public Exchange createDirectExchange(String exchangeName) {
 		return createExchange(new CreateExchangeRequest(exchangeName,"direct"));
 	}
