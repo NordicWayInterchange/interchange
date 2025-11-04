@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Card, CardContent, Divider, IconButton, Tooltip, Typography } from "@mui/material";
+import React from "react";
+import { Divider, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { Box, Stack } from "@mui/system";
+import { Box } from "@mui/system";
 import Link from "next/link";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
@@ -17,11 +17,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
-import { tooltipFontStyle } from "@/components/shared/styles/TooltipFontStyle";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -68,94 +63,19 @@ export default function Home() {
     },
   ];
 
-  const [hasAccess, setHasAccess] = useState(false);
-
-
-  const handleToggleAccess = () => {
-    setHasAccess((prev) => !prev);
-  };
-
   return (
     <Box flex={1}>
       <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
-      <Divider sx={{ marginY: 3 }} />
-
-      <Box sx={elementStyle}>
+      <Box sx={commonNameStyle}>
         <Typography
           sx={{ fontSize: "0.85rem", fontWeight: 600}}>
           Your common name:
         </Typography>
-        <Typography variant="h6" sx={{ fontSize: "0.85rem", textAlign: "center"}}>
+        <Typography variant="h6" sx={{ fontSize: "0.85rem", textAlign: "center" }}>
           {session?.user?.commonName}
         </Typography>
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
-      <Divider sx={{ marginY: 2, visibility: 'hidden' }} />
-
-      <Box>
-        <Card sx={elementStyle}>
-          <CardContent>
-            {hasAccess ? (
-              <>
-                <CheckCircleOutlineIcon color="success" sx={{ fontSize: 50, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Bi Queue Access Granted
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  You currently have permission to view Bi queue.
-                  <Tooltip
-                    slotProps={{
-                      tooltip: {
-                        sx: tooltipFontStyle,
-                      },
-                    }}
-                    title="Revoke access to the bi-consumers group"
-                  >
-                    <IconButton size="small">
-                      <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Typography>
-              </>
-            ) : (
-              <>
-                <LockOutlinedIcon color="action" sx={{ fontSize: 50, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  No Access to Bi Queue
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  You currently do not have permission to Bi queue.
-                  <Tooltip
-                    slotProps={{
-                      tooltip: {
-                        sx: tooltipFontStyle,
-                      },
-                    }}
-                    title="Gain access to the bi-consumers group"
-                  >
-                    <IconButton size="small">
-                      <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Typography>
-              </>
-            )}
-
-            <Stack spacing={2} sx={{display: "flex", alignItems: "center",textAlign: 'center', justifyContent: "center"}}>
-              <StyledButton
-                variant="contained"
-                color={hasAccess ? 'redLight' : 'buttonThemeColor'}
-                onClick={handleToggleAccess}
-              >
-                {hasAccess ? 'Revoke Access' : 'Grant Access'}
-              </StyledButton>
-
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
-
-
       <Divider sx={{ marginY: 3 }} />
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -210,11 +130,9 @@ export default function Home() {
   );
 }
 
-const elementStyle = {
+const commonNameStyle = {
   display: "flex",
   alignItems: "center",
-  textAlign: 'center',
-  bgcolor: "white",
   justifyContent: "center",
   flexDirection: "row",
   padding: 1,
