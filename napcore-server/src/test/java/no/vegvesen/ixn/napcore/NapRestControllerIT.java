@@ -817,8 +817,10 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testPutServiceProviderHasAccessToBiConsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ObjectMapper mapper = new ObjectMapper();
-        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, true))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
-        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, false))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
+        ServiceProviderBiAccessRequest withBiQueueAccess = new ServiceProviderBiAccessRequest(true);
+        ServiceProviderBiAccessRequest withoutBiQueueAccess = new ServiceProviderBiAccessRequest(false);
+        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
+        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, withoutBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
     }
 
     @Autowired

@@ -185,10 +185,10 @@ public class TypeTransformer {
         );
     }
 
-    public ServiceProviderBiAccessResponse transformAddBiConsumerAccess(ServiceProvider serviceProvider, Boolean access) {
+    public ServiceProviderBiAccessResponse transformAddBiConsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiAccessRequest access) {
         return new ServiceProviderBiAccessResponse(
                 serviceProvider.getName(),
-                access
+                access.isAccess()
         );
     }
 

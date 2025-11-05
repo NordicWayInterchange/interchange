@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -659,7 +660,7 @@ public class NapRestController {
     @Tag(name = "BiConsumer")
     @Operation(summary = "Add access to bi-consumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider bi-consumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
-    public ServiceProviderBiAccessResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody boolean BiConsumerAccess) {
+    public ServiceProviderBiAccessResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiAccessRequest BiConsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Adds or removes access to bi-consumer in service provider {}", actorCommonName);
