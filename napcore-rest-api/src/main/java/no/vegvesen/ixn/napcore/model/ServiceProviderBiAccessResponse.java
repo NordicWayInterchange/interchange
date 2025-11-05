@@ -4,13 +4,13 @@ public class ServiceProviderBiAccessResponse {
 
     private String name;
 
-    private boolean access = false;
+    private Boolean access = false;
 
     public ServiceProviderBiAccessResponse() {
     }
 
     public ServiceProviderBiAccessResponse(String name,
-                                           boolean biConsumer) {
+                                           Boolean biConsumer) {
         this.name = name;
         this.access = biConsumer;
 
@@ -24,11 +24,11 @@ public class ServiceProviderBiAccessResponse {
         this.name = name;
     }
 
-    public boolean isAccess() {
+    public Boolean isAccess() {
         return access;
     }
 
-    public void setAccess(boolean access) {
+    public void setAccess(Boolean access) {
         this.access = access;
     }
 
