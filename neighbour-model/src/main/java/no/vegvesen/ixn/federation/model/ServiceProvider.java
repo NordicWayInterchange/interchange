@@ -20,7 +20,7 @@ public class ServiceProvider {
 	@Column(length = 320)
 	private String name;
 
-	@Column
+	@Column(nullable = false)
 	private boolean biConsumer = false;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
