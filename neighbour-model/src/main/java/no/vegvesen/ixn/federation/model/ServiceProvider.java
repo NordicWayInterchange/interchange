@@ -20,6 +20,7 @@ public class ServiceProvider {
 	@Column(length = 320)
 	private String name;
 
+	@Column(name="bi-consumer", nullable = false)
 	private boolean biConsumer = false;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -106,11 +107,11 @@ public class ServiceProvider {
 		this.id = id;
 	}
 
-	public boolean hasBiConsumerAccess() {
+	public boolean isBiConsumer() {
 		return biConsumer;
 	}
 
-	public void setHasBiConsumerAccess(boolean biConsumer) {
+	public void setBiConsumer(boolean biConsumer) {
 		this.biConsumer = biConsumer;
 	}
 
@@ -319,6 +320,7 @@ public class ServiceProvider {
 		return "ServiceProvider{" +
 				"id=" + id +
 				", name='" + name + '\'' +
+				", biConsumer='" + biConsumer +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +

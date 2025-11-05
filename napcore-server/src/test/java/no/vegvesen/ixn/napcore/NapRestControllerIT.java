@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.napcore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
@@ -801,20 +803,22 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetServiceProviderHasAccessToBiConsumer() {
+    public void testGetServiceProviderHasAccessToBiConsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ServiceProvider sp = new ServiceProvider(actorCommonName);
         sp = serviceProviderRepository.save(sp);
-        sp.setHasBiConsumerAccess(true);
-        assertThat(napRestController.getServiceProviderBiConsumerAccess(actorCommonName).toString()).isEqualTo("ServiceProvider {name='actor', access=true}");
+        sp.setBiConsumer(true);
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiConsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
     }
 
 
     @Test
-    public void testPutServiceProviderHasAccessToBiConsumer() {
+    public void testPutServiceProviderHasAccessToBiConsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
-        assertThat(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, true).toString()).isEqualTo("ServiceProvider {name='actor', access=true}");
-        assertThat(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, false).toString()).isEqualTo("ServiceProvider {name='actor', access=false}");
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, true))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
+        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiConsumerAccess(actorCommonName, false))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
     }
 
     @Autowired

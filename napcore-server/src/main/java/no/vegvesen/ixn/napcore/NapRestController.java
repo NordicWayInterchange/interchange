@@ -646,7 +646,7 @@ public class NapRestController {
     @Tag(name = "Bi-consumer")
     @Operation(summary = "Does service provider have access to bi-consumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETBICONSUMERACCESS)))})
-    public ServiceProviderResponse getServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+    public ServiceProviderBiAccessResponse getServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get service provider {} have access to bi-consumer", actorCommonName);
@@ -659,7 +659,7 @@ public class NapRestController {
     @Tag(name = "Bi-consumer")
     @Operation(summary = "Add access to bi-consumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider bi-consumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
-    public ServiceProviderResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName,  @RequestBody boolean BiConsumerAccess) {
+    public ServiceProviderBiAccessResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody boolean BiConsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Adds or removes access to bi-consumer in service provider {}", actorCommonName);
