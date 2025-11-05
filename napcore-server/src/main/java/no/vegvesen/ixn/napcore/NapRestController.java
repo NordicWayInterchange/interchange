@@ -642,8 +642,8 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/bi-consumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Tag(name = "Bi-consumer")
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biConsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "BiConsumer")
     @Operation(summary = "Does service provider have access to bi-consumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETBICONSUMERACCESS)))})
     public ServiceProviderBiAccessResponse getServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
@@ -655,8 +655,8 @@ public class NapRestController {
         return typeTransformer.transformBiConsumerAccess(serviceProvider);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/bi-consumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Tag(name = "Bi-consumer")
+    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biConsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "BiConsumer")
     @Operation(summary = "Add access to bi-consumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider bi-consumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
     public ServiceProviderBiAccessResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody boolean BiConsumerAccess) {
