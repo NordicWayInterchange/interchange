@@ -15,6 +15,7 @@ import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 import { useSession } from "next-auth/react";
 import { useAccessToBiQueue } from "@/hooks/useAccessToBiQueue";
+import Loading from "@/components/shared/actions/Loading";
 
 const BiQueue = () => {
 
@@ -32,6 +33,9 @@ const BiQueue = () => {
   return (
     <Box>
       <Card sx={frontPageCardStyle}>
+        {(biQueueAccess === undefined || biQueueAccess === null || isLoading) ? (
+          <Loading text="Bi queue access status"/>
+        ) : (
         <CardContent>
           {hasAccess ? (
             <>
@@ -89,6 +93,7 @@ const BiQueue = () => {
             </StyledButton>
           </Stack>
         </CardContent>
+          )}
       </Card>
     </Box>
   );
