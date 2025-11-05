@@ -29,7 +29,7 @@ import {
   basicPatchFunction,
   deleteNapcoreMyselfFromSubscribedPrivateChannel,
   deleteNapcorePeerFromExistingPrivateChannel,
-  deleteNapcorePrivateChannels, addNapcorePeerToExistingPrivateChannel
+  deleteNapcorePrivateChannels, addNapcorePeerToExistingPrivateChannel, fetchNapcoreAccessToBiQueue
 } from "@/lib/fetchers/interchangeConnector";
 import { ExtendedCapability } from "@/types/capability";
 import { Capability, Publicationids } from "@/types/napcore/capability";
@@ -41,6 +41,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { DeliveriesDelivery } from "@/types/napcore/delivery";
 import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
+import { BiQueue } from "@/types/napcore/biQueue";
 const logger = require("../../../lib/logger");
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
@@ -131,6 +132,12 @@ const fetchPeers = async (params: extendedGetParams) => {
   const privateChannelsPeers: PrivateChannelPeers = await res.data;
   return [res.status, privateChannelsPeers];
 };
+
+const fetchAccessToBiQueue = async (params: extendedGetParams) => {
+  const res = await fetchNapcoreAccessToBiQueue(params);
+  const accessToBiQueue: BiQueue = await res.data;
+  return [res.status, accessToBiQueue];
+}
 
 export const addPrivateChannels: basicPostFunction = async (
   params: basicPostParams
@@ -251,6 +258,7 @@ const getPaths: {
   "capabilities/publicationids": fetchPublicationIds,
   "private-channels": fetchPrivateChannels,
   "private-channels/peer": fetchPeers,
+  "bi-consumer": fetchAccessToBiQueue,
 };
 
 const patchPaths: {

@@ -229,3 +229,10 @@ export const fetchNapcorePrivateChannelsPeers: extendedGetFunction = async (
   const { actorCommonName } = params;
   return await fetchIXN(actorCommonName, `/privatechannels/peer`);
 };
+
+export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
+  params
+) => {
+  const { actorCommonName } = params;
+  return await fetchIXN(actorCommonName, `/bi-consumer`);
+};
