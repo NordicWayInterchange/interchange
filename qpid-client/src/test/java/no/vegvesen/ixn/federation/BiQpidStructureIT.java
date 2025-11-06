@@ -1,12 +1,13 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.jms.MessageListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.*;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,6 +113,68 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             assertThat(receive).isNotPresent();
         }
     }
+
+    @Test
+    public void testHeadersExchangeWithRandomBinding() throws Exception {
+        System.out.println(qpidContainer.getHttpUrl());
+        Exchange inExchange = qpidClient.createHeadersExchange("delex");
+        Exchange capExhange = qpidClient.createHeadersExchange("capex");
+        Queue subscriptionQueue = qpidClient.createQueue("loc");
+
+        qpidClient.addBinding(inExchange.getName(),new Binding("yoyoyo", capExhange.getName(), null));
+        qpidClient.addBinding(capExhange.getName(),new Binding(subscriptionQueue.getName(), subscriptionQueue.getName(), null));
+
+        assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
+    }
+
+    @Test
+    public void testDirectExchangeWithRandomBinding() throws Exception {
+        System.out.println(qpidContainer.getHttpUrl());
+        Exchange inExchange = qpidClient.createDirectExchange("delex");
+        Exchange capExhange = qpidClient.createHeadersExchange("capex");
+        Queue subscriptionQueue = qpidClient.createQueue("loc");
+
+        qpidClient.addBinding(inExchange.getName(),new Binding("yoyoyo", capExhange.getName(), null));
+        qpidClient.addBinding(capExhange.getName(),new Binding(subscriptionQueue.getName(), subscriptionQueue.getName(), null));
+
+        assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isFalse();
+    }
+
+    @Test
+    public void testDirectExchangeWithBindingLikeSourceName() throws Exception {
+        System.out.println(qpidContainer.getHttpUrl());
+        Exchange inExchange = qpidClient.createDirectExchange("delex");
+        Exchange capExhange = qpidClient.createHeadersExchange("capex");
+        Queue subscriptionQueue = qpidClient.createQueue("loc");
+
+        qpidClient.addBinding(inExchange.getName(),new Binding(inExchange.getName(), capExhange.getName(), null));
+        qpidClient.addBinding(capExhange.getName(),new Binding(subscriptionQueue.getName(), subscriptionQueue.getName(), null));
+
+        assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
+    }
+
+
+
+    private boolean sendAndReceive(String inExchangeName, String outQueue) throws Exception {
+        WriteToScreenMessageListener writeToScreenMessageListener = new WriteToScreenMessageListener();
+        CountDownLatch latch = new CountDownLatch(1);
+        boolean success;
+        MessageListener messageListener = message -> {
+            writeToScreenMessageListener.onMessage(message);
+            latch.countDown();
+        };
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), outQueue,sslContext, messageListener)){
+            sink.start();
+           try (Source source = new Source(qpidContainer.getAmqpsUrl(), inExchangeName,sslContext)){
+               source.start();
+               JmsMessage denmMessage = createDenmMessage(source, "This is a test".getBytes(StandardCharsets.UTF_8), 3000);
+               source.sendNonPersistentMessage(denmMessage);
+           }
+           success = latch.await(10, TimeUnit.SECONDS);
+        }
+        return success;
+    }
+
 
     private JmsMessage createDenmMessage(Source source, byte[] bytemessage, long ttl) throws JMSException {
         return source.createMessageBuilder()
