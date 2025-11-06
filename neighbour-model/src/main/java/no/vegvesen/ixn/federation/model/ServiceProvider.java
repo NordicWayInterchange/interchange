@@ -20,8 +20,8 @@ public class ServiceProvider {
 	@Column(length = 320)
 	private String name;
 
-	@Column(nullable = false)
-	private Boolean biConsumer = false;
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private Boolean biconsumer = false;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
@@ -107,12 +107,12 @@ public class ServiceProvider {
 		this.id = id;
 	}
 
-	public Boolean isBiConsumer() {
-		return biConsumer;
+	public Boolean isBiconsumer() {
+		return biconsumer;
 	}
 
-	public void setBiConsumer(Boolean biConsumer) {
-		this.biConsumer = biConsumer;
+	public void setBiconsumer(Boolean biconsumer) {
+		this.biconsumer = biconsumer;
 	}
 
 	public Capabilities getCapabilities() {
@@ -320,7 +320,7 @@ public class ServiceProvider {
 		return "ServiceProvider{" +
 				"id=" + id +
 				", name='" + name + '\'' +
-				", biConsumer='" + biConsumer +
+				", biconsumer='" + biconsumer +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +

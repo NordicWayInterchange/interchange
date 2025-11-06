@@ -7,8 +7,8 @@ public class ServiceProviderBiAccessRequest {
     public ServiceProviderBiAccessRequest() {
     }
 
-    public ServiceProviderBiAccessRequest(Boolean biConsumer) {
-        this.access = biConsumer;
+    public ServiceProviderBiAccessRequest(Boolean biconsumer) {
+        this.access = biconsumer;
 
     }
 

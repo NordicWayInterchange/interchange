@@ -643,30 +643,31 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biConsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Tag(name = "BiConsumer")
-    @Operation(summary = "Does service provider have access to bi-consumer")
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Biconsumer")
+    @Operation(summary = "Does service provider have access to biconsumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETBICONSUMERACCESS)))})
-    public ServiceProviderBiAccessResponse getServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+    public ServiceProviderBiAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Get service provider {} have access to bi-consumer", actorCommonName);
+        logger.info("Get service provider {} have access to biconsumer", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        return typeTransformer.transformBiConsumerAccess(serviceProvider);
+        return typeTransformer.transformBiconsumerAccess(serviceProvider);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biConsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Tag(name = "BiConsumer")
-    @Operation(summary = "Add access to bi-consumer")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider bi-consumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
-    public ServiceProviderBiAccessResponse addServiceProviderBiConsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiAccessRequest BiConsumerAccess) {
+    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Biconsumer")
+    @Operation(summary = "Add access to biconsumer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
+    public ServiceProviderBiAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiAccessRequest BiconsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Adds or removes access to bi-consumer in service provider {}", actorCommonName);
+        logger.info("Adds or removes access to biconsumer in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        return typeTransformer.transformAddBiConsumerAccess(serviceProvider, BiConsumerAccess);
+        serviceProviderRepository.save(serviceProvider);
+        return typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
     }
 
     private void validatePathVariable(String pathVariable){

@@ -10,9 +10,9 @@ public class ServiceProviderBiAccessResponse {
     }
 
     public ServiceProviderBiAccessResponse(String name,
-                                           Boolean biConsumer) {
+                                           Boolean biconsumer) {
         this.name = name;
-        this.access = biConsumer;
+        this.access = biconsumer;
 
     }
 
